@@ -31,3 +31,11 @@ test('is deterministic and safely accepts empty/non-string input', () => {
   assert.equal(routeRequest('').category, 'general');
   assert.equal(routeRequest(null).category, 'general');
 });
+
+test('routes programming requests to the bundled coding model', () => {
+  const result = routeRequest('Escribe una función en Python para ordenar una lista');
+  assert.equal(result.category, 'coding');
+  assert.equal(result.model, 'onnx-community/Qwen2.5-Coder-0.5B-Instruct');
+  assert.equal(result.expertStatus, 'active');
+  assert.equal(result.fallback, false);
+});
