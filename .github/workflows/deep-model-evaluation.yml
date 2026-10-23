@@ -6,6 +6,7 @@ on:
     branches: [main, master]
     paths:
       - 'scripts/benchmark_fusion.py'
+      - 'scripts/benchmark_capabilities.py'
       - 'scripts/merge_compatible_models.py'
       - 'scripts/audit_fusion_candidates.py'
       - 'tests/test_audit_fusion_candidates.py'
@@ -44,6 +45,21 @@ jobs:
           HF_HUB_DISABLE_TELEMETRY: '1'
           TOKENIZERS_PARALLELISM: 'false'
         run: python scripts/benchmark_fusion.py
+      - name: Run reproducible capability benchmark (Spanish, math, code, instructions)
+        id: capabilities
+        continue-on-error: true
+        env:
+          HF_HUB_DISABLE_TELEMETRY: '1'
+          TOKENIZERS_PARALLELISM: 'false'
+        run: python scripts/benchmark_capabilities.py
+      - name: Upload capability benchmark report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-capability-benchmark
+          path: capability-benchmark-report.json
+          if-no-files-found: warn
+          retention-days: 30
       - name: Upload complete evaluation report
         if: always()
         uses: actions/upload-artifact@v4
