@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
 const ROOT = new URL('../www/models/', import.meta.url);
+const OPTIONAL_FILES = new Set(['generation_config.json', 'special_tokens_map.json', 'added_tokens.json', 'merges.txt', 'vocab.json', 'chat_template.jinja']);
 const FILES = [
   'config.json',
   'generation_config.json',
@@ -36,6 +37,10 @@ async function downloadFile(model, file) {
   const tempPath = finalPath + '.partial';
   console.log('↓', relative);
   const response = await fetch(url, { redirect: 'follow' });
+  if (response.status === 404 && OPTIONAL_FILES.has(file)) {
+    console.log('· opcional no publicado, se omite', relative);
+    return;
+  }
   if (!response.ok || !response.body) throw new Error(`Descarga fallida (${response.status}): ${url}`);
   const expected = Number(response.headers.get('content-length') || 0);
   let received = 0;
