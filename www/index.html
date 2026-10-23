@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#07111f">
 <!-- Branding: SVG propio, vectorial y sin dependencias externas para mantenerlo nítido y ligero. -->
 <link rel="icon" type="image/svg+xml" href="./assets/ronin-logo.svg">
-<meta name="description" content="Ronin IA: asistente open source para web y Android, con modelo local bajo demanda.">
+<meta name="description" content="Ronin IA: asistente open source para web y Android, con modelo local y preparación automática en Android.">
 <meta name="color-scheme" content="dark">
 <title>Ronin IA</title>
 <style>
@@ -50,7 +50,7 @@ function persist(){try{localStorage.setItem(KEY,JSON.stringify(sessions.slice(0,
 // Centralizar la sesión activa evita duplicar la lógica de selección en los controles de la UI.
 function current(){return sessions.find(s=>s.id===activeId)}
 function toast(t){el.toast.textContent=t;el.toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.toast.classList.remove('show'),2800)}
-function setStatus(s,label){status=s;el.dot.className='dot'+(s==='ready'?' ready':s==='loading'?' loading':'');el.caption.textContent=label||(s==='ready'?'Modelo listo':s==='loading'?'Descargando modelo…':'Modelo bajo demanda');el.badge.textContent=s==='ready'?'Modelo listo':s==='loading'?'Preparando IA…':'Lista para empezar';el.load.textContent=s==='ready'?'IA activada':s==='loading'?'Cargando…':'Activar IA';el.load.disabled=s==='loading';el.modelBtn.disabled=s==='loading'}
+function setStatus(s,label){status=s;el.dot.className='dot'+(s==='ready'?' ready':s==='loading'?' loading':'');el.caption.textContent=label||(s==='ready'?'Modelo listo':s==='loading'?'Preparando modelo…':'Modelo disponible bajo demanda');el.badge.textContent=s==='ready'?'Modelo listo':s==='loading'?'Preparando IA…':'Lista para empezar';el.load.textContent=s==='ready'?'IA activada':s==='loading'?'Cargando…':'Activar IA';el.load.disabled=s==='loading';el.modelBtn.disabled=s==='loading'}
 function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 // Render Markdown con escape previo: nunca insertamos HTML crudo del modelo, reduciendo el riesgo de XSS.
 function markdown(raw){
@@ -99,7 +99,7 @@ function closeSidebar(){el.sidebar.classList.remove('open');el.overlay.classList
 // Carga diferida para que la primera pantalla aparezca rápido; GPU primero y CPU compatible como reserva.
 async function loadModel(){
  if(pipe)return pipe;if(loading)return loading;
- setStatus('loading','Cargando runtime y Qwen3…');
+ setStatus('loading','Preparando runtime y Qwen3…');
  loading=(async()=>{try{
   const lib=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2');
   lib.env.allowLocalModels=false;lib.env.useBrowserCache=true;
@@ -110,7 +110,7 @@ async function loadModel(){
   try{pipe=await lib.pipeline('text-generation',MODEL,{dtype:webgpuDtype,device:'webgpu'});setStatus('ready','Qwen3 0.6B · '+webgpuDtype+' WebGPU')}
   catch(e){console.info('WebGPU no disponible o falló; probando backend CPU con cuantización compatible',e);const cpuDtype=['q8','int8','uint8','fp32'].find(d=>available.includes(d))||'q8';pipe=await lib.pipeline('text-generation',MODEL,{dtype:cpuDtype});setStatus('ready','Qwen3 0.6B · '+cpuDtype+' CPU')}
   toast('Qwen3 está listo.');return pipe;
- }catch(e){pipe=null;loading=null;setStatus('error','No se pudo cargar');console.error(e);toast('No se pudo cargar Qwen3. Comprueba internet y memoria disponible.');throw e}})();return loading;
+ }catch(e){pipe=null;loading=null;setStatus('error','No se pudo cargar');console.error(e);toast('No se pudo preparar Qwen3. Comprueba internet y memoria disponible; puedes reintentar con «Activar IA».');throw e}})();return loading;
 }
 // Parser aritmético limitado a números y operadores; no se usa eval() para no ejecutar texto del usuario como código.
 // Evalúa solo expresiones aritméticas permitidas mediante un parser acotado; no ejecutar código arbitrario.
@@ -147,8 +147,10 @@ $('newChat').onclick=createChat;$('openSidebar').onclick=openSidebar;$('closeSid
 document.querySelectorAll('[data-prompt]').forEach(b=>b.onclick=()=>sendMessage(b.dataset.prompt));
 el.conversation.addEventListener('click',e=>{let b=e.target.closest('[data-copy]');if(b){let code=b.closest('.code')?.querySelector('code');if(code)copyText(code.textContent)}});
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();createChat()}if(e.key==='Escape')closeSidebar()});
-renderHistory();renderCurrent();resize();setStatus('idle','Modelo bajo demanda');
-// Inicio deliberadamente ligero: no descargamos pesos al abrir. Así la interfaz es inmediata y el usuario decide cuándo consumir datos y memoria.
+renderHistory();renderCurrent();resize();setStatus('idle','Modelo local no cargado');
+// En la APK Android, preparar el modelo al inicio satisface el modo «abrir y usar». La interfaz se pinta primero; la descarga inicial requiere internet y espacio. Transformers.js usa su caché del navegador cuando está disponible, pero esto no empaqueta los pesos dentro del APK. La web normal sigue siendo bajo demanda para no gastar datos inesperadamente.
+const isNativeAndroid=(()=>{try{return /Android/i.test(navigator.userAgent)&&window.Capacitor?.getPlatform?.()==='android'}catch(e){return false}})();
+if(isNativeAndroid){setStatus('loading','Preparando IA al iniciar…');requestAnimationFrame(()=>{loadModel().catch(()=>{})})}
 </script>
 </body>
 </html>
