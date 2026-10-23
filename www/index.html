@@ -75,9 +75,13 @@ async function loadModel(){
  loading=(async()=>{try{
   const lib=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2');
   lib.env.allowLocalModels=false;lib.env.useBrowserCache=true;
-  try{pipe=await lib.pipeline('text-generation',MODEL,{dtype:'q4',device:'webgpu'})}
-  catch(e){console.info('WebGPU no disponible o falló; usando backend automático',e);pipe=await lib.pipeline('text-generation',MODEL,{dtype:'q4'})}
-  setStatus('ready','Qwen3 0.6B · cuantizado q4');toast('Qwen3 está listo.');return pipe;
+  let dtypes=['q4'];
+  try{const available=await lib.ModelRegistry.get_available_dtypes(MODEL);dtypes=['q4','q8','fp16','fp32'].filter(d=>available.includes(d));if(!dtypes.length)dtypes=['q4'];}
+  catch(e){console.info('No se pudo consultar la lista de cuantizaciones; se probará q4',e)}
+  const dtype=dtypes[0];
+  try{pipe=await lib.pipeline('text-generation',MODEL,{dtype,device:'webgpu'})}
+  catch(e){console.info('WebGPU no disponible o falló; usando backend automático',e);pipe=await lib.pipeline('text-generation',MODEL,{dtype})}
+  setStatus('ready','Qwen3 0.6B · '+dtype);toast('Qwen3 está listo.');return pipe;
  }catch(e){pipe=null;loading=null;setStatus('error','No se pudo cargar');console.error(e);toast('No se pudo cargar Qwen3. Comprueba internet y memoria disponible.');throw e}})();return loading;
 }
 function mathResult(q){let expr=q.replace(/^(cu[aá]nto es|calcula|resuelve)\s*/i,'').replace(/[?=]/g,'').trim();if(!new RegExp('^[0-9\\s()+*%./-]+$').test(expr)||!/[0-9]/.test(expr)||!new RegExp('[+*%/-]').test(expr))return null;const ts=expr.match(new RegExp('[0-9]+(?:\\.[0-9]+)?|[()+*%/-]','g'));if(!ts||ts.join('')!==expr.replace(/\s/g,''))return null;let i=0;function f(){let t=ts[i++];if(t==='+')return f();if(t==='-')return -f();if(t==='('){let v=e();if(ts[i++]!==')')throw Error();return v}if(!t||!new RegExp('^[0-9]+(?:\\.[0-9]+)?$').test(t))throw Error();return +t}function term(){let v=f();while(['*','/','%'].includes(ts[i])){let op=ts[i++],r=f();if((op==='/'||op==='%')&&!r)throw Error();v=op==='*'?v*r:op==='/'?v/r:v%r}return v}function e(){let v=term();while(ts[i]==='+'||ts[i]==='-'){let op=ts[i++],r=term();v=op==='+'?v+r:v-r}return v}try{let n=e();return i===ts.length&&Number.isFinite(n)?String(Number(n.toPrecision(12))):null}catch(x){return null}}
