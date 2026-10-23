@@ -19,7 +19,9 @@ test('la ruta de modelo local utiliza caché y mantiene fallback CPU', () => {
   assert.match(script, /performance\.now\(\)-startedAt/);
 });
 
-test('la APK Android intenta preparar el modelo al iniciar, pero la web no lo descarga automáticamente', () => {
+test('la APK Android prepara el modelo al iniciar y la bienvenida explica la descarga inicial', () => {
+  assert.match(html, /En Android, Ronin prepara la IA al abrirse/);
+  assert.match(html, /la primera vez necesita internet/);
   assert.match(script, /window\.Capacitor\?\.getPlatform\?\.\(\)==='android'/);
   assert.match(script, /if\(isNativeAndroid\).*?loadModel\(\)\.catch/s);
 });
