@@ -81,7 +81,7 @@ def main():
     base_state = base.state_dict()
     base_shapes = {k:tuple(v.shape) for k,v in base_state.items()}
     # Cache only compatible candidate state dicts one at a time on CPU; 0.6B models can be RAM-heavy.
-    compatible = {}
+    compatible = []
     for label in eligible:
         repo = CANDIDATES[label]
         try:
@@ -95,13 +95,12 @@ def main():
             if set(state) != set(base_state) or any(tuple(state[k].shape) != base_shapes[k] for k in base_state):
                 report["candidates"][label] = {"repo":repo,"compatible":False,"reason":"tensor keys/shapes differ"}
             else:
-                compatible[label] = {k:v.detach().cpu().clone() for k,v in state.items() if v.is_floating_point()}
+                compatible.append(label)
                 report["candidates"][label] = {"repo":repo,"compatible":True,"tensor_count":len(state)}
             del candidate, state, tok, vocab
         except Exception as exc:
             report["candidates"][label] = {"repo":repo,"compatible":False,"reason":str(exc)}
     combos = [c for n in range(1,len(compatible)+1) for c in itertools.combinations(sorted(compatible),n)]
-    baseline = {"label":"base","score":None,"latency_seconds":None}
     def evaluate(model, tokenizer):
         total=checks=0; lat=[]
         for case in PROMPTS:
@@ -111,35 +110,46 @@ def main():
             start=time.monotonic()
             with torch.inference_mode():
                 ids=model.generate(**inputs,max_new_tokens=128,do_sample=False,pad_token_id=tokenizer.eos_token_id)
-            elapsed=time.monotonic()-start; lat.append(elapsed)
+            lat.append(time.monotonic()-start)
             answer=tokenizer.decode(ids[0][inputs["input_ids"].shape[1]:],skip_special_tokens=True).strip()
             s=score(case,answer); total+=s["passed"]; checks+=s["checks"]
         return {"score":total,"checks":checks,"mean_latency_seconds":round(sum(lat)/max(1,len(lat)),2)}
+    baseline = {"label":"base","score":None,"latency_seconds":None}
     baseline.update(evaluate(base,base_tok)); report["runs"].append(baseline)
+    del base, base_state
     for index, combo in enumerate(combos,1):
         label="base_plus_"+"_".join(combo)
         print(f"[{index}/{len(combos)}] Evaluating {label}",flush=True)
-        state=base.state_dict()
-        # Restore base weights for every independent combination.
-        merged = {k:v.detach().clone() for k,v in state.items()}
-        count=len(combo)+1
-        with torch.no_grad():
-            for candidate_label in combo:
-                candidate_state=compatible[candidate_label]
-                for key,value in candidate_state.items():
-                    if merged[key].is_floating_point():
-                        merged[key].mul_((count-1)/count).add_(value,alpha=1/count)
-        base.load_state_dict(merged,strict=True); base.eval()
-        run=evaluate(base,base_tok)
+        # Reload the base for each independent combination. Load one candidate at a
+        # time to avoid retaining several 0.6B state dictionaries in RAM.
+        merged_model=AutoModelForCausalLM.from_pretrained(BASE,torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
+        merged_model.eval()
+        merged_state=merged_model.state_dict()
+        count=1
+        for candidate_label in combo:
+            repo=CANDIDATES[candidate_label]
+            candidate=AutoModelForCausalLM.from_pretrained(repo,torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
+            candidate_state=candidate.state_dict()
+            missing=set(merged_state)-set(candidate_state)
+            extra=set(candidate_state)-set(merged_state)
+            shape_bad=[k for k in set(merged_state)&set(candidate_state) if merged_state[k].shape != candidate_state[k].shape]
+            if missing or extra or shape_bad:
+                raise RuntimeError(f"Compatibility changed during sweep for {repo}: missing={len(missing)}, extra={len(extra)}, shape_mismatch={len(shape_bad)}")
+            with torch.no_grad():
+                for key, ref_tensor in merged_state.items():
+                    other=candidate_state[key]
+                    if ref_tensor.is_floating_point():
+                        ref_tensor.mul_(count/(count+1)).add_(other,alpha=1/(count+1))
+                    elif not torch.equal(ref_tensor,other):
+                        raise RuntimeError(f"Non-floating tensor mismatch for {repo}: {key}")
+            count+=1
+            del candidate_state, candidate
+        merged_model.eval()
+        run=evaluate(merged_model,base_tok)
         run.update({"label":label,"models":[BASE]+[CANDIDATES[x] for x in combo],"combination_size":count})
         report["runs"].append(run)
-        del merged
-        # Save each tested model to temporary directory, then retain only the current best.
-        tmp=OUTPUT/"current"
-        if tmp.exists(): shutil.rmtree(tmp)
-        base.save_pretrained(tmp,safe_serialization=True)
-        base_tok.save_pretrained(tmp)
-        base.load_state_dict(state,strict=True)
+        del merged_state, merged_model
+        if hasattr(torch, "cuda") and torch.cuda.is_available(): torch.cuda.empty_cache()
     # Heuristic score first, latency as tie-breaker; no human quality claim.
     ranked=sorted([r for r in report["runs"] if r["label"]!="base"],key=lambda r:(r["score"],-r["mean_latency_seconds"]),reverse=True)
     report["winner"]=ranked[0] if ranked else None
