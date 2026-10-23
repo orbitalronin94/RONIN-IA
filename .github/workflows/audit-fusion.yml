@@ -7,6 +7,8 @@ on:
     paths:
       - 'scripts/audit_fusion_candidates.py'
       - 'tests/test_audit_fusion_candidates.py'
+      - 'tests/test_benchmark_fusion.py'
+      - 'scripts/benchmark_fusion.py'
       - '.github/workflows/audit-fusion.yml'
       - 'docs/EXPERIMENTO_FUSION_MODELOS.md'
       - 'docs/LOOP_FUSION_4_MODELOS.md'
@@ -34,7 +36,7 @@ jobs:
           python-version: '3.12'
       - name: Test fusion audit logic offline
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
-      - name: Audit four candidate repositories on Hugging Face
+      - name: Audit all 24 candidate repositories on Hugging Face
         id: audit
         continue-on-error: true
         run: python3 scripts/audit_fusion_candidates.py
@@ -46,7 +48,7 @@ jobs:
           path: fusion-audit-report.json
           if-no-files-found: warn
           retention-days: 30
-      - name: Fail if candidate audit found errors
+      - name: Fail only if base audit infrastructure failed
         if: steps.audit.outcome == 'failure'
         run: |
           echo "::error::La auditoría detectó errores o no pudo verificar uno o más candidatos. Descarga el artefacto ronin-fusion-audit."
