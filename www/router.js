@@ -11,7 +11,7 @@ const RULES = {
     /\b(traduce|traducci[oó]n|corrige|redacta|reescribe|resume|resumen|gram[aá]tica|ortograf[ií]a|estilo|email|correo|poema|historia|en ingl[eé]s|en espa[nñ]ol)\b/i,
   ],
   instruction: [
-    /\b(sigue exactamente|formato json|solo responde|no incluyas|en una tabla|paso a paso|lista numerada|cumple estas instrucciones)\b/i,
+    /\b(sigue exactamente|formato json|solo responde|responde solo|no incluyas|en una tabla|paso a paso|lista numerada|cumple estas instrucciones)\b/i,
   ],
 };
 
