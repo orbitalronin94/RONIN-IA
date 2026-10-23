@@ -1,0 +1,50 @@
+name: Deep model evaluation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '41 4 1 * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-deep-evaluation
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install CPU inference dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch transformers safetensors accelerate
+      - name: Run offline script tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Evaluate models, tensor shapes, and Spanish task prompts
+        id: benchmark
+        continue-on-error: true
+        env:
+          HF_HUB_DISABLE_TELEMETRY: '1'
+          TOKENIZERS_PARALLELISM: 'false'
+        run: python scripts/benchmark_fusion.py
+      - name: Upload complete evaluation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-deep-model-evaluation
+          path: fusion-benchmark-report.json
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Mark base-model evaluation failures
+        if: steps.benchmark.outcome == 'failure'
+        run: |
+          echo "::error::La evaluación profunda falló. Consulta los logs y el artefacto si se generó."
+          exit 1
