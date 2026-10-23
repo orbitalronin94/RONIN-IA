@@ -88,15 +88,15 @@ function closeSidebar(){el.sidebar.classList.remove('open');el.overlay.classList
 async function loadModel(){
  if(pipe)return pipe;if(loading)return loading;
  setStatus('loading','Preparando runtime y Qwen3…');
- loading=(async()=>{try{
+ loading=(async()=>{const startedAt=performance.now();try{
   const lib=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2');
   lib.env.allowLocalModels=false;lib.env.useBrowserCache=true;
   let available=['q4f16','q4','q8','int8','uint8','fp16','fp32'];
   try{available=await lib.ModelRegistry.get_available_dtypes(MODEL)}
   catch(e){console.info('No se pudo consultar la lista de cuantizaciones; se usarán valores compatibles por defecto',e)}
   const webgpuDtype=['q4f16','q4','fp16','q8','fp32'].find(d=>available.includes(d))||'q4f16';
-  try{pipe=await lib.pipeline('text-generation',MODEL,{dtype:webgpuDtype,device:'webgpu'});setStatus('ready','Qwen3 0.6B · '+webgpuDtype+' WebGPU')}
-  catch(e){console.info('WebGPU no disponible o falló; probando backend CPU con cuantización compatible',e);const cpuDtype=['q8','int8','uint8','fp32'].find(d=>available.includes(d))||'q8';pipe=await lib.pipeline('text-generation',MODEL,{dtype:cpuDtype});setStatus('ready','Qwen3 0.6B · '+cpuDtype+' CPU')}
+  try{pipe=await lib.pipeline('text-generation',MODEL,{dtype:webgpuDtype,device:'webgpu'});setStatus('ready','Qwen3 0.6B · '+webgpuDtype+' WebGPU · '+((performance.now()-startedAt)/1000).toFixed(1)+' s')}
+  catch(e){console.info('WebGPU no disponible o falló; probando backend CPU con cuantización compatible',e);const cpuDtype=['q8','int8','uint8','fp32'].find(d=>available.includes(d))||'q8';pipe=await lib.pipeline('text-generation',MODEL,{dtype:cpuDtype});setStatus('ready','Qwen3 0.6B · '+cpuDtype+' CPU · '+((performance.now()-startedAt)/1000).toFixed(1)+' s')}
   toast('Qwen3 está listo.');return pipe;
  }catch(e){pipe=null;loading=null;setStatus('error','No se pudo cargar');console.error(e);toast('No se pudo preparar Qwen3. Comprueba internet y memoria disponible; puedes reintentar con «Activar IA».');throw e}})();return loading;
 }
