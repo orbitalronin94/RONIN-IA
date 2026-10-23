@@ -47,6 +47,26 @@ jobs:
       # El proyecto Android se genera en CI para mantener ligera la base fuente.
       - run: npx cap add android
       - run: npx cap sync android
+      # INTERNET es un permiso normal de Android (no muestra diálogo); declararlo explícitamente habilita CDN y descarga del modelo.
+      - name: Ensure Android network permissions
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('android/app/src/main/AndroidManifest.xml')
+          s = p.read_text()
+          marker = '    <application'
+          if marker not in s:
+              raise SystemExit('No se encontró <application> en AndroidManifest.xml')
+          permissions = [
+              '    <uses-permission android:name="android.permission.INTERNET" />',
+              '    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />',
+          ]
+          for permission in permissions:
+              if permission not in s:
+                  s = s.replace(marker, permission + '\\n' + marker, 1)
+          p.write_text(s)
+          print('Permisos de red verificados en AndroidManifest.xml')
+          PY
       - run: chmod +x android/gradlew
       - run: cd android && ./gradlew --no-daemon assembleDebug
       # Artefacto de depuración temporal; no es una release firmada para Play Store.
