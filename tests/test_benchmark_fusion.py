@@ -9,6 +9,22 @@ SPEC.loader.exec_module(benchmark)
 
 
 class FusionBenchmarkTests(unittest.TestCase):
+    def test_matching_tokenizer_vocab_is_compatible(self):
+        result = benchmark.compare_tokenizer_vocab({"hola": 1, "mundo": 2}, {"hola": 1, "mundo": 2})
+        self.assertTrue(result["compatible"])
+        self.assertEqual(result["shared_token_id_mismatch_count"], 0)
+
+    def test_token_id_mismatch_blocks_compatibility(self):
+        result = benchmark.compare_tokenizer_vocab({"hola": 1, "mundo": 2}, {"hola": 9, "mundo": 2})
+        self.assertFalse(result["compatible"])
+        self.assertEqual(result["shared_token_id_mismatch_count"], 1)
+
+    def test_vocab_difference_blocks_compatibility(self):
+        result = benchmark.compare_tokenizer_vocab({"hola": 1}, {"adios": 1})
+        self.assertFalse(result["compatible"])
+        self.assertEqual(result["base_only_token_count"], 1)
+        self.assertEqual(result["candidate_only_token_count"], 1)
+
     def test_four_models_and_nine_prompt_cases_are_defined(self):
         self.assertEqual(len(benchmark.MODELS), 4)
         self.assertEqual(len(benchmark.PROMPTS), 9)
