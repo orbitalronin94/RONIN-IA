@@ -234,3 +234,27 @@ En la APK Android, Ronin intenta preparar Qwen3 al abrir la app. La primera aper
 ## Comprobaciones locales
 
 `npm test` ejecuta pruebas de contrato estáticas sobre las protecciones críticas del frontend. La compilación de GitHub Actions valida además la sintaxis del módulo y genera un APK de depuración. Las pruebas estáticas no sustituyen una prueba de inferencia en móviles físicos.
+
+## Estado de validación del proyecto
+
+**Última revisión:** 2026-10-23 (UTC). Esta sección refleja ejecuciones concretas de GitHub Actions; consulta los enlaces para ver el estado más reciente.
+
+| Comprobación | Resultado conocido | Evidencia |
+|---|---|---|
+| Auditoría de candidatos (24 repositorios) | Correcta | [Ejecución 39995711599](https://github.com/orbitalronin94/RONIN-IA/actions/runs/39995711599) |
+| APK Android en el commit `ef0ff49` | Compilación correcta; artefacto publicado | [Ejecución 39995711424](https://github.com/orbitalronin94/RONIN-IA/actions/runs/39995711424) |
+| Evaluación profunda en el commit `71d2f79` | Workflow correcto; informe publicado | [Ejecución 39994459932](https://github.com/orbitalronin94/RONIN-IA/actions/runs/39994459932) |
+| Evaluación profunda en el commit `8e92cc5` | En curso en la última consulta | [Ejecución 39995671249](https://github.com/orbitalronin94/RONIN-IA/actions/runs/39995671249) |
+| Nueva compilación tras añadir la memoria | En curso en la última consulta | [Ejecución 39997128627](https://github.com/orbitalronin94/RONIN-IA/actions/runs/39997128627) |
+
+El informe de evaluación profunda de la ejecución `39994459932` se publicó como artefacto `ronin-deep-model-evaluation`. Ese workflow corresponde al commit `71d2f79`, por lo que sus resultados **no deben atribuirse automáticamente a los commits posteriores**. Revisa el contenido del informe antes de afirmar compatibilidad o mejora de calidad.
+
+### Memoria técnica de iteraciones
+
+El historial de cambios, resultados, fallos conocidos y próximos pasos se mantiene en [`docs/MEMORIA_ITERACIONES.md`](docs/MEMORIA_ITERACIONES.md). Actualiza ese documento junto con este README cuando haya resultados nuevos y verificables.
+
+### Estado y límites de la validación
+
+- Una auditoría correcta no demuestra que todos los candidatos sean compatibles entre sí.
+- Una compilación APK correcta no sustituye las pruebas funcionales en un dispositivo Android real.
+- No se declara una fusión validada ni una mejora del modelo hasta disponer de resultados reproducibles y comparables con el modelo base.
