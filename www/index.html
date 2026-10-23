@@ -18,7 +18,7 @@
  <div class="sidehead"><div class="brand"><span class="mark">✳</span><span>Ronin IA</span></div><button class="icon" id="closeSidebar" aria-label="Cerrar menú">☰</button></div>
  <button class="new-chat" id="newChat"><span style="font-size:20px">＋</span><span>Nuevo chat</span><span style="margin-left:auto;color:#777;font-size:10px">Ctrl K</span></button>
  <div class="hist-label">Recientes</div><div class="history" id="history"></div>
- <div class="sidefoot"><div class="model-row"><div class="model-icon">✳</div><div class="model-copy"><strong>Ronin · SmolLM2</strong><small id="modelCaption">Modelo bajo demanda</small></div><span class="dot" id="modelDot"></span></div></div>
+ <div class="sidefoot"><div class="model-row"><div class="model-icon">✳</div><div class="model-copy"><strong>Ronin · Qwen3 0.6B</strong><small id="modelCaption">Modelo bajo demanda</small></div><span class="dot" id="modelDot"></span></div></div>
 </aside><div class="overlay" id="overlay"></div>
 <main class="main">
 <header class="topbar"><div class="top-left"><button class="icon mobile-menu" id="openSidebar" aria-label="Abrir menú">☰</button><div class="title">Ronin IA <span style="color:#888;font-weight:400">⌄</span></div></div><div class="top-actions"><span class="badge" id="connectionBadge">Lista para empezar</span><button class="icon" id="modelBtn" title="Cargar modelo" aria-label="Cargar modelo">⇩</button></div></header>
@@ -30,7 +30,7 @@
 <footer class="composer-area"><div class="composer-wrap"><div class="composer"><textarea id="input" rows="1" maxlength="12000" placeholder="Pregunta lo que quieras…" aria-label="Mensaje para Ronin IA"></textarea><div class="composer-bottom"><span class="hint">Intro para enviar · Mayús + Intro para nueva línea</span><div class="composer-actions"><button class="tool-btn" id="loadModelText">Activar IA</button><button class="send" id="send" disabled aria-label="Enviar mensaje">↑</button></div></div></div><div class="disclaimer">Ronin puede cometer errores. Verifica la información importante. El modelo se descarga al activarlo.</div></div></footer><div class="toast" id="toast" role="status"></div>
 </main></div>
 <script type="module">
-const MODEL='HuggingFaceTB/SmolLM2-360M-Instruct', KEY='ronin.ia.sessions.v2';
+const MODEL='onnx-community/Qwen3-0.6B-ONNX', KEY='ronin.ia.sessions.v2';
 const $=id=>document.getElementById(id);
 const el={sidebar:$('sidebar'),overlay:$('overlay'),history:$('history'),view:$('view'),welcome:$('welcome'),conversation:$('conversation'),input:$('input'),send:$('send'),toast:$('toast'),dot:$('modelDot'),caption:$('modelCaption'),badge:$('connectionBadge'),load:$('loadModelText'),modelBtn:$('modelBtn')};
 let sessions=readSessions(), activeId=sessions[0]?.id||newId(), pipe=null, loading=null, status='idle', busy=false, toastTimer;
@@ -71,26 +71,30 @@ function openSidebar(){el.sidebar.classList.add('open');el.overlay.classList.add
 function closeSidebar(){el.sidebar.classList.remove('open');el.overlay.classList.remove('show')}
 async function loadModel(){
  if(pipe)return pipe;if(loading)return loading;
- setStatus('loading','Cargando runtime y modelo…');
+ setStatus('loading','Cargando runtime y Qwen3…');
  loading=(async()=>{try{
   const lib=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2');
   lib.env.allowLocalModels=false;lib.env.useBrowserCache=true;
   try{pipe=await lib.pipeline('text-generation',MODEL,{dtype:'q4',device:'webgpu'})}
-  catch(e){console.info('WebGPU no disponible; probando backend automático',e);pipe=await lib.pipeline('text-generation',MODEL,{dtype:'q4'})}
-  setStatus('ready','Modelo cargado · SmolLM2');toast('Modelo generativo listo.');return pipe;
- }catch(e){pipe=null;loading=null;setStatus('error','No se pudo cargar');console.error(e);toast('No se pudo cargar la IA. Comprueba internet y vuelve a intentarlo.');throw e}})();return loading;
+  catch(e){console.info('WebGPU no disponible o falló; usando backend automático',e);pipe=await lib.pipeline('text-generation',MODEL,{dtype:'q4'})}
+  setStatus('ready','Qwen3 0.6B · cuantizado q4');toast('Qwen3 está listo.');return pipe;
+ }catch(e){pipe=null;loading=null;setStatus('error','No se pudo cargar');console.error(e);toast('No se pudo cargar Qwen3. Comprueba internet y memoria disponible.');throw e}})();return loading;
 }
 function mathResult(q){let expr=q.replace(/^(cu[aá]nto es|calcula|resuelve)\s*/i,'').replace(/[?=]/g,'').trim();if(!new RegExp('^[0-9\\s()+*%./-]+$').test(expr)||!/[0-9]/.test(expr)||!new RegExp('[+*%/-]').test(expr))return null;const ts=expr.match(new RegExp('[0-9]+(?:\\.[0-9]+)?|[()+*%/-]','g'));if(!ts||ts.join('')!==expr.replace(/\s/g,''))return null;let i=0;function f(){let t=ts[i++];if(t==='+')return f();if(t==='-')return -f();if(t==='('){let v=e();if(ts[i++]!==')')throw Error();return v}if(!t||!new RegExp('^[0-9]+(?:\\.[0-9]+)?$').test(t))throw Error();return +t}function term(){let v=f();while(['*','/','%'].includes(ts[i])){let op=ts[i++],r=f();if((op==='/'||op==='%')&&!r)throw Error();v=op==='*'?v*r:op==='/'?v/r:v%r}return v}function e(){let v=term();while(ts[i]==='+'||ts[i]==='-'){let op=ts[i++],r=term();v=op==='+'?v+r:v-r}return v}try{let n=e();return i===ts.length&&Number.isFinite(n)?String(Number(n.toPrecision(12))):null}catch(x){return null}}
 async function wiki(q){let topic=q.replace(/^(busca(r)?|dime|resume|explica)?\s*(en\s+)?wikipedia\s*/i,'').trim()||q;const r=await fetch('https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent(topic)+'&format=json&origin=*&srlimit=3');if(!r.ok)throw Error();const hits=(await r.json()).query?.search||[];if(!hits.length)return 'No encuentro una página clara en Wikipedia para '+topic+'.';let h=hits[0],snippet=h.snippet.replace(/<[^>]+>/g,'').replace(/&quot;/g,'"').replace(/&amp;/g,'&');return '**'+h.title+'**\n\n'+snippet+'…\n\n[Leer el artículo](https://es.wikipedia.org/wiki/'+encodeURIComponent(h.title.replace(/ /g,'_'))+')'}
 async function weather(q){let m=q.match(/(?:tiempo|clima|temperatura|llueve|lluvia)\s+(?:hace\s+)?(?:en|de)\s+(.+)/i);let city=(m?m[1]:'').replace(/[?.!]+$/,'').trim();if(!city)return null;let g=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(city)+'&count=1&language=es&format=json');if(!g.ok)throw Error();let place=(await g.json()).results?.[0];if(!place)return 'No encuentro la localidad '+city+'. Indica ciudad y país.';let f=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+place.latitude+'&longitude='+place.longitude+'&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m&timezone=auto');if(!f.ok)throw Error();let c=(await f.json()).current;return '**Tiempo actual en '+place.name+(place.country?', '+place.country:'')+'**\n\n- Temperatura: **'+c.temperature_2m+' °C** (sensación '+c.apparent_temperature+' °C)\n- Humedad: '+c.relative_humidity_2m+'%\n- Viento: '+c.wind_speed_10m+' km/h\n\n_Fuente: Open-Meteo._'}
 async function answer(q){
  if(/wikipedia/i.test(q)){try{return await wiki(q)}catch(e){return 'No pude conectar con Wikipedia ahora mismo. Comprueba tu conexión.'}}
- if(/\b(tiempo|clima|temperatura|llueve|lluvia)\b/i.test(q)&&/\b(en|de)\b/i.test(q)){try{let w=await weather(q);if(w)return w}catch(e){return 'No pude consultar el tiempo ahora mismo. Comprueba tu conexión.'}}
+ if(/\\b(tiempo|clima|temperatura|llueve|lluvia)\\b/i.test(q)&&/\\b(en|de)\\b/i.test(q)){try{let w=await weather(q);if(w)return w}catch(e){return 'No pude consultar el tiempo ahora mismo. Comprueba tu conexión.'}}
  let math=mathResult(q);if(math!==null)return 'El resultado es **'+math+'**.';
- let p=await loadModel(),s=current(),history=(s?.messages||[]).slice(-10).map(m=>({role:m.role==='assistant'?'assistant':'user',content:m.content}));
- const messages=[{role:'system',content:'Eres Ronin IA, un asistente útil, inteligente, honesto y conciso. Responde en el idioma del usuario. Explica claramente; no inventes datos actuales ni afirmes haber consultado fuentes que no has consultado. Si no sabes algo, dilo. Para código, usa bloques Markdown.'},...history];
- const out=await p(messages,{max_new_tokens:240,temperature:.65,do_sample:true,return_full_text:false}),gen=out?.[0]?.generated_text;
+ let p=await loadModel(),s=current();
+ // Mantener contexto útil sin inflar el prompt: máximo 8 mensajes y 1.600 caracteres por turno.
+ const history=(s?.messages||[]).slice(-8).map(m=>({role:m.role==='assistant'?'assistant':'user',content:String(m.content).slice(-1600)}));
+ const messages=[{role:'system',content:'Eres Ronin IA, un asistente competente, claro y honesto. Responde en el idioma del usuario. Prioriza exactitud, utilidad y razonamiento breve. Si una petición es ambigua, pregunta solo lo necesario. No inventes datos ni fuentes. Para programación, entrega soluciones ejecutables y explica decisiones importantes. No muestres razonamiento privado ni etiquetas internas; presenta solo una respuesta final concisa. Si no sabes algo, dilo con claridad.'},...history];
+ const out=await p(messages,{max_new_tokens:192,temperature:.55,top_p:.85,repetition_penalty:1.08,do_sample:true,return_full_text:false}),gen=out?.[0]?.generated_text;
  let text=typeof gen==='string'?gen.trim():Array.isArray(gen)?String(gen[gen.length-1]?.content||'').trim():'';
+ // Qwen puede emitir un bloque <think>; nunca mostrarlo en la interfaz.
+ text=text.replace(/<think>[\\s\\S]*?<\\/think>/gi,'').replace(/<\\|[^|]+\\|>/g,'').trim();
  if(!text)throw Error('El modelo no devolvió una respuesta.');return text;
 }
 async function copyText(text){try{await navigator.clipboard.writeText(text)}catch(e){let t=document.createElement('textarea');t.value=text;document.body.append(t);t.select();document.execCommand('copy');t.remove()}toast('Copiado al portapapeles.')}
