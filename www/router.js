@@ -1,4 +1,5 @@
 // Router local de RONIN-IA. Determinista, sin red ni llamadas adicionales a modelos.
+import { selectExpert } from './experts.js';
 const RULES = {
   coding: [
     /\b(c[oó]digo|programa|programar|programaci[oó]n|debug|depura|error en|stack trace|javascript|typescript|python|java|html|css|sql|api|regex|algoritmo|funci[oó]n|script|terminal|bash|git|github)\b/i,
@@ -37,11 +38,15 @@ export function routeRequest(query) {
   );
   const priority = ['coding', 'math', 'language', 'instruction'];
   const category = priority.find(name => signals[name]) ?? 'general';
+  const expert = selectExpert(category);
   return {
     category,
     profile: PROFILES[category],
     signals: Object.keys(signals).filter(name => signals[name]),
-    // El único modelo conectado actualmente. No declarar expertos separados hasta integrarlos.
-    model: 'onnx-community/Qwen3-0.6B-ONNX',
+    // Cada categoría apunta al experto incluido; el runtime carga el modelo bajo demanda.
+    model: expert.model,
+    expertId: expert.id,
+    expertStatus: expert.status,
+    fallback: expert.fallback,
   };
 }
