@@ -74,3 +74,18 @@ test('el dictado de voz usa SpeechRecognition de forma opcional y explica incomp
   assert.match(script, /El dictado por voz no está disponible/);
   assert.match(script, /recognition\.lang='es-ES'/);
 });
+
+
+test('la compilación declara permisos Android de red antes de generar la APK', () => {
+  const workflow = readFileSync(new URL('../.github/workflows/build-android.yml', import.meta.url), 'utf8');
+  assert.match(workflow, /Ensure Android network permissions/);
+  assert.match(workflow, /android\.permission\.INTERNET/);
+  assert.match(workflow, /android\.permission\.ACCESS_NETWORK_STATE/);
+  assert.match(workflow, /android\/app\/src\/main\/AndroidManifest\.xml/);
+});
+
+test('la UI aclara que Android no muestra un diálogo para el permiso normal de internet', () => {
+  assert.match(html, /Modelo local no cargado/);
+  assert.match(script, /Preparando IA al iniciar/);
+  assert.match(script, /Comprueba internet y memoria disponible/);
+});
