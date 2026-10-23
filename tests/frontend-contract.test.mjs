@@ -16,6 +16,7 @@ test('la ruta de modelo local utiliza caché y mantiene fallback CPU', () => {
   assert.match(script, /useBrowserCache\s*=\s*true/);
   assert.match(script, /device:\s*'webgpu'/);
   assert.match(script, /cpuDtype/);
+  assert.match(script, /performance\\.now\\(\\)-startedAt/);
 });
 
 test('la APK Android intenta preparar el modelo al iniciar, pero la web no lo descarga automáticamente', () => {
