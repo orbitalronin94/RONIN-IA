@@ -26,27 +26,25 @@ Ronin IA empaqueta una aplicación web en una app Android mediante **Capacitor**
 
 ## Qué incluye
 
-- Interfaz de chat basada en HTML, CSS y JavaScript.
-- Capa de respuestas heurísticas para determinadas intenciones y consultas sencillas.
-- Integraciones web para consultar información, cuando hay conectividad.
-- Ruta opcional para cargar **Transformers.js** y el modelo `HuggingFaceTB/SmolLM2-360M-Instruct` en formato cuantizado `q4`.
-- Compatibilidad con las capacidades disponibles en el navegador, como WebGPU, y posibilidad de ejecución mediante WASM cuando la configuración y el dispositivo lo permiten.
-- Envoltorio Android con Capacitor.
-- Flujo de CI en GitHub Actions que genera un APK de depuración y lo publica como artefacto descargable de la ejecución.
+- Interfaz conversacional inspirada en ChatGPT, adaptable a móvil, tablet y escritorio.
+- Historial local de conversaciones, creación de chats y copia de respuestas.
+- Arranque ligero: la interfaz aparece sin descargar el modelo de lenguaje.
+- Carga bajo demanda de **Transformers.js** y `HuggingFaceTB/SmolLM2-360M-Instruct` en formato cuantizado `q4`.
+- Respuestas rápidas para operaciones aritméticas sencillas.
+- Consultas a Wikipedia y Open-Meteo cuando se detectan esas peticiones y hay conexión.
+- Empaquetado Android con Capacitor y compilación de APK mediante GitHub Actions.
 
-> **Importante:** el modelo no se incluye dentro del repositorio ni del APK como conjunto de pesos integrado. La primera carga del modelo necesita internet y espacio suficiente en el dispositivo. La disponibilidad y el rendimiento dependen del navegador/WebView, la memoria, el procesador y el soporte de aceleración.
+> **Importante:** el modelo no está incluido en el APK como pesos locales. La primera carga requiere internet y puede tardar. La capacidad de razonamiento del modelo de 360 millones de parámetros es limitada comparada con modelos grandes alojados en la nube.
 
 ## Cómo funciona
 
-A grandes rasgos, el flujo es:
+1. La interfaz se muestra primero: no descarga pesos ni inicializa el runtime de IA al abrir.
+2. Las operaciones aritméticas sencillas se resuelven localmente; algunas consultas de Wikipedia y tiempo usan servicios públicos.
+3. Al activar la IA o enviar un mensaje normal, Ronin carga Transformers.js y el modelo seleccionado.
+4. La conversación reciente se usa como contexto del modelo y el historial se guarda en el almacenamiento local del navegador/WebView.
+5. Capacitor empaqueta la web en una aplicación Android.
 
-1. La persona escribe un mensaje en la interfaz.
-2. La aplicación intenta resolver las consultas sencillas mediante su lógica local.
-3. Para las funciones que lo requieren, puede consultar servicios externos.
-4. Si la ruta de modelo está habilitada y el dispositivo puede cargarlo, Transformers.js intenta ejecutar el modelo seleccionado.
-5. Capacitor presenta la misma aplicación web dentro del contenedor Android.
-
-La ruta heurística **no equivale a un LLM**: sirve para respuestas o clasificación sencillas, pero no tiene la capacidad general de razonamiento de un modelo generativo. La respuesta generada por el modelo puede variar según la disponibilidad de sus archivos y de los recursos del dispositivo.
+La carga bajo demanda mejora el tiempo hasta la primera pantalla, pero no garantiza que la primera respuesta generativa sea rápida: depende de la descarga inicial, memoria, CPU/GPU y WebView del dispositivo.
 
 ## Arquitectura
 
@@ -66,13 +64,11 @@ RONIN-IA/
 
 | Componente | Responsabilidad |
 |---|---|
-| `www/index.html` | Interfaz, lógica del cliente y conexiones definidas por la aplicación |
-| `@capacitor/core` | Puente entre la aplicación web y el contenedor nativo |
-| `@capacitor/android` | Proyecto de destino Android |
-| `@capacitor/cli` | Preparación y sincronización del proyecto nativo |
-| GitHub Actions | Instalación de dependencias, generación del proyecto Android, compilación y publicación del APK |
-
-El proyecto Android se genera durante el workflow con `npx cap add android`; por eso no es necesario mantener el directorio nativo generado en el repositorio para el flujo de compilación actual.
+| `www/index.html` | Interfaz, estilos responsive, historial, lógica del chat y consultas públicas |
+| `localStorage` | Persistencia local del historial de chats |
+| Transformers.js | Runtime de inferencia del modelo en navegador |
+| `@capacitor/core` y `@capacitor/android` | Contenedor y plataforma Android |
+| GitHub Actions | Comprobación de sintaxis, generación Android, compilación y publicación del APK |
 
 ## Modelo de lenguaje y requisitos
 
@@ -147,18 +143,17 @@ Para inspeccionar la versión web sin empaquetar, puedes servir el contenido de 
 
 ## Servicios externos
 
-La implementación web incluye o contempla consultas a servicios públicos para distintas funciones, entre ellas:
+La aplicación puede consultar estos servicios públicos cuando el usuario hace una petición compatible:
 
-- **Wikipedia:** contenido enciclopédico.
-- **Open-Meteo:** datos meteorológicos.
-- **DuckDuckGo:** búsqueda web.
-- **MyMemory:** traducción.
+- **Wikipedia:** búsqueda de artículos y extractos.
+- **Open-Meteo:** geocodificación y condiciones meteorológicas actuales.
 
-La disponibilidad, las políticas de uso, los límites de solicitudes y los resultados dependen de cada proveedor y de la conectividad. Una integración con un servicio público no implica afiliación, patrocinio ni garantía de disponibilidad por parte de ese servicio.
+Los servicios requieren conectividad y pueden cambiar disponibilidad, límites o políticas. La integración no implica afiliación ni garantía por parte de esos proveedores.
 
 ## Limitaciones conocidas
 
 - El proyecto está en fase experimental; no debe asumirse que todas las funciones están disponibles en todos los dispositivos.
+- SmolLM2-360M es un modelo pequeño: el diseño optimiza el arranque, pero no puede convertir ese modelo en un sistema de razonamiento de gran escala.
 - El modelo se descarga cuando se necesita; el primer arranque de esa función puede tardar y consumir datos.
 - WebGPU y WASM varían en rendimiento y compatibilidad según el navegador/WebView y el hardware.
 - Los servicios externos pueden fallar, cambiar sus API o limitar las solicitudes.
