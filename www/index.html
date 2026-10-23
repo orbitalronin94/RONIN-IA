@@ -137,16 +137,10 @@ async function loadCodingExpert(){
 }
 async function getPipelineForRequest(route){
  if(route.category!=='coding')return loadModel();
- let optedIn=false;try{optedIn=localStorage.getItem(CODING_OPT_IN_KEY)==='yes'}catch(e){}
- if(!optedIn){
-  const accepted=window.confirm('Activar el experto de programación opcional? La variante prevista ocupa unos 862 MB y necesita conexión y espacio libre. Si cancelas, RONIN seguirá usando Qwen.');
-  if(!accepted)return loadModel();
-  try{localStorage.setItem(CODING_OPT_IN_KEY,'yes')}catch(e){}
- }
+ // Los pesos ya vienen en la APK: no se pregunta ni se descarga al usar el experto.
  const expertPipe=await loadCodingExpert();
  return expertPipe||loadModel();
 }
-
 // Parser aritmético limitado a números y operadores; no se usa eval() para no ejecutar texto del usuario como código.
 function mathResult(q){let expr=q.replace(/^(cu[aá]nto es|calcula|resuelve)\s*/i,'').replace(/[?=]/g,'').trim();if(!new RegExp('^[0-9\\s()+*%./-]+$').test(expr)||!/[0-9]/.test(expr)||!new RegExp('[+*%/-]').test(expr))return null;const ts=expr.match(new RegExp('[0-9]+(?:\\.[0-9]+)?|[()+*%/-]','g'));if(!ts||ts.join('')!==expr.replace(/\s/g,''))return null;let i=0;function f(){let t=ts[i++];if(t==='+')return f();if(t==='-')return -f();if(t==='('){let v=e();if(ts[i++]!==')')throw Error();return v}if(!t||!new RegExp('^[0-9]+(?:\\.[0-9]+)?$').test(t))throw Error();return +t}function term(){let v=f();while(['*','/','%'].includes(ts[i])){let op=ts[i++],r=f();if((op==='/'||op==='%')&&!r)throw Error();v=op==='*'?v*r:op==='/'?v/r:v%r}return v}function e(){let v=term();while(ts[i]==='+'||ts[i]==='-'){let op=ts[i++],r=term();v=op==='+'?v+r:v-r}return v}try{let n=e();return i===ts.length&&Number.isFinite(n)?String(Number(n.toPrecision(12))):null}catch(x){return null}}
 // Wikipedia se consulta solo cuando la petición lo solicita; la app no hace búsquedas remotas en segundo plano.
