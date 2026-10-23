@@ -100,7 +100,10 @@ def main():
             del candidate, state, tok, vocab
         except Exception as exc:
             report["candidates"][label] = {"repo":repo,"compatible":False,"reason":str(exc)}
-    combos = [c for n in range(1,len(compatible)+1) for c in itertools.combinations(sorted(compatible),n)]
+    # Evaluate candidate-only averages as well as base-plus-candidate averages.
+    candidate_combos = [c for n in range(1, len(compatible)+1)
+                        for c in itertools.combinations(sorted(compatible), n)]
+    combos = [(False, c) for c in candidate_combos] + [(True, c) for c in candidate_combos]
     def evaluate(model, tokenizer):
         total=checks=0; lat=[]
         for case in PROMPTS:
@@ -117,16 +120,19 @@ def main():
     baseline = {"label":"base","score":None,"latency_seconds":None}
     baseline.update(evaluate(base,base_tok)); report["runs"].append(baseline)
     del base, base_state
-    for index, combo in enumerate(combos,1):
-        label="base_plus_"+"_".join(combo)
+    for index, (include_base, combo) in enumerate(combos,1):
+        prefix = "base_plus_" if include_base else "candidate_only_"
+        label = prefix + "_".join(combo)
         print(f"[{index}/{len(combos)}] Evaluating {label}",flush=True)
-        # Reload the base for each independent combination. Load one candidate at a
-        # time to avoid retaining several 0.6B state dictionaries in RAM.
-        merged_model=AutoModelForCausalLM.from_pretrained(BASE,torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
+        # Candidate-only averages start from the first candidate; base-inclusive
+        # averages start from the base. Load other candidates one at a time.
+        initial_repo = BASE if include_base else CANDIDATES[combo[0]]
+        merged_model=AutoModelForCausalLM.from_pretrained(initial_repo,torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
         merged_model.eval()
         merged_state=merged_model.state_dict()
         count=1
-        for candidate_label in combo:
+        remaining = combo if include_base else combo[1:]
+        for candidate_label in remaining:
             repo=CANDIDATES[candidate_label]
             candidate=AutoModelForCausalLM.from_pretrained(repo,torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
             candidate_state=candidate.state_dict()
@@ -146,7 +152,8 @@ def main():
             del candidate_state, candidate
         merged_model.eval()
         run=evaluate(merged_model,base_tok)
-        run.update({"label":label,"models":[BASE]+[CANDIDATES[x] for x in combo],"combination_size":count})
+        model_repos = ([BASE] if include_base else []) + [CANDIDATES[x] for x in combo]
+        run.update({"label":label,"models":model_repos,"includes_base":include_base,"combination_size":count})
         report["runs"].append(run)
         del merged_state, merged_model
         if hasattr(torch, "cuda") and torch.cuda.is_available(): torch.cuda.empty_cache()
