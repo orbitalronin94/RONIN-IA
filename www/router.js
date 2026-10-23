@@ -43,7 +43,7 @@ export function routeRequest(query) {
     category,
     profile: PROFILES[category],
     signals: Object.keys(signals).filter(name => signals[name]),
-    // El catálogo puede proponer expertos, pero por defecto solo se activa el modelo local.
+    // Cada categoría apunta al experto incluido; el runtime carga el modelo bajo demanda.
     model: expert.model,
     expertId: expert.id,
     expertStatus: expert.status,
