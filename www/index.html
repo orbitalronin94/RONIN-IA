@@ -68,33 +68,21 @@ function markdown(raw){
  return text.replace(/%%BLOCK(\d+)%%/g,(_,i)=>blocks[Number(i)]||'');
 }
 // Se construye el historial con nodos y textContent para que los títulos de chats nunca se interpreten como HTML.
-// Renderiza el historial desde datos ya validados; los títulos se insertan como texto, no como HTML confiable.
 function renderHistory(){el.history.innerHTML='';[...sessions].sort((a,b)=>(b.updated||0)-(a.updated||0)).forEach(s=>{const row=document.createElement('div');row.className='history-item'+(s.id===activeId?' active':'');const label=document.createElement('span');label.textContent=s.title||'Nuevo chat';row.append(label);const del=document.createElement('button');del.className='del';del.textContent='×';del.title='Eliminar chat';del.setAttribute('aria-label','Eliminar chat');del.onclick=e=>{e.stopPropagation();deleteSession(s.id)};row.append(del);row.onclick=()=>{activeId=s.id;renderCurrent();renderHistory();closeSidebar()};el.history.append(row)})}
 // Los mensajes del usuario siempre se escapan; el asistente solo admite el subconjunto de Markdown sanitizado por markdown().
-// Crea la estructura DOM de un mensaje y aplica renderizado seguro según el rol.
 function makeMessage(m,i){const article=document.createElement('article');article.className='message '+(m.role==='user'?'user':'assistant');const avatar=document.createElement('div');avatar.className='avatar';if(m.role==='user'){avatar.textContent='TÚ'}else{const logo=document.createElement('img');logo.src='./assets/ronin-logo.svg';logo.alt='';avatar.append(logo)}const body=document.createElement('div');body.className='message-body';body.innerHTML=m.role==='user'?escapeHtml(m.content).replace(/\n/g,'<br>'):markdown(m.content);if(m.role==='assistant'){const tools=document.createElement('div');tools.className='message-tools';const copy=document.createElement('button');copy.textContent='▢ Copiar';copy.onclick=()=>copyText(m.content);tools.append(copy);body.append(tools)}article.append(avatar,body);return article}
 // Renderizar desde el estado guardado mantiene una única fuente de verdad al cambiar de chat.
-// Cambia entre la pantalla de bienvenida y el hilo activo sin perder el historial guardado.
 function renderCurrent(){const s=current();if(!s)return;const empty=!s.messages.length;el.welcome.hidden=!empty;el.conversation.hidden=empty;if(empty)return;el.conversation.innerHTML='';s.messages.forEach((m,i)=>el.conversation.append(makeMessage(m,i)));requestAnimationFrame(()=>el.view.scrollTop=el.view.scrollHeight)}
 // Toda entrada se persiste antes de actualizar la lista, para que el historial sobreviva a recargas.
-// Añade un turno al chat, actualiza la marca temporal y persiste el estado de la conversación.
 function add(role,content){const s=current();s.messages.push({role,content:String(content),time:Date.now()});if(role==='user'&&s.messages.filter(m=>m.role==='user').length===1)s.title=String(content).trim().slice(0,38)||'Nuevo chat';s.updated=Date.now();persist();renderHistory();renderCurrent()}
-// Indica visualmente que hay una operación en curso para evitar confundir espera con bloqueo.
 function thinking(){el.welcome.hidden=true;el.conversation.hidden=false;const a=document.createElement('article');a.className='message assistant';a.id='thinking';a.innerHTML='<div class="avatar"><img src="./assets/ronin-logo.svg" alt=""></div><div class="message-body"><div class="thinking"><i></i><i></i><i></i></div><p style="font-size:11px;color:#8e8e8e">Pensando…</p></div>';el.conversation.append(a);requestAnimationFrame(()=>el.view.scrollTop=el.view.scrollHeight)}
-// Elimina el indicador de espera al terminar tanto las respuestas correctas como los errores.
 function stopThinking(){const t=$('thinking');if(t)t.remove()}
 // Ajustar el alto al contenido evita scroll interno innecesario en móviles y respeta el límite visual de 180 px.
-// Ajusta el alto del campo al texto hasta un máximo para que el compositor siga siendo usable en móvil.
 function resize(){el.input.style.height='auto';el.input.style.height=Math.min(el.input.scrollHeight,180)+'px';el.send.disabled=busy||!el.input.value.trim()}
-// Centraliza bloqueo/desbloqueo de controles mientras se genera una respuesta.
 function busyState(v){busy=v;el.input.disabled=v;el.send.disabled=v||!el.input.value.trim();el.load.disabled=v||status==='loading';if(!v)el.input.focus()}
-// Crea una conversación aislada y la selecciona sin borrar las conversaciones anteriores.
 function createChat(){activeId=newId();sessions.unshift({id:activeId,title:'Nuevo chat',messages:[],updated:Date.now()});sessions=sessions.slice(0,40);persist();renderHistory();renderCurrent();el.input.value='';resize();closeSidebar();el.input.focus()}
-// Borra únicamente la sesión solicitada y garantiza que siempre quede una conversación activa.
 function deleteSession(id){sessions=sessions.filter(s=>s.id!==id);if(!sessions.length)sessions=[{id:newId(),title:'Nuevo chat',messages:[],updated:Date.now()}];if(activeId===id)activeId=sessions[0].id;persist();renderHistory();renderCurrent()}
-// Abre el menú móvil; se mantiene como panel superpuesto para no estrechar el chat.
 function openSidebar(){el.sidebar.classList.add('open');el.overlay.classList.add('show')}
-// Cierra el menú móvil y devuelve el foco visual a la conversación.
 function closeSidebar(){el.sidebar.classList.remove('open');el.overlay.classList.remove('show')}
 // Carga diferida para que la primera pantalla aparezca rápido; GPU primero y CPU compatible como reserva.
 async function loadModel(){
@@ -113,7 +101,6 @@ async function loadModel(){
  }catch(e){pipe=null;loading=null;setStatus('error','No se pudo cargar');console.error(e);toast('No se pudo preparar Qwen3. Comprueba internet y memoria disponible; puedes reintentar con «Activar IA».');throw e}})();return loading;
 }
 // Parser aritmético limitado a números y operadores; no se usa eval() para no ejecutar texto del usuario como código.
-// Evalúa solo expresiones aritméticas permitidas mediante un parser acotado; no ejecutar código arbitrario.
 function mathResult(q){let expr=q.replace(/^(cu[aá]nto es|calcula|resuelve)\s*/i,'').replace(/[?=]/g,'').trim();if(!new RegExp('^[0-9\\s()+*%./-]+$').test(expr)||!/[0-9]/.test(expr)||!new RegExp('[+*%/-]').test(expr))return null;const ts=expr.match(new RegExp('[0-9]+(?:\\.[0-9]+)?|[()+*%/-]','g'));if(!ts||ts.join('')!==expr.replace(/\s/g,''))return null;let i=0;function f(){let t=ts[i++];if(t==='+')return f();if(t==='-')return -f();if(t==='('){let v=e();if(ts[i++]!==')')throw Error();return v}if(!t||!new RegExp('^[0-9]+(?:\\.[0-9]+)?$').test(t))throw Error();return +t}function term(){let v=f();while(['*','/','%'].includes(ts[i])){let op=ts[i++],r=f();if((op==='/'||op==='%')&&!r)throw Error();v=op==='*'?v*r:op==='/'?v/r:v%r}return v}function e(){let v=term();while(ts[i]==='+'||ts[i]==='-'){let op=ts[i++],r=term();v=op==='+'?v+r:v-r}return v}try{let n=e();return i===ts.length&&Number.isFinite(n)?String(Number(n.toPrecision(12))):null}catch(x){return null}}
 // Wikipedia se consulta solo cuando la petición lo solicita; la app no hace búsquedas remotas en segundo plano.
 async function wiki(q){let topic=q.replace(/^(busca(r)?|dime|resume|explica)?\s*(en\s+)?wikipedia\s*/i,'').trim()||q;const r=await fetch('https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent(topic)+'&format=json&origin=*&srlimit=3');if(!r.ok)throw Error();const hits=(await r.json()).query?.search||[];if(!hits.length)return 'No encuentro una página clara en Wikipedia para '+topic+'.';let h=hits[0],snippet=h.snippet.replace(/<[^>]+>/g,'').replace(/&quot;/g,'"').replace(/&amp;/g,'&');return '**'+h.title+'**\n\n'+snippet+'…\n\n[Leer el artículo](https://es.wikipedia.org/wiki/'+encodeURIComponent(h.title.replace(/ /g,'_'))+')'}
@@ -138,9 +125,7 @@ async function answer(q){
  text=text.replaceAll('<|im_end|>','').replaceAll('<|im_start|>assistant','').trim();
  if(!text)throw Error('El modelo no devolvió una respuesta.');return text;
 }
-// Usa Clipboard API y un fallback para WebView antiguos; no requiere enviar el texto a ningún servidor.
 async function copyText(text){try{await navigator.clipboard.writeText(text)}catch(e){let t=document.createElement('textarea');t.value=text;document.body.append(t);t.select();document.execCommand('copy');t.remove()}toast('Copiado al portapapeles.')}
-// Orquesta el ciclo completo del turno y libera los controles en finally incluso si falla la inferencia.
 async function sendMessage(prefill){if(busy)return;let q=(typeof prefill==='string'?prefill:el.input.value).trim();if(!q)return;el.input.value='';resize();busyState(true);add('user',q);thinking();try{let a=await answer(q);stopThinking();add('assistant',a)}catch(e){stopThinking();console.error(e);add('assistant','No he podido generar una respuesta. Si es la primera vez, pulsa «Activar IA» y espera a que se descargue el modelo. Comprueba tu conexión y la memoria disponible del dispositivo.')}finally{busyState(false)}}
 el.send.onclick=()=>sendMessage();el.input.addEventListener('input',resize);el.input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}});
 $('newChat').onclick=createChat;$('openSidebar').onclick=openSidebar;$('closeSidebar').onclick=closeSidebar;el.overlay.onclick=closeSidebar;el.load.onclick=()=>loadModel().catch(()=>{});el.modelBtn.onclick=()=>loadModel().catch(()=>{});
