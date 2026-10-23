@@ -41,3 +41,17 @@ test('el historial local tolera errores de almacenamiento', () => {
   assert.match(script, /function readSessions\(\)\{try\{/);
   assert.match(script, /function persist\(\)\{try\{/);
 });
+
+test('los controles principales conservan etiquetas accesibles y foco visible', () => {
+  assert.match(html, /aria-label="Mensaje para Ronin IA"/);
+  assert.match(html, /aria-label="Enviar mensaje"/);
+  assert.match(html, /aria-label="Abrir menú"/);
+  assert.match(html, /button:focus-visible/);
+  assert.match(html, /prefers-reduced-motion:reduce/);
+});
+
+test('la salida del modelo pasa por el renderizador Markdown y el escape HTML', () => {
+  assert.match(script, /function escapeHtml\(/);
+  assert.match(script, /function markdown\(/);
+  assert.match(script, /m\.role==='user'\?escapeHtml\(m\.content\).*?:markdown\(m\.content\)/);
+});
