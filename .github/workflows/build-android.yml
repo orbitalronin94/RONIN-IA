@@ -103,6 +103,21 @@ jobs:
           print('Permisos de red verificados en AndroidManifest.xml')
           PY
       - run: chmod +x android/gradlew
+      # El empaquetado del modelo ONNX consume mucha memoria al comprimir assets.
+      # Fijar heap explícito evita que Gradle falle con "Java heap space".
+      - name: Configure Gradle memory
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('android/gradle.properties')
+          lines = p.read_text().splitlines() if p.exists() else []
+          key = 'org.gradle.jvmargs='
+          value = 'org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8'
+          lines = [line for line in lines if not line.startswith(key)]
+          lines.append(value)
+          p.write_text('\\n'.join(lines) + '\\n')
+          print('Gradle JVM heap configured to 4 GiB')
+          PY
       - run: cd android && ./gradlew --no-daemon assembleDebug
       # Artefacto de depuración temporal; no es una release firmada para Play Store.
       - uses: actions/upload-artifact@v4
