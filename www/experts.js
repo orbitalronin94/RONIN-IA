@@ -1,5 +1,5 @@
-// Catálogo de expertos RONIN-IA. Los candidatos no se cargan automáticamente.
-// Mantener expertos remotos desactivados evita descargas grandes y costes de datos sorpresa.
+// Catálogo de expertos incluidos en el paquete de modelos de Android.
+// Los pesos se descargan durante la preparación del build, no durante el uso de la app.
 export const BASE_MODEL = 'onnx-community/Qwen3-0.6B-ONNX';
 
 export const EXPERTS = Object.freeze({
@@ -13,12 +13,9 @@ export const EXPERTS = Object.freeze({
   coding: Object.freeze({
     id: 'qwen25-coder-05b-instruct',
     model: 'onnx-community/Qwen2.5-Coder-0.5B-Instruct',
-    source: 'huggingface',
-    status: 'candidate',
-    // El archivo ONNX q4 publicado ronda los 862 MB. Usamos la misma cuantización
-    // en GPU/CPU para reducir el riesgo de descargar dos variantes distintas.
-    estimatedDownloadMB: 862,
-    requiresExplicitOptIn: true,
+    source: 'bundled',
+    status: 'active',
+    estimatedDownloadMB: 0,
   }),
 });
 
@@ -32,8 +29,8 @@ const CATEGORY_EXPERT = Object.freeze({
 
 /**
  * Planifica qué modelo usar sin cargarlo.
- * Un experto candidato solo se selecciona cuando el usuario lo ha habilitado.
- * La carga real y su comprobación de caché se gestionan en la capa de runtime.
+ * Todos los modelos del catálogo se incluyen durante la preparación del APK.
+ * La carga de inferencia sigue siendo diferida para no ocupar RAM hasta necesitarlos.
  */
 export function selectExpert(category, { enabledExperts = [] } = {}) {
   const key = CATEGORY_EXPERT[category] || 'general';
