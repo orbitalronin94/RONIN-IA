@@ -29,7 +29,7 @@ Ronin IA empaqueta una aplicación web en una app Android mediante **Capacitor**
 - Interfaz conversacional inspirada en ChatGPT, adaptable a móvil, tablet y escritorio.
 - Historial local de conversaciones, creación de chats y copia de respuestas.
 - Arranque ligero: la interfaz aparece sin descargar el modelo de lenguaje.
-- Carga bajo demanda de **Transformers.js** y `onnx-community/Qwen3-0.6B-ONNX` en formato cuantizado `q4`, con selección automática de cuantización (`q4` preferido) y WebGPU cuando está disponible, con backend automático como alternativa.
+- Carga bajo demanda de **Transformers.js** y `onnx-community/Qwen3-0.6B-ONNX` en formato cuantizado `q4`, con selección automática de cuantización (`q4f16` en WebGPU y `q8`/`int8` como alternativas de CPU) y backend de reserva cuando la GPU no está disponible.
 - Respuestas rápidas para operaciones aritméticas sencillas.
 - Consultas a Wikipedia y Open-Meteo cuando se detectan esas peticiones y hay conexión.
 - Empaquetado Android con Capacitor y compilación de APK mediante GitHub Actions.
