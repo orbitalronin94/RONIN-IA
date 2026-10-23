@@ -275,3 +275,22 @@ El historial de cambios, resultados, fallos conocidos y próximos pasos se manti
 - Una auditoría correcta no demuestra que todos los candidatos sean compatibles entre sí.
 - Una compilación APK correcta no sustituye las pruebas funcionales en un dispositivo Android real.
 - No se declara una fusión validada ni una mejora del modelo hasta disponer de resultados reproducibles y comparables con el modelo base.
+
+
+## APK Android con modelos precargados
+
+La preparación de Android descarga los pesos ONNX q4 de los dos modelos del catálogo y los coloca bajo `www/models/`; Capacitor los copia a los recursos de la app para que la inferencia no dependa de descargar los pesos al abrirla.
+
+```bash
+npm install
+npx cap add android   # solo la primera vez, si aún no existe android/
+npm run sync:android
+```
+
+La descarga de preparación requiere conexión y aproximadamente **1,8 GB** de espacio para los pesos, además del espacio temporal de compilación. El APK resultante será muy grande y debe instalarse mediante distribución directa; las tiendas pueden imponer límites distintos. Los pesos generados se excluyen de Git mediante `.gitignore` para no convertir el repositorio en un almacén de binarios gigantes. El paquete incluye los modelos, pero la app carga un único experto cada vez para limitar el uso de RAM.
+
+Para listar qué archivos se empaquetarán sin descargarlos:
+
+```bash
+npm run prepare:models -- --list
+```
