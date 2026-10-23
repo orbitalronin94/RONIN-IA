@@ -6,6 +6,7 @@ on:
     branches: [main, master]
     paths:
       - 'scripts/audit_fusion_candidates.py'
+      - 'scripts/audit_fusion_backup_candidates.py'
       - 'tests/test_audit_fusion_candidates.py'
       - 'tests/test_benchmark_fusion.py'
       - 'scripts/benchmark_fusion.py'
@@ -40,6 +41,18 @@ jobs:
         id: audit
         continue-on-error: true
         run: python3 scripts/audit_fusion_candidates.py
+      - name: Discover and screen 20 backup candidates
+        id: backup_audit
+        continue-on-error: true
+        run: python3 scripts/audit_fusion_backup_candidates.py
+      - name: Publish backup candidate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-fusion-backup-candidates
+          path: fusion-backup-candidates-report.json
+          if-no-files-found: warn
+          retention-days: 30
       - name: Publish audit report
         if: always()
         uses: actions/upload-artifact@v4
@@ -48,6 +61,11 @@ jobs:
           path: fusion-audit-report.json
           if-no-files-found: warn
           retention-days: 30
+      - name: Fail if backup discovery infrastructure failed
+        if: steps.backup_audit.outcome == 'failure'
+        run: |
+          echo "::error::No se pudo completar la búsqueda de candidatos de respaldo. Revisa los logs del trabajo."
+          exit 1
       - name: Fail only if base audit infrastructure failed
         if: steps.audit.outcome == 'failure'
         run: |
