@@ -8,10 +8,15 @@ Mantener una experiencia tipo chat que arranque rápido en Android y web, pueda 
 
 ## Marca y recursos
 
+- El SVG incluye título y descripción accesibles; no usa rasterizados, fuentes externas ni dependencias. Los comentarios del SVG explican el propósito de cada capa visual.
+
 - `www/assets/ronin-logo.svg`: SVG propio, sin fuentes ni imágenes remotas. Se ve nítido a cualquier escala y no añade dependencias.
 - La paleta azul noche/cian/violeta da identidad visual y mantiene contraste en la interfaz oscura.
 
 ## Frontend
+
+- Los comentarios junto a funciones críticas explican el motivo de la decisión, no solo repiten lo que hace la línea. Esto ayuda a cambiar la arquitectura con menos riesgo.
+- El contenido del modelo se trata como entrada no confiable. El Markdown permitido es deliberadamente limitado; no debe añadirse soporte para HTML arbitrario.
 
 - `www/index.html` es el punto de entrada autocontenido para simplificar el empaquetado con Capacitor. Si crece, el siguiente paso será dividir CSS y JavaScript en módulos probados.
 - El diseño responsive usa CSS y media queries para evitar añadir un framework UI pesado a una app pequeña.
@@ -37,6 +42,13 @@ Mantener una experiencia tipo chat que arranque rápido en Android y web, pueda 
 - El workflow valida sintaxis antes de Gradle y publica un APK debug temporal.
 - `package.json` y `capacitor.config.json` son JSON estricto y no admiten comentarios. Sus decisiones se documentan aquí.
 - Un APK debug no es una release firmada para distribución pública.
+
+## Criterio de investigación open source
+
+- Transformers.js es la ruta actual porque evita un servidor y funciona con ONNX en navegador; no se asume que WebGPU esté disponible en todos los WebView.
+- Ollama y Open WebUI son referencias para API y experiencia de producto, no dependencias requeridas para una aplicación móvil autónoma.
+- llama.cpp se evaluará como alternativa nativa solo con mediciones comparables de tiempo hasta primera respuesta, tokens/s, RAM y tamaño de descarga.
+- Los proyectos de referencia y sus límites se registran en `docs/REFERENCIAS_OPEN_SOURCE.md`.
 
 ## Próximos pasos
 
