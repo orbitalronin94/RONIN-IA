@@ -122,7 +122,7 @@ async function loadCodingExpert(){
    if(isNativeAndroid&&lib.env.backends?.onnx?.wasm)lib.env.backends.onnx.wasm.wasmPaths='./vendor/';
    let available=['q4','q4f16','q8','int8','uint8','fp16','fp32'];
    try{available=await lib.ModelRegistry.get_available_dtypes(expert.model)}catch(e){console.info('No se pudo consultar cuantizaciones del experto; probando opciones conocidas',e)}
-   const webgpuDtype=['q4f16','q4','q8','fp16','fp32'].find(d=>available.includes(d))||'q4';
+   const webgpuDtype=['q4','q4f16','q8','fp16','fp32'].find(d=>available.includes(d))||'q4';
    let expertPipe;
    try{expertPipe=await lib.pipeline('text-generation',expert.model,{dtype:webgpuDtype,device:'webgpu'})}
    catch(e){console.info('Experto sin WebGPU; probando CPU',e);const cpuDtype=['q4','q8','int8','uint8','fp32'].find(d=>available.includes(d))||'q8';expertPipe=await lib.pipeline('text-generation',expert.model,{dtype:cpuDtype})}
@@ -139,7 +139,7 @@ async function getPipelineForRequest(route){
  if(route.category!=='coding')return loadModel();
  let optedIn=false;try{optedIn=localStorage.getItem(CODING_OPT_IN_KEY)==='yes'}catch(e){}
  if(!optedIn){
-  const accepted=window.confirm('Activar el experto de programación opcional? Puede descargar unos 555–862 MB y necesita conexión y espacio libre. Si cancelas, RONIN seguirá usando Qwen.');
+  const accepted=window.confirm('Activar el experto de programación opcional? La variante prevista ocupa unos 862 MB y necesita conexión y espacio libre. Si cancelas, RONIN seguirá usando Qwen.');
   if(!accepted)return loadModel();
   try{localStorage.setItem(CODING_OPT_IN_KEY,'yes')}catch(e){}
  }
