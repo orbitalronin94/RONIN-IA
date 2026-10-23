@@ -9,18 +9,12 @@ test('el modelo base actual sigue siendo el respaldo por defecto', () => {
   assert.equal(selected.fallback, false);
 });
 
-test('el experto de código no se activa sin consentimiento explícito', () => {
+test('el experto de código está disponible como modelo incluido en el paquete', () => {
   const selected = selectExpert('coding');
-  assert.equal(selected.model, BASE_MODEL);
-  assert.equal(selected.fallback, true);
-  assert.equal(selected.requestedCategory, 'coding');
-});
-
-test('el experto de código solo se selecciona si está habilitado', () => {
-  const selected = selectExpert('coding', { enabledExperts: ['coding'] });
   assert.equal(selected.model, EXPERTS.coding.model);
+  assert.equal(selected.status, 'active');
   assert.equal(selected.fallback, false);
-  assert.equal(selected.requiresExplicitOptIn, true);
+  assert.equal(selected.source, 'bundled');
 });
 
 test('categorías aún no especializadas conservan el modelo base', () => {
@@ -29,8 +23,10 @@ test('categorías aún no especializadas conservan el modelo base', () => {
   }
 });
 
-test('el catálogo distingue candidatos de modelos activos', () => {
+test('todos los expertos del catálogo están marcados como incluidos en el paquete', () => {
   assert.equal(EXPERTS.general.status, 'active');
-  assert.equal(EXPERTS.coding.status, 'candidate');
-  assert.ok(EXPERTS.coding.estimatedDownloadMB >= 500);
+  assert.equal(EXPERTS.coding.status, 'active');
+  assert.equal(EXPERTS.general.source, 'bundled');
+  assert.equal(EXPERTS.coding.source, 'bundled');
+  assert.equal(EXPERTS.coding.estimatedDownloadMB, 0);
 });
