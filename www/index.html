@@ -40,7 +40,7 @@ import { EXPERTS } from './experts.js';
 const MODEL='onnx-community/Qwen3-0.6B-ONNX', KEY='ronin.ia.sessions.v2';
 const $=id=>document.getElementById(id);
 const el={sidebar:$('sidebar'),overlay:$('overlay'),history:$('history'),view:$('view'),welcome:$('welcome'),conversation:$('conversation'),input:$('input'),send:$('send'),toast:$('toast'),dot:$('modelDot'),caption:$('modelCaption'),badge:$('connectionBadge'),load:$('loadModelText'),modelBtn:$('modelBtn'),fileInput:$('fileInput'),attachBtn:$('attachBtn'),voiceBtn:$('voiceBtn'),attachments:$('attachments')};
-let sessions=readSessions(), activeId=sessions[0]?.id||newId(), pipe=null, loading=null, status='idle', busy=false, toastTimer, pendingFiles=[], recognition=null, listening=false;
+let sessions=readSessions(), activeId=sessions[0]?.id||newId(), pipe=null, loading=null, status='idle', busy=false, toastTimer, pendingFiles=[], recognition=null, listening=false, activeModelId=null;
 const expertPipelines=new Map(), expertLoading=new Map();
 const MAX_FILE_BYTES=5*1024*1024, MAX_FILES=5, MAX_EXTRACTED_CHARS=18000;
 if(!sessions.length)sessions=[{id:activeId,title:'Nuevo chat',messages:[],updated:Date.now()}];
@@ -92,8 +92,19 @@ function createChat(){activeId=newId();sessions.unshift({id:activeId,title:'Nuev
 function deleteSession(id){sessions=sessions.filter(s=>s.id!==id);if(!sessions.length)sessions=[{id:newId(),title:'Nuevo chat',messages:[],updated:Date.now()}];if(activeId===id)activeId=sessions[0].id;persist();renderHistory();renderCurrent()}
 function openSidebar(){el.sidebar.classList.add('open');el.overlay.classList.add('show')}
 function closeSidebar(){el.sidebar.classList.remove('open');el.overlay.classList.remove('show')}
+// Libera el modelo anterior antes de cambiar de experto para reducir el pico de RAM en Android.
+async function releaseActiveModel(){
+ const current=pipe||expertPipelines.values().next().value;
+ try{
+  if(typeof current?.model?.dispose==='function')await current.model.dispose();
+  else if(typeof current?.dispose==='function')await current.dispose();
+ }catch(error){console.info('El runtime no pudo liberar explícitamente la sesión; se liberarán las referencias',error)}
+ pipe=null;loading=null;expertPipelines.clear();expertLoading.clear();activeModelId=null;
+}
 // Carga diferida para que la primera pantalla aparezca rápido; GPU primero y CPU compatible como reserva.
 async function loadModel(){
+ if(activeModelId&&activeModelId!==MODEL)await releaseActiveModel();
+
  if(pipe)return pipe;if(loading)return loading;
  setStatus('loading','Preparando runtime y Qwen3…');
  loading=(async()=>{const startedAt=performance.now();try{
@@ -103,8 +114,8 @@ async function loadModel(){
   try{available=await lib.ModelRegistry.get_available_dtypes(MODEL)}
   catch(e){console.info('No se pudo consultar la lista de cuantizaciones; se usarán valores compatibles por defecto',e)}
   const webgpuDtype=['q4','q4f16','fp16','q8','fp32'].find(d=>available.includes(d))||'q4f16';
-  try{pipe=await lib.pipeline('text-generation',MODEL,{dtype:webgpuDtype,device:'webgpu'});setStatus('ready','Qwen3 0.6B · '+webgpuDtype+' WebGPU · '+((performance.now()-startedAt)/1000).toFixed(1)+' s')}
-  catch(e){console.info('WebGPU no disponible o falló; probando backend CPU con cuantización compatible',e);const cpuDtype=['q4','q8','int8','uint8','fp32'].find(d=>available.includes(d))||'q8';pipe=await lib.pipeline('text-generation',MODEL,{dtype:cpuDtype});setStatus('ready','Qwen3 0.6B · '+cpuDtype+' CPU · '+((performance.now()-startedAt)/1000).toFixed(1)+' s')}
+  try{pipe=await lib.pipeline('text-generation',MODEL,{dtype:webgpuDtype,device:'webgpu'});activeModelId=MODEL;setStatus('ready','Qwen3 0.6B · '+webgpuDtype+' WebGPU · '+((performance.now()-startedAt)/1000).toFixed(1)+' s')}
+  catch(e){console.info('WebGPU no disponible o falló; probando backend CPU con cuantización compatible',e);const cpuDtype=['q4','q8','int8','uint8','fp32'].find(d=>available.includes(d))||'q8';pipe=await lib.pipeline('text-generation',MODEL,{dtype:cpuDtype});activeModelId=MODEL;setStatus('ready','Qwen3 0.6B · '+cpuDtype+' CPU · '+((performance.now()-startedAt)/1000).toFixed(1)+' s')}
   toast('Qwen3 está listo.');return pipe;
  }catch(e){pipe=null;loading=null;setStatus('error','No se pudo cargar');console.error(e);toast('No se pudo preparar Qwen3. Comprueba internet y memoria disponible; puedes reintentar con «Activar IA».');throw e}})();return loading;
 }
@@ -114,6 +125,7 @@ async function loadCodingExpert(){
  if(expertPipelines.has(expert.id))return expertPipelines.get(expert.id);
  if(expertLoading.has(expert.id))return expertLoading.get(expert.id);
  const task=(async()=>{
+  if(activeModelId&&activeModelId!==expert.model)await releaseActiveModel();
   setStatus('loading','Preparando experto de programación…');
   const lib=isNativeAndroid?await import('./vendor/transformers.js'):await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2');
   const previousRemote=lib.env.allowRemoteModels;
@@ -126,7 +138,7 @@ async function loadCodingExpert(){
    let expertPipe;
    try{expertPipe=await lib.pipeline('text-generation',expert.model,{dtype:webgpuDtype,device:'webgpu'})}
    catch(e){console.info('Experto sin WebGPU; probando CPU',e);const cpuDtype=['q4','q8','int8','uint8','fp32'].find(d=>available.includes(d))||'q8';expertPipe=await lib.pipeline('text-generation',expert.model,{dtype:cpuDtype})}
-   expertPipelines.set(expert.id,expertPipe);
+   activeModelId=expert.model;expertPipelines.set(expert.id,expertPipe);
    setStatus('ready','Experto de código listo');toast('Experto de código cargado.');
    return expertPipe;
   }finally{lib.env.allowRemoteModels=previousRemote;}
