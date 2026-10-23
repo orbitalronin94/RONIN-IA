@@ -49,6 +49,51 @@
 - Aplicación a Ronin: candidato para estudiar una integración nativa Android si las pruebas revelan que la ruta WebGPU/WASM no cumple objetivos.
 - Decisión: no cambiar todavía. Un segundo motor añade código nativo, licencias y complejidad de compilación; primero se necesita un benchmark reproducible.
 
+
+### LiteRT-LM / Google AI Edge — candidato Android nativo
+
+- Proyecto: https://github.com/google-ai-edge/LiteRT-LM
+- Runtime base: https://github.com/google-ai-edge/LiteRT
+- Aporta una ruta nativa enfocada en inferencia on-device y aceleración disponible en el dispositivo.
+- Uso propuesto: prototipo separado para Android, sin sustituir aún la versión web.
+- Precaución: las cifras de rendimiento publicadas por Google corresponden a modelos, móviles y configuraciones concretos; no equivalen a una comparación independiente de todos los runtimes.
+
+### ExecuTorch y Optimum ExecuTorch — runtime móvil alternativo
+
+- Proyecto: https://github.com/pytorch/executorch
+- Integración y benchmarks: https://github.com/huggingface/optimum-executorch
+- Aporta un runtime orientado a móvil con backends variables por plataforma y un flujo para exportar modelos compatibles.
+- Los resultados publicados para Qwen3-0.6B y otros modelos se obtuvieron en dispositivos y configuraciones específicas; no deben compararse directamente con Transformers.js sin repetir la misma tarea y condiciones.
+- Decisión: evaluar junto a LiteRT-LM, pero no añadir ambos a la aplicación de producción en la primera iteración.
+
+### MLC LLM — ejecución compilada para dispositivos
+
+- Proyecto: https://github.com/mlc-ai/mlc-llm
+- Aporta un stack de inferencia compilado con rutas de despliegue para Android y WebGPU.
+- Uso propuesto: alternativa si los perfiles de dispositivos muestran que la ruta actual no alcanza los objetivos.
+- Riesgo: toolchain, compilación, kernels y compatibilidad GPU añaden coste operativo; no es una sustitución trivial de una dependencia JS.
+
+### WebLLM — comparación del runtime web
+
+- Proyecto: https://github.com/mlc-ai/web-llm
+- Aporta inferencia en navegador con WebGPU y una API inspirada en chat/completions.
+- Uso propuesto: benchmark web contra Transformers.js en navegadores y WebView compatibles.
+- Riesgo: WebGPU no es universal en todos los WebView; debe existir una ruta clara cuando no esté disponible.
+
+### Voz local — sherpa-onnx y whisper.cpp
+
+- sherpa-onnx: https://github.com/k2-fsa/sherpa-onnx
+- whisper.cpp: https://github.com/ggml-org/whisper.cpp
+- Aportan componentes para reconocimiento de voz, detección de actividad vocal y/o síntesis, según el modelo elegido.
+- Uso propuesto: módulo opcional independiente con descarga explícita de modelos y permisos claros.
+- Riesgo: la voz suma almacenamiento, tiempo de inferencia, consumo de batería y permisos de micrófono; no debe cargarse automáticamente.
+
+### Lista curada de modelos móviles
+
+- https://github.com/AI-with-Andrew/awesome-mobile-llm
+- Sirve como índice inicial para descubrir runtimes, modelos, optimizaciones y benchmarks; no sustituye la verificación de licencias ni las pruebas locales.
+
+
 ## Plan de evaluación
 
 Registrar en al menos tres dispositivos Android de capacidades diferentes:
@@ -62,6 +107,12 @@ Registrar en al menos tres dispositivos Android de capacidades diferentes:
 - Tamaño de descarga y consumo de datos.
 
 Cada prueba debe anotar el modelo exacto, cuantización, versión del runtime, navegador/WebView, dispositivo y conectividad. No presentar estrellas de GitHub ni una compilación CI exitosa como evidencia de calidad o velocidad.
+
+## Arquitectura propuesta tras la revisión ampliada
+
+Separar la UI de un proveedor de inferencia y comparar primero Transformers.js/WebGPU, Transformers.js/WASM y **un** prototipo nativo. LiteRT-LM y llama.cpp son candidatos iniciales; escoger cuál prototipar primero tras medir el estado actual y comprobar compatibilidad/licencia. No integrar a la vez LiteRT-LM, ExecuTorch y MLC en la app principal: duplicar runtimes eleva tamaño, superficie de fallos y mantenimiento.
+
+La voz offline con sherpa-onnx o whisper.cpp queda como módulo posterior y opcional. El benchmark debe guardar hardware, versión Android/WebView, runtime, cuantización, prompt, contexto, repeticiones, memoria y errores.
 
 ## Decisión actual
 
