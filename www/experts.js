@@ -15,9 +15,9 @@ export const EXPERTS = Object.freeze({
     model: 'onnx-community/Qwen2.5-Coder-0.5B-Instruct',
     source: 'huggingface',
     status: 'candidate',
-    // El archivo ONNX q4f16 publicado ronda los 555 MB; q4 ronda los 862 MB.
-    // El tamaño final depende del backend y la cuantización seleccionada.
-    estimatedDownloadMB: 555,
+    // El archivo ONNX q4 publicado ronda los 862 MB. Usamos la misma cuantización
+    // en GPU/CPU para reducir el riesgo de descargar dos variantes distintas.
+    estimatedDownloadMB: 862,
     requiresExplicitOptIn: true,
   }),
 });
