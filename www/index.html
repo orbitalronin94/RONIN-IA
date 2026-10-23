@@ -114,7 +114,8 @@ async function wiki(q){let topic=q.replace(/^(busca(r)?|dime|resume|explica)?\s*
 async function weather(q){let m=q.match(/(?:tiempo|clima|temperatura|llueve|lluvia)\s+(?:hace\s+)?(?:en|de)\s+(.+)/i);let city=(m?m[1]:'').replace(/[?.!]+$/,'').trim();if(!city)return null;let g=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(city)+'&count=1&language=es&format=json');if(!g.ok)throw Error();let place=(await g.json()).results?.[0];if(!place)return 'No encuentro la localidad '+city+'. Indica ciudad y país.';let f=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+place.latitude+'&longitude='+place.longitude+'&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m&timezone=auto');if(!f.ok)throw Error();let c=(await f.json()).current;return '**Tiempo actual en '+place.name+(place.country?', '+place.country:'')+'**\n\n- Temperatura: **'+c.temperature_2m+' °C** (sensación '+c.apparent_temperature+' °C)\n- Humedad: '+c.relative_humidity_2m+'%\n- Viento: '+c.wind_speed_10m+' km/h\n\n_Fuente: Open-Meteo._'}
 // Herramientas deterministas/red externas primero; el modelo se reserva para preguntas generativas.
 async function answer(q){
- const lower=q.toLowerCase();\n const route=routeRequest(q);
+ const lower=q.toLowerCase();
+ const route=routeRequest(q);
  if(lower.includes('wikipedia')){try{return await wiki(q)}catch(e){return 'No pude conectar con Wikipedia ahora mismo. Comprueba tu conexión.'}}
  const weatherIntent=['tiempo','clima','temperatura','llueve','lluvia'].some(k=>lower.includes(k));
  const locationIntent=lower.includes(' en ')||lower.includes(' de ')||lower.startsWith('en ')||lower.startsWith('de ');
