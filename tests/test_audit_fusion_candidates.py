@@ -10,8 +10,8 @@ SPEC.loader.exec_module(audit_module)
 
 
 class FusionAuditTests(unittest.TestCase):
-    def test_exactly_four_candidates_and_base_reference(self):
-        self.assertEqual(len(audit_module.CANDIDATES), 4)
+    def test_candidate_count_and_base_reference(self):
+        self.assertEqual(len(audit_module.CANDIDATES), 24)
         self.assertEqual(audit_module.CANDIDATES["qwen3_base"], "Qwen/Qwen3-0.6B")
 
     def test_weight_filter_excludes_adapter_and_gguf(self):
