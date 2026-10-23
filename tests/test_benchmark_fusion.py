@@ -41,8 +41,8 @@ class FusionBenchmarkTests(unittest.TestCase):
         self.assertEqual(result["base_only_token_count"], 1)
         self.assertEqual(result["candidate_only_token_count"], 1)
 
-    def test_four_models_and_nine_prompt_cases_are_defined(self):
-        self.assertEqual(len(benchmark.MODELS), 4)
+    def test_all_models_and_nine_prompt_cases_are_defined(self):
+        self.assertEqual(len(benchmark.MODELS), 24)
         self.assertEqual(len(benchmark.PROMPTS), 9)
         self.assertEqual(len({case["id"] for case in benchmark.PROMPTS}), 9)
 
