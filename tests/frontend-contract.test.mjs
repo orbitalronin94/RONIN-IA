@@ -93,10 +93,13 @@ test('la UI aclara que Android no muestra un diálogo para el permiso normal de 
 
 test('la compilación descarga y empaqueta las cuantizaciones locales de Qwen3', () => {
   const workflow = readFileSync(new URL('../.github/workflows/build-android.yml', import.meta.url), 'utf8');
+  assert.match(workflow, /Bundle local inference runtime/);
+  assert.match(workflow, /node_modules\/@huggingface\/transformers\/src\/transformers\.js/);
   assert.match(workflow, /Download bundled Qwen3 model weights/);
   assert.match(workflow, /snapshot_download/);
   assert.match(workflow, /onnx\/model_q4f16\.onnx/);
   assert.match(workflow, /onnx\/model_quantized\.onnx/);
+  assert.match(script, /import\('\.\/vendor\/transformers\.js'\)/);
   assert.match(script, /allowLocalModels=isNativeAndroid/);
   assert.match(script, /allowRemoteModels=!isNativeAndroid/);
   assert.match(script, /localModelPath='\.\/models\/'/);
