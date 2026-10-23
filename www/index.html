@@ -35,11 +35,13 @@
 </main></div>
 <script type="module">
 import { routeRequest } from './router.js';
+import { EXPERTS } from './experts.js';
 // Modelo base y clave de persistencia versionada: cambiar la clave evita interpretar datos antiguos con otro esquema.
 const MODEL='onnx-community/Qwen3-0.6B-ONNX', KEY='ronin.ia.sessions.v2';
 const $=id=>document.getElementById(id);
 const el={sidebar:$('sidebar'),overlay:$('overlay'),history:$('history'),view:$('view'),welcome:$('welcome'),conversation:$('conversation'),input:$('input'),send:$('send'),toast:$('toast'),dot:$('modelDot'),caption:$('modelCaption'),badge:$('connectionBadge'),load:$('loadModelText'),modelBtn:$('modelBtn'),fileInput:$('fileInput'),attachBtn:$('attachBtn'),voiceBtn:$('voiceBtn'),attachments:$('attachments')};
 let sessions=readSessions(), activeId=sessions[0]?.id||newId(), pipe=null, loading=null, status='idle', busy=false, toastTimer, pendingFiles=[], recognition=null, listening=false;
+const expertPipelines=new Map(), expertLoading=new Map(), CODING_OPT_IN_KEY='ronin.expert.coding.optin.v1';
 const MAX_FILE_BYTES=5*1024*1024, MAX_FILES=5, MAX_EXTRACTED_CHARS=18000;
 if(!sessions.length)sessions=[{id:activeId,title:'Nuevo chat',messages:[],updated:Date.now()}];
 if(!sessions.some(s=>s.id===activeId))activeId=sessions[0].id;
@@ -106,6 +108,44 @@ async function loadModel(){
   toast('Qwen3 está listo.');return pipe;
  }catch(e){pipe=null;loading=null;setStatus('error','No se pudo cargar');console.error(e);toast('No se pudo preparar Qwen3. Comprueba internet y memoria disponible; puedes reintentar con «Activar IA».');throw e}})();return loading;
 }
+// Gestor de expertos opcionales. No descarga nada hasta que el usuario acepta.
+async function loadCodingExpert(){
+ const expert=EXPERTS.coding;
+ if(expertPipelines.has(expert.id))return expertPipelines.get(expert.id);
+ if(expertLoading.has(expert.id))return expertLoading.get(expert.id);
+ const task=(async()=>{
+  const lib=isNativeAndroid?await import('./vendor/transformers.js'):await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2');
+  const previousRemote=lib.env.allowRemoteModels;
+  try{
+   lib.env.allowRemoteModels=true;lib.env.allowLocalModels=!!isNativeAndroid;lib.env.localModelPath='./models/';lib.env.useBrowserCache=true;
+   if(isNativeAndroid&&lib.env.backends?.onnx?.wasm)lib.env.backends.onnx.wasm.wasmPaths='./vendor/';
+   let available=['q4','q4f16','q8','int8','uint8','fp16','fp32'];
+   try{available=await lib.ModelRegistry.get_available_dtypes(expert.model)}catch(e){console.info('No se pudo consultar cuantizaciones del experto; probando opciones conocidas',e)}
+   const webgpuDtype=['q4','q4f16','q8','fp16','fp32'].find(d=>available.includes(d))||'q4';
+   let expertPipe;
+   try{expertPipe=await lib.pipeline('text-generation',expert.model,{dtype:webgpuDtype,device:'webgpu'})}
+   catch(e){console.info('Experto sin WebGPU; probando CPU',e);const cpuDtype=['q4','q8','int8','uint8','fp32'].find(d=>available.includes(d))||'q8';expertPipe=await lib.pipeline('text-generation',expert.model,{dtype:cpuDtype})}
+   expertPipelines.set(expert.id,expertPipe);
+   setStatus('ready','Experto de código listo');toast('Experto de código cargado.');
+   return expertPipe;
+  }finally{lib.env.allowRemoteModels=previousRemote;}
+ })();
+ expertLoading.set(expert.id,task);
+ try{return await task}catch(error){console.error('No se pudo cargar el experto de código; se usará Qwen',error);toast('No se pudo cargar el experto. Continuaré con Qwen.');return null}
+ finally{expertLoading.delete(expert.id)}
+}
+async function getPipelineForRequest(route){
+ if(route.category!=='coding')return loadModel();
+ let optedIn=false;try{optedIn=localStorage.getItem(CODING_OPT_IN_KEY)==='yes'}catch(e){}
+ if(!optedIn){
+  const accepted=window.confirm('Activar el experto de programación opcional? Puede descargar varios cientos de MB y necesita conexión y espacio libre. Si cancelas, RONIN seguirá usando Qwen.');
+  if(!accepted)return loadModel();
+  try{localStorage.setItem(CODING_OPT_IN_KEY,'yes')}catch(e){}
+ }
+ const expertPipe=await loadCodingExpert();
+ return expertPipe||loadModel();
+}
+
 // Parser aritmético limitado a números y operadores; no se usa eval() para no ejecutar texto del usuario como código.
 function mathResult(q){let expr=q.replace(/^(cu[aá]nto es|calcula|resuelve)\s*/i,'').replace(/[?=]/g,'').trim();if(!new RegExp('^[0-9\\s()+*%./-]+$').test(expr)||!/[0-9]/.test(expr)||!new RegExp('[+*%/-]').test(expr))return null;const ts=expr.match(new RegExp('[0-9]+(?:\\.[0-9]+)?|[()+*%/-]','g'));if(!ts||ts.join('')!==expr.replace(/\s/g,''))return null;let i=0;function f(){let t=ts[i++];if(t==='+')return f();if(t==='-')return -f();if(t==='('){let v=e();if(ts[i++]!==')')throw Error();return v}if(!t||!new RegExp('^[0-9]+(?:\\.[0-9]+)?$').test(t))throw Error();return +t}function term(){let v=f();while(['*','/','%'].includes(ts[i])){let op=ts[i++],r=f();if((op==='/'||op==='%')&&!r)throw Error();v=op==='*'?v*r:op==='/'?v/r:v%r}return v}function e(){let v=term();while(ts[i]==='+'||ts[i]==='-'){let op=ts[i++],r=term();v=op==='+'?v+r:v-r}return v}try{let n=e();return i===ts.length&&Number.isFinite(n)?String(Number(n.toPrecision(12))):null}catch(x){return null}}
 // Wikipedia se consulta solo cuando la petición lo solicita; la app no hace búsquedas remotas en segundo plano.
@@ -121,7 +161,7 @@ async function answer(q){
  const locationIntent=lower.includes(' en ')||lower.includes(' de ')||lower.startsWith('en ')||lower.startsWith('de ');
  if(weatherIntent&&locationIntent){try{let w=await weather(q);if(w)return w}catch(e){return 'No pude consultar el tiempo ahora mismo. Comprueba tu conexión.'}}
  let math=mathResult(q);if(math!==null)return 'El resultado es **'+math+'**.';
- let p=await loadModel(),s=current();
+ let p=await getPipelineForRequest(route),s=current();
  // Mantener contexto útil sin inflar el prompt: máximo 8 mensajes y 1.600 caracteres por turno.
  const history=(s?.messages||[]).slice(-8).map(m=>({role:m.role==='assistant'?'assistant':'user',content:String(m.content).slice(0,1600)}));
  const messages=[{role:'system',content:'Eres Ronin IA, un asistente competente, claro y honesto. '+route.profile+' Responde en el idioma del usuario. Prioriza exactitud y utilidad. No inventes datos ni fuentes. No muestres razonamiento privado ni etiquetas internas; presenta solo una respuesta final concisa. Si no sabes algo, dilo con claridad.'},...history];
