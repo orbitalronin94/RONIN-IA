@@ -102,9 +102,9 @@ async function loadModel(){
   let available=['q4f16','q4','q8','int8','uint8','fp16','fp32'];
   try{available=await lib.ModelRegistry.get_available_dtypes(MODEL)}
   catch(e){console.info('No se pudo consultar la lista de cuantizaciones; se usarán valores compatibles por defecto',e)}
-  const webgpuDtype=['q4f16','q4','fp16','q8','fp32'].find(d=>available.includes(d))||'q4f16';
+  const webgpuDtype=['q4','q4f16','fp16','q8','fp32'].find(d=>available.includes(d))||'q4f16';
   try{pipe=await lib.pipeline('text-generation',MODEL,{dtype:webgpuDtype,device:'webgpu'});setStatus('ready','Qwen3 0.6B · '+webgpuDtype+' WebGPU · '+((performance.now()-startedAt)/1000).toFixed(1)+' s')}
-  catch(e){console.info('WebGPU no disponible o falló; probando backend CPU con cuantización compatible',e);const cpuDtype=['q8','int8','uint8','fp32'].find(d=>available.includes(d))||'q8';pipe=await lib.pipeline('text-generation',MODEL,{dtype:cpuDtype});setStatus('ready','Qwen3 0.6B · '+cpuDtype+' CPU · '+((performance.now()-startedAt)/1000).toFixed(1)+' s')}
+  catch(e){console.info('WebGPU no disponible o falló; probando backend CPU con cuantización compatible',e);const cpuDtype=['q4','q8','int8','uint8','fp32'].find(d=>available.includes(d))||'q8';pipe=await lib.pipeline('text-generation',MODEL,{dtype:cpuDtype});setStatus('ready','Qwen3 0.6B · '+cpuDtype+' CPU · '+((performance.now()-startedAt)/1000).toFixed(1)+' s')}
   toast('Qwen3 está listo.');return pipe;
  }catch(e){pipe=null;loading=null;setStatus('error','No se pudo cargar');console.error(e);toast('No se pudo preparar Qwen3. Comprueba internet y memoria disponible; puedes reintentar con «Activar IA».');throw e}})();return loading;
 }
@@ -118,7 +118,7 @@ async function loadCodingExpert(){
   const lib=isNativeAndroid?await import('./vendor/transformers.js'):await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2');
   const previousRemote=lib.env.allowRemoteModels;
   try{
-   lib.env.allowRemoteModels=true;lib.env.allowLocalModels=!!isNativeAndroid;lib.env.localModelPath='./models/';lib.env.useBrowserCache=true;
+   lib.env.allowRemoteModels=!isNativeAndroid;lib.env.allowLocalModels=!!isNativeAndroid;lib.env.localModelPath='./models/';lib.env.useBrowserCache=true;
    if(isNativeAndroid&&lib.env.backends?.onnx?.wasm)lib.env.backends.onnx.wasm.wasmPaths='./vendor/';
    let available=['q4','q4f16','q8','int8','uint8','fp16','fp32'];
    try{available=await lib.ModelRegistry.get_available_dtypes(expert.model)}catch(e){console.info('No se pudo consultar cuantizaciones del experto; probando opciones conocidas',e)}
