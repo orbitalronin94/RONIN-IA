@@ -34,6 +34,7 @@
 <footer class="composer-area"><div class="composer-wrap"><div class="composer"><textarea id="input" rows="1" maxlength="12000" placeholder="Pregunta lo que quieras…" aria-label="Mensaje para Ronin IA"></textarea><div id="attachments" class="attachments" aria-live="polite"></div><div class="composer-bottom"><span class="hint">Intro para enviar · Mayús + Intro para nueva línea</span><div class="composer-actions"><button class="tool-btn" id="attachBtn" type="button" aria-label="Adjuntar archivos" title="Adjuntar archivos">＋ Archivo</button><input id="fileInput" type="file" multiple accept=".txt,.md,.csv,.json,.html,.htm,.pdf,.docx" aria-label="Seleccionar archivos"><button class="tool-btn" id="voiceBtn" type="button" aria-label="Dictar mensaje" title="Dictar con voz">🎙 Voz</button><button class="tool-btn" id="loadModelText">Activar IA</button><button class="send" id="send" disabled aria-label="Enviar mensaje">↑</button></div></div></div><div class="disclaimer">Ronin puede cometer errores. Verifica la información importante. El modelo se descarga al activarlo.</div></div></footer><div class="toast" id="toast" role="status"></div>
 </main></div>
 <script type="module">
+import { routeRequest } from './router.js';
 // Modelo base y clave de persistencia versionada: cambiar la clave evita interpretar datos antiguos con otro esquema.
 const MODEL='onnx-community/Qwen3-0.6B-ONNX', KEY='ronin.ia.sessions.v2';
 const $=id=>document.getElementById(id);
@@ -112,28 +113,6 @@ async function wiki(q){let topic=q.replace(/^(busca(r)?|dime|resume|explica)?\s*
 // Open-Meteo no requiere una clave de API; geocodificamos primero y luego pedimos las condiciones actuales.
 async function weather(q){let m=q.match(/(?:tiempo|clima|temperatura|llueve|lluvia)\s+(?:hace\s+)?(?:en|de)\s+(.+)/i);let city=(m?m[1]:'').replace(/[?.!]+$/,'').trim();if(!city)return null;let g=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(city)+'&count=1&language=es&format=json');if(!g.ok)throw Error();let place=(await g.json()).results?.[0];if(!place)return 'No encuentro la localidad '+city+'. Indica ciudad y país.';let f=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+place.latitude+'&longitude='+place.longitude+'&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m&timezone=auto');if(!f.ok)throw Error();let c=(await f.json()).current;return '**Tiempo actual en '+place.name+(place.country?', '+place.country:'')+'**\n\n- Temperatura: **'+c.temperature_2m+' °C** (sensación '+c.apparent_temperature+' °C)\n- Humedad: '+c.relative_humidity_2m+'%\n- Viento: '+c.wind_speed_10m+' km/h\n\n_Fuente: Open-Meteo._'}
 // Herramientas deterministas/red externas primero; el modelo se reserva para preguntas generativas.
-// Router MoE ligero: decide por reglas locales, sin otra llamada a un modelo ni coste adicional.
-function routeRequest(q){
- const text=String(q||'').toLocaleLowerCase('es');
- const has=patterns=>patterns.some(p=>p.test(text));
- const signals={
-  coding:has([/\b(c[oó]digo|programa|programar|programaci[oó]n|debug|depura|error en|stack trace|javascript|typescript|python|java|html|css|sql|api|regex|algoritmo|funci[oó]n|script|terminal|bash|git|github)\b/]),
-  math:has([/\b(matem[aá]tica|matem[aá]ticas|ecuaci[oó]n|derivada|integral|probabilidad|estad[ií]stica|geometr[ií]a|[á]lgebra|demuestra|calcula|resuelve)\b/,/\b\d+\s*[+*/=^-]\s*\d+\b/]),
-  writing:has([/\b(traduce|traducci[oó]n|corrige|redacta|reescribe|resume|resumen|gram[aá]tica|ortograf[ií]a|estilo|escribe una carta|email|correo|poema|historia|en ingl[eé]s|en espa[nñ]ol)\b/]),
-  instruction:has([/\b(sigue exactamente|formato json|solo responde|no incluyas|en una tabla|paso a paso|lista numerada|cumple estas instrucciones)\b/])
- };
- const matches=Object.entries(signals).filter(([,yes])=>yes).map(([name])=>name);
- // Si hay varias señales, priorizar programación y matemáticas; los demás casos van al perfil general.
- const category=signals.coding?'coding':signals.math?'math':signals.writing?'language':signals.instruction?'instruction':'general';
- const profiles={
-  coding:'Actúa como especialista en programación. Ofrece código ejecutable, detecta supuestos, explica brevemente y señala riesgos o pruebas relevantes. No inventes APIs.',
-  math:'Actúa como especialista en matemáticas. Resuelve de forma ordenada, comprueba el resultado cuando sea posible y declara cualquier supuesto.',
-  language:'Actúa como especialista en idiomas y redacción. Respeta el idioma, el tono y el formato solicitados; no añadas explicaciones si solo se pide una traducción.',
-  instruction:'Prioriza cumplir exactamente las restricciones de formato y las instrucciones válidas del usuario. Comprueba la salida antes de responder.',
-  general:'Responde con claridad y precisión en el idioma del usuario. Distingue hechos de incertidumbre y pregunta solo si falta información esencial.'
- };
- return {category,profile:profiles[category],signals:matches,model: 'onnx-community/Qwen3-0.6B-ONNX'};
-}
 async function answer(q){
  const lower=q.toLowerCase();\n const route=routeRequest(q);
  if(lower.includes('wikipedia')){try{return await wiki(q)}catch(e){return 'No pude conectar con Wikipedia ahora mismo. Comprueba tu conexión.'}}
