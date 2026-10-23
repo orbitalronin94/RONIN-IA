@@ -2,20 +2,39 @@ name: Audit fusion candidates
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - 'scripts/audit_fusion_candidates.py'
+      - 'tests/test_audit_fusion_candidates.py'
+      - '.github/workflows/audit-fusion.yml'
+      - 'docs/EXPERIMENTO_FUSION_MODELOS.md'
+      - 'docs/LOOP_FUSION_4_MODELOS.md'
+      - 'docs/BENCHMARK_FUSION_ES.md'
   schedule:
     - cron: '23 5 * * 1'
 
 permissions:
   contents: read
 
+concurrency:
+  group: ronin-fusion-audit-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Audit four candidate repositories
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test fusion audit logic offline
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Audit four candidate repositories on Hugging Face
         id: audit
         continue-on-error: true
         run: python3 scripts/audit_fusion_candidates.py
@@ -27,3 +46,8 @@ jobs:
           path: fusion-audit-report.json
           if-no-files-found: warn
           retention-days: 30
+      - name: Fail if candidate audit found errors
+        if: steps.audit.outcome == 'failure'
+        run: |
+          echo "::error::La auditoría detectó errores o no pudo verificar uno o más candidatos. Descarga el artefacto ronin-fusion-audit."
+          exit 1
