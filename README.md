@@ -29,7 +29,7 @@ Ronin IA empaqueta una aplicación web en una app Android mediante **Capacitor**
 - Interfaz conversacional inspirada en ChatGPT, adaptable a móvil, tablet y escritorio.
 - Historial local de conversaciones, creación de chats y copia de respuestas.
 - Arranque ligero: la interfaz aparece sin descargar el modelo de lenguaje.
-- Carga bajo demanda de **Transformers.js** y `HuggingFaceTB/SmolLM2-360M-Instruct` en formato cuantizado `q4`.
+- Carga bajo demanda de **Transformers.js** y `onnx-community/Qwen3-0.6B-ONNX` en formato cuantizado `q4`, con WebGPU cuando está disponible y backend automático como alternativa.
 - Respuestas rápidas para operaciones aritméticas sencillas.
 - Consultas a Wikipedia y Open-Meteo cuando se detectan esas peticiones y hay conexión.
 - Empaquetado Android con Capacitor y compilación de APK mediante GitHub Actions.
@@ -44,7 +44,7 @@ Ronin IA empaqueta una aplicación web en una app Android mediante **Capacitor**
 4. La conversación reciente se usa como contexto del modelo y el historial se guarda en el almacenamiento local del navegador/WebView.
 5. Capacitor empaqueta la web en una aplicación Android.
 
-La carga bajo demanda mejora el tiempo hasta la primera pantalla, pero no garantiza que la primera respuesta generativa sea rápida: depende de la descarga inicial, memoria, CPU/GPU y WebView del dispositivo.
+La carga bajo demanda mejora el tiempo hasta la primera pantalla, pero no garantiza que la primera respuesta generativa sea rápida: depende de la descarga inicial, memoria, CPU/GPU y WebView del dispositivo. El contexto se limita a los últimos ocho mensajes (con límite por mensaje) y la generación a 192 tokens para equilibrar calidad, latencia y memoria.
 
 ## Arquitectura
 
@@ -74,7 +74,7 @@ RONIN-IA/
 
 Modelo configurado en la aplicación:
 
-- **Modelo:** `HuggingFaceTB/SmolLM2-360M-Instruct`
+- **Modelo:** `onnx-community/Qwen3-0.6B-ONNX`
 - **Formato solicitado:** cuantización `q4`
 - **Runtime web:** Transformers.js
 - **Aceleración:** WebGPU si el entorno la admite; WASM puede actuar como alternativa según la configuración efectiva.
@@ -153,7 +153,7 @@ Los servicios requieren conectividad y pueden cambiar disponibilidad, límites o
 ## Limitaciones conocidas
 
 - El proyecto está en fase experimental; no debe asumirse que todas las funciones están disponibles en todos los dispositivos.
-- SmolLM2-360M es un modelo pequeño: el diseño optimiza el arranque, pero no puede convertir ese modelo en un sistema de razonamiento de gran escala.
+- Qwen3-0.6B es un modelo pequeño: el diseño optimiza el arranque, pero no puede convertir ese modelo en un sistema de razonamiento de gran escala.
 - El modelo se descarga cuando se necesita; el primer arranque de esa función puede tardar y consumir datos.
 - WebGPU y WASM varían en rendimiento y compatibilidad según el navegador/WebView y el hardware.
 - Los servicios externos pueden fallar, cambiar sus API o limitar las solicitudes.
