@@ -3,7 +3,7 @@
 > **Propósito:** mantener una memoria técnica acumulativa de las iteraciones, decisiones, pruebas, resultados y pendientes del proyecto. Registrar hechos verificables y separar claramente los resultados confirmados de las tareas en curso o las hipótesis.
 >
 > **Última actualización:** 2026-10-23 (UTC).  
-> **Estado general:** auditoría de candidatos correcta; APK de depuración compilada correctamente; evaluación profunda de modelos en curso. No se ha demostrado todavía una fusión de modelos válida ni una mejora de calidad.
+> **Estado general:** auditoría de candidatos correcta; APK de depuración compilada correctamente en el commit `bac497f`; evaluación profunda iniciada en `8e92cc5` seguía en curso en la última consulta. No se ha demostrado todavía una fusión de modelos válida ni una mejora de calidad.
 
 ## Índice
 
@@ -31,6 +31,7 @@
 - Revisar configuración, archivos de pesos, formas/nombres de tensores y vocabulario/tokenizador.
 - Evaluar los modelos con prompts de prueba y registrar fallos de descarga, carga o inferencia.
 - Comparar el modelo base y cualquier candidato o modelo fusionado con pruebas reproducibles.
+- Demostrar o refutar la hipótesis de que una persona sin laboratorio ni entorno local potente puede mejorar modelos existentes mediante selección y fusión compatible, usando GitHub Actions y recursos gratuitos/de bajo coste cuando sea viable.
 - Construir la aplicación Android y verificar los tests y el artefacto APK.
 - Documentar limitaciones, incompatibilidades y pasos para reproducir los resultados.
 
@@ -88,7 +89,7 @@
 |---|---|---|
 | Tests offline de auditoría | Correctos en la última ejecución | Workflow 39995711599 |
 | Auditoría de candidatos | Correcta | Workflow 39995711599; artefacto `ronin-fusion-audit` |
-| Compilación Android debug | Correcta | Workflow 39995711424; artefacto `ronin-ia-debug-apk` |
+| Compilación Android debug | Correcta | Workflow 39997314107 en el commit `bac497f`; artefacto publicado |
 | Evaluación profunda de modelos | En curso en la última consulta | Workflow 39995671249 |
 | Compatibilidad real para fusionar | Pendiente de demostrar | Requiere evidencia por candidato |
 | Comparativa base vs. modelo fusionado | Pendiente | No se debe inventar ningún resultado |
@@ -129,7 +130,18 @@ La lista de trabajo contiene 24 repositorios candidatos:
 - Nueve prompts heurísticos, incluidos prompts en español.
 - Benchmark de referencia con EleutherAI `lm_eval`: ARC-Easy, HellaSwag, TruthfulQA MC2 y GSM8K, con límite configurado de 100 ejemplos por tarea, semilla 42 y batch 1.
 
-**Importante:** el benchmark está configurado, pero esta memoria no contiene puntuaciones finales. No afirmar mejoras ni ordenar los candidatos por calidad hasta que el informe de evaluación lo demuestre.
+**Informe exploratorio anterior inspeccionado:** artefacto de la ejecución `39994459932`, commit `71d2f79`, generado el 2026-10-23 a las 17:23 UTC. El método declarado fue inferencia CPU, decodificación greedy y comprobaciones heurísticas; el propio informe advierte que son señales de cribado, no evaluación humana.
+
+| Modelo | Repositorio | Comprobaciones heurísticas | Compatibilidad estructural preliminar |
+|---|---|---:|---|
+| Base | `Qwen/Qwen3-0.6B` | 10/14 | Referencia |
+| instruction | `andresnowak/Qwen3-0.6B-instruction-finetuned_v2` | 7/14 | Compatible en la comparación reportada |
+| coding | `rohitnagareddy/Qwen3-0.6B-Coding-Finetuned-v1` | 7/14 | Compatible en la comparación reportada |
+| luth | `kurakurai/Luth-0.6B-Instruct` | 8/14 | Compatible en la comparación reportada |
+
+Para estos tres candidatos, el informe reporta 311 tensores, sin tensores faltantes/adicionales ni diferencias de forma, y 151.669 tokens con IDs coincidentes. En esa prueba el modelo base superó las puntuaciones heurísticas de los tres candidatos; por tanto, no hay ganador demostrado. Estos resultados pertenecen al commit `71d2f79` y no deben atribuirse a la evaluación en curso del commit `8e92cc5`.
+
+**Importante:** no hay puntuaciones finales del benchmark `lm_eval` ni evidencia de una fusión validada. No afirmar mejoras hasta que el informe actualizado lo demuestre.
 
 ## Decisiones técnicas
 
@@ -177,3 +189,21 @@ La lista de trabajo contiene 24 repositorios candidatos:
 - **Problemas o limitaciones:**
 - **Próximos pasos:**
 - **Enlaces a CI/artefactos:**
+
+
+### 2026-10-23 — Iteración 5: objetivo experimental explícito y resultados históricos documentados
+
+**Commit de README:** [7a5a6e9](https://github.com/orbitalronin94/RONIN-IA/commit/7a5a6e994d5b7d02b0e24f3069887e391c244b17)
+
+**Objetivo del experimento**
+- Investigar si una persona sin laboratorio de IA ni entorno local potente puede mejorar modelos existentes con selección informada, fusión compatible y evaluación reproducible.
+- Evitar entrenamiento desde cero; usar GitHub Actions y recursos gratuitos o de bajo coste cuando sea viable.
+- Publicar método, puntuaciones, latencia, memoria, costes y regresiones, incluidos resultados negativos.
+
+**Resultado nuevo confirmado**
+- Se descargó e inspeccionó el artefacto histórico `ronin-deep-model-evaluation` de la ejecución `39994459932`. En ese informe, el base obtuvo 10/14 comprobaciones heurísticas, frente a 7/14 (`instruction`), 7/14 (`coding`) y 8/14 (`luth`).
+- Los tres candidatos tenían compatibilidad estructural preliminar con el base en el informe: 311 tensores y vocabulario/token IDs coincidentes.
+- Interpretación: estos candidatos pueden merecer pruebas de fusión, pero el cribado no demuestra que mejoren al modelo base; de hecho, sus puntuaciones heurísticas fueron inferiores.
+- La evaluación posterior `39995671249` seguía en curso en la última consulta. La compilación Android del commit `bac497f`, ejecución `39997314107`, terminó correctamente.
+
+**Próximo paso:** cerrar la evaluación actual y luego seleccionar un candidato compatible para una primera fusión reproducible, comparándola con el modelo base con las mismas pruebas.
