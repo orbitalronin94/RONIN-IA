@@ -225,3 +225,12 @@ Las propuestas, correcciones y reportes de errores son bienvenidos. Incluye paso
 ## Licencia
 
 No se especifica aquí una licencia del proyecto. Hasta que se añada un archivo `LICENSE`, no debe asumirse que el código puede reutilizarse, modificarse o redistribuirse sin restricciones. Las licencias del modelo, las dependencias y los servicios de terceros son independientes.
+
+
+## Preparación del modelo en Android
+
+En la APK Android, Ronin intenta preparar Qwen3 al abrir la app. La primera apertura necesita conexión y espacio para descargar el modelo; la caché del navegador se reutiliza cuando está disponible. En la web normal el modelo sigue cargándose bajo demanda para no consumir datos automáticamente. Esta modalidad **no incorpora aún los pesos dentro del APK**; para ello se necesita una variante de distribución específica y comprobar el tamaño final.
+
+## Comprobaciones locales
+
+`npm test` ejecuta pruebas de contrato estáticas sobre las protecciones críticas del frontend. La compilación de GitHub Actions valida además la sintaxis del módulo y genera un APK de depuración. Las pruebas estáticas no sustituyen una prueba de inferencia en móviles físicos.
