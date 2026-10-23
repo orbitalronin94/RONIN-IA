@@ -39,11 +39,12 @@ BASE_KEYS = (
 TOKENIZER_FILES = ("tokenizer.json", "tokenizer_config.json", "vocab.json", "merges.txt")
 WEIGHT_SUFFIXES = (".safetensors", ".bin", ".pt", ".pth")
 ADAPTER_MARKERS = ("adapter_model.", "adapter_config.", "lora", "gguf")
+NON_MODEL_WEIGHT_FILES = {"optimizer.pt", "optimizer.bin", "rng_state.pth", "scaler.pt", "scheduler.pt", "training_args.bin", "trainer_state.json"}
 
 
 def is_full_weight_file(name):
     lower = name.lower()
-    return lower.endswith(WEIGHT_SUFFIXES) and not any(marker in lower for marker in ADAPTER_MARKERS)
+    return lower.endswith(WEIGHT_SUFFIXES) and Path(lower).name not in NON_MODEL_WEIGHT_FILES and not any(marker in lower for marker in ADAPTER_MARKERS)
 
 
 def get_json(url):
@@ -106,13 +107,15 @@ def main():
         "purpose": "Metadata screening only; this does not perform or authorize a weight merge.",
         "base_repo": CANDIDATES["qwen3_base"],
         "candidates": reports,
+        "coverage": {"total_candidates": len(reports), "audited_candidates": sum(1 for item in reports if item.get("revision") or item.get("errors")), "eligible_for_next_stage": sum(1 for item in reports if item.get("compatibility_with_base") == "config-compatible; tensor/tokenizer checks still required"), "excluded_or_incomplete": sum(1 for item in reports if item.get("compatibility_with_base") != "config-compatible; tensor/tokenizer checks still required")},
         "decision": "NO MERGE until tensor names/shapes, tokenizer IDs, license terms, and behavior are verified.",
     }
     out = Path("fusion-audit-report.json")
     out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2, ensure_ascii=False))
     print(f"\nInforme guardado en {out}")
-    return 1 if any(item.get("errors") for item in reports) else 0
+    # Candidate-specific failures are findings, not infrastructure failures.
+    return 0 if base.get("revision") and base.get("config") else 1
 
 
 if __name__ == "__main__":
