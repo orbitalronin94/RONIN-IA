@@ -91,14 +91,17 @@ test('la UI aclara que Android no muestra un diálogo para el permiso normal de 
 });
 
 
-test('la compilación descarga y empaqueta las cuantizaciones locales de Qwen3', () => {
+test('la compilación descarga y empaqueta los dos expertos ONNX locales', () => {
   const workflow = readFileSync(new URL('../.github/workflows/build-android.yml', import.meta.url), 'utf8');
   assert.match(workflow, /Bundle local inference runtime/);
   assert.match(workflow, /node_modules\/@huggingface\/transformers\/src\/transformers\.js/);
-  assert.match(workflow, /Download bundled Qwen3 model weights/);
-  assert.match(workflow, /snapshot_download/);
-  assert.match(workflow, /onnx\/model_q4f16\.onnx/);
-  assert.match(workflow, /onnx\/model_quantized\.onnx/);
+  assert.match(workflow, /Download all bundled model weights/);
+  assert.match(workflow, /npm run prepare:models/);
+  assert.match(workflow, /Generate Android launcher icon from Ronin logo/);
+  const manifest = readFileSync(new URL('../scripts/prepare-models.mjs', import.meta.url), 'utf8');
+  assert.match(manifest, /Qwen3-0\.6B-ONNX/);
+  assert.match(manifest, /Qwen2\.5-Coder-0\.5B-Instruct/);
+  assert.match(manifest, /onnx\/model_q4\.onnx/);
   assert.match(script, /import\('\.\/vendor\/transformers\.js'\)/);
   assert.match(script, /allowLocalModels=isNativeAndroid/);
   assert.match(script, /allowRemoteModels=!isNativeAndroid/);
