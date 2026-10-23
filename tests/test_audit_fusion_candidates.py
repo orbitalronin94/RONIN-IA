@@ -14,6 +14,14 @@ class FusionAuditTests(unittest.TestCase):
         self.assertEqual(len(audit_module.CANDIDATES), 4)
         self.assertEqual(audit_module.CANDIDATES["qwen3_base"], "Qwen/Qwen3-0.6B")
 
+    def test_weight_filter_excludes_adapter_and_gguf(self):
+        self.assertTrue(audit_module.is_full_weight_file("model.safetensors"))
+        self.assertTrue(audit_module.is_full_weight_file("pytorch_model.bin"))
+        self.assertFalse(audit_module.is_full_weight_file("adapter_model.safetensors"))
+        self.assertFalse(audit_module.is_full_weight_file("adapter_config.json"))
+        self.assertFalse(audit_module.is_full_weight_file("model.gguf"))
+        self.assertFalse(audit_module.is_full_weight_file("model-lora.safetensors"))
+
     def test_candidate_metadata_and_config_are_read(self):
         api_data = {
             "sha": "abc123",
