@@ -27,7 +27,7 @@
 <main class="main">
 <header class="topbar"><div class="top-left"><button class="icon mobile-menu" id="openSidebar" aria-label="Abrir menú">☰</button><div class="title">Ronin IA <span style="color:#888;font-weight:400">⌄</span></div></div><div class="top-actions"><span class="badge" id="connectionBadge">Lista para empezar</span><button class="icon" id="modelBtn" title="Cargar modelo" aria-label="Cargar modelo">⇩</button></div></header>
 <section class="view" id="view" aria-live="polite">
- <div class="welcome" id="welcome"><div class="hero"><img src="./assets/ronin-logo.svg" alt="Logo de Ronin IA"></div><h1>¿Qué vamos a crear hoy?</h1><p>Pregunta, explora una idea o resuelve un problema. En Android, Ronin prepara la IA al abrirse; la primera vez necesita internet y puede descargar cientos de MB. En web, la carga sigue siendo manual.</p>
+ <div class="welcome" id="welcome"><div class="hero"><img src="./assets/ronin-logo.svg" alt="Logo de Ronin IA"></div><h1>¿Qué vamos a crear hoy?</h1><p>Pregunta, explora una idea o resuelve un problema. En Android, Ronin prepara la IA al abrirse y lleva los pesos del modelo dentro de la APK; la primera descarga de la APK es grande. En web, la carga sigue siendo manual.</p>
  <div class="suggestions"><button class="suggestion" data-prompt="Explícame un tema difícil de forma sencilla, con ejemplos."><strong>✧ Aprender algo nuevo</strong><span>Una explicación clara, paso a paso</span></button><button class="suggestion" data-prompt="Ayúdame a crear una aplicación web moderna. Propón la arquitectura y empieza con el código."><strong>⌘ Programar</strong><span>Diseña, depura y mejora código</span></button><button class="suggestion" data-prompt="Dame tres ideas creativas para un proyecto personal y cómo empezar cada una."><strong>◈ Generar ideas</strong><span>Explora posibilidades y planes</span></button><button class="suggestion" data-prompt="Ayúdame a organizar mi semana con prioridades realistas."><strong>↗ Organizarme</strong><span>Convierte objetivos en acciones</span></button></div></div>
  <div class="conversation" id="conversation" hidden></div>
 </section>
@@ -95,7 +95,7 @@ async function loadModel(){
  setStatus('loading','Preparando runtime y Qwen3…');
  loading=(async()=>{const startedAt=performance.now();try{
   const lib=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2');
-  lib.env.allowLocalModels=false;lib.env.useBrowserCache=true;
+  lib.env.allowLocalModels=isNativeAndroid;lib.env.allowRemoteModels=!isNativeAndroid;lib.env.localModelPath='./models/';lib.env.useBrowserCache=true;
   let available=['q4f16','q4','q8','int8','uint8','fp16','fp32'];
   try{available=await lib.ModelRegistry.get_available_dtypes(MODEL)}
   catch(e){console.info('No se pudo consultar la lista de cuantizaciones; se usarán valores compatibles por defecto',e)}
