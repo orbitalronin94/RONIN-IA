@@ -25,7 +25,8 @@ test('la APK Android intenta preparar el modelo al iniciar, pero la web no lo de
 });
 
 test('no se usa eval y la entrada del usuario tiene un límite', () => {
-  assert.doesNotMatch(script, /\beval\s*\(/);
+  const executableScript = script.replace(/^\s*\/\/.*$/gm, '');
+  assert.doesNotMatch(executableScript, /\beval\s*\(/);
   assert.match(html, /maxlength="12000"/);
 });
 
