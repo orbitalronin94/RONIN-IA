@@ -1,0 +1,39 @@
+name: Test MoE router
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master, "feat/**"]
+    paths:
+      - "www/router.js"
+      - "www/index.html"
+      - "tests/**"
+      - "package.json"
+      - ".github/workflows/test-router.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  router-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run unit tests
+        run: npm test
+      - name: Validate frontend module syntax
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          const html = readFileSync('www/index.html', 'utf8');
+          const match = html.match(/<script type="module">([\s\S]*?)<\/script>/);
+          if (!match) throw new Error('No module script found in www/index.html');
+          writeFileSync('/tmp/ronin-frontend-check.mjs', match[1]);
+          NODE
+          node --check /tmp/ronin-frontend-check.mjs
+          node --check www/router.js

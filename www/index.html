@@ -34,6 +34,7 @@
 <footer class="composer-area"><div class="composer-wrap"><div class="composer"><textarea id="input" rows="1" maxlength="12000" placeholder="Pregunta lo que quieras…" aria-label="Mensaje para Ronin IA"></textarea><div id="attachments" class="attachments" aria-live="polite"></div><div class="composer-bottom"><span class="hint">Intro para enviar · Mayús + Intro para nueva línea</span><div class="composer-actions"><button class="tool-btn" id="attachBtn" type="button" aria-label="Adjuntar archivos" title="Adjuntar archivos">＋ Archivo</button><input id="fileInput" type="file" multiple accept=".txt,.md,.csv,.json,.html,.htm,.pdf,.docx" aria-label="Seleccionar archivos"><button class="tool-btn" id="voiceBtn" type="button" aria-label="Dictar mensaje" title="Dictar con voz">🎙 Voz</button><button class="tool-btn" id="loadModelText">Activar IA</button><button class="send" id="send" disabled aria-label="Enviar mensaje">↑</button></div></div></div><div class="disclaimer">Ronin puede cometer errores. Verifica la información importante. El modelo se descarga al activarlo.</div></div></footer><div class="toast" id="toast" role="status"></div>
 </main></div>
 <script type="module">
+import { routeRequest } from './router.js';
 // Modelo base y clave de persistencia versionada: cambiar la clave evita interpretar datos antiguos con otro esquema.
 const MODEL='onnx-community/Qwen3-0.6B-ONNX', KEY='ronin.ia.sessions.v2';
 const $=id=>document.getElementById(id);
@@ -114,6 +115,7 @@ async function weather(q){let m=q.match(/(?:tiempo|clima|temperatura|llueve|lluv
 // Herramientas deterministas/red externas primero; el modelo se reserva para preguntas generativas.
 async function answer(q){
  const lower=q.toLowerCase();
+ const route=routeRequest(q);
  if(lower.includes('wikipedia')){try{return await wiki(q)}catch(e){return 'No pude conectar con Wikipedia ahora mismo. Comprueba tu conexión.'}}
  const weatherIntent=['tiempo','clima','temperatura','llueve','lluvia'].some(k=>lower.includes(k));
  const locationIntent=lower.includes(' en ')||lower.includes(' de ')||lower.startsWith('en ')||lower.startsWith('de ');
@@ -122,7 +124,7 @@ async function answer(q){
  let p=await loadModel(),s=current();
  // Mantener contexto útil sin inflar el prompt: máximo 8 mensajes y 1.600 caracteres por turno.
  const history=(s?.messages||[]).slice(-8).map(m=>({role:m.role==='assistant'?'assistant':'user',content:String(m.content).slice(0,1600)}));
- const messages=[{role:'system',content:'Eres Ronin IA, un asistente competente, claro y honesto. Responde en el idioma del usuario. Prioriza exactitud, utilidad y razonamiento breve. Si una petición es ambigua, pregunta solo lo necesario. No inventes datos ni fuentes. Para programación, entrega soluciones ejecutables y explica decisiones importantes. No muestres razonamiento privado ni etiquetas internas; presenta solo una respuesta final concisa. Si no sabes algo, dilo con claridad.'},...history];
+ const messages=[{role:'system',content:'Eres Ronin IA, un asistente competente, claro y honesto. '+route.profile+' Responde en el idioma del usuario. Prioriza exactitud y utilidad. No inventes datos ni fuentes. No muestres razonamiento privado ni etiquetas internas; presenta solo una respuesta final concisa. Si no sabes algo, dilo con claridad.'},...history];
  const out=await p(messages,{max_new_tokens:192,temperature:.55,top_p:.85,repetition_penalty:1.08,do_sample:true,return_full_text:false}),gen=out?.[0]?.generated_text;
  let text=typeof gen==='string'?gen.trim():Array.isArray(gen)?String(gen[gen.length-1]?.content||'').trim():'';
  // Qwen puede emitir un bloque <think>; elimina el bloque sin mostrarlo en la interfaz.
