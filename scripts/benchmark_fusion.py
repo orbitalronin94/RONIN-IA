@@ -5,8 +5,6 @@ import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
 
 MODELS = {
     "base": "Qwen/Qwen3-0.6B",
@@ -73,7 +71,31 @@ def score_response(case, response):
     return {"passed": sum(results.values()), "checks": len(results), "details": results}
 
 
+def compare_tokenizer_vocab(base_vocab, candidate_vocab, sample_limit=25):
+    base_tokens = set(base_vocab)
+    candidate_tokens = set(candidate_vocab)
+    shared = base_tokens & candidate_tokens
+    mismatches = sorted(token for token in shared if base_vocab[token] != candidate_vocab[token])
+    base_only = sorted(base_tokens - candidate_tokens)
+    candidate_only = sorted(candidate_tokens - base_tokens)
+    return {
+        "base_vocab_entries": len(base_vocab),
+        "candidate_vocab_entries": len(candidate_vocab),
+        "shared_token_count": len(shared),
+        "shared_token_id_mismatch_count": len(mismatches),
+        "shared_token_id_mismatch_examples": [{"token": token, "base_id": base_vocab[token], "candidate_id": candidate_vocab[token]} for token in mismatches[:sample_limit]],
+        "base_only_token_count": len(base_only),
+        "base_only_token_examples": base_only[:sample_limit],
+        "candidate_only_token_count": len(candidate_only),
+        "candidate_only_token_examples": candidate_only[:sample_limit],
+        "compatible": not mismatches and not base_only and not candidate_only,
+    }
+
+
 def main():
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+
     torch.set_num_threads(max(1, min(4, os.cpu_count() or 1)))
     report = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -84,7 +106,8 @@ def main():
         "fusion_decision": "NO MERGE: requires compatible tensor shapes/names, tokenizer IDs, licensing review, and human-reviewed quality improvement.",
     }
     base_shapes = None
-    base_vocab = None
+    base_vocab_size = None
+    base_token_ids = None
     for label, repo in MODELS.items():
         item = {"repo": repo, "cases": [], "errors": []}
         report["models"][label] = item
@@ -98,23 +121,30 @@ def main():
             model.eval()
             item["load_seconds"] = round(time.monotonic() - start, 2)
             item["tokenizer_vocab_size"] = len(tokenizer)
+            token_ids = tokenizer.get_vocab()
             shapes = {key: list(value.shape) for key, value in model.state_dict().items()}
             item["tensor_count"] = len(shapes)
             if label == "base":
                 base_shapes = shapes
-                base_vocab = len(tokenizer)
+                base_vocab_size = len(tokenizer)
+                base_token_ids = token_ids
                 item["tensor_compatibility"] = "reference"
             elif base_shapes is not None:
                 missing = sorted(set(base_shapes) - set(shapes))
                 extra = sorted(set(shapes) - set(base_shapes))
                 mismatched = sorted(key for key in set(base_shapes) & set(shapes) if base_shapes[key] != shapes[key])
+                tokenizer_compatibility = compare_tokenizer_vocab(base_token_ids or {}, token_ids)
                 item["tensor_compatibility"] = {
                     "missing_tensors": missing[:100],
                     "extra_tensors": extra[:100],
                     "shape_mismatches": {key: {"base": base_shapes[key], "candidate": shapes[key]} for key in mismatched[:100]},
-                    "compatible": not missing and not extra and not mismatched and len(tokenizer) == base_vocab,
+                    "base_tokenizer_vocab_size": base_vocab_size,
+                    "candidate_tokenizer_vocab_size": len(tokenizer),
+                    "tokenizer_compatibility": tokenizer_compatibility,
+                    "compatible": not missing and not extra and not mismatched and len(tokenizer) == base_vocab_size and tokenizer_compatibility["compatible"],
                 }
                 report["tensor_compatibility"][label] = item["tensor_compatibility"]
+            del token_ids
             del shapes
             for case in PROMPTS:
                 input_text = render_prompt(tokenizer, case["prompt"])
