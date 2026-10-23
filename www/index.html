@@ -85,7 +85,7 @@ async function wiki(q){let topic=q.replace(/^(busca(r)?|dime|resume|explica)?\s*
 async function weather(q){let m=q.match(/(?:tiempo|clima|temperatura|llueve|lluvia)\s+(?:hace\s+)?(?:en|de)\s+(.+)/i);let city=(m?m[1]:'').replace(/[?.!]+$/,'').trim();if(!city)return null;let g=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(city)+'&count=1&language=es&format=json');if(!g.ok)throw Error();let place=(await g.json()).results?.[0];if(!place)return 'No encuentro la localidad '+city+'. Indica ciudad y país.';let f=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+place.latitude+'&longitude='+place.longitude+'&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m&timezone=auto');if(!f.ok)throw Error();let c=(await f.json()).current;return '**Tiempo actual en '+place.name+(place.country?', '+place.country:'')+'**\n\n- Temperatura: **'+c.temperature_2m+' °C** (sensación '+c.apparent_temperature+' °C)\n- Humedad: '+c.relative_humidity_2m+'%\n- Viento: '+c.wind_speed_10m+' km/h\n\n_Fuente: Open-Meteo._'}
 async function answer(q){
  if(/wikipedia/i.test(q)){try{return await wiki(q)}catch(e){return 'No pude conectar con Wikipedia ahora mismo. Comprueba tu conexión.'}}
- if(/\\b(tiempo|clima|temperatura|llueve|lluvia)\\b/i.test(q)&&/\\b(en|de)\\b/i.test(q)){try{let w=await weather(q);if(w)return w}catch(e){return 'No pude consultar el tiempo ahora mismo. Comprueba tu conexión.'}}
+ if(/\b(tiempo|clima|temperatura|llueve|lluvia)\b/i.test(q)&&/\b(en|de)\b/i.test(q)){try{let w=await weather(q);if(w)return w}catch(e){return 'No pude consultar el tiempo ahora mismo. Comprueba tu conexión.'}}
  let math=mathResult(q);if(math!==null)return 'El resultado es **'+math+'**.';
  let p=await loadModel(),s=current();
  // Mantener contexto útil sin inflar el prompt: máximo 8 mensajes y 1.600 caracteres por turno.
@@ -94,7 +94,7 @@ async function answer(q){
  const out=await p(messages,{max_new_tokens:192,temperature:.55,top_p:.85,repetition_penalty:1.08,do_sample:true,return_full_text:false}),gen=out?.[0]?.generated_text;
  let text=typeof gen==='string'?gen.trim():Array.isArray(gen)?String(gen[gen.length-1]?.content||'').trim():'';
  // Qwen puede emitir un bloque <think>; nunca mostrarlo en la interfaz.
- text=text.replace(/<think>[\\s\\S]*?<\\/think>/gi,'').replace(/<\\|[^|]+\\|>/g,'').trim();
+ text=text.replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/<\|[^|]+\|>/g,'').trim();
  if(!text)throw Error('El modelo no devolvió una respuesta.');return text;
 }
 async function copyText(text){try{await navigator.clipboard.writeText(text)}catch(e){let t=document.createElement('textarea');t.value=text;document.body.append(t);t.select();document.execCommand('copy');t.remove()}toast('Copiado al portapapeles.')}
