@@ -32,7 +32,7 @@ Los formatos JSON (`package.json` y `capacitor.config.json`) no admiten comentar
 
 - **Marca propia:** `www/assets/ronin-logo.svg` es un SVG ligero, escalable y sin dependencias externas.
 - **Interfaz:** paleta azul noche con acentos cian/violeta, diseño responsive y respeto por `prefers-reduced-motion`.
-- **Arranque:** los pesos se descargan solo al activar la IA o enviar una pregunta.
+- **Arranque:** Android intenta preparar el modelo al abrir; la web mantiene la carga bajo demanda.
 - **Inferencia:** WebGPU primero cuando es compatible, con CPU de reserva; la cuantización depende del dispositivo/runtime.
 - **Seguridad de salida:** el texto del modelo se escapa antes de renderizar Markdown y los enlaces externos usan `noopener noreferrer`.
 - **Datos:** el historial permanece en almacenamiento local; Wikipedia y el tiempo necesitan conexión.
@@ -52,7 +52,7 @@ Los formatos JSON (`package.json` y `capacitor.config.json`) no admiten comentar
 
 ## Cómo funciona
 
-1. La interfaz se muestra primero: no descarga pesos ni inicializa el runtime de IA al abrir.
+1. La interfaz se muestra primero. En Android nativo se inicia después la preparación del modelo; en web no se descarga hasta que el usuario activa la IA o envía una pregunta.
 2. Las operaciones aritméticas sencillas se resuelven localmente; algunas consultas de Wikipedia y tiempo usan servicios públicos.
 3. Al activar la IA o enviar un mensaje normal, Ronin carga Transformers.js y el modelo seleccionado.
 4. La conversación reciente se usa como contexto del modelo y el historial se guarda en el almacenamiento local del navegador/WebView.
@@ -168,7 +168,7 @@ Los servicios requieren conectividad y pueden cambiar disponibilidad, límites o
 
 - El proyecto está en fase experimental; no debe asumirse que todas las funciones están disponibles en todos los dispositivos.
 - Qwen3-0.6B es un modelo pequeño: el diseño optimiza el arranque, pero no puede convertir ese modelo en un sistema de razonamiento de gran escala.
-- El modelo se descarga cuando se necesita; el primer arranque de esa función puede tardar y consumir datos.
+- En Android la preparación automática puede descargar el modelo en el primer arranque y consumir datos; en web se inicia bajo demanda.
 - WebGPU y WASM varían en rendimiento y compatibilidad según el navegador/WebView y el hardware.
 - Los servicios externos pueden fallar, cambiar sus API o limitar las solicitudes.
 - La compilación de CI verifica que el proyecto pueda empaquetarse; por sí sola no garantiza la corrección funcional de todas las funciones ni pruebas en dispositivos físicos.
