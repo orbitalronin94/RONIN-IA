@@ -111,12 +111,17 @@ jobs:
           from pathlib import Path
           p = Path('android/gradle.properties')
           lines = p.read_text().splitlines() if p.exists() else []
-          key = 'org.gradle.jvmargs='
-          value = 'org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8'
-          lines = [line for line in lines if not line.startswith(key)]
-          lines.append(value)
-          p.write_text('\\n'.join(lines) + '\\n')
-          print('Gradle JVM heap configured to 4 GiB')
+          settings = {
+              'org.gradle.jvmargs': '-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8',
+              'android.useAndroidX': 'true',
+              'android.enableJetifier': 'true',
+          }
+          for key, value in settings.items():
+              prefix = key + '='
+              lines = [line for line in lines if not line.startswith(prefix)]
+              lines.append(prefix + value)
+          p.write_text('\n'.join(lines) + '\n')
+          print('Gradle heap and AndroidX settings configured')
           PY
       - run: cd android && ./gradlew --no-daemon assembleDebug
       # Artefacto de depuración temporal; no es una release firmada para Play Store.
