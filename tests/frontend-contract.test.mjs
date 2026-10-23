@@ -55,3 +55,22 @@ test('la salida del modelo pasa por el renderizador Markdown y el escape HTML', 
   assert.match(script, /function markdown\(/);
   assert.match(script, /m\.role==='user'\?escapeHtml\(m\.content\).*?:markdown\(m\.content\)/);
 });
+
+
+test('los adjuntos admiten formatos documentales con límites y extracción local', () => {
+  assert.match(html, /id="fileInput" type="file" multiple/);
+  assert.match(script, /MAX_FILE_BYTES=5\*1024\*1024/);
+  assert.match(script, /MAX_FILES=5/);
+  assert.match(script, /MAX_EXTRACTED_CHARS=18000/);
+  assert.match(script, /async function extractFile\(file\)/);
+  assert.match(script, /pdfjs-dist/);
+  assert.match(script, /mammoth/);
+  assert.match(script, /Analiza los siguientes archivos adjuntos/);
+});
+
+test('el dictado de voz usa SpeechRecognition de forma opcional y explica incompatibilidad', () => {
+  assert.match(html, /id="voiceBtn"/);
+  assert.match(script, /window\.SpeechRecognition\|\|window\.webkitSpeechRecognition/);
+  assert.match(script, /El dictado por voz no está disponible/);
+  assert.match(script, /recognition\.lang='es-ES'/);
+});
