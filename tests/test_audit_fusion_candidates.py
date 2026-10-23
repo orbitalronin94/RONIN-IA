@@ -21,6 +21,10 @@ class FusionAuditTests(unittest.TestCase):
         self.assertFalse(audit_module.is_full_weight_file("adapter_config.json"))
         self.assertFalse(audit_module.is_full_weight_file("model.gguf"))
         self.assertFalse(audit_module.is_full_weight_file("model-lora.safetensors"))
+        self.assertFalse(audit_module.is_full_weight_file("optimizer.pt"))
+        self.assertFalse(audit_module.is_full_weight_file("rng_state.pth"))
+        self.assertFalse(audit_module.is_full_weight_file("scheduler.pt"))
+        self.assertFalse(audit_module.is_full_weight_file("training_args.bin"))
 
     def test_candidate_metadata_and_config_are_read(self):
         api_data = {
