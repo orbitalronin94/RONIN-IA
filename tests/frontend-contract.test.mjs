@@ -21,7 +21,7 @@ test('la ruta de modelo local utiliza caché y mantiene fallback CPU', () => {
 
 test('la APK Android prepara el modelo al iniciar y la bienvenida explica la descarga inicial', () => {
   assert.match(html, /En Android, Ronin prepara la IA al abrirse/);
-  assert.match(html, /la primera vez necesita internet/);
+  assert.match(html, /lleva los pesos del modelo dentro de la APK/);
   assert.match(script, /window\.Capacitor\?\.getPlatform\?\.\(\)==='android'/);
   assert.match(script, /if\(isNativeAndroid\).*?loadModel\(\)\.catch/s);
 });
@@ -88,4 +88,16 @@ test('la UI aclara que Android no muestra un diálogo para el permiso normal de 
   assert.match(html, /Modelo local no cargado/);
   assert.match(script, /Preparando IA al iniciar/);
   assert.match(script, /Comprueba internet y memoria disponible/);
+});
+
+
+test('la compilación descarga y empaqueta las cuantizaciones locales de Qwen3', () => {
+  const workflow = readFileSync(new URL('../.github/workflows/build-android.yml', import.meta.url), 'utf8');
+  assert.match(workflow, /Download bundled Qwen3 model weights/);
+  assert.match(workflow, /snapshot_download/);
+  assert.match(workflow, /onnx\/model_q4f16\.onnx/);
+  assert.match(workflow, /onnx\/model_quantized\.onnx/);
+  assert.match(script, /allowLocalModels=isNativeAndroid/);
+  assert.match(script, /allowRemoteModels=!isNativeAndroid/);
+  assert.match(script, /localModelPath='\.\/models\/'/);
 });
