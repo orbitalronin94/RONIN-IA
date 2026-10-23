@@ -8,6 +8,22 @@
 
 Ronin IA empaqueta una aplicación web en una app Android mediante **Capacitor**. El objetivo es mantener una base sencilla de inspeccionar y modificar, con compilación reproducible en GitHub Actions y sin exigir un entorno Android local para generar el APK de depuración.
 
+## Objetivo del experimento
+
+RONIN-IA investiga si una persona sin un laboratorio de IA ni un entorno de desarrollo local potente puede mejorar modelos existentes mediante selección informada, fusión de pesos compatible y evaluación reproducible, utilizando GitHub Actions y recursos gratuitos o de bajo coste cuando sea viable. El proyecto **no pretende entrenar un modelo fundacional desde cero**.
+
+La hipótesis es que una combinación cuidadosamente elegida de modelos preentrenados puede mejorar determinadas capacidades frente al modelo base sin asumir el coste de un entrenamiento completo. Es una hipótesis por comprobar, no un resultado garantizado.
+
+### Criterios de éxito
+
+- Identificar candidatos con arquitectura, formas de tensores y tokenizadores compatibles.
+- Ejecutar una fusión real y conservar la configuración exacta para reproducirla.
+- Comparar el modelo base, los candidatos y el modelo fusionado con las mismas pruebas; incluir tareas en español, razonamiento, código y seguridad.
+- Informar puntuaciones, latencia, memoria, costes y regresiones, sin presentar señales heurísticas como una evaluación humana.
+- Publicar el procedimiento y los resultados, incluidos los experimentos fallidos, para que otras personas puedan repetirlos sin un entorno local potente.
+
+**Definición de mejora:** el modelo fusionado solo se considerará mejor si supera al modelo base en criterios previamente definidos y comparables, sin ocultar las tareas en las que empeora. La compilación de una APK, la compatibilidad estructural o la creación de un archivo fusionado no bastan para demostrarlo.
+
 ## Índice
 
 - [Decisiones de diseño](#decisiones-de-diseño)
@@ -242,12 +258,13 @@ En la APK Android, Ronin intenta preparar Qwen3 al abrir la app. La primera aper
 | Comprobación | Resultado conocido | Evidencia |
 |---|---|---|
 | Auditoría de candidatos (24 repositorios) | Correcta | [Ejecución 39995711599](https://github.com/orbitalronin94/RONIN-IA/actions/runs/39995711599) |
-| APK Android en el commit `ef0ff49` | Compilación correcta; artefacto publicado | [Ejecución 39995711424](https://github.com/orbitalronin94/RONIN-IA/actions/runs/39995711424) |
+| APK Android en el commit `bac497f` | Compilación correcta; artefacto publicado | [Ejecución 39997314107](https://github.com/orbitalronin94/RONIN-IA/actions/runs/39997314107) |
 | Evaluación profunda en el commit `71d2f79` | Workflow correcto; informe publicado | [Ejecución 39994459932](https://github.com/orbitalronin94/RONIN-IA/actions/runs/39994459932) |
-| Evaluación profunda en el commit `8e92cc5` | En curso en la última consulta | [Ejecución 39995671249](https://github.com/orbitalronin94/RONIN-IA/actions/runs/39995671249) |
-| Nueva compilación tras añadir la memoria | En curso en la última consulta | [Ejecución 39997128627](https://github.com/orbitalronin94/RONIN-IA/actions/runs/39997128627) |
+| Evaluación profunda en el commit `8e92cc5` | En curso en la última consulta; aún sin informe final | [Ejecución 39995671249](https://github.com/orbitalronin94/RONIN-IA/actions/runs/39995671249) |
 
-El informe de evaluación profunda de la ejecución `39994459932` se publicó como artefacto `ronin-deep-model-evaluation`. Ese workflow corresponde al commit `71d2f79`, por lo que sus resultados **no deben atribuirse automáticamente a los commits posteriores**. Revisa el contenido del informe antes de afirmar compatibilidad o mejora de calidad.
+El informe de la ejecución anterior `39994459932` (`71d2f79`) se inspeccionó y contiene una prueba exploratoria de cuatro modelos. El modelo base Qwen3-0.6B obtuvo 10/14 comprobaciones heurísticas; `instruction`, 7/14; `coding`, 7/14; y `luth`, 8/14. Los tres candidatos muestran compatibilidad estructural preliminar (311 tensores, sin diferencias de forma reportadas y vocabulario/token IDs coincidentes). Estas puntuaciones son señales de cribado pequeñas, no una evaluación humana ni una prueba de mejora; en esa prueba el base quedó por encima de los tres candidatos. No se ha demostrado aún una fusión superior.
+
+La ejecución más reciente de evaluación, `39995671249` (`8e92cc5`), seguía en curso en la última consulta. Los números del informe anterior no deben atribuirse a ese commit.
 
 ### Memoria técnica de iteraciones
 
