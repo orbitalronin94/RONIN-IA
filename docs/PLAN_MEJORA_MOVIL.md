@@ -48,6 +48,10 @@ Los benchmarks publicados por autores de un runtime son referencias, no comparac
 - **Gemma 3 1B:** candidato según soporte del runtime y artefacto; verificar licencia y requisitos.
 No cambiar de modelo por un benchmark aislado: usar el mismo conjunto de prompts en español.
 
+## Inicio del modelo en Android
+
+La APK ahora intenta preparar Qwen3 al iniciar, después de pintar la interfaz. La primera ejecución requiere conexión y espacio para descargar los pesos; Transformers.js está configurado para usar la caché del navegador cuando el WebView la permita. La web fuera de Android conserva carga bajo demanda para evitar consumo inesperado de datos. **Esto no significa que los pesos estén empaquetados dentro del APK**. La inclusión real de pesos requiere medir el tamaño, validar el formato/runtime y probar instalación/actualización en dispositivos físicos.
+
 ## Arquitectura objetivo
 
 ```text
