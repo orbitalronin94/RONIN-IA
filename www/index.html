@@ -95,7 +95,7 @@ async function loadModel(){
  setStatus('loading','Preparando runtime y Qwen3…');
  loading=(async()=>{const startedAt=performance.now();try{
   const lib=isNativeAndroid?await import('./vendor/transformers.js'):await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2');
-  lib.env.allowLocalModels=isNativeAndroid;lib.env.allowRemoteModels=!isNativeAndroid;lib.env.localModelPath='./models/';lib.env.useBrowserCache=true;
+  lib.env.allowLocalModels=isNativeAndroid;lib.env.allowRemoteModels=!isNativeAndroid;lib.env.localModelPath='./models/';lib.env.useBrowserCache=true;if(isNativeAndroid&&lib.env.backends?.onnx?.wasm)lib.env.backends.onnx.wasm.wasmPaths='./vendor/';
   let available=['q4f16','q4','q8','int8','uint8','fp16','fp32'];
   try{available=await lib.ModelRegistry.get_available_dtypes(MODEL)}
   catch(e){console.info('No se pudo consultar la lista de cuantizaciones; se usarán valores compatibles por defecto',e)}
