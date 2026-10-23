@@ -10,6 +10,8 @@ Ronin IA empaqueta una aplicación web en una app Android mediante **Capacitor**
 
 ## Índice
 
+- [Decisiones de diseño](#decisiones-de-diseño)
+
 - [Qué incluye](#qué-incluye)
 - [Cómo funciona](#cómo-funciona)
 - [Arquitectura](#arquitectura)
@@ -23,6 +25,18 @@ Ronin IA empaqueta una aplicación web en una app Android mediante **Capacitor**
 - [Hoja de ruta](#hoja-de-ruta)
 - [Contribuir](#contribuir)
 - [Licencia](#licencia)
+
+## Decisiones de diseño
+
+Los formatos JSON (`package.json` y `capacitor.config.json`) no admiten comentarios válidos; sus motivos se documentan aquí y en `docs/DECISIONES.md`.
+
+- **Marca propia:** `www/assets/ronin-logo.svg` es un SVG ligero, escalable y sin dependencias externas.
+- **Interfaz:** paleta azul noche con acentos cian/violeta, diseño responsive y respeto por `prefers-reduced-motion`.
+- **Arranque:** los pesos se descargan solo al activar la IA o enviar una pregunta.
+- **Inferencia:** WebGPU primero cuando es compatible, con CPU de reserva; la cuantización depende del dispositivo/runtime.
+- **Seguridad de salida:** el texto del modelo se escapa antes de renderizar Markdown y los enlaces externos usan `noopener noreferrer`.
+- **Datos:** el historial permanece en almacenamiento local; Wikipedia y el tiempo necesitan conexión.
+- **Build:** GitHub Actions valida sintaxis JavaScript antes de construir el APK de depuración.
 
 ## Qué incluye
 
