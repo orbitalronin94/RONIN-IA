@@ -56,6 +56,8 @@ jobs:
           dest = Path('www/vendor')
           # ONNX Runtime Web ships WASM binaries separately from its JS bundle.
           candidates = list(root.glob('onnxruntime-web/dist/*.wasm')) + list(root.glob('@huggingface/transformers/dist/*.wasm'))
+          if not candidates:
+              raise SystemExit('No se encontraron binarios WASM de ONNX Runtime Web; no se puede afirmar que la APK sea offline.')
           for f in candidates:
               shutil.copy2(f, dest / f.name)
           print(f'WASM assets copied: {len(candidates)}')
@@ -80,7 +82,7 @@ jobs:
       # El proyecto Android se genera en CI para mantener ligera la base fuente.
       - run: npx cap add android
       - run: npx cap sync android
-      # INTERNET es un permiso normal de Android (no muestra diálogo); declararlo explícitamente habilita CDN y descarga del modelo.
+      # INTERNET es un permiso normal de Android. El runtime y el modelo se empaquetan; las funciones web externas opcionales siguen necesitando conexión.
       - name: Ensure Android network permissions
         run: |
           python3 - <<'PY'
