@@ -44,6 +44,9 @@ jobs:
           writeFileSync('/tmp/ronin-frontend-check.mjs', match[1]);
           NODE
           node --check /tmp/ronin-frontend-check.mjs
+          node --check www/router.js
+          node --check www/experts.js
+          node --check scripts/prepare-models.mjs
       # Copiar el runtime JS y los archivos ONNX al paquete de la app: el APK no dependerá de una CDN.
       - name: Bundle local inference runtime
         run: |
@@ -62,25 +65,16 @@ jobs:
               shutil.copy2(f, dest / f.name)
           print(f'WASM assets copied: {len(candidates)}')
           PY
-      - name: Download bundled Qwen3 model weights
+      - name: Download all bundled model weights
+        run: npm run prepare:models
+      - name: Prepare Ronin app icon
         run: |
-          python3 -m pip install --disable-pip-version-check huggingface_hub
-          python3 - <<'PY'
-          from huggingface_hub import snapshot_download
-          snapshot_download(
-              repo_id='onnx-community/Qwen3-0.6B-ONNX',
-              local_dir='www/models/onnx-community/Qwen3-0.6B-ONNX',
-              allow_patterns=[
-                  'config.json', 'generation_config.json', 'tokenizer.json',
-                  'tokenizer_config.json', 'special_tokens_map.json',
-                  'onnx/model_q4f16.onnx', 'onnx/model_quantized.onnx',
-              ],
-          )
-          PY
-          test -s www/models/onnx-community/Qwen3-0.6B-ONNX/onnx/model_q4f16.onnx
-          test -s www/models/onnx-community/Qwen3-0.6B-ONNX/onnx/model_quantized.onnx
+          mkdir -p assets
+          cp www/assets/ronin-logo.svg assets/icon.svg
       # El proyecto Android se genera en CI para mantener ligera la base fuente.
       - run: npx cap add android
+      - name: Generate Android launcher icon from Ronin logo
+        run: npx @capacitor/assets generate --android --assetPath assets --iconBackgroundColor '#07111f' --iconBackgroundColorDark '#07111f'
       - run: npx cap sync android
       # INTERNET es un permiso normal de Android. El runtime y el modelo se empaquetan; las funciones web externas opcionales siguen necesitando conexión.
       - name: Ensure Android network permissions
