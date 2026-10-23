@@ -48,7 +48,7 @@ Los formatos JSON (`package.json` y `capacitor.config.json`) no admiten comentar
 - Consultas a Wikipedia y Open-Meteo cuando se detectan esas peticiones y hay conexión.
 - Empaquetado Android con Capacitor y compilación de APK mediante GitHub Actions.
 
-> **Importante:** el modelo no está incluido en el APK como pesos locales. La primera carga requiere internet y puede tardar. La capacidad de razonamiento del modelo de 360 millones de parámetros es limitada comparada con modelos grandes alojados en la nube.
+> **Importante:** el modelo no está incluido en el APK como pesos locales. La primera carga requiere internet y puede tardar. La capacidad de razonamiento de Qwen3-0.6B es limitada comparada con modelos grandes alojados en la nube.
 
 ## Cómo funciona
 
