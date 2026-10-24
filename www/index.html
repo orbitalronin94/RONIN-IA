@@ -138,9 +138,14 @@ async function loadCodingExpert(){
   try{
    lib.env.allowRemoteModels=!isNativeAndroid;lib.env.allowLocalModels=!!isNativeAndroid;lib.env.localModelPath='./models/';lib.env.useBrowserCache=true;
    if(isNativeAndroid&&lib.env.backends?.onnx?.wasm)lib.env.backends.onnx.wasm.wasmPaths='./vendor/';
-   let available=['q4','q4f16','q8','int8','uint8','fp16','fp32'];
-   try{available=await lib.ModelRegistry.get_available_dtypes(expert.model)}catch(e){console.info('No se pudo consultar cuantizaciones del experto; probando opciones conocidas',e)}
-   const webgpuDtype=['q4','q4f16','q8','fp16','fp32'].find(d=>available.includes(d))||'q4';
+   // En Android solo se empaqueta la variante q4 del experto; no elegir una variante no incluida en la APK.
+   let available=['q4'];
+   if(!isNativeAndroid){
+    available=['q4','q4f16','q8','int8','uint8','fp16','fp32'];
+    try{available=await lib.ModelRegistry.get_available_dtypes(expert.model)}catch(e){console.info('[model-loader] No se pudo consultar cuantizaciones del experto; probando opciones conocidas',e)}
+   }
+   const webgpuDtype=isNativeAndroid?'q4':(['q4','q4f16','q8','fp16','fp32'].find(d=>available.includes(d))||'q4');
+   console.info('[model-loader] Experto de código', {nativeAndroid:isNativeAndroid, model:expert.model, dtypes:available, selectedDtype:webgpuDtype});
    let expertPipe;
    try{expertPipe=await lib.pipeline('text-generation',expert.model,{dtype:webgpuDtype,device:'webgpu'})}
    catch(e){console.info('Experto sin WebGPU; probando CPU',e);const cpuDtype=['q4','q8','int8','uint8','fp32'].find(d=>available.includes(d))||'q8';expertPipe=await lib.pipeline('text-generation',expert.model,{dtype:cpuDtype})}
