@@ -110,14 +110,20 @@ async function loadModel(){
  loading=(async()=>{const startedAt=performance.now();try{
   const lib=isNativeAndroid?await import('./vendor/transformers.js'):await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2');
   lib.env.allowLocalModels=isNativeAndroid;lib.env.allowRemoteModels=!isNativeAndroid;lib.env.localModelPath='./models/';lib.env.useBrowserCache=true;if(isNativeAndroid&&lib.env.backends?.onnx?.wasm)lib.env.backends.onnx.wasm.wasmPaths='./vendor/';
-  let available=['q4f16','q4','q8','int8','uint8','fp16','fp32'];
-  try{available=await lib.ModelRegistry.get_available_dtypes(MODEL)}
-  catch(e){console.info('No se pudo consultar la lista de cuantizaciones; se usarán valores compatibles por defecto',e)}
-  const webgpuDtype=['q4','q4f16','fp16','q8','fp32'].find(d=>available.includes(d))||'q4';
-  try{pipe=await lib.pipeline('text-generation',MODEL,{dtype:webgpuDtype,device:'webgpu'});activeModelId=MODEL;setStatus('ready','Qwen3 0.6B · '+webgpuDtype+' WebGPU · '+((performance.now()-startedAt)/1000).toFixed(1)+' s')}
-  catch(e){console.info('WebGPU no disponible o falló; probando backend CPU con cuantización compatible',e);const cpuDtype=['q4','q8','int8','uint8','fp32'].find(d=>available.includes(d))||'q4';pipe=await lib.pipeline('text-generation',MODEL,{dtype:cpuDtype});activeModelId=MODEL;setStatus('ready','Qwen3 0.6B · '+cpuDtype+' CPU · '+((performance.now()-startedAt)/1000).toFixed(1)+' s')}
+  // Android solo empaqueta model_q4.onnx. No consultar el registro remoto ni elegir una cuantización distinta:
+  // el registro puede anunciar q4f16 aunque ese archivo no exista dentro de la APK.
+  let available=['q4'];
+  if(!isNativeAndroid){
+   available=['q4f16','q4','q8','int8','uint8','fp16','fp32'];
+   try{available=await lib.ModelRegistry.get_available_dtypes(MODEL)}
+   catch(e){console.info('[model-loader] No se pudo consultar la lista de cuantizaciones; se usarán valores compatibles por defecto',e)}
+  }
+  const webgpuDtype=isNativeAndroid?'q4':(['q4','q4f16','fp16','q8','fp32'].find(d=>available.includes(d))||'q4');
+  console.info('[model-loader] Modelo principal', {nativeAndroid:isNativeAndroid, model:MODEL, localModelPath:lib.env.localModelPath, allowRemoteModels:lib.env.allowRemoteModels, dtypes:available, selectedDtype:webgpuDtype});
+  try{pipe=await lib.pipeline('text-generation',MODEL,{dtype:webgpuDtype,device:'webgpu'});activeModelId=MODEL;setStatus('ready','Qwen3 0.6B · '+webgpuDtype+' WebGPU · '+((performance.now()-startedAt)/1000).toFixed(1)+' s');console.info('[model-loader] Modelo listo en WebGPU', {seconds:((performance.now()-startedAt)/1000).toFixed(1),dtype:webgpuDtype})}
+  catch(e){console.info('WebGPU no disponible o falló; probando backend CPU con cuantización compatible',e);const cpuDtype=['q4','q8','int8','uint8','fp32'].find(d=>available.includes(d))||'q4';pipe=await lib.pipeline('text-generation',MODEL,{dtype:cpuDtype});activeModelId=MODEL;setStatus('ready','Qwen3 0.6B · '+cpuDtype+' CPU · '+((performance.now()-startedAt)/1000).toFixed(1)+' s');console.info('[model-loader] Modelo listo en CPU', {seconds:((performance.now()-startedAt)/1000).toFixed(1),dtype:cpuDtype})}
   toast('Qwen3 está listo.');return pipe;
- }catch(e){pipe=null;loading=null;setStatus('error','No se pudo cargar');console.error(e);toast('No se pudo preparar Qwen3. Comprueba internet y memoria disponible; puedes reintentar con «Activar IA».');throw e}})();return loading;
+ }catch(e){pipe=null;loading=null;setStatus('error','No se pudo cargar');console.error('[model-loader] Falló la carga del modelo', {nativeAndroid:isNativeAndroid, model:MODEL, localModelPath:'./models/', message:e?.message, stack:e?.stack});toast('No se pudo preparar Qwen3 ('+(e?.message||'error desconocido')+'). Comprueba internet y memoria disponible; revisa los registros y reintenta.');throw e}})();return loading;
 }
 // Gestor de expertos opcionales. No descarga nada hasta que el usuario acepta.
 async function loadCodingExpert(){
@@ -132,9 +138,14 @@ async function loadCodingExpert(){
   try{
    lib.env.allowRemoteModels=!isNativeAndroid;lib.env.allowLocalModels=!!isNativeAndroid;lib.env.localModelPath='./models/';lib.env.useBrowserCache=true;
    if(isNativeAndroid&&lib.env.backends?.onnx?.wasm)lib.env.backends.onnx.wasm.wasmPaths='./vendor/';
-   let available=['q4','q4f16','q8','int8','uint8','fp16','fp32'];
-   try{available=await lib.ModelRegistry.get_available_dtypes(expert.model)}catch(e){console.info('No se pudo consultar cuantizaciones del experto; probando opciones conocidas',e)}
-   const webgpuDtype=['q4','q4f16','q8','fp16','fp32'].find(d=>available.includes(d))||'q4';
+   // En Android solo se empaqueta la variante q4 del experto; no elegir una variante no incluida en la APK.
+   let available=['q4'];
+   if(!isNativeAndroid){
+    available=['q4','q4f16','q8','int8','uint8','fp16','fp32'];
+    try{available=await lib.ModelRegistry.get_available_dtypes(expert.model)}catch(e){console.info('[model-loader] No se pudo consultar cuantizaciones del experto; probando opciones conocidas',e)}
+   }
+   const webgpuDtype=isNativeAndroid?'q4':(['q4','q4f16','q8','fp16','fp32'].find(d=>available.includes(d))||'q4');
+   console.info('[model-loader] Experto de código', {nativeAndroid:isNativeAndroid, model:expert.model, dtypes:available, selectedDtype:webgpuDtype});
    let expertPipe;
    try{expertPipe=await lib.pipeline('text-generation',expert.model,{dtype:webgpuDtype,device:'webgpu'})}
    catch(e){console.info('Experto sin WebGPU; probando CPU',e);const cpuDtype=['q4','q8','int8','uint8','fp32'].find(d=>available.includes(d))||'q8';expertPipe=await lib.pipeline('text-generation',expert.model,{dtype:cpuDtype})}
@@ -187,7 +198,7 @@ document.querySelectorAll('[data-prompt]').forEach(b=>b.onclick=()=>sendMessage(
 el.conversation.addEventListener('click',e=>{let b=e.target.closest('[data-copy]');if(b){let code=b.closest('.code')?.querySelector('code');if(code)copyText(code.textContent)}});
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();createChat()}if(e.key==='Escape')closeSidebar()});
 renderHistory();renderCurrent();resize();setStatus('idle','Modelo local no cargado');
-// En la APK Android, preparar el modelo al inicio satisface el modo «abrir y usar». La interfaz se pinta primero; la descarga inicial requiere internet y espacio. Transformers.js usa su caché del navegador cuando está disponible, pero esto no empaqueta los pesos dentro del APK. La web normal sigue siendo bajo demanda para no gastar datos inesperadamente.
+// En Android se intenta cargar al abrir: el workflow empaqueta runtime y pesos q4 dentro de la APK. La interfaz se pinta primero; la primera carga puede tardar y requiere RAM suficiente. La web normal sigue siendo bajo demanda para no gastar datos inesperadamente.
 const isNativeAndroid=(()=>{try{return /Android/i.test(navigator.userAgent)&&window.Capacitor?.getPlatform?.()==='android'}catch(e){return false}})();
 if(isNativeAndroid){setStatus('loading','Preparando IA al iniciar…');requestAnimationFrame(()=>{loadModel().catch(()=>{})})}
 </script>
