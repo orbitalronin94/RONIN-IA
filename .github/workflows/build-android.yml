@@ -118,6 +118,42 @@ jobs:
           print('Gradle heap and AndroidX settings configured')
           PY
       - run: cd android && ./gradlew --no-daemon assembleDebug
+      # No basta con que Gradle termine: verificar que el APK contiene pesos, runtime y WASM y registrar tamaño/hash.
+      - name: Verify APK model assets and fingerprint
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          import hashlib
+          apk = Path('android/app/build/outputs/apk/debug/app-debug.apk')
+          if not apk.is_file() or apk.stat().st_size == 0:
+              raise SystemExit('APK inexistente o vacía')
+          with ZipFile(apk) as z:
+              names = z.namelist()
+          required = [
+              'Qwen3-0.6B-ONNX/onnx/model_q4.onnx',
+              'Qwen2.5-Coder-0.5B-Instruct/onnx/model_q4.onnx',
+          ]
+          for suffix in required:
+              matches = [n for n in names if n.endswith(suffix)]
+              if not matches:
+                  raise SystemExit(f'FALTA en APK: {suffix}')
+              print(f'OK modelo: {matches[0]}')
+          runtime = [n for n in names if n.endswith('/vendor/transformers.js')]
+          wasm = [n for n in names if n.endswith('.wasm') and '/vendor/' in n]
+          if not runtime:
+              raise SystemExit('FALTA runtime local vendor/transformers.js en APK')
+          if not wasm:
+              raise SystemExit('FALTAN binarios WASM de ONNX Runtime en APK')
+          print(f'OK runtime JS: {runtime[0]}')
+          print(f'OK binarios WASM: {len(wasm)}')
+          digest = hashlib.sha256()
+          with apk.open('rb') as f:
+              for chunk in iter(lambda: f.read(8 * 1024 * 1024), b''):
+                  digest.update(chunk)
+          print(f'APK_BYTES={apk.stat().st_size}')
+          print(f'APK_SHA256={digest.hexdigest()}')
+          PY
       # Artefacto de depuración temporal; no es una release firmada para Play Store.
       - uses: actions/upload-artifact@v4
         with:
