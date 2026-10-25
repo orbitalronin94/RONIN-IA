@@ -58,29 +58,22 @@ jobs:
         run: |
           python - <<'PY'
           import json
+          import os
           from pathlib import Path
+          from scripts.sweep_fusions import checkpoint_is_valid
 
-          root = Path("fusion-sweep-results")
-          report_path = root / "sweep-report.json"
-          valid = False
+          report_path = Path("fusion-sweep-results/sweep-report.json")
+          report = {}
           if report_path.is_file():
               try:
                   report = json.loads(report_path.read_text(encoding="utf-8"))
-                  checkpoint = root / "ronin-fused-checkpoint"
-                  valid = (
-                      report.get("status") == "completed"
-                      and report.get("best_beats_base_heuristic") is True
-                      and report.get("exported_checkpoint") == str(checkpoint)
-                      and (checkpoint / "config.json").is_file()
-                      and any(checkpoint.glob("*.safetensors"))
-                  )
               except (OSError, json.JSONDecodeError):
-                  valid = False
-          with open(Path(__import__("os").environ["GITHUB_OUTPUT"]), "a", encoding="utf-8") as output:
-              output.write(f"checkpoint_exists={'true' if valid else 'false'}\n")
+                  report = {}
+          valid = checkpoint_is_valid(report)
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"checkpoint_exists={'true' if valid else 'false'}\\n")
           print(f"Validated current-run fusion checkpoint: {valid}")
-          PY
-      - name: Publish sweep report and optional checkpoint
+          PY      - name: Publish sweep report and optional checkpoint
         if: always()
         uses: actions/upload-artifact@v4
         with:
