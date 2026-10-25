@@ -107,3 +107,18 @@ test('la compilación descarga y empaqueta los dos expertos ONNX locales', () =>
   assert.match(script, /allowRemoteModels=!isNativeAndroid/);
   assert.match(script, /localModelPath='\.\/models\/'/);
 });
+
+
+test('Qwen3 evita razonamiento interno largo y limita la salida para reducir latencia', () => {
+  assert.match(script, /messages\[lastUser\]\.content\+='\\n\/no_think'/);
+  assert.match(script, /max_new_tokens:128/);
+  assert.match(script, /\[inference\] generación completada/);
+});
+
+test('la pregunta pendiente se persiste antes de inferir y se recupera al reiniciar Android', () => {
+  assert.match(script, /const PENDING_KEY='ronin\.ia\.pending\.v1'/);
+  assert.match(script, /savePendingRequest\(q,activeId\)/);
+  assert.match(script, /async function resumePendingRequest\(\)/);
+  assert.match(script, /loadModel\(\)\.then\(\(\)=>resumePendingRequest\(\)\)/);
+  assert.match(script, /clearPendingRequest\(\)/);
+});
