@@ -155,13 +155,18 @@ def main():
             answer=tokenizer.decode(ids[0][inputs["input_ids"].shape[1]:],skip_special_tokens=True).strip()
             s=score(case,answer); total+=s["passed"]; checks+=s["checks"]
         return {"score":total,"checks":checks,"mean_latency_seconds":round(sum(lat)/max(1,len(lat)),2)}
-    baseline = {"label":"base","score":None,"latency_seconds":None}
-    baseline.update(evaluate(base,base_tok)); report["runs"].append(baseline)
-    save_report(report)
+    baseline = next((run for run in report["runs"] if run.get("label") == "base"), None)
+    if baseline is None:
+        baseline = {"label":"base","score":None,"latency_seconds":None}
+        baseline.update(evaluate(base,base_tok)); report["runs"].append(baseline)
+        save_report(report)
     del base, base_state
     for index, (include_base, combo) in enumerate(combos,1):
         prefix = "base_plus_" if include_base else "candidate_only_"
         label = prefix + "_".join(combo)
+        if args.resume and any(run.get("label") == label for run in report["runs"]):
+            print(f"[{index}/{len(combos)}] Skipping completed {label}", flush=True)
+            continue
         print(f"[{index}/{len(combos)}] Evaluating {label}",flush=True)
         # Candidate-only averages start from the first candidate; base-inclusive
         # averages start from the base. Load other candidates one at a time.
@@ -201,10 +206,15 @@ def main():
     # so test conservative deltas from the base before deciding whether a checkpoint
     # is worth exporting. Never ship a heuristic regression as a production model.
     baseline_score = baseline.get("score")
-    interpolation_results = []
+    interpolation_results = list(report.get("interpolation_runs", [])) if args.resume else []
+    completed_interpolations = {run.get("label") for run in interpolation_results}
     for candidate_label in sorted(compatible):
         candidate_repo = CANDIDATES[candidate_label]
         for alpha in (0.05, 0.10, 0.15, 0.25, 0.40, 0.50, 0.75):
+            interpolation_label = f"base_plus_{candidate_label}_alpha_{alpha:.2f}"
+            if args.resume and interpolation_label in completed_interpolations:
+                print(f"Skipping completed {interpolation_label}", flush=True)
+                continue
             print(f"Interpolating base + {candidate_label} at alpha={alpha:.2f}", flush=True)
             merged_model = AutoModelForCausalLM.from_pretrained(
                 BASE, torch_dtype=torch.float32, low_cpu_mem_usage=True, trust_remote_code=False
@@ -266,7 +276,7 @@ def main():
     report["best_beats_base_heuristic"]=bool(report["winner"] and baseline["score"] is not None and report["winner"]["score"]>baseline["score"])
     report["quality_improvement_proven"]=False
     report["decision"]="Candidate selected by small heuristic screen only; require independent benchmark and human review before calling it an improvement."
-    (OUTPUT/"sweep-report.json").write_text(json.dumps(report,indent=2,ensure_ascii=False)+"\n")
+    save_report(report)
     print(json.dumps(report,indent=2,ensure_ascii=False))
 
 if __name__=="__main__": main()
