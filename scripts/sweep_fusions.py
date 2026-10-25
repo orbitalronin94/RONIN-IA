@@ -32,6 +32,7 @@ CANDIDATES = {
 }
 ALLOWED_LICENSES = {"apache-2.0", "mit", "bsd-3-clause", "bsd-2-clause"}
 OUTPUT = Path("fusion-sweep-results")
+EXPERIMENTAL_CHECKPOINT_NAME = "Ronin-0.6B-Fusion-Exp-001"
 INTERPOLATION_ALPHAS = (0.05, 0.10, 0.15, 0.25, 0.40, 0.50, 0.75)
 ALGORITHM_VERSION = "ronin-fusion-sweep-v2"
 PROMPTS = [
@@ -167,7 +168,9 @@ def main():
 
     # Never let an old checkpoint survive a new/different experiment and later be
     # mistaken for the result of this run.
-    checkpoint_dir = OUTPUT / "ronin-fused-checkpoint"
+    checkpoint_dir = OUTPUT / EXPERIMENTAL_CHECKPOINT_NAME
+    # Remove the legacy output name so a restored cache cannot publish an old checkpoint.
+    shutil.rmtree(OUTPUT / "ronin-fused-checkpoint", ignore_errors=True)
     if not previous:
         shutil.rmtree(checkpoint_dir, ignore_errors=True)
 
