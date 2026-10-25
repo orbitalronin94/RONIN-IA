@@ -12,21 +12,16 @@ test('la app tiene un único módulo principal y puede validarse en CI', () => {
   assert.match(html, /<html lang="es">/);
 });
 
-test('la ruta de modelo local utiliza caché y mantiene fallback CPU', () => {
-  assert.match(script, /useBrowserCache\s*=\s*true/);
-  assert.match(script, /device:\s*'webgpu'/);
-  assert.match(script, /cpuDtype/);
-  assert.match(script, /performance\.now\(\)-startedAt/);
+test('la app no incluye runtime ni pesos de modelos locales', () => {
+  assert.doesNotMatch(script, /transformers\.js|loadModel\(|getPipelineForRequest|Qwen3-0\.6B-ONNX/);
+  assert.doesNotMatch(html, /Probar IA local|Qwen3 local/);
 });
 
-test('la IA remota anónima es el modo predeterminado y Qwen3 local queda opcional', () => {
+test('la IA remota anónima es el único modo de inferencia', () => {
   assert.match(html, /LLMFaucet · sin clave personal/);
   assert.match(html, /No envíes contraseñas ni datos sensibles/);
-  assert.match(script, /inferenceMode='remote'/);
   assert.match(script, /requestRemoteCompletion\(\{messages\}\)/);
-  assert.match(script, /function switchInferenceMode\(\)/);
-  assert.match(script, /loadModel\(\)\.catch\(\(\)=>\{\}\)/);
-  assert.doesNotMatch(script, /if\(isNativeAndroid\)\{setStatus\('loading','Preparando IA al iniciar/);
+  assert.doesNotMatch(script, /inferenceMode|switchInferenceMode|loadModel\(/);
 });
 
 test('no se usa eval y la entrada del usuario tiene un límite', () => {
@@ -87,25 +82,18 @@ test('la compilación declara permisos Android de red antes de generar la APK', 
   assert.match(workflow, /android\/app\/src\/main\/AndroidManifest\.xml/);
 });
 
-test('la UI explica la naturaleza experimental de la IA remota y ofrece cambio a local', () => {
+test('la UI explica la naturaleza experimental de la IA remota', () => {
   assert.match(html, /IA remota experimental/);
-  assert.match(script, /cambiar a Qwen3 local/);
+  assert.doesNotMatch(html, /cambiar a Qwen3 local|Probar IA local/);
 });
 
-
-test('la compilación descarga y empaqueta los dos expertos ONNX locales', () => {
+test('la compilación no descarga ni empaqueta modelos locales', () => {
   const workflow = readFileSync(new URL('../.github/workflows/build-android.yml', import.meta.url), 'utf8');
-  assert.match(workflow, /Bundle local inference runtime/);
-  assert.match(workflow, /node_modules\/@huggingface\/transformers\/src\/transformers\.js/);
-  assert.match(workflow, /Download all bundled model weights/);
-  assert.match(workflow, /npm run prepare:models/);
+  assert.doesNotMatch(workflow, /Bundle local inference runtime|Download all bundled model weights|npm run prepare:models|@huggingface\/transformers\/src\/transformers\.js/);
   assert.match(workflow, /Generate Android launcher icon from Ronin logo/);
-  const manifest = readFileSync(new URL('../scripts/prepare-models.mjs', import.meta.url), 'utf8');
-  assert.match(manifest, /Qwen3-0\.6B-ONNX/);
-  assert.match(manifest, /Qwen2\.5-Coder-0\.5B-Instruct/);
-  assert.match(manifest, /onnx\/model_q4\.onnx/);
-  assert.match(script, /import\('\.\/vendor\/transformers\.js'\)/);
-  assert.match(script, /allowLocalModels=isNativeAndroid/);
-  assert.match(script, /allowRemoteModels=!isNativeAndroid/);
-  assert.match(script, /localModelPath='\.\/models\/'/);
+  assert.match(workflow, /Verify APK size and fingerprint/);
+  assert.match(workflow, /APK_MIB=/);
+  assert.match(workflow, /La APK aún contiene pesos ONNX locales/);
+  assert.doesNotMatch(script, /transformers\.js|allowLocalModels|localModelPath/);
 });
+
