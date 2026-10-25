@@ -251,6 +251,10 @@ En la APK Android, Ronin intenta preparar Qwen3 al abrir la app. La primera aper
 
 `npm test` ejecuta pruebas de contrato estáticas sobre las protecciones críticas del frontend. La compilación de GitHub Actions valida además la sintaxis del módulo y genera un APK de depuración. Las pruebas estáticas no sustituyen una prueba de inferencia en móviles físicos.
 
+## Validación independiente tras el barrido
+
+Cuando el cribado heurístico exporta `fusion-sweep-results/ronin-fused-checkpoint`, el workflow ejecuta una segunda etapa con `lm-evaluation-harness`: compara base y candidato con ARC-Easy, HellaSwag, TruthfulQA MC2 y GSM8K (100 ejemplos por tarea, semilla 42), y publica `comparison.json`. Si no se exporta checkpoint, no hay nada que validar y el workflow debe dejar constancia de que el cribado no encontró candidato. Un resultado positivo en estas cuatro tareas es evidencia direccional, no prueba universal: revisar deltas por tarea, muestras y regresiones antes de adoptar el modelo.
+
 ## Estado de validación del proyecto
 
 **Última revisión:** 2026-10-23 (UTC). Esta sección refleja ejecuciones concretas de GitHub Actions; consulta los enlaces para ver el estado más reciente.
