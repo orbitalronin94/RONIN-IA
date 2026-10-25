@@ -67,6 +67,20 @@ jobs:
           npx @capacitor/assets generate --android --assetPath assets --iconBackgroundColor '#07111f' --iconBackgroundColorDark '#07111f'
       - name: Sync Capacitor assets
         run: npx cap sync android
+      - name: Avoid recompressing large ONNX model assets
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('android/app/build.gradle')
+          s = p.read_text()
+          marker = "android {"
+          if marker not in s:
+              raise SystemExit('No se encontró el bloque android en app/build.gradle')
+          if "noCompress += ['onnx']" not in s:
+              s += "\n\n// Keep large ONNX weights uncompressed in the APK to avoid aapt2 heap exhaustion.\nandroid {\n    androidResources {\n        noCompress += ['onnx']\n    }\n}\n"
+              p.write_text(s)
+          print('Configured ONNX assets as uncompressed APK assets.')
+          PY
       - name: Ensure Android network permissions exist (remote mode remains optional)
         run: |
           python3 - <<'PY'
