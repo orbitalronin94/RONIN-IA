@@ -129,6 +129,8 @@ def main():
         except Exception as exc:
             metadata[repo] = {"revision": None, "license": None, "error": str(exc)}
     revisions = {repo: item.get("revision") for repo, item in metadata.items()}
+    if not revisions.get(BASE):
+        raise RuntimeError(f"Cannot run a reproducible sweep: failed to resolve immutable revision for base model {BASE}")
     fingerprint = experiment_fingerprint(revisions)
 
     previous = {}
@@ -171,15 +173,15 @@ def main():
         }
         if item.get("error"):
             report["license_review"][repo]["error"] = item["error"]
-    eligible = [label for label,repo in CANDIDATES.items() if report["license_review"].get(repo,{}).get("allowlisted")]
+    eligible = [label for label,repo in CANDIDATES.items() if report["license_review"].get(repo,{}).get("allowlisted") and report["license_review"].get(repo,{}).get("revision")]
     report["candidates"] = {label:repo for label,repo in CANDIDATES.items()}
     if not eligible:
         report["blocked_reason"] = "No candidate passed automatic permissive-license metadata gate; manual license review required."
         save_report(report)
         print(json.dumps(report,indent=2,ensure_ascii=False)); return 0
-    base_tok = AutoTokenizer.from_pretrained(BASE, trust_remote_code=False)
+    base_tok = AutoTokenizer.from_pretrained(BASE, revision=revisions[BASE], trust_remote_code=False)
     base_vocab = base_tok.get_vocab()
-    base = AutoModelForCausalLM.from_pretrained(BASE,torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
+    base = AutoModelForCausalLM.from_pretrained(BASE,revision=revisions[BASE],torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
     base.eval()
     base_state = base.state_dict()
     base_shapes = {k:tuple(v.shape) for k,v in base_state.items()}
@@ -193,7 +195,7 @@ def main():
             if vocab != base_vocab:
                 report["candidates"][label] = {"repo":repo,"compatible":False,"reason":"tokenizer vocabulary/IDs differ"}
                 continue
-            candidate = AutoModelForCausalLM.from_pretrained(repo,torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
+            candidate = AutoModelForCausalLM.from_pretrained(repo,revision=revisions[repo],torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
             state = candidate.state_dict()
             if set(state) != set(base_state) or any(tuple(state[k].shape) != base_shapes[k] for k in base_state):
                 report["candidates"][label] = {"repo":repo,"compatible":False,"reason":"tensor keys/shapes differ"}
@@ -237,7 +239,7 @@ def main():
         # Candidate-only averages start from the first candidate; base-inclusive
         # averages start from the base. Load other candidates one at a time.
         initial_repo = BASE if include_base else CANDIDATES[combo[0]]
-        merged_model=AutoModelForCausalLM.from_pretrained(initial_repo,torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
+        merged_model=AutoModelForCausalLM.from_pretrained(initial_repo,revision=revisions[initial_repo],torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
         merged_model.eval()
         merged_state=merged_model.state_dict()
         count=1
@@ -319,8 +321,8 @@ def main():
         candidate_label = label.removeprefix("base_plus_").split("_alpha_")[0]
         alpha = float(label.rsplit("_alpha_", 1)[1])
         repo = CANDIDATES[candidate_label]
-        export_model = AutoModelForCausalLM.from_pretrained(BASE, torch_dtype=torch.float32, low_cpu_mem_usage=True, trust_remote_code=False)
-        candidate = AutoModelForCausalLM.from_pretrained(repo, torch_dtype=torch.float32, low_cpu_mem_usage=True, trust_remote_code=False)
+        export_model = AutoModelForCausalLM.from_pretrained(BASE, revision=revisions[BASE], torch_dtype=torch.float32, low_cpu_mem_usage=True, trust_remote_code=False)
+        candidate = AutoModelForCausalLM.from_pretrained(repo, revision=revisions[repo], torch_dtype=torch.float32, low_cpu_mem_usage=True, trust_remote_code=False)
         with torch.no_grad():
             for key, ref_tensor in export_model.state_dict().items():
                 other = candidate.state_dict()[key]
