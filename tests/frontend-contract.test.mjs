@@ -19,11 +19,14 @@ test('la ruta de modelo local utiliza caché y mantiene fallback CPU', () => {
   assert.match(script, /performance\.now\(\)-startedAt/);
 });
 
-test('la APK Android prepara el modelo al iniciar y la bienvenida explica la descarga inicial', () => {
-  assert.match(html, /En Android, Ronin prepara la IA al abrirse/);
-  assert.match(html, /lleva los pesos del modelo dentro de la APK/);
-  assert.match(script, /window\.Capacitor\?\.getPlatform\?\.\(\)==='android'/);
-  assert.match(script, /if\(isNativeAndroid\).*?loadModel\(\)\.catch/s);
+test('la IA remota anónima es el modo predeterminado y Qwen3 local queda opcional', () => {
+  assert.match(html, /LLMFaucet · sin clave personal/);
+  assert.match(html, /No envíes contraseñas ni datos sensibles/);
+  assert.match(script, /inferenceMode='remote'/);
+  assert.match(script, /requestRemoteCompletion\(\{messages\}\)/);
+  assert.match(script, /function switchInferenceMode\(\)/);
+  assert.match(script, /loadModel\(\)\.catch\(\(\)=>\{\}\)/);
+  assert.doesNotMatch(script, /if\(isNativeAndroid\)\{setStatus\('loading','Preparando IA al iniciar/);
 });
 
 test('no se usa eval y la entrada del usuario tiene un límite', () => {
@@ -84,10 +87,10 @@ test('la compilación declara permisos Android de red antes de generar la APK', 
   assert.match(workflow, /android\/app\/src\/main\/AndroidManifest\.xml/);
 });
 
-test('la UI aclara que Android no muestra un diálogo para el permiso normal de internet', () => {
-  assert.match(html, /Modelo local no cargado/);
-  assert.match(script, /Preparando IA al iniciar/);
-  assert.match(script, /Comprueba internet y memoria disponible/);
+test('la UI explica la naturaleza experimental de la IA remota y ofrece cambio a local', () => {
+  assert.match(html, /IA remota experimental/);
+  assert.match(script, /cambiar a Qwen3 local/);
+  assert.match(script, /La cuota anónima de IA se ha agotado temporalmente/);
 });
 
 
