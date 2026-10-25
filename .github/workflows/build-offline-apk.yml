@@ -88,7 +88,8 @@ jobs:
         run: |
           chmod +x android/gradlew
           cd android
-          ./gradlew --no-daemon assembleDebug
+          # The bundled q4 model is ~750 MiB; give the asset compressor a larger heap.
+          ./gradlew --no-daemon -Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8' assembleDebug
       - name: Record APK size and fingerprint
         run: |
           python3 - <<'PY'
