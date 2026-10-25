@@ -6,6 +6,7 @@ on:
     branches: [main, master]
     paths:
       - 'scripts/sweep_fusions.py'
+      - 'scripts/benchmark_merge_vs_base.py'
       - '.github/workflows/fusion-sweep.yml'
 
 permissions:
@@ -19,6 +20,8 @@ jobs:
   sweep:
     runs-on: ubuntu-latest
     timeout-minutes: 350
+    outputs:
+      checkpoint_exists: ${{ steps.result.outputs.checkpoint_exists }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -33,7 +36,17 @@ jobs:
           HF_HUB_DISABLE_TELEMETRY: '1'
           TOKENIZERS_PARALLELISM: 'false'
         run: python scripts/sweep_fusions.py
-      - name: Publish sweep report
+      - name: Detect whether a candidate checkpoint was exported
+        id: result
+        if: always()
+        shell: bash
+        run: |
+          if [ -d fusion-sweep-results/ronin-fused-checkpoint ] && [ -f fusion-sweep-results/sweep-report.json ]; then
+            echo "checkpoint_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "checkpoint_exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Publish sweep report and optional checkpoint
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -42,9 +55,10 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-  independent-benchmark:
+  confirm-with-lm-eval:
+    name: Confirm candidate against base (lm-evaluation-harness)
     needs: sweep
-    if: needs.sweep.result == 'success'
+    if: needs.sweep.outputs.checkpoint_exists == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 350
     steps:
@@ -52,47 +66,31 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Download fusion sweep artifact
+      - name: Download sweep artifact
         uses: actions/download-artifact@v4
         with:
           name: ronin-fusion-sweep-results
-          path: fusion-sweep-results/
-      - name: Check for exported checkpoint
-        id: checkpoint
-        shell: bash
-        run: |
-          if [ -d fusion-sweep-results/ronin-fused-checkpoint ] && [ -f fusion-sweep-results/sweep-report.json ]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "No checkpoint passed the heuristic screening; independent benchmark is intentionally skipped."
-          fi
-      - name: Install independent benchmark dependencies
-        if: steps.checkpoint.outputs.available == 'true'
+          path: fusion-sweep-results
+      - name: Install independent benchmark harness
         run: |
           python -m pip install --upgrade pip
-          pip install lm-eval transformers accelerate sentencepiece protobuf
-      - name: Compare base against fused checkpoint
-        if: steps.checkpoint.outputs.available == 'true'
+          pip install lm-eval
+      - name: Compare base and exported candidate on fixed tasks
         env:
           HF_HUB_DISABLE_TELEMETRY: '1'
           TOKENIZERS_PARALLELISM: 'false'
-        run: >-
-          python scripts/benchmark_merge_vs_base.py
-          --base-model Qwen/Qwen3-0.6B
-          --merged-model fusion-sweep-results/ronin-fused-checkpoint
-          --limit 100 --num-fewshot 0 --batch-size 1 --seed 42
-          --output-dir independent-benchmark-results
-      - name: Record skipped benchmark reason
-        if: steps.checkpoint.outputs.available == 'false'
         run: |
-          mkdir -p independent-benchmark-results
-          printf '%s\\n' '{"status":"skipped","reason":"The heuristic sweep did not export a checkpoint; no quality claim is made."}' > independent-benchmark-results/benchmark-status.json
+          python scripts/benchmark_merge_vs_base.py \
+            --base-model Qwen/Qwen3-0.6B \
+            --merged-model fusion-sweep-results/ronin-fused-checkpoint \
+            --tasks arc_easy,hellaswag,truthfulqa_mc2,gsm8k \
+            --limit 100 --num-fewshot 0 --batch-size 1 --seed 42 \
+            --output-dir merge-validation-results
       - name: Publish independent benchmark report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ronin-independent-benchmark
-          path: independent-benchmark-results/
+          name: ronin-merge-validation
+          path: merge-validation-results/
           if-no-files-found: warn
           retention-days: 30
