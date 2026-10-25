@@ -106,7 +106,10 @@ jobs:
           p = Path('android/gradle.properties')
           lines = p.read_text().splitlines() if p.exists() else []
           settings = {
-              'org.gradle.jvmargs': '-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8',
+              # Model ONNX assets are very large; keep Gradle's heap and worker count explicit.
+              'org.gradle.jvmargs': '-Xmx6g -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8',
+              'org.gradle.workers.max': '1',
+              'org.gradle.parallel': 'false',
               'android.useAndroidX': 'true',
               'android.enableJetifier': 'true',
           }
