@@ -122,6 +122,28 @@ def compare(base, merged):
     }
 
 
+
+def validate_comparison(base, merged, comparison, requested_tasks):
+    """Identify incomplete or incomparable benchmark results before CI treats them as valid."""
+    base_metrics = base.get("metrics", {})
+    merged_metrics = merged.get("metrics", {})
+    missing_base = sorted(set(requested_tasks) - set(base_metrics))
+    missing_merged = sorted(set(requested_tasks) - set(merged_metrics))
+    rows = {row["task"]: row for row in comparison["tasks"]}
+    incomparable = sorted(
+        task for task in requested_tasks
+        if task in base_metrics and task in merged_metrics
+        and not rows.get(task, {}).get("comparable", False)
+    )
+    return {
+        "complete": not missing_base and not missing_merged and not incomparable,
+        "requested_task_count": len(requested_tasks),
+        "base_missing_tasks": missing_base,
+        "merged_missing_tasks": missing_merged,
+        "incomparable_tasks": incomparable,
+    }
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-model", default="Qwen/Qwen3-0.6B")
@@ -139,6 +161,8 @@ def main(argv=None):
     args.tasks = [task.strip() for task in args.tasks.split(",") if task.strip()]
     if not args.tasks:
         parser.error("At least one benchmark task is required")
+    if len(args.tasks) != len(set(args.tasks)):
+        parser.error("--tasks contains duplicate task IDs")
     if args.base_model == args.merged_model:
         parser.error("--merged-model must differ from --base-model")
 
@@ -162,13 +186,18 @@ def main(argv=None):
         "merged": merged,
         "comparison": compare(base, merged),
     }
+    report["validation"] = validate_comparison(base, merged, report["comparison"], args.tasks)
     report_path = root / "comparison.json"
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print("\n=== BASE vs MERGED ===")
     for row in report["comparison"]["tasks"]:
         print(f'{row["task"]:20} base={row["base_score"]!s:>10} merged={row["merged_score"]!s:>10} delta={row["delta_merged_minus_base"]!s:>12}')
     print(f'\nMean comparable delta: {report["comparison"]["mean_delta"]}')
+    print(f'Benchmark complete: {report["validation"]["complete"]}')
     print(f'Report: {report_path}')
+    if not report["validation"]["complete"]:
+        print(f'Incomplete/incomparable tasks: {report["validation"]}', file=sys.stderr)
+        return 3
     return 0
 
 

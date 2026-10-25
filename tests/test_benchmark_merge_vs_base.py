@@ -36,6 +36,24 @@ class MergeVsBaseTests(unittest.TestCase):
         self.assertEqual(result["comparable_task_count"], 0)
         self.assertIsNone(result["tasks"][0]["delta_merged_minus_base"])
 
+    def test_validation_flags_missing_and_incomparable_requested_tasks(self):
+        base = {"metrics": {"a": {"metric": "acc", "score": 0.5}}}
+        merged = {"metrics": {"a": {"metric": "exact_match", "score": 0.6}}}
+        comparison = benchmark.compare(base, merged)
+        result = benchmark.validate_comparison(base, merged, comparison, ["a", "b"])
+        self.assertFalse(result["complete"])
+        self.assertEqual(result["base_missing_tasks"], ["b"])
+        self.assertEqual(result["merged_missing_tasks"], ["b"])
+        self.assertEqual(result["incomparable_tasks"], ["a"])
+
+    def test_validation_accepts_all_requested_comparable_tasks(self):
+        base = {"metrics": {"a": {"metric": "acc", "score": 0.5}}}
+        merged = {"metrics": {"a": {"metric": "acc", "score": 0.6}}}
+        comparison = benchmark.compare(base, merged)
+        result = benchmark.validate_comparison(base, merged, comparison, ["a"])
+        self.assertTrue(result["complete"])
+        self.assertEqual(result["requested_task_count"], 1)
+
     def test_result_discovery_requires_results_object(self):
         with tempfile.TemporaryDirectory() as temp:
             Path(temp, "junk.json").write_text('{"hello": "world"}', encoding="utf-8")
