@@ -157,10 +157,71 @@ def main():
         report["runs"].append(run)
         del merged_state, merged_model
         if hasattr(torch, "cuda") and torch.cuda.is_available(): torch.cuda.empty_cache()
+    # Second-stage interpolation sweep: equal-weight averages underperformed the base,
+    # so test conservative deltas from the base before deciding whether a checkpoint
+    # is worth exporting. Never ship a heuristic regression as a production model.
+    baseline_score = baseline.get("score")
+    interpolation_results = []
+    for candidate_label in sorted(compatible):
+        candidate_repo = CANDIDATES[candidate_label]
+        for alpha in (0.10, 0.25, 0.50):
+            print(f"Interpolating base + {candidate_label} at alpha={alpha:.2f}", flush=True)
+            merged_model = AutoModelForCausalLM.from_pretrained(
+                BASE, torch_dtype=torch.float32, low_cpu_mem_usage=True, trust_remote_code=False
+            )
+            candidate = AutoModelForCausalLM.from_pretrained(
+                candidate_repo, torch_dtype=torch.float32, low_cpu_mem_usage=True, trust_remote_code=False
+            )
+            merged_state = merged_model.state_dict()
+            candidate_state = candidate.state_dict()
+            with torch.no_grad():
+                for key, ref_tensor in merged_state.items():
+                    other = candidate_state[key]
+                    if ref_tensor.is_floating_point():
+                        ref_tensor.mul_(1.0 - alpha).add_(other, alpha=alpha)
+                    elif not torch.equal(ref_tensor, other):
+                        raise RuntimeError(f"Non-floating tensor mismatch for {candidate_repo}: {key}")
+            del candidate_state, candidate
+            merged_model.eval()
+            run = evaluate(merged_model, base_tok)
+            run.update({
+                "label": f"base_plus_{candidate_label}_alpha_{alpha:.2f}",
+                "models": [BASE, candidate_repo], "includes_base": True,
+                "method": "linear parameter interpolation", "candidate_weight": alpha,
+            })
+            interpolation_results.append(run)
+            report["runs"].append(run)
+            del merged_state, merged_model
+            if hasattr(torch, "cuda") and torch.cuda.is_available(): torch.cuda.empty_cache()
+    report["interpolation_runs"] = interpolation_results
+    # Only export weights when the small heuristic screen strictly beats the base.
+    best_interpolation = max(interpolation_results, key=lambda r: r["score"], default=None)
+    if best_interpolation and baseline_score is not None and best_interpolation["score"] > baseline_score:
+        label = best_interpolation["label"]
+        candidate_label = label.removeprefix("base_plus_").split("_alpha_")[0]
+        alpha = float(label.rsplit("_alpha_", 1)[1])
+        repo = CANDIDATES[candidate_label]
+        export_model = AutoModelForCausalLM.from_pretrained(BASE, torch_dtype=torch.float32, low_cpu_mem_usage=True, trust_remote_code=False)
+        candidate = AutoModelForCausalLM.from_pretrained(repo, torch_dtype=torch.float32, low_cpu_mem_usage=True, trust_remote_code=False)
+        with torch.no_grad():
+            for key, ref_tensor in export_model.state_dict().items():
+                other = candidate.state_dict()[key]
+                if ref_tensor.is_floating_point(): ref_tensor.mul_(1.0-alpha).add_(other, alpha=alpha)
+        del candidate
+        checkpoint_dir = OUTPUT / "ronin-fused-checkpoint"
+        export_model.save_pretrained(checkpoint_dir, safe_serialization=True)
+        base_tok.save_pretrained(checkpoint_dir)
+        report["exported_checkpoint"] = str(checkpoint_dir)
+        report["exported_checkpoint_candidate"] = repo
+        report["exported_candidate_weight"] = alpha
+        del export_model
+    else:
+        report["exported_checkpoint"] = None
+        report["export_blocked_reason"] = "No tested interpolation strictly beat the base on the heuristic screen."
     # Heuristic score first, latency as tie-breaker; no human quality claim.
     ranked=sorted([r for r in report["runs"] if r["label"]!="base"],key=lambda r:(r["score"],-r["mean_latency_seconds"]),reverse=True)
-    report["winner"]=ranked[0] if ranked else None
-    report["best_beats_base_heuristic"]=bool(ranked and baseline["score"] is not None and ranked[0]["score"]>baseline["score"])
+    report["winner"]=max(report["runs"], key=lambda r: r["score"]) if report["runs"] else None
+    report["best_beats_base_heuristic"]=bool(report["winner"] and baseline["score"] is not None and report["winner"]["score"]>baseline["score"])
     report["quality_improvement_proven"]=False
     report["decision"]="Candidate selected by small heuristic screen only; require independent benchmark and human review before calling it an improvement."
     (OUTPUT/"sweep-report.json").write_text(json.dumps(report,indent=2,ensure_ascii=False)+"\n")
