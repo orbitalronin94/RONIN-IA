@@ -140,6 +140,20 @@ jobs:
           p.write_text('\\n'.join(lines) + '\\n')
           print('Gradle heap and AndroidX settings configured')
           PY
+      - name: Verify AndroidX Gradle setting
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('android/gradle.properties')
+          lines = p.read_text().splitlines() if p.exists() else []
+          lines = [line for line in lines if not line.startswith('android.useAndroidX=')]
+          lines.append('android.useAndroidX=true')
+          p.write_text('\\n'.join(lines) + '\\n')
+          actual = [line for line in p.read_text().splitlines() if line.startswith('android.useAndroidX=')]
+          print('Effective AndroidX setting:', actual)
+          if actual != ['android.useAndroidX=true']:
+              raise SystemExit('android.useAndroidX was not persisted')
+          PY
       - run: cd android && ./gradlew --no-daemon assembleDebug
       # No basta con que Gradle termine: verificar que el APK contiene pesos, runtime y WASM y registrar tamaño/hash.
       - name: Verify APK model assets and fingerprint
