@@ -2,8 +2,8 @@
 
 > **Propósito:** mantener una memoria técnica acumulativa de las iteraciones, decisiones, pruebas, resultados y pendientes del proyecto. Registrar hechos verificables y separar claramente los resultados confirmados de las tareas en curso o las hipótesis.
 >
-> **Última actualización:** 2026-10-23 (UTC).  
-> **Estado general:** auditoría de candidatos correcta; APK de depuración compilada correctamente en el commit `bac497f`; evaluación profunda iniciada en `8e92cc5` seguía en curso en la última consulta. No se ha demostrado todavía una fusión de modelos válida ni una mejora de calidad.
+> **Última actualización:** 2026-10-25 (UTC).  
+> **Estado general:** la APK debug se compiló correctamente en el commit `8d395bb`; el test del router MoE pasó en `750a560`; el barrido de fusiones más reciente sigue bloqueado en cola detrás de una ejecución antigua. No se ha demostrado todavía una fusión válida ni una mejora de calidad.
 
 ## Índice
 
@@ -142,6 +142,29 @@ La lista de trabajo contiene 24 repositorios candidatos:
 Para estos tres candidatos, el informe reporta 311 tensores, sin tensores faltantes/adicionales ni diferencias de forma, y 151.669 tokens con IDs coincidentes. En esa prueba el modelo base superó las puntuaciones heurísticas de los tres candidatos; por tanto, no hay ganador demostrado. Estos resultados pertenecen al commit `71d2f79` y no deben atribuirse a la evaluación en curso del commit `8e92cc5`.
 
 **Importante:** no hay puntuaciones finales del benchmark `lm_eval` ni evidencia de una fusión validada. No afirmar mejoras hasta que el informe actualizado lo demuestre.
+
+
+
+### 2026-10-25 — Iteración 6: estado del barrido y validación independiente
+
+**Cambios de proceso**
+- Se añade una etapa independiente de benchmark tras el barrido, condicionada a que exista un checkpoint exportado.
+- La comparación reutiliza `scripts/benchmark_merge_vs_base.py` y fija cuatro tareas, 100 ejemplos por tarea, cero ejemplos few-shot, batch 1 y semilla 42.
+- El informe se publica como artefacto `ronin-fusion-confirmation`; si no hay checkpoint, no se finge que se ha evaluado una fusión.
+- Se actualiza el README para describir el protocolo y distinguir compilación APK, cribado heurístico y validación comparativa.
+
+**Estado real comprobado al comenzar esta iteración**
+- [Build APK, ejecución 40173795125](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40173795125): **éxito** en el commit `8d395bb`. Confirma la compilación Android debug en CI, no una inferencia validada en dispositivo físico ni pesos fusionados dentro del APK.
+- [Test MoE router, ejecución 40173666533](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40173666533): **éxito** en el commit `750a560`.
+- [Barrido actual, ejecución 40173666529](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40173666529): **pendiente** en la última consulta.
+- [Barrido antiguo, ejecución 40173401635](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40173401635): seguía **en curso** en la última consulta y mantiene ocupada la concurrencia del grupo `ronin-fusion-sweep`; la ejecución nueva espera. No se lanza otro barrido duplicado.
+- No consta aún un artefacto final del barrido ni una mejora validada. Las nueve pruebas heurísticas solo sirven de filtro y nunca se interpretarán como prueba suficiente de calidad.
+
+**Próximos pasos**
+1. Inspeccionar la ejecución antigua y el barrido pendiente, y registrar artefactos y fallos.
+2. Si se exporta checkpoint, revisar deltas por tarea en el benchmark independiente; no adoptar una fusión si hay regresiones inaceptables o evidencia incompleta.
+3. Si no aparece candidato, registrar resultado negativo y mejorar la evaluación antes de ampliar cómputo.
+4. Mantener el modelo de la APK sin cambios hasta demostrar una mejora y verificar conversión/runtime/tamaño en Android.
 
 ## Decisiones técnicas
 
