@@ -1,0 +1,48 @@
+name: Agent quality gate
+
+on:
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-agent-quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-tests:
+    name: Offline tests and syntax checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Node dependencies
+        run: npm install
+      - name: Run frontend and contract tests
+        run: npm test
+      - name: Run offline Python unit tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Validate Python syntax
+        run: python -m compileall -q scripts tests
+      - name: Validate frontend JavaScript syntax
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          const html = readFileSync('www/index.html', 'utf8');
+          const match = html.match(/<script type="module">([\s\S]*?)<\/script>/);
+          if (!match) throw new Error('No module script found in www/index.html');
+          writeFileSync('/tmp/ronin-agent-check.mjs', match[1]);
+          NODE
+          node --check /tmp/ronin-agent-check.mjs
+          node --check www/router.js
+          node --check www/experts.js
+          node --check scripts/prepare-models.mjs
