@@ -237,7 +237,10 @@ Comprueba la conexión y si el proveedor externo está disponible. Los servicios
 
 ## Hoja de ruta
 
-- [ ] Completar el barrido de fusión reanudable y publicar el informe, incluidos candidatos descartados.\n- [ ] Ejecutar benchmark independiente y revisión de regresiones antes de declarar una mejora.\n- [ ] Medir tamaño cuantizado cercano a 300 MB, memoria y latencia en hardware objetivo.\n- [ ] Añadir pruebas automatizadas para la lógica de interfaz y las funciones principales.
+- [ ] Completar el barrido de fusión reanudable y publicar el informe, incluidos candidatos descartados. 
+- [ ] Ejecutar benchmark independiente y revisión de regresiones antes de declarar una mejora. 
+- [ ] Medir tamaño cuantizado cercano a 300 MB, memoria y latencia en hardware objetivo. 
+- [ ] Añadir pruebas automatizadas para la lógica de interfaz y las funciones principales.
 - [ ] Validar el flujo en dispositivos Android reales y distintas versiones de WebView.
 - [ ] Mejorar la presentación del estado de carga y de los errores del modelo.
 - [ ] Documentar con precisión las licencias y versiones de dependencias.
