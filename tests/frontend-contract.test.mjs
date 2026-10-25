@@ -125,5 +125,5 @@ test('la APK offline empaqueta Qwen2.5 y runtime local sin cambiar el build lige
   assert.ok(runtimeBundle.includes("conditions: ['browser']"));
   assert.ok(runtimeBundle.includes("mainFields: ['browser', 'module', 'main']"));
   assert.ok(runtimeBundle.includes("await rm(entry, { force: true })"), 'el entry temporal debe limpiarse incluso si falla el bundle');
-  assert.ok(marker.includes('OFFLINE_BUNDLE_ENABLED = false'));
+  assert.match(marker, /OFFLINE_BUNDLE_ENABLED = (?:true|false)/, 'el marcador debe exportar un booleano; CI lo cambia a true solo para la APK offline');
 });
