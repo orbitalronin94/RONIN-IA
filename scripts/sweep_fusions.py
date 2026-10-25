@@ -285,10 +285,12 @@ def main():
                 continue
             print(f"Interpolating base + {candidate_label} at alpha={alpha:.2f}", flush=True)
             merged_model = AutoModelForCausalLM.from_pretrained(
-                BASE, torch_dtype=torch.float32, low_cpu_mem_usage=True, trust_remote_code=False
+                BASE, revision=revisions[BASE], torch_dtype=torch.float32,
+                low_cpu_mem_usage=True, trust_remote_code=False
             )
             candidate = AutoModelForCausalLM.from_pretrained(
-                candidate_repo, torch_dtype=torch.float32, low_cpu_mem_usage=True, trust_remote_code=False
+                candidate_repo, revision=revisions[candidate_repo], torch_dtype=torch.float32,
+                low_cpu_mem_usage=True, trust_remote_code=False
             )
             merged_state = merged_model.state_dict()
             candidate_state = candidate.state_dict()
