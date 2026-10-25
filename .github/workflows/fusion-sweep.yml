@@ -96,3 +96,52 @@ jobs:
           path: independent-benchmark-results/
           if-no-files-found: warn
           retention-days: 30
+
+  confirm-benchmark:
+    name: Confirm candidate against base on standard tasks
+    needs: sweep
+    if: needs.sweep.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download sweep report and any candidate checkpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: ronin-fusion-sweep-results
+          path: fusion-sweep-results/
+      - name: Check whether a candidate checkpoint exists
+        id: candidate
+        shell: bash
+        run: |
+          if [ -f fusion-sweep-results/ronin-fused-checkpoint/config.json ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "No checkpoint exported by the heuristic screen; independent benchmark skipped."
+          fi
+      - name: Install independent benchmark dependencies
+        if: steps.candidate.outputs.available == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install 'lm-eval[api]' transformers accelerate sentencepiece
+      - name: Compare base and candidate on standard tasks
+        if: steps.candidate.outputs.available == 'true'
+        run: |
+          python scripts/benchmark_merge_vs_base.py \
+            --base-model Qwen/Qwen3-0.6B \
+            --merged-model fusion-sweep-results/ronin-fused-checkpoint \
+            --tasks arc_easy,hellaswag,truthfulqa_mc2,gsm8k \
+            --limit 100 --num-fewshot 0 --batch-size 1 --seed 42 \
+            --output-dir benchmark-confirmation
+      - name: Publish independent benchmark report
+        if: always() && steps.candidate.outputs.available == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-fusion-confirmation
+          path: benchmark-confirmation/
+          if-no-files-found: warn
+          retention-days: 30
