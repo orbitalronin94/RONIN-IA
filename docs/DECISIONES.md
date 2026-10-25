@@ -31,6 +31,15 @@ Mantener una experiencia tipo chat que arranque rápido en Android y web, pueda 
 - La cuantización depende del runtime; no se promete la misma variante ni velocidad en todos los teléfonos.
 - El contexto y los tokens limitados ayudan a controlar memoria y latencia; deben ajustarse con pruebas reales.
 
+## Investigación de fusión y objetivo de tamaño
+
+- La investigación se realiza sobre `Qwen/Qwen3-0.6B` como base, no mediante entrenamiento fundacional desde cero.
+- La compatibilidad estructural y la licencia son filtros de elegibilidad, no pruebas de que una fusión funcione o mejore el modelo.
+- El barrido preliminar usa puntuaciones heurísticas deterministas solo como filtro. Una mejora debe confirmarse con un benchmark independiente y revisión explícita de regresiones.
+- Se prioriza la reanudación de experimentos largos: el script guarda un informe JSON de forma atómica después de evaluaciones y el workflow intenta restaurar/guardar ese directorio mediante la caché de Actions.
+- El objetivo exploratorio de ~300 MB se refiere al artefacto cuantizado final, no al checkpoint float32 de investigación. Se compararán tamaño real, memoria, latencia y calidad; si la cuantización degrada demasiado el resultado, no se declarará un éxito.
+- Ningún checkpoint candidato se integra automáticamente en la app. La promoción requiere resultados reproducibles, licencias revisadas y pruebas en el runtime objetivo.
+
 ## Herramientas web
 
 - Wikipedia y Open-Meteo requieren conexión; no son funciones offline.
