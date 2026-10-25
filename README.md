@@ -306,3 +306,14 @@ Para listar qué archivos se empaquetarán sin descargarlos:
 ```bash
 npm run prepare:models -- --list
 ```
+
+
+## Protocolo automático de validación de fusiones
+
+El workflow [Exhaustive bounded fusion sweep](.github/workflows/fusion-sweep.yml) realiza un cribado limitado de candidatos compatibles y publica `ronin-fusion-sweep-results`. La puntuación rápida usa nueve prompts con comprobaciones heurísticas: sirve para descartar regresiones obvias, **no demuestra calidad general ni equivale a evaluación humana**.
+
+Si el barrido exporta un checkpoint candidato, el workflow encadena ahora una segunda fase independiente con `lm-evaluation-harness`: compara base y candidato con las mismas tareas (`arc_easy`, `hellaswag`, `truthfulqa_mc2`, `gsm8k`), límite de 100 ejemplos por tarea, cero ejemplos de demostración, batch 1 y semilla 42. El informe `comparison.json` se publica como artefacto `ronin-merge-validation`. Si el cribado no exporta checkpoint, esta fase se omite; no se fuerza una fusión para producir un artefacto.
+
+La comparación debe revisarse tarea por tarea. Una media positiva puede ocultar regresiones, y estos benchmarks públicos son solo evidencia direccional: no certifican mejora general ni rendimiento en Android. Antes de seleccionar un modelo para distribuir, se debe comprobar carga/inferencia, licencia, tamaño del APK, memoria, latencia y comportamiento en dispositivo físico.
+
+**Estado CI consultado el 2026-10-25:** el commit de este protocolo es `693f500`; el barrido `40174390884` y el build Android `40174390812` aparecen pendientes en la última consulta. Todavía no hay resultado nuevo que permita declarar una fusión validada. Consulta [el barrido](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40174390884) y [la compilación Android](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40174390812).
