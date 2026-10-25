@@ -23,6 +23,12 @@ Construir una APK de debug que incluya el runtime de inferencia, los recursos WA
 
 ## Resultados
 
+### Tercer intento de CI del 2026-10-25
+
+- Ejecución: [workflow 40218981726](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40218981726).
+- El bundle del runtime y las pruebas frontend superaron sus pasos; falló `:app:compressDebugAssets` con `Java heap space` al construir la APK que contiene el modelo q4 de aproximadamente 750 MiB.
+- Corrección propuesta en este PR: elevar el heap de Gradle a 4 GiB para la tarea de build. Es una hipótesis correctiva que debe validarse con una nueva ejecución; no se ha producido artefacto offline todavía.
+
 ### Segundo intento de CI del 2026-10-25
 
 - Ejecución: [workflow 40218696661](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40218696661/job/121245333034).
