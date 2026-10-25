@@ -372,7 +372,7 @@ def main():
                 other = candidate.state_dict()[key]
                 if ref_tensor.is_floating_point(): ref_tensor.mul_(1.0-alpha).add_(other, alpha=alpha)
         del candidate
-        checkpoint_dir = OUTPUT / "ronin-fused-checkpoint"
+        checkpoint_dir = OUTPUT / EXPERIMENTAL_CHECKPOINT_NAME
         export_model.save_pretrained(checkpoint_dir, safe_serialization=True)
         base_tok.save_pretrained(checkpoint_dir)
         report["exported_checkpoint"] = str(checkpoint_dir)
