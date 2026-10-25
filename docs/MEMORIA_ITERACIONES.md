@@ -230,3 +230,29 @@ Para estos tres candidatos, el informe reporta 311 tensores, sin tensores faltan
 - La evaluación posterior `39995671249` seguía en curso en la última consulta. La compilación Android del commit `bac497f`, ejecución `39997314107`, terminó correctamente.
 
 **Próximo paso:** cerrar la evaluación actual y luego seleccionar un candidato compatible para una primera fusión reproducible, comparándola con el modelo base con las mismas pruebas.
+
+
+### 2026-10-25 — Iteración: benchmark independiente y documentación sincronizada
+
+**Cambio de workflow:** [commit `3f42370`](https://github.com/orbitalronin94/RONIN-IA/commit/3f423708573c2a89975e35fa182985910f6bfe58)
+
+**Cambios realizados**
+- `.github/workflows/fusion-sweep.yml` encadena un job de comparación independiente tras el barrido, solo si este termina correctamente y publica un checkpoint en `fusion-sweep-results/ronin-fused-checkpoint`.
+- La comparación usa `scripts/benchmark_merge_vs_base.py` y contrasta el modelo base con el checkpoint en ARC-Easy, HellaSwag, TruthfulQA MC2 y GSM8K, hasta 100 ejemplos por tarea, cero-shot, batch 1 y semilla 42.
+- El artefacto `ronin-independent-benchmark` conserva el informe 30 días. Si no existe checkpoint, se publica un estado de omisión explícito y no se presenta como mejora.
+- README actualizado para reflejar la evaluación, el estado de CI y las limitaciones.
+
+**Evidencia observada**
+- Build Android [40173795125](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40173795125), commit `8d395bb`: **éxito**. Se completaron los tests frontend, la validación de sintaxis, la descarga de pesos ONNX, la sincronización de Capacitor, Gradle y la publicación del APK de depuración.
+- Barrido antiguo [40173401635](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40173401635): seguía en `in_progress` en la última consulta, dentro del paso de barrido; aún no había artefactos publicados.
+- Barrido [40173666529](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40173666529): pendiente por concurrencia en la última consulta.
+
+**Limitaciones**
+- La etapa de benchmark independiente está implementada, pero aún no hay resultados de ella. No se ha demostrado mejora de calidad ni hay checkpoint fusionado validado.
+- Los nueve prompts heurísticos sirven únicamente como cribado. Las métricas de cuatro tareas son direccionales y deben revisarse por tarea, ejemplos y regresiones.
+- La validación de tamaño, latencia, RAM y estabilidad de la APK requiere mediciones y pruebas funcionales en dispositivos Android reales.
+
+**Siguientes pasos**
+1. Recuperar el informe del barrido cuando termine y comprobar el estado de concurrencia.
+2. Revisar el artefacto del benchmark independiente cuando exista.
+3. Solo si hay una candidata prometedora, validar inferencia y recursos en Android y registrar resultados reales aquí y en README.
