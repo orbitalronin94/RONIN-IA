@@ -31,12 +31,21 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install torch transformers safetensors accelerate huggingface_hub
-      - name: Sweep all eligible candidate combinations
+      - name: Restore fusion sweep progress
+        id: fusion-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: fusion-sweep-results/
+          key: ronin-fusion-progress-${{ github.ref_name }}-${{ hashFiles('scripts/sweep_fusions.py') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ronin-fusion-progress-${{ github.ref_name }}-${{ hashFiles('scripts/sweep_fusions.py') }}-
+      - name: Sweep or resume eligible candidate combinations
+        timeout-minutes: 340
         env:
           HF_HUB_DISABLE_TELEMETRY: '1'
           TOKENIZERS_PARALLELISM: 'false'
-        run: python scripts/sweep_fusions.py
-      - name: Detect whether a candidate checkpoint was exported
+        run: python scripts/sweep_fusions.py --resume
+      - name: Save fusion sweep progress for the next run\n        if: always()\n        uses: actions/cache/save@v4\n        with:\n          path: fusion-sweep-results/\n          key: ronin-fusion-progress-${{ github.ref_name }}-${{ hashFiles('scripts/sweep_fusions.py') }}-${{ github.run_id }}-${{ github.run_attempt }}\n      - name: Detect whether a candidate checkpoint was exported
         id: result
         if: always()
         shell: bash
