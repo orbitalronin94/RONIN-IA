@@ -23,6 +23,13 @@ Construir una APK de debug que incluya el runtime de inferencia, los recursos WA
 
 ## Resultados
 
+### Intento de CI del 2026-10-25
+
+- Ejecución fallida: [workflow 40218243647](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40218243647/job/121243963156).
+- La descarga de `onnx-community/Qwen2.5-0.5B-Instruct` q4 terminó; `onnx/model_q4.onnx` indicó 749.7 MiB.
+- Falló el bundle porque el script apuntaba directamente a `src/transformers.js`, saltándose la resolución del entrypoint del paquete para navegador. esbuild reportó 21 errores con imports Node (`node:fs`, `node:path`, `sharp`, `onnxruntime-node`).
+- No se generó APK ni artefacto. Este PR cambia el punto de entrada del bundle; el resultado debe confirmarse repitiendo el workflow.
+
 | Prueba | Resultado | Evidencia |
 |---|---|---|
 | Workflow de compilación | Pendiente | Enlace a ejecución de GitHub Actions |
