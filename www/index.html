@@ -181,7 +181,13 @@ async function answer(q){
  const locationIntent=lower.includes(' en ')||lower.includes(' de ')||lower.startsWith('en ')||lower.startsWith('de ');
  if(weatherIntent&&locationIntent){try{let w=await weather(q);if(w)return w}catch(e){return 'No pude consultar el tiempo ahora mismo. Comprueba tu conexión.'}}
  let math=mathResult(q);if(math!==null)return 'El resultado es **'+math+'**.';
- if(inferenceMode==='remote'){\n  const s=current();\n  const history=(s?.messages||[]).slice(-8).map(m=>({role:m.role==='assistant'?'assistant':m.role==='system'?'system':'user',content:String(m.content).slice(0,3000)}));\n  const messages=[{role:'system',content:'Eres Ronin IA, un asistente competente, claro y honesto. '+route.profile+' Responde en el idioma del usuario. Distingue hechos de incertidumbre. No inventes datos ni fuentes. No muestres razonamiento privado.'},...history];\n  return await requestRemoteCompletion({messages});\n }\n let p=await getPipelineForRequest(route),s=current();
+ if(inferenceMode==='remote'){
+  const s=current();
+  const history=(s?.messages||[]).slice(-8).map(m=>({role:m.role==='assistant'?'assistant':m.role==='system'?'system':'user',content:String(m.content).slice(0,3000)}));
+  const messages=[{role:'system',content:'Eres Ronin IA, un asistente competente, claro y honesto. '+route.profile+' Responde en el idioma del usuario. Distingue hechos de incertidumbre. No inventes datos ni fuentes. No muestres razonamiento privado.'},...history];
+  return await requestRemoteCompletion({messages});
+ }
+ let p=await getPipelineForRequest(route),s=current();
  // Mantener contexto útil sin inflar el prompt: máximo 8 mensajes y 1.600 caracteres por turno.
  const history=(s?.messages||[]).slice(-8).map(m=>({role:m.role==='assistant'?'assistant':'user',content:String(m.content).slice(0,1600)}));
  const messages=[{role:'system',content:'Eres Ronin IA, un asistente competente, claro y honesto. '+route.profile+' Responde en el idioma del usuario. Prioriza exactitud y utilidad. No inventes datos ni fuentes. No muestres razonamiento privado ni etiquetas internas; presenta solo una respuesta final concisa. Si no sabes algo, dilo con claridad.'},...history];
