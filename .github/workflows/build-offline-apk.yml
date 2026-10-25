@@ -1,6 +1,14 @@
 name: Build RONIN-IA offline APK (Qwen2.5-0.5B)
 
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/build-offline-apk.yml'
+      - 'scripts/bundle-offline-runtime.mjs'
+      - 'scripts/prepare-offline-model.mjs'
+      - 'www/local-ai.js'
+      - 'tests/frontend-contract.test.mjs'
+      - 'package.json'
   workflow_dispatch:
     inputs:
       model_revision:
@@ -59,6 +67,20 @@ jobs:
           npx @capacitor/assets generate --android --assetPath assets --iconBackgroundColor '#07111f' --iconBackgroundColorDark '#07111f'
       - name: Sync Capacitor assets
         run: npx cap sync android
+      - name: Avoid recompressing large ONNX model assets
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('android/app/build.gradle')
+          s = p.read_text()
+          marker = "android {"
+          if marker not in s:
+              raise SystemExit('No se encontró el bloque android en app/build.gradle')
+          if "noCompress += ['onnx']" not in s:
+              s += "\n\n// Keep large ONNX weights uncompressed in the APK to avoid aapt2 heap exhaustion.\nandroid {\n    androidResources {\n        noCompress += ['onnx']\n    }\n}\n"
+              p.write_text(s)
+          print('Configured ONNX assets as uncompressed APK assets.')
+          PY
       - name: Ensure Android network permissions exist (remote mode remains optional)
         run: |
           python3 - <<'PY'
@@ -80,7 +102,8 @@ jobs:
         run: |
           chmod +x android/gradlew
           cd android
-          ./gradlew --no-daemon assembleDebug
+          # The bundled q4 model is ~750 MiB; give the asset compressor a larger heap.
+          ./gradlew --no-daemon -Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8' assembleDebug
       - name: Record APK size and fingerprint
         run: |
           python3 - <<'PY'
