@@ -121,5 +121,9 @@ test('la APK offline empaqueta Qwen2.5 y runtime local sin cambiar el build lige
   assert.ok(modelPrep.includes('resolved_revision'));
   assert.ok(modelPrep.includes('sha256'));
   assert.ok(runtimeBundle.includes('onnxruntime-web'));
+  assert.ok(runtimeBundle.includes("@huggingface/transformers';"), 'debe resolver el entrypoint del paquete, no su src interno');
+  assert.ok(runtimeBundle.includes("conditions: ['browser']"));
+  assert.ok(runtimeBundle.includes("mainFields: ['browser', 'module', 'main']"));
+  assert.ok(runtimeBundle.includes("await rm(entry, { force: true })"), 'el entry temporal debe limpiarse incluso si falla el bundle');
   assert.ok(marker.includes('OFFLINE_BUNDLE_ENABLED = false'));
 });
