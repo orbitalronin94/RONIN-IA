@@ -54,6 +54,21 @@ Los formatos JSON (`package.json` y `capacitor.config.json`) no admiten comentar
 - **Datos:** el historial permanece en almacenamiento local; Wikipedia y el tiempo necesitan conexión.
 - **Build:** GitHub Actions valida sintaxis JavaScript antes de construir el APK de depuración.
 
+## Experimento de fusión de modelos (en curso)
+
+El objetivo de investigación es comprobar, no asumir, si una fusión compatible de modelos pequeños puede superar al modelo base. El barrido se ejecuta en GitHub Actions sobre CPU y registra progreso en `fusion-sweep-results/sweep-report.json`; el workflow intenta restaurar ese progreso en ejecuciones posteriores para evitar repetir evaluaciones ya completadas.
+
+- **Base de referencia:** `Qwen/Qwen3-0.6B`.
+- **Puerta de entrada:** revisión de licencia, igualdad exacta del vocabulario/tokenizador y compatibilidad de claves y formas de tensores.
+- **Búsqueda:** candidatos individuales, promedios compatibles y varias interpolaciones conservadoras de pesos respecto a la base.
+- **Evaluación preliminar:** prompts heurísticos deterministas. Sirven para descartar fallos obvios, no para demostrar calidad general.
+- **Confirmación independiente:** si un candidato supera el filtro heurístico, el workflow intenta evaluarlo con `lm-evaluation-harness` en tareas fijas.
+- **Objetivo de despliegue exploratorio:** investigar una variante cuantizada cercana a 300 MB, midiendo el tamaño real del archivo, memoria, latencia y calidad. El tamaño no es una garantía ni se permite sacrificar calidad sin medirla.
+
+No se considerará éxito que el script termine, que las formas coincidan o que exista un checkpoint. La conclusión requiere comparación reproducible con la base, resultados independientes y revisión de regresiones. El modelo resultante no sustituirá automáticamente al modelo de la aplicación.
+
+**Estado actual:** la mejora de calidad aún no está demostrada. Consulta [la memoria de iteraciones](docs/MEMORIA_ITERACIONES.md) y [las decisiones técnicas](docs/DECISIONES.md) para el historial y los criterios.
+
 ## Qué incluye
 
 - Interfaz conversacional inspirada en ChatGPT, adaptable a móvil, tablet y escritorio.
@@ -222,7 +237,7 @@ Comprueba la conexión y si el proveedor externo está disponible. Los servicios
 
 ## Hoja de ruta
 
-- [ ] Añadir pruebas automatizadas para la lógica de interfaz y las funciones principales.
+- [ ] Completar el barrido de fusión reanudable y publicar el informe, incluidos candidatos descartados.\n- [ ] Ejecutar benchmark independiente y revisión de regresiones antes de declarar una mejora.\n- [ ] Medir tamaño cuantizado cercano a 300 MB, memoria y latencia en hardware objetivo.\n- [ ] Añadir pruebas automatizadas para la lógica de interfaz y las funciones principales.
 - [ ] Validar el flujo en dispositivos Android reales y distintas versiones de WebView.
 - [ ] Mejorar la presentación del estado de carga y de los errores del modelo.
 - [ ] Documentar con precisión las licencias y versiones de dependencias.
