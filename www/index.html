@@ -183,7 +183,11 @@ async function answer(q){
  // Mantener contexto útil sin inflar el prompt: máximo 8 mensajes y 1.600 caracteres por turno.
  const history=(s?.messages||[]).slice(-8).map(m=>({role:m.role==='assistant'?'assistant':'user',content:String(m.content).slice(0,1600)}));
  const messages=[{role:'system',content:'Eres Ronin IA, un asistente competente, claro y honesto. '+route.profile+' Responde en el idioma del usuario. Prioriza exactitud y utilidad. No inventes datos ni fuentes. No muestres razonamiento privado ni etiquetas internas; presenta solo una respuesta final concisa. Si no sabes algo, dilo con claridad.'},...history];
- const out=await p(messages,{max_new_tokens:192,temperature:.55,top_p:.85,repetition_penalty:1.08,do_sample:true,return_full_text:false}),gen=out?.[0]?.generated_text;
+ // Qwen3 permite desactivar su bloque de razonamiento mediante /no_think; así no consume el presupuesto de salida antes de responder.
+ const lastUser=messages.findLastIndex(m=>m.role==='user');if(lastUser>=0)messages[lastUser].content+='\n/no_think';
+ const generationStarted=performance.now();
+ const out=await p(messages,{max_new_tokens:128,temperature:.55,top_p:.85,repetition_penalty:1.08,do_sample:true,return_full_text:false}),gen=out?.[0]?.generated_text;
+ console.info('[inference] generación completada',{backend:el.caption.textContent,seconds:((performance.now()-generationStarted)/1000).toFixed(1),maxNewTokens:128});
  let text=typeof gen==='string'?gen.trim():Array.isArray(gen)?String(gen[gen.length-1]?.content||'').trim():'';
  // Qwen puede emitir un bloque <think>; elimina el bloque sin mostrarlo en la interfaz.
  while(true){const a=text.indexOf('<think>');if(a<0)break;const b=text.indexOf('</think>',a+7);if(b<0){text=text.slice(0,a);break;}text=text.slice(0,a)+text.slice(b+8);}
@@ -191,7 +195,21 @@ async function answer(q){
  if(!text)throw Error('El modelo no devolvió una respuesta.');return text;
 }
 async function copyText(text){try{await navigator.clipboard.writeText(text)}catch(e){let t=document.createElement('textarea');t.value=text;document.body.append(t);t.select();document.execCommand('copy');t.remove()}toast('Copiado al portapapeles.')}
-async function sendMessage(prefill){if(busy)return;let q=(typeof prefill==='string'?prefill:el.input.value).trim();if(!q&&!pendingFiles.length)return;if(pendingFiles.length){const docs=pendingFiles.map(f=>'[ARCHIVO: '+f.name+']\\n'+f.text).join('\\n\\n');q=(q?q+'\\n\\n':'')+'Analiza los siguientes archivos adjuntos y responde usando su contenido. Si la información no aparece en ellos, indícalo.\\n\\n'+docs;pendingFiles=[];renderAttachments()}el.input.value='';resize();busyState(true);add('user',q);thinking();try{let a=await answer(q);stopThinking();add('assistant',a)}catch(e){stopThinking();console.error(e);add('assistant','No he podido generar una respuesta. Si es la primera vez, pulsa «Activar IA» y espera a que se descargue el modelo. Comprueba tu conexión y la memoria disponible del dispositivo.')}finally{busyState(false)}}
+const PENDING_KEY='ronin.ia.pending.v1';
+function savePendingRequest(q,sessionId){try{localStorage.setItem(PENDING_KEY,JSON.stringify({q,sessionId,savedAt:Date.now()}))}catch(e){console.warn('[resume] No se pudo guardar la pregunta pendiente',e)}}
+function clearPendingRequest(){try{localStorage.removeItem(PENDING_KEY)}catch(e){console.warn('[resume] No se pudo limpiar la pregunta pendiente',e)}}
+// Si Android mata el proceso mientras la inferencia está en curso, recuperar la última pregunta al volver a abrir la APK.
+async function resumePendingRequest(){
+ let pending;try{pending=JSON.parse(localStorage.getItem(PENDING_KEY)||'null')}catch(e){clearPendingRequest();return}
+ if(!pending||typeof pending.q!=='string'||!pending.sessionId)return;
+ const session=sessions.find(item=>item.id===pending.sessionId);
+ if(!session||session.messages.at(-1)?.role!=='user'||session.messages.at(-1)?.content!==pending.q){clearPendingRequest();return}
+ activeId=session.id;renderHistory();renderCurrent();busyState(true);thinking();
+ try{const a=await answer(pending.q);stopThinking();add('assistant',a);clearPendingRequest()}
+ catch(e){stopThinking();console.error('[resume] No se pudo reanudar la pregunta',e);add('assistant','La pregunta se ha conservado, pero no he podido reanudar la inferencia. Pulsa Enviar para intentarlo de nuevo.');clearPendingRequest()}
+ finally{busyState(false)}
+}
+async function sendMessage(prefill){if(busy)return;let q=(typeof prefill==='string'?prefill:el.input.value).trim();if(!q&&!pendingFiles.length)return;if(pendingFiles.length){const docs=pendingFiles.map(f=>'[ARCHIVO: '+f.name+']\\n'+f.text).join('\\n\\n');q=(q?q+'\\n\\n':'')+'Analiza los siguientes archivos adjuntos y responde usando su contenido. Si la información no aparece en ellos, indícalo.\\n\\n'+docs;pendingFiles=[];renderAttachments()}el.input.value='';resize();busyState(true);add('user',q);savePendingRequest(q,activeId);thinking();try{let a=await answer(q);stopThinking();add('assistant',a);clearPendingRequest()}catch(e){stopThinking();console.error(e);clearPendingRequest();add('assistant','No he podido generar una respuesta. Si es la primera vez, pulsa «Activar IA» y espera a que se descargue el modelo. Comprueba tu conexión y la memoria disponible del dispositivo.')}finally{busyState(false)}}
 el.send.onclick=()=>sendMessage();el.attachBtn.onclick=()=>el.fileInput.click();el.fileInput.addEventListener('change',e=>addFiles(e.target.files));el.voiceBtn.onclick=toggleVoice;el.input.addEventListener('input',resize);el.input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}});
 $('newChat').onclick=createChat;$('openSidebar').onclick=openSidebar;$('closeSidebar').onclick=closeSidebar;el.overlay.onclick=closeSidebar;el.load.onclick=()=>loadModel().catch(()=>{});el.modelBtn.onclick=()=>loadModel().catch(()=>{});
 document.querySelectorAll('[data-prompt]').forEach(b=>b.onclick=()=>sendMessage(b.dataset.prompt));
@@ -200,7 +218,7 @@ document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLower
 renderHistory();renderCurrent();resize();setStatus('idle','Modelo local no cargado');
 // En Android se intenta cargar al abrir: el workflow empaqueta runtime y pesos q4 dentro de la APK. La interfaz se pinta primero; la primera carga puede tardar y requiere RAM suficiente. La web normal sigue siendo bajo demanda para no gastar datos inesperadamente.
 const isNativeAndroid=(()=>{try{return /Android/i.test(navigator.userAgent)&&window.Capacitor?.getPlatform?.()==='android'}catch(e){return false}})();
-if(isNativeAndroid){setStatus('loading','Preparando IA al iniciar…');requestAnimationFrame(()=>{loadModel().catch(()=>{})})}
+if(isNativeAndroid){setStatus('loading','Preparando IA al iniciar…');requestAnimationFrame(()=>{loadModel().then(()=>resumePendingRequest()).catch(e=>console.error('[model-loader] No se pudo preparar la IA al iniciar',e))})}
 </script>
 </body>
 </html>
