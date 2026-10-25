@@ -12,7 +12,6 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - 'capacitor.config.json'
-      - 'scripts/prepare-models.mjs'
       - 'www/**'
       - 'assets/**'
       - 'tests/**'
@@ -67,26 +66,6 @@ jobs:
           node --check www/router.js
           node --check www/experts.js
           node --check scripts/prepare-models.mjs
-      # Copiar el runtime JS y los archivos ONNX al paquete de la app: el APK no dependerá de una CDN.
-      - name: Bundle local inference runtime
-        run: |
-          mkdir -p www/vendor www/models/onnx-community/Qwen3-0.6B-ONNX
-          npx esbuild node_modules/@huggingface/transformers/src/transformers.js --bundle --format=esm --platform=browser --target=es2022 --outfile=www/vendor/transformers.js
-          python3 - <<'PY'
-          from pathlib import Path
-          import shutil
-          root = Path('node_modules')
-          dest = Path('www/vendor')
-          # ONNX Runtime Web ships WASM binaries separately from its JS bundle.
-          candidates = list(root.glob('onnxruntime-web/dist/*.wasm')) + list(root.glob('@huggingface/transformers/dist/*.wasm'))
-          if not candidates:
-              raise SystemExit('No se encontraron binarios WASM de ONNX Runtime Web; no se puede afirmar que la APK sea offline.')
-          for f in candidates:
-              shutil.copy2(f, dest / f.name)
-          print(f'WASM assets copied: {len(candidates)}')
-          PY
-      - name: Download all bundled model weights
-        run: npm run prepare:models
       - name: Prepare Ronin app icon
         run: |
           mkdir -p assets
@@ -155,8 +134,8 @@ jobs:
               raise SystemExit('android.useAndroidX was not persisted')
           PY
       - run: cd android && ./gradlew --no-daemon assembleDebug
-      # No basta con que Gradle termine: verificar que el APK contiene pesos, runtime y WASM y registrar tamaño/hash.
-      - name: Verify APK model assets and fingerprint
+      # Verificar la APK final sin exigir modelos locales empaquetados.
+      - name: Verify APK size and fingerprint
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -167,28 +146,14 @@ jobs:
               raise SystemExit('APK inexistente o vacía')
           with ZipFile(apk) as z:
               names = z.namelist()
-          required = [
-              'Qwen3-0.6B-ONNX/onnx/model_q4.onnx',
-              'Qwen2.5-Coder-0.5B-Instruct/onnx/model_q4.onnx',
-          ]
-          for suffix in required:
-              matches = [n for n in names if n.endswith(suffix)]
-              if not matches:
-                  raise SystemExit(f'FALTA en APK: {suffix}')
-              print(f'OK modelo: {matches[0]}')
-          runtime = [n for n in names if n.endswith('/vendor/transformers.js')]
-          wasm = [n for n in names if n.endswith('.wasm') and '/vendor/' in n]
-          if not runtime:
-              raise SystemExit('FALTA runtime local vendor/transformers.js en APK')
-          if not wasm:
-              raise SystemExit('FALTAN binarios WASM de ONNX Runtime en APK')
-          print(f'OK runtime JS: {runtime[0]}')
-          print(f'OK binarios WASM: {len(wasm)}')
+          if any('/models/' in n and n.endswith('.onnx') for n in names):
+              raise SystemExit('La APK aún contiene pesos ONNX locales; no deben empaquetarse')
           digest = hashlib.sha256()
           with apk.open('rb') as f:
               for chunk in iter(lambda: f.read(8 * 1024 * 1024), b''):
                   digest.update(chunk)
           print(f'APK_BYTES={apk.stat().st_size}')
+          print(f'APK_MIB={apk.stat().st_size / 1024 / 1024:.1f}')
           print(f'APK_SHA256={digest.hexdigest()}')
           PY
       # Artefacto de depuración temporal; no es una release firmada para Play Store.
