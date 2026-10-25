@@ -22,11 +22,12 @@ test('la app no incluye runtime ni pesos de modelos locales', () => {
   assert.doesNotMatch(html, /Probar IA local|Qwen3 local/);
 });
 
-test('la IA remota anónima es el único modo de inferencia', () => {
+test('el modo seleccionado enruta al motor local o remoto', () => {
   assert.match(html, /LLMFaucet · sin clave personal/);
   assert.match(html, /No envíes contraseñas ni datos sensibles/);
-  assert.match(script, /requestRemoteCompletion\(\{messages\}\)/);
-  assert.doesNotMatch(script, /inferenceMode|switchInferenceMode|loadModel\(/);
+  assert.match(script, /localMode \? requestLocalCompletion\(\{messages\}\) : requestRemoteCompletion\(\{messages\}\)/);
+  assert.match(script, /import \{ requestLocalCompletion \} from '\.\/local-ai\.js'/);
+  assert.match(script, /Si es la primera ejecución, comprueba la conexión para descargar el runtime y los pesos/);
 });
 
 test('no se usa eval y la entrada del usuario tiene un límite', () => {
