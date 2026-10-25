@@ -2,12 +2,6 @@ name: Exhaustive bounded fusion sweep
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main, master]
-    paths:
-      - 'scripts/sweep_fusions.py'
-      - 'scripts/benchmark_merge_vs_base.py'
-      - '.github/workflows/fusion-sweep.yml'
 
 permissions:
   contents: read
@@ -19,7 +13,7 @@ concurrency:
 jobs:
   sweep:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 90
     outputs:
       checkpoint_exists: ${{ steps.result.outputs.checkpoint_exists }}
     steps:
@@ -40,7 +34,7 @@ jobs:
           restore-keys: |
             ronin-fusion-progress-${{ github.ref_name }}-${{ hashFiles('scripts/sweep_fusions.py') }}-
       - name: Sweep or resume eligible candidate combinations
-        timeout-minutes: 340
+        timeout-minutes: 80
         env:
           HF_HUB_DISABLE_TELEMETRY: '1'
           TOKENIZERS_PARALLELISM: 'false'
@@ -89,7 +83,7 @@ jobs:
     needs: sweep
     if: needs.sweep.outputs.checkpoint_exists == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

@@ -22,7 +22,6 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - 'capacitor.config.json'
-      - 'scripts/prepare-models.mjs'
       - 'www/**'
       - 'assets/**'
       - 'tests/**'
@@ -65,17 +64,16 @@ jobs:
           node --check /tmp/ronin-frontend-check.mjs
           node --check www/router.js
           node --check www/experts.js
-          node --check scripts/prepare-models.mjs
       - name: Prepare Ronin app icon
         run: |
           mkdir -p assets
           cp www/assets/ronin-logo.svg assets/icon.svg
-      # El proyecto Android se genera en CI para mantener ligera la base fuente.
+      # El proyecto Android se genera en CI; no se descargan ni empaquetan pesos.
       - run: npx cap add android
       - name: Generate Android launcher icon from Ronin logo
         run: npx @capacitor/assets generate --android --assetPath assets --iconBackgroundColor '#07111f' --iconBackgroundColorDark '#07111f'
       - run: npx cap sync android
-      # INTERNET es un permiso normal de Android. El runtime y el modelo se empaquetan; las funciones web externas opcionales siguen necesitando conexión.
+      # La app usa IA remota experimental; no empaqueta pesos ni runtime local.
       - name: Ensure Android network permissions
         run: |
           python3 - <<'PY'
@@ -96,8 +94,7 @@ jobs:
           print('Permisos de red verificados en AndroidManifest.xml')
           PY
       - run: chmod +x android/gradlew
-      # El empaquetado del modelo ONNX consume mucha memoria al comprimir assets.
-      # Fijar heap explícito evita que Gradle falle con "Java heap space".
+      # Mantener el consumo de memoria de Gradle predecible.
       - name: Configure Gradle memory
         run: |
           python3 - <<'PY'
@@ -105,7 +102,7 @@ jobs:
           p = Path('android/gradle.properties')
           lines = p.read_text().splitlines() if p.exists() else []
           settings = {
-              # Model ONNX assets are very large; keep Gradle's heap and worker count explicit.
+              # No se empaquetan modelos; mantener workers limitados.
               'org.gradle.jvmargs': '-Xmx6g -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8',
               'org.gradle.workers.max': '1',
               'org.gradle.parallel': 'false',

@@ -9,12 +9,12 @@ test('el modelo base actual sigue siendo el respaldo por defecto', () => {
   assert.equal(selected.fallback, false);
 });
 
-test('el experto de código está disponible como modelo incluido en el paquete', () => {
+test('el perfil de código usa el proveedor remoto actual', () => {
   const selected = selectExpert('coding');
   assert.equal(selected.model, EXPERTS.coding.model);
   assert.equal(selected.status, 'active');
   assert.equal(selected.fallback, false);
-  assert.equal(selected.source, 'bundled');
+  assert.equal(selected.source, 'remote');
 });
 
 test('categorías aún no especializadas conservan el modelo base', () => {
@@ -23,10 +23,10 @@ test('categorías aún no especializadas conservan el modelo base', () => {
   }
 });
 
-test('todos los expertos del catálogo están marcados como incluidos en el paquete', () => {
+test('el catálogo no afirma que los pesos estén incluidos en el paquete', () => {
   assert.equal(EXPERTS.general.status, 'active');
   assert.equal(EXPERTS.coding.status, 'active');
-  assert.equal(EXPERTS.general.source, 'bundled');
-  assert.equal(EXPERTS.coding.source, 'bundled');
+  assert.equal(EXPERTS.general.source, 'remote');
+  assert.equal(EXPERTS.coding.source, 'remote');
   assert.equal(EXPERTS.coding.estimatedDownloadMB, 0);
 });
