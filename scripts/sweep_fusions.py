@@ -114,6 +114,8 @@ def checkpoint_is_valid(report, output=OUTPUT):
     if not exported:
         return False
     checkpoint = Path(exported)
+    if checkpoint.name != EXPERIMENTAL_CHECKPOINT_NAME:
+        return False
     if not checkpoint.is_absolute():
         checkpoint = Path(output) / checkpoint.name if checkpoint.parent == Path(".") else checkpoint
     return checkpoint.is_dir() and any(checkpoint.glob("*.safetensors")) and (checkpoint / "config.json").is_file()
