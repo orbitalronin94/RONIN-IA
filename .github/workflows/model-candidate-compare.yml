@@ -6,6 +6,7 @@ on:
     branches: [main, master]
     paths:
       - '.github/workflows/model-candidate-compare.yml'
+      - 'benchmarks/model-candidates.json'
       - 'benchmarks/model-eval-prompts.jsonl'
       - 'scripts/run_model_eval.py'
       - 'scripts/score_model_eval.py'
@@ -29,8 +30,17 @@ jobs:
         include:
           - model_key: qwen-0.5b
             model_id: Qwen/Qwen2.5-0.5B-Instruct
+            extra_args: ''
           - model_key: smollm2-360m
             model_id: HuggingFaceTB/SmolLM2-360M-Instruct
+            extra_args: ''
+          - model_key: smollm2-135m
+            model_id: HuggingFaceTB/SmolLM2-135M-Instruct
+            extra_args: ''
+          - model_key: qwen3-0.6b
+            model_id: Qwen/Qwen3-0.6B
+            extra_args: '--disable-thinking'
+
     steps:
       - uses: actions/checkout@v4
 
@@ -52,11 +62,13 @@ jobs:
           HF_HUB_DISABLE_PROGRESS_BARS: '1'
           TOKENIZERS_PARALLELISM: 'false'
           MODEL_ID: ${{ matrix.model_id }}
+          EXTRA_ARGS: ${{ matrix.extra_args }}
         run: |
           python scripts/run_model_eval.py \
             --model "$MODEL_ID" \
             --max-new-tokens 96 \
-            --predictions "model-eval-${{ matrix.model_key }}-predictions.jsonl"
+            --predictions "model-eval-${{ matrix.model_key }}-predictions.jsonl" \
+            $EXTRA_ARGS
 
       - name: Score predictions
         run: |
@@ -74,6 +86,8 @@ jobs:
             echo "- Runner: ubuntu-latest (CPU inference, float32)"
             echo "- Dataset: benchmarks/model-eval-prompts.jsonl"
             echo "- Generation limit: 96 new tokens"
+            echo "- Evaluator extra args: ${{ matrix.extra_args }}"
+            echo "- Qwen3 is evaluated with thinking mode disabled for comparability."
             echo "- This is not a browser/WebGPU/mobile performance measurement."
           } >> "$GITHUB_STEP_SUMMARY"
 
