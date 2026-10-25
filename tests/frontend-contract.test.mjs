@@ -12,7 +12,7 @@ test('la app tiene un único módulo principal y puede validarse en CI', () => {
   assert.match(html, /<html lang="es">/);
 });
 
-test('la app no incluye runtime ni pesos de modelos locales', () => {
+test('el envío no referencia un control inexistente antes de enviar el prompt', () => {\n  assert.match(script, /function busyState\\(v\\)\\{busy=v;el\\.input\\.disabled=v;el\\.send\\.disabled=v\\|\\|!el\\.input\\.value\\.trim\\(\\);if\\(!v\\)el\\.input\\.focus\\(\\)\\}/);\n  assert.doesNotMatch(script, /el\\.load\\.disabled/);\n});\n\ntest('la app no incluye runtime ni pesos de modelos locales', () => {
   assert.doesNotMatch(script, /transformers\.js|loadModel\(|getPipelineForRequest|Qwen3-0\.6B-ONNX/);
   assert.doesNotMatch(html, /Probar IA local|Qwen3 local/);
 });
