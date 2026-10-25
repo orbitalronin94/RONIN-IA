@@ -7,8 +7,26 @@ on:
   workflow_dispatch:
   push:
     branches: [main, master]
+    paths:
+      - '.github/workflows/build-android.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'capacitor.config.json'
+      - 'scripts/prepare-models.mjs'
+      - 'www/**'
+      - 'assets/**'
+      - 'tests/**'
   pull_request:
     branches: [main, master]
+    paths:
+      - '.github/workflows/build-android.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'capacitor.config.json'
+      - 'scripts/prepare-models.mjs'
+      - 'www/**'
+      - 'assets/**'
+      - 'tests/**'
 
 concurrency:
   group: ronin-android-${{ github.ref }}
@@ -94,7 +112,7 @@ jobs:
           ]
           for permission in permissions:
               if permission not in s:
-                  s = s.replace(marker, permission + '\n' + marker, 1)
+                  s = s.replace(marker, permission + '\\n' + marker, 1)
           p.write_text(s)
           print('Permisos de red verificados en AndroidManifest.xml')
           PY
@@ -119,7 +137,7 @@ jobs:
               prefix = key + '='
               lines = [line for line in lines if not line.startswith(prefix)]
               lines.append(prefix + value)
-          p.write_text('\n'.join(lines) + '\n')
+          p.write_text('\\n'.join(lines) + '\\n')
           print('Gradle heap and AndroidX settings configured')
           PY
       - run: cd android && ./gradlew --no-daemon assembleDebug
