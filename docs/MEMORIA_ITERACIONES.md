@@ -256,3 +256,14 @@ Para estos tres candidatos, el informe reporta 311 tensores, sin tensores faltan
 1. Recuperar el informe del barrido cuando termine y comprobar el estado de concurrencia.
 2. Revisar el artefacto del benchmark independiente cuando exista.
 3. Solo si hay una candidata prometedora, validar inferencia y recursos en Android y registrar resultados reales aquí y en README.
+
+
+### 2026-10-25 — Iteración 6: benchmark independiente automático y documentación de estado
+
+- **Commit del workflow:** [693f500](https://github.com/orbitalronin94/RONIN-IA/commit/693f50056348d98c8b316f975c04d6dcde208acb).
+- **Motivo:** evitar que el cribado de nueve prompts heurísticos se confunda con una mejora de calidad y encadenar una comparación más independiente cuando exista un checkpoint candidato.
+- **Cambios:** `.github/workflows/fusion-sweep.yml` ahora detecta si el barrido exportó `fusion-sweep-results/ronin-fused-checkpoint`. Si existe, descarga el artefacto y ejecuta `scripts/benchmark_merge_vs_base.py` con `lm-eval`, comparando `Qwen/Qwen3-0.6B` y el candidato en ARC-Easy, HellaSwag, TruthfulQA MC2 y GSM8K, 100 ejemplos por tarea, semilla 42, batch 1 y cero-shot. El informe se publica como artefacto `ronin-merge-validation`. Si no hay checkpoint, la validación se omite y no se inventa un modelo.
+- **Documentación:** README actualizado para describir el flujo, sus límites y el estado de CI; esta memoria registra la decisión y los enlaces.
+- **Estado observado al actualizar:** ejecución de barrido [40174390884](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40174390884) y build Android [40174390812](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40174390812) pendientes. Es un estado provisional, no un resultado.
+- **Interpretación:** el benchmark de cuatro tareas mejora la trazabilidad respecto al filtro heurístico, pero es evidencia direccional; hay que revisar métricas por tarea y regresiones. No prueba por sí solo una mejora general ni sustituye la prueba de inferencia en Android físico.
+- **Pendiente:** esperar a que termine el barrido, revisar el informe/artifacto real y registrar puntuaciones, candidatos descartados y motivo. Si se exporta checkpoint, revisar después `ronin-merge-validation`. No incorporar un modelo a la APK solo por ganar el filtro heurístico.
