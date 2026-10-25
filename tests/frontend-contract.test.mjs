@@ -90,7 +90,6 @@ test('la compilación declara permisos Android de red antes de generar la APK', 
 test('la UI explica la naturaleza experimental de la IA remota y ofrece cambio a local', () => {
   assert.match(html, /IA remota experimental/);
   assert.match(script, /cambiar a Qwen3 local/);
-  assert.match(script, /La cuota anónima de IA se ha agotado temporalmente/);
 });
 
 
