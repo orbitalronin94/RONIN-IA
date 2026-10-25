@@ -61,6 +61,15 @@ def score(case, text):
         elif c == "4": out[c] = "4" in text and ("2 + 2 = 4" in text or "es 4" in low or text.strip() == "4")
     return {"passed":sum(out.values()),"checks":len(out),"details":out}
 
+def save_report(report):
+    """Persist an atomic progress snapshot so interrupted CI runs retain results."""
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+    target = OUTPUT / "sweep-report.json"
+    temporary = target.with_suffix(".json.tmp")
+    temporary.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    temporary.replace(target)
+
+
 def main():
     import torch
     from huggingface_hub import model_info
@@ -82,7 +91,7 @@ def main():
     report["candidates"] = {label:repo for label,repo in CANDIDATES.items()}
     if not eligible:
         report["blocked_reason"] = "No candidate passed automatic permissive-license metadata gate; manual license review required."
-        (OUTPUT/"sweep-report.json").write_text(json.dumps(report,indent=2,ensure_ascii=False)+"\n")
+        save_report(report)
         print(json.dumps(report,indent=2,ensure_ascii=False)); return 0
     base_tok = AutoTokenizer.from_pretrained(BASE, trust_remote_code=False)
     base_vocab = base_tok.get_vocab()
@@ -130,6 +139,7 @@ def main():
         return {"score":total,"checks":checks,"mean_latency_seconds":round(sum(lat)/max(1,len(lat)),2)}
     baseline = {"label":"base","score":None,"latency_seconds":None}
     baseline.update(evaluate(base,base_tok)); report["runs"].append(baseline)
+    save_report(report)
     del base, base_state
     for index, (include_base, combo) in enumerate(combos,1):
         prefix = "base_plus_" if include_base else "candidate_only_"
@@ -166,6 +176,7 @@ def main():
         model_repos = ([BASE] if include_base else []) + [CANDIDATES[x] for x in combo]
         run.update({"label":label,"models":model_repos,"includes_base":include_base,"combination_size":count})
         report["runs"].append(run)
+        save_report(report)
         del merged_state, merged_model
         if hasattr(torch, "cuda") and torch.cuda.is_available(): torch.cuda.empty_cache()
     # Second-stage interpolation sweep: equal-weight averages underperformed the base,
@@ -202,6 +213,8 @@ def main():
             })
             interpolation_results.append(run)
             report["runs"].append(run)
+            report["interpolation_runs"] = interpolation_results
+            save_report(report)
             del merged_state, merged_model
             if hasattr(torch, "cuda") and torch.cuda.is_available(): torch.cuda.empty_cache()
     report["interpolation_runs"] = interpolation_results
