@@ -2,7 +2,7 @@
 
 > **Propósito:** mantener una memoria técnica acumulativa de las iteraciones, decisiones, pruebas, resultados y pendientes del proyecto. Registrar hechos verificables y separar claramente los resultados confirmados de las tareas en curso o las hipótesis.
 >
-> **Última actualización:** 2026-10-25 (UTC).  
+> **Última actualización:** 2026-10-25 (UTC).
 > **Estado general:** la APK debug se compiló correctamente en el commit `8d395bb`; el test del router MoE pasó en `750a560`; el barrido de fusiones más reciente sigue bloqueado en cola detrás de una ejecución antigua. No se ha demostrado todavía una fusión válida ni una mejora de calidad.
 
 ## Índice
@@ -277,3 +277,30 @@ Para estos tres candidatos, el informe reporta 311 tensores, sin tensores faltan
 - **PR #5 — [Evitar builds Android para cambios ajenos al empaquetado](https://github.com/orbitalronin94/RONIN-IA/pull/5):** la primera ejecución falló en Gradle porque AndroidX no estaba activo en el entorno generado ([40175187138](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40175187138)). Se añadió una comprobación explícita de `android.useAndroidX=true` justo antes de Gradle; la nueva ejecución está pendiente. No se considera resuelto hasta comprobar su resultado.
 - **Limitaciones:** el barrido heurístico sigue siendo un filtro pequeño, no una prueba de calidad. No se declara mejora de fusión hasta tener resultados independientes completos y revisar regresiones por tarea.
 - **Próximos pasos:** confirmar el CI actualizado de PR #5; revisar los artefactos del barrido/benchmark cuando terminen y registrar métricas reales, no inferidas.
+
+
+### 2026-10-25 — Iteración: persistencia del barrido y objetivo de modelo compacto
+
+**Rama:** `experiment/resumable-fusion-and-docs`  
+**Archivos:** `.github/workflows/fusion-sweep.yml`, `README.md`, `docs/DECISIONES.md`, esta memoria.
+
+**Motivo**
+- El barrido de fusiones puede superar el tiempo práctico de una única sesión de CI; hay que conservar evaluaciones terminadas y evitar repetirlas.
+- Se fija como objetivo de investigación estudiar una variante cuantizada cercana a 300 MB, sin asumir que el tamaño por sí solo indique calidad suficiente.
+
+**Cambios preparados**
+- El workflow restaura y guarda `fusion-sweep-results/` con la caché de GitHub Actions, usando una clave por rama y versión del script.
+- La ejecución llama a `scripts/sweep_fusions.py --resume` y limita el paso de barrido a 340 minutos dentro de un trabajo de 350 minutos, dejando margen para guardar el informe y subir artefactos.
+- README y decisiones documentan el proceso, los criterios de confirmación independiente y el hecho de que ningún candidato se integra automáticamente en la app.
+
+**Cautelas**
+- La caché de Actions es temporal y puede ser desalojada; no sustituye la publicación del artefacto final ni una memoria versionada.
+- La reanudación solo es correcta si el informe previo corresponde a la misma base y al mismo diseño de experimento. El script comprueba la base; los cambios futuros en prompts, candidatos o método deben invalidar el progreso anterior.
+- La puntuación heurística no demuestra calidad general. Solo se considerará mejora después de un benchmark independiente, revisión de regresiones y medición de tamaño/memoria/latencia.
+- Aún no se ha ejecutado esta rama ni hay un checkpoint de fusión confirmado.
+
+**Siguiente paso**
+1. Revisar el diff y la lógica de reanudación antes de integrar.
+2. Ejecutar el workflow y comprobar que el informe y artefactos se publican incluso si el barrido falla.
+3. Analizar los candidatos realmente compatibles; si no hay ninguno, ajustar el conjunto de candidatos con licencia compatible en vez de forzar una fusión.
+4. Tras una mejora confirmada, cuantizar y medir el artefacto objetivo cercano a 300 MB y probarlo en el runtime Android/WebView.
