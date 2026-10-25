@@ -1,19 +1,19 @@
-// Catálogo de expertos incluidos en el paquete de modelos de Android.
-// Los pesos se descargan durante la preparación del build, no durante el uso de la app.
-export const BASE_MODEL = 'onnx-community/Qwen3-0.6B-ONNX';
+// Routing profiles for the current lightweight remote-inference MVP.
+// No model weights are bundled or downloaded by the Android build.
+export const BASE_MODEL = 'auto:fast';
 
 export const EXPERTS = Object.freeze({
   general: Object.freeze({
-    id: 'general-base',
-    model: BASE_MODEL,
-    source: 'bundled',
+    id: 'general-remote',
+    model: 'auto:fast',
+    source: 'remote',
     status: 'active',
     estimatedDownloadMB: 0,
   }),
   coding: Object.freeze({
-    id: 'qwen25-coder-05b-instruct',
-    model: 'onnx-community/Qwen2.5-Coder-0.5B-Instruct',
-    source: 'bundled',
+    id: 'coding-remote',
+    model: 'auto:coding',
+    source: 'remote',
     status: 'active',
     estimatedDownloadMB: 0,
   }),
@@ -28,9 +28,8 @@ const CATEGORY_EXPERT = Object.freeze({
 });
 
 /**
- * Planifica qué modelo usar sin cargarlo.
- * Todos los modelos del catálogo se incluyen durante la preparación del APK.
- * La carga de inferencia sigue siendo diferida para no ocupar RAM hasta necesitarlos.
+ * Selects a prompt-routing profile. This is application-level routing,
+ * not a neural MoE and not a registry of locally installed model weights.
  */
 export function selectExpert(category, { enabledExperts = [] } = {}) {
   const key = CATEGORY_EXPERT[category] || 'general';
