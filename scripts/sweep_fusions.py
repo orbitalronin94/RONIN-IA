@@ -17,6 +17,16 @@ CANDIDATES = {
     "instruction": "andresnowak/Qwen3-0.6B-instruction-finetuned_v2",
     "coding": "rohitnagareddy/Qwen3-0.6B-Coding-Finetuned-v1",
     "luth": "kurakurai/Luth-0.6B-Instruct",
+    "math_expert": "suayptalha/Qwen3-0.6B-Math-Expert",
+    "code_expert": "suayptalha/Qwen3-0.6B-Code-Expert",
+    "instruction_following": "suayptalha/Qwen3-0.6B-IF-Expert",
+    "gsm8k_grpo": "x32/Qwen3-0.6B-GRPO-GSM8K-Think",
+    "dpo": "codelion/Qwen3-0.6B-PTS-DPO",
+    "security": "MaheshNagabhairava/Best-Security-Practices-Model",
+    "smali": "MoxStone/SmaliLLM-Qwen3-0.6B-Finetuned",
+    "medical": "suayptalha/Qwen3-0.6B-Medical-Expert",
+    "medical_sft": "rohitnagareddy/Qwen3-0.6B-Medical-Finetuned-v1",
+    "distill": "Rexhaif/Qwen3-0.6B-MTEval-SFT",
 }
 ALLOWED_LICENSES = {"apache-2.0", "mit", "bsd-3-clause", "bsd-2-clause"}
 OUTPUT = Path("fusion-sweep-results")
@@ -58,7 +68,7 @@ def main():
     torch.set_num_threads(max(1, min(4, os.cpu_count() or 1)))
     OUTPUT.mkdir(parents=True, exist_ok=True)
     report = {"generated_at":datetime.now(timezone.utc).isoformat(),"base":BASE,
-              "method":"equal-weight average of base plus each non-empty subset of candidates; greedy CPU inference; heuristic prompts only",
+              "method":"bounded broad sweep of licensed compatible experts: each standalone, each equal-weight with base, and seven base-preserving interpolation weights; greedy CPU inference; heuristic prompts only",
               "license_allowlist":sorted(ALLOWED_LICENSES),"license_review":{},"candidates":{},
               "runs":[],"winner":None,"quality_improvement_proven":False}
     for label, repo in CANDIDATES.items():
@@ -100,10 +110,11 @@ def main():
             del candidate, state, tok, vocab
         except Exception as exc:
             report["candidates"][label] = {"repo":repo,"compatible":False,"reason":str(exc)}
-    # Evaluate candidate-only averages as well as base-plus-candidate averages.
-    candidate_combos = [c for n in range(1, len(compatible)+1)
-                        for c in itertools.combinations(sorted(compatible), n)]
-    combos = [(False, c) for c in candidate_combos] + [(True, c) for c in candidate_combos]
+    # Bounded broad search: test every eligible expert individually, both standalone
+    # and against the base. Avoid exponential subset enumeration on CPU runners.
+    combos = [(False, (label,)) for label in sorted(compatible)] + [
+        (True, (label,)) for label in sorted(compatible)
+    ]
     def evaluate(model, tokenizer):
         total=checks=0; lat=[]
         for case in PROMPTS:
@@ -164,7 +175,7 @@ def main():
     interpolation_results = []
     for candidate_label in sorted(compatible):
         candidate_repo = CANDIDATES[candidate_label]
-        for alpha in (0.10, 0.25, 0.50):
+        for alpha in (0.05, 0.10, 0.15, 0.25, 0.40, 0.50, 0.75):
             print(f"Interpolating base + {candidate_label} at alpha={alpha:.2f}", flush=True)
             merged_model = AutoModelForCausalLM.from_pretrained(
                 BASE, torch_dtype=torch.float32, low_cpu_mem_usage=True, trust_remote_code=False
