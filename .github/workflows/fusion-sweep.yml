@@ -56,11 +56,30 @@ jobs:
         if: always()
         shell: bash
         run: |
-          if [ -d fusion-sweep-results/ronin-fused-checkpoint ] && [ -f fusion-sweep-results/sweep-report.json ]; then
-            echo "checkpoint_exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "checkpoint_exists=false" >> "$GITHUB_OUTPUT"
-          fi
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("fusion-sweep-results")
+          report_path = root / "sweep-report.json"
+          valid = False
+          if report_path.is_file():
+              try:
+                  report = json.loads(report_path.read_text(encoding="utf-8"))
+                  checkpoint = root / "ronin-fused-checkpoint"
+                  valid = (
+                      report.get("status") == "completed"
+                      and report.get("best_beats_base_heuristic") is True
+                      and report.get("exported_checkpoint") == str(checkpoint)
+                      and (checkpoint / "config.json").is_file()
+                      and any(checkpoint.glob("*.safetensors"))
+                  )
+              except (OSError, json.JSONDecodeError):
+                  valid = False
+          with open(Path(__import__("os").environ["GITHUB_OUTPUT"]), "a", encoding="utf-8") as output:
+              output.write(f"checkpoint_exists={'true' if valid else 'false'}\\n")
+          print(f"Validated current-run fusion checkpoint: {valid}")
+          PY
       - name: Publish sweep report and optional checkpoint
         if: always()
         uses: actions/upload-artifact@v4
