@@ -27,7 +27,8 @@ Construir una APK de debug que incluya el runtime de inferencia, los recursos WA
 
 - Ejecución: [workflow 40218981726](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40218981726).
 - El bundle del runtime y las pruebas frontend superaron sus pasos; falló `:app:compressDebugAssets` con `Java heap space` al construir la APK que contiene el modelo q4 de aproximadamente 750 MiB.
-- Corrección propuesta en este PR: elevar el heap de Gradle a 4 GiB para la tarea de build. Es una hipótesis correctiva que debe validarse con una nueva ejecución; no se ha producido artefacto offline todavía.
+- Se probó elevar el heap de Gradle a 4 GiB (`-Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g ...'`), pero `:app:compressDebugAssets` siguió fallando con `Java heap space` ([logs del job](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40218981726)). No se produjo artefacto offline.
+- Siguiente experimento en este PR: configurar `androidResources.noCompress` para `.onnx` en el proyecto Android generado por CI, para evitar recomprimir los pesos de 749.7 MiB durante el empaquetado. Se mantiene el heap aumentado. Esta mitigación todavía necesita una nueva ejecución; no se declara como resuelta hasta que exista artefacto.
 
 ### Segundo intento de CI del 2026-10-25
 
