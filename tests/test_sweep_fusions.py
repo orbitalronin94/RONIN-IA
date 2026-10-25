@@ -69,7 +69,7 @@ class SweepReproducibilityTests(unittest.TestCase):
     def test_checkpoint_without_weights_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            checkpoint = root / "ronin-fused-checkpoint"
+            checkpoint = root / sweep.EXPERIMENTAL_CHECKPOINT_NAME
             checkpoint.mkdir()
             (checkpoint / "config.json").write_text("{}", encoding="utf-8")
             report = {
