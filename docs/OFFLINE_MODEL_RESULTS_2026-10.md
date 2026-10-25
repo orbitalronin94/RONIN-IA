@@ -23,6 +23,14 @@ Construir una APK de debug que incluya el runtime de inferencia, los recursos WA
 
 ## Resultados
 
+### Segundo intento de CI del 2026-10-25
+
+- Ejecución: [workflow 40218696661](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40218696661/job/121245333034).
+- El empaquetado del runtime y los assets WASM terminó correctamente.
+- Falló una prueba de contrato porque el workflow cambia intencionadamente `www/offline-build.js` a `OFFLINE_BUNDLE_ENABLED = true` antes de ejecutar las pruebas, mientras que el test exigía el valor predeterminado `false`. Es una expectativa de test incorrecta en el workspace de la APK offline, no un fallo de compilación del runtime.
+- Este cambio valida que el marcador exporte un booleano, permitiendo tanto el valor por defecto (`false`) como la sobreescritura temporal de CI (`true`).
+- La APK todavía no se generó en este intento porque las pruebas fallaron antes de la fase Android.
+
 ### Intento de CI del 2026-10-25
 
 - Ejecución fallida: [workflow 40218243647](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40218243647/job/121243963156).
