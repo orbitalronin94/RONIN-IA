@@ -49,7 +49,7 @@ for (const candidate of candidates) {
 }
 if (!dist) throw new Error('No se encontró onnxruntime-web/dist con archivos WASM.');
 const names = await readdir(dist);
-const assets = names.filter((name) => /\\.(wasm|mjs)$/.test(name));
+const assets = names.filter((name) => /\.(wasm|mjs)$/.test(name));
 if (!assets.some((name) => name.endsWith('.wasm'))) {
   throw new Error('El runtime no contiene assets WASM.');
 }
