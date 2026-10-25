@@ -23,7 +23,7 @@ test('routes strict formatting requests to instruction profile', () => {
 test('falls back to general and reports the one currently connected model', () => {
   const result = routeRequest('¿Qué es la fotosíntesis?');
   assert.equal(result.category, 'general');
-  assert.equal(result.model, 'onnx-community/Qwen3-0.6B-ONNX');
+  assert.equal(result.model, 'auto:fast');
 });
 
 test('is deterministic and safely accepts empty/non-string input', () => {
