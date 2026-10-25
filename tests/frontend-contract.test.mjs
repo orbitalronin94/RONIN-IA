@@ -117,6 +117,7 @@ test('la APK offline empaqueta Qwen2.5 y runtime local sin cambiar el build lige
   assert.ok(offlineBuild.includes('workflow_dispatch'));
   assert.ok(offlineBuild.includes('RONIN_MODEL_REVISION'));
   assert.ok(offlineBuild.includes('ronin-ia-qwen25-offline-debug-apk'));
+  assert.match(offlineBuild, /-Dorg\.gradle\.jvmargs=.*-Xmx4g/, 'la APK offline necesita más heap para comprimir los assets grandes');
   assert.ok(modelPrep.includes('onnx/model_q4.onnx'));
   assert.ok(modelPrep.includes('resolved_revision'));
   assert.ok(modelPrep.includes('sha256'));
