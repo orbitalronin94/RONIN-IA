@@ -1,0 +1,93 @@
+name: Ronin from-scratch prototype
+
+on:
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: "Target total optimizer steps (1-1000)"
+        required: true
+        default: "300"
+        type: choice
+        options:
+          - "100"
+          - "300"
+          - "500"
+          - "1000"
+      resume:
+        description: "Resume the cached checkpoint if compatible"
+        required: true
+        default: true
+        type: boolean
+  pull_request:
+    branches: [main, master, "research/ronin-fusion-reproducibility"]
+    paths:
+      - "experiments/ronin-from-scratch/**"
+      - ".github/workflows/ronin-from-scratch.yml"
+  push:
+    branches: [main, master]
+    paths:
+      - "experiments/ronin-from-scratch/**"
+      - ".github/workflows/ronin-from-scratch.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-from-scratch-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyTorch CPU
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Restore previous training checkpoint
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: experiments/ronin-from-scratch/output/latest.pt
+          key: ronin-scratch-${{ github.ref_name }}-${{ hashFiles('experiments/ronin-from-scratch/train.py', 'experiments/ronin-from-scratch/corpus.txt') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ronin-scratch-${{ github.ref_name }}-${{ hashFiles('experiments/ronin-from-scratch/train.py', 'experiments/ronin-from-scratch/corpus.txt') }}-
+
+      - name: Train from random initialization or resume
+        env:
+          STEPS: ${{ inputs.steps || '300' }}
+          RESUME: ${{ inputs.resume || 'false' }}
+        run: |
+          ARGS=(--steps "$STEPS" --seed 42)
+          if [[ "$RESUME" == "true" && -f experiments/ronin-from-scratch/output/latest.pt ]]; then
+            ARGS+=(--resume)
+          fi
+          python experiments/ronin-from-scratch/train.py "${ARGS[@]}"
+
+      - name: Save checkpoint for the next iteration
+        if: always() && hashFiles('experiments/ronin-from-scratch/output/latest.pt') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: experiments/ronin-from-scratch/output/latest.pt
+          key: ronin-scratch-${{ github.ref_name }}-${{ hashFiles('experiments/ronin-from-scratch/train.py', 'experiments/ronin-from-scratch/corpus.txt') }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Publish checkpoint, metrics, and sample
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-from-scratch-results
+          path: experiments/ronin-from-scratch/output/
+          if-no-files-found: warn
+          retention-days: 30
