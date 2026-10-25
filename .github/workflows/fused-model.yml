@@ -1,0 +1,59 @@
+name: Build experimental RONIN fused checkpoint
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - 'scripts/build_ronin_fused_model.py'
+      - '.github/workflows/fused-model.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-fused-checkpoint
+  cancel-in-progress: false
+
+jobs:
+  fuse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install fusion dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch transformers safetensors accelerate huggingface_hub
+      - name: Create strict weighted merge
+        env:
+          HF_HUB_DISABLE_TELEMETRY: '1'
+          TOKENIZERS_PARALLELISM: 'false'
+        run: python scripts/build_ronin_fused_model.py --base-weight 0.75 --coder-weight 0.25
+      - name: Validate checkpoint and report
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
+          root = Path('ronin-fused-model')
+          report = json.loads((root / 'ronin-fusion-report.json').read_text())
+          config = AutoConfig.from_pretrained(root, trust_remote_code=False)
+          tokenizer = AutoTokenizer.from_pretrained(root, trust_remote_code=False)
+          assert config.model_type == 'qwen3', config.model_type
+          assert len(tokenizer) == report['tokenizer_vocab_entries']
+          model = AutoModelForCausalLM.from_pretrained(root, torch_dtype='auto', low_cpu_mem_usage=True, trust_remote_code=False)
+          assert len(model.state_dict()) == report['tensor_count']
+          print('Checkpoint structurally loadable; model_type=', config.model_type)
+          print(json.dumps(report, indent=2, ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ronin-fused-checkpoint-experimental
+          path: ronin-fused-model/
+          if-no-files-found: error
+          retention-days: 30
