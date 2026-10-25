@@ -41,3 +41,58 @@ jobs:
           path: fusion-sweep-results/
           if-no-files-found: warn
           retention-days: 30
+
+  independent-benchmark:
+    needs: sweep
+    if: needs.sweep.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download fusion sweep artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ronin-fusion-sweep-results
+          path: fusion-sweep-results/
+      - name: Check for exported checkpoint
+        id: checkpoint
+        shell: bash
+        run: |
+          if [ -d fusion-sweep-results/ronin-fused-checkpoint ] && [ -f fusion-sweep-results/sweep-report.json ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "No checkpoint passed the heuristic screening; independent benchmark is intentionally skipped."
+          fi
+      - name: Install independent benchmark dependencies
+        if: steps.checkpoint.outputs.available == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install lm-eval transformers accelerate sentencepiece protobuf
+      - name: Compare base against fused checkpoint
+        if: steps.checkpoint.outputs.available == 'true'
+        env:
+          HF_HUB_DISABLE_TELEMETRY: '1'
+          TOKENIZERS_PARALLELISM: 'false'
+        run: >-
+          python scripts/benchmark_merge_vs_base.py
+          --base-model Qwen/Qwen3-0.6B
+          --merged-model fusion-sweep-results/ronin-fused-checkpoint
+          --limit 100 --num-fewshot 0 --batch-size 1 --seed 42
+          --output-dir independent-benchmark-results
+      - name: Record skipped benchmark reason
+        if: steps.checkpoint.outputs.available == 'false'
+        run: |
+          mkdir -p independent-benchmark-results
+          printf '%s\\n' '{"status":"skipped","reason":"The heuristic sweep did not export a checkpoint; no quality claim is made."}' > independent-benchmark-results/benchmark-status.json
+      - name: Publish independent benchmark report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-independent-benchmark
+          path: independent-benchmark-results/
+          if-no-files-found: warn
+          retention-days: 30
