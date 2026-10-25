@@ -77,7 +77,7 @@ export default {
             },
             body: JSON.stringify({
               model,
-              messages: body.messages.map(m => ({ role: m.role, content: m.content.slice(0, 6000) }),
+              messages: body.messages.map(m => ({ role: m.role, content: m.content.slice(0, 6000) })),
               max_tokens: Math.min(Math.max(Number(body.max_tokens) || 600, 1), 1000),
               temperature: 0.6,
               stream: false
