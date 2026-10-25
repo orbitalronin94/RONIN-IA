@@ -13,8 +13,12 @@ No descargar modelos en CI normal, no guardar pesos en Git y no entrenar/fusiona
 | Prioridad | Modelo / artefacto | Evidencia publicada | Encaje en Ronin | Riesgos / siguiente paso |
 |---|---|---|---|---|
 | A — baseline | [Qwen2.5-0.5B-Instruct (ONNX)](https://huggingface.co/onnx-community/Qwen2.5-0.5B-Instruct) | Model card de Qwen informa 0.49B parámetros y resultados en matemáticas/código/IFEval; Apache-2.0 para el modelo base. | Ya integrado con Transformers.js. ONNX `q4f16` ~483 MB; `q4` ~786 MB según archivos publicados. | Mantener como referencia, no asumir que es el mejor. Medir WebGPU/WASM, memoria y español en un dispositivo real. |
-| B — comparación directa | [SmolLM2-360M-Instruct (ONNX)](https://huggingface.co/onnx-community/SmolLM2-360M-Instruct-ONNX) | SmolLM2 publica comparaciones con Qwen2.5-0.5B: mejora en varias pruebas de conocimiento/IFEval; Qwen supera en algunas pruebas matemáticas y MT-Bench. | Apache-2.0 y familia de 360M; artefacto ONNX para Transformers.js, con `q4f16` ~272 MB y `q4` ~386 MB listados en el repositorio ONNX. | Buena alternativa para reducir descarga; validar plantilla de chat, calidad en español y runtime real. Los benchmarks publicados no son una comparación específica de nuestro uso. |
-| C — investigación, no integrar aún | [LFM2-350M](https://huggingface.co/LiquidAI/LFM2-350M) | Liquid AI publica resultados propios competitivos para el tamaño, incluidos MMLU/IFEval/GSM8K. | Diseñado para edge y tamaño compacto. | No dar por hecho compatibilidad con el runtime Transformers.js/ONNX actual. Verificar licencia LFM Open License v1.0, disponibilidad de formato y restricciones antes de invertir en integración. |
+| B — comparación directa | [SmolLM2-360M-Instruct (ONNX)](https://huggingface.co/onnx-community/SmolLM2-360M-Instruct-ONNX) | SmolLM2 publica comparaciones con Qwen2.5-0.5B: mejora en varias pruebas de conocimiento/IFEval; Qwen supera en algunas pruebas matemáticas y MT-Bench. | Apache-2.0 y familia de 360M; artefacto ONNX para Transformers.js, con `q4f16` ~272 MB y `q4` ~386 MB listados en el repositorio ONNX. | Ya comparado en CPU PyTorch en nuestro dataset; resultado inicial inferior a Qwen. Puede servir como opción más pequeña, pero no priorizar integración sin más evidencia. |
+| C — candidato ultrapequeño | [SmolLM2-135M-Instruct (ONNX)](https://huggingface.co/onnx-community/SmolLM2-135M-Instruct-ONNX) | Modelo de 135M con licencia Apache-2.0 en el modelo base; el creador advierte que la familia está orientada principalmente al inglés. | Variante ONNX para Transformers.js; archivos publicados indican aproximadamente 117 MB en `q4f16` y 181 MB en `q4`. | Probar como límite inferior de tamaño. La calidad en español es un riesgo explícito; no inferirla de los benchmarks ingleses. |
+| D — candidato de nueva generación | [Qwen3-0.6B (ONNX)](https://huggingface.co/onnx-community/Qwen3-0.6B-ONNX) | Modelo Qwen3 de aproximadamente 0.75B parámetros en el checkpoint oficial; licencia Apache-2.0. | ONNX disponible para Transformers.js; archivo publicado de `q4f16` ~570 MB y `q4` ~919 MB. | La plantilla puede activar el modo de razonamiento. La comparación CPU lo desactiva explícitamente; validar también el comportamiento del artefacto ONNX y la plantilla real antes de integrar. |
+| E — investigación, no integrar aún | [LFM2-350M](https://huggingface.co/LiquidAI/LFM2-350M) | Liquid AI publica resultados propios competitivos para el tamaño, incluidos MMLU/IFEval/GSM8K. | Diseñado para edge y tamaño compacto. | No dar por hecho compatibilidad con el runtime Transformers.js/ONNX actual. Verificar licencia LFM Open License v1.0, disponibilidad de formato y restricciones antes de invertir en integración. |
+
+Los tamaños de artefactos son aproximados y describen archivos publicados, no el total de descarga real de una aplicación ni la memoria máxima durante inferencia. Verificar los archivos y metadatos exactos antes de cualquier lanzamiento.
 
 ### Lectura correcta de los números
 
@@ -23,17 +27,23 @@ No descargar modelos en CI normal, no guardar pesos en Git y no entrenar/fusiona
 - Los benchmarks ingleses no sustituyen pruebas en español.
 - El tamaño del archivo no equivale a RAM máxima ni predice por sí solo velocidad o calidad.
 - Una variante cuantizada puede cambiar la calidad y el consumo; registrar siempre el artefacto y la cuantización exactos.
+- La comparación CPU de GitHub Actions usa checkpoints PyTorch en float32; no compara directamente las variantes ONNX cuantizadas.
 
 Fuentes principales:
 - Qwen2.5: https://qwenlm.github.io/blog/qwen2.5-llm/
 - Qwen2.5-0.5B-Instruct model card: https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct
 - SmolLM2-360M-Instruct model card y benchmarks: https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct
 - SmolLM2 ONNX para Transformers.js: https://huggingface.co/onnx-community/SmolLM2-360M-Instruct-ONNX
+- SmolLM2-135M-Instruct model card: https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct
+- SmolLM2-135M-Instruct ONNX: https://huggingface.co/onnx-community/SmolLM2-135M-Instruct-ONNX
+- Qwen3-0.6B model card: https://huggingface.co/Qwen/Qwen3-0.6B
+- Qwen3-0.6B ONNX para Transformers.js: https://huggingface.co/onnx-community/Qwen3-0.6B-ONNX
 - LFM2-350M model card: https://huggingface.co/LiquidAI/LFM2-350M
 
 ## Protocolo de evaluación de Ronin
 
 ### 1. Filtro de viabilidad (antes de comparar calidad)
+
 1. Licencia y términos del artefacto exacto documentados.
 2. Existe formato compatible con el runtime elegido y se conoce el tamaño de descarga.
 3. La carga y una generación corta funcionan en Android/WebView real.
