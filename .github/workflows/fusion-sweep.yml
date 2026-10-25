@@ -56,11 +56,25 @@ jobs:
         if: always()
         shell: bash
         run: |
-          if [ -d fusion-sweep-results/ronin-fused-checkpoint ] && [ -f fusion-sweep-results/sweep-report.json ]; then
-            echo "checkpoint_exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "checkpoint_exists=false" >> "$GITHUB_OUTPUT"
-          fi
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from scripts.sweep_fusions import checkpoint_is_valid
+
+          report_path = Path("fusion-sweep-results/sweep-report.json")
+          report = {}
+          if report_path.is_file():
+              try:
+                  report = json.loads(report_path.read_text(encoding="utf-8"))
+              except (OSError, json.JSONDecodeError):
+                  report = {}
+          valid = checkpoint_is_valid(report)
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              value = "true" if valid else "false"
+              output.write("checkpoint_exists=" + value + "\n")
+          print(f"Validated current-run fusion checkpoint: {valid}")
+          PY
       - name: Publish sweep report and optional checkpoint
         if: always()
         uses: actions/upload-artifact@v4
@@ -97,7 +111,7 @@ jobs:
         run: |
           python scripts/benchmark_merge_vs_base.py \
             --base-model Qwen/Qwen3-0.6B \
-            --merged-model fusion-sweep-results/ronin-fused-checkpoint \
+            --merged-model fusion-sweep-results/Ronin-0.6B-Fusion-Exp-001 \
             --tasks arc_easy,hellaswag,truthfulqa_mc2,gsm8k \
             --limit 100 --num-fewshot 0 --batch-size 1 --seed 42 \
             --output-dir merge-validation-results
