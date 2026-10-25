@@ -158,6 +158,7 @@ def main():
     report["experiment_fingerprint"] = fingerprint
     report["resolved_revisions"] = revisions
     report["status"] = "running"
+    save_report(report)
     report.setdefault("license_review", {})
     report.setdefault("candidates", {})
     report.setdefault("runs", [])
@@ -190,7 +191,7 @@ def main():
     for label in eligible:
         repo = CANDIDATES[label]
         try:
-            tok = AutoTokenizer.from_pretrained(repo,trust_remote_code=False)
+            tok = AutoTokenizer.from_pretrained(repo,revision=revisions[repo],trust_remote_code=False)
             vocab = tok.get_vocab()
             if vocab != base_vocab:
                 report["candidates"][label] = {"repo":repo,"compatible":False,"reason":"tokenizer vocabulary/IDs differ"}
@@ -246,7 +247,7 @@ def main():
         remaining = combo if include_base else combo[1:]
         for candidate_label in remaining:
             repo=CANDIDATES[candidate_label]
-            candidate=AutoModelForCausalLM.from_pretrained(repo,torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
+            candidate=AutoModelForCausalLM.from_pretrained(repo,revision=revisions[repo],torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
             candidate_state=candidate.state_dict()
             missing=set(merged_state)-set(candidate_state)
             extra=set(candidate_state)-set(merged_state)
