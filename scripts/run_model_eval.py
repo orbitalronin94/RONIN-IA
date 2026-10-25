@@ -22,6 +22,11 @@ def main() -> int:
     parser.add_argument("--predictions", type=Path, default=Path("model-eval-predictions.jsonl"))
     parser.add_argument("--model", default="Qwen/Qwen2.5-0.5B-Instruct")
     parser.add_argument("--max-new-tokens", type=int, default=96)
+    parser.add_argument(
+        "--disable-thinking",
+        action="store_true",
+        help="Pass enable_thinking=False to chat templates that support it (e.g. Qwen3).",
+    )
     args = parser.parse_args()
     if args.max_new_tokens < 1 or args.max_new_tokens > 512:
         parser.error("--max-new-tokens must be between 1 and 512")
@@ -44,8 +49,13 @@ def main() -> int:
         case = json.loads(line)
         messages = [{"role": "user", "content": case["prompt"]}]
         if hasattr(tokenizer, "apply_chat_template"):
+            template_kwargs = {"enable_thinking": False} if args.disable_thinking else {}
             encoded = tokenizer.apply_chat_template(
-                messages, tokenize=True, add_generation_prompt=True, return_tensors="pt"
+                messages,
+                tokenize=True,
+                add_generation_prompt=True,
+                return_tensors="pt",
+                **template_kwargs,
             )
             input_ids = encoded if isinstance(encoded, torch.Tensor) else encoded["input_ids"]
             model_inputs = {"input_ids": input_ids}
@@ -70,6 +80,7 @@ def main() -> int:
             "model_id": args.model,
             "quantization": "float32",
             "backend": "pytorch_cpu_github_actions",
+            "thinking_mode": "disabled" if args.disable_thinking else "template_default",
         })
         print(f"[{line_no}] {case['id']}: {latency_ms:.2f} ms", flush=True)
 
