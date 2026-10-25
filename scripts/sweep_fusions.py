@@ -82,6 +82,27 @@ def experiment_fingerprint(revisions=None):
     return hashlib.sha256(encoded).hexdigest()
 
 
+def config_compatibility(reference, candidate):
+    """Reject structural/configuration drift before comparing tensors or averaging weights."""
+    fields = (
+        "model_type", "architectures", "hidden_size", "intermediate_size",
+        "num_hidden_layers", "num_attention_heads", "num_key_value_heads",
+        "head_dim", "vocab_size", "tie_word_embeddings", "hidden_act",
+        "rms_norm_eps", "rope_theta", "rope_scaling", "max_position_embeddings",
+    )
+    missing = [key for key in fields if (key in reference) != (key in candidate)]
+    mismatches = {
+        key: {"base": reference[key], "candidate": candidate[key]}
+        for key in fields
+        if key in reference and key in candidate and reference[key] != candidate[key]
+    }
+    return {
+        "compatible": not missing and not mismatches,
+        "missing_on_one_side": missing,
+        "mismatches": mismatches,
+    }
+
+
 def checkpoint_is_valid(report, output=OUTPUT):
     """Only treat a checkpoint as usable when the current report explicitly validates it."""
     if not isinstance(report, dict):
@@ -111,7 +132,7 @@ def main():
     args = parser.parse_args()
     import torch
     from huggingface_hub import model_info
-    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
     torch.set_num_threads(max(1, min(4, os.cpu_count() or 1)))
     OUTPUT.mkdir(parents=True, exist_ok=True)
     report_path = OUTPUT / "sweep-report.json"
@@ -180,6 +201,7 @@ def main():
         report["blocked_reason"] = "No candidate passed automatic permissive-license metadata gate; manual license review required."
         save_report(report)
         print(json.dumps(report,indent=2,ensure_ascii=False)); return 0
+    base_config = AutoConfig.from_pretrained(BASE, revision=revisions[BASE], trust_remote_code=False).to_dict()
     base_tok = AutoTokenizer.from_pretrained(BASE, revision=revisions[BASE], trust_remote_code=False)
     base_vocab = base_tok.get_vocab()
     base = AutoModelForCausalLM.from_pretrained(BASE,revision=revisions[BASE],torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
@@ -191,10 +213,24 @@ def main():
     for label in eligible:
         repo = CANDIDATES[label]
         try:
+            candidate_config = AutoConfig.from_pretrained(
+                repo, revision=revisions[repo], trust_remote_code=False
+            ).to_dict()
+            config_check = config_compatibility(base_config, candidate_config)
+            if not config_check["compatible"]:
+                report["candidates"][label] = {
+                    "repo": repo, "compatible": False,
+                    "reason": "model configuration differs from base",
+                    "config_compatibility": config_check,
+                }
+                continue
             tok = AutoTokenizer.from_pretrained(repo,revision=revisions[repo],trust_remote_code=False)
             vocab = tok.get_vocab()
             if vocab != base_vocab:
-                report["candidates"][label] = {"repo":repo,"compatible":False,"reason":"tokenizer vocabulary/IDs differ"}
+                report["candidates"][label] = {
+                    "repo":repo,"compatible":False,"reason":"tokenizer vocabulary/IDs differ",
+                    "config_compatibility": config_check,
+                }
                 continue
             candidate = AutoModelForCausalLM.from_pretrained(repo,revision=revisions[repo],torch_dtype=torch.float32,low_cpu_mem_usage=True,trust_remote_code=False)
             state = candidate.state_dict()
@@ -202,7 +238,7 @@ def main():
                 report["candidates"][label] = {"repo":repo,"compatible":False,"reason":"tensor keys/shapes differ"}
             else:
                 compatible.append(label)
-                report["candidates"][label] = {"repo":repo,"compatible":True,"tensor_count":len(state)}
+                report["candidates"][label] = {"repo":repo,"compatible":True,"tensor_count":len(state),"config_compatibility":config_check}
             del candidate, state, tok, vocab
         except Exception as exc:
             report["candidates"][label] = {"repo":repo,"compatible":False,"reason":str(exc)}
