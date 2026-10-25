@@ -270,6 +270,14 @@ El informe de la ejecución anterior `39994459932` (`71d2f79`) se inspeccionó y
 
 La ejecución más reciente de evaluación, `39995671249` (`8e92cc5`), seguía en curso en la última consulta. Los números del informe anterior no deben atribuirse a ese commit.
 
+### Última iteración de fusión y validación independiente (2026-10-25)
+
+- El workflow de barrido encadena una comparación independiente con `lm-evaluation-harness` si el cribado exporta un checkpoint: ARC-Easy, HellaSwag, TruthfulQA MC2 y GSM8K, hasta 100 ejemplos por tarea, semilla 42 y batch 1.
+- Si no se exporta checkpoint, la comparación se marca como omitida y no se afirma mejora alguna. La puntuación de nueve prompts sigue siendo solo un filtro preliminar.
+- [Workflow de barrido de fusiones](https://github.com/orbitalronin94/RONIN-IA/actions/workflows/fusion-sweep.yml) · [Build APK, ejecución 40173795125](https://github.com/orbitalronin94/RONIN-IA/actions/runs/40173795125).
+- El build de depuración terminó correctamente: descarga de pesos ONNX, sincronización de Capacitor, Gradle y publicación del artefacto. Esto no demuestra calidad del modelo fusionado ni funcionamiento en dispositivo físico.
+- En la última consulta, el barrido antiguo 40173401635 seguía activo y 40173666529 esperaba por concurrencia; aún no había artefactos del primero.
+
 ### Memoria técnica de iteraciones
 
 El historial de cambios, resultados, fallos conocidos y próximos pasos se mantiene en [`docs/MEMORIA_ITERACIONES.md`](docs/MEMORIA_ITERACIONES.md). Actualiza ese documento junto con este README cuando haya resultados nuevos y verificables.
