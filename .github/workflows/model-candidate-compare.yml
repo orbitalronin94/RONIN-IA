@@ -1,0 +1,89 @@
+name: Compare local model candidates
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - '.github/workflows/model-candidate-compare.yml'
+      - 'benchmarks/model-eval-prompts.jsonl'
+      - 'scripts/run_model_eval.py'
+      - 'scripts/score_model_eval.py'
+      - 'tests/test_score_model_eval.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-model-candidate-compare
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    name: Evaluate ${{ matrix.model_key }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - model_key: qwen-0.5b
+            model_id: Qwen/Qwen2.5-0.5B-Instruct
+          - model_key: smollm2-360m
+            model_id: HuggingFaceTB/SmolLM2-360M-Instruct
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run evaluator unit tests
+        run: python -m unittest discover -s tests -p 'test_score_model_eval.py' -v
+
+      - name: Install CPU inference dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch transformers safetensors accelerate
+
+      - name: Run fixed prompt set
+        env:
+          HF_HUB_DISABLE_TELEMETRY: '1'
+          HF_HUB_DISABLE_PROGRESS_BARS: '1'
+          TOKENIZERS_PARALLELISM: 'false'
+          MODEL_ID: ${{ matrix.model_id }}
+        run: |
+          python scripts/run_model_eval.py \
+            --model "$MODEL_ID" \
+            --max-new-tokens 96 \
+            --predictions "model-eval-${{ matrix.model_key }}-predictions.jsonl"
+
+      - name: Score predictions
+        run: |
+          python scripts/score_model_eval.py \
+            --predictions "model-eval-${{ matrix.model_key }}-predictions.jsonl" \
+            --output "model-eval-${{ matrix.model_key }}-report.json"
+
+      - name: Add run metadata
+        if: always()
+        run: |
+          {
+            echo "## Model candidate: ${{ matrix.model_id }}"
+            echo
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Runner: ubuntu-latest (CPU inference, float32)"
+            echo "- Dataset: benchmarks/model-eval-prompts.jsonl"
+            echo "- Generation limit: 96 new tokens"
+            echo "- This is not a browser/WebGPU/mobile performance measurement."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload predictions and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-model-compare-${{ matrix.model_key }}-${{ github.run_id }}
+          path: |
+            model-eval-${{ matrix.model_key }}-predictions.jsonl
+            model-eval-${{ matrix.model_key }}-report.json
+          if-no-files-found: warn
+          retention-days: 30
