@@ -103,3 +103,23 @@ test('la compilación no descarga ni empaqueta modelos locales', () => {
   assert.doesNotMatch(script, /transformers\.js|allowLocalModels|localModelPath/);
 });
 
+
+test('la APK offline empaqueta Qwen2.5 y runtime local sin cambiar el build ligero', () => {
+  const localAI = readFileSync(new URL('../www/local-ai.js', import.meta.url), 'utf8');
+  const offlineBuild = readFileSync(new URL('../.github/workflows/build-offline-apk.yml', import.meta.url), 'utf8');
+  const modelPrep = readFileSync(new URL('../scripts/prepare-offline-model.mjs', import.meta.url), 'utf8');
+  const runtimeBundle = readFileSync(new URL('../scripts/bundle-offline-runtime.mjs', import.meta.url), 'utf8');
+  const marker = readFileSync(new URL('../www/offline-build.js', import.meta.url), 'utf8');
+  assert.ok(localAI.includes('onnx-community/Qwen2.5-0.5B-Instruct'));
+  assert.ok(localAI.includes('env.allowRemoteModels = !IS_NATIVE_ANDROID'));
+  assert.ok(localAI.includes("import('./vendor/transformers.js')"));
+  assert.ok(localAI.includes("env.backends.onnx.wasm.wasmPaths = './vendor/'"));
+  assert.ok(offlineBuild.includes('workflow_dispatch'));
+  assert.ok(offlineBuild.includes('RONIN_MODEL_REVISION'));
+  assert.ok(offlineBuild.includes('ronin-ia-qwen25-offline-debug-apk'));
+  assert.ok(modelPrep.includes('onnx/model_q4.onnx'));
+  assert.ok(modelPrep.includes('resolved_revision'));
+  assert.ok(modelPrep.includes('sha256'));
+  assert.ok(runtimeBundle.includes('onnxruntime-web'));
+  assert.ok(marker.includes('OFFLINE_BUNDLE_ENABLED = false'));
+});

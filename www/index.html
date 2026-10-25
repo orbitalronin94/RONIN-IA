@@ -37,6 +37,7 @@
 import { routeRequest } from './router.js';
 import { requestRemoteCompletion } from './remote-ai.js';
 import { requestLocalCompletion } from './local-ai.js';
+import { OFFLINE_BUNDLE_ENABLED } from './offline-build.js';
 // Clave de persistencia versionada para el historial local del chat.
 const KEY='ronin.ia.sessions.v2';
 const $=id=>document.getElementById(id);
@@ -47,7 +48,7 @@ if(!sessions.length)sessions=[{id:activeId,title:'Nuevo chat',messages:[],update
 if(!sessions.some(s=>s.id===activeId))activeId=sessions[0].id;
 // IDs locales sin backend: suficientes para el historial del dispositivo; no son identificadores de seguridad.
 function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
-function readLocalMode(){try{return localStorage.getItem('ronin.ia.localMode')==='1'}catch(e){return false}}
+function readLocalMode(){if(OFFLINE_BUNDLE_ENABLED)return true;try{return localStorage.getItem('ronin.ia.localMode')==='1'}catch(e){return false}}
 // La persistencia es local por diseño; toleramos JSON corrupto y almacenamiento deshabilitado para que la app siga abriendo.
 function readSessions(){try{let a=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(a)?a.filter(s=>s&&s.id&&Array.isArray(s.messages)).slice(0,40):[]}catch(e){return []}}
 // localStorage evita cuentas y servidor, pero puede estar lleno o deshabilitado: nunca debe bloquear el chat.
