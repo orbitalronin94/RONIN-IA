@@ -5,6 +5,7 @@ Only combinations that pass tensor/tokenizer and permissive-license gates are ru
 This is an experiment, not evidence that averaging improves model quality.
 """
 import argparse
+import hashlib
 import itertools
 import json
 import os
@@ -31,6 +32,8 @@ CANDIDATES = {
 }
 ALLOWED_LICENSES = {"apache-2.0", "mit", "bsd-3-clause", "bsd-2-clause"}
 OUTPUT = Path("fusion-sweep-results")
+INTERPOLATION_ALPHAS = (0.05, 0.10, 0.15, 0.25, 0.40, 0.50, 0.75)
+ALGORITHM_VERSION = "ronin-fusion-sweep-v2"
 PROMPTS = [
     {"id":"ES-01","prompt":"Responde en español, con exactamente tres viñetas, sobre ventajas y desventajas de estudiar por la mañana.","checks":["bullet","three_bullets","spanish"]},
     {"id":"ES-02","prompt":"Resume en una sola frase: La aplicación funciona localmente, pero descarga el modelo la primera vez si no está incluido en el paquete. Después puede responder sin conexión siempre que los archivos estén disponibles.","checks":["one_sentence","spanish"]},
@@ -62,6 +65,37 @@ def score(case, text):
         elif c == "4": out[c] = "4" in text and ("2 + 2 = 4" in text or "es 4" in low or text.strip() == "4")
     return {"passed":sum(out.values()),"checks":len(out),"details":out}
 
+
+def experiment_fingerprint(revisions=None):
+    """Stable identity for a sweep, including resolved upstream model revisions."""
+    payload = {
+        "algorithm_version": ALGORITHM_VERSION,
+        "base": BASE,
+        "candidates": CANDIDATES,
+        "revisions": revisions or {},
+        "license_allowlist": sorted(ALLOWED_LICENSES),
+        "prompts": PROMPTS,
+        "interpolation_alphas": INTERPOLATION_ALPHAS,
+        "method": "base-preserving linear parameter interpolation; heuristic screening only",
+    }
+    encoded = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def checkpoint_is_valid(report, output=OUTPUT):
+    """Only treat a checkpoint as usable when the current report explicitly validates it."""
+    if not isinstance(report, dict):
+        return False
+    if report.get("status") != "completed" or not report.get("best_beats_base_heuristic"):
+        return False
+    exported = report.get("exported_checkpoint")
+    if not exported:
+        return False
+    checkpoint = Path(exported)
+    if not checkpoint.is_absolute():
+        checkpoint = Path(output) / checkpoint.name if checkpoint.parent == Path(".") else checkpoint
+    return checkpoint.is_dir() and any(checkpoint.glob("*.safetensors")) and (checkpoint / "config.json").is_file()
+
 def save_report(report):
     """Persist an atomic progress snapshot so interrupted CI runs retain results."""
     OUTPUT.mkdir(parents=True, exist_ok=True)
@@ -81,30 +115,62 @@ def main():
     torch.set_num_threads(max(1, min(4, os.cpu_count() or 1)))
     OUTPUT.mkdir(parents=True, exist_ok=True)
     report_path = OUTPUT / "sweep-report.json"
+
+    # Resolve upstream revisions before deciding whether cached results are reusable.
+    # This prevents a moving Hugging Face main branch from silently changing an experiment.
+    metadata = {}
+    for repo in [BASE, *CANDIDATES.values()]:
+        try:
+            info = model_info(repo)
+            metadata[repo] = {
+                "revision": getattr(info, "sha", None),
+                "license": (getattr(info, "card_data", None) or {}).get("license"),
+            }
+        except Exception as exc:
+            metadata[repo] = {"revision": None, "license": None, "error": str(exc)}
+    revisions = {repo: item.get("revision") for repo, item in metadata.items()}
+    fingerprint = experiment_fingerprint(revisions)
+
     previous = {}
     if args.resume and report_path.is_file():
         try:
-            previous = json.loads(report_path.read_text(encoding="utf-8"))
+            candidate_previous = json.loads(report_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
             raise RuntimeError(f"Cannot resume: existing report is unreadable: {exc}") from exc
-        if previous.get("base") != BASE:
-            raise RuntimeError(f"Cannot resume report for a different base model: {previous.get('base')!r}")
+        if candidate_previous.get("experiment_fingerprint") == fingerprint:
+            previous = candidate_previous
+        else:
+            print("Existing sweep report belongs to a different experiment fingerprint; starting a clean sweep.", flush=True)
+
+    # Never let an old checkpoint survive a new/different experiment and later be
+    # mistaken for the result of this run.
+    checkpoint_dir = OUTPUT / "ronin-fused-checkpoint"
+    if not previous:
+        shutil.rmtree(checkpoint_dir, ignore_errors=True)
+
     report = previous if previous else {"generated_at":datetime.now(timezone.utc).isoformat(),"base":BASE,
-              "method":"bounded broad sweep of licensed compatible experts: each standalone, each equal-weight with base, and seven base-preserving interpolation weights; greedy CPU inference; heuristic prompts only",
+              "experiment_fingerprint":fingerprint,"resolved_revisions":revisions,
+              "method":"bounded search of individually compatible experts and base-preserving interpolations; greedy CPU inference; heuristic prompts only",
               "license_allowlist":sorted(ALLOWED_LICENSES),"license_review":{},"candidates":{},
-              "runs":[],"winner":None,"quality_improvement_proven":False}
+              "runs":[],"winner":None,"quality_improvement_proven":False,"status":"running"}
+    report["experiment_fingerprint"] = fingerprint
+    report["resolved_revisions"] = revisions
+    report["status"] = "running"
     report.setdefault("license_review", {})
     report.setdefault("candidates", {})
     report.setdefault("runs", [])
     report.setdefault("interpolation_runs", [])
     report["resume_enabled"] = bool(args.resume)
     for label, repo in CANDIDATES.items():
-        try:
-            info = model_info(repo)
-            license_name = (getattr(info, "card_data", None) or {}).get("license")
-            report["license_review"][repo] = {"license":license_name,"allowlisted":str(license_name).lower() in ALLOWED_LICENSES if license_name else False}
-        except Exception as exc:
-            report["license_review"][repo] = {"license":None,"allowlisted":False,"error":str(exc)}
+        item = metadata.get(repo, {})
+        license_name = item.get("license")
+        report["license_review"][repo] = {
+            "license": license_name,
+            "allowlisted": str(license_name).lower() in ALLOWED_LICENSES if license_name else False,
+            "revision": item.get("revision"),
+        }
+        if item.get("error"):
+            report["license_review"][repo]["error"] = item["error"]
     eligible = [label for label,repo in CANDIDATES.items() if report["license_review"].get(repo,{}).get("allowlisted")]
     report["candidates"] = {label:repo for label,repo in CANDIDATES.items()}
     if not eligible:
@@ -210,7 +276,7 @@ def main():
     completed_interpolations = {run.get("label") for run in interpolation_results}
     for candidate_label in sorted(compatible):
         candidate_repo = CANDIDATES[candidate_label]
-        for alpha in (0.05, 0.10, 0.15, 0.25, 0.40, 0.50, 0.75):
+        for alpha in INTERPOLATION_ALPHAS:
             interpolation_label = f"base_plus_{candidate_label}_alpha_{alpha:.2f}"
             if args.resume and interpolation_label in completed_interpolations:
                 print(f"Skipping completed {interpolation_label}", flush=True)
@@ -270,12 +336,14 @@ def main():
     else:
         report["exported_checkpoint"] = None
         report["export_blocked_reason"] = "No tested interpolation strictly beat the base on the heuristic screen."
+        shutil.rmtree(checkpoint_dir, ignore_errors=True)
     # Heuristic score first, latency as tie-breaker; no human quality claim.
     ranked=sorted([r for r in report["runs"] if r["label"]!="base"],key=lambda r:(r["score"],-r["mean_latency_seconds"]),reverse=True)
     report["winner"]=max(report["runs"], key=lambda r: r["score"]) if report["runs"] else None
     report["best_beats_base_heuristic"]=bool(report["winner"] and baseline["score"] is not None and report["winner"]["score"]>baseline["score"])
     report["quality_improvement_proven"]=False
     report["decision"]="Candidate selected by small heuristic screen only; require independent benchmark and human review before calling it an improvement."
+    report["status"] = "completed"
     save_report(report)
     print(json.dumps(report,indent=2,ensure_ascii=False))
 
