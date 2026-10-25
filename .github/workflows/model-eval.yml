@@ -1,0 +1,92 @@
+name: Reproducible model evaluation
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: Hugging Face model repository
+        required: true
+        default: Qwen/Qwen2.5-0.5B-Instruct
+        type: string
+      max_new_tokens:
+        description: Maximum generated tokens per prompt (1-512)
+        required: true
+        default: "96"
+        type: string
+  push:
+    branches: [main, master]
+    paths:
+      - 'benchmarks/model-eval-prompts.jsonl'
+      - 'scripts/run_model_eval.py'
+      - 'scripts/score_model_eval.py'
+      - 'tests/test_score_model_eval.py'
+      - '.github/workflows/model-eval.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-model-eval
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Run evaluator unit tests
+        run: python -m unittest discover -s tests -p 'test_score_model_eval.py' -v
+
+      - name: Install CPU inference dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch transformers safetensors accelerate
+
+      - name: Run model on the fixed prompt set
+        env:
+          HF_HUB_DISABLE_TELEMETRY: '1'
+          HF_HUB_DISABLE_PROGRESS_BARS: '1'
+          TOKENIZERS_PARALLELISM: 'false'
+          MODEL_ID: ${{ inputs.model || 'Qwen/Qwen2.5-0.5B-Instruct' }}
+          MAX_NEW_TOKENS: ${{ inputs.max_new_tokens || '96' }}
+        run: |
+          python scripts/run_model_eval.py \
+            --model "$MODEL_ID" \
+            --max-new-tokens "$MAX_NEW_TOKENS" \
+            --predictions model-eval-predictions.jsonl
+
+      - name: Score predictions
+        run: |
+          python scripts/score_model_eval.py \
+            --predictions model-eval-predictions.jsonl \
+            --output model-eval-report.json
+
+      - name: Add run metadata
+        if: always()
+        run: |
+          {
+            echo "## Model evaluation"
+            echo
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Runner: ubuntu-latest (CPU inference)"
+            echo "- Model input: ${{ inputs.model || 'Qwen/Qwen2.5-0.5B-Instruct' }}"
+            echo "- This benchmark does not measure browser/WebGPU or mobile performance."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload predictions and scored report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-model-evaluation-${{ github.run_id }}
+          path: |
+            model-eval-predictions.jsonl
+            model-eval-report.json
+          if-no-files-found: warn
+          retention-days: 30
