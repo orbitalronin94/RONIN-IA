@@ -4,6 +4,7 @@
 Only combinations that pass tensor/tokenizer and permissive-license gates are run.
 This is an experiment, not evidence that averaging improves model quality.
 """
+import argparse
 import itertools
 import json
 import os
@@ -71,15 +72,32 @@ def save_report(report):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Run the bounded Ronin weight-fusion sweep.')
+    parser.add_argument('--resume', action='store_true', help='Resume completed evaluations from the existing report.')
+    args = parser.parse_args()
     import torch
     from huggingface_hub import model_info
     from transformers import AutoModelForCausalLM, AutoTokenizer
     torch.set_num_threads(max(1, min(4, os.cpu_count() or 1)))
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    report = {"generated_at":datetime.now(timezone.utc).isoformat(),"base":BASE,
+    report_path = OUTPUT / "sweep-report.json"
+    previous = {}
+    if args.resume and report_path.is_file():
+        try:
+            previous = json.loads(report_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise RuntimeError(f"Cannot resume: existing report is unreadable: {exc}") from exc
+        if previous.get("base") != BASE:
+            raise RuntimeError(f"Cannot resume report for a different base model: {previous.get('base')!r}")
+    report = previous if previous else {"generated_at":datetime.now(timezone.utc).isoformat(),"base":BASE,
               "method":"bounded broad sweep of licensed compatible experts: each standalone, each equal-weight with base, and seven base-preserving interpolation weights; greedy CPU inference; heuristic prompts only",
               "license_allowlist":sorted(ALLOWED_LICENSES),"license_review":{},"candidates":{},
               "runs":[],"winner":None,"quality_improvement_proven":False}
+    report.setdefault("license_review", {})
+    report.setdefault("candidates", {})
+    report.setdefault("runs", [])
+    report.setdefault("interpolation_runs", [])
+    report["resume_enabled"] = bool(args.resume)
     for label, repo in CANDIDATES.items():
         try:
             info = model_info(repo)
