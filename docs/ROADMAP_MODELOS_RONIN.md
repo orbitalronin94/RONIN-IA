@@ -6,7 +6,7 @@ El nombre público de un modelo debe expresar el número real de parámetros, no
 
 - **Ronin-0.6B**: modelo con aproximadamente 0,6 mil millones de parámetros.
 - **Ronin-1.5B**, **Ronin-3B**, etc.: usar solo cuando el conteo real del artefacto coincida aproximadamente.
-- Durante la investigación, usar nombres inequívocos como `Ronin-0.6B-Fusion-Exp-001`. No publicar el nombre estable `Ronin-0.6B` como una versión aprobada hasta superar los criterios de evaluación y procedencia de este documento.
+- Durante la investigación, el artefacto de esta búsqueda se denomina `Ronin-0.6B-Fusion-Exp-001`. No publicar el nombre estable `Ronin-0.6B` como una versión aprobada hasta superar los criterios de evaluación y procedencia de este documento.
 
 La cuantización (Q4, Q8, etc.) cambia el tamaño en disco y el coste de inferencia, no el número nominal de parámetros. Un archivo de 300 MB no demuestra que el modelo tenga 0,3B parámetros.
 
@@ -86,6 +86,6 @@ El checkpoint experimental no debe reemplazar automáticamente el modelo de la a
 
 ## Estado conocido de esta línea
 
-El barrido previo informó que ninguna interpolación probada superó estrictamente al modelo base en su pantalla heurística de 14 comprobaciones; por tanto, no se exportó un checkpoint validado. Es una conclusión negativa útil, no una demostración de que todos los métodos de fusión fallen.
+El barrido previo informó que ninguna interpolación probada superó estrictamente al modelo base en su pantalla heurística de 14 comprobaciones; por tanto, no se exportó un checkpoint validado. El directorio experimental `Ronin-0.6B-Fusion-Exp-001` solo se crea si una interpolación supera ese filtro, y su nombre no equivale a una aprobación de calidad. Es una conclusión negativa útil, no una demostración de que todos los métodos de fusión fallen.
 
 El workflow debe considerar válido un checkpoint solo cuando el informe de la ejecución actual declara finalización, mejora heurística estricta y una ruta de artefacto existente. Después se ejecuta la confirmación independiente. Nunca basta con que exista una carpeta antigua restaurada desde caché.
