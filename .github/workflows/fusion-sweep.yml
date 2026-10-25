@@ -45,7 +45,13 @@ jobs:
           HF_HUB_DISABLE_TELEMETRY: '1'
           TOKENIZERS_PARALLELISM: 'false'
         run: python scripts/sweep_fusions.py --resume
-      - name: Save fusion sweep progress for the next run\n        if: always()\n        uses: actions/cache/save@v4\n        with:\n          path: fusion-sweep-results/\n          key: ronin-fusion-progress-${{ github.ref_name }}-${{ hashFiles('scripts/sweep_fusions.py') }}-${{ github.run_id }}-${{ github.run_attempt }}\n      - name: Detect whether a candidate checkpoint was exported
+      - name: Save fusion sweep progress for the next run
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: fusion-sweep-results/
+          key: ronin-fusion-progress-${{ github.ref_name }}-${{ hashFiles('scripts/sweep_fusions.py') }}-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Detect whether a candidate checkpoint was exported
         id: result
         if: always()
         shell: bash
