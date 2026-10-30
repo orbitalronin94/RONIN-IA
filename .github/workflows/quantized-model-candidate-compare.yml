@@ -95,12 +95,20 @@ jobs:
           report = json.loads(report_path.read_text())
           if metadata["artifact_bytes"] >= 400_000_000:
               raise SystemExit("Candidate exceeds strict 400 MB cap: " + str(metadata["artifact_mb_decimal"]) + " MB")
+          groups = report["groups"]
+          reasoning = groups.get("reasoning", {})
+          cobol = groups.get("cobol_semantics", {})
+          reasoning_accuracy = reasoning["correct"] / reasoning["scored"] if reasoning.get("scored") else None
+          cobol_accuracy = cobol["correct"] / cobol["scored"] if cobol.get("scored") else None
           summary = {
               "model": metadata["model_id"],
               "revision": metadata["model_revision"],
               "artifact_mb": metadata["artifact_mb_decimal"],
               "accuracy": report["deterministic_accuracy"],
               "accuracy_per_mb": (report["deterministic_accuracy"] / metadata["artifact_mb_decimal"]) if report["deterministic_accuracy"] is not None else None,
+              "reasoning_accuracy": reasoning_accuracy,
+              "reasoning_accuracy_per_mb": (reasoning_accuracy / metadata["artifact_mb_decimal"]) if reasoning_accuracy is not None else None,
+              "cobol_semantics_accuracy": cobol_accuracy,
               "correct": report["deterministic_correct"],
               "scored": report["deterministic_scored"],
               "cold_start_ms": metadata["cold_start_ms"],
@@ -113,6 +121,9 @@ jobs:
               out.write("| Métrica | Resultado |\n|---|---:|\n")
               out.write(f"| Artefacto descargado | {metadata['artifact_mb_decimal']} MB |\n")
               out.write(f"| Exactitud por MB | {summary['accuracy_per_mb']} |\n")
+              out.write(f"| Razonamiento | {reasoning.get('correct', 0)}/{reasoning.get('scored', 0)} ({reasoning_accuracy}) |\n")
+              out.write(f"| Razonamiento por MB | {summary['reasoning_accuracy_per_mb']} |\n")
+              out.write(f"| Semántica COBOL | {cobol.get('correct', 0)}/{cobol.get('scored', 0)} ({cobol_accuracy}) |\n")
               out.write(f"| Exactitud determinista | {report['deterministic_correct']}/{report['deterministic_scored']} ({report['deterministic_accuracy']}) |\n")
               out.write(f"| Arranque frío | {metadata['cold_start_ms']} ms |\n")
               out.write(f"| RSS pico | {metadata['peak_rss_mb']} MB |\n")
