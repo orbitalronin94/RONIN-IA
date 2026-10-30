@@ -64,3 +64,14 @@ El historial de chat se conserva localmente en el dispositivo. En modo remoto, l
 - El tamaño publicado del repositorio no equivale a memoria RAM total; también cuentan runtime, KV cache y buffers.
 - El build de APK no valida el rendimiento en un dispositivo Android físico.
 - La selección de modelos y las puntuaciones preliminares no demuestran superioridad; hacen falta benchmarks comparables.
+
+
+### Reproducible under-400MB model comparison
+
+\`.github/workflows/quantized-model-candidate-compare.yml\` compares Qwen3-0.6B DQ-ONNX, SmolLM2-360M Q4F16 and SmolLM2-135M Q4F16 using the same Spanish reasoning and COBOL semantics prompts. It measures the files actually downloaded, cold start, RSS and latency, and reports exact-match accuracy and reasoning accuracy per MB. COBOL target outputs are checked against GnuCOBOL before scoring.
+
+The first candidate is not promoted until the workflow passes and the comparison is reviewed. The Node CPU run is a screening measurement, not an Android/WebGPU performance claim.
+
+### Dataset synchronization
+
+\`.github/workflows/sync-agent-eval-datasets.yml\` checks Agent-Eval's curated approval manifest weekly and opens an integration PR when approved train/dev data changes. It refuses holdout, model proposals, non-MIT sources and unverified records. The sync is PR-based; it does not auto-merge datasets or weights.
