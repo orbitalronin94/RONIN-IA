@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   evaluate:
-    name: \${{ matrix.key }} — q4f16 / WASM
+    name: ${{ matrix.key }} — q4f16 / WASM
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
@@ -68,19 +68,19 @@ jobs:
           MODEL_CACHE_DIR: .cache/onnx-models
         run: |
           node --max-old-space-size=6144 scripts/run_onnx_model_eval.mjs \
-            "\${{ matrix.model }}" "\${{ matrix.revision }}" \
+            "${{ matrix.model }}" "${{ matrix.revision }}" \
             benchmarks/reasoning-eval-prompts.jsonl \
-            "onnx-\${{ matrix.key }}-predictions.jsonl"
+            "onnx-${{ matrix.key }}-predictions.jsonl"
       - name: Score exact answers
         run: |
           python scripts/score_model_eval.py \
             --dataset benchmarks/reasoning-eval-prompts.jsonl \
-            --predictions "onnx-\${{ matrix.key }}-predictions.jsonl" \
-            --output "onnx-\${{ matrix.key }}-report.json"
+            --predictions "onnx-${{ matrix.key }}-predictions.jsonl" \
+            --output "onnx-${{ matrix.key }}-report.json"
       - name: Publish comparable measurements
         if: always()
         env:
-          MODEL_KEY: \${{ matrix.key }}
+          MODEL_KEY: ${{ matrix.key }}
         run: |
           python - <<'PY'
           import json, os
@@ -118,10 +118,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ronin-onnx-\${{ matrix.key }}-\${{ github.run_id }}
+          name: ronin-onnx-${{ matrix.key }}-${{ github.run_id }}
           path: |
-            onnx-\${{ matrix.key }}-predictions.jsonl
-            onnx-\${{ matrix.key }}-predictions.jsonl.metadata.json
-            onnx-\${{ matrix.key }}-report.json
+            onnx-${{ matrix.key }}-predictions.jsonl
+            onnx-${{ matrix.key }}-predictions.jsonl.metadata.json
+            onnx-${{ matrix.key }}-report.json
           if-no-files-found: warn
           retention-days: 90
