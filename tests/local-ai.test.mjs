@@ -1,23 +1,37 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { LOCAL_MODEL_ID, loadLocalModel, requestLocalCompletion } from '../www/local-ai.js';
+import {
+  LOCAL_MODEL_ID,
+  FALLBACK_MODEL_ID,
+  LOCAL_MODEL_ARTIFACT_MB,
+  requestLocalCompletion,
+} from '../www/local-ai.js';
 
-test('la inferencia local requiere mensajes y no consulta el endpoint remoto', async () => {
+test('la inferencia local requiere mensajes y propone Qwen3 DQ-ONNX por debajo de 400 MB', async () => {
   await assert.rejects(requestLocalCompletion({ messages: [] }), /al menos un mensaje/i);
-  assert.equal(LOCAL_MODEL_ID, 'onnx-community/Qwen2.5-0.5B-Instruct');
+  assert.equal(LOCAL_MODEL_ID, 'onnx-community/Qwen3-0.6B-DQ-ONNX');
+  assert.equal(FALLBACK_MODEL_ID, 'onnx-community/Qwen2.5-0.5B-Instruct');
+  assert.ok(LOCAL_MODEL_ARTIFACT_MB < 400);
 });
 
-test('carga el modelo una sola vez y devuelve la respuesta generada', async () => {
+test('carga Qwen3 una sola vez, recurre al modelo anterior si falla y devuelve la respuesta', async () => {
   let loads = 0;
   let calls = 0;
+  const attemptedModels = [];
   const loader = async () => {
     loads++;
     return {
       env: {},
       pipeline: async (task, model, options) => {
         assert.equal(task, 'text-generation');
-        assert.equal(model, LOCAL_MODEL_ID);
+        attemptedModels.push(model);
         assert.equal(options.device, 'wasm');
+        if (model === LOCAL_MODEL_ID) {
+          assert.equal(options.dtype, 'q4f16');
+          throw new Error('simulated missing Qwen3 weights');
+        }
+        assert.equal(model, FALLBACK_MODEL_ID);
+        assert.equal(options.dtype, 'q4');
         return async (messages, generation) => {
           calls++;
           assert.equal(messages.at(-1).content, 'Hola');
@@ -31,6 +45,7 @@ test('carga el modelo una sola vez y devuelve la respuesta generada', async () =
   const second = await requestLocalCompletion({ messages: [{ role: 'user', content: 'Hola' }], loader });
   assert.equal(first, '¡Hola desde Ronin!');
   assert.equal(second, first);
+  assert.deepEqual(attemptedModels, [LOCAL_MODEL_ID, FALLBACK_MODEL_ID]);
   assert.equal(loads, 1);
   assert.equal(calls, 2);
 });
