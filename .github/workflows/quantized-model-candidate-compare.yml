@@ -1,0 +1,106 @@
+name: Compare under-400MB quantized ONNX models
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "benchmarks/reasoning-eval-prompts.jsonl"
+      - "benchmarks/model-candidates.json"
+      - "scripts/run_onnx_model_eval.mjs"
+      - "scripts/score_model_eval.py"
+      - ".github/workflows/quantized-model-candidate-compare.yml"
+  schedule:
+    - cron: "17 5 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-quantized-model-compare
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    name: \${{ matrix.key }} — q4f16 / WASM
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - key: qwen3-06b-dq
+            model: onnx-community/Qwen3-0.6B-DQ-ONNX
+            revision: d6beae7
+          - key: smollm2-360m
+            model: onnx-community/SmolLM2-360M-Instruct-ONNX
+            revision: fe7c7db
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install pinned Transformers.js
+        run: npm install --no-save --no-package-lock @huggingface/transformers@3.7.2
+      - name: Run fixed reasoning and COBOL semantics prompts
+        env:
+          MODEL_CACHE_DIR: .cache/onnx-models
+        run: |
+          node --max-old-space-size=6144 scripts/run_onnx_model_eval.mjs \
+            "\${{ matrix.model }}" "\${{ matrix.revision }}" \
+            benchmarks/reasoning-eval-prompts.jsonl \
+            "onnx-\${{ matrix.key }}-predictions.jsonl"
+      - name: Score exact answers
+        run: |
+          python scripts/score_model_eval.py \
+            --dataset benchmarks/reasoning-eval-prompts.jsonl \
+            --predictions "onnx-\${{ matrix.key }}-predictions.jsonl" \
+            --output "onnx-\${{ matrix.key }}-report.json"
+      - name: Publish comparable measurements
+        if: always()
+        env:
+          MODEL_KEY: \${{ matrix.key }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          key = os.environ["MODEL_KEY"]
+          metadata_path = Path(f"onnx-{key}-predictions.jsonl.metadata.json")
+          report_path = Path(f"onnx-{key}-report.json")
+          if not metadata_path.is_file() or not report_path.is_file():
+              print("No complete prediction/score artifact was produced.")
+              raise SystemExit(0)
+          metadata = json.loads(metadata_path.read_text())
+          report = json.loads(report_path.read_text())
+          summary = {
+              "model": metadata["model_id"],
+              "revision": metadata["model_revision"],
+              "artifact_mb": metadata["artifact_mb_decimal"],
+              "accuracy": report["deterministic_accuracy"],
+              "correct": report["deterministic_correct"],
+              "scored": report["deterministic_scored"],
+              "cold_start_ms": metadata["cold_start_ms"],
+              "peak_rss_mb": metadata["peak_rss_mb"],
+              "median_case_latency_ms": metadata["median_case_latency_ms"],
+          }
+          print(json.dumps(summary, indent=2))
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as out:
+              out.write("## " + key + "\n\n")
+              out.write("| Métrica | Resultado |\n|---|---:|\n")
+              out.write(f"| Artefacto descargado | {metadata['artifact_mb_decimal']} MB |\n")
+              out.write(f"| Exactitud determinista | {report['deterministic_correct']}/{report['deterministic_scored']} ({report['deterministic_accuracy']}) |\n")
+              out.write(f"| Arranque frío | {metadata['cold_start_ms']} ms |\n")
+              out.write(f"| RSS pico | {metadata['peak_rss_mb']} MB |\n")
+              out.write(f"| Latencia mediana/caso | {metadata['median_case_latency_ms']} ms |\n")
+          PY
+      - name: Upload predictions and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-onnx-\${{ matrix.key }}-\${{ github.run_id }}
+          path: |
+            onnx-\${{ matrix.key }}-predictions.jsonl
+            onnx-\${{ matrix.key }}-predictions.jsonl.metadata.json
+            onnx-\${{ matrix.key }}-report.json
+          if-no-files-found: warn
+          retention-days: 90
