@@ -16,7 +16,6 @@ env.allowRemoteModels = true;
 env.allowLocalModels = true;
 env.useBrowserCache = false;
 env.cacheDir = cacheDir;
-if (env.backends?.onnx?.wasm) env.backends.onnx.wasm.numThreads = 2;
 
 async function filesUnder(directory) {
   const rows = [];
@@ -45,7 +44,7 @@ function finalAnswer(value) {
 const datasetBytes = await fs.readFile(datasetPath);
 const dataset = datasetBytes.toString('utf8').split(/\r?\n/).filter(Boolean).map(line => JSON.parse(line));
 const started = performance.now();
-const generator = await pipeline('text-generation', modelId, { device: 'wasm', dtype, revision });
+const generator = await pipeline('text-generation', modelId, { device: 'cpu', dtype, revision });
 const startupMs = Math.round((performance.now() - started) * 100) / 100;
 const cachedFiles = await filesUnder(cacheDir);
 const artifactBytes = cachedFiles.reduce((sum, file) => sum + file.bytes, 0);
@@ -91,7 +90,7 @@ const metadata = {
   model_id: modelId,
   model_revision: revision,
   quantization: dtype,
-  backend: 'Transformers.js / ONNX Runtime Web / WASM CPU',
+  backend: 'Transformers.js / ONNX Runtime Node CPU',
   dataset_sha256: crypto.createHash('sha256').update(datasetBytes).digest('hex'),
   dataset_cases: dataset.length,
   artifact_bytes: artifactBytes,
@@ -102,7 +101,7 @@ const metadata = {
   median_case_latency_ms: predictions.map(row => row.latency_ms).sort((a, b) => a - b)[Math.floor(predictions.length / 2)],
   thinking_mode: modelId.includes('Qwen3') ? 'template_default_enabled' : 'not_applicable',
   limitations: [
-    'WASM CPU runner measurement is not a physical Android/WebGPU measurement.',
+    'Node CPU runner measurement is not a browser WASM/WebGPU or physical Android measurement.',
     'Peak RSS includes Node, tokenizer, runtime and model; it is not isolated model memory.',
     'Artifact bytes count files present in this job cache after loading this model.',
     'Qwen3 uses sampling settings recommended for thinking mode; seed support may vary by runtime version.',
