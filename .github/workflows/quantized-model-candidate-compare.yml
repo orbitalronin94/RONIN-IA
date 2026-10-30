@@ -93,11 +93,14 @@ jobs:
               raise SystemExit(0)
           metadata = json.loads(metadata_path.read_text())
           report = json.loads(report_path.read_text())
+          if metadata["artifact_bytes"] >= 400_000_000:
+              raise SystemExit("Candidate exceeds strict 400 MB cap: " + str(metadata["artifact_mb_decimal"]) + " MB")
           summary = {
               "model": metadata["model_id"],
               "revision": metadata["model_revision"],
               "artifact_mb": metadata["artifact_mb_decimal"],
               "accuracy": report["deterministic_accuracy"],
+              "accuracy_per_mb": (report["deterministic_accuracy"] / metadata["artifact_mb_decimal"]) if report["deterministic_accuracy"] is not None else None,
               "correct": report["deterministic_correct"],
               "scored": report["deterministic_scored"],
               "cold_start_ms": metadata["cold_start_ms"],
