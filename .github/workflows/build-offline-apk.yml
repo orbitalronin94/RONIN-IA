@@ -1,4 +1,4 @@
-name: Build RONIN-IA offline APK (Qwen2.5-0.5B)
+name: Build RONIN-IA offline APK (Qwen3-0.6B-DQ)
 
 on:
   pull_request:
@@ -14,7 +14,7 @@ on:
       model_revision:
         description: Hugging Face model revision (branch/tag/40-char commit SHA); resolved SHA is recorded in the APK manifest
         required: true
-        default: main
+        default: d6beae7
         type: string
 
 permissions:
@@ -40,8 +40,8 @@ jobs:
       - name: Install project dependencies
         run: npm install
       - name: Install pinned model runtime and bundler for this build only
-        run: npm install --no-save --package-lock=false @huggingface/transformers@3.7.2 esbuild@0.25.0
-      - name: Download Qwen2.5-0.5B ONNX q4 assets
+        run: npm install --no-save --package-lock=false @huggingface/transformers@4.3.2 esbuild@0.25.0
+      - name: Download Qwen3-0.6B-DQ ONNX q4 assets
         env:
           RONIN_MODEL_REVISION: ${{ inputs.model_revision }}
         run: node scripts/prepare-offline-model.mjs
@@ -102,7 +102,7 @@ jobs:
         run: |
           chmod +x android/gradlew
           cd android
-          # The bundled q4 model is ~750 MiB; give the asset compressor a larger heap.
+          # The bundled Qwen3 DQ-ONNX q4f16 model is ~370 MB including tokenizer assets.
           ./gradlew --no-daemon -Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8' assembleDebug
       - name: Record APK size and fingerprint
         run: |
@@ -118,6 +118,6 @@ jobs:
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: ronin-ia-qwen25-offline-debug-apk
+          name: ronin-ia-qwen3-dq-offline-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
