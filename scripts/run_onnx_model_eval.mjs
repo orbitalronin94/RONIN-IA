@@ -39,11 +39,11 @@ function finalAnswer(value) {
     : String(value ?? '');
   const endThink = text.lastIndexOf('</think>');
   if (endThink >= 0) text = text.slice(endThink + '</think>'.length);
-  return text.replace(/<think>[\\s\\S]*?<\\/think>/g, '').trim();
+  return text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 }
 
 const datasetBytes = await fs.readFile(datasetPath);
-const dataset = datasetBytes.toString('utf8').split(/\\r?\\n/).filter(Boolean).map(line => JSON.parse(line));
+const dataset = datasetBytes.toString('utf8').split(/\r?\n/).filter(Boolean).map(line => JSON.parse(line));
 const started = performance.now();
 const generator = await pipeline('text-generation', modelId, { device: 'wasm', dtype, revision });
 const startupMs = Math.round((performance.now() - started) * 100) / 100;
@@ -84,7 +84,7 @@ for (let index = 0; index < dataset.length; index++) {
 }
 
 await fs.mkdir(path.dirname(path.resolve(predictionsPath)), { recursive: true });
-await fs.writeFile(predictionsPath, predictions.map(row => JSON.stringify(row)).join('\\n') + '\\n');
+await fs.writeFile(predictionsPath, predictions.map(row => JSON.stringify(row)).join('\n') + '\n');
 const metadata = {
   schema_version: 1,
   model_id: modelId,
@@ -107,7 +107,7 @@ const metadata = {
     'Qwen3 uses sampling settings recommended for thinking mode; seed support may vary by runtime version.',
   ],
 };
-await fs.writeFile(predictionsPath + '.metadata.json', JSON.stringify(metadata, null, 2) + '\\n');
+await fs.writeFile(predictionsPath + '.metadata.json', JSON.stringify(metadata, null, 2) + '\n');
 console.log(JSON.stringify({
   model_id: modelId,
   artifact_mb_decimal: metadata.artifact_mb_decimal,
