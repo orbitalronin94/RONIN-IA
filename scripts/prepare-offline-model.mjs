@@ -5,6 +5,7 @@ import { dirname, join, resolve } from 'node:path';
 import { Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
+// The offline bundle pins the same <400 MB q4f16 artifact used by the runtime candidate.
 const MODEL_ID = 'onnx-community/Qwen3-0.6B-DQ-ONNX';
 const REQUESTED_REVISION = process.env.RONIN_MODEL_REVISION || 'd6beae7';
 const ROOT = resolve('www/models');
