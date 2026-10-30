@@ -5,11 +5,11 @@ import { dirname, join, resolve } from 'node:path';
 import { Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
-const MODEL_ID = 'onnx-community/Qwen2.5-0.5B-Instruct';
-const REQUESTED_REVISION = process.env.RONIN_MODEL_REVISION || 'main';
+const MODEL_ID = 'onnx-community/Qwen3-0.6B-DQ-ONNX';
+const REQUESTED_REVISION = process.env.RONIN_MODEL_REVISION || 'd6beae7';
 const ROOT = resolve('www/models');
 const MODEL_DIR = join(ROOT, MODEL_ID);
-const REQUIRED = ['config.json', 'tokenizer.json', 'tokenizer_config.json', 'onnx/model_q4.onnx'];
+const REQUIRED = ['config.json', 'tokenizer.json', 'tokenizer_config.json', 'added_tokens.json', 'special_tokens_map.json', 'genai_config.json', 'vocab.json', 'onnx/model_q4f16.onnx', 'onnx/model_q4f16.onnx_data'];
 const OPTIONAL = ['generation_config.json', 'special_tokens_map.json', 'added_tokens.json', 'chat_template.jinja'];
 const sha256 = createHash;
 
@@ -60,7 +60,7 @@ async function downloadFile(revision, file, optional) {
 async function main() {
   const revision = await resolveRevision();
   console.log(`Modelo: ${MODEL_ID}@${revision}`);
-  console.log('Cuantización empaquetada: q4 (CPU/WASM); esta descarga puede ocupar varios cientos de MB.');
+  console.log('Cuantización empaquetada: Q4F16 DQ-ONNX; pesos ONNX ~356 MB y repositorio completo ~370 MB.');
   await mkdir(MODEL_DIR, { recursive: true });
   const files = [];
   for (const file of REQUIRED) {
@@ -81,7 +81,7 @@ async function main() {
     model_id: MODEL_ID,
     resolved_revision: revision,
     requested_revision: REQUESTED_REVISION,
-    dtype: 'q4',
+    dtype: 'q4f16',
     generated_at: new Date().toISOString(),
     files: files.map(({ path, size, sha256: hash, cached }) => ({ path, size_bytes: size, sha256: hash, sha256_reused_from_cache: cached })),
     note: 'El hash es null cuando el archivo ya existía en el workspace; en CI limpio no debería ocurrir.',
