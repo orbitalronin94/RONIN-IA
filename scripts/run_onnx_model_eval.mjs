@@ -9,6 +9,7 @@ const modelId = args[0], revision = args[1], datasetPath = args[2], predictionsP
 if (!modelId || !revision || !datasetPath || !predictionsPath) {
   throw new Error('Usage: node scripts/run_onnx_model_eval.mjs MODEL_ID REVISION DATASET PREDICTIONS');
 }
+// Qwen3 DQ-ONNX GatherBlockQuantized requires the newer Transformers.js / ONNX Runtime stack.
 const dtype = 'q4f16';
 const cacheDir = path.resolve(process.env.MODEL_CACHE_DIR || '.cache/onnx-models');
 await fs.mkdir(cacheDir, { recursive: true });
