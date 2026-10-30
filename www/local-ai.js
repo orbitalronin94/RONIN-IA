@@ -1,5 +1,6 @@
 // Inferencia local opcional. El candidato Qwen3 se carga bajo demanda; el fallback conserva compatibilidad.
 export const LOCAL_MODEL_ID = 'onnx-community/Qwen3-0.6B-DQ-ONNX';
+export const LOCAL_MODEL_REVISION = 'd6beae7';
 export const FALLBACK_MODEL_ID = 'onnx-community/Qwen2.5-0.5B-Instruct';
 export const LOCAL_MODEL_ARTIFACT_MB = 356;
 const TRANSFORMERS_CDN = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2/+esm';
@@ -27,6 +28,7 @@ async function createPipeline({ loader, onProgress }) {
     return await pipeline('text-generation', LOCAL_MODEL_ID, {
       device,
       dtype: 'q4f16',
+      revision: LOCAL_MODEL_REVISION,
       progress_callback: (event) => {
         if (event && typeof event === 'object') onProgress?.(event);
       },
