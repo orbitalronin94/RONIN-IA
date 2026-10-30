@@ -11,7 +11,7 @@ const REQUESTED_REVISION = process.env.RONIN_MODEL_REVISION || 'd6beae7';
 const ROOT = resolve('www/models');
 const MODEL_DIR = join(ROOT, MODEL_ID);
 const REQUIRED = ['config.json', 'tokenizer.json', 'tokenizer_config.json', 'added_tokens.json', 'special_tokens_map.json', 'genai_config.json', 'vocab.json', 'onnx/model_q4f16.onnx', 'onnx/model_q4f16.onnx_data'];
-const OPTIONAL = ['generation_config.json', 'special_tokens_map.json', 'added_tokens.json', 'chat_template.jinja'];
+const OPTIONAL = ['generation_config.json', 'chat_template.jinja'];
 const sha256 = createHash;
 
 async function resolveRevision() {
@@ -78,6 +78,9 @@ async function main() {
       console.log(`· ${file} no está publicado; se omite`);
     }
   }
+  const totalBytes = files.reduce((sum, file) => sum + file.size, 0);
+  if (totalBytes >= 400_000_000) throw new Error(`El artefacto descargado supera el límite estricto de 400 MB: ${totalBytes} bytes.`);
+  console.log(`Tamaño total verificado: ${(totalBytes / 1_000_000).toFixed(2)} MB.`);
   const manifest = {
     model_id: MODEL_ID,
     resolved_revision: revision,
