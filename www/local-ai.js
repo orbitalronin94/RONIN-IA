@@ -2,7 +2,7 @@
 export const LOCAL_MODEL_ID = 'onnx-community/Qwen3-0.6B-DQ-ONNX';
 export const FALLBACK_MODEL_ID = 'onnx-community/Qwen2.5-0.5B-Instruct';
 export const LOCAL_MODEL_ARTIFACT_MB = 356;
-const TRANSFORMERS_CDN = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm';
+const TRANSFORMERS_CDN = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2/+esm';
 const IS_NATIVE_ANDROID = typeof window !== 'undefined' && window.Capacitor?.getPlatform?.() === 'android';
 let pipelinePromise;
 
