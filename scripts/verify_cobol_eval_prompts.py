@@ -21,7 +21,6 @@ def main() -> int:
     parser.add_argument("--report", type=Path, default=Path("cobol-prompt-oracle-report.json"))
     args = parser.parse_args()
     root = args.source_root.resolve()
-    dataset = json.loads if False else None
     rows = [json.loads(line) for line in args.dataset.read_text(encoding="utf-8").splitlines() if line.strip()]
     cases = [row for row in rows if row.get("oracle_source_path")]
     if not cases:
