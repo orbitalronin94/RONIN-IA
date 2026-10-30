@@ -2,6 +2,12 @@ name: Sync approved Agent-Eval datasets
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "scripts/sync_agent_eval_dataset.py"
+      - ".github/workflows/sync-agent-eval-datasets.yml"
+      - "data/agent-eval/cobol2py/**"
   schedule:
     - cron: "31 5 * * 1"
 
@@ -14,7 +20,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate-sync:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: orbitalronin94/Agent-Eval
+          ref: main
+          path: vendor/agent-eval
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate metadata-only sync
+        run: |
+          python scripts/sync_agent_eval_dataset.py \
+            --source vendor/agent-eval/datasets/cobol2py \
+            --source-revision "$(git -C vendor/agent-eval rev-parse HEAD)" \
+            --destination "$RUNNER_TEMP/agent-eval-sync-check"
   sync-approved-data:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
