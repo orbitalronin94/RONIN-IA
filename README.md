@@ -21,7 +21,7 @@ La APK no debe incluir pesos de modelos ni descargar varios modelos durante cada
 - No se descargan pesos durante el build Android normal.
 - El modo local es opt-in mediante el botón **IA local**; los pesos se descargan bajo demanda en entornos que permiten modelos remotos.
 - El candidato Qwen3-0.6B DQ-ONNX se ha elegido inicialmente por su huella publicada inferior a 400 MB y compatibilidad con Transformers.js. Todavía no es un ganador medido: debe superar un benchmark de razonamiento y rendimiento frente al fallback.
-- Si Qwen3 no está disponible, el runtime intenta Qwen2.5-0.5B-Instruct como fallback.
+- En navegador, si Qwen3 no está disponible, el runtime intenta Qwen2.5-0.5B-Instruct como fallback. El APK offline no lleva ese fallback para respetar el límite de tamaño.
 - Los pesos, checkpoints, cachés y resultados grandes permanecen fuera del historial Git.
 
 ## Ejecutar y probar
