@@ -24,9 +24,9 @@ async function filesUnder(directory) {
     for (const entry of await fs.readdir(current, { withFileTypes: true })) {
       const full = path.join(current, entry.name);
       if (entry.isDirectory()) await walk(full);
-      else if (entry.isFile()) {
+      else if (entry.isFile() || entry.isSymbolicLink()) {
         const stat = await fs.stat(full);
-        rows.push({ path: path.relative(directory, full), bytes: stat.size });
+        if (stat.isFile()) rows.push({ path: path.relative(directory, full), bytes: stat.size });
       }
     }
   }
