@@ -49,6 +49,7 @@ const generator = await pipeline('text-generation', modelId, { device: 'wasm', d
 const startupMs = Math.round((performance.now() - started) * 100) / 100;
 const cachedFiles = await filesUnder(cacheDir);
 const artifactBytes = cachedFiles.reduce((sum, file) => sum + file.bytes, 0);
+if (artifactBytes <= 0) throw new Error("Model cache is empty; exact artifact size cannot be measured.");
 const predictions = [];
 let peakRssBytes = process.memoryUsage().rss;
 
