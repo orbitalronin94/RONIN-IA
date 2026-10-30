@@ -34,6 +34,8 @@ async function createPipeline({ loader, onProgress }) {
       },
     });
   } catch (error) {
+    // The offline APK bundles Qwen3 only; do not attempt to load an absent remote fallback.
+    if (IS_NATIVE_ANDROID) throw error;
     onProgress?.({
       status: 'fallback',
       message: 'Qwen3 no está disponible en este dispositivo; probando Qwen2.5-0.5B.',
