@@ -1,6 +1,9 @@
-// Inferencia local opcional. En la APK offline, runtime, tokenizer y pesos se sirven desde assets empaquetados.
-export const LOCAL_MODEL_ID = 'onnx-community/Qwen2.5-0.5B-Instruct';
-const TRANSFORMERS_CDN = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm';
+// Inferencia local opcional. El candidato Qwen3 se carga bajo demanda; el fallback conserva compatibilidad.
+export const LOCAL_MODEL_ID = 'onnx-community/Qwen3-0.6B-DQ-ONNX';
+export const LOCAL_MODEL_REVISION = 'd6beae7';
+export const FALLBACK_MODEL_ID = 'onnx-community/Qwen2.5-0.5B-Instruct';
+export const LOCAL_MODEL_ARTIFACT_MB = 356;
+const TRANSFORMERS_CDN = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2/+esm';
 const IS_NATIVE_ANDROID = typeof window !== 'undefined' && window.Capacitor?.getPlatform?.() === 'android';
 let pipelinePromise;
 
@@ -12,29 +15,38 @@ async function createPipeline({ loader, onProgress }) {
   env.allowRemoteModels = !IS_NATIVE_ANDROID;
   env.localModelPath = './models/';
   env.useBrowserCache = !IS_NATIVE_ANDROID;
+
   if (IS_NATIVE_ANDROID && env.backends?.onnx?.wasm) {
     env.backends.onnx.wasm.wasmPaths = './vendor/';
   }
 
   const hasWebGPU = !IS_NATIVE_ANDROID && typeof navigator !== 'undefined' && !!navigator.gpu;
   const device = hasWebGPU ? 'webgpu' : 'wasm';
-  const dtype = IS_NATIVE_ANDROID ? 'q4' : hasWebGPU ? 'q4f16' : 'q4';
-  const options = {
-    device,
-    dtype,
-    progress_callback: (event) => {
-      if (event && typeof event === 'object') onProgress?.(event);
-    },
-  };
+
   try {
-    return await pipeline('text-generation', LOCAL_MODEL_ID, options);
+    // Qwen3 DQ-ONNX publica pesos q4f16 y es compatible con Transformers.js.
+    return await pipeline('text-generation', LOCAL_MODEL_ID, {
+      device,
+      dtype: 'q4f16',
+      revision: LOCAL_MODEL_REVISION,
+      progress_callback: (event) => {
+        if (event && typeof event === 'object') onProgress?.(event);
+      },
+    });
   } catch (error) {
-    if (!hasWebGPU) throw error;
-    onProgress?.({ status: 'fallback', message: 'Aceleración GPU no compatible; usando CPU.' });
-    return pipeline('text-generation', LOCAL_MODEL_ID, {
-      ...options,
-      device: 'wasm',
-      dtype: 'q4',
+    // The offline APK bundles Qwen3 only; do not attempt to load an absent remote fallback.
+    if (IS_NATIVE_ANDROID) throw error;
+    onProgress?.({
+      status: 'fallback',
+      message: 'Qwen3 no está disponible en este dispositivo; probando Qwen2.5-0.5B.',
+    });
+    // El fallback mantiene operativas las instalaciones que aún no tengan los pesos Qwen3.
+    return pipeline('text-generation', FALLBACK_MODEL_ID, {
+      device,
+      dtype: hasWebGPU ? 'q4f16' : 'q4',
+      progress_callback: (event) => {
+        if (event && typeof event === 'object') onProgress?.(event);
+      },
     });
   }
 }

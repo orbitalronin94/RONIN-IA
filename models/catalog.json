@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "default_local_candidate": {
+    "id": "qwen3-0.6b-dq-onnx",
+    "model_id": "onnx-community/Qwen3-0.6B-DQ-ONNX",
+    "family": "Qwen3-0.6B",
+    "format": "ONNX dynamic quantization",
+    "runtime": "Transformers.js",
+    "published_repository_size_mb": 370,
+    "onnx_folder_size_mb": 356,
+    "license": "Apache-2.0 (inherited from Qwen/Qwen3-0.6B; verify upstream terms before redistribution)",
+    "role": "experimental local inference candidate",
+    "selection_status": "initial_candidate_not_yet_benchmarked",
+    "reason": "Under-400-MB artifact and direct compatibility with the existing Transformers.js runtime; Qwen3 supports explicit thinking mode in the upstream model family.",
+    "upstream_revision": "d6beae7",
+    "runtime_version": "4.3.2"
+  },
+  "comparison_candidates": [
+    {
+      "id": "smollm2-360m-q4f16",
+      "model_id": "onnx-community/SmolLM2-360M-Instruct-ONNX",
+      "revision": "fe7c7db",
+      "parameters": 360000000,
+      "artifact": "onnx/model_q4f16.onnx",
+      "published_weight_mb": 272,
+      "license": "Apache-2.0",
+      "known_risk": "SmolLM2 family is primarily English; Spanish reasoning quality must be measured.",
+      "runtime_version": "4.3.2"
+    },
+    {
+      "id": "smollm2-135m-q4f16",
+      "model_id": "onnx-community/SmolLM2-135M-Instruct-ONNX",
+      "revision": "b8a5c0f",
+      "parameters": 135000000,
+      "artifact": "onnx/model_q4f16.onnx",
+      "published_weight_mb": 117,
+      "license": "Apache-2.0",
+      "known_risk": "Very small model; likely capability ceiling must be measured rather than assumed.",
+      "runtime_version": "4.3.2"
+    }
+  ],
+  "fallback": {
+    "model_id": "onnx-community/Qwen2.5-0.5B-Instruct",
+    "role": "compatibility fallback while Qwen3 weights/runtime are unavailable"
+  },
+  "promotion_requirements": [
+    "fixed reasoning benchmark against the current fallback",
+    "exact task accuracy and calibration",
+    "peak memory and cold-start latency on browser and Android hardware",
+    "artifact bytes measured from the exact downloaded files",
+    "no holdout leakage into prompts, training or model selection"
+  ],
+  "training_note": "Quantized inference artifacts are not trainable checkpoints. LoRA/QLoRA must use a separately pinned trainable base checkpoint and an independent protected holdout."
+}

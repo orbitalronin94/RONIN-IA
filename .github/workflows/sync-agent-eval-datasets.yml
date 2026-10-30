@@ -1,0 +1,72 @@
+name: Sync approved Agent-Eval datasets
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "scripts/sync_agent_eval_dataset.py"
+      - ".github/workflows/sync-agent-eval-datasets.yml"
+      - "data/agent-eval/cobol2py/**"
+  schedule:
+    - cron: "31 5 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ronin-agent-eval-dataset-sync
+  cancel-in-progress: false
+
+jobs:
+  validate-sync:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: orbitalronin94/Agent-Eval
+          ref: ml/cobol2py-model-dataset-pipeline
+          path: vendor/agent-eval
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate metadata-only sync
+        run: |
+          python scripts/sync_agent_eval_dataset.py \
+            --source vendor/agent-eval/datasets/cobol2py \
+            --source-revision "$(git -C vendor/agent-eval rev-parse HEAD)" \
+            --destination "$RUNNER_TEMP/agent-eval-sync-check"
+  sync-approved-data:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: orbitalronin94/Agent-Eval
+          ref: main
+          path: vendor/agent-eval
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate and sync approved Cobol2py data
+        run: |
+          python scripts/sync_agent_eval_dataset.py \
+            --source vendor/agent-eval/datasets/cobol2py \
+            --source-revision "$(git -C vendor/agent-eval rev-parse HEAD)" \
+            --destination data/agent-eval/cobol2py
+      - name: Create integration pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: sync/agent-eval-cobol2py
+          delete-branch: true
+          commit-message: "Sync approved Agent-Eval Cobol2py dataset"
+          title: "Sync approved Agent-Eval Cobol2py dataset"
+          body: |
+            Automated sync from orbitalronin94/Agent-Eval.
+
+            The sync script imports only maintainer-approved train/dev records whose manifest hash, count, source repository and MIT license declaration validate. Holdout and unreviewed model proposals are never imported. This PR does not start fine-tuning or merge model weights.
