@@ -8,6 +8,7 @@ on:
       - "benchmarks/reasoning-eval-prompts.jsonl"
       - "benchmarks/model-candidates.json"
       - "scripts/run_onnx_model_eval.mjs"
+      - "scripts/verify_cobol_eval_prompts.py"
       - "scripts/score_model_eval.py"
       - ".github/workflows/quantized-model-candidate-compare.yml"
   schedule:
@@ -40,9 +41,26 @@ jobs:
             revision: b8a5c0f
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: orbitalronin94/cobol2py
+          ref: main
+          path: vendor/cobol2py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install GnuCOBOL
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes gnucobol
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - name: Verify COBOL prompt targets with GnuCOBOL
+        run: |
+          python scripts/verify_cobol_eval_prompts.py \
+            --source-root vendor/cobol2py \
+            --dataset benchmarks/reasoning-eval-prompts.jsonl
       - name: Install pinned Transformers.js
         run: npm install --no-save --no-package-lock @huggingface/transformers@3.7.2
       - name: Run fixed reasoning and COBOL semantics prompts
