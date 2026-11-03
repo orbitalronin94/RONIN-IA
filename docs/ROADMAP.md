@@ -13,7 +13,8 @@ This roadmap is a sequence of verifiable engineering gates, not a promise that a
 - [x] Atomic periodic checkpoint save
 - [x] Feature registry and evidence-based readiness report
 - [x] Basic generation and evaluation metric helpers
-- [ ] Execute CI and fix all failures\n- [x] Manual external-tutor generation and tiny scratch-training workflow implemented
+- [ ] Execute CI and fix all failures
+- [x] Manual external-tutor generation and tiny scratch-training workflow implemented
 - [x] Full checkpoint resume and sampler-state test
 - [ ] End-to-end smoke training on an approved corpus
 
