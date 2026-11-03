@@ -7,7 +7,7 @@ import json
 
 from ronin.config import PROFILES, profile_dict
 from ronin.manifest.registry import FEATURES, readiness
-from ronin.models.transformer import RoninLM
+from ronin.models.parameters import count_parameters
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -34,8 +34,8 @@ def main() -> None:
         print(json.dumps(profile_dict(args.profile), indent=2))
     elif args.command == "count-params":
         model_config, _ = PROFILES[args.profile]
-        model = RoninLM(model_config)
-        print(f"{args.profile}: {model.parameter_count:,} trainable parameters")
+        count = count_parameters(model_config)
+        print(f"{args.profile}: {count:,} trainable parameters (analytical, no model allocation)")
     elif args.command == "features":
         selected = [f for f in FEATURES if args.category is None or f.category == args.category]
         print(json.dumps([f.__dict__ for f in selected], indent=2, default=str))
