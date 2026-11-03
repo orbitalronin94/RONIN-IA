@@ -28,8 +28,8 @@ TOPICS = (
 
 def build_prompts(count: int) -> list[str]:
     """Return a deterministic set of varied prompts in Spanish."""
-    if count < 1:
-        raise ValueError("count must be positive")
+    if count < 1 or count > 500:
+        raise ValueError("count must be between 1 and 500")
     prompts = []
     for index in range(count):
         topic = TOPICS[index % len(TOPICS)]
