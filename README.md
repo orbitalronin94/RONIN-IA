@@ -37,7 +37,7 @@ Counts are analytical for the current tied-embedding architecture and can be rec
 - 50-feature evidence-aware manifest, readiness and CLI.
 - Unit tests and GitHub Actions CI workflow.
 
-The full provenance-aware data pipeline, learned tokenizer, distributed training and production evaluation are still planned. A declared target is not an implemented feature.
+The full provenance-aware corpus pipeline, learned tokenizer, distributed training and production evaluation are still planned. A declared target is not an implemented feature. The manual [teacher workflow](docs/TEACHER_WORKFLOW.md) can generate a small Spanish tutor corpus from an external API and train the tiny model from random initialization.
 
 ## Quick start
 
@@ -100,7 +100,7 @@ tests/                   Unit and integration tests
 - [Training operations](docs/TRAINING.md)
 - [Evaluation](docs/EVALUATION.md)
 - [Hardware planning](docs/HARDWARE.md)
-- [Roadmap](docs/ROADMAP.md)
+- [Roadmap](docs/ROADMAP.md)\n- [External tutor and first model](docs/TEACHER_WORKFLOW.md)
 
 ## Feature manifest
 
