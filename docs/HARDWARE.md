@@ -1,23 +1,71 @@
-# Planificación de hardware y recursos
+# Recursos de hardware y ejecución gratuita
 
-La tabla de perfiles del README recoge la escalera de hardware prevista por el proyecto:
+## Entorno operativo de referencia
 
-- tiny: CPU.
-- seed-0: una RTX 4090.
-- seed-1: dos A100 de 40 GB.
-- seed-2: cuatro A100 de 80 GB.
+RONIN toma como referencia el entorno gratuito de GitHub Actions para repositorios públicos. El workflow actual usa `runs-on: ubuntu-latest` en sus tres trabajos.
 
-Son objetivos de planificación. Esta fase inicial no ha medido benchmarks de hardware y no implica garantías de duración, coste ni tokens por segundo.
+Según la documentación oficial de GitHub, el runner estándar `ubuntu-latest` para repositorios públicos dispone de:
 
-Antes de ejecutar un perfil distinto de tiny, se debe elaborar un informe de adecuación específico de la máquina que incluya:
+| Recurso | Especificación publicada |
+|---|---:|
+| CPU | 4 vCPU |
+| RAM | 16 GB |
+| Almacenamiento | 14 GB SSD |
+| Arquitectura | x86_64 |
+| GPU CUDA | No incluida |
+| Precio del runner estándar público | Gratis |
 
-- modelo y número de GPU, VRAM, versiones de controlador y CUDA;
-- recuento exacto de parámetros y tipo numérico;
-- tamaño del micro-lote, longitud de secuencia y acumulación de gradientes;
-- memoria estimada y medida de parámetros, gradientes, optimizador y activaciones;
-- implementación de atención y asignaciones temporales máximas;
-- rendimiento de CPU, RAM y almacenamiento del cargador de datos;
-- tiempo de paso medido, tokens por segundo y utilización;
-- tamaño del checkpoint, tiempo de escritura y espacio libre en disco.
+Los runners estándar son gratuitos y sin límite de minutos para repositorios públicos. Esta condición no debe extrapolarse a repositorios privados ni a runners de mayor tamaño. Referencia: [GitHub-hosted runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners).
 
-Que los parámetros quepan en memoria no garantiza que el paso hacia delante y hacia atrás vaya a completarse: también cuentan las activaciones, estados del optimizador, espacios de trabajo temporales, fragmentación y búferes de comunicación. La implementación actual todavía no ofrece un estimador de adecuación al hardware validado. No se debe decidir el lanzamiento usando únicamente cálculos aproximados del número de parámetros.
+## Límites prácticos
+
+- Cada trabajo de Actions se ejecuta en una máquina virtual nueva. Los trabajos paralelos no comparten memoria, disco, procesos ni GPU.
+- El disco es efímero. Los 14 GB son capacidad nominal, no espacio libre para datasets o checkpoints; sistema operativo, herramientas y dependencias consumen parte.
+- La RAM anunciada no está íntegramente disponible para PyTorch. El sistema, los procesos auxiliares, el cargador de datos, los pesos, gradientes, estados del optimizador y activaciones compiten por ella.
+- El runner estándar no ofrece una GPU NVIDIA/CUDA. La selección automática de precisión debe acabar en FP32 sobre CPU.
+- Las máquinas se destruyen al terminar el trabajo. Los resultados que deban conservarse se publicarán como artefactos pequeños y no sensibles, con retención explícita. No usar Actions como almacenamiento de corpus, modelos tutores ni checkpoints persistentes.
+- Las imágenes `-latest` pueden cambiar. Registrar las especificaciones observadas en cada ejecución y no tratar la tabla publicada como benchmark del rendimiento de PyTorch.
+
+## Uso admitido en esta fase
+
+El runner gratuito sirve para:
+
+1. Ruff, comprobaciones de paquete y pruebas unitarias.
+2. Pruebas de integración de arquitectura, tokenizador, optimizador y checkpoints.
+3. Entrenamientos diminutos de humo en CPU, con corpus sintético temporal y número de pasos acotado.
+4. Verificación de que la inicialización del estudiante es aleatoria y no importa pesos de tutores.
+5. Pruebas de reproducibilidad y evaluación de métricas sobre muestras pequeñas.
+
+No es el entorno para preentrenamiento prolongado, generación masiva de corpus, entrenamiento distribuido, ni para validar escalas de cientos de millones o miles de millones de parámetros.
+
+## Perfiles y decisión de escala
+
+| Perfil | Parámetros objetivo | Decisión actual |
+|---|---:|---|
+| tiny | 9.964.160 | Perfil operativo para CI y experimentos CPU pequeños |
+| seed-0 | 147.909.120 | No habilitar como objetivo de Actions hasta medir RAM máxima, tiempo por paso y estabilidad |
+| seed-1 | 958.467.072 | Fuera del entorno gratuito actual |
+| seed-2 | 6.993.518.592 | Fuera del entorno gratuito actual |
+
+Los perfiles seed-0, seed-1 y seed-2 permanecen como configuraciones de investigación, no como promesas de que el runner puede ejecutarlos. No reducir el tamaño de RONIN a partir de una estimación de parámetros aislada ni afirmar que un perfil cabe sin medir el proceso completo.
+
+## Diagnóstico obligatorio por ejecución
+
+Antes de cualquier experimento no trivial, registrar:
+
+- etiqueta y sistema operativo del runner;
+- CPU detectada y memoria total/disponible;
+- espacio libre antes y después de instalar dependencias;
+- versión de Python y PyTorch;
+- disponibilidad CUDA y número/nombre de dispositivos;
+- parámetros, precisión, micro-lote, longitud de secuencia y acumulación;
+- pico de RAM, tiempo por paso, tokens por segundo y estado final;
+- tamaño del checkpoint y espacio libre restante.
+
+Los valores publicados por GitHub son especificaciones de referencia; los valores observados por el propio workflow son la evidencia del experimento.
+
+## Regla de promoción
+
+Un perfil solo puede pasar de «objetivo» a «validado en hardware» si existe un workflow reproducible que termina correctamente y conserva un informe con las mediciones anteriores. No se deben inferir tokens por segundo, duración de entrenamiento, capacidad de generalización ni coste a partir del número de parámetros.
+
+Los recursos de Actions son adecuados para construir y auditar RONIN desde cero, no para fingir que ya disponemos de un clúster de entrenamiento.
