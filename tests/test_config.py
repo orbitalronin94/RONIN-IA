@@ -12,6 +12,6 @@ def test_unknown_profile_fails():
     try:
         get_profile("not-a-profile")
     except ValueError as exc:
-        assert "perfil desconocido" in str(exc)
+        assert "perfil desconocido" in str(exc).lower()
     else:
         raise AssertionError("unknown profile should fail")
