@@ -1,4 +1,4 @@
-"""Auditable feature registry; declarations are not implementation evidence."""
+"""Registro auditable de capacidades; las declaraciones no son evidencia."""
 
 from __future__ import annotations
 
@@ -22,65 +22,63 @@ class Feature:
     evidence: str | None = None
 
 
-# Exactly 50 capabilities: 16 training, 8 data, 8 evaluation,
-# 6 monitoring, 5 deployment and 7 testing.
 _FEATURES = [
-    # Training (16)
-    ("model_architecture", "training", "Decoder-only causal Transformer", "tiny", Status.IMPLEMENTED, "ronin/models/transformer.py"),
-    ("random_initialization", "training", "Initialize all base-model weights locally", "tiny", Status.IMPLEMENTED, "ronin/models/transformer.py"),
-    ("adamw", "training", "AdamW optimizer", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
-    ("gradient_accumulation", "training", "Accumulate gradients across microbatches", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
-    ("gradient_clipping", "training", "Clip global gradient norm", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
-    ("lr_warmup_cosine", "training", "Linear warmup and cosine decay", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
-    ("mixed_precision", "training", "Runtime precision selection with safe fallback", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
-    ("nonfinite_loss_guard", "training", "Stop on NaN or infinite loss", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
-    ("checkpoint_save", "training", "Atomic model and optimizer checkpoint save", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
-    ("checkpoint_resume", "training", "Restore model optimizer scaler and RNG state", "tiny", Status.IMPLEMENTED, "ronin/training/checkpoint.py"),
-    ("activation_checkpointing", "training", "Recompute activations to reduce memory", "seed-0", Status.PLANNED, None),
-    ("loss_spike_detection", "training", "Detect and diagnose abrupt loss spikes", "seed-0", Status.PLANNED, None),
-    ("early_stopping", "training", "Optional validation-driven early stopping", "seed-0", Status.PLANNED, None),
-    ("distributed_training", "training", "Multi-GPU distributed training", "seed-1", Status.PLANNED, None),
-    ("optimizer_state_sharding", "training", "Shard optimizer state across devices", "seed-1", Status.PLANNED, None),
-    ("training_resume_test", "training", "Test checkpoint resume and sampler state", "tiny", Status.IMPLEMENTED, "tests/test_training.py"),
-    # Data (8)
-    ("byte_tokenizer", "data", "Reversible UTF-8 byte tokenizer baseline", "tiny", Status.IMPLEMENTED, "ronin/tokenizer/byte.py"),
-    ("text_file_loader", "data", "Load UTF-8 text into token IDs", "tiny", Status.IMPLEMENTED, "ronin/data/batches.py"),
-    ("next_token_batches", "data", "Deterministic next-token window batches", "tiny", Status.IMPLEMENTED, "ronin/data/batches.py"),
-    ("corpus_provenance", "data", "Record source and license provenance", "seed-0", Status.PLANNED, None),
-    ("exact_deduplication", "data", "Remove exact duplicate documents", "seed-0", Status.PLANNED, None),
-    ("near_deduplication", "data", "Remove near-duplicate documents", "seed-0", Status.PLANNED, None),
-    ("deterministic_sharding", "data", "Create reproducible corpus shards", "seed-0", Status.PLANNED, None),
-    ("mixture_scheduler", "data", "Sample data sources by configured mixture", "seed-1", Status.PLANNED, None),
-    # Evaluation (8)
-    ("training_loss", "evaluation", "Track next-token training loss", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
-    ("validation_loss", "evaluation", "Evaluate held-out validation loss", "tiny", Status.IMPLEMENTED, "ronin/evaluation/metrics.py"),
-    ("perplexity", "evaluation", "Report tokenizer-scoped perplexity", "tiny", Status.IMPLEMENTED, "ronin/evaluation/metrics.py"),
-    ("bits_per_byte", "evaluation", "Normalize comparisons across tokenizers", "tiny", Status.IMPLEMENTED, "ronin/evaluation/metrics.py"),
-    ("generation_smoke_test", "evaluation", "Test autoregressive generation", "tiny", Status.IMPLEMENTED, "tests/test_evaluation_inference.py"),
-    ("regression_benchmarks", "evaluation", "Versioned prompt and output regressions", "seed-1", Status.PLANNED, None),
-    ("data_leakage_checks", "evaluation", "Check split leakage and overlap", "seed-1", Status.PLANNED, None),
-    ("human_evaluation", "evaluation", "Structured human quality assessment", "seed-2", Status.PLANNED, None),
-    # Monitoring (6)
-    ("console_loss_log", "monitoring", "Return per-step scalar losses to the caller", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
-    ("learning_rate_log", "monitoring", "Record effective learning rate", "seed-0", Status.PLANNED, None),
-    ("tokens_per_second", "monitoring", "Measure throughput", "seed-0", Status.PLANNED, None),
-    ("gradient_norm_log", "monitoring", "Record gradient norm", "seed-0", Status.PLANNED, None),
-    ("hardware_telemetry", "monitoring", "Record accelerator and memory telemetry", "seed-1", Status.PLANNED, None),
-    ("experiment_tracking", "monitoring", "Persist searchable run metadata", "seed-1", Status.PLANNED, None),
-    # Deployment (5)
-    ("local_generation_api", "deployment", "Local generation interface", "seed-0", Status.PLANNED, None),
-    ("checkpoint_export", "deployment", "Versioned model checkpoint export", "seed-0", Status.PLANNED, None),
-    ("inference_batching", "deployment", "Batch independent inference requests", "seed-1", Status.PLANNED, None),
-    ("quantized_inference", "deployment", "Validated quantized inference path", "seed-2", Status.PLANNED, None),
-    ("deployment_smoke_test", "deployment", "Verify packaged inference deployment", "seed-1", Status.PLANNED, None),
-    # Tests (7)
-    ("config_tests", "tests", "Validate model and training configs", "tiny", Status.IMPLEMENTED, "tests/test_config.py"),
-    ("model_tests", "tests", "Test model shapes, loss and tied weights", "tiny", Status.IMPLEMENTED, "tests/test_model.py"),
-    ("data_tokenizer_tests", "tests", "Test tokenizer and deterministic batches", "tiny", Status.IMPLEMENTED, "tests/test_data_tokenizer.py"),
-    ("training_step_tests", "tests", "Test optimizer step and finite gradients", "tiny", Status.IMPLEMENTED, "tests/test_training.py"),
-    ("checkpoint_roundtrip_tests", "tests", "Test save/load roundtrip", "tiny", Status.IMPLEMENTED, "tests/test_training.py"),
-    ("integration_pipeline_tests", "tests", "Test end-to-end tiny training pipeline", "seed-0", Status.PLANNED, None),
-    ("ci_quality_gates", "tests", "Run lint and tests on GitHub Actions", "tiny", Status.IMPLEMENTED, ".github/workflows/ci.yml"),
+    # Entrenamiento (16)
+    ("model_architecture", "training", "Transformer causal con RoPE, RMSNorm, SwiGLU y GQA configurable", "tiny", Status.IMPLEMENTED, "ronin/models/transformer.py"),
+    ("random_initialization", "training", "Inicialización local de todos los pesos del estudiante", "tiny", Status.IMPLEMENTED, "ronin/models/transformer.py"),
+    ("adamw", "training", "Optimizador AdamW", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
+    ("gradient_accumulation", "training", "Acumulación de gradientes entre micro lotes", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
+    ("gradient_clipping", "training", "Recorte de la norma global de gradiente", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
+    ("lr_warmup_cosine", "training", "Calentamiento lineal y decaimiento coseno", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
+    ("mixed_precision", "training", "Selección de precisión en tiempo de ejecución", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
+    ("nonfinite_loss_guard", "training", "Detención ante pérdida NaN o infinita", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
+    ("checkpoint_save", "training", "Guardado atómico de modelo y optimizador", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
+    ("checkpoint_resume", "training", "Restauración de modelo, optimizador, escalador y RNG", "tiny", Status.IMPLEMENTED, "ronin/training/checkpoint.py"),
+    ("activation_checkpointing", "training", "Recalcular activaciones para reducir memoria", "seed-0", Status.PLANNED, None),
+    ("loss_spike_detection", "training", "Detectar y diagnosticar picos abruptos de pérdida", "seed-0", Status.PLANNED, None),
+    ("early_stopping", "training", "Parada opcional basada en validación", "seed-0", Status.PLANNED, None),
+    ("distributed_training", "training", "Entrenamiento distribuido entre varias GPU", "seed-1", Status.PLANNED, None),
+    ("optimizer_state_sharding", "training", "Fragmentación del estado del optimizador", "seed-1", Status.PLANNED, None),
+    ("training_resume_test", "training", "Prueba de reanudación y estado del muestreador", "tiny", Status.IMPLEMENTED, "tests/test_training.py"),
+    # Datos (8)
+    ("byte_tokenizer", "data", "Tokenizador reversible de bytes UTF-8", "tiny", Status.IMPLEMENTED, "ronin/tokenizer/byte.py"),
+    ("text_file_loader", "data", "Lectura de texto UTF-8 y conversión a tokens", "tiny", Status.IMPLEMENTED, "ronin/data/batches.py"),
+    ("next_token_batches", "data", "Lotes deterministas para siguiente token", "tiny", Status.IMPLEMENTED, "ronin/data/batches.py"),
+    ("corpus_provenance", "data", "Registrar procedencia y licencia de fuentes", "seed-0", Status.PLANNED, None),
+    ("exact_deduplication", "data", "Eliminar documentos duplicados exactos", "seed-0", Status.PLANNED, None),
+    ("near_deduplication", "data", "Eliminar documentos casi duplicados", "seed-0", Status.PLANNED, None),
+    ("deterministic_sharding", "data", "Crear fragmentos reproducibles de corpus", "seed-0", Status.PLANNED, None),
+    ("mixture_scheduler", "data", "Muestrear fuentes mediante una mezcla configurable", "seed-1", Status.PLANNED, None),
+    # Evaluación (8)
+    ("training_loss", "evaluation", "Seguimiento de pérdida de entrenamiento", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
+    ("validation_loss", "evaluation", "Evaluación de pérdida en validación", "tiny", Status.IMPLEMENTED, "ronin/evaluation/metrics.py"),
+    ("perplexity", "evaluation", "Perplejidad asociada al tokenizador", "tiny", Status.IMPLEMENTED, "ronin/evaluation/metrics.py"),
+    ("bits_per_byte", "evaluation", "Normalización de comparaciones entre tokenizadores", "tiny", Status.IMPLEMENTED, "ronin/evaluation/metrics.py"),
+    ("generation_smoke_test", "evaluation", "Prueba de generación autorregresiva", "tiny", Status.IMPLEMENTED, "tests/test_evaluation_inference.py"),
+    ("regression_benchmarks", "evaluation", "Regresiones de prompts y salidas versionadas", "seed-1", Status.PLANNED, None),
+    ("data_leakage_checks", "evaluation", "Comprobación de fugas y solapamiento entre particiones", "seed-1", Status.PLANNED, None),
+    ("human_evaluation", "evaluation", "Evaluación estructurada de calidad humana", "seed-2", Status.PLANNED, None),
+    # Monitorización (6)
+    ("console_loss_log", "monitoring", "Devolver pérdidas por paso al proceso llamante", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
+    ("learning_rate_log", "monitoring", "Registrar tasa de aprendizaje efectiva", "seed-0", Status.PLANNED, None),
+    ("tokens_per_second", "monitoring", "Medir rendimiento en tokens por segundo", "seed-0", Status.PLANNED, None),
+    ("gradient_norm_log", "monitoring", "Registrar norma del gradiente", "seed-0", Status.PLANNED, None),
+    ("hardware_telemetry", "monitoring", "Registrar telemetría de acelerador y memoria", "seed-1", Status.PLANNED, None),
+    ("experiment_tracking", "monitoring", "Persistir metadatos consultables de experimentos", "seed-1", Status.PLANNED, None),
+    # Despliegue (5)
+    ("local_generation_api", "deployment", "Interfaz local de generación", "seed-0", Status.PLANNED, None),
+    ("checkpoint_export", "deployment", "Exportación versionada de checkpoints", "seed-0", Status.PLANNED, None),
+    ("inference_batching", "deployment", "Agrupar solicitudes independientes de inferencia", "seed-1", Status.PLANNED, None),
+    ("quantized_inference", "deployment", "Ruta de inferencia cuantizada y validada", "seed-2", Status.PLANNED, None),
+    ("deployment_smoke_test", "deployment", "Verificar despliegue empaquetado de inferencia", "seed-1", Status.PLANNED, None),
+    # Pruebas (7)
+    ("config_tests", "tests", "Validar configuración de modelo y entrenamiento", "tiny", Status.IMPLEMENTED, "tests/test_config.py"),
+    ("model_tests", "tests", "Probar dimensiones, pérdida y pesos compartidos", "tiny", Status.IMPLEMENTED, "tests/test_model.py"),
+    ("data_tokenizer_tests", "tests", "Probar tokenizador y lotes deterministas", "tiny", Status.IMPLEMENTED, "tests/test_data_tokenizer.py"),
+    ("training_step_tests", "tests", "Probar paso de optimización y gradientes finitos", "tiny", Status.IMPLEMENTED, "tests/test_training.py"),
+    ("checkpoint_roundtrip_tests", "tests", "Probar ida y vuelta de checkpoints", "tiny", Status.IMPLEMENTED, "tests/test_training.py"),
+    ("integration_pipeline_tests", "tests", "Probar canalización completa de entrenamiento tiny", "seed-0", Status.PLANNED, None),
+    ("ci_quality_gates", "tests", "Ejecutar lint y pruebas en GitHub Actions", "tiny", Status.IMPLEMENTED, ".github/workflows/ci.yml"),
 ]
 
 FEATURES: tuple[Feature, ...] = tuple(Feature(*row) for row in _FEATURES)
@@ -91,28 +89,40 @@ PROFILE_ORDER = {name: index for index, name in enumerate(PROFILES)}
 def validate_registry() -> None:
     keys = [feature.key for feature in FEATURES]
     if len(FEATURES) != 50 or len(set(keys)) != len(keys):
-        raise ValueError("feature registry must contain exactly 50 unique features")
-    expected = {"training": 16, "data": 8, "evaluation": 8, "monitoring": 6, "deployment": 5, "tests": 7}
+        raise ValueError("el registro debe contener exactamente 50 capacidades únicas")
+    expected = {
+        "training": 16,
+        "data": 8,
+        "evaluation": 8,
+        "monitoring": 6,
+        "deployment": 5,
+        "tests": 7,
+    }
     actual = {category: sum(f.category == category for f in FEATURES) for category in expected}
     if actual != expected:
-        raise ValueError(f"category counts mismatch: {actual}")
+        raise ValueError(f"recuento de categorías incoherente: {actual}")
 
 
 def features(category: str | None = None) -> list[Feature]:
     validate_registry()
-    return [f for f in FEATURES if category is None or f.category == category]
+    return [feature for feature in FEATURES if category is None or feature.category == category]
 
 
 def readiness(profile: str) -> dict[str, object]:
     if profile not in PROFILE_ORDER:
-        raise ValueError(f"unknown profile {profile!r}")
+        raise ValueError(f"perfil desconocido {profile!r}")
     eligible = [
-        f for f in FEATURES
-        if PROFILE_ORDER[f.min_profile] <= PROFILE_ORDER[profile]
+        feature
+        for feature in FEATURES
+        if PROFILE_ORDER[feature.min_profile] <= PROFILE_ORDER[profile]
     ]
-    implemented = [f for f in eligible if f.status == Status.IMPLEMENTED and f.evidence]
-    planned = [f for f in eligible if f.status == Status.PLANNED]
-    blocked = [f for f in eligible if f.status == Status.BLOCKED]
+    implemented = [
+        feature
+        for feature in eligible
+        if feature.status == Status.IMPLEMENTED and feature.evidence
+    ]
+    planned = [feature for feature in eligible if feature.status == Status.PLANNED]
+    blocked = [feature for feature in eligible if feature.status == Status.BLOCKED]
     return {
         "profile": profile,
         "eligible": len(eligible),
@@ -120,7 +130,7 @@ def readiness(profile: str) -> dict[str, object]:
         "planned": len(planned),
         "blocked": len(blocked),
         "readiness_percent": round(100 * len(implemented) / max(1, len(eligible)), 1),
-        "features": [asdict(f) for f in eligible],
+        "features": [asdict(feature) for feature in eligible],
     }
 
 
