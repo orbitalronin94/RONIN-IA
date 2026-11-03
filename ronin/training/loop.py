@@ -140,7 +140,7 @@ def train(
         scaler.update()
         losses.append(accumulated / config.gradient_accumulation_steps)
 
-        if (step + 1) % config.checkpoint_every == 0:
+        if (step + 1) % config.checkpoint_every == 0 or step + 1 == config.max_steps:
             save_checkpoint(
                 Path(checkpoint_dir) / f"step-{step + 1:08d}.pt",
                 model,
