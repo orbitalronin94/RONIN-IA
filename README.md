@@ -100,7 +100,8 @@ tests/                   Unit and integration tests
 - [Training operations](docs/TRAINING.md)
 - [Evaluation](docs/EVALUATION.md)
 - [Hardware planning](docs/HARDWARE.md)
-- [Roadmap](docs/ROADMAP.md)\n- [External tutor and first model](docs/TEACHER_WORKFLOW.md)
+- [Roadmap](docs/ROADMAP.md)
+- [External tutor and first model](docs/TEACHER_WORKFLOW.md)
 
 ## Feature manifest
 
