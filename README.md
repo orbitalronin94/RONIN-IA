@@ -41,6 +41,12 @@ python scripts/download_teacher_models.py --model gpt-neo-125m
 
 La guía completa está en [Modelos auxiliares locales](docs/TEACHER_WORKFLOW.md).
 
+## Arquitectura del estudiante
+
+El modelo estudiante es un Transformer causal decoder-only implementado en PyTorch. La arquitectura incorpora RoPE, RMSNorm, SwiGLU y atención agrupada por consultas (GQA configurable). Los embeddings de tokens y la proyección de salida comparten pesos.
+
+Todos los pesos se inicializan localmente. No se cargan pesos de tutores ni checkpoints externos en el constructor del modelo. Los tutores aportan, como máximo, ejemplos de texto con procedencia registrada.
+
 ## Escalera de desarrollo de RONIN
 
 | Perfil | Recuento analítico objetivo | Hardware previsto | Propósito |
@@ -54,7 +60,7 @@ Son objetivos de planificación, no garantías de ajuste en memoria. Los recuent
 
 ## Implementación inicial
 
-- Transformer causal decoder-only en PyTorch, con embeddings de entrada y salida compartidos e inicialización aleatoria.
+- Transformer causal decoder-only en PyTorch con RoPE, RMSNorm, SwiGLU y GQA configurable.
 - Tokenizador de bytes y lotes deterministas para predicción del siguiente token.
 - Entrenador AdamW compartido, acumulación de gradientes, recorte, calentamiento y decaimiento coseno.
 - Protección ante pérdidas y gradientes no finitos.
@@ -129,6 +135,7 @@ tests/                   Pruebas unitarias y de integración
 - [Planificación de hardware](docs/HARDWARE.md)
 - [Hoja de ruta](docs/ROADMAP.md)
 - [Modelos auxiliares locales](docs/TEACHER_WORKFLOW.md)
+- [Auditoría e integración del código de referencia](docs/AUDIT_INTEGRATION.md)
 
 ## Reglas de evaluación
 
@@ -139,9 +146,9 @@ tests/                   Pruebas unitarias y de integración
 - Informar referencias y variabilidad cuando proceda.
 - No fabricar resultados de benchmarks.
 
-## Contrato de contribución y ejecución
+## Reglas de contribución
 
-Trabajar directamente sobre `main` cuando el propietario del repositorio lo haya autorizado expresamente. Hacer cambios pequeños y commits secuenciales. Leer el contenido actual antes de sustituir un archivo. Ejecutar las pruebas pertinentes tras cada cambio coherente. No subir secretos, corpus privados, checkpoints ni conjuntos de datos generados. Si no se puede ejecutar un comando en el entorno disponible, indicarlo y proporcionar el comando exacto para una máquina adecuada.
+Trabajar en ramas pequeñas y commits secuenciales. Leer el contenido actual antes de sustituir un archivo. Ejecutar las pruebas pertinentes tras cada cambio coherente. No subir secretos, corpus privados, checkpoints ni conjuntos de datos generados. Si no se puede ejecutar un comando en el entorno disponible, indicarlo y proporcionar el comando exacto para una máquina adecuada.
 
 ## Licencia
 
