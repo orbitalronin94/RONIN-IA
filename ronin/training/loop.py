@@ -13,7 +13,6 @@ from torch import nn
 
 from ronin.config import TrainingConfig
 from ronin.training.checkpoint import load_checkpoint
-from ronin.utils.repro import seed_everything
 
 
 def resolve_precision(requested: str, device: torch.device) -> torch.dtype | None:
@@ -83,12 +82,11 @@ def train(
 ) -> list[float]:
     """Train to config.max_steps; optionally resume from a full checkpoint.
 
-    Seed the model before construction with seed_everything(config.seed) when
-    reproducible initialization is required. Resume requires an unchanged
-    training config and a batch source whose generator state can be restored.
+    For reproducible initialization, call seed_everything(config.seed) before
+    constructing the model. This function deliberately does not reseed after
+    construction, which would make initialization depend on caller order.
     """
     config.validate()
-    seed_everything(config.seed)
     device = torch.device(device)
     model.to(device)
     optimizer = torch.optim.AdamW(
