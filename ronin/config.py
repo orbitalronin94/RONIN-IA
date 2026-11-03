@@ -59,10 +59,12 @@ class TrainingConfig:
 
 
 PROFILES: dict[str, tuple[ModelConfig, TrainingConfig]] = {
+    # ByteTokenizer is the tiny-profile tokenizer, hence vocab_size=256.
     "tiny": (
-        ModelConfig(vocab_size=4_096, context_length=128, n_layers=2, n_heads=4, d_model=128),
+        ModelConfig(vocab_size=256, context_length=128, n_layers=2, n_heads=4, d_model=128),
         TrainingConfig(batch_size=4, max_steps=100, warmup_steps=10, checkpoint_every=50),
     ),
+    # Larger profiles require a separately trained, versioned tokenizer.
     "seed-0": (
         ModelConfig(vocab_size=16_384, context_length=1_024, n_layers=12, n_heads=12, d_model=768),
         TrainingConfig(batch_size=2, gradient_accumulation_steps=16, max_steps=10_000),
@@ -79,7 +81,7 @@ PROFILES: dict[str, tuple[ModelConfig, TrainingConfig]] = {
 
 
 def get_profile(name: ProfileName | str) -> tuple[ModelConfig, TrainingConfig]:
-    """Return a fresh immutable profile pair and validate it."""
+    """Return a validated immutable profile pair."""
     try:
         model, training = PROFILES[name]
     except KeyError as exc:
