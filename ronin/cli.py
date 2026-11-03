@@ -18,6 +18,7 @@ def build_parser() -> argparse.ArgumentParser:
         ("count-params", "calculate model parameters from architecture"),
         ("features", "list the canonical 50-feature registry"),
         ("readiness", "show evidence-based profile readiness"),
+        ("matrix", "show readiness across all model profiles"),
         ("roadmap", "show the implementation sequence"),
     ):
         command = sub.add_parser(name, help=help_text)
@@ -41,6 +42,16 @@ def main() -> None:
         print(json.dumps([f.__dict__ for f in selected], indent=2, default=str))
     elif args.command == "readiness":
         print(json.dumps(readiness(args.profile), indent=2, default=str))
+    elif args.command == "matrix":
+        matrix = {
+            name: {
+                key: value
+                for key, value in readiness(name).items()
+                if key != "features"
+            }
+            for name in PROFILES
+        }
+        print(json.dumps(matrix, indent=2, default=str))
     elif args.command == "roadmap":
         print(
             "1. Bootstrap and CI\n"
