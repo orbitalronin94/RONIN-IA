@@ -84,8 +84,8 @@ def train(
     """Train to config.max_steps; optionally resume from a full checkpoint.
 
     Seed the model before construction with seed_everything(config.seed) when
-    reproducible initialization is required. Resume requires the same resolved
-    training configuration and a batch source whose generator state is saved.
+    reproducible initialization is required. Resume requires an unchanged
+    training config and a batch source whose generator state can be restored.
     """
     config.validate()
     seed_everything(config.seed)
@@ -100,17 +100,14 @@ def train(
     batch_generator = getattr(batches, "generator", None)
     start_step = 0
     if resume_from is not None:
-        checkpoint = torch.load(resume_from, map_location="cpu", weights_only=False)
-        saved_config = checkpoint.get("training_config")
-        if saved_config != config.__dict__:
-            raise ValueError("resume configuration differs from checkpoint training_config")
         start_step = load_checkpoint(
             resume_from,
             model,
             optimizer=optimizer,
             scaler=scaler,
             batch_generator=batch_generator if isinstance(batch_generator, torch.Generator) else None,
-            map_location=device,
+            map_location="cpu",
+            expected_config=config.__dict__,
         )
         if start_step > config.max_steps:
             raise ValueError("checkpoint step exceeds configured max_steps")
