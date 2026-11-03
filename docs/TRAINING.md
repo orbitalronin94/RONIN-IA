@@ -8,14 +8,16 @@ The trainer is shared by every model profile. Profile configuration changes mode
 - Linear warmup followed by cosine decay to a configured minimum learning rate.
 - Gradient accumulation and global gradient clipping.
 - Runtime precision selection: BF16 on supported CUDA devices, otherwise FP16 on CUDA, FP32 on CPU. Explicit unsupported precision requests fail loudly.
-- Non-finite loss detection.
-- Periodic atomic checkpoint writes containing model, optimizer, step and RNG state.
+- Non-finite loss and gradient-norm detection.
+- Periodic atomic checkpoint writes containing model, optimizer, scaler, step, Python/NumPy/CPU/CUDA RNG and the next-token sampler generator state.
+- Resume from a checkpoint with strict training-config equality; the closed-form learning-rate schedule is reconstructed from the global step.
+
+Resume currently supports the deterministic next-token batch sampler. A future streaming/distributed data loader must provide its own serializable cursor/state before it can claim exact resume semantics.
 
 ## Required next steps
 
-- Add checkpoint loading and exact resume, including Python, NumPy, CPU and CUDA RNG states.
 - Add validation loop and best-checkpoint selection.
-- Add GradScaler overflow/skipped-step telemetry and scheduler state.
+- Add GradScaler overflow/skipped-step telemetry.
 - Add activation checkpointing and distributed data/model parallel strategies.
 - Add loss-spike detection, diagnostics and bounded recovery. Never silently roll back weights without recording the event.
 - Add early stopping only for explicitly configured finite-data experiments; it must not silently terminate long pretraining runs.
