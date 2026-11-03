@@ -22,7 +22,7 @@ ALLOWED_MODELS = {
 ALLOW_PATTERNS = [
     "config.json", "generation_config.json", "model.safetensors",
     "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json",
-    "vocab.json", "merges.txt", "added_tokens.json",
+    "vocab.json", "merges.txt", "added_tokens.json", "README.md", "LICENSE*",
 ]
 
 
@@ -44,11 +44,7 @@ def download_model(name: str, destination: Path) -> Path:
     repo_id = selected["repo_id"]
     info = HfApi().model_info(repo_id, files_metadata=True)
     card_data = info.card_data
-    license_id = (
-        getattr(card_data, "license", None)
-        if card_data is not None
-        else None
-    )
+    license_id = getattr(card_data, "license", None) if card_data is not None else None
     if license_id is None and isinstance(card_data, dict):
         license_id = card_data.get("license")
     if str(license_id).lower() != "mit":
