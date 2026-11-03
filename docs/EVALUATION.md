@@ -1,26 +1,27 @@
-# Evaluation
+# Evaluación
 
-Evaluation must be reproducible and tied to exact model, tokenizer, corpus and configuration versions.
+La evaluación debe ser reproducible y estar vinculada a versiones exactas del modelo, tokenizador, corpus y configuración.
 
-## Required measurements
+## Mediciones obligatorias
 
-- Next-token validation cross-entropy and perplexity.
-- Bits per byte (BPB) for comparisons across tokenizers/tokenization schemes.
-- Tokens processed, validation examples and uncertainty/variance where meaningful.
-- Generation smoke tests: output shape, EOS/stop behavior, deterministic sampling mode and context-window enforcement.
-- Regression suite for known prompts and data leakage checks.
-- Baselines trained under documented conditions.
+- Entropía cruzada y perplejidad sobre datos de validación.
+- Bits por byte (BPB) para comparaciones entre tokenizadores o esquemas de tokenización.
+- Tokens procesados, ejemplos de validación e incertidumbre/variabilidad cuando tenga sentido.
+- Pruebas de generación: forma de la salida, comportamiento de EOS/parada, muestreo determinista y límites de contexto.
+- Pruebas de regresión para prompts conocidos y detección de filtraciones de datos.
+- Referencias entrenadas bajo condiciones documentadas.
 
-Perplexity is tokenizer- and corpus-dependent. Do not compare raw perplexity values across different tokenizers as if they were directly equivalent; report BPB or another justified normalized metric. A synthetic-data or one-batch overfit test validates mechanics only and is not evidence of language competence or generalization.
+La perplejidad depende del tokenizador y del corpus. No se deben comparar valores brutos de perplejidad entre tokenizadores distintos como si fueran equivalentes; se debe informar BPB u otra métrica normalizada justificada. Una prueba con datos sintéticos o el sobreajuste de un único lote solo valida la mecánica; no demuestra competencia lingüística ni generalización.
 
-## Acceptance gates
+## Criterios de aceptación
 
-A training run is valid only if:
-1. Dataset manifests and licenses are complete.
-2. Train/validation/test isolation is verified.
-3. Model and tokenizer vocabularies match.
-4. Loss and gradients remain finite.
-5. Checkpoint save and reload reproduce outputs within documented numeric tolerance.
-6. Evaluation is run on held-out data and results are saved with run metadata.
+Una ejecución de entrenamiento solo es válida si:
 
-No benchmark score, quality claim or readiness badge may be invented.
+1. Los manifiestos y licencias de los conjuntos de datos están completos.
+2. La separación entre entrenamiento, validación y prueba está verificada.
+3. Los vocabularios del modelo y del tokenizador coinciden.
+4. Las pérdidas y los gradientes permanecen finitos.
+5. Guardar y volver a cargar un checkpoint reproduce las salidas dentro de una tolerancia numérica documentada.
+6. La evaluación se realiza sobre datos no vistos y sus resultados se guardan con los metadatos de la ejecución.
+
+No se inventarán puntuaciones de benchmarks, afirmaciones de calidad ni indicadores de preparación.

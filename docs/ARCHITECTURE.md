@@ -1,24 +1,26 @@
-# Architecture
+# Arquitectura
 
-## Current implementation
+## Implementación actual
 
-RONIN starts with a decoder-only Transformer language model. Token embeddings and output projection are tied. Attention is causal and uses PyTorch scaled dot-product attention. Parameters are initialized locally with a normal distribution; no checkpoint-loading path is invoked by model construction.
+RONIN comienza con un modelo de lenguaje Transformer causal de tipo decoder-only, implementado en PyTorch. Los embeddings de tokens y la proyección de salida comparten pesos. La atención es causal y utiliza la implementación escalada de atención de PyTorch. Los parámetros se inicializan localmente con una distribución normal; al construir el modelo no se carga ningún checkpoint externo.
 
-The initial byte tokenizer is a reversible UTF-8 byte mapping (IDs 0–255). It is a bootstrap baseline for pipeline tests, not the final tokenizer. Model configurations use a larger vocabulary for future learned tokenizers; keep tokenizer vocabulary and model vocabulary equal in any runnable experiment.
+El tokenizador inicial representa el texto como bytes UTF-8 reversibles (identificadores 0–255). Es una base provisional para probar la canalización, no el tokenizador definitivo. La dimensión del vocabulario del tokenizador y la del modelo deben coincidir en todo experimento ejecutable.
 
-## Scale profiles
+## Perfiles de escala
 
-Profiles are centralized in `ronin/config.py`. The same `RoninLM` implementation is used for all profiles. Parameter counts must always be computed from instantiated modules. Target sizes in the README are aspirations and must not be presented as measured counts.
+Los perfiles se centralizan en `ronin/config.py`. Todos utilizan la misma implementación `RoninLM`. Los recuentos de parámetros se deben calcular a partir de módulos instanciados. Los tamaños objetivo del README son aspiraciones y no deben presentarse como recuentos medidos.
 
-## Invariants
+## Invariantes
 
-- Decoder-only causal masking; no future-token leakage.
-- Explicit context-length enforcement.
-- Stable tensor shapes: input `[batch, sequence]`, logits `[batch, sequence, vocab]`.
-- Cross-entropy next-token objective.
-- Embedding/output weight tying is tested.
-- New architecture changes require parameter-count, shape, causality and gradient tests.
+- Máscara causal decoder-only; no puede filtrarse información de tokens futuros.
+- Límite explícito de longitud de contexto.
+- Formas estables: entrada `[lote, secuencia]`, logits `[lote, secuencia, vocabulario]`.
+- Objetivo de entropía cruzada para predecir el siguiente token.
+- El uso compartido de pesos entre embeddings y proyección de salida está probado.
+- Todo cambio de arquitectura requiere pruebas de parámetros, dimensiones, causalidad y gradientes.
 
-## Planned extensions
+## Ampliaciones previstas
 
-Rotary position embeddings, grouped-query attention, configurable feed-forward variants, activation checkpointing and distributed training are not yet part of the bootstrap implementation. Add them behind tested configuration switches; do not fork the training pipeline by profile.
+Las codificaciones posicionales rotatorias, atención agrupada por consultas, variantes configurables de redes feed-forward, checkpointing de activaciones y entrenamiento distribuido todavía no forman parte de la implementación inicial. Deben añadirse mediante opciones de configuración probadas, sin bifurcar la canalización de entrenamiento por perfil.
+
+Los modelos auxiliares MIT se ejecutan fuera de RONIN. Su única salida admitida para el estudiante son ejemplos de texto con procedencia registrada; nunca se reutilizan sus tensores de pesos.

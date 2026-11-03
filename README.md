@@ -1,47 +1,73 @@
 # RONIN-IA
 
-**RONIN** is an original language-model research and engineering project. The goal is to build and train the model from random initialization, with a reproducible data, training, evaluation and deployment pipeline.
+**RONIN** es un proyecto de investigación e ingeniería de modelos de lenguaje. Su propósito es comprobar hasta dónde puede llegar una arquitectura propia entrenada desde una inicialización aleatoria, con un proceso reproducible de datos, entrenamiento, evaluación y despliegue.
 
-- Repository: https://github.com/orbitalronin94/RONIN-IA
-- Canonical branch: `main`
-- Specification: this repository is the source of truth. Implementation, tests, configuration and operational documentation belong here.
-- Status: bootstrap implementation. A feature is not considered implemented until code, tests and evidence exist.
+- Repositorio: https://github.com/orbitalronin94/RONIN-IA
+- Rama principal: `main`
+- Fuente de verdad: este repositorio. El código, las pruebas, las configuraciones y la documentación operativa viven aquí.
+- Estado: implementación inicial. Ninguna función se considera terminada sin código, pruebas y evidencias.
 
-## Non-negotiable principles
+## Principios irrenunciables
 
-1. **Train from scratch.** RONIN base checkpoints start from random initialization. Do not load, merge, fine-tune, distil from, or silently depend on externally pretrained model weights.
-2. **One pipeline, multiple scales.** Tiny, seed-0, seed-1 and seed-2 use the same end-to-end pipeline. Scale is selected by validated configuration, not by maintaining unrelated training implementations.
-3. **Reproducibility.** Record seeds, data manifests, tokenizer version, configuration, software versions and hardware metadata in every run.
-4. **Evidence over flags.** A feature is active only when its implementation and tests pass. A manifest declaration alone is not evidence.
-5. **Honest reporting.** Hardware estimates, throughput, cost and readiness are estimates until measured. Never label a toy run or synthetic-data run as a trained language model.
-6. **Data governance.** Track source, license, provenance, filtering and deduplication for every corpus shard. Do not ingest data whose usage rights are unknown.
+1. **RONIN aprende desde cero.** Todos los pesos del modelo estudiante se inicializan aleatoriamente. No se importan, mezclan ni ajustan pesos de modelos externos dentro de RONIN.
+2. **Tutores locales, no dependencias remotas.** Se permiten modelos auxiliares descargables, gratuitos y con licencia MIT verificada. Se ejecutan localmente y solo aportan texto de entrenamiento. Sus pesos nunca se incorporan al estudiante.
+3. **Licencia comprobada antes de descargar.** El descargador consulta la ficha del modelo, exige la etiqueta exacta `mit`, fija una revisión inmutable y guarda huellas SHA-256. Si la licencia no se verifica, cancela la descarga.
+4. **Un proceso, varias escalas.** Los perfiles tiny, seed-0, seed-1 y seed-2 comparten la misma canalización. El tamaño se define mediante configuraciones validadas.
+5. **Reproducibilidad.** Cada experimento registra semillas, manifiestos de datos, versión del tokenizador, configuración, versiones de software y hardware.
+6. **Evidencias antes que etiquetas.** Una función solo está activa cuando existe implementación y pruebas. Una declaración en el manifiesto no demuestra que funcione.
+7. **Honestidad experimental.** No se presentan pruebas sintéticas ni ejecuciones diminutas como modelos competentes. No se inventan métricas, velocidad, costes ni resultados.
+8. **Gobernanza de datos.** Cada corpus registra procedencia, licencia, permisos, filtrado y deduplicación.
 
-## Model development ladder
+## Modelos auxiliares MIT
 
-| Profile | Analytical parameter count | Intended hardware | Purpose |
+El punto de partida incluye dos modelos de tamaño reducido, disponibles en Hugging Face bajo licencia MIT:
+
+| Alias | Modelo | Parámetros aproximados | Licencia declarada |
+|---|---|---:|---|
+| `gpt2` | `openai-community/gpt2` | 124 M | MIT |
+| `gpt-neo-125m` | `EleutherAI/gpt-neo-125m` | 125 M | MIT |
+
+Fichas oficiales: [GPT-2](https://huggingface.co/openai-community/gpt2) · [GPT-Neo 125M](https://huggingface.co/EleutherAI/gpt-neo-125m).
+
+**Advertencia:** ambos son modelos de base principalmente anglófonos. Sirven para probar la descarga, inferencia local, generación y trazabilidad; no se debe presuponer que producirán buenas explicaciones en castellano. La calidad de cada corpus generado debe revisarse antes de entrenar.
+
+Los modelos se descargan una vez en `models/teachers/` y se reutilizan desde disco. No se consulta ninguna API de generación durante el entrenamiento. Las dependencias de tutores son opcionales:
+
+```bash
+pip install -e '.[teachers]'
+python scripts/download_teacher_models.py --model gpt2
+python scripts/download_teacher_models.py --model gpt-neo-125m
+```
+
+La guía completa está en [Modelos auxiliares locales](docs/TEACHER_WORKFLOW.md).
+
+## Escalera de desarrollo de RONIN
+
+| Perfil | Recuento analítico objetivo | Hardware previsto | Propósito |
 |---|---:|---|---|
-| tiny | 9,964,160 | CPU | Fast smoke tests and pipeline validation |
-| seed-0 | 147,909,120 | 1× RTX 4090 | First meaningful scratch-training experiment |
-| seed-1 | 958,467,072 | 2× A100 40GB | Larger-scale training |
-| seed-2 | 6,993,518,592 | 4× A100 80GB | Larger-scale training |
+| tiny | 9.964.160 | CPU | Pruebas rápidas y validación de la canalización |
+| seed-0 | 147.909.120 | 1× RTX 4090 | Primer experimento relevante desde cero |
+| seed-1 | 958.467.072 | 2× A100 40 GB | Experimento de mayor escala |
+| seed-2 | 6.993.518.592 | 4× A100 80 GB | Escala superior |
 
-Counts are analytical for the current tied-embedding architecture and can be recalculated with `ronin count-params --profile PROFILE`. They are not hardware-fit claims. The 2.8T-parameter MoE concept is out of scope for the initial ladder.
+Son objetivos de planificación, no garantías de ajuste en memoria. Los recuentos deben verificarse con `ronin count-params --profile PERFIL`. El concepto MoE de 2,8 billones de parámetros queda fuera de la primera escalera.
 
-## Current bootstrap implementation
+## Implementación inicial
 
-- Decoder-only causal Transformer, tied token/output embeddings, random initialization.
-- Tiny byte-tokenizer baseline and deterministic next-token batches.
-- Shared AdamW training loop with gradient accumulation, clipping, warmup/cosine schedule and precision selection.
-- Non-finite loss/gradient guards, atomic periodic checkpoint saving and checkpoint resume with optimizer, RNG and sampler state.
-- Autoregressive top-k generation, validation-loss helper, perplexity and BPB metric helpers.
-- 50-feature evidence-aware manifest, readiness and CLI.
-- Unit tests and GitHub Actions CI workflow.
+- Transformer causal decoder-only en PyTorch, con embeddings de entrada y salida compartidos e inicialización aleatoria.
+- Tokenizador de bytes y lotes deterministas para predicción del siguiente token.
+- Entrenador AdamW compartido, acumulación de gradientes, recorte, calentamiento y decaimiento coseno.
+- Protección ante pérdidas y gradientes no finitos.
+- Guardado atómico de checkpoints y reanudación con estado del optimizador y generadores aleatorios.
+- Generación autorregresiva, métricas de pérdida, perplejidad y bits por byte.
+- Registro de capacidades con evidencias y comandos de diagnóstico.
+- Pruebas unitarias y flujo de integración continua.
 
-The full provenance-aware corpus pipeline, learned tokenizer, distributed training and production evaluation are still planned. A declared target is not an implemented feature. The manual [teacher workflow](docs/TEACHER_WORKFLOW.md) can generate a small Spanish tutor corpus from an external API and train the tiny model from random initialization.
+La canalización completa de corpus con procedencia, el tokenizador aprendido, el entrenamiento distribuido y la evaluación de producción siguen pendientes. Un objetivo declarado no equivale a una función implementada.
 
-## Quick start
+## Inicio rápido
 
-Python 3.11+ is required.
+Se requiere Python 3.11 o posterior.
 
 ```bash
 python -m venv .venv
@@ -52,7 +78,7 @@ pytest
 ruff check ronin tests scripts
 ```
 
-Useful commands:
+Comandos útiles:
 
 ```bash
 ronin info --profile tiny
@@ -63,63 +89,60 @@ ronin matrix
 ronin roadmap
 ```
 
-Train the tiny profile only on an operator-supplied, licensed UTF-8 corpus:
+Entrenamiento del perfil tiny con un corpus UTF-8 autorizado:
 
 ```bash
-python scripts/train_text.py --text /path/to/approved-corpus.txt --profile tiny --steps 100
+python scripts/train_text.py --text /ruta/corpus-aprobado.txt --profile tiny --steps 100
 ```
 
-The byte tokenizer is a bootstrap baseline. This script does not create a train/validation/test split and its loss is not a held-out evaluation.
+El tokenizador de bytes es una base provisional. Este comando no crea una separación entre entrenamiento, validación y prueba; su pérdida no es una evaluación independiente.
 
-## Repository layout
+## Estructura del repositorio
 
 ```text
-configs/                 Versioned model and training profiles
-data/manifests/          Corpus provenance and license manifests
-data/raw/                Local-only source data (never commit private data)
-data/processed/          Local-only processed shards
-docs/                    Architecture, data, training, evaluation and roadmap
-ronin/manifest/          Feature registry and readiness model
-ronin/models/            Transformer architecture and parameter accounting
-ronin/tokenizer/         Tokenizer implementations
-ronin/data/              Dataset readers and batching
-ronin/training/          Trainer, optimizer, schedules and checkpoints
-ronin/evaluation/        Metrics and evaluation helpers
-ronin/inference/         Sampling and generation interfaces
-ronin/utils/             Reproducibility utilities
-scripts/                 Reproducible developer and operator commands
-tests/                   Unit and integration tests
-.github/workflows/       Continuous integration
+configs/                 Perfiles versionados de modelo y entrenamiento
+data/manifests/          Manifiestos de procedencia y licencias de corpus
+data/raw/                Datos locales (no subir datos privados)
+data/processed/          Fragmentos procesados locales
+docs/                    Arquitectura, datos, entrenamiento y hoja de ruta
+models/teachers/         Modelos auxiliares MIT descargados (no versionar)
+ronin/manifest/          Registro de funciones y estado de preparación
+ronin/models/            Arquitectura Transformer y recuento de parámetros
+ronin/tokenizer/         Implementaciones de tokenizadores
+ronin/data/              Lectura de conjuntos de datos y generación tutorizada
+ronin/training/          Entrenador, optimizador, planificadores y checkpoints
+ronin/evaluation/        Métricas y utilidades de evaluación
+ronin/inference/         Muestreo y generación
+ronin/utils/             Utilidades de reproducibilidad
+scripts/                 Comandos reproducibles para desarrollo y operación
+tests/                   Pruebas unitarias y de integración
+.github/workflows/       Integración continua
 ```
 
-## Canonical documentation
+## Documentación principal
 
-- [Architecture](docs/ARCHITECTURE.md)
-- [Manifest v3](docs/MANIFEST.md)
-- [Data governance](docs/DATA.md)
-- [Training operations](docs/TRAINING.md)
-- [Evaluation](docs/EVALUATION.md)
-- [Hardware planning](docs/HARDWARE.md)
-- [Roadmap](docs/ROADMAP.md)
-- [External tutor and first model](docs/TEACHER_WORKFLOW.md)
+- [Arquitectura](docs/ARCHITECTURE.md)
+- [Manifiesto de capacidades](docs/MANIFEST.md)
+- [Gobernanza de datos](docs/DATA.md)
+- [Operaciones de entrenamiento](docs/TRAINING.md)
+- [Evaluación](docs/EVALUATION.md)
+- [Planificación de hardware](docs/HARDWARE.md)
+- [Hoja de ruta](docs/ROADMAP.md)
+- [Modelos auxiliares locales](docs/TEACHER_WORKFLOW.md)
 
-## Feature manifest
+## Reglas de evaluación
 
-The 50 capabilities are grouped into training (16), data (8), evaluation (8), monitoring (6), deployment (5) and tests (7). Per-profile eligibility and implementation evidence are encoded in `ronin/manifest/registry.py`. Historical target matrix totals are documented separately and are not used to fake readiness.
+- Informar pérdida de validación y perplejidad junto con la identidad del tokenizador y corpus.
+- Usar BPB al comparar tokenizadores; la perplejidad no es directamente comparable entre tokenizadores distintos.
+- Mantener separados los datos de entrenamiento, validación y prueba.
+- Una prueba diminuta de memorización no demuestra generalización.
+- Informar referencias y variabilidad cuando proceda.
+- No fabricar resultados de benchmarks.
 
-## Evaluation rules
+## Contrato de contribución y ejecución
 
-- Report validation loss and perplexity with tokenizer and corpus identity.
-- Use BPB when comparing tokenizers; perplexity alone is not directly comparable across tokenizers.
-- Keep training, validation and test data isolated.
-- A tiny memorization/smoke test is not evidence of generalization.
-- Report baselines and variance where appropriate.
-- Never fabricate benchmark results.
+Trabajar directamente sobre `main` cuando el propietario del repositorio lo haya autorizado expresamente. Hacer cambios pequeños y commits secuenciales. Leer el contenido actual antes de sustituir un archivo. Ejecutar las pruebas pertinentes tras cada cambio coherente. No subir secretos, corpus privados, checkpoints ni conjuntos de datos generados. Si no se puede ejecutar un comando en el entorno disponible, indicarlo y proporcionar el comando exacto para una máquina adecuada.
 
-## Contribution and execution contract
+## Licencia
 
-Work directly against `main` when explicitly authorized by the repository owner. Make small, sequential commits. Before replacing a file, read its current contents. Run relevant tests after each coherent change. Never commit secrets, raw private corpora, checkpoints or generated datasets. If a command cannot be run in the available environment, state that clearly and provide the exact command for a suitable machine.
-
-## License
-
-See [LICENSE](LICENSE). Data licenses are separate from the software license and must be recorded per dataset.
+Consultar [LICENSE](LICENSE). Las licencias de los datos y de cada modelo auxiliar son independientes de la licencia del software y deben registrarse por separado.

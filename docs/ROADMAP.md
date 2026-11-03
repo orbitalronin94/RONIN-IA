@@ -1,48 +1,48 @@
-# RONIN implementation roadmap
+# Hoja de ruta de RONIN
 
-This roadmap is a sequence of verifiable engineering gates, not a promise that all capabilities already exist.
+Esta hoja de ruta define hitos de ingeniería verificables. No promete que todas las capacidades estén implementadas.
 
-## Phase 0 — Bootstrap (current)
+## Fase 0: base inicial (actual)
 
-- [x] Python package and CI workflow
-- [x] Shared decoder-only Transformer
-- [x] Random initialization and tied embeddings
-- [x] Tiny byte-tokenizer baseline
-- [x] Deterministic next-token batch sampler
-- [x] Shared optimizer/training loop with accumulation, clipping, schedule and precision selection
-- [x] Atomic periodic checkpoint save
-- [x] Feature registry and evidence-based readiness report
-- [x] Basic generation and evaluation metric helpers
-- [ ] Execute CI and fix all failures
-- [x] Manual external-tutor generation and tiny scratch-training workflow implemented
-- [x] Full checkpoint resume and sampler-state test
-- [ ] End-to-end smoke training on an approved corpus
+- [x] Paquete Python y flujo CI
+- [x] Transformer decoder-only compartido
+- [x] Inicialización aleatoria y embeddings compartidos
+- [x] Tokenizador de bytes para tiny
+- [x] Muestreador determinista de lotes de siguiente token
+- [x] Optimizador y bucle de entrenamiento compartidos, con acumulación, recorte, planificación y selección de precisión
+- [x] Guardado atómico de checkpoints periódicos
+- [x] Registro de capacidades e informe de preparación basado en evidencias
+- [x] Generación básica y utilidades de métricas de evaluación
+- [ ] Ejecutar CI y corregir todos los fallos
+- [x] Descargador de tutores locales con comprobación de licencia MIT
+- [x] Generación de texto local con trazabilidad de modelo y revisión
+- [ ] Prueba integral de entrenamiento con un corpus aprobado
 
-## Phase 1 — Data and evaluation
+## Fase 1: datos y evaluación
 
-- [ ] Corpus manifest schema and license validation
-- [ ] Exact and near deduplication
-- [ ] Deterministic train/validation/test split by source/document
-- [ ] Sharding, mixture weights and tokenizer training
-- [ ] Validation loop, perplexity and BPB reporting
-- [ ] Generation regression suite and leakage checks
+- [ ] Esquema de manifiesto de corpus y validación de licencias
+- [ ] Deduplicación exacta y aproximada
+- [ ] Separación determinista de entrenamiento/validación/prueba por origen/documento
+- [ ] Fragmentación, pesos de mezcla y entrenamiento del tokenizador
+- [ ] Bucle de validación e informes de perplejidad y BPB
+- [ ] Suite de regresión de generación y controles de filtraciones
 
-## Phase 2 — Seed-0
+## Fase 2: seed-0
 
-- [ ] Validate actual parameter count against the target profile
-- [ ] Benchmark peak memory and tokens/sec on target GPU
-- [ ] Add exact checkpoint resume, RNG state and scheduler state
-- [ ] Add loss-spike diagnostics and checkpoint rotation
-- [ ] Run only after approved corpus and measured hardware fit are available
+- [ ] Validar el recuento real de parámetros frente al perfil objetivo
+- [ ] Medir memoria máxima y tokens por segundo en la GPU de destino
+- [ ] Añadir reanudación exacta de checkpoint, estado aleatorio y estado del planificador
+- [ ] Añadir diagnósticos de picos de pérdida y rotación de checkpoints
+- [ ] Ejecutar solo cuando exista corpus aprobado y adecuación de hardware medida
 
-## Phase 3 — Seed-1 and seed-2
+## Fase 3: seed-1 y seed-2
 
-- [ ] Distributed training and communication tests
-- [ ] Optimizer-state sharding where required
-- [ ] Activation checkpointing and efficient attention
-- [ ] Multi-node recovery and experiment tracking
-- [ ] Held-out benchmark and human evaluation
+- [ ] Entrenamiento distribuido y pruebas de comunicación
+- [ ] Fragmentación de estados del optimizador cuando sea necesaria
+- [ ] Checkpointing de activaciones y atención eficiente
+- [ ] Recuperación multinodo y seguimiento de experimentos
+- [ ] Benchmarks con datos reservados y evaluación humana
 
-## Release gate
+## Criterio de publicación
 
-A phase is complete only when implementation, tests, CI evidence, reproducible commands and a written result report are committed. A checklist tick must never be inferred from a declaration in the manifest.
+Una fase solo se completa cuando se han comprometido la implementación, las pruebas, las evidencias de CI, los comandos reproducibles y un informe escrito de resultados. Nunca se marca una casilla por el mero hecho de declararla en un manifiesto.

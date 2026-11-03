@@ -1,69 +1,105 @@
-# External tutor and first tiny model
+# Modelos auxiliares locales y generación de corpus
 
-This workflow creates a small Spanish-language tutor corpus, then trains the RONIN tiny decoder-only Transformer **from random initialization**. The external model is used only to generate text examples; no teacher weights, adapters or checkpoints are downloaded or loaded.
+Esta guía descarga modelos auxiliares gratuitos con licencia MIT, los ejecuta localmente para generar texto y prepara ese texto para entrenar RONIN. El estudiante RONIN siempre parte de una inicialización aleatoria.
 
-## Free teacher providers
+## Modelos admitidos inicialmente
 
-The implementation uses the OpenAI-compatible `POST /chat/completions` interface. Choose a provider/model that currently offers free inference to your account:
+El descargador contiene una lista permitida de dos modelos:
 
-- **Google Gemini API**: Google documents a free tier for selected models in AI Studio. The free tier's data-use terms differ from paid service; Google states free-tier content may be used to improve products. Do not send private or sensitive data. Check the exact model's current availability and quotas in AI Studio.
-  - Base URL: `https://generativelanguage.googleapis.com/v1beta/openai/`
-  - Official pricing: https://ai.google.dev/gemini-api/docs/pricing
-  - Official rate limits: https://ai.google.dev/gemini-api/docs/rate-limits
-- **Groq**: provides a Free plan with per-model RPM/RPD/TPM/TPD limits. Check the current limits shown for your organization and chosen model.
-  - Base URL: `https://api.groq.com/openai/v1`
-  - Official rate limits: https://console.groq.com/docs/rate-limits
-- **Mistral**: Free mode includes limited monthly usage for testing and prototyping; current model-specific limits are shown in the account's Limits page.
-  - Base URL: `https://api.mistral.ai/v1`
-  - Official usage limits: https://docs.mistral.ai/admin/billing-usage/usage-limits
+| Alias | Repositorio | Licencia declarada | Uso previsto |
+|---|---|---|---|
+| `gpt2` | [openai-community/gpt2](https://huggingface.co/openai-community/gpt2) | MIT | Prueba de generación local |
+| `gpt-neo-125m` | [EleutherAI/gpt-neo-125m](https://huggingface.co/EleutherAI/gpt-neo-125m) | MIT | Comparación de un segundo tutor |
 
-Free quotas, model names, access and provider terms change. This repository does not promise unlimited free generation. The workflow is manual to avoid accidental API usage. The provider and model must explicitly permit the intended training use; the operator must review those terms before confirming the workflow input.
+La ficha pública de cada repositorio declara la licencia MIT. El script no se fía únicamente de esta documentación: consulta de nuevo los metadatos al descargar y cancela la operación si la licencia no es exactamente `mit`. También fija el identificador de revisión y calcula SHA-256 de los archivos descargados.
 
-## Configure GitHub
+**Limitación lingüística importante:** ambos modelos se entrenaron principalmente con texto en inglés. No son tutores competentes en castellano por defecto. En esta primera etapa se utilizan para verificar que el circuito de descarga, ejecución local, generación y trazabilidad funciona. Las respuestas deben revisarse y filtrarse; no se deben incorporar automáticamente a un corpus de calidad.
 
-In the repository's **Settings → Secrets and variables → Actions**, add this repository secret:
+La licencia MIT del modelo no convierte en MIT sus datos de entrenamiento ni garantiza los derechos de cada texto generado. La procedencia y la legalidad del corpus deben evaluarse por separado.
 
-- `RONIN_TEACHER_API_KEY`: API key from the selected provider. Never commit this value.
-
-The workflow defaults to Google's OpenAI-compatible Gemini endpoint and `gemini-3.8-flash`. To use another provider, optionally add repository variables `RONIN_TEACHER_BASE_URL` and `RONIN_TEACHER_MODEL` with the endpoint and exact model identifier enabled for your account.
-
-Do not put the key in a variable, workflow file, prompt, issue, log or commit.
-
-## Recommended first configuration
-
-For the simplest initial run, create a Gemini API key in Google AI Studio and save it as `RONIN_TEACHER_API_KEY`. The workflow defaults to `gemini-3.8-flash`, which Google's current pricing page lists as free on its Free tier. Google states that Free-tier content may be used to improve its products, so send only the synthetic educational prompts in this workflow and review the current terms before opting in.
-
-## Run the first model
-
-1. Open **Actions → Teacher data and first RONIN model → Run workflow**.
-2. Start with 24 tutor examples and 5 optimizer steps.
-3. Set `confirm_teacher_terms` to true only after verifying that the selected provider and model terms allow generated outputs to be used for model training.
-4. Run on the default branch (`main`).
-5. Download the `ronin-tiny-first-run` artifact after the workflow completes.
-
-The artifact contains:
-- `train.jsonl`: teacher text plus model/provider and SHA-256 provenance;
-- `corpus.txt`: validated instruction/answer text used for language-model training;
-- `step-*.pt`: RONIN checkpoints trained from random initialization.
-
-The workflow runs on a CPU GitHub-hosted runner. It does not provide a GPU training environment. The first run is deliberately tiny and proves the end-to-end path; it is not a quality benchmark or evidence of generalization.
-
-## Local execution
-
-Install the project, set the same three environment variables, then run:
+## Instalación
 
 ```bash
-python scripts/generate_teacher_data.py --count 24 --confirm-training-rights
-python scripts/prepare_teacher_corpus.py --input artifacts/teacher/train.jsonl
-python scripts/train_text.py --text artifacts/teacher/corpus.txt --profile tiny --steps 5 --device cpu
+python -m pip install -e '.[teachers]'
 ```
 
-## Dataset safeguards and limitations
+## Descargar los modelos una sola vez
 
-- The generator requires an explicit terms-review confirmation.
-- Each record stores the teacher provider, model, timestamp and SHA-256 digest.
-- Corpus preparation verifies the digest and review flag before accepting a record.
-- The current curriculum is a small deterministic Spanish education prompt set.
-- The current training objective is next-byte prediction over formatted prompt/answer text. It is not masked instruction fine-tuning.
-- There is no independent validation/test split yet. Training loss from this run must not be presented as a generalization metric.
-- Human review, factuality checks, exact/near deduplication across generations, contamination controls and a larger licensed corpus are required before any serious model-quality claim.
+```bash
+python scripts/download_teacher_models.py --model gpt2
+python scripts/download_teacher_models.py --model gpt-neo-125m
+```
+
+Los pesos y el manifiesto quedan en:
+
+```text
+models/teachers/gpt2/
+models/teachers/gpt-neo-125m/
+```
+
+El manifiesto `ronin-teacher-manifest.json` contiene el identificador del modelo, la revisión fijada, la licencia verificada, la fecha de comprobación y las huellas SHA-256. El código carga desde el directorio local con `local_files_only=True`; la generación no necesita una API remota.
+
+No se deben subir a Git los pesos descargados ni los corpus generados. La carpeta `models/teachers/` es un artefacto local.
+
+## Generar datos con un tutor
+
+Ejemplo con GPT-2:
+
+```bash
+python scripts/generate_teacher_data.py \
+  --model-dir models/teachers/gpt2 \
+  --count 40 \
+  --device auto \
+  --max-new-tokens 192 \
+  --output artifacts/teacher/gpt2.jsonl
+```
+
+Ejemplo con GPT-Neo:
+
+```bash
+python scripts/generate_teacher_data.py \
+  --model-dir models/teachers/gpt-neo-125m \
+  --count 40 \
+  --device auto \
+  --max-new-tokens 192 \
+  --output artifacts/teacher/gpt-neo.jsonl
+```
+
+El dispositivo `auto` utiliza CUDA si está disponible y CPU en caso contrario. La primera carga y la inferencia local pueden ser más lentas en CPU; una vez descargados, los modelos se reutilizan sin repetir la descarga.
+
+Cada registro JSONL incluye prompt, respuesta, modelo, revisión, licencia, fecha, SHA-256, indicación de que el tutor se ejecutó localmente y confirmación explícita de que los pesos del tutor no se importaron al estudiante.
+
+## Preparar el corpus y entrenar RONIN
+
+La preparación del corpus comprueba la procedencia y la huella de cada registro:
+
+```bash
+python scripts/prepare_teacher_corpus.py \
+  --input artifacts/teacher/gpt2.jsonl \
+  --output artifacts/teacher/gpt2-corpus.txt
+
+python scripts/train_text.py \
+  --text artifacts/teacher/gpt2-corpus.txt \
+  --profile tiny \
+  --steps 5 \
+  --device cpu
+```
+
+Para comparar tutores, generar dos corpus independientes y mantenerlos identificados. No mezclar resultados ni corpus sin registrar qué modelo los produjo.
+
+## Separación estricta entre tutor y estudiante
+
+- Los pesos del tutor se descargan y cargan solo en el proceso generador de datos.
+- RONIN se construye con inicialización aleatoria.
+- El entrenador de RONIN solo recibe texto tokenizado; no recibe el estado de pesos del tutor.
+- No se realiza fine-tuning, fusión ni destilación de parámetros.
+- El texto generado debe someterse a revisión humana, control de calidad, deduplicación y comprobación de derechos antes de entrenar.
+
+## Límites de esta primera etapa
+
+- Los dos tutores iniciales son anglófonos; el castellano generado puede ser deficiente.
+- El corpus curricular es pequeño y determinista.
+- El objetivo actual es predecir el siguiente byte/token en texto formateado; no es un ajuste supervisado de instrucciones completo.
+- Todavía no existe una separación independiente de validación y prueba para este flujo.
+- La pérdida de entrenamiento no es una métrica de generalización.
+- Antes de hacer afirmaciones sobre calidad se necesitan datos con licencia clara, revisión factual humana, deduplicación, controles de contaminación y evaluación reservada.

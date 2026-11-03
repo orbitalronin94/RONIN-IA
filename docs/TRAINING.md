@@ -1,30 +1,30 @@
-# Training operations
+# Operaciones de entrenamiento
 
-The trainer is shared by every model profile. Profile configuration changes model dimensions and resource settings; it must not select a separate training implementation.
+El entrenador es compartido por todos los perfiles. La configuración cambia las dimensiones del modelo y los recursos; no debe seleccionar una implementación de entrenamiento diferente.
 
-## Implemented bootstrap behavior
+## Comportamiento inicial implementado
 
-- AdamW optimizer.
-- Linear warmup followed by cosine decay to a configured minimum learning rate.
-- Gradient accumulation and global gradient clipping.
-- Runtime precision selection: BF16 on supported CUDA devices, otherwise FP16 on CUDA, FP32 on CPU. Explicit unsupported precision requests fail loudly.
-- Non-finite loss and gradient-norm detection.
-- Periodic atomic checkpoint writes containing model, optimizer, scaler, step, Python/NumPy/CPU/CUDA RNG and the next-token sampler generator state.
-- Resume from a checkpoint with strict training-config equality; the closed-form learning-rate schedule is reconstructed from the global step.
+- Optimizador AdamW.
+- Calentamiento lineal seguido de una reducción coseno hasta la tasa de aprendizaje mínima configurada.
+- Acumulación de gradientes y recorte global.
+- Selección de precisión en tiempo de ejecución: BF16 en CUDA compatible, en otro caso FP16 en CUDA y FP32 en CPU. Las solicitudes explícitas de una precisión no compatible deben fallar claramente.
+- Detección de pérdidas y normas de gradiente no finitas.
+- Escritura atómica y periódica de checkpoints que contienen modelo, optimizador, escalador, paso, estados aleatorios de Python/NumPy/CPU/CUDA y estado del generador del muestreador de siguiente token.
+- Reanudación desde checkpoint con igualdad estricta de configuración de entrenamiento; la tasa de aprendizaje se reconstruye a partir del paso global.
 
-Resume currently supports the deterministic next-token batch sampler. A future streaming/distributed data loader must provide its own serializable cursor/state before it can claim exact resume semantics.
+La reanudación actual admite el muestreador determinista de lotes de siguiente token. Un futuro cargador de datos en streaming o distribuido deberá proporcionar un cursor/estado serializable antes de poder afirmar que la reanudación es exacta.
 
-## Required next steps
+## Próximos pasos obligatorios
 
-- Add validation loop and best-checkpoint selection.
-- Add GradScaler overflow/skipped-step telemetry.
-- Add activation checkpointing and distributed data/model parallel strategies.
-- Add loss-spike detection, diagnostics and bounded recovery. Never silently roll back weights without recording the event.
-- Add early stopping only for explicitly configured finite-data experiments; it must not silently terminate long pretraining runs.
-- Add checkpoint rotation, disk-space safeguards and signal-safe shutdown.
-- Record tokens seen, tokens/sec, optimizer steps, effective batch size, gradient norm, learning rate, precision and hardware.
-- Persist the exact resolved config and data/tokenizer fingerprints with every run.
+- Añadir bucle de validación y selección del mejor checkpoint.
+- Añadir telemetría de desbordamientos y pasos omitidos del GradScaler.
+- Añadir checkpointing de activaciones y estrategias distribuidas de datos/modelo.
+- Añadir detección de picos de pérdida, diagnóstico y recuperación acotada. Nunca revertir pesos en silencio sin registrar el evento.
+- Añadir parada temprana solo a experimentos de datos finitos configurados expresamente; no debe detener de forma silenciosa ejecuciones largas de preentrenamiento.
+- Añadir rotación de checkpoints, protección de espacio en disco y cierre seguro ante señales.
+- Registrar tokens vistos, tokens por segundo, pasos del optimizador, lote efectivo, norma de gradiente, tasa de aprendizaje, precisión y hardware.
+- Guardar la configuración resuelta exacta y las huellas de datos/tokenizador en cada ejecución.
 
-## Operational safety
+## Seguridad operativa
 
-Hardware-fit and cost calculations must be labelled estimates until benchmarked on the target host. Account for parameters, gradients, optimizer states, activations, temporary attention buffers, fragmentation and distributed communication. A simplistic parameter-only estimate is not a fit guarantee.
+Los cálculos de adecuación al hardware y coste se etiquetan como estimaciones hasta que se contrasten con benchmarks en el equipo de destino. Incluir parámetros, gradientes, estados del optimizador, activaciones, búferes temporales de atención, fragmentación y comunicación distribuida. Una estimación simple basada solo en parámetros no garantiza que el modelo quepa.
