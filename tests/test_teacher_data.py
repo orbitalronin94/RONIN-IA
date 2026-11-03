@@ -44,7 +44,7 @@ def test_teacher_record_has_provenance_and_student_stays_random(tmp_path, monkey
     assert count == 1
     record = json.loads(output.read_text(encoding="utf-8"))
     expected = hashlib.sha256(
-        "Explica una idea.\nRespuesta local.".encode("utf-8")
+        b"Explica una idea.\nRespuesta local."
     ).hexdigest()
     assert record["sha256"] == expected
     assert record["teacher_license"] == "MIT"
