@@ -3,7 +3,8 @@ import math
 import torch
 
 from ronin.config import ModelConfig
-from ronin.evaluation.metrics import bits_per_byte, perplexity
+from ronin.data.batches import NextTokenBatches
+from ronin.evaluation.metrics import bits_per_byte, evaluate_loss, perplexity
 from ronin.inference.generate import generate
 from ronin.models.transformer import RoninLM
 
@@ -11,6 +12,16 @@ from ronin.models.transformer import RoninLM
 def test_metric_helpers():
     assert math.isclose(perplexity(0.0), 1.0)
     assert bits_per_byte(math.log(2.0) * 10, 10) == 1.0
+
+
+def test_evaluate_loss_restores_model_mode():
+    config = ModelConfig(vocab_size=32, context_length=8, n_layers=1, n_heads=2, d_model=8)
+    model = RoninLM(config)
+    model.train()
+    batches = NextTokenBatches(torch.randint(0, 32, (128,)), 2, 8, seed=3)
+    loss = evaluate_loss(model, batches, max_batches=2)
+    assert math.isfinite(loss)
+    assert model.training
 
 
 def test_generation_appends_requested_tokens_and_restores_mode():
