@@ -67,3 +67,14 @@ def test_swiglu_and_rmsnorm_gradients_are_finite():
     grads = [p.grad for p in model.parameters() if p.grad is not None]
     assert grads
     assert all(torch.isfinite(grad).all() for grad in grads)
+
+
+def test_causal_attention_does_not_leak_future_tokens():
+    config = ModelConfig(vocab_size=32, context_length=8, n_layers=2, n_heads=2, d_model=8)
+    model = RoninLM(config).eval()
+    first = torch.tensor([[1, 2, 3, 4, 5]])
+    changed_future = torch.tensor([[1, 2, 3, 4, 9]])
+    with torch.no_grad():
+        logits_a, _ = model(first)
+        logits_b, _ = model(changed_future)
+    torch.testing.assert_close(logits_a[:, :4], logits_b[:, :4], rtol=0, atol=1e-6)
