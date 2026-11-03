@@ -10,9 +10,10 @@ def count_parameters(config: ModelConfig) -> int:
     config.validate()
     d = config.d_model
     embedding = config.vocab_size * d + config.context_length * d
-    # QKV + attention projection + two-layer 4x MLP.
+    # QKV + attention projection + two-layer 4x MLP + two block layer norms.
     per_block = 12 * d * d + 4 * d
+    # QKV (3d), attention projection (d), MLP hidden (4d) and output (d).
     if config.bias:
-        per_block += 12 * d
+        per_block += 9 * d
     final_norm = 2 * d
     return embedding + config.n_layers * per_block + final_norm
