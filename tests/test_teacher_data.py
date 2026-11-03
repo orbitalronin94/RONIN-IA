@@ -4,7 +4,7 @@ import pytest
 
 from ronin.data.prompts import build_prompts
 from ronin.data.teacher import TeacherConfig, chat_completion, write_teacher_dataset
-from scripts.prepare_teacher_corpus import prepare
+from ronin.data.corpus import prepare
 
 
 class FakeResponse:
