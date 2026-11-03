@@ -110,7 +110,5 @@ def get_profile(name: ProfileName | str) -> tuple[ModelConfig, TrainingConfig]:
 
 
 def profile_dict(name: ProfileName | str) -> dict[str, dict[str, object]]:
-    from dataclasses import asdict
-
     model, training = get_profile(name)
     return {"model": asdict(model), "training": asdict(training)}
