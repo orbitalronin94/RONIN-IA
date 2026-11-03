@@ -43,7 +43,14 @@ def download_model(name: str, destination: Path) -> Path:
     selected = ALLOWED_MODELS[name]
     repo_id = selected["repo_id"]
     info = HfApi().model_info(repo_id, files_metadata=True)
-    license_id = (info.card_data or {}).get("license")
+    card_data = info.card_data
+    license_id = (
+        getattr(card_data, "license", None)
+        if card_data is not None
+        else None
+    )
+    if license_id is None and isinstance(card_data, dict):
+        license_id = card_data.get("license")
     if str(license_id).lower() != "mit":
         raise RuntimeError(
             f"{repo_id}: licencia declarada {license_id!r}; se exige MIT exacta. No se descarga."
