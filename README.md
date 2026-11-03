@@ -51,10 +51,10 @@ Todos los pesos se inicializan localmente. No se cargan pesos de tutores ni chec
 
 | Perfil | Recuento analítico objetivo | Hardware previsto | Propósito |
 |---|---:|---|---|
-| tiny | 9.964.160 | CPU | Pruebas rápidas y validación de la canalización |
-| seed-0 | 147.909.120 | 1× RTX 4090 | Primer experimento relevante desde cero |
-| seed-1 | 958.467.072 | 2× A100 40 GB | Experimento de mayor escala |
-| seed-2 | 6.993.518.592 | 4× A100 80 GB | Escala superior |
+| tiny | 9.922.880 | CPU | Pruebas rápidas y validación de la canalización |
+| seed-0 | 147.092.736 | 1× RTX 4090 | Primer experimento relevante desde cero |
+| seed-1 | 955.221.504 | 2× A100 40 GB | Experimento de mayor escala |
+| seed-2 | 6.976.598.016 | 4× A100 80 GB | Escala superior |
 
 Son objetivos de planificación, no garantías de ajuste en memoria. Los recuentos deben verificarse con `ronin count-params --profile PERFIL`. El concepto MoE de 2,8 billones de parámetros queda fuera de la primera escalera.
 
