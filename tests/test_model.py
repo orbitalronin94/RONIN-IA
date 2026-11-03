@@ -1,7 +1,7 @@
 import torch
 
 from ronin.config import ModelConfig
-from ronin.models.transformer import RoninLM
+from ronin.models.transformer import RoninLM, apply_rope
 
 
 def test_forward_and_loss_shapes():
@@ -28,3 +28,42 @@ def test_embeddings_are_tied():
     config = ModelConfig(vocab_size=32, context_length=8, n_layers=1, n_heads=2, d_model=8)
     model = RoninLM(config)
     assert model.lm_head.weight.data_ptr() == model.token_embedding.weight.data_ptr()
+
+
+def test_rope_preserves_shape_and_is_differentiable():
+    x = torch.randn(2, 4, 7, 8, requires_grad=True)
+    result = apply_rope(x, theta=10_000.0)
+    assert result.shape == x.shape
+    result.square().mean().backward()
+    assert x.grad is not None
+    assert torch.isfinite(x.grad).all()
+
+
+def test_grouped_query_attention_forward_and_backward():
+    config = ModelConfig(
+        vocab_size=48,
+        context_length=12,
+        n_layers=1,
+        n_heads=4,
+        n_kv_heads=2,
+        d_model=32,
+    )
+    model = RoninLM(config)
+    tokens = torch.randint(0, config.vocab_size, (2, 7))
+    logits, loss = model(tokens, tokens)
+    assert logits.shape == (2, 7, config.vocab_size)
+    assert loss is not None
+    loss.backward()
+    assert model.blocks[0].attention.k_proj.weight.grad is not None
+    assert torch.isfinite(model.blocks[0].attention.k_proj.weight.grad).all()
+
+
+def test_swiglu_and_rmsnorm_gradients_are_finite():
+    config = ModelConfig(vocab_size=32, context_length=8, n_layers=1, n_heads=2, d_model=8)
+    model = RoninLM(config)
+    tokens = torch.randint(0, config.vocab_size, (2, 6))
+    _, loss = model(tokens, tokens)
+    loss.backward()
+    grads = [p.grad for p in model.parameters() if p.grad is not None]
+    assert grads
+    assert all(torch.isfinite(grad).all() for grad in grads)
