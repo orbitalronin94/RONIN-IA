@@ -59,6 +59,7 @@ ronin info --profile tiny
 ronin count-params --profile tiny
 ronin features
 ronin readiness --profile tiny
+ronin matrix
 ronin roadmap
 ```
 
