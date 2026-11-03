@@ -21,16 +21,17 @@ Free quotas, model names, access and provider terms change. This repository does
 
 ## Configure GitHub
 
-In the repository's **Settings → Secrets and variables → Actions**, add:
+In the repository's **Settings → Secrets and variables → Actions**, add this repository secret:
 
-Repository secret:
 - `RONIN_TEACHER_API_KEY`: API key from the selected provider. Never commit this value.
 
-Repository variables:
-- `RONIN_TEACHER_BASE_URL`: one of the compatible base URLs above.
-- `RONIN_TEACHER_MODEL`: exact model identifier currently enabled for your account.
+The workflow defaults to Google's OpenAI-compatible Gemini endpoint and `gemini-3.8-flash`. To use another provider, optionally add repository variables `RONIN_TEACHER_BASE_URL` and `RONIN_TEACHER_MODEL` with the endpoint and exact model identifier enabled for your account.
 
 Do not put the key in a variable, workflow file, prompt, issue, log or commit.
+
+## Recommended first configuration
+
+For the simplest initial run, create a Gemini API key in Google AI Studio and save it as `RONIN_TEACHER_API_KEY`. The workflow defaults to `gemini-3.8-flash`, which Google's current pricing page lists as free on its Free tier. Google states that Free-tier content may be used to improve its products, so send only the synthetic educational prompts in this workflow and review the current terms before opting in.
 
 ## Run the first model
 
