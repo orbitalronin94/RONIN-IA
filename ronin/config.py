@@ -1,4 +1,4 @@
-"""Validated model and training configuration profiles."""
+"""Configuraciones validadas de arquitectura y entrenamiento."""
 
 from __future__ import annotations
 
@@ -17,18 +17,38 @@ class ModelConfig:
     d_model: int = 256
     dropout: float = 0.0
     bias: bool = False
+    n_kv_heads: int | None = None
+    d_ff: int | None = None
+    rope_theta: float = 10_000.0
+    rms_norm_eps: float = 1e-6
+
+    def __post_init__(self) -> None:
+        if self.n_kv_heads is None:
+            object.__setattr__(self, "n_kv_heads", self.n_heads)
+        if self.d_ff is None:
+            object.__setattr__(self, "d_ff", (8 * self.d_model + 2) // 3)
 
     def validate(self) -> None:
         if self.vocab_size < 2:
-            raise ValueError("vocab_size must be >= 2")
+            raise ValueError("vocab_size debe ser >= 2")
         if self.context_length < 1:
-            raise ValueError("context_length must be positive")
+            raise ValueError("context_length debe ser positivo")
         if self.n_layers < 1 or self.n_heads < 1 or self.d_model < 1:
-            raise ValueError("layers, heads and model width must be positive")
+            raise ValueError("capas, cabezas y ancho del modelo deben ser positivos")
         if self.d_model % self.n_heads:
-            raise ValueError("d_model must be divisible by n_heads")
+            raise ValueError("d_model debe ser divisible por n_heads")
+        if self.n_kv_heads is None or self.n_kv_heads < 1:
+            raise ValueError("n_kv_heads debe ser positivo")
+        if self.n_heads % self.n_kv_heads:
+            raise ValueError("n_heads debe ser divisible por n_kv_heads")
+        if self.d_model // self.n_heads % 2:
+            raise ValueError("la dimensión de cada cabeza debe ser par para RoPE")
+        if self.d_ff is None or self.d_ff < 1:
+            raise ValueError("d_ff debe ser positivo")
+        if self.rope_theta <= 0 or self.rms_norm_eps <= 0:
+            raise ValueError("rope_theta y rms_norm_eps deben ser positivos")
         if not 0.0 <= self.dropout < 1.0:
-            raise ValueError("dropout must be in [0, 1)")
+            raise ValueError("dropout debe estar en [0, 1)")
 
 
 @dataclass(frozen=True)
@@ -47,19 +67,17 @@ class TrainingConfig:
 
     def validate(self) -> None:
         if self.batch_size < 1 or self.gradient_accumulation_steps < 1:
-            raise ValueError("batch size and gradient accumulation must be positive")
+            raise ValueError("batch_size y gradient_accumulation_steps deben ser positivos")
         if self.learning_rate <= 0 or self.min_learning_rate < 0:
-            raise ValueError("learning rates must be non-negative and max LR positive")
+            raise ValueError("las tasas de aprendizaje deben ser válidas")
         if self.min_learning_rate > self.learning_rate:
-            raise ValueError("min_learning_rate cannot exceed learning_rate")
+            raise ValueError("min_learning_rate no puede superar learning_rate")
         if self.weight_decay < 0 or self.warmup_steps < 0 or self.max_steps < 1:
-            raise ValueError("invalid optimizer or schedule settings")
+            raise ValueError("configuración de optimizador o planificador no válida")
         if self.grad_clip_norm <= 0 or self.checkpoint_every < 1:
-            raise ValueError("grad_clip_norm and checkpoint_every must be positive")
+            raise ValueError("grad_clip_norm y checkpoint_every deben ser positivos")
 
 
-# Parameter targets are approximate and are verified by the ronin count-params CLI.
-# The tokenizer vocabulary is part of the architecture, so it affects counts.
 PROFILES: dict[str, tuple[ModelConfig, TrainingConfig]] = {
     "tiny": (
         ModelConfig(vocab_size=256, context_length=128, n_layers=8, n_heads=8, d_model=320),
@@ -81,16 +99,18 @@ PROFILES: dict[str, tuple[ModelConfig, TrainingConfig]] = {
 
 
 def get_profile(name: ProfileName | str) -> tuple[ModelConfig, TrainingConfig]:
-    """Return a validated immutable profile pair."""
+    """Devuelve el par validado e inmutable de un perfil."""
     try:
         model, training = PROFILES[name]
     except KeyError as exc:
-        raise ValueError(f"Unknown profile {name!r}; choose from {', '.join(PROFILES)}") from exc
+        raise ValueError(f"Perfil desconocido {name!r}; elige entre {', '.join(PROFILES)}") from exc
     model.validate()
     training.validate()
     return model, training
 
 
 def profile_dict(name: ProfileName | str) -> dict[str, dict[str, object]]:
+    from dataclasses import asdict
+
     model, training = get_profile(name)
     return {"model": asdict(model), "training": asdict(training)}
