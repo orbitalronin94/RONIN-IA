@@ -5,9 +5,18 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
+  lint:
+    name: Lint and package checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,7 +24,58 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - run: python -m pip install --upgrade pip
-      - run: pip install -e ".[dev]"
-      - run: ruff check ronin tests scripts
-      - run: pytest --cov=ronin --cov-report=term-missing
+      - name: Install package and tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Ruff
+        run: ruff check ronin tests scripts
+      - name: Verify package metadata
+        run: python -m pip check
+
+  tests:
+    name: Unit and integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install package and tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Run test suite
+        run: pytest --cov=ronin --cov-report=term-missing
+
+  tiny-smoke:
+    name: Tiny scratch-training smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+      - name: Create disposable synthetic smoke corpus
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          sample = ("RONIN aprende desde una inicialización aleatoria. " * 80)
+          Path("/tmp/ronin-smoke.txt").write_text(sample, encoding="utf-8")
+          PY
+      - name: Train one tiny CPU step
+        run: |
+          python scripts/train_text.py \
+            --text /tmp/ronin-smoke.txt \
+            --profile tiny \
+            --steps 1 \
+            --device cpu \
+            --checkpoints /tmp/ronin-smoke-checkpoints
+      - name: Verify final checkpoint exists
+        run: test -s /tmp/ronin-smoke-checkpoints/step-00000001.pt
