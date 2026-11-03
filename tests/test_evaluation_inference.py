@@ -2,9 +2,9 @@ import math
 
 import torch
 
+from ronin.config import ModelConfig
 from ronin.evaluation.metrics import bits_per_byte, perplexity
 from ronin.inference.generate import generate
-from ronin.config import ModelConfig
 from ronin.models.transformer import RoninLM
 
 
