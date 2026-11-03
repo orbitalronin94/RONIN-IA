@@ -58,23 +58,23 @@ class TrainingConfig:
             raise ValueError("grad_clip_norm and checkpoint_every must be positive")
 
 
+# Parameter targets are approximate and are verified by the ronin count-params CLI.
+# The tokenizer vocabulary is part of the architecture, so it affects counts.
 PROFILES: dict[str, tuple[ModelConfig, TrainingConfig]] = {
-    # ByteTokenizer is the tiny-profile tokenizer, hence vocab_size=256.
     "tiny": (
-        ModelConfig(vocab_size=256, context_length=128, n_layers=2, n_heads=4, d_model=128),
-        TrainingConfig(batch_size=4, max_steps=100, warmup_steps=10, checkpoint_every=50),
+        ModelConfig(vocab_size=256, context_length=128, n_layers=8, n_heads=8, d_model=320),
+        TrainingConfig(batch_size=2, max_steps=100, warmup_steps=10, checkpoint_every=50),
     ),
-    # Larger profiles require a separately trained, versioned tokenizer.
     "seed-0": (
-        ModelConfig(vocab_size=16_384, context_length=1_024, n_layers=12, n_heads=12, d_model=768),
-        TrainingConfig(batch_size=2, gradient_accumulation_steps=16, max_steps=10_000),
+        ModelConfig(vocab_size=16_384, context_length=1_024, n_layers=19, n_heads=12, d_model=768),
+        TrainingConfig(batch_size=1, gradient_accumulation_steps=16, max_steps=10_000),
     ),
     "seed-1": (
-        ModelConfig(vocab_size=32_000, context_length=2_048, n_layers=24, n_heads=16, d_model=1_024),
+        ModelConfig(vocab_size=32_000, context_length=2_048, n_layers=32, n_heads=24, d_model=1_536),
         TrainingConfig(batch_size=1, gradient_accumulation_steps=64, max_steps=100_000),
     ),
     "seed-2": (
-        ModelConfig(vocab_size=32_000, context_length=4_096, n_layers=32, n_heads=32, d_model=4_096),
+        ModelConfig(vocab_size=32_000, context_length=4_096, n_layers=34, n_heads=32, d_model=4_096),
         TrainingConfig(batch_size=1, gradient_accumulation_steps=128, max_steps=300_000),
     ),
 }
