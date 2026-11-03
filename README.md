@@ -18,6 +18,23 @@
 7. **Honestidad experimental.** No se presentan pruebas sintéticas ni ejecuciones diminutas como modelos competentes. No se inventan métricas, velocidad, costes ni resultados.
 8. **Gobernanza de datos.** Cada corpus registra procedencia, licencia, permisos, filtrado y deduplicación.
 
+## Recursos gratuitos realmente disponibles
+
+El entorno de ejecución de referencia es **GitHub Actions estándar en un repositorio público**, usando `ubuntu-latest`. Según la documentación de GitHub, ese runner ofrece:
+
+| Recurso | Disponibilidad de referencia |
+|---|---:|
+| CPU | 4 vCPU |
+| Memoria RAM | 16 GB |
+| Almacenamiento SSD | 14 GB nominales |
+| Arquitectura | x86_64 |
+| GPU CUDA | No incluida |
+| Coste del runner estándar en repositorio público | Gratis |
+
+Los tres trabajos del workflow actual usan `ubuntu-latest`. Cada trabajo recibe una máquina virtual nueva; no comparte RAM, disco ni aceleradores con los otros trabajos. El almacenamiento del runner es efímero y el espacio utilizable es inferior al nominal después de instalar el sistema, Python y dependencias. GitHub puede actualizar las imágenes y sus recursos: la ejecución debe registrar lo que realmente recibió.
+
+**Consecuencia para el proyecto:** el objetivo operativo actual es desarrollar, probar y ejecutar experimentos pequeños en CPU. Actions sirve para lint, pruebas, comprobaciones de integración y pruebas mínimas de entrenamiento; no es una plataforma de preentrenamiento prolongado ni proporciona GPU para entrenar modelos grandes. No se presupone que un modelo quepa o sea práctico solo por tener 16 GB de RAM.
+
 ## Modelos auxiliares MIT
 
 El punto de partida incluye dos modelos de tamaño reducido, disponibles en Hugging Face bajo licencia MIT:
@@ -43,14 +60,16 @@ La guía completa está en [Modelos auxiliares locales](docs/TEACHER_WORKFLOW.md
 
 ## Escalera de desarrollo de RONIN
 
-| Perfil | Recuento analítico objetivo | Hardware previsto | Propósito |
-|---|---:|---|---|
-| tiny | 9.964.160 | CPU | Pruebas rápidas y validación de la canalización |
-| seed-0 | 147.909.120 | 1× RTX 4090 | Primer experimento relevante desde cero |
-| seed-1 | 958.467.072 | 2× A100 40 GB | Experimento de mayor escala |
-| seed-2 | 6.993.518.592 | 4× A100 80 GB | Escala superior |
+Los tamaños configurados siguen existiendo como objetivos de investigación, pero **no describen recursos disponibles en GitHub Actions**:
 
-Son objetivos de planificación, no garantías de ajuste en memoria. Los recuentos deben verificarse con `ronin count-params --profile PERFIL`. El concepto MoE de 2,8 billones de parámetros queda fuera de la primera escalera.
+| Perfil | Parámetros objetivo | Situación respecto al runner gratuito |
+|---|---:|---|
+| tiny | 9.964.160 | Perfil de referencia para pruebas y experimentos CPU pequeños |
+| seed-0 | 147.909.120 | No validado para entrenamiento en CPU; requiere medición de memoria y tiempo |
+| seed-1 | 958.467.072 | Fuera del objetivo operativo actual |
+| seed-2 | 6.993.518.592 | Fuera del objetivo operativo actual |
+
+Los recuentos son objetivos analíticos y deben verificarse con `ronin count-params --profile PERFIL`. No se anuncian GPUs, tiempos de entrenamiento ni ajuste en memoria que no se hayan medido. Los perfiles grandes solo se promoverán cuando exista hardware real, presupuesto de memoria medido y evidencia de una ejecución completa. El concepto MoE de 2,8 billones de parámetros queda fuera de la primera escalera.
 
 ## Implementación inicial
 
