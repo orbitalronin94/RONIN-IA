@@ -31,7 +31,7 @@ def prepare(source: Path, destination: Path) -> int:
         if record.get("training_terms_reviewed") is not True:
             raise ValueError(f"training terms not confirmed on line {line_number}")
         expected = hashlib.sha256(
-            (prompt.strip() + "\\n" + completion.strip()).encode("utf-8")
+            (prompt.strip() + "\n" + completion.strip()).encode("utf-8")
         ).hexdigest()
         if digest != expected:
             raise ValueError(f"SHA-256 mismatch on line {line_number}")
