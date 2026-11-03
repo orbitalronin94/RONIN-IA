@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import math
+import sys
+from collections.abc import Iterable
 
 import torch
 from torch import nn
@@ -10,7 +12,10 @@ from torch import nn
 
 @torch.no_grad()
 def evaluate_loss(
-    model: nn.Module, batches, max_batches: int, device: torch.device | str = "cpu"
+    model: nn.Module,
+    batches: Iterable[tuple[torch.Tensor, torch.Tensor]],
+    max_batches: int,
+    device: torch.device | str = "cpu",
 ) -> float:
     if max_batches < 1:
         raise ValueError("max_batches must be positive")
@@ -32,9 +37,11 @@ def evaluate_loss(
 
 
 def perplexity(mean_cross_entropy: float) -> float:
-    if not math.isfinite(mean_cross_entropy):
-        raise ValueError("cross entropy must be finite")
-    return math.exp(min(mean_cross_entropy, 80.0))
+    if not math.isfinite(mean_cross_entropy) or mean_cross_entropy < 0:
+        raise ValueError("cross entropy must be finite and non-negative")
+    if mean_cross_entropy > math.log(sys.float_info.max):
+        return math.inf
+    return math.exp(mean_cross_entropy)
 
 
 def bits_per_byte(total_nll_nats: float, byte_count: int) -> float:
