@@ -39,7 +39,7 @@ class TeacherConfig:
             raise ValueError("temperature must be between 0 and 2")
 
     @classmethod
-    def from_env(cls) -> "TeacherConfig":
+    def from_env(cls) -> TeacherConfig:
         return cls(
             base_url=os.environ.get("RONIN_TEACHER_BASE_URL", "").rstrip("/"),
             api_key=os.environ.get("RONIN_TEACHER_API_KEY", ""),
