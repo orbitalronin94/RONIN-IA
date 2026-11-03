@@ -139,7 +139,7 @@ def write_teacher_dataset(
                     continue
                 completion = chat_completion(config, prompt, opener=opener)
                 digest = hashlib.sha256(
-                    (prompt.strip() + "\\n" + completion.strip()).encode("utf-8")
+                    (prompt.strip() + "\n" + completion.strip()).encode("utf-8")
                 ).hexdigest()
                 if digest in seen:
                     continue
@@ -155,7 +155,7 @@ def write_teacher_dataset(
                     "source_type": "teacher_generated_text",
                     "training_terms_reviewed": True,
                 }
-                stream.write(json.dumps(record, ensure_ascii=False) + "\\n")
+                stream.write(json.dumps(record, ensure_ascii=False) + "\n")
                 written += 1
         if written == 0:
             raise ValueError("no teacher examples were generated")
