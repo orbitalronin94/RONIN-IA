@@ -12,9 +12,37 @@ def test_two_step_cpu_training_and_checkpoint(tmp_path):
         batch_size=2, max_steps=2, warmup_steps=1, checkpoint_every=1, precision="fp32"
     )
     model = RoninLM(model_config)
-    batches = NextTokenBatches(torch.randint(0, 16, (128,)), 2, 8, seed=1)
+    tokens = torch.randint(0, 16, (128,))
+    batches = NextTokenBatches(tokens, 2, 8, seed=1)
     losses = train(model, batches, training_config, device="cpu", checkpoint_dir=tmp_path)
     assert len(losses) == 2
     assert all(torch.isfinite(torch.tensor(loss)) for loss in losses)
     assert (tmp_path / "step-00000001.pt").exists()
     assert (tmp_path / "step-00000002.pt").exists()
+
+
+def test_resume_restores_checkpoint_and_sampler_state(tmp_path):
+    model_config = ModelConfig(vocab_size=16, context_length=8, n_layers=1, n_heads=2, d_model=8)
+    training_config = TrainingConfig(
+        batch_size=2, max_steps=2, warmup_steps=1, checkpoint_every=1, precision="fp32"
+    )
+    tokens = torch.randint(0, 16, (128,))
+    first_model = RoninLM(model_config)
+    train(
+        first_model,
+        NextTokenBatches(tokens, 2, 8, seed=1),
+        training_config,
+        device="cpu",
+        checkpoint_dir=tmp_path,
+    )
+    resumed_model = RoninLM(model_config)
+    resumed_losses = train(
+        resumed_model,
+        NextTokenBatches(tokens, 2, 8, seed=1),
+        training_config,
+        device="cpu",
+        checkpoint_dir=tmp_path,
+        resume_from=tmp_path / "step-00000001.pt",
+    )
+    assert len(resumed_losses) == 1
+    assert all(torch.isfinite(torch.tensor(loss)) for loss in resumed_losses)
