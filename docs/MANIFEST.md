@@ -49,6 +49,7 @@ The project brief included target enabled-feature counts of 30/50 (tiny), 37/50 
 - `ronin count-params --profile tiny`
 - `ronin features [--category training|data|evaluation|monitoring|deployment|tests]`
 - `ronin readiness --profile tiny`
+- `ronin matrix`
 - `ronin roadmap`
 
 The feature list is intentionally not a substitute for a working implementation. See [ROADMAP.md](ROADMAP.md) for acceptance gates.
