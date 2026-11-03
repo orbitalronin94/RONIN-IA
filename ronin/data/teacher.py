@@ -131,30 +131,36 @@ def write_teacher_dataset(
     destination.parent.mkdir(parents=True, exist_ok=True)
     seen: set[str] = set()
     written = 0
-    with destination.open("w", encoding="utf-8") as stream:
-        for prompt in prompts:
-            if not prompt.strip():
-                continue
-            completion = chat_completion(config, prompt, opener=opener)
-            digest = hashlib.sha256(
-                (prompt.strip() + "\n" + completion.strip()).encode("utf-8")
-            ).hexdigest()
-            if digest in seen:
-                continue
-            seen.add(digest)
-            record = {
-                "id": digest[:20],
-                "prompt": prompt.strip(),
-                "completion": completion,
-                "teacher_provider": config.base_url,
-                "teacher_model": config.model,
-                "generated_at": datetime.now(UTC).isoformat(),
-                "sha256": digest,
-                "source_type": "teacher_generated_text",
-                "training_terms_reviewed": True,
-            }
-            stream.write(json.dumps(record, ensure_ascii=False) + "\n")
-            written += 1
-    if written == 0:
-        raise ValueError("no teacher examples were generated")
+    temporary = destination.with_suffix(destination.suffix + ".tmp")
+    try:
+        with temporary.open("w", encoding="utf-8") as stream:
+            for prompt in prompts:
+                if not prompt.strip():
+                    continue
+                completion = chat_completion(config, prompt, opener=opener)
+                digest = hashlib.sha256(
+                    (prompt.strip() + "\\n" + completion.strip()).encode("utf-8")
+                ).hexdigest()
+                if digest in seen:
+                    continue
+                seen.add(digest)
+                record = {
+                    "id": digest[:20],
+                    "prompt": prompt.strip(),
+                    "completion": completion,
+                    "teacher_provider": config.base_url,
+                    "teacher_model": config.model,
+                    "generated_at": datetime.now(UTC).isoformat(),
+                    "sha256": digest,
+                    "source_type": "teacher_generated_text",
+                    "training_terms_reviewed": True,
+                }
+                stream.write(json.dumps(record, ensure_ascii=False) + "\\n")
+                written += 1
+        if written == 0:
+            raise ValueError("no teacher examples were generated")
+        temporary.replace(destination)
+    except Exception:
+        temporary.unlink(missing_ok=True)
+        raise
     return written
