@@ -8,6 +8,7 @@ The corpus must be licensed for model training and kept out of version control.
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 from pathlib import Path
 
 from ronin.config import get_profile
@@ -31,7 +32,6 @@ def main() -> None:
     if args.steps is not None:
         if not 1 <= args.steps <= 1_000:
             parser.error("--steps must be between 1 and 1000 for the tiny profile")
-        from dataclasses import replace
         training_config = replace(
             training_config,
             max_steps=args.steps,
