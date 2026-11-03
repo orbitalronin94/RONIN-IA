@@ -10,6 +10,7 @@ import torch
 from torch import nn
 
 from ronin.config import TrainingConfig
+from ronin.utils.repro import seed_everything
 
 
 def resolve_precision(requested: str, device: torch.device) -> torch.dtype | None:
@@ -18,6 +19,8 @@ def resolve_precision(requested: str, device: torch.device) -> torch.dtype | Non
     if requested == "bf16":
         if device.type == "cuda" and not torch.cuda.is_bf16_supported():
             raise RuntimeError("bf16 requested but this CUDA device does not support it")
+        if device.type == "cpu":
+            return torch.bfloat16
         return torch.bfloat16
     if requested == "fp16":
         if device.type != "cuda":
@@ -67,8 +70,14 @@ def train(
     device: torch.device | str = "cpu",
     checkpoint_dir: str | Path = "checkpoints",
 ) -> list[float]:
-    """Train for max_steps; returns scalar losses for run-level reporting."""
+    """Train for max_steps; returns scalar losses for run-level reporting.
+
+    Seed the model before construction with seed_everything(config.seed) when
+    reproducible initialization is required. This function seeds training-time
+    stochastic operations and device generators.
+    """
     config.validate()
+    seed_everything(config.seed)
     device = torch.device(device)
     model.to(device)
     optimizer = torch.optim.AdamW(
@@ -76,7 +85,7 @@ def train(
     )
     dtype = resolve_precision(config.precision, device)
     use_scaler = dtype == torch.float16 and device.type == "cuda"
-    scaler = torch.amp.GradScaler("cuda", enabled=use_scaler)
+    scaler = torch.cuda.amp.GradScaler(enabled=use_scaler)
     iterator = iter(batches)
     losses: list[float] = []
 
