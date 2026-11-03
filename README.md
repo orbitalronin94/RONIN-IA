@@ -25,48 +25,23 @@
 | seed-1 | ~1B | 2× A100 40GB | Larger-scale training |
 | seed-2 | ~7B | 4× A100 80GB | Larger-scale training |
 
-These are target profiles, not verified parameter counts or guaranteed hardware-fit claims. The implementation must calculate parameter counts from the actual architecture and estimate memory with explicit assumptions. The 2.8T-parameter MoE concept is out of scope for this repository's initial ladder.
+The current architecture dimensions are tuned to approximate these parameter targets; verify the exact count with `ronin count-params --profile PROFILE`. These are not guaranteed hardware-fit claims. The 2.8T-parameter MoE concept is out of scope for the initial ladder.
 
-## Required system
+## Current bootstrap implementation
 
-- Architecture and configuration validation
-- Tokenizer trained from project-approved data
-- Corpus ingestion, normalization, filtering, deduplication and deterministic sharding
-- Streaming data loader and deterministic train/validation/test splits
-- Autoregressive language-model training from random initialization
-- Mixed precision with runtime capability checks and safe fallback
-- Gradient accumulation, clipping, learning-rate schedule and checkpoint/resume
-- NaN/Inf detection, loss-spike diagnostics and recoverable failure handling
-- Evaluation: validation loss, perplexity, bits-per-byte (BPB), generation and regression tests
-- Experiment metadata, logs, metrics and readiness reporting
-- CLI, unit tests, integration tests and CI
+- Decoder-only causal Transformer, tied token/output embeddings, random initialization.
+- Tiny byte-tokenizer baseline and deterministic next-token batches.
+- Shared AdamW training loop with gradient accumulation, clipping, warmup/cosine schedule and precision selection.
+- Non-finite loss/gradient guards and atomic periodic checkpoint saving.
+- Autoregressive top-k generation, validation-loss helper, perplexity and BPB metric helpers.
+- 50-feature evidence-aware manifest, readiness and CLI.
+- Unit tests and GitHub Actions CI workflow.
 
-## Repository layout
+The full provenance-aware data pipeline, learned tokenizer, exact checkpoint resume, distributed training and production evaluation are still planned. A declared target is not an implemented feature.
 
-```text
-configs/                 Versioned model and training profiles
-data/
-  manifests/             Corpus provenance, licenses and split manifests
-  raw/                   Local-only source data (never commit private data)
-  processed/             Local-only processed shards
-docs/                    Architecture, data, training and evaluation docs
-ronin/
-  manifest/              Feature registry and readiness model
-  models/                Transformer architecture and parameter accounting
-  tokenizer/             Trainable tokenizer and serialization
-  data/                  Dataset readers, filters, dedup and batching
-  training/              Trainer, optimizer, schedules and checkpoints
-  evaluation/            Metrics, generation and regression harness
-  inference/             Sampling and generation interfaces
-  utils/                 Reproducibility, logging and hardware utilities
-scripts/                 Reproducible developer and operator commands
-tests/                   Unit and integration tests
-.github/workflows/       Continuous integration
-```
+## Quick start
 
-## Quick start (bootstrap)
-
-Python 3.11+ is the baseline. Install the project in editable mode once packaging is present:
+Python 3.11+ is required.
 
 ```bash
 python -m venv .venv
@@ -74,43 +49,70 @@ source .venv/bin/activate
 python -m pip install -U pip
 pip install -e '.[dev]'
 pytest
+ruff check ronin tests scripts
 ```
 
-The CLI is being built incrementally. Do not assume a command exists until it is implemented and covered by tests.
+Useful commands:
 
-## Feature manifest and readiness
+```bash
+ronin info --profile tiny
+ronin count-params --profile tiny
+ronin features
+ronin readiness --profile tiny
+ronin roadmap
+```
 
-The intended manifest has 50 capabilities grouped into six areas:
+Train the tiny profile only on an operator-supplied, licensed UTF-8 corpus:
 
-- Training (16)
-- Data (8)
-- Evaluation (8)
-- Monitoring (6)
-- Deployment (5)
-- Tests (7)
+```bash
+python scripts/train_text.py --text /path/to/approved-corpus.txt --profile tiny --steps 100
+```
 
-The feature registry must encode per-profile availability explicitly. Defaults such as ON/OFF/PLANNED must not be confused with profile activation. Every feature must expose its status, dependencies, minimum profile and evidence/tests. Readiness must distinguish implemented, tested, planned and blocked capabilities.
+The byte tokenizer is a bootstrap baseline. This script does not create a train/validation/test split and its loss is not a held-out evaluation.
+
+## Repository layout
+
+```text
+configs/                 Versioned model and training profiles
+data/manifests/          Corpus provenance and license manifests
+data/raw/                Local-only source data (never commit private data)
+data/processed/          Local-only processed shards
+docs/                    Architecture, data, training, evaluation and roadmap
+ronin/manifest/          Feature registry and readiness model
+ronin/models/            Transformer architecture and parameter accounting
+ronin/tokenizer/         Tokenizer implementations
+ronin/data/              Dataset readers and batching
+ronin/training/          Trainer, optimizer, schedules and checkpoints
+ronin/evaluation/        Metrics and evaluation helpers
+ronin/inference/         Sampling and generation interfaces
+ronin/utils/             Reproducibility utilities
+scripts/                 Reproducible developer and operator commands
+tests/                   Unit and integration tests
+.github/workflows/       Continuous integration
+```
+
+## Canonical documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Manifest v3](docs/MANIFEST.md)
+- [Data governance](docs/DATA.md)
+- [Training operations](docs/TRAINING.md)
+- [Evaluation](docs/EVALUATION.md)
+- [Hardware planning](docs/HARDWARE.md)
+- [Roadmap](docs/ROADMAP.md)
+
+## Feature manifest
+
+The 50 capabilities are grouped into training (16), data (8), evaluation (8), monitoring (6), deployment (5) and tests (7). Per-profile eligibility and implementation evidence are encoded in `ronin/manifest/registry.py`. Historical target matrix totals are documented separately and are not used to fake readiness.
 
 ## Evaluation rules
 
 - Report validation loss and perplexity with tokenizer and corpus identity.
-- Use BPB when comparing tokenizers or tokenization schemes; perplexity alone is not directly comparable across different tokenizers.
+- Use BPB when comparing tokenizers; perplexity alone is not directly comparable across tokenizers.
 - Keep training, validation and test data isolated.
 - A tiny memorization/smoke test is not evidence of generalization.
-- Report baselines and confidence/variance where appropriate.
+- Report baselines and variance where appropriate.
 - Never fabricate benchmark results.
-
-## Development sequence
-
-1. Bootstrap package, configuration, manifest and CI.
-2. Implement model architecture and parameter-count tests.
-3. Implement tokenizer and data pipeline with provenance.
-4. Implement the single scale-independent training loop.
-5. Add checkpointing, resume, monitoring and failure recovery.
-6. Add evaluation and generation regression tests.
-7. Validate tiny end-to-end on synthetic data, clearly labelled as a smoke test.
-8. Run seed-0 only after real, licensed data and hardware are available.
-9. Scale to seed-1 and seed-2 only after measured fit and stable validation.
 
 ## Contribution and execution contract
 
