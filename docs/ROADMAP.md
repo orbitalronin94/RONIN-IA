@@ -14,7 +14,7 @@ This roadmap is a sequence of verifiable engineering gates, not a promise that a
 - [x] Feature registry and evidence-based readiness report
 - [x] Basic generation and evaluation metric helpers
 - [ ] Execute CI and fix all failures
-- [ ] Full checkpoint resume and round-trip test
+- [x] Full checkpoint resume and sampler-state test
 - [ ] End-to-end smoke training on an approved corpus
 
 ## Phase 1 — Data and evaluation
