@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from enum import StrEnum
-from typing import Iterable
 
 
 class Status(StrEnum):
@@ -36,13 +35,13 @@ _FEATURES = [
     ("mixed_precision", "training", "Runtime precision selection with safe fallback", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
     ("nonfinite_loss_guard", "training", "Stop on NaN or infinite loss", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
     ("checkpoint_save", "training", "Atomic model and optimizer checkpoint save", "tiny", Status.IMPLEMENTED, "ronin/training/loop.py"),
-    ("checkpoint_resume", "training", "Restore full training state and RNG", "seed-0", Status.PLANNED, None),
+    ("checkpoint_resume", "training", "Restore model optimizer scaler and RNG state", "tiny", Status.IMPLEMENTED, "ronin/training/checkpoint.py"),
     ("activation_checkpointing", "training", "Recompute activations to reduce memory", "seed-0", Status.PLANNED, None),
     ("loss_spike_detection", "training", "Detect and diagnose abrupt loss spikes", "seed-0", Status.PLANNED, None),
     ("early_stopping", "training", "Optional validation-driven early stopping", "seed-0", Status.PLANNED, None),
     ("distributed_training", "training", "Multi-GPU distributed training", "seed-1", Status.PLANNED, None),
     ("optimizer_state_sharding", "training", "Shard optimizer state across devices", "seed-1", Status.PLANNED, None),
-    ("training_resume_test", "training", "Prove deterministic resume behavior", "seed-0", Status.PLANNED, None),
+    ("training_resume_test", "training", "Test checkpoint resume and sampler state", "tiny", Status.IMPLEMENTED, "tests/test_training.py"),
     # Data (8)
     ("byte_tokenizer", "data", "Reversible UTF-8 byte tokenizer baseline", "tiny", Status.IMPLEMENTED, "ronin/tokenizer/byte.py"),
     ("text_file_loader", "data", "Load UTF-8 text into token IDs", "tiny", Status.IMPLEMENTED, "ronin/data/batches.py"),
@@ -78,8 +77,8 @@ _FEATURES = [
     ("config_tests", "tests", "Validate model and training configs", "tiny", Status.IMPLEMENTED, "tests/test_config.py"),
     ("model_tests", "tests", "Test model shapes, loss and tied weights", "tiny", Status.IMPLEMENTED, "tests/test_model.py"),
     ("data_tokenizer_tests", "tests", "Test tokenizer and deterministic batches", "tiny", Status.IMPLEMENTED, "tests/test_data_tokenizer.py"),
-    ("training_step_tests", "tests", "Test optimizer step and finite gradients", "tiny", Status.PLANNED, None),
-    ("checkpoint_roundtrip_tests", "tests", "Test save/load roundtrip", "seed-0", Status.PLANNED, None),
+    ("training_step_tests", "tests", "Test optimizer step and finite gradients", "tiny", Status.IMPLEMENTED, "tests/test_training.py"),
+    ("checkpoint_roundtrip_tests", "tests", "Test save/load roundtrip", "tiny", Status.IMPLEMENTED, "tests/test_training.py"),
     ("integration_pipeline_tests", "tests", "Test end-to-end tiny training pipeline", "seed-0", Status.PLANNED, None),
     ("ci_quality_gates", "tests", "Run lint and tests on GitHub Actions", "tiny", Status.IMPLEMENTED, ".github/workflows/ci.yml"),
 ]
