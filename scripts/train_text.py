@@ -29,6 +29,8 @@ def main() -> None:
 
     model_config, training_config = get_profile(args.profile)
     if args.steps is not None:
+        if not 1 <= args.steps <= 1_000:
+            parser.error("--steps must be between 1 and 1000 for the tiny profile")
         from dataclasses import replace
         training_config = replace(training_config, max_steps=args.steps)
     tokens = encode_text_file(args.text, ByteTokenizer())
