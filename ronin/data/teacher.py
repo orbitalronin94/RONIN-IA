@@ -100,7 +100,10 @@ def chat_completion(
             if attempt >= config.max_retries:
                 raise RuntimeError(f"teacher API exhausted retries (HTTP {exc.code})") from exc
             retry_after = exc.headers.get("Retry-After")
-            delay = min(60.0, float(retry_after)) if retry_after else min(30.0, 2.0**attempt)
+            try:
+                delay = min(60.0, max(0.0, float(retry_after))) if retry_after else min(30.0, 2.0**attempt)
+            except ValueError:
+                delay = min(30.0, 2.0**attempt)
             time.sleep(delay)
         except (TimeoutError, urllib.error.URLError):
             if attempt >= config.max_retries:
@@ -133,7 +136,7 @@ def write_teacher_dataset(
                 continue
             completion = chat_completion(config, prompt)
             digest = hashlib.sha256(
-                (prompt.strip() + "\\n" + completion.strip()).encode("utf-8")
+                (prompt.strip() + "\n" + completion.strip()).encode("utf-8")
             ).hexdigest()
             if digest in seen:
                 continue
@@ -149,7 +152,7 @@ def write_teacher_dataset(
                 "source_type": "teacher_generated_text",
                 "training_terms_reviewed": True,
             }
-            stream.write(json.dumps(record, ensure_ascii=False) + "\\n")
+            stream.write(json.dumps(record, ensure_ascii=False) + "\n")
             written += 1
     if written == 0:
         raise ValueError("no teacher examples were generated")
