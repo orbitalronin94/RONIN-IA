@@ -3,6 +3,7 @@ import json
 
 import pytest
 
+from ronin.data.corpus import prepare
 from ronin.data.prompts import build_prompts
 from ronin.data.teacher import generate_completion, write_teacher_dataset
 
@@ -39,9 +40,7 @@ def test_teacher_record_has_provenance_and_student_stays_random(tmp_path, monkey
         "license_url": "https://huggingface.co/openai-community/gpt2",
     }
     output = tmp_path / "teacher.jsonl"
-    count = write_teacher_dataset(
-        ["Explica una idea."], output, object(), object(), manifest
-    )
+    count = write_teacher_dataset(["Explica una idea."], output, object(), object(), manifest)
     assert count == 1
     record = json.loads(output.read_text(encoding="utf-8"))
     expected = hashlib.sha256(
@@ -51,3 +50,25 @@ def test_teacher_record_has_provenance_and_student_stays_random(tmp_path, monkey
     assert record["teacher_license"] == "MIT"
     assert record["student_initialization"] == "random"
     assert record["teacher_weights_imported_into_student"] is False
+    assert record["teacher_license_verified"] is True
+
+
+def test_prepared_corpus_accepts_only_verified_local_mit_records(tmp_path, monkeypatch):
+    import ronin.data.teacher as teacher
+
+    monkeypatch.setattr(teacher, "generate_completion", lambda *args, **kwargs: "Respuesta local.")
+    manifest = {
+        "model_id": "openai-community/gpt2",
+        "revision": "b" * 40,
+        "license": "mit",
+        "license_verified": True,
+        "license_url": "https://huggingface.co/openai-community/gpt2",
+    }
+    source = tmp_path / "teacher.jsonl"
+    write_teacher_dataset(["Explica una idea."], source, object(), object(), manifest)
+    destination = tmp_path / "corpus.txt"
+    assert prepare(source, destination) == 1
+    corpus = destination.read_text(encoding="utf-8")
+    assert "### Instrucción" in corpus
+    assert "### Respuesta del tutor" in corpus
+    assert "Respuesta local." in corpus

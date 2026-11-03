@@ -10,7 +10,7 @@ from typing import Any
 
 
 def load_local_teacher(model_dir: str | Path, device: str = "auto") -> tuple[Any, Any, dict]:
-    """Carga exclusivamente desde disco un modelo cuyo manifiesto declara licencia MIT."""
+    """Carga desde disco un modelo cuyo manifiesto acredita licencia MIT."""
     try:
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -33,10 +33,7 @@ def load_local_teacher(model_dir: str | Path, device: str = "auto") -> tuple[Any
 
     tokenizer = AutoTokenizer.from_pretrained(root, local_files_only=True)
     model = AutoModelForCausalLM.from_pretrained(
-        root,
-        local_files_only=True,
-        use_safetensors=True,
-        torch_dtype="auto",
+        root, local_files_only=True, use_safetensors=True, torch_dtype="auto"
     )
     if device == "auto":
         device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -90,9 +87,12 @@ def write_teacher_dataset(
     max_new_tokens: int = 192,
     seed: int = 1337,
 ) -> int:
-    """Escribe texto generado y su procedencia; nunca copia pesos al modelo RONIN."""
+    """Escribe texto generado y su procedencia, sin copiar pesos al estudiante."""
     if manifest.get("license") != "mit" or manifest.get("license_verified") is not True:
         raise ValueError("Solo se aceptan modelos auxiliares con licencia MIT verificada")
+    for field in ("model_id", "revision", "license_url"):
+        if not manifest.get(field):
+            raise ValueError(f"El manifiesto del tutor no contiene {field}")
     destination = Path(output_path)
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_suffix(destination.suffix + ".tmp")
@@ -102,11 +102,7 @@ def write_teacher_dataset(
         with temporary.open("w", encoding="utf-8") as stream:
             for index, prompt in enumerate(prompts):
                 completion = generate_completion(
-                    model,
-                    tokenizer,
-                    prompt,
-                    max_new_tokens=max_new_tokens,
-                    seed=seed + index,
+                    model, tokenizer, prompt, max_new_tokens=max_new_tokens, seed=seed + index
                 )
                 if not completion:
                     continue
@@ -123,6 +119,7 @@ def write_teacher_dataset(
                     "teacher_model": manifest["model_id"],
                     "teacher_revision": manifest["revision"],
                     "teacher_license": "MIT",
+                    "teacher_license_verified": True,
                     "teacher_license_url": manifest["license_url"],
                     "teacher_weights_loaded_locally": True,
                     "generated_at": datetime.now(UTC).isoformat(),

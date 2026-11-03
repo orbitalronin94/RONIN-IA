@@ -33,8 +33,10 @@ def prepare(source: str | Path, destination: str | Path) -> int:
             raise ValueError(f"Falta la respuesta en la línea {line_number}")
         if record.get("source_type") != "local_mit_teacher_generated_text":
             raise ValueError(f"Tipo de origen inesperado en la línea {line_number}")
-        if record.get("teacher_license") != "MIT":
+        if record.get("teacher_license") != "MIT" or record.get("teacher_license_verified") is not True:
             raise ValueError(f"El tutor no acredita licencia MIT en la línea {line_number}")
+        if record.get("teacher_weights_loaded_locally") is not True:
+            raise ValueError(f"No consta que el tutor se ejecutara localmente en la línea {line_number}")
         if record.get("teacher_weights_imported_into_student") is not False:
             raise ValueError(f"Se detectó una importación de pesos en la línea {line_number}")
         if record.get("student_initialization") != "random":
@@ -50,11 +52,8 @@ def prepare(source: str | Path, destination: str | Path) -> int:
             continue
         seen.add(digest)
         records.append(
-            "### Instrucción\n"
-            + prompt.strip()
-            + "\n\n### Respuesta del tutor\n"
-            + completion.strip()
-            + "\n\n"
+            "### Instrucción\n" + prompt.strip()
+            + "\n\n### Respuesta del tutor\n" + completion.strip() + "\n\n"
         )
     if not records:
         raise ValueError("No se han encontrado ejemplos válidos del tutor")

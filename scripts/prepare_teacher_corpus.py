@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate tutor JSONL provenance and render a plain-text LM training corpus."""
+"""Valida la procedencia del JSONL del tutor y prepara un corpus de texto."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("artifacts/teacher/corpus.txt"))
     args = parser.parse_args()
     count = prepare(args.input, args.output)
-    print(f"Validated and prepared {count} unique examples at {args.output}")
+    print(f"Se han validado y preparado {count} ejemplos en {args.output}")
 
 
 if __name__ == "__main__":
