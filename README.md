@@ -18,14 +18,14 @@
 
 ## Model development ladder
 
-| Profile | Target parameters | Intended hardware | Purpose |
+| Profile | Analytical parameter count | Intended hardware | Purpose |
 |---|---:|---|---|
-| tiny | ~10M | CPU | Fast smoke tests and pipeline validation |
-| seed-0 | ~150M | 1× RTX 4090 | First meaningful scratch-training experiment |
-| seed-1 | ~1B | 2× A100 40GB | Larger-scale training |
-| seed-2 | ~7B | 4× A100 80GB | Larger-scale training |
+| tiny | 9,964,160 | CPU | Fast smoke tests and pipeline validation |
+| seed-0 | 147,909,120 | 1× RTX 4090 | First meaningful scratch-training experiment |
+| seed-1 | 958,467,072 | 2× A100 40GB | Larger-scale training |
+| seed-2 | 6,993,518,592 | 4× A100 80GB | Larger-scale training |
 
-The current architecture dimensions are tuned to approximate these parameter targets; verify the exact count with `ronin count-params --profile PROFILE`. These are not guaranteed hardware-fit claims. The 2.8T-parameter MoE concept is out of scope for the initial ladder.
+Counts are analytical for the current tied-embedding architecture and can be recalculated with `ronin count-params --profile PROFILE`. They are not hardware-fit claims. The 2.8T-parameter MoE concept is out of scope for the initial ladder.
 
 ## Current bootstrap implementation
 
