@@ -32,12 +32,12 @@ The current architecture dimensions are tuned to approximate these parameter tar
 - Decoder-only causal Transformer, tied token/output embeddings, random initialization.
 - Tiny byte-tokenizer baseline and deterministic next-token batches.
 - Shared AdamW training loop with gradient accumulation, clipping, warmup/cosine schedule and precision selection.
-- Non-finite loss/gradient guards and atomic periodic checkpoint saving.
+- Non-finite loss/gradient guards, atomic periodic checkpoint saving and checkpoint resume with optimizer, RNG and sampler state.
 - Autoregressive top-k generation, validation-loss helper, perplexity and BPB metric helpers.
 - 50-feature evidence-aware manifest, readiness and CLI.
 - Unit tests and GitHub Actions CI workflow.
 
-The full provenance-aware data pipeline, learned tokenizer, exact checkpoint resume, distributed training and production evaluation are still planned. A declared target is not an implemented feature.
+The full provenance-aware data pipeline, learned tokenizer, distributed training and production evaluation are still planned. A declared target is not an implemented feature.
 
 ## Quick start
 
