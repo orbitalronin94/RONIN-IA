@@ -32,7 +32,11 @@ def main() -> None:
         if not 1 <= args.steps <= 1_000:
             parser.error("--steps must be between 1 and 1000 for the tiny profile")
         from dataclasses import replace
-        training_config = replace(\n            training_config,\n            max_steps=args.steps,\n            warmup_steps=min(training_config.warmup_steps, max(1, args.steps // 10)),\n        )
+        training_config = replace(
+            training_config,
+            max_steps=args.steps,
+            warmup_steps=min(training_config.warmup_steps, max(1, args.steps // 10)),
+        )
     tokens = encode_text_file(args.text, ByteTokenizer())
     if model_config.vocab_size != ByteTokenizer.vocab_size:
         raise ValueError("tiny profile and byte tokenizer vocabulary do not match")
