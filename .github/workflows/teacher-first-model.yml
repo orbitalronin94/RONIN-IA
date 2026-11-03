@@ -33,8 +33,8 @@ jobs:
     timeout-minutes: 90
     env:
       RONIN_TEACHER_API_KEY: ${{ secrets.RONIN_TEACHER_API_KEY }}
-      RONIN_TEACHER_BASE_URL: ${{ vars.RONIN_TEACHER_BASE_URL }}
-      RONIN_TEACHER_MODEL: ${{ vars.RONIN_TEACHER_MODEL }}
+      RONIN_TEACHER_BASE_URL: ${{ vars.RONIN_TEACHER_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/' }}
+      RONIN_TEACHER_MODEL: ${{ vars.RONIN_TEACHER_MODEL || 'gemini-3.8-flash' }}
       RONIN_TEACHER_MAX_TOKENS: "384"
     steps:
       - uses: actions/checkout@v4
@@ -49,8 +49,6 @@ jobs:
       - name: Validate teacher configuration
         run: |
           test -n "$RONIN_TEACHER_API_KEY" || (echo "Missing repository secret RONIN_TEACHER_API_KEY" && exit 1)
-          test -n "$RONIN_TEACHER_BASE_URL" || (echo "Missing repository variable RONIN_TEACHER_BASE_URL" && exit 1)
-          test -n "$RONIN_TEACHER_MODEL" || (echo "Missing repository variable RONIN_TEACHER_MODEL" && exit 1)
       - name: Generate tutor examples
         run: |
           python scripts/generate_teacher_data.py \
