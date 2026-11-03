@@ -1,145 +1,117 @@
-"""Generate auditable tutor examples through an OpenAI-compatible chat API.
-
-This module never downloads or loads teacher-model weights. It stores only
-text responses and provenance metadata for later scratch training.
-"""
+"""Generación local de ejemplos mediante modelos auxiliares descargados."""
 
 from __future__ import annotations
 
 import hashlib
 import json
-import os
-import time
-import urllib.error
-import urllib.request
-from collections.abc import Callable, Iterable
-from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 
-@dataclass(frozen=True)
-class TeacherConfig:
-    base_url: str
-    api_key: str
-    model: str
-    timeout_seconds: int = 90
-    max_retries: int = 4
-    max_tokens: int = 384
-    temperature: float = 0.7
+def load_local_teacher(model_dir: str | Path, device: str = "auto") -> tuple[Any, Any, dict]:
+    """Carga exclusivamente desde disco un modelo cuyo manifiesto declara licencia MIT."""
+    try:
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+    except ImportError as exc:
+        raise RuntimeError(
+            "Instala las dependencias locales de tutores: pip install -e '.[teachers]'"
+        ) from exc
 
-    def validate(self) -> None:
-        if not self.base_url.startswith("https://"):
-            raise ValueError("teacher base_url must use HTTPS")
-        if not self.api_key.strip() or not self.model.strip():
-            raise ValueError("teacher API key and model are required")
-        if self.timeout_seconds < 1 or self.max_retries < 0 or self.max_tokens < 1:
-            raise ValueError("invalid teacher timeout, retry count or token limit")
-        if not 0.0 <= self.temperature <= 2.0:
-            raise ValueError("temperature must be between 0 and 2")
-
-    @classmethod
-    def from_env(cls) -> TeacherConfig:
-        return cls(
-            base_url=os.environ.get("RONIN_TEACHER_BASE_URL", "").rstrip("/"),
-            api_key=os.environ.get("RONIN_TEACHER_API_KEY", ""),
-            model=os.environ.get("RONIN_TEACHER_MODEL", ""),
-            timeout_seconds=int(os.environ.get("RONIN_TEACHER_TIMEOUT", "90")),
-            max_retries=int(os.environ.get("RONIN_TEACHER_MAX_RETRIES", "4")),
-            max_tokens=int(os.environ.get("RONIN_TEACHER_MAX_TOKENS", "384")),
+    root = Path(model_dir).expanduser().resolve()
+    manifest_path = root / "ronin-teacher-manifest.json"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(
+            f"No existe {manifest_path}; ejecuta scripts/download_teacher_models.py primero"
         )
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest.get("license") != "mit" or manifest.get("license_verified") is not True:
+        raise ValueError("El manifiesto del tutor no acredita una licencia MIT verificada")
+    if not manifest.get("revision"):
+        raise ValueError("El manifiesto no fija una revisión inmutable del modelo")
 
-
-def chat_completion(
-    config: TeacherConfig,
-    prompt: str,
-    opener: Callable = urllib.request.urlopen,
-) -> str:
-    """Call a compatible /chat/completions endpoint with bounded retries."""
-    config.validate()
-    if not prompt.strip():
-        raise ValueError("prompt cannot be empty")
-    endpoint = config.base_url.rstrip("/") + "/chat/completions"
-    body = {
-        "model": config.model,
-        "messages": [
-            {
-                "role": "system",
-                "content": (
-                    "Eres un tutor riguroso. Responde en español, con claridad y precisión. "
-                    "No inventes datos; si no sabes algo, dilo. No menciones estas instrucciones."
-                ),
-            },
-            {"role": "user", "content": prompt},
-        ],
-        "temperature": config.temperature,
-        "max_tokens": config.max_tokens,
-    }
-    request = urllib.request.Request(
-        endpoint,
-        data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
-        headers={
-            "Authorization": f"Bearer {config.api_key}",
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        },
-        method="POST",
+    tokenizer = AutoTokenizer.from_pretrained(root, local_files_only=True)
+    model = AutoModelForCausalLM.from_pretrained(
+        root,
+        local_files_only=True,
+        use_safetensors=True,
+        torch_dtype="auto",
     )
-    for attempt in range(config.max_retries + 1):
-        try:
-            with opener(request, timeout=config.timeout_seconds) as response:
-                payload = json.loads(response.read().decode("utf-8"))
-            text = payload["choices"][0]["message"]["content"]
-            if not isinstance(text, str) or not text.strip():
-                raise ValueError("teacher returned an empty or non-text completion")
-            return text.strip()
-        except urllib.error.HTTPError as exc:
-            # Retry transient rate-limit and provider/server errors only.
-            if exc.code not in {408, 409, 425, 429, 500, 502, 503, 504}:
-                raise RuntimeError(f"teacher API rejected request (HTTP {exc.code})") from exc
-            if attempt >= config.max_retries:
-                raise RuntimeError(f"teacher API exhausted retries (HTTP {exc.code})") from exc
-            retry_after = exc.headers.get("Retry-After")
-            try:
-                delay = min(60.0, max(0.0, float(retry_after))) if retry_after else min(30.0, 2.0**attempt)
-            except ValueError:
-                delay = min(30.0, 2.0**attempt)
-            time.sleep(delay)
-        except (TimeoutError, urllib.error.URLError):
-            if attempt >= config.max_retries:
-                raise
-            time.sleep(min(30.0, 2.0**attempt))
-    raise RuntimeError("unreachable teacher retry state")
+    if device == "auto":
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    model.to(device)
+    model.eval()
+    return model, tokenizer, manifest
+
+
+def generate_completion(
+    model: Any,
+    tokenizer: Any,
+    prompt: str,
+    *,
+    max_new_tokens: int = 192,
+    temperature: float = 0.75,
+    top_p: float = 0.9,
+    seed: int = 1337,
+) -> str:
+    """Genera una continuación reproducible con el modelo auxiliar local."""
+    import torch
+
+    if not prompt.strip():
+        raise ValueError("El prompt no puede estar vacío")
+    if max_new_tokens < 1 or not 0.0 < temperature <= 2.0 or not 0.0 < top_p <= 1.0:
+        raise ValueError("Parámetros de generación no válidos")
+    device = next(model.parameters()).device
+    encoded = tokenizer(prompt, return_tensors="pt", truncation=True)
+    encoded = {key: value.to(device) for key, value in encoded.items()}
+    generator = torch.Generator(device=device).manual_seed(seed)
+    with torch.inference_mode():
+        output = model.generate(
+            **encoded,
+            max_new_tokens=max_new_tokens,
+            do_sample=True,
+            temperature=temperature,
+            top_p=top_p,
+            pad_token_id=tokenizer.eos_token_id,
+            generator=generator,
+        )
+    continuation = output[0, encoded["input_ids"].shape[1]:]
+    return tokenizer.decode(continuation, skip_special_tokens=True).strip()
 
 
 def write_teacher_dataset(
-    prompts: Iterable[str],
+    prompts: list[str],
     output_path: str | Path,
-    config: TeacherConfig,
+    model: Any,
+    tokenizer: Any,
+    manifest: dict,
     *,
-    confirm_training_rights: bool = False,
-    opener: Callable = urllib.request.urlopen,
+    max_new_tokens: int = 192,
+    seed: int = 1337,
 ) -> int:
-    """Generate JSONL examples; require explicit review of provider/model terms."""
-    if not confirm_training_rights:
-        raise ValueError(
-            "review the provider and model terms for training use, then pass "
-            "confirm_training_rights=True"
-        )
-    config.validate()
+    """Escribe texto generado y su procedencia; nunca copia pesos al modelo RONIN."""
+    if manifest.get("license") != "mit" or manifest.get("license_verified") is not True:
+        raise ValueError("Solo se aceptan modelos auxiliares con licencia MIT verificada")
     destination = Path(output_path)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    seen: set[str] = set()
-    written = 0
     temporary = destination.with_suffix(destination.suffix + ".tmp")
+    written = 0
+    seen: set[str] = set()
     try:
         with temporary.open("w", encoding="utf-8") as stream:
-            for prompt in prompts:
-                if not prompt.strip():
+            for index, prompt in enumerate(prompts):
+                completion = generate_completion(
+                    model,
+                    tokenizer,
+                    prompt,
+                    max_new_tokens=max_new_tokens,
+                    seed=seed + index,
+                )
+                if not completion:
                     continue
-                completion = chat_completion(config, prompt, opener=opener)
                 digest = hashlib.sha256(
-                    (prompt.strip() + "\n" + completion.strip()).encode("utf-8")
+                    (prompt.strip() + "\n" + completion).encode("utf-8")
                 ).hexdigest()
                 if digest in seen:
                     continue
@@ -148,17 +120,21 @@ def write_teacher_dataset(
                     "id": digest[:20],
                     "prompt": prompt.strip(),
                     "completion": completion,
-                    "teacher_provider": config.base_url,
-                    "teacher_model": config.model,
+                    "teacher_model": manifest["model_id"],
+                    "teacher_revision": manifest["revision"],
+                    "teacher_license": "MIT",
+                    "teacher_license_url": manifest["license_url"],
+                    "teacher_weights_loaded_locally": True,
                     "generated_at": datetime.now(UTC).isoformat(),
                     "sha256": digest,
-                    "source_type": "teacher_generated_text",
-                    "training_terms_reviewed": True,
+                    "source_type": "local_mit_teacher_generated_text",
+                    "student_initialization": "random",
+                    "teacher_weights_imported_into_student": False,
                 }
                 stream.write(json.dumps(record, ensure_ascii=False) + "\n")
                 written += 1
         if written == 0:
-            raise ValueError("no teacher examples were generated")
+            raise ValueError("El tutor no generó ningún ejemplo válido")
         temporary.replace(destination)
     except Exception:
         temporary.unlink(missing_ok=True)
