@@ -17,10 +17,8 @@ def resolve_precision(requested: str, device: torch.device) -> torch.dtype | Non
     if requested == "fp32":
         return None
     if requested == "bf16":
-        if device.type == "cuda" and not torch.cuda.is_bf16_supported():
-            raise RuntimeError("bf16 requested but this CUDA device does not support it")
-        if device.type == "cpu":
-            return torch.bfloat16
+        if device.type != "cuda" or not torch.cuda.is_bf16_supported():
+            raise RuntimeError("explicit bf16 currently requires a CUDA device with BF16 support")
         return torch.bfloat16
     if requested == "fp16":
         if device.type != "cuda":
@@ -98,9 +96,7 @@ def train(
         for _ in range(config.gradient_accumulation_steps):
             inputs, targets = next(iterator)
             inputs, targets = inputs.to(device), targets.to(device)
-            with torch.autocast(
-                device_type=device.type, dtype=dtype, enabled=dtype is not None
-            ):
+            with torch.autocast(device_type=device.type, dtype=dtype, enabled=dtype is not None):
                 _, loss = model(inputs, targets)
                 if loss is None:
                     raise RuntimeError("model did not return a training loss")
@@ -110,7 +106,9 @@ def train(
             scaler.scale(scaled_loss).backward()
             accumulated += float(loss.detach())
         scaler.unscale_(optimizer)
-        torch.nn.utils.clip_grad_norm_(model.parameters(), config.grad_clip_norm)
+        grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), config.grad_clip_norm)
+        if not torch.isfinite(grad_norm):
+            raise FloatingPointError(f"non-finite gradient norm at step {step}")
         scaler.step(optimizer)
         scaler.update()
         losses.append(accumulated / config.gradient_accumulation_steps)
