@@ -12,10 +12,10 @@ import os
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Callable, Iterable
 
 
 @dataclass(frozen=True)
