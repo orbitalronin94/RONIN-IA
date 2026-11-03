@@ -1,0 +1,102 @@
+name: Teacher data and first RONIN model
+
+on:
+  workflow_dispatch:
+    inputs:
+      samples:
+        description: "Number of Spanish tutor examples to generate"
+        required: true
+        type: number
+        default: 24
+      steps:
+        description: "Tiny model optimizer steps (start small)"
+        required: true
+        type: number
+        default: 5
+      confirm_teacher_terms:
+        description: "I reviewed the provider/model terms and confirm generated outputs may be used for model training"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-first-model
+  cancel-in-progress: false
+
+jobs:
+  generate-and-train:
+    if: inputs.confirm_teacher_terms == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      RONIN_TEACHER_API_KEY: ${{ secrets.RONIN_TEACHER_API_KEY }}
+      RONIN_TEACHER_BASE_URL: ${{ vars.RONIN_TEACHER_BASE_URL }}
+      RONIN_TEACHER_MODEL: ${{ vars.RONIN_TEACHER_MODEL }}
+      RONIN_TEACHER_MAX_TOKENS: "384"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install RONIN
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+      - name: Validate teacher configuration
+        run: |
+          test -n "$RONIN_TEACHER_API_KEY" || (echo "Missing repository secret RONIN_TEACHER_API_KEY" && exit 1)
+          test -n "$RONIN_TEACHER_BASE_URL" || (echo "Missing repository variable RONIN_TEACHER_BASE_URL" && exit 1)
+          test -n "$RONIN_TEACHER_MODEL" || (echo "Missing repository variable RONIN_TEACHER_MODEL" && exit 1)
+      - name: Generate tutor examples
+        run: |
+          python scripts/generate_teacher_data.py \
+            --count "${{ inputs.samples }}" \
+            --output artifacts/teacher/train.jsonl \
+            --confirm-training-rights
+      - name: Validate provenance and build corpus
+        run: |
+          python scripts/prepare_teacher_corpus.py \
+            --input artifacts/teacher/train.jsonl \
+            --output artifacts/teacher/corpus.txt
+      - name: Train RONIN tiny from random initialization
+        run: |
+          python scripts/train_text.py \
+            --text artifacts/teacher/corpus.txt \
+            --profile tiny \
+            --steps "${{ inputs.steps }}" \
+            --device cpu \
+            --checkpoints artifacts/checkpoints/tiny
+      - name: Write run summary
+        run: |
+          {
+            echo "## RONIN first-model run"
+            echo "- Profile: tiny (random initialization)"
+            echo "- Teacher: ${RONIN_TEACHER_MODEL}"
+            echo "- Tutor examples: ${{ inputs.samples }}"
+            echo "- Optimizer steps: ${{ inputs.steps }}"
+            echo "- Training corpus: generated tutor text; not an independent evaluation set"
+            echo "- Checkpoint: artifacts/checkpoints/tiny/step-$(printf '%08d' "${{ inputs.steps }}").pt"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload corpus and checkpoint artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-tiny-first-run
+          path: |
+            artifacts/teacher/train.jsonl
+            artifacts/teacher/corpus.txt
+            artifacts/checkpoints/tiny/*.pt
+          if-no-files-found: error
+          retention-days: 14
+
+  terms-not-confirmed:
+    if: inputs.confirm_teacher_terms != true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stop before any external API call
+        run: |
+          echo "Set confirm_teacher_terms=true only after reviewing the provider and model terms for training use."
+          exit 1
