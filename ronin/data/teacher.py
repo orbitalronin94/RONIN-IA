@@ -118,6 +118,7 @@ def write_teacher_dataset(
     config: TeacherConfig,
     *,
     confirm_training_rights: bool = False,
+    opener: Callable = urllib.request.urlopen,
 ) -> int:
     """Generate JSONL examples; require explicit review of provider/model terms."""
     if not confirm_training_rights:
@@ -134,7 +135,7 @@ def write_teacher_dataset(
         for prompt in prompts:
             if not prompt.strip():
                 continue
-            completion = chat_completion(config, prompt)
+            completion = chat_completion(config, prompt, opener=opener)
             digest = hashlib.sha256(
                 (prompt.strip() + "\n" + completion.strip()).encode("utf-8")
             ).hexdigest()
