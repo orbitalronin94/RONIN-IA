@@ -2,25 +2,43 @@
 
 ## Implementación actual
 
-RONIN comienza con un modelo de lenguaje Transformer causal de tipo decoder-only, implementado en PyTorch. Los embeddings de tokens y la proyección de salida comparten pesos. La atención es causal y utiliza la implementación escalada de atención de PyTorch. Los parámetros se inicializan localmente con una distribución normal; al construir el modelo no se carga ningún checkpoint externo.
+RONIN utiliza un Transformer causal decoder-only implementado en PyTorch. La arquitectura actual incorpora:
 
-El tokenizador inicial representa el texto como bytes UTF-8 reversibles (identificadores 0–255). Es una base provisional para probar la canalización, no el tokenizador definitivo. La dimensión del vocabulario del tokenizador y la del modelo deben coincidir en todo experimento ejecutable.
+- **RoPE** para codificar posiciones sin una tabla de embeddings posicionales aprendida.
+- **RMSNorm** en los bloques y en la salida.
+- **SwiGLU** como red feed-forward.
+- **GQA configurable** mediante `n_kv_heads`; por defecto se mantiene MHA (`n_kv_heads = n_heads`).
+- Embeddings de tokens y proyección de salida con pesos compartidos.
+- Atención causal mediante `torch.nn.functional.scaled_dot_product_attention`.
 
-## Perfiles de escala
+Los pesos se inicializan localmente con una distribución normal. El constructor no carga pesos preentrenados ni importa parámetros de los modelos auxiliares.
 
-Los perfiles se centralizan en `ronin/config.py`. Todos utilizan la misma implementación `RoninLM`. Los recuentos de parámetros se deben calcular a partir de módulos instanciados. Los tamaños objetivo del README son aspiraciones y no deben presentarse como recuentos medidos.
+## Dimensiones y configuración
+
+Los campos `n_kv_heads`, `d_ff`, `rope_theta` y `rms_norm_eps` se definen en `ModelConfig`. La dimensión de cabeza debe ser par para RoPE y `n_heads` debe ser divisible por `n_kv_heads`. El contador analítico de parámetros refleja las proyecciones GQA, las tres matrices SwiGLU, las normalizaciones y el embedding compartido.
+
+El límite de contexto se valida en el modelo. RoPE calcula las frecuencias en función de las posiciones de la secuencia de entrada; no se conserva una tabla de embeddings posicionales aprendida.
 
 ## Invariantes
 
-- Máscara causal decoder-only; no puede filtrarse información de tokens futuros.
+- Máscara causal decoder-only: una posición no puede atender a tokens futuros.
 - Límite explícito de longitud de contexto.
 - Formas estables: entrada `[lote, secuencia]`, logits `[lote, secuencia, vocabulario]`.
-- Objetivo de entropía cruzada para predecir el siguiente token.
-- El uso compartido de pesos entre embeddings y proyección de salida está probado.
-- Todo cambio de arquitectura requiere pruebas de parámetros, dimensiones, causalidad y gradientes.
+- Entropía cruzada para predecir el siguiente token.
+- Pesos compartidos entre embeddings y proyección de salida.
+- Inicialización aleatoria local del estudiante.
+- Todo cambio de arquitectura requiere pruebas de dimensiones, causalidad, gradientes y recuento de parámetros.
 
-## Ampliaciones previstas
+## Decisiones de integración
 
-Las codificaciones posicionales rotatorias, atención agrupada por consultas, variantes configurables de redes feed-forward, checkpointing de activaciones y entrenamiento distribuido todavía no forman parte de la implementación inicial. Deben añadirse mediante opciones de configuración probadas, sin bifurcar la canalización de entrenamiento por perfil.
+El diseño de referencia en NumPy se ha utilizado como especificación conceptual, no como backend alternativo. Las operaciones diferenciables se implementan con PyTorch autograd; no se incorpora backpropagation manual.
 
-Los modelos auxiliares MIT se ejecutan fuera de RONIN. Su única salida admitida para el estudiante son ejemplos de texto con procedencia registrada; nunca se reutilizan sus tensores de pesos.
+El tokenizador BPE de referencia no se integra: su decodificador reconstruye los tokens fusionados a partir de claves centinela en lugar de conservar los bytes originales, por lo que no garantiza round-trip UTF-8. Se mantiene el tokenizador de bytes reversible existente hasta disponer de un BPE corregido y probado.
+
+El pipeline de datos de referencia tampoco se copia como paquete paralelo: RONIN ya tiene lectura de corpus, validación de procedencia y lotes PyTorch. Las utilidades duplicadas se incorporarán solo cuando cubran una carencia real y tengan pruebas de integridad de datos.
+
+## Límites actuales
+
+GQA está implementada como proyección y repetición de cabezas KV en la ruta de atención; no equivale a un servidor de inferencia con caché KV incremental. No se declara paged attention, batching continuo, planificación de peticiones ni entrenamiento distribuido hasta que existan implementaciones y pruebas específicas.
+
+Los modelos auxiliares MIT se ejecutan fuera de RONIN. Su única salida admitida para el estudiante son ejemplos de texto con procedencia registrada; sus pesos nunca se reutilizan.
