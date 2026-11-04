@@ -23,6 +23,7 @@ def test_training_mixture_is_deterministic_and_tracks_each_source(tmp_path):
 
     raw = output.read_bytes()
     assert result["source_count"] == 2
+    assert sum(row["byte_share"] for row in result["sources"]) == pytest.approx(1.0)
     assert result["total_input_bytes"] == portfolio.stat().st_size + literature.stat().st_size
     assert result["output_sha256"] == hashlib.sha256(raw).hexdigest()
     assert "FUENTE DE ENTRENAMIENTO: portfolio" in raw.decode("utf-8")
