@@ -12,6 +12,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 17:48 | [Integración continua #596 (run 41879664885)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41879664885) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Corregir prueba de filtro temático estricto. Trigger: push; rama: main; intento: 1. | 6da8c06d |
 | 2026-11-04 17:48 | [Integración continua #601 (run 41879839583)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41879839583) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Alinear esquema SQLite y fracción HKD configurable. Trigger: push; rama: main; intento: 1. | 7593a422 |
 | 2026-11-04 17:48 | [Integración continua #589 (run 41879459133)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41879459133) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Exigir autorización G-0 limitada y cerrar sidecars correctamente. Trigger: push; rama: main; intento: 1. | 8456a9c9 |
 | 2026-11-04 17:47 | [Integración continua #595 (run 41879636687)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41879636687) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Añadir pruebas de clasificación y licencias del intake RUN 5. Trigger: push; rama: main; intento: 1. | ff3c5ae2 |
