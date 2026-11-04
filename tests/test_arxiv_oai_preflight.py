@@ -76,3 +76,58 @@ def test_preflight_limits_and_report_never_claim_text_download():
         assert "max_records_per_set" in str(exc)
     else:
         raise AssertionError("preflight must reject unbounded page samples")
+
+
+def test_request_oai_retries_transient_timeout(monkeypatch):
+    from scripts import preflight_arxiv_oai as module
+
+    calls = {"count": 0}
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def read(self):
+            return b'<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"><ListSets/></OAI-PMH>'
+
+    def fake_urlopen(_request, timeout):
+        assert timeout == module.REQUEST_TIMEOUT_SECONDS
+        calls["count"] += 1
+        if calls["count"] == 1:
+            raise TimeoutError("temporary timeout")
+        return Response()
+
+    monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(module.time, "sleep", lambda _seconds: None)
+    monkeypatch.setattr(module, "_last_request_at", 0.0)
+    root = module.request_oai({"verb": "ListSets"}, min_interval=0)
+    assert root.find(f"{module.OAI_NS}ListSets") is not None
+    assert calls["count"] == 2
+
+
+def test_preflight_writes_partial_report_when_one_set_times_out(tmp_path, monkeypatch):
+    from scripts import preflight_arxiv_oai as module
+
+    monkeypatch.setattr(
+        module,
+        "list_category_sets",
+        lambda: [{"set_spec": "math:math:AG", "set_name": "Algebraic Geometry"}],
+    )
+
+    def fail_sample(_set_spec, *, max_records):
+        assert max_records == 10
+        raise RuntimeError("upstream OAI timeout")
+
+    monkeypatch.setattr(module, "sample_set", fail_sample)
+    output = tmp_path / "reports" / "arxiv-preflight.json"
+    report = module.run_preflight(output=output, max_records_per_set=10)
+
+    assert output.is_file()
+    assert report["status"] == "partial_source_unavailable"
+    assert report["domains"]["mathematics"]["sets_selected"][0]["request_error"]
+    assert report["errors"][0]["set_spec"] == "math:math:AG"
+    assert report["text_downloaded"] is False
+    assert report["candidate_text_downloads_authorized"] is False
