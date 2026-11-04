@@ -91,3 +91,16 @@ At this stage, **zero payloads were downloaded, zero new level-A rights records 
 A separate adapter now pins `eulogikon/ancient-greek-texts` at commit `97d5e15939c858ff047a576633255c923b8fb6f8`. The upstream `NOTICE` explicitly places Eulogikon's preparation layer, manifests and metadata under CC0-1.0; the underlying Greek texts are separately marked Public Domain Mark 1.0 and are **not** covered by that CC0 declaration. The adapter exports only structured metadata fields from `manifest.works.min.csv`; it does not fetch any text payload.
 
 The adapter verifies upstream Git blob SHA-1 values for the manifest, NOTICE and LICENSE before producing a JSONL metadata candidate, SHA-256 hashes, and a proposed rights record. Its workflow is `.github/workflows/verify-eulogikon-metadata.yml`. A rights record is not considered registered until the workflow has completed successfully and its generated hash-bearing record has been reviewed and appended to `rights_registry/records.jsonl`. Even then, rights level A for this metadata export does not imply dataset admission or training eligibility: quality, privacy, deduplication, split integrity and global G-0 remain separate gates. The underlying Greek texts remain unadmitted pending per-work edition/source evidence.
+
+
+## CoVoST 2 translation-only candidate lane
+
+`scripts/ingest_covost2_translation_only.py` pins the archived upstream CoVoST repository at commit `4cddf32dedd6bfef86ca3a40f49b27e252650f3f` and verifies the README Git blob before download. The adapter is deliberately narrow: it exports only the CoVoST `translation` column for Spanish→English, Catalan→English and English→Catalan. It does not export the Common Voice `sentence`, `path`, `client_id`, audio, Tatoeba evaluation data, or repository code. The upstream README explicitly separates CoVoST data (CC0), Tatoeba data (other CC licenses) and all other repository assets (CC BY-NC 4.0).
+
+The workflow `.github/workflows/ingest-covost2-translation-candidate.yml` creates a hash-bearing JSONL artifact and a proposed rights record. The downloaded archive SHA-256 values and final payload hash are generated at run time; they are not guessed or committed in advance. Candidate-only: no ledger append, no library assignment, and no training eligibility.
+
+## OpenAlex anonymous snapshot metadata lane
+
+`scripts/ingest_openalex_public_metadata.py` uses the public anonymous OpenAlex S3 JSONL snapshot, not the API. This avoids API keys, credentials and the API's current authentication/rate-limit constraints. It selects one bounded `works` shard from the published manifest, records the manifest date/hash and exact shard/hash, and exports only an explicit bibliographic/graph metadata allowlist. Abstract inverted indexes, full text, PDFs and content archive URLs are excluded.
+
+The workflow `.github/workflows/ingest-openalex-metadata-candidate.yml` publishes a bounded candidate artifact and proposed rights record. This is metadata for catalogue, retrieval and domain routing; it is not a substitute for scientific source text and is not counted as a text-training library. The public snapshot is much larger than a GitHub Actions job should mirror, so the adapter intentionally retrieves only one bounded shard. Candidate-only, no automatic rights-ledger append or training.
