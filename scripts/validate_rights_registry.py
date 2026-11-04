@@ -49,11 +49,17 @@ def validate(record: dict, line: int, policy: dict) -> list[str]:
         errors.append(f"line {line}: license {record['license_id']!r} is not allowlisted")
     if record["rights_assertion_scope"] not in {"exact_text_and_version", "exact_metadata_file_and_version"}:
         errors.append(f"line {line}: rights assertion must cover an exact text or metadata file and version")
-    if record["third_party_content_review"] not in {"clear", "excluded_or_separately_cleared"}:
-        errors.append(f"line {line}: third-party content is not cleared")
+    level = record["rights_level"]
+    review_state = record["third_party_content_review"]
+    if review_state not in {"clear", "excluded_or_separately_cleared", "pending", "unknown"}:
+        errors.append(f"line {line}: invalid third_party_content_review state")
+    if level == "A" and review_state not in {"clear", "excluded_or_separately_cleared"}:
+        errors.append(f"line {line}: level A requires third-party content clearance or explicit exclusion")
     jurisdictions = record["jurisdictions_cleared"]
-    if not isinstance(jurisdictions, list) or not set(policy["jurisdictions"]).issubset(jurisdictions):
-        errors.append(f"line {line}: rights are not cleared for every target jurisdiction")
+    if not isinstance(jurisdictions, list) or not set(jurisdictions).issubset(set(policy["jurisdictions"])):
+        errors.append(f"line {line}: jurisdictions_cleared contains unsupported jurisdictions")
+    elif level == "A" and not set(policy["jurisdictions"]).issubset(jurisdictions):
+        errors.append(f"line {line}: level A rights are not cleared for every target jurisdiction")
     if record["rights_level"] == "A":
         if record["policy_version"] != policy["policy_id"]:
             errors.append(f"line {line}: policy version mismatch")
