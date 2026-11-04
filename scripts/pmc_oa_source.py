@@ -16,8 +16,9 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from collections import Counter
+from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Iterator
+from typing import Any
 
 from scripts.preflight_pmc_oa import (
     DOMAIN_QUERIES,
