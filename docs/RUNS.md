@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 22:54 | [Integración continua #810 (run 41929253432)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41929253432) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs: distinguish CC0 arXiv abstracts from per-paper full-text rights. Trigger: push; rama: main; intento: 1. | 400615f0 |
 | 2026-11-04 22:54 | [Integración continua #809 (run 41929219758)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41929219758) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): write compressed arXiv CC0 metadata records. Trigger: push; rama: main; intento: 1. | 0cc771e1 |
 | 2026-11-04 22:53 | [Integración continua #808 (run 41929206411)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41929206411) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(ci\): correct arXiv metadata artifact command continuation. Trigger: push; rama: main; intento: 1. | 7178db34 |
 | 2026-11-04 22:53 | [Integración continua #806 (run 41929177524)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41929177524) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: feat: preserve CC0 arXiv metadata abstracts as auditable JSONL. Trigger: push; rama: main; intento: 1. | 3baf90f3 |
