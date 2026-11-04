@@ -1,8 +1,8 @@
 # Inventario de corpus y materiales de RONIN-IA
 
 **Corte de auditoría:** 4 de noviembre de 2026, aproximadamente 12:04 UTC.  
-**Rama con la integración más reciente:** `ronin/integrate-all-corpora-phi4-cycle`, [PR #39](https://github.com/orbitalronin94/RONIN-IA/pull/39).  
-**Estado:** la PR sigue abierta; los resultados de esta ficha no implican que todo esté fusionado en `main`.
+**Rama de integración:** `main`.  
+**Estado:** [PR #39](https://github.com/orbitalronin94/RONIN-IA/pull/39) fusionada el 4 de noviembre de 2026.
 
 Este documento es el índice maestro para preparar mezclas reproducibles. No contiene textos de terceros ni pesos: apunta a manifiestos y artefactos temporales de Actions. Su espejo estructurado para herramientas es [data/manifests/corpus_inventory.json](../data/manifests/corpus_inventory.json). La regla central es no mezclar corpus de entrenamiento, holdouts de evaluación, material auxiliar y benchmarks.
 
@@ -15,7 +15,7 @@ Este documento es el índice maestro para preparar mezclas reproducibles. No con
 | CoNSSA | 184 documentos preparados | Train dentro del total de literatura | Integrado y auditado |
 | ELTeC-spa | 96 documentos preparados | Train dentro del total de literatura | Integrado y auditado |
 | Literatura abierta conjunta | 644 documentos: 608 train, 18 validation, 18 test | Preentrenamiento + validación/test literarios separados | Descarga verificada en Actions |
-| Salidas opcionales de Phi-4 | Tamaño variable, generado durante el ciclo | Augmentación candidata, no conocimiento certificado | Tutor MIT verificado; salida sin licencia presumida y con auditoría REF |
+| Salidas opcionales de Phi-4 | Tamaño variable, generado durante el ciclo | No entran en el workflow oficial hasta revisión humana | Tutor MIT verificado; salida sin licencia presumida; REF solo valida estructura |
 | Biblioteca de codificación/opacidad | 6 fuentes originales; 506 registros estructurados | Investigación auxiliar separada | Excluida del preentrenamiento general hasta revisión manual |
 | Corpus sintético de pseudopalabras | 12.000 train + 2.000 validation en el smoke documentado | Smoke técnico exclusivamente | Excluido del entrenamiento general |
 | MMLU-Pro | 140 preguntas por defecto en el ciclo | Evaluación externa; nunca entrenamiento | Holdout de benchmark |
@@ -166,8 +166,10 @@ El script `scripts/prepare_training_mixture.py` construye una mezcla a partir de
 - [Auditoría de adquisición, run #145](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919840) — corpus literario y biblioteca especializada.
 - [CI, run #351](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919819) — 100 tests, smoke CPU y Ruff en verde.
 - [Primera iteración/benchmark, run #126](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919786) — smoke tiny completado.
-- [Ciclo de entrenamiento y MMLU-Pro, run #59](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919709) — terminó con fallo: Phi-4 no pudo generar texto porque `generator` no es un argumento aceptado por el modelo; después MMLU-Pro no pudo importar `BucketNotFoundError` desde `huggingface_hub.errors`. No se generó el informe final ni el artefacto `ronin-portfolio-mmlu-training-cycle`.
-- [PR #39: integración de corpus + Phi-4](https://github.com/orbitalronin94/RONIN-IA/pull/39).
+- [Ciclo histórico Portfolio + Phi-4/MMLU-Pro, run #59](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919709) — falló y queda como antecedente, no como workflow vigente. El workflow oficial nuevo excluye textos de tutor no revisados y ejecuta el test MMLU-Pro completo.
+- [PR #39: integración de corpus + Phi-4](https://github.com/orbitalronin94/RONIN-IA/pull/39) — fusionada.
+- [Workflow oficial: entrenamiento desde cero + MMLU-Pro completo](../.github/workflows/ronin-official-training-holdout.yml).
+- [Primera ejecución oficial #1](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377) — en curso al corte de esta ficha.
 
 ## 8. Decisión de uso resumida
 
@@ -177,4 +179,4 @@ El script `scripts/prepare_training_mixture.py` construye una mezcla a partir de
 - **No descargar/no entrenar:** cuatro colecciones G-0 bloqueadas.
 - **No considerar integrado:** PleIAs PD Books, Mozilla Finance Sentences y las demás candidatas hasta completar su propio gate.
 
-La PR #39 debe corregir la compatibilidad de generación Phi-4 y fijar una combinación compatible de `datasets`/`huggingface_hub`, repetir el ciclo y generar el manifiesto final antes de describir la mezcla Portfolio + literatura + Phi-4 como pipeline estable de `main`. Los artefactos de adquisición separados sí existen; el artefacto consolidado del ciclo no se produjo.
+La mezcla Portfolio + literatura está integrada en `main`. El nuevo workflow oficial genera el manifiesto y el informe de entrenamiento; no incluye texto de tutores ni biblioteca criptográfica en cuarentena. La primera ejecución completa aún debe terminar para producir resultados y artefactos.
