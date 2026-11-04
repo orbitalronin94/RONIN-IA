@@ -1,6 +1,16 @@
 name: Ciclos sintéticos de entrenamiento RONIN
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/prepare_synthetic_corpus.py"
+      - ".github/workflows/synthetic-training-cycles.yml"
+      - "scripts/train_text.py"
+      - "scripts/evaluate_text.py"
+      - "scripts/evaluate_domains.py"
+      - "scripts/evaluate_mmlu_pro.py"
+      - "tests/test_evaluate_mmlu_pro.py"
   pull_request:
     paths:
       - "scripts/prepare_synthetic_corpus.py"
@@ -8,6 +18,8 @@ on:
       - "scripts/train_text.py"
       - "scripts/evaluate_text.py"
       - "scripts/evaluate_domains.py"
+      - "scripts/evaluate_mmlu_pro.py"
+      - "tests/test_evaluate_mmlu_pro.py"
   workflow_dispatch:
     inputs:
       steps:
@@ -20,6 +32,16 @@ on:
         required: true
         default: "1337,2027,42"
         type: string
+      mmlu_limit:
+        description: Preguntas MMLU-Pro (1-12032; 0=todas)
+        required: true
+        default: "70"
+        type: string
+      mmlu_context_length:
+        description: Contexto de inferencia en bytes (128-8192)
+        required: true
+        default: "2048"
+        type: string
 
 permissions:
   contents: read
@@ -30,13 +52,15 @@ concurrency:
 
 jobs:
   train:
-    name: Ciclos sintéticos (sin corpus externo)
+    name: Ciclos sintéticos (sin corpus de entrenamiento externo)
     runs-on: ubuntu-latest
     timeout-minutes: 180
     env:
       PYTHONUNBUFFERED: "1"
-      STEPS: ${{ github.event_name == 'pull_request' && '100' || inputs.steps }}
-      SEEDS: ${{ github.event_name == 'pull_request' && '1337' || inputs.seeds }}
+      STEPS: ${{ github.event_name == 'workflow_dispatch' && inputs.steps || '100' }}
+      SEEDS: ${{ github.event_name == 'workflow_dispatch' && inputs.seeds || '1337' }}
+      MMLU_LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.mmlu_limit || '0' }}
+      MMLU_CONTEXT_LENGTH: ${{ github.event_name == 'workflow_dispatch' && inputs.mmlu_context_length || '2048' }}
     steps:
       - name: Obtener código
         uses: actions/checkout@v4
@@ -53,12 +77,25 @@ jobs:
           python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
           python -m pip install -e . --no-deps
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66"
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            python -m pip install "datasets>=3.1"
+          fi
 
       - name: Validar parámetros
         run: |
           if ! [[ "$STEPS" =~ ^[0-9]+$ ]] || [ "$STEPS" -lt 1 ] || [ "$STEPS" -gt 1000 ]; then
             echo "::error::Pasos inválidos (1-1000)."
             exit 1
+          fi
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            if ! [[ "$MMLU_LIMIT" =~ ^[0-9]+$ ]] || [ "$MMLU_LIMIT" -gt 12032 ]; then
+              echo "::error::Límite MMLU-Pro inválido (0-12032)."
+              exit 1
+            fi
+            if ! [[ "$MMLU_CONTEXT_LENGTH" =~ ^[0-9]+$ ]] || [ "$MMLU_CONTEXT_LENGTH" -lt 128 ] || [ "$MMLU_CONTEXT_LENGTH" -gt 8192 ]; then
+              echo "::error::Contexto MMLU-Pro inválido (128-8192 bytes)."
+              exit 1
+            fi
           fi
           if ! [[ "$SEEDS" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
             echo "::error::Semillas inválidas."
@@ -123,6 +160,13 @@ jobs:
               --profile tiny --device cpu \
               --output "$report_dir/domains-inicial.json"
 
+            if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "$seed" = "${seed_values[0]}" ]; then
+              python scripts/evaluate_mmlu_pro.py \
+                --checkpoint "$initial_checkpoint" --profile tiny \
+                --limit "$MMLU_LIMIT" --context-length "$MMLU_CONTEXT_LENGTH" \
+                --device cpu --output "$report_dir/mmlu-pro-inicial.json"
+            fi
+
             python scripts/train_text.py \
               --text /tmp/ronin-synthetic/train.txt \
               --profile tiny --steps "$STEPS" --seed "$seed" \
@@ -142,6 +186,13 @@ jobs:
               --dataset benchmarks/domains_v1.jsonl \
               --profile tiny --device cpu \
               --output "$report_dir/domains-final.json"
+
+            if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "$seed" = "${seed_values[0]}" ]; then
+              python scripts/evaluate_mmlu_pro.py \
+                --checkpoint "$checkpoint" --profile tiny \
+                --limit "$MMLU_LIMIT" --context-length "$MMLU_CONTEXT_LENGTH" \
+                --device cpu --output "$report_dir/mmlu-pro-final.json"
+            fi
 
             echo "::endgroup::"
           done
@@ -169,8 +220,21 @@ jobs:
               lm1 = json.loads((folder / "language-model-final.json").read_text())
               d0 = json.loads((folder / "domains-inicial.json").read_text())
               d1 = json.loads(domain_path.read_text())
+              mmlu = {}
+              for phase in ("inicial", "final"):
+                  mmlu_path = folder / f"mmlu-pro-{phase}.json"
+                  if mmlu_path.is_file():
+                      result = json.loads(mmlu_path.read_text())
+                      mmlu[phase] = {
+                          "accuracy": result["overall"]["accuracy"],
+                          "evaluated_items": result["evaluated_items"],
+                          "selected_items": result["selected_items"],
+                          "coverage": result["coverage"],
+                          "by_domain": result["by_domain"],
+                      }
               cycles.append({
                   "seed": folder.name.removeprefix("seed-"),
+                  "mmlu_pro": mmlu,
                   "initial": {"bits_per_byte": lm0["bits_per_byte"], "domain_accuracy": d0["overall"]["accuracy"]},
                   "final": {"bits_per_byte": lm1["bits_per_byte"], "domain_accuracy": d1["overall"]["accuracy"]},
                   "delta": {
@@ -188,11 +252,14 @@ jobs:
               "seeds": [x["seed"] for x in cycles],
               "sha256": {"train": sha(train_path), "validation": sha(val_path), "domain_benchmark": sha(dataset)},
               "cycles": cycles,
+              "external_benchmark": "TIGER-Lab/MMLU-Pro; split test; MIT declarado; solo evaluación y nunca entrenamiento.",
               "limitations": [
                   "El corpus artificial solo valida que entrenamiento y evaluación funcionan; no mide aprendizaje de conocimiento real.",
                   "El benchmark multidominio tiene 23 preguntas y evalúa selección por siguiente byte, no razonamiento abierto.",
+                  "MMLU-Pro se evalúa en modo zero-shot por siguiente byte; no es puntuación oficial ni comparable con su leaderboard.",
+                  "La cobertura MMLU-Pro excluye explícitamente preguntas que superan el contexto; no se truncan.",
                   "No usar estos resultados para comparar la calidad lingüística general ni para decidir arquitectura.",
-                  "No se descargan ni utilizan corpus externos en este workflow.",
+                  "No se descargan corpus externos de entrenamiento; MMLU-Pro se descarga solo para evaluación y nunca se usa para actualizar pesos.",
               ],
           }
           Path("reports/resumen-sintetico.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
