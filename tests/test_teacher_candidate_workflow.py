@@ -13,6 +13,7 @@ def test_phi4_candidate_workflow_never_trains_or_publishes_generated_text():
     workflow = yaml.load(path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
     assert "workflow_dispatch" in workflow["on"]
     assert "workflow_run" in workflow["on"]
+    assert workflow["on"]["workflow_run"]["workflows"] == ["Preparar caché de tutores locales"]
     job = workflow["jobs"]["generate-candidates"]
     steps = {step.get("name"): step for step in job["steps"]}
     audit = steps["Auditar estructura de las propuestas; no certificar veracidad"]["run"]
