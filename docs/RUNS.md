@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:26 | [Integración continua #928 (run 41933717203)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933717203) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Certify exact Crossref and DataCite CC0 metadata exports in rights ledger. Trigger: push; rama: main; intento: 1. | 22f3e744 |
 | 2026-11-04 23:26 | [Integración continua #926 (run 41933556574)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933556574) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Trigger and version Crossref/DataCite metadata candidate workflow. Trigger: push; rama: main; intento: 1. | 3eeddd49 |
 | 2026-11-04 23:25 | [Integración continua #925 (run 41933545712)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933545712) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Register Crossref, DataCite and OpenCitations CC0 metadata sources. Trigger: push; rama: main; intento: 1. | 3063540b |
 | 2026-11-04 23:25 | [Integración continua #924 (run 41933511233)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933511233) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add scheduled/manual Crossref and DataCite CC0 metadata workflow. Trigger: push; rama: main; intento: 1. | cb656473 |
