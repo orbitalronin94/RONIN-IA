@@ -108,7 +108,7 @@ def main() -> int:
         "payload_sha256": payload_sha,
         "provenance_uri": f"{BASE}/about",
         "third_party_content_review": "pending",
-        "jurisdictions_cleared": ["ES", "EU", "US"],
+        "jurisdictions_cleared": [],
         "rights_level": "B",
         "decision_reason": "Candidate export of GovEasy's own published dataset snapshot. The publisher declares CC BY 4.0, but the adapter preserves source links and does not assert that third-party government source documents are relicensed. Rights level B pending field/source review; not admitted and not training-eligible.",
         "policy_version": "RONIN-RIGHTS-A-1",
