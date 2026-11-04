@@ -69,7 +69,7 @@ def score_record(text: str, domain: str, df: Counter[str], total_docs: int) -> d
     relevant = len(unique & domain_terms)
     relevance = min(1.0, relevant / 8.0)
     pattern_hits = sum(bool(pattern.search(text)) for pattern in KNOWLEDGE_PATTERNS.values())
-    equations = len(re.findall(r"(?:=|≤|≥|∑|∫|√|\frac|\begin\{equation\})", text))
+    equations = len(re.findall(r"(?:=|≤|≥|∑|∫|√|\\frac|\\begin\{equation\})", text))
     numeric = len(re.findall(r"\b\d+(?:[.,]\d+)?(?:%|\s?(?:kg|mg|m|s|Hz|Pa|mol|°C|USD|EUR))?\b", text))
     relations = len(re.findall(r"\b(?:is a|consists of|depends on|defined by|causes|implies|equivalent to|es un|se compone de|depende de|implica|equivale a|produce)\b", text, re.I))
     units = pattern_hits + min(4, equations) + min(4, numeric / 2) + min(4, relations)
