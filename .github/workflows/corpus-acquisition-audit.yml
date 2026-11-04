@@ -1,0 +1,68 @@
+name: Auditoría de descargas reales del corpus
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/prepare_open_corpora.py"
+      - ".github/workflows/corpus-acquisition-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  acquire-and-audit:
+    name: Descargar y verificar bibliotecas abiertas
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Descargar archivos originales sin credenciales y preparar corpus
+        run: |
+          python scripts/prepare_open_corpora.py \
+            --output /tmp/ronin-open-corpus/processed \
+            --cache-dir /tmp/ronin-open-corpus/cache
+      - name: Comprobar manifiesto, fuentes y particiones
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("/tmp/ronin-open-corpus/processed")
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          assert manifest["document_count"] >= 100
+          assert len(manifest["sources"]) == 3
+          assert manifest["source_document_counts"]["cligs-textbox"] > 0
+          assert manifest["source_document_counts"]["cligs-conssa"] > 0
+          assert manifest["source_document_counts"]["eltec-spa"] > 0
+          assert set(manifest["document_counts"]) == {"train", "validation", "test"}
+          assert sum(manifest["document_counts"].values()) == manifest["document_count"]
+          assert all(len(value) == 64 for value in manifest["output_sha256"].values())
+          for name in ("train.txt", "validation.txt", "test.txt"):
+              assert (root / name).is_file() and (root / name).stat().st_size > 0
+          print(json.dumps({
+              "document_count": manifest["document_count"],
+              "source_document_counts": manifest["source_document_counts"],
+              "document_counts": manifest["document_counts"],
+              "archive_sha256": {
+                  item["id"]: item["archive_sha256"] for item in manifest["sources"]
+              },
+              "output_sha256": manifest["output_sha256"],
+              "skipped_count": manifest["skipped_count"],
+          }, ensure_ascii=False, indent=2))
+          PY
+      - name: Publicar manifiesto de adquisición (sin textos ni corpus)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-corpus-acquisition-manifest
+          path: /tmp/ronin-open-corpus/processed/manifest.json
+          if-no-files-found: error
+          retention-days: 30
