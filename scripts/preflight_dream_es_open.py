@@ -75,7 +75,7 @@ def main() -> int:
                         "token_count": token_count,
                         "source_corpus": CORPUS,
                     })
-    document_index = b"".join((json.dumps(row, ensure_ascii=False, sort_keys=True) + "\\n").encode("utf-8") for row in document_rows)
+    document_index = b"".join((json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8") for row in document_rows)
     (a.out / "documents-index.jsonl").write_bytes(document_index)
     sample_languages = {}
     sample_documents = {}
