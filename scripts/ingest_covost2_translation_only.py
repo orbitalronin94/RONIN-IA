@@ -75,11 +75,11 @@ def main() -> int:
                 if not reader.fieldnames or "translation" not in reader.fieldnames:
                     raise ValueError(f"{filename}: missing translation column")
                 pair_rows = 0
-                for row in reader:
+                for source_row_index, row in enumerate(reader, start=1):
                     translation = (row.get("translation") or "").strip()
                     if not translation:
                         continue
-                    key = hashlib.sha256(translation.encode("utf-8")).hexdigest()
+                    key = hashlib.sha256((pair + "\\0" + translation).encode("utf-8")).hexdigest()
                     if key in seen:
                         continue
                     seen.add(key)
@@ -88,7 +88,7 @@ def main() -> int:
                         "language_pair": pair,
                         "source_dataset": "CoVoST 2",
                         "source_file": filename,
-                        "source_row": pair_rows,
+                        "source_row": source_row_index,
                     }, ensure_ascii=False, sort_keys=True) + "\n")
                     pair_rows += 1
                     rows_written += 1
