@@ -6,6 +6,9 @@ on:
     paths:
       - "scripts/prepare_open_corpora.py"
       - "scripts/acquire_cryptography_library.py"
+      - "scripts/acquire_pleias_pd_shards.py"
+      - "tests/test_acquire_pleias_pd_shards.py"
+      - "docs/FUENTES_CORPUS_ABIERTOS.md"
       - "docs/CASOS_CODIFICACION_DOCUMENTADA.md"
       - ".github/workflows/corpus-acquisition-audit.yml"
   workflow_dispatch:
@@ -76,9 +79,6 @@ jobs:
               "skipped_count": manifest["skipped_count"],
           }, ensure_ascii=False, indent=2))
           PY
-      - name: Descargar fuentes criptográficas históricas y literarias sin credenciales
-        run: |
-          python scripts/acquire_cryptography_library.py --output-dir /tmp/ronin-cryptography-library
       - name: Publicar corpus y fuentes primarias como artefactos auditables
         uses: actions/upload-artifact@v4
         with:
@@ -86,7 +86,6 @@ jobs:
           path: |
             /tmp/ronin-open-corpus/processed/manifest.json
             /tmp/ronin-open-corpus/processed/documents.jsonl
-            /tmp/ronin-cryptography-library/
           if-no-files-found: error
           retention-days: 30
 
@@ -155,3 +154,65 @@ jobs:
           path: /tmp/ronin-cryptography-library
           if-no-files-found: error
           retention-days: 7
+
+  acquire-pleias-pd:
+    name: Descargar fragmentos PleIAs de dominio público
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar lector Parquet fijado
+        run: python -m pip install --no-cache-dir pyarrow==21.0.0
+      - name: Descargar 4 fragmentos de libros y 1 de prensa sin credenciales
+        run: |
+          python scripts/acquire_pleias_pd_shards.py \
+            --output-dir /tmp/ronin-pleias-pd
+      - name: Verificar hashes, filas y columnas de texto
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path("/tmp/ronin-pleias-pd")
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          assert manifest["credential_free"] is True
+          assert manifest["source_count"] == 5
+          assert manifest["total_downloaded_bytes"] > 1_000_000_000
+          assert manifest["total_parquet_rows"] > 1_000
+          assert all(
+              source["sha256"] == source["expected_sha256"]
+              and source["text_column"] == "text"
+              and source["nonempty_text_rows"] > 0
+              and source["training_status"] == "acquired_pending_ocr_quality_review"
+              for source in manifest["sources"]
+          )
+          assert sum(source["collection"] == "libros" for source in manifest["sources"]) == 4
+          assert sum(source["collection"] == "prensa" for source in manifest["sources"]) == 1
+          print(json.dumps({
+              "library_id": manifest["library_id"],
+              "total_downloaded_bytes": manifest["total_downloaded_bytes"],
+              "total_parquet_rows": manifest["total_parquet_rows"],
+              "total_nonempty_text_rows": manifest["total_nonempty_text_rows"],
+              "sources": [
+                  {
+                      "id": source["id"],
+                      "size_bytes": source["size_bytes"],
+                      "rows": source["parquet_rows"],
+                      "nonempty_text_rows": source["nonempty_text_rows"],
+                      "sha256": source["sha256"],
+                  }
+                  for source in manifest["sources"]
+              ],
+          }, ensure_ascii=False, indent=2))
+          PY
+      - name: Publicar manifiesto de adquisición PleIAs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-pleias-pd-shards-manifest
+          path: /tmp/ronin-pleias-pd/manifest.json
+          if-no-files-found: error
+          retention-days: 30
