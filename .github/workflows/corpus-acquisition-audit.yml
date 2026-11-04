@@ -145,6 +145,8 @@ jobs:
           assert summary["counts_by_type"]["A"] >= 3
           assert summary["counts_by_type"]["C"] >= 1
           assert summary["counts_by_type"]["D"] >= 1
+          test_labels = {row["label"] for row in rows if row["split"] == "test"}
+          assert {"CONFIRMED_STRUCTURE", "NO_MESSAGE_IN_CONTROL", "UNRESOLVED"} <= test_labels
           print(json.dumps({
               "source_count": source_manifest["source_count"],
               "source_sizes": {item["id"]: item["size_bytes"] for item in source_manifest["sources"]},
