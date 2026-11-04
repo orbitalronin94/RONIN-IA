@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:22 | [Integración continua #916 (run 41933183905)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933183905) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document Common Corpus MIT notice-bundle exclusion. Trigger: push; rama: main; intento: 1. | 3d0a4071 |
 | 2026-11-04 23:22 | [Integración continua #915 (run 41933173442)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933173442) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Exclude MIT code rows until per-repository license notice bundles are preserved. Trigger: push; rama: main; intento: 1. | 58e5c635 |
 | 2026-11-04 23:22 | [Integración continua #909 (run 41933051946)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933051946) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Correct ROR JSONL record separators to actual newline characters. Trigger: push; rama: main; intento: 1. | b3ab1c57 |
 | 2026-11-04 23:22 | [Integración continua #912 (run 41933120162)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933120162) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add NASA NTRS and record explicit exclusions for OpenStax and gated The Stack v2. Trigger: push; rama: main; intento: 1. | 7c193529 |
