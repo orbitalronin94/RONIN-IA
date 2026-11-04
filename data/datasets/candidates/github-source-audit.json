@@ -231,18 +231,20 @@
       "dataset_name": "CoVoST 2 translation TSVs (translation text only)",
       "upstream_url": "https://github.com/facebookresearch/covost",
       "license_id": "CC0-1.0",
-      "rights_evidence_url": "https://github.com/facebookresearch/covost/blob/main/README.md",
-      "evidence_source": "Upstream CoVoST README, License section; README Git blob f29667eaacba91d35de372001ebc793adb2b5530",
+      "rights_evidence_url": "https://github.com/facebookresearch/covost/blob/4cddf32dedd6bfef86ca3a40f49b27e252650f3f/README.md",
+      "evidence_source": "Pinned CoVoST README at commit 4cddf32dedd6bfef86ca3a40f49b27e252650f3f; Git blob f29667eaacba91d35de372001ebc793adb2b5530",
       "evidence_note": "Upstream explicitly assigns CC0 to 'CoVoST data'. This entry is limited to CoVoST translation TSV payloads. It excludes Tatoeba evaluation files (CC-BY 2.0 FR / mixed audio licenses), repository code and other repository assets (root LICENSE is CC-BY-NC 4.0).",
-      "status": "candidate_pending_immutable_revision_payload_hash_and_quality",
+      "status": "adapter_added_pending_successful_download_hash_and_manual_review",
       "training_eligible": false,
       "admission_eligible": false,
       "risk_flags": [
-        "pin exact CoVoST release/version and translation TSV hashes before ingest",
-        "do not bundle Tatoeba data or audio under this CC0 entry",
-        "Common Voice audio/transcripts are separate upstream assets and require separate version/license verification",
-        "dataset is archived upstream; preserve source snapshot"
-      ]
+        "adapter exports translation column only for es_en, ca_en and en_ca; no source sentence, audio path or speaker ID",
+        "pin commit and verify README Git blob before accepting data",
+        "archive bytes are hashed at acquisition; do not infer hashes before workflow completes",
+        "do not bundle Tatoeba, Common Voice media/transcripts, or repository code",
+        "archived upstream source"
+      ],
+      "upstream_revision": "4cddf32dedd6bfef86ca3a40f49b27e252650f3f"
     },
     {
       "id": "openalex-work-metadata",
@@ -253,14 +255,15 @@
       "rights_evidence_url": "https://registry.opendata.aws/openalex/",
       "evidence_source": "AWS Registry of Open Data official OpenAlex entry; OurResearch snapshot documentation",
       "evidence_note": "Official AWS data registry states OpenAlex dataset license CC0 and describes public JSONL entity buckets without AWS credentials. Candidate scope is bibliographic/graph metadata only; exclude abstract text, full text, publisher-hosted content and any field whose upstream rights basis is not independently clear.",
-      "status": "candidate_pending_snapshot_manifest_field_allowlist_and_payload_hash",
+      "status": "anonymous_s3_metadata_adapter_added_pending_snapshot_and_payload_hash",
       "training_eligible": false,
       "admission_eligible": false,
       "risk_flags": [
-        "pin quarterly public snapshot and published manifest",
-        "define field allowlist before export; exclude abstract inverted index and full text",
-        "metadata is useful for domain routing/retrieval, not equivalent to source-paper training text",
-        "preserve source IDs, DOI, authorship, venue and update timestamp"
+        "adapter reads only the anonymous public quarterly JSONL S3 snapshot; no API key or credentials",
+        "manifest date, manifest SHA-256, exact shard key and shard SHA-256 are recorded",
+        "explicit metadata field allowlist; abstract_inverted_index, full text, PDFs and content archive URLs excluded",
+        "metadata is for catalogue/routing/retrieval, not substantive text training",
+        "candidate remains unadmitted pending successful workflow, hash review and quality gates"
       ]
     }
   ],
@@ -305,7 +308,7 @@
     "payloads_downloaded": 0,
     "level_a_records_created": 0,
     "training_eligible_records": 0,
-    "reason": "Manual source audit is not a substitute for per-version rights proof, immutable payload hashes, privacy/quality checks, deduplication, split integrity, and global G-0. Eulogikon metadata is separate from underlying text; CC0 scope is limited to Eulogikon's preparation layer/manifests. Added CoVoST CC0 translation-only lane and OpenAlex CC0 bibliographic-metadata lane; neither is admitted pending immutable source versions, hashes and applicable quality/privacy gates.",
+    "reason": "Manual source audit is not a substitute for per-version rights proof, immutable payload hashes, privacy/quality checks, deduplication, split integrity, and global G-0. Eulogikon metadata is separate from underlying text; CC0 scope is limited to Eulogikon's preparation layer/manifests. Added CoVoST CC0 translation-only lane and OpenAlex CC0 bibliographic-metadata lane; neither is admitted pending immutable source versions, hashes and applicable quality/privacy gates. Added bounded CoVoST 2 translation-field-only and OpenAlex anonymous-S3 metadata-only acquisition adapters. Both export candidate artifacts and proposed rights records; neither appends the rights ledger or enables training.",
     "metadata_sources_registered": 1
   },
   "metadata_sources": [
