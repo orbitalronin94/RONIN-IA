@@ -15,7 +15,7 @@ def test_manifest_has_32_libraries_across_16_domains_and_portfolio_is_retrieval_
     assert data["policy"]["minimum_total_train_bytes"] == 32 * 1024**2
     assert data["policy"]["target_total_train_bytes"] == 32 * 10 * 1024**3
     assert data["policy"]["hkd_fraction"] == 0.5
-    assert "2.5 GiB" in data["policy"]["hkd_scale_rationale"]
+    assert "1 MiB" in data["policy"]["hkd_scale_rationale"]
     assert len({item["id"] for item in data["libraries"]}) == 32
     assert len({item["domain"].split(" — ")[0] for item in data["libraries"]}) == 16
     assert data["policy"]["required_library_count"] == 32
@@ -31,7 +31,7 @@ def test_official_training_gate_blocks_all_unadmitted_libraries(tmp_path):
     assert sum("not admitted" in error for error in errors) == 32
 
 
-def test_gate_requires_density_report_and_human_review_for_extra_eight(tmp_path):
+def test_gate_requires_density_report_and_human_review_for_each_hkd_library(tmp_path):
     data = json.loads(MANIFEST.read_text(encoding="utf-8"))
     data["policy"]["minimum_train_bytes_per_library"] = 4
     content = b"RONIN"
