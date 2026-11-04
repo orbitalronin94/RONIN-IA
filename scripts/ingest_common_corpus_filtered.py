@@ -148,7 +148,7 @@ def main() -> int:
                 "review content quality, domain, language and split assignment"
             ]
         })
-    (a.out / "rights-review-queue.json").write_text(json.dumps(review_queue, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    (a.out / "rights-review-queue.json").write_text(json.dumps(review_queue, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     summary = {
         "dataset": REPO, "revision": revision, "dataset_card_sha256": card_sha,
         "scanned": scanned, "accepted": accepted, "rejected_license": rejected_license,
