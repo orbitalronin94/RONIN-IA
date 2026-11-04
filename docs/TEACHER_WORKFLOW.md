@@ -12,7 +12,7 @@ RONIN aprende siempre desde una inicialización aleatoria. Los tutores solo apor
 
 El descargador vuelve a consultar los metadatos y cancela si la licencia del modelo no es exactamente MIT. Fija una revisión inmutable y calcula SHA-256 de los archivos. Al cargar el tutor, RONIN vuelve a verificar el inventario completo y cada hash; rechaza archivos ausentes, inesperados, alterados o rutas inseguras. **La licencia MIT del modelo no se atribuye automáticamente al texto que genere.**
 
-Phi-4-mini-instruct es el tutor principal para las nuevas pruebas: 3,8B parámetros, ajuste instruct, soporte declarado para español y otros 23 idiomas. Su licencia publicada es MIT. Se carga con la implementación Phi-3 integrada en Transformers 4.53.3, sin ejecutar código Python remoto del repositorio. El workflow fija la combinación recomendada por la ficha del modelo: PyTorch 2.5.1, Transformers 4.53.3, Hugging Face Hub 0.36.0 y Accelerate 1.3.0. El descargador fija el commit, omite los archivos de código del modelo y el cargador verifica los pesos y el resto del inventario antes de usarlos. Sigue siendo principalmente entrenado en inglés y puede equivocarse; no se debe tratar como experto ni como fuente de verdad. GPT-2 y GPT-Neo 125M se conservan como líneas base pequeñas. Sus salidas son propuestas de tutor, no etiquetas certificadas ni hechos verificados. Requieren revisión, filtrado, deduplicación y comprobación de derechos antes de incorporarse a un entrenamiento.
+Phi-4-mini-instruct es el tutor principal para las nuevas pruebas: 3,8B parámetros, ajuste instruct, soporte declarado para español y otros 23 idiomas. Su licencia publicada es MIT. Requiere Transformers 4.49 o posterior y código de modelo remoto; el descargador fija el commit y calcula hashes, y el cargador verifica cada archivo antes de ejecutar ese código. Sigue siendo principalmente entrenado en inglés y puede equivocarse; no se debe tratar como experto ni como fuente de verdad. GPT-2 y GPT-Neo 125M se conservan como líneas base pequeñas. Sus salidas son propuestas de tutor, no etiquetas certificadas ni hechos verificados. Requieren revisión, filtrado, deduplicación y comprobación de derechos antes de incorporarse a un entrenamiento.
 
 ## Descargar una vez en el equipo local
 
@@ -60,11 +60,3 @@ El corpus generado por Phi-4 puede incorporarse como augmentación experimental 
 - RONIN se construye con inicialización aleatoria.
 - El entrenador solo recibe texto tokenizado.
 - No se realiza fine-tuning, fusión ni destilación de parámetros.
-
-
-La revisión de Phi-4 queda fijada en `cfbefacb99257ffa30c83adab238a50856ac3083`; no se descarga la rama móvil `main`. La carga usa el soporte Phi-3/Phi-4 integrado en Transformers 4.53.3 y mantiene `trust_remote_code=False`.
-
-
-## Ejecución de candidatos en GitHub Actions
-
-Tras completar correctamente la caché de tutores, el workflow `Generar candidatos REF con Phi-4 (sin entrenar al estudiante)` genera 16 propuestas y ejecuta la auditoría estructural. Publica únicamente el resumen, el hash del lote y el informe de auditoría; no publica las generaciones. El resumen marca siempre `used_for_training=false` y exige revisión humana de calidad y derechos.
