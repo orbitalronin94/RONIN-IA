@@ -20,6 +20,7 @@ Large corpus payloads are published as versioned GitHub Actions artifacts rather
 - Text rights recorded as public domain; TEI/metadata attribution recorded as CC BY 4.0.
 - Training text SHA-256: `9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78`.
 - Original acquisition artifact: run `41825919840`, artifact `13319630770`.
+- Verified train-only materialization: [run `41926088900`](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41926088900), artifact `ronin-admitted-literature-es-v1-train` (53,464,079-byte ZIP; 90-day retention). Its contents were downloaded and re-hashed after publication.
 
 The materializer workflow rechecks the artifact and per-document provenance, extracts **only** the train partition, and republishes a train-only artifact. It does not expose validation/test as training data.
 
