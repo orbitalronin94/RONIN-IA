@@ -145,7 +145,7 @@ def main() -> int:
         "decision_reason": "Candidate covers only CoVoST translation field values under the upstream CC0 data declaration. Common Voice source sentences, audio, speaker IDs, paths, Tatoeba and code are not exported. Candidate record is not appended to the ledger until human review.",
         "policy_version": "RONIN-RIGHTS-A-1",
     }
-    (args.out / "rights-record.candidate.json").write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    (args.out / "rights-record.candidate.json").write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps({"rows": rows_written, "bytes": len(payload), "sha256": digest(payload), "status": "candidate_only"}, indent=2))
     return 0
 
