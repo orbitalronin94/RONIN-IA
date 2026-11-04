@@ -1,0 +1,28 @@
+name: Validate dataset rights registry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/datasets/rights_registry/**"
+      - "scripts/validate_rights_registry.py"
+      - ".github/workflows/validate-rights-registry.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Validate item-level rights evidence
+        run: python scripts/validate_rights_registry.py
+      - name: Refuse silent empty registry
+        run: |
+          test -s data/datasets/rights_registry/records.jsonl
+          echo "Registry file exists. Zero records means zero level-A documents."
