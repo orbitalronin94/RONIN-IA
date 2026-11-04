@@ -150,3 +150,8 @@ def test_github_api_headers_uses_actions_token_without_exposing_it_elsewhere(mon
     headers = _github_api_headers()
     assert headers["Authorization"] == "Bearer test-token"
     assert headers["Accept"] == "application/vnd.github+json"
+
+
+def test_github_api_headers_without_token_omits_authorization(monkeypatch):
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    assert "Authorization" not in _github_api_headers()
