@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 22:45 | [Integración continua #787 (run 41927570621)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927570621) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(data\): assert 64 libraries across 32 domains. Trigger: push; rama: main; intento: 1. | 830ecc85 |
 | 2026-11-04 22:44 | [Integración continua #789 (run 41927932287)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927932287) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: add PMC candidate shard aggregation and global hash audit. Trigger: push; rama: main; intento: 1. | cbefa5fe |
 | 2026-11-04 22:44 | [Integración continua #774 (run 41927110815)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927110815) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(data\): refresh 1000-record open-source samples weekly. Trigger: push; rama: main; intento: 1. | a7e4809a |
 | 2026-11-04 22:44 | [Integración continua #788 (run 41927700977)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927700977) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Test standalone imports and both corpus generation commands. Trigger: pull_request; rama: fix/500-seed-validation-pythonpath; intento: 1. | 7e71893e |
