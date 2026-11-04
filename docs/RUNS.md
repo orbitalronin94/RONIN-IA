@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:44 | [Integración continua #984 (run 41935963892)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935963892) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Update DReaM preflight ledger with complete 128-document metadata index hashes. Trigger: push; rama: main; intento: 1. | 56ec8170 |
 | 2026-11-04 23:43 | [Integración continua #979 (run 41935811364)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935811364) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Correct ROR candidate source ID in domain-to-library mapping. Trigger: push; rama: main; intento: 1. | 520b0096 |
 | 2026-11-04 23:43 | [Integración continua #982 (run 41935904888)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935904888) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Trigger source-link-aware expanded registry validation. Trigger: push; rama: main; intento: 1. | 182eee0a |
 | 2026-11-04 23:43 | [Integración continua #981 (run 41935891793)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935891793) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add CI validation for 32-domain 64-library source mappings. Trigger: push; rama: main; intento: 1. | cb521be4 |
