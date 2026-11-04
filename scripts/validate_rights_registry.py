@@ -67,6 +67,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--policy", type=Path, default=POLICY)
     parser.add_argument("--registry", type=Path, default=REGISTRY)
+    parser.add_argument("--record", type=Path, help="Validate one proposed rights record in addition to the ledger")
     args = parser.parse_args()
     policy = json.loads(args.policy.read_text(encoding="utf-8"))
     errors = []
@@ -94,8 +95,18 @@ def main() -> int:
             if rid in ids:
                 errors.append(f"line {line_no}: duplicate record_id {rid!r}")
             ids.add(rid)
+    candidate_valid = None
+    if args.record:
+        try:
+            candidate = json.loads(args.record.read_text(encoding="utf-8"))
+            candidate_errors = validate(candidate, "candidate", policy)
+            errors.extend(candidate_errors)
+            candidate_valid = not candidate_errors
+        except (OSError, json.JSONDecodeError) as exc:
+            errors.append(f"candidate record could not be read: {exc}")
+            candidate_valid = False
     print(json.dumps({
-        "registry": str(args.registry), "records": rows,
+        "registry": str(args.registry), "records": rows, "candidate_record_valid": candidate_valid,
         "rights_level_counts": counts, "valid": not errors,
         "errors": errors,
         "training_eligible": False,
