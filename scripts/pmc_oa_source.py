@@ -130,6 +130,19 @@ def search_page(domain: str, cursor_mark: str, page_size: int) -> dict[str, Any]
     return payload
 
 
+def normalize_s3_url(url: str) -> str:
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme == "s3" and parsed.netloc == "pmc-oa-opendata":
+        path = parsed.path.lstrip("/")
+        return f"{S3_BASE}/{path}" + (f"?{parsed.query}" if parsed.query else "")
+    if parsed.scheme == "https" and parsed.hostname in {
+        "pmc-oa-opendata.s3.amazonaws.com",
+        "pmc-oa-opendata.s3.us-east-1.amazonaws.com",
+    }:
+        return url
+    raise ValueError("PMC XML URL is not in the official public S3 bucket")
+
+
 def verify_xml_digest(xml_payload: bytes, xml_url: str) -> str | None:
     expected_values = urllib.parse.parse_qs(urllib.parse.urlparse(xml_url).query).get("md5", [])
     if not expected_values:
@@ -149,6 +162,13 @@ def fetch_article_versions(item: dict[str, Any], domain: str) -> tuple[list[dict
     pmcid = str(item.get("pmcid") or "").strip()
     if not pmcid.startswith("PMC"):
         stats["missing_pmcid"] += 1
+        return records, stats
+    pub_types = item.get("pubType") or []
+    if isinstance(pub_types, str):
+        pub_types = [pub_types]
+    title_for_retraction = str(item.get("title") or "").casefold()
+    if any("retracted" in str(value).casefold() for value in pub_types) or "retracted article" in title_for_retraction:
+        stats["retracted_by_europe_pmc"] += 1
         return records, stats
     try:
         versions = list_s3_version_prefixes(pmcid)
@@ -189,17 +209,11 @@ def fetch_article_versions(item: dict[str, Any], domain: str) -> tuple[list[dict
         if not xml_url:
             stats["missing_xml_url"] += 1
             continue
-        xml_host = urllib.parse.urlparse(xml_url).hostname
-        if xml_host not in {
-            "pmc-oa-opendata.s3.amazonaws.com",
-            "pmc-oa-opendata.s3.us-east-1.amazonaws.com",
-        }:
-            stats["unsafe_xml_url"] += 1
-            continue
         try:
-            xml_payload, _ = request_bytes(xml_url)
+            fetch_url = normalize_s3_url(xml_url)
+            xml_payload, _ = request_bytes(fetch_url)
             stats["xml_bytes_downloaded"] += len(xml_payload)
-            expected_md5 = verify_xml_digest(xml_payload, xml_url)
+            expected_md5 = verify_xml_digest(xml_payload, fetch_url)
             xml_sha256 = hashlib.sha256(xml_payload).hexdigest()
             text, language = extract_article_text(xml_payload, item.get("language"))
         except ValueError:
@@ -241,7 +255,10 @@ def fetch_article_versions(item: dict[str, Any], domain: str) -> tuple[list[dict
             "source_metadata_etag": metadata_etag,
             "source_metadata_sha256": metadata_sha256,
             "source_xml_url": xml_url,
+            "source_xml_https_url": fetch_url,
             "source_xml_md5": expected_md5,
+            "pmid": metadata.get("pmid") or item.get("pmid"),
+            "citation": metadata.get("citation"),
             "source_xml_sha256": xml_sha256,
             "pmcid": pmcid,
             "doi": item.get("doi"),
