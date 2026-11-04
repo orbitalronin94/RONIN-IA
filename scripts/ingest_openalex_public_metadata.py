@@ -17,7 +17,10 @@ from pathlib import Path
 BASE = "https://openalex.s3.amazonaws.com/"
 MANIFEST_URL = BASE + "data/jsonl/works/manifest.json"
 LICENSE_URL = "https://creativecommons.org/publicdomain/zero/1.0/"
-RIGHTS_URL = "https://registry.opendata.aws/openalex/"
+RIGHTS_URL = "https://github.com/ourresearch/openalex-docs/blob/8cec9dba1ee17af56e5de4666f63650a02fb798b/license.md"
+RIGHTS_COMMIT = "8cec9dba1ee17af56e5de4666f63650a02fb798b"
+RIGHTS_BLOB_SHA1 = "eb42d224f37aadc2e4346dab46103f08040eca6b"
+RIGHTS_RAW_URL = f"https://raw.githubusercontent.com/ourresearch/openalex-docs/{RIGHTS_COMMIT}/license.md"
 USER_AGENT = "RONIN-IA-openalex-metadata-export/1.0"
 ALLOW = (
     "id", "doi", "title", "display_name", "publication_year", "publication_date",
@@ -44,6 +47,11 @@ def main() -> int:
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
 
+    rights_text = fetch(RIGHTS_RAW_URL, 1024 * 1024)
+    git_blob = b"blob " + str(len(rights_text)).encode() + b"\\0" + rights_text
+    actual_rights_blob = hashlib.sha1(git_blob).hexdigest()
+    if actual_rights_blob != RIGHTS_BLOB_SHA1:
+        raise ValueError(f"pinned OpenAlex license document blob mismatch: {actual_rights_blob}")
     manifest_bytes = fetch(MANIFEST_URL, 16 * 1024 * 1024)
     manifest = json.loads(manifest_bytes)
     files = manifest.get("files", [])
@@ -93,6 +101,8 @@ def main() -> int:
         "admission_eligible": False,
         "snapshot_date": manifest_date,
         "snapshot_manifest_url": MANIFEST_URL,
+        "rights_evidence_url": RIGHTS_URL,
+        "rights_evidence_git_blob_sha1": actual_rights_blob,
         "snapshot_manifest_sha256": manifest_sha,
         "shard_url": shard_url,
         "shard_s3_key": s3_url,
@@ -111,7 +121,7 @@ def main() -> int:
         "record_id": "openalex-works-metadata-" + sha(payload)[:16],
         "source_id": "openalex-public-snapshot",
         "source_item_id": s3_url,
-        "source_version": str(manifest_date) + "; manifest-sha256:" + manifest_sha + "; shard-sha256:" + shard_sha,
+        "source_version": str(manifest_date) + "; manifest-sha256:" + manifest_sha + "; shard-sha256:" + shard_sha + "; license-doc-git-blob-sha1:" + actual_rights_blob,
         "source_url": shard_url,
         "rights_statement_uri": RIGHTS_URL,
         "license_id": "CC0-1.0",
