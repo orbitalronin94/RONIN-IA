@@ -81,7 +81,7 @@ def rows_from_db(
     query = (
         "SELECT id, text_blob, license, provenance, score, components, source_revision, "
         "pmcid, doi, title, publication_date, language, metadata_etag, metadata_sha256, "
-        "xml_url, xml_https_url, xml_md5, xml_sha256, text_sha256, pmid, citation "
+        "xml_url, xml_https_url, xml_md5, xml_sha256, text_sha, pmid, citation "
         "FROM docs WHERE domain=? ORDER BY score " + order + ", id ASC LIMIT ?"
     )
     for row in db.execute(query, (domain, limit)):
