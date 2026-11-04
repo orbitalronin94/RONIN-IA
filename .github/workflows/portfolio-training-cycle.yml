@@ -190,6 +190,88 @@ jobs:
           }, ensure_ascii=False, indent=2))
           PY
 
+      - name: Adquirir biblioteca primaria de criptografía como corpus auxiliar
+        run: |
+          python scripts/acquire_cryptography_library.py --output-dir /tmp/ronin-cryptography-library
+          python scripts/build_obfuscation_cases.py \
+            --source-manifest /tmp/ronin-cryptography-library/manifest.json \
+            --output /tmp/ronin-obfuscation-library/cases.jsonl \
+            --noise-count 500
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          from ronin.epistemic.obfuscation import validate_obfuscation_case
+
+          source_root = Path("/tmp/ronin-cryptography-library")
+          source_manifest = json.loads((source_root / "manifest.json").read_text(encoding="utf-8"))
+          assert source_manifest["source_count"] == 6
+          assert source_manifest["credential_free"] is True
+          for source in source_manifest["sources"]:
+              file_path = source_root / source["local_filename"]
+              assert file_path.is_file()
+              assert hashlib.sha256(file_path.read_bytes()).hexdigest() == source["sha256"]
+              assert source["training_status"] == "excluded_pending_manual_review"
+
+          cases_root = Path("/tmp/ronin-obfuscation-library")
+          case_manifest = json.loads((cases_root / "manifest.json").read_text(encoding="utf-8"))
+          rows = [
+              json.loads(line)
+              for line in (cases_root / "cases.jsonl").read_text(encoding="utf-8").splitlines()
+          ]
+          errors = [
+              (row["record_id"], messages)
+              for row in rows
+              if (messages := validate_obfuscation_case(row))
+          ]
+          assert not errors, errors[:5]
+          Path("reports").mkdir(exist_ok=True)
+          Path("reports/cryptography-library-manifest.json").write_text(
+              json.dumps(source_manifest, ensure_ascii=False, indent=2) + "\\n",
+              encoding="utf-8",
+          )
+          Path("reports/obfuscation-case-manifest.json").write_text(
+              json.dumps(case_manifest, ensure_ascii=False, indent=2) + "\\n",
+              encoding="utf-8",
+          )
+          print(json.dumps({
+              "verified_primary_sources": source_manifest["source_count"],
+              "case_records": case_manifest["record_count"],
+              "case_splits": case_manifest["counts_by_split"],
+              "training_policy": "auxiliary only; not mixed into general pretraining",
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Registrar corpus sintético propio como smoke, no como conocimiento
+        run: |
+          python scripts/prepare_synthetic_corpus.py \
+            --output /tmp/ronin-synthetic-smoke \
+            --train-sentences 12000 --validation-sentences 2000 --seed 8675309
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          root = Path("/tmp/ronin-synthetic-smoke")
+          report = {
+              "dataset_id": "ronin-synthetic-pseudowords-v1",
+              "purpose": "smoke del pipeline; no aporta conocimiento lingüístico",
+              "training_status": "excluded_from_general_training",
+              "seed": 8675309,
+              "files": {
+                  name: {
+                      "bytes": (root / name).stat().st_size,
+                      "sha256": hashlib.sha256((root / name).read_bytes()).hexdigest(),
+                  }
+                  for name in ("train.txt", "validation.txt")
+              },
+          }
+          Path("reports/synthetic-smoke-corpus.json").write_text(
+              json.dumps(report, ensure_ascii=False, indent=2) + "\\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          PY
+
       - name: Descargar Phi-4 mini instruct si la caché no existe
         run: |
           if [ ! -f models/teachers/phi-4-mini-instruct/ronin-teacher-manifest.json ]; then
