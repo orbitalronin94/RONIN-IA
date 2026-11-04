@@ -37,6 +37,10 @@ def test_gate_requires_density_report_and_human_review_for_extra_eight(tmp_path)
         library["license_audit"] = "reports/license-audit.json"
         library["train_bytes"] = len(content)
         library["train_sha256"] = digest
+        library["sensitive_scan_sha256"] = "c" * 64
+        library["split_manifest_sha256"] = "d" * 64
+        library["dedup_report_sha256"] = "e" * 64
+        library["quality_review"] = "reports/quality-review.json"
         if library.get("source_type") == "high_knowledge_density_extraction":
             library["selection_report_sha256"] = "b" * 64
             library["human_quality_review"] = "reports/human-review.json"
