@@ -165,3 +165,10 @@ Si una ejecución cambia datos, código o documentación, la descripción debe i
 - [Manifiesto de datasets externos](../data/manifests/external_datasets.json)
 - [Política de ingesta y derechos G-0](INGESTA_AMPLIA_DATASETS_EXTERNOS.md)
 - [README del proyecto](../README.md)
+
+
+## Gate previo a RUN #5 — 4 de noviembre de 2026
+
+RUN #5 queda **bloqueada intencionalmente**. No hay ocho bibliotecas nuevas admitidas ni ocho ficheros train con hashes verificados. El manifiesto data/manifests/eight_libraries.json mantiene las ocho áreas en estado candidate y training_eligible=false. El validador scripts/validate_eight_libraries.py --require-ready exige ocho manifiestos, hashes, licencias y ficheros train preparados con un mínimo de 256 MiB por biblioteca y balance de bytes.
+
+Portfolio/Papers deja de ser dato de entrenamiento. Se reserva para recuperación RAG de experto y no cuenta como biblioteca. No se lanzará un entrenamiento hasta que la ingesta de las ocho bibliotecas esté completa y el gate pase.
