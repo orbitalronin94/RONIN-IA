@@ -53,11 +53,15 @@ def digest(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def source_hash(manifest: dict[str, Any], source_id: str) -> str:
+def source_metadata(manifest: dict[str, Any], source_id: str) -> dict[str, Any]:
     for source in manifest["sources"]:
         if source["id"] == source_id:
-            return source["sha256"]
+            return source
     raise ValueError(f"Fuente ausente en manifiesto: {source_id}")
+
+
+def source_hash(manifest: dict[str, Any], source_id: str) -> str:
+    return source_metadata(manifest, source_id)["sha256"]
 
 
 def record(**values: Any) -> dict[str, Any]:
@@ -84,10 +88,6 @@ def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dic
     for source_id in required_sources:
         source_hash(manifest, source_id)
     rows: list[dict[str, Any]] = []
-    common = {
-        "source_license": "Dominio público; ejemplar primario registrado en manifiesto",
-    }
-
     rows.append(record(
         record_id="poe-goldbug-cipher-001",
         case_type="A",
@@ -96,7 +96,7 @@ def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dic
         text=POE_CIPHER,
         source_id="poe-gold-bug",
         source_sha256=source_hash(manifest, "poe-gold-bug"),
-        source_license=common["source_license"],
+        source_license=source_metadata(manifest, "poe-gold-bug")["license"],
         evidence_refs=[
             "https://www.gutenberg.org/ebooks/2147",
             "https://www.eapoe.org/works/tales/goldbgc.htm",
@@ -117,7 +117,7 @@ def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dic
         text=VERNE_CIPHER,
         source_id="verne-la-jangada-fr",
         source_sha256=source_hash(manifest, "verne-la-jangada-fr"),
-        source_license=common["source_license"],
+        source_license=source_metadata(manifest, "verne-la-jangada-fr")["license"],
         evidence_refs=[
             "https://www.gutenberg.org/ebooks/14806",
             "https://culturacientifica.com/2021/01/20/el-cifrado-de-gronsfeld-en-la-jangada/",
@@ -139,7 +139,7 @@ def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dic
         text="Iniciales ornamentales de los capítulos: " + " ".join(HYPNEROTOMACHIA_ACROSTIC.replace(" ", "")),
         source_id="hypnerotomachia-poliphili-1499",
         source_sha256=source_hash(manifest, "hypnerotomachia-poliphili-1499"),
-        source_license="Public Domain Mark 1.0; ejemplar digital de 1499",
+        source_license=source_metadata(manifest, "hypnerotomachia-poliphili-1499")["license"],
         evidence_refs=[
             "https://www.themorgan.org/morganmobile/in-disguise/colonna",
             "https://www.otago.ac.nz/library/exhibitions/authorship/cabinet8-1.html",
