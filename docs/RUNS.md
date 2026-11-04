@@ -186,3 +186,11 @@ Se añadieron:
 - docs/METRICA_DENSIDAD_SEMANTICA.md: papers base, fórmula, pesos y protocolo de validación.
 
 Estado: 0/16 admitidas; las ocho bases y ocho HKD siguen candidatas. No se ha descargado ni admitido ningún texto nuevo por esta implementación. No se lanza entrenamiento ni se mergea la PR hasta que el gate completo pase.
+
+
+
+## Iteración de evaluador MMLU-Pro — 4 de noviembre de 2026
+
+En la PR #53 se incorpora evaluación por lotes con padding derecho causal y presupuesto configurable de tokens. Se añade un workflow de rendimiento activado por cambios del evaluador en PR; compara secuencial frente a batched en los mismos 140 ítems, mismo checkpoint y misma revisión inmutable del test. El artefacto registra tiempos, speedup y paridad de predicciones. La entrada de resultado se completará con el run real de Actions; no se anticipa ningún speedup.
+
+El workflow oficial de entrenamiento recibe `MMLU_BATCH_TOKEN_BUDGET=8192` por defecto y lo registra en el resumen experimental. El gate de 16 bibliotecas permanece obligatorio; este benchmark de rendimiento no lo omite ni lanza entrenamiento.
