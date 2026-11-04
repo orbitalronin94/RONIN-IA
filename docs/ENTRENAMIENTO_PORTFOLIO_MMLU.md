@@ -73,7 +73,7 @@ La siguiente versión del workflow mezcla, con manifiesto y SHA-256 por fuente:
 
 1. **Portfolio/Papers**: permiso expreso del titular, revisión inmutable; se usa únicamente su partición de entrenamiento.
 2. **CLiGS Textbox, CoNSSA y ELTeC-spa**: revisiones Git fijadas en `scripts/prepare_open_corpora.py`; se incorpora únicamente `train.txt`. Las particiones `validation` y `test` quedan reservadas y no se pasan al entrenador.
-3. **Phi-4-mini-instruct**: tutor MIT de 3,8B parámetros, ajustado para instrucciones y con español entre sus idiomas declarados. Se generan 32 propuestas en 16 dominios, se filtran por estructura REF y se incorpora solo la salida que supera el esquema. La auditoría REF no demuestra que las respuestas sean verdaderas ni que sus fuentes sean correctas; se registra como augmentación sintética de tutor, no como dato experto.
+3. **Phi-4-mini-instruct**: tutor MIT de 3,8B parámetros, ajustado para instrucciones y con español entre sus idiomas declarados. Se generan 32 propuestas en 16 dominios, se filtran por estructura REF y se incorpora solo la salida que supera el esquema. La auditoría REF no demuestra que las respuestas sean verdaderas ni que sus fuentes sean correctas; se registra como augmentación sintética de tutor, no como dato experto. La licencia MIT corresponde al modelo, no se atribuye automáticamente a las salidas; el lote generado permanece temporal en el runner y no se publica como artefacto.
 
 El workflow concatena esas tres entradas en un corpus mixto reproducible y publica su manifiesto con tamaños y hashes. Cada semilla parte de inicialización aleatoria; los pesos de Phi-4 nunca se cargan en RONIN.
 
