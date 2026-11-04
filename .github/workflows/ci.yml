@@ -34,6 +34,12 @@ jobs:
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "pytest>=8.0" "pytest-cov>=5.0" "ruff>=0.5"
       - name: Ejecutar Ruff
         run: ruff check ronin tests scripts
+      - name: Validar sintaxis y expresiones de los workflows RUN 5
+        run: |
+          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.7
+          "$(go env GOPATH)/bin/actionlint" \
+            .github/workflows/prepare-run5-corpus-candidates.yml \
+            .github/workflows/ronin-official-training-holdout.yml
       - name: Verificar metadatos del paquete
         run: python -m pip check
       - name: Enlazar libro de runs
