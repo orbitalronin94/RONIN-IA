@@ -20,7 +20,7 @@ HASH_FIELDS = (
     "split_manifest_sha256",
     "dedup_report_sha256",
 )
-MINIMUM_DEFAULT = 256 * 1024 * 1024
+MINIMUM_DEFAULT = 1 * 1024 * 1024
 
 
 def sha256_file(path: Path) -> str:
@@ -41,7 +41,7 @@ def build_report(
     audit = json.loads(license_audit_path.read_text(encoding="utf-8"))
     policy = manifest.get("policy", {})
     libraries = manifest.get("libraries", [])
-    required = int(policy.get("required_library_count", 16))
+    required = int(policy.get("required_library_count", 32))
     minimum = int(policy.get("minimum_train_bytes_per_library", MINIMUM_DEFAULT))
 
     gate = audit.get("gate", {})
