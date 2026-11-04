@@ -323,3 +323,10 @@ Se añade una ruta de inferencia que calcula logits solo en la última posición
 | 2026-11-04 16:54 | [Benchmark inicial del evaluador (run 41872201685)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41872201685) | success | Benchmark A/B de la versión anterior: comparó secuencial, batching y proyección final sobre los mismos ítems. No equivale al barrido posterior de presupuestos. | f844e9b6 |
 | 2026-11-04 17:00 | [Benchmark de barrido de presupuestos (run 41873245213)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41873245213) | cancelled | La ejecución se canceló durante la sincronización de la rama con `main`; no se publica speedup ni se extrae un presupuesto ganador. Debe repetirse para validar la versión con barrido 256–8192. | cf3b64aa |
 
+
+
+## Retirada del generador REF aislado — 4 de noviembre de 2026
+
+Se elimina `.github/workflows/teacher-candidate-generation.yml`. La ejecución automática posterior a la caché de tutores duplicaba preparación de entorno y carga de Phi-4, generaba propuestas efímeras y solo publicaba metadatos; no tenía consumidor posterior ni incorporaba conocimiento al estudiante. Se conserva `scripts/generate_teacher_data.py` y la auditoría REF como capacidad reutilizable para integrarlas en una futura fase de ingesta con revisión de calidad, procedencia y derechos. No se autoriza entrenamiento con generaciones del tutor por defecto.
+
+La retirada del YAML impide nuevos disparos desde ese workflow, pero no garantiza cancelar ejecuciones ya encoladas o iniciadas. Run #4 observado al documentar el cambio: estado `pending`, conclusión `pendiente` ([run #4](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41876092755)).
