@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:05 | [Integración continua #827 (run 41930868078)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41930868078) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Trigger Eulogikon verification on rights and source ledger changes. Trigger: push; rama: main; intento: 1. | f46e4ff9 |
 | 2026-11-04 23:05 | [Integración continua #826 (run 41930859801)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41930859801) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Validate pinned CC0 metadata source audit entries. Trigger: push; rama: main; intento: 1. | bf184215 |
 | 2026-11-04 23:05 | [Integración continua #824 (run 41930813275)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41930813275) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Keep proposed rights record schema-compliant and timestamp retrieval. Trigger: push; rama: main; intento: 1. | 28e89103 |
 | 2026-11-04 23:05 | [Integración continua #823 (run 41930787463)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41930787463) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document Eulogikon CC0 metadata candidate lane. Trigger: push; rama: main; intento: 1. | 3275438f |
