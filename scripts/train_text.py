@@ -27,6 +27,12 @@ def main() -> None:
     parser.add_argument("--profile", choices=["tiny"], default="tiny")
     parser.add_argument("--steps", type=int, default=None)
     parser.add_argument("--seed", type=int, default=None, help="semilla de inicialización y muestreo")
+    parser.add_argument(
+        "--init-checkpoint",
+        type=Path,
+        default=None,
+        help="checkpoint previo del que cargar solo los pesos del modelo",
+    )
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--checkpoints", type=Path, default=Path("checkpoints/tiny"))
     parser.add_argument("--metrics-out", type=Path, default=None, help="JSON con tiempos y throughput")
@@ -59,6 +65,15 @@ def main() -> None:
         raise ValueError("tiny profile and byte tokenizer vocabulary do not match")
     seed_everything(training_config.seed)
     model = RoninLM(model_config)
+    if args.init_checkpoint is not None:
+        if not args.init_checkpoint.is_file():
+            parser.error(f"no existe el checkpoint inicial: {args.init_checkpoint}")
+        payload = torch.load(args.init_checkpoint, map_location="cpu", weights_only=False)
+        state_dict = payload.get("model") if isinstance(payload, dict) else None
+        if not isinstance(state_dict, dict):
+            raise ValueError("el checkpoint inicial debe contener un state_dict en la clave 'model'")
+        model.load_state_dict(state_dict, strict=True)
+        print(f"Pesos iniciales cargados desde {args.init_checkpoint}")
     batches = NextTokenBatches(
         tokens, training_config.batch_size, model_config.context_length, training_config.seed
     )

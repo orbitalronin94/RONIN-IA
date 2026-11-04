@@ -136,3 +136,11 @@ def test_collection_names_match_common_corpus_manifest_values():
         "A court judgment interprets a statute, regulation and contractual liability.",
         "Open Government",
     )[0] == "law_economics_social_sciences"
+
+
+
+def test_domain_worker_expects_two_libraries_but_aggregate_expects_sixteen():
+    from scripts.prepare_run5_candidates import expected_library_count
+
+    assert expected_library_count("philosophy") == 2
+    assert expected_library_count(None) == 16

@@ -271,6 +271,11 @@ def domain_kind_name(domain: str, kind: str) -> str:
     return domain if kind == "base" else f"{domain}_hkd"
 
 
+def expected_library_count(domain: str | None) -> int:
+    """A domain worker emits base+HKD; the aggregate emits all 16."""
+    return 2 if domain else 16
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=Path("/tmp/ronin-run5-candidates"))
@@ -358,12 +363,19 @@ def main() -> int:
 
     for row in dataset:
         scanned_rows += 1
-        if scanned_rows > args.max_rows or scanned_text_bytes >= args.max_input_bytes:
+        if scanned_rows > args.max_rows:
             break
         if not isinstance(row, dict):
             rejected["invalid_row"] += 1
             continue
         raw_text = row_value(row, "text")
+        raw_text_bytes = len(raw_text.encode("utf-8")) if isinstance(raw_text, str) else 0
+        if scanned_text_bytes + raw_text_bytes > args.max_input_bytes:
+            rejected["input_byte_budget_exhausted"] += 1
+            break
+        # Count every source text inspected, including rows later rejected by
+        # license, language, length, provenance or domain filters.
+        scanned_text_bytes += raw_text_bytes
         license_name = normalize_license(row_value(row, "license"))
         if license_name not in ALLOWED_LICENSES:
             rejected["license_not_allowlisted"] += 1
@@ -406,11 +418,6 @@ def main() -> int:
         if args.domain and domain != args.domain:
             rejected["other_domain"] += 1
             continue
-        # Each matrix job gets its own byte budget for its target domain.
-        # Counting other domains here would let unrelated rows exhaust the
-        # budget before this worker had enough material for its two libraries.
-        if isinstance(raw_text, str):
-            scanned_text_bytes += len(raw_text.encode())
         doc_id = hashlib.sha256(
             f"{DATASET_REVISION}\0{provenance}\0{license_name}".encode()
         ).hexdigest()
@@ -562,7 +569,18 @@ def main() -> int:
         "training_eligible": False,
         "report": str(report_path),
     }, ensure_ascii=False, indent=2))
-    return 0 if len(libraries) == 16 else 2
+    expected = expected_library_count(args.domain)
+    if len(libraries) != expected:
+        print(
+            f"ERROR: se esperaban {expected} bibliotecas en este alcance "
+            f"y se generaron {len(libraries)}.",
+            file=sys.stderr,
+        )
+        return 2
+    # The aggregate workflow separately enforces the 16-library size and
+    # human-review gates. A worker's successful artifact creation is not
+    # equivalent to corpus sufficiency or admission.
+    return 0
 
 
 if __name__ == "__main__":
