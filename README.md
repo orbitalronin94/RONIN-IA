@@ -16,7 +16,7 @@ También se ha ejecutado un primer ciclo reproducible de entrenamiento desde ini
 | Medición | Antes | Después |
 |---|---:|---:|
 | Bits por byte (BPB) | 7,9281 | 2,2395 |
-| Aciertos en el piloto multidominio | 0/23 | 8/23 (34,78 %) |
+| Aciertos en el piloto multidominio | 0/23 | 8/23 (34,8 %; IC95 % exacto de Clopper–Pearson ≈ [16 %, 57 %]) |
 
 La evaluación de lenguaje utilizó 32.768 bytes de validación. El benchmark multidominio contiene 23 preguntas de opción múltiple y se puntúa mediante predicción del siguiente byte.
 
@@ -33,6 +33,8 @@ Workflow principal: [Experimento oficial RONIN desde cero + MMLU-Pro completo](h
 La [PR #39](https://github.com/orbitalronin94/RONIN-IA/pull/39) ya está fusionada en `main` (merge commit `ba22ed03fd76b3543f32ce301b8bbd0da6a714f9`).
 
 ### Datos que entran en el nuevo entrenamiento
+
+**Puerta G-0 — licencias y derechos:** ningún material entra en entrenamiento por el mero hecho de estar disponible. Cada recurso debe tener procedencia, licencia o autorización compatible y revisión de los materiales de terceros; lo que no supera esa puerta queda excluido o en cuarentena. La autorización del Portfolio cubre las aportaciones originales, no concede automáticamente derechos sobre material de terceros incrustado.
 
 - **Portfolio/Papers:** 48 documentos utilizables, con autorización expresa para las aportaciones originales. Se usa solo como entrenamiento; el material de terceros incrustado requiere revisión propia.
 - **Literatura abierta:** 644 documentos preparados de CLiGS Textbox, CoNSSA y ELTeC-spa: 608 train, 18 validation y 18 test. Solo la partición train entra en la mezcla.
@@ -59,10 +61,34 @@ La [ejecución oficial #1](https://github.com/orbitalronin94/RONIN-IA/actions/ru
 - Diferencia global: **−0,137 puntos porcentuales**.
 - Seleccionados: 12.032; evaluados: 11.687; omitidos por exceder 2.048 bytes: 345.
 - Cobertura: 97,13 %. `complete_test_set=false`; por tanto, no se debe describir como cobertura completa.
-- Biology: −0,707 pp; Computer Science: −6,618 pp; Philosophy: −4,810 pp. Law: +4,762 pp; History: +4,221 pp.
 - La mezcla de entrenamiento fue 94,53 % literatura abierta y 5,47 % Portfolio por bytes.
 
-El resultado no demuestra que el entrenamiento causara por sí solo cada variación por dominio: fue una sola semilla y el informe agregado no permite pruebas pareadas por pregunta. Tampoco es una puntuación oficial comparable con el leaderboard de MMLU-Pro: RONIN evalúa la probabilidad del siguiente byte de A–J, sin CoT. Consulta el [artefacto de la ejecución](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377/artifacts/13325455883) y el [protocolo de benchmarks](docs/BENCHMARKS_MULTIDOMINIO.md).
+**Variación observada por dominio** (diferencia de accuracy antes/después, en puntos porcentuales):
+
+| Dominio | Antes → después (aciertos) | Diferencia |
+|---|---:|---:|
+| Biology | 83 → 78 | −0,707 pp |
+| Business | 85 → 84 | −0,127 pp |
+| Chemistry | 113 → 108 | −0,442 pp |
+| Computer Science | 69 → 42 | **−6,618 pp** |
+| Economics | 98 → 104 | +0,715 pp |
+| Engineering | 107 → 112 | +0,521 pp |
+| Health | 93 → 103 | +1,225 pp |
+| History | 31 → 44 | **+4,221 pp** |
+| Law | 79 → 121 | **+4,762 pp** |
+| Math | 146 → 111 | −2,593 pp |
+| Other | 106 → 101 | −0,548 pp |
+| Philosophy | 78 → 54 | **−4,810 pp** |
+| Physics | 136 → 127 | −0,695 pp |
+| Psychology | 75 → 94 | +2,405 pp |
+
+El patrón relevante no es solo el delta global negativo: aparece una **asimetría entre dominios**. Derecho e historia suben más de cuatro puntos, mientras informática y filosofía retroceden con fuerza. Es una señal que merece un experimento dirigido de retención y mezcla de datos, no una demostración de olvido catastrófico ni de su causa. Con una sola semilla, resultados agregados y sin predicciones pareadas por pregunta, no podemos separar variación muestral, sensibilidad del evaluador y efecto real del entrenamiento. La composición del corpus es una hipótesis que debe probarse mediante ablations y varias semillas, no una causa establecida.
+
+### Límite de interpretación
+
+Este resultado **no es el protocolo oficial de MMLU-Pro** y **no es comparable con su leaderboard**: RONIN puntúa la probabilidad del siguiente byte de las opciones A–J, sin cadena de razonamiento CoT. Es **una sola semilla** (1337), en un modelo tiny de **9.922.880 parámetros**, entrenado en **CPU** durante 1.000 pasos. Además, se evaluaron 11.687 de los 12.032 ítems seleccionados: 345 se omitieron por superar el contexto de 2.048 bytes, de modo que la cobertura fue 97,13 % y `complete_test_set=false`. Los resultados son una observación preliminar de este protocolo y esta ejecución; no prueban mejora general, causalidad por dominio ni superioridad frente a otros modelos.
+
+Consulta el [artefacto de la ejecución](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377/artifacts/13325455883) y el [protocolo de benchmarks](docs/BENCHMARKS_MULTIDOMINIO.md).
 
 ### Siguiente ciclo: benchmark reducido e instrumentación CPU
 
@@ -90,21 +116,6 @@ El workflow reducido se ejecutará después de integrar los cambios y lanzarlo m
 
 El inventario completo, con procedencia, revisiones, licencias, particiones, exclusiones y hashes, está en [Inventario de corpus y materiales](docs/INVENTARIO_CORPUS_Y_MATERIALES.md) y en el [manifiesto JSON](data/manifests/corpus_inventory.json).
 
-## La advertencia del README
-
-> Sepan cuantos este repositorio vieren que aquí se hace escarnio de cuanto los doctos predicaron sobre acrecentar modelos. Non hay hueste de tarjetas gráficas, nin caudal de dineros, nin ley del escalado que valga. Hay un ingenio de cuarenta y cuatro millones que apenas distingue el saludo del mandado, y un artificio de trazas que non se rompe.
->
-> Al modelo non le tengo ley, ca es ruin y él lo sabe. Al artificio se la tengo entera.
->
-> Quien viniere por el modelo, tórnese por do vino, que aquí non hay sino el método. Quien viniere por las trazas, quédese, mas sepa desde luego que el método es largo y el modelo, corto. Non me pidáis que lo aderece, que quien se consuela con el modelo es porque non ha mirado las trazas.
-
-### Nota de léxico
-
-*Sepan cuantos… vieren* abre como las cartas de privilegio y las Partidas, y avisa de que lo que sigue no es un README sino un edicto. *Escarnio* es burla pública, no ironía fina. *Non* en vez de *no* es licencia arcaizante, no error: aparece en Berceo y en el Cantar. *Ca* por *porque* es la conjunción causal del mester de clerecía. *Do vino* por *de donde vino*. *Aderezar* por *arreglar o maquillar* es el uso de los plateros y los cocineros del XVII. Y *tener ley a alguien* es tenerle lealtad, que es lo que se le niega al modelo y se le concede al pipeline.
-
-El cierre es la única línea que no es arcaica, y está puesta a propósito: el que llega al final ya no necesita el disfraz.
-
-
 ## Principios irrenunciables
 
 1. **RONIN aprende desde cero.** Todos los pesos del modelo estudiante se inicializan aleatoriamente. No se importan, mezclan ni ajustan pesos de modelos externos dentro de RONIN.
@@ -112,7 +123,7 @@ El cierre es la única línea que no es arcaica, y está puesta a propósito: el
 3. **Licencia comprobada antes de descargar.** El descargador consulta la ficha del modelo, exige la etiqueta exacta `mit`, fija una revisión inmutable y guarda huellas SHA-256. Si la licencia no se verifica, cancela la descarga.
 4. **Un proceso, varias escalas.** Los perfiles tiny, seed-0, seed-1 y seed-2 comparten la misma canalización. El tamaño se define mediante configuraciones validadas.
 5. **Reproducibilidad.** Cada experimento registra semillas, manifiestos de datos, versión del tokenizador, configuración, versiones de software y hardware.
-6. **Evidencias antes que etiquetas.** Una función solo está activa cuando existe implementación y pruebas. Una declaración en el manifiesto no demuestra que funcione.
+6. **Evidencias antes que etiquetas.** Una función solo se declara activa cuando existe una implementación ejecutable y pruebas que la cubren. Una declaración en el manifiesto, una interfaz o una hoja de ruta no demuestran que funcione.
 7. **Honestidad experimental.** No se presentan pruebas sintéticas ni ejecuciones diminutas como modelos competentes. No se inventan métricas, velocidad, costes ni resultados.
 8. **Gobernanza de datos.** Cada corpus registra procedencia, licencia, permisos, filtrado y deduplicación.
 
@@ -158,7 +169,7 @@ El entorno operativo de referencia es GitHub Actions estándar para repositorios
 | seed-1 | 955.221.504 | Fuera del entorno operativo actual |
 | seed-2 | 6.976.598.016 | Fuera del entorno operativo actual |
 
-Los perfiles son objetivos de arquitectura, no garantías de memoria, duración ni rendimiento. Los recuentos deben verificarse con `ronin count-params --profile PERFIL`. El concepto MoE de 2,8 billones de parámetros queda fuera de la primera escalera.
+Los perfiles son objetivos de arquitectura, no garantías de memoria, duración ni rendimiento. Los recuentos deben verificarse con `ronin count-params --profile PERFIL`.
 
 ## Filtro epistémico REF
 
@@ -279,3 +290,17 @@ Los negativos de esta primera tanda son controles sintéticos con semilla
 reproducible y sin carga útil insertada. Un texto histórico no resuelto —como
 el manuscrito Voynich— no se convierte en negativo por defecto. Las
 transcripciones sin licencia compatible quedan fuera del entrenamiento.
+
+## Cierre: la advertencia del README
+
+> Sepan cuantos este repositorio vieren que aquí se hace escarnio de cuanto los doctos predicaron sobre acrecentar modelos. Non hay hueste de tarjetas gráficas, nin caudal de dineros, nin ley del escalado que valga. Hay un ingenio de cuarenta y cuatro millones que apenas distingue el saludo del mandado, y un artificio de trazas que non se rompe.
+>
+> Al modelo non le tengo ley, ca es ruin y él lo sabe. Al artificio se la tengo entera.
+>
+> Quien viniere por el modelo, tórnese por do vino, que aquí non hay sino el método. Quien viniere por las trazas, quédese, mas sepa desde luego que el método es largo y el modelo, corto. Non me pidáis que lo aderece, que quien se consuela con el modelo es porque non ha mirado las trazas.
+
+### Nota de léxico
+
+*Sepan cuantos… vieren* abre como las cartas de privilegio y las Partidas, y avisa de que lo que sigue no es un README sino un edicto. *Escarnio* es burla pública, no ironía fina. *Non* en vez de *no* es licencia arcaizante, no error: aparece en Berceo y en el Cantar. *Ca* por *porque* es la conjunción causal del mester de clerecía. *Do vino* por *de donde vino*. *Aderezar* por *arreglar o maquillar* es el uso de los plateros y los cocineros del XVII. Y *tener ley a alguien* es tenerle lealtad, que es lo que se le niega al modelo y se le concede al pipeline.
+
+El cierre es la única línea que no es arcaica, y está puesta a propósito: el que llega al final ya no necesita el disfraz. 
