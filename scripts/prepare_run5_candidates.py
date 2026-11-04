@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build auditable, non-admitted RUN 5 candidates from the pinned Common Corpus.
 
-One streaming pass feeds eight domain buckets. Each bucket is split by a
+One streaming pass feeds sixteen domain buckets. Each bucket is split by a
 deterministic semantic-density ranking into an 80% general library and a 20%
 HKD library. This script NEVER marks data as admitted or training-eligible.
 """
@@ -358,7 +358,7 @@ def write_split(
         "exact_deduplication": "SHA-256 sobre texto normalizado; deduplicación dentro del dominio y entre sus dos bibliotecas base/HKD",
         "near_duplicates_removed": near_dupes,
         "unique_text_hashes_written": len(exact_hashes),
-        "method": "SimHash-64 con distancia de Hamming <=3 dentro del dominio; la auditoría global de las 16 bibliotecas se ejecuta después de agregar artefactos",
+        "method": "SimHash-64 con distancia de Hamming <=3 dentro del dominio; la auditoría global de las 32 bibliotecas se ejecuta después de agregar artefactos",
     }
     selection_report = {
         "metric": "RONIN-HKD-0.1",
@@ -423,7 +423,7 @@ def main() -> int:
     parser.add_argument("--max-rows", type=int, default=5_000_000)
     parser.add_argument("--domain", choices=DOMAIN_PRIORITY, help="Process one of 16 domains per runner to scale storage horizontally")
     parser.add_argument("--max-input-bytes", type=int, default=6 * 1024**3)
-    parser.add_argument("--min-train-bytes", type=int, default=2_560 * 1024**2)
+    parser.add_argument("--min-train-bytes", type=int, default=1 * 1024**2)
     parser.add_argument("--hkd-fraction", type=float, default=HKD_FRACTION)
     parser.add_argument("--license-audit", type=Path, default=Path("reports/license_audit.json"))
     parser.add_argument("--source-manifest", type=Path, default=Path("data/manifests/knowledge_dense_sources.json"))
