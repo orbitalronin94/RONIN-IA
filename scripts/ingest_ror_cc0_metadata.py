@@ -35,7 +35,7 @@ def main() -> int:
     if str(meta.get("id")) != RECORD_ID:
         raise ValueError("Zenodo record ID mismatch")
     license_id = (meta.get("metadata", {}).get("license") or {}).get("id")
-    if license_id not in ("cc0-1.0", "CC0-1.0"):
+    if license_id not in ("cc0-1.0", "CC0-1.0", "cc-zero"):
         raise ValueError(f"unexpected Zenodo record license: {license_id!r}")
     files = meta.get("files", [])
     zips = [f for f in files if f.get("key", "").endswith(".zip")]
