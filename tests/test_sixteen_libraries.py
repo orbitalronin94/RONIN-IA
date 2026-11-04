@@ -52,7 +52,6 @@ def test_gate_requires_density_report_and_human_review_for_extra_eight(tmp_path)
     portfolio_root.mkdir()
     index_path = portfolio_root / "portfolio.sqlite3"
     index_path.write_bytes(b"fixture-rag-index")
-    import hashlib
     rag_manifest = {
         "role": "retrieval_only_fallback",
         "retrieval_only": True,
