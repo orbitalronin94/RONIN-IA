@@ -349,7 +349,7 @@ def test_common_corpus_expansion_workflow_publishes_32_library_index():
     assert aggregate["if"] == "always()"
     assemble = next(
         step for step in aggregate["steps"]
-        if step.get("name") == "Assemble 32 libraries and the master index"
+        if step.get("name") == "Assemble 32 libraries, audit duplicates and publish master index"
     )
     assert "datasets/run5/INDEX.json" in assemble["run"]
     assert "datasets/run5/INDEX.md" in assemble["run"]
