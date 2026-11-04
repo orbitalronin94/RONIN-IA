@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:38 | [Integración continua #967 (run 41935114526)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935114526) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Support capitalized Valencian Text field in GPLSI ClearText JSON pages. Trigger: push; rama: main; intento: 1. | 715f4e99 |
 | 2026-11-04 23:37 | [Integración continua #964 (run 41935023993)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935023993) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add scheduled/manual GPLSI ClearText candidate workflow. Trigger: push; rama: main; intento: 1. | c606f453 |
 | 2026-11-04 23:36 | [Integración continua #966 (run 41935055735)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935055735) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Register GPLSI ClearText CAS and VAL official CC BY candidates. Trigger: push; rama: main; intento: 1. | 4a135a42 |
 | 2026-11-04 23:36 | [Integración continua #965 (run 41935035468)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935035468) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Trigger and version GPLSI ClearText CAS/VAL candidate workflow. Trigger: push; rama: main; intento: 1. | 16a61fa1 |
