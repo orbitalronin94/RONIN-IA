@@ -129,6 +129,7 @@ jobs:
           import os
           import platform
           from pathlib import Path
+          from dataclasses import replace
           import torch
           from ronin.config import get_profile
           
@@ -142,6 +143,12 @@ jobs:
                       digest.update(chunk)
               return digest.hexdigest()
           model_config, training_config = get_profile("tiny")
+          steps = int(os.environ["STEPS"])
+          training_config = replace(
+              training_config,
+              max_steps=steps,
+              warmup_steps=min(training_config.warmup_steps, max(1, steps // 10)),
+          )
           metrics = {}
           for split in ("validation", "test"):
               initial = json.loads((reports / f"inicial-{split}.json").read_text())
@@ -172,8 +179,8 @@ jobs:
                   "configuracion": model_config.__dict__,
                   "parametros": metrics["validation"]["entrenado"]["parameter_count"],
                   "configuracion_entrenamiento": training_config.__dict__,
-                  "pasos_ejecutados": int(os.environ["STEPS"]),
-                  "tokens_presentados_aproximados": int(os.environ["STEPS"]) * training_config.batch_size * training_config.gradient_accumulation_steps * model_config.context_length,
+                  "pasos_ejecutados": steps,
+                  "tokens_presentados_aproximados": steps * training_config.batch_size * training_config.gradient_accumulation_steps * model_config.context_length,
                   "tiempo_entrenamiento_segundos": int((reports / "tiempo_entrenamiento_segundos.txt").read_text()),
               },
               "entorno": {
