@@ -60,3 +60,8 @@ El corpus generado por Phi-4 puede incorporarse como augmentación experimental 
 - RONIN se construye con inicialización aleatoria.
 - El entrenador solo recibe texto tokenizado.
 - No se realiza fine-tuning, fusión ni destilación de parámetros.
+
+
+## Compatibilidad de ejecución
+
+El entorno de generación fija `transformers==4.53.3` para evitar la incompatibilidad conocida entre el código remoto Phi-4 y versiones posteriores que ya no exponen `LossKwargs` desde `transformers.utils`. La descarga y la verificación de pesos son una fase distinta de la carga e inferencia; que el hash sea correcto no garantiza que el código del modelo sea compatible con cualquier versión de Transformers.

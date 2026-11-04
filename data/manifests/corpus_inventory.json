@@ -1,0 +1,208 @@
+{
+  "schema_version": "1.0",
+  "project": "RONIN-IA",
+  "audited_at": "2026-11-04T12:08:00Z",
+  "integration_branch": "ronin/integrate-all-corpora-phi4-cycle",
+  "pull_request": "https://github.com/orbitalronin94/RONIN-IA/pull/39",
+  "policy": "Never mix training data, validation/test holdouts, benchmarks, tutor models, or quarantined specialist material.",
+  "artifacts": {
+    "literature_acquisition_run": "https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919840",
+    "ci_run": "https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919819",
+    "smoke_run": "https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919786",
+    "integrated_training_run": "https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919709",
+    "integrated_training_status": "failure",
+    "integrated_training_failure": [
+      "Phi-4 generation failed because generate() rejected model_kwargs ['generator'].",
+      "MMLU-Pro evaluation failed because datasets attempted to import BucketNotFoundError from huggingface_hub.errors."
+    ],
+    "separate_actions_artifacts": [
+      {
+        "name": "ronin-corpus-v2-particiones",
+        "size_bytes": 58181685
+      },
+      {
+        "name": "ronin-bibliotecas-adquiridas",
+        "size_bytes": 92503
+      },
+      {
+        "name": "ronin-biblioteca-opacidad-v1",
+        "size_bytes": 203231066
+      }
+    ],
+    "combined_training_artifact": "not produced"
+  },
+  "training_candidates": [
+    {
+      "id": "portfolio-papers",
+      "source": "https://github.com/orbitalronin94/Portfolio/tree/main/Papers",
+      "revision": "fffc234fdf3f82b6a90d56ae9b190d1c0de79690",
+      "usable_documents": 48,
+      "split": {
+        "train": "all usable documents",
+        "validation": 0,
+        "test": 0
+      },
+      "authorization": "explicit authorization from repository owner for original contributions",
+      "constraints": [
+        "third-party quotations, images, tables, code, translations and embedded works require separate review",
+        "not eligible for validation or test"
+      ],
+      "status": "approved_for_training_with_document_level_review"
+    },
+    {
+      "id": "cligs-textbox",
+      "source": "https://github.com/cligs/textbox",
+      "revision": "1b91e940475c8a7e866457a3953fed5edb0a29f1",
+      "prepared_documents": 364,
+      "license": {
+        "text": "public domain",
+        "metadata": "CC-BY-4.0"
+      },
+      "status": "downloaded_and_audited"
+    },
+    {
+      "id": "cligs-conssa",
+      "source": "https://github.com/cligs/conssa",
+      "revision": "8fccf669ed1bdbad309ff190f5afb0d6066d70a3",
+      "prepared_documents": 184,
+      "license": {
+        "text": "public domain",
+        "metadata": "CC-BY-4.0"
+      },
+      "status": "downloaded_and_audited"
+    },
+    {
+      "id": "eltec-spa",
+      "source": "https://github.com/COST-ELTeC/ELTeC-spa",
+      "revision": "83e2a22d5ef66f96e59f47f7ef810358c4236322",
+      "prepared_documents": 96,
+      "license": {
+        "text": "public domain",
+        "metadata": "CC-BY-4.0"
+      },
+      "status": "downloaded_and_audited"
+    },
+    {
+      "id": "open-literature-mixture",
+      "prepared_documents": 644,
+      "partitions": {
+        "train": 608,
+        "validation": 18,
+        "test": 18
+      },
+      "output_sha256": {
+        "train": "9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78",
+        "validation": "ec1e32817f44b75f2983ab42179d677063b39728b108be3915be56289ceb95cf",
+        "test": "6ea09e2c0e4a2cc2753dfc91c841335600a9c6a954f3cf0ffb8b1d2336bfbd94"
+      },
+      "status": "audited_training_and_holdout_partitions"
+    }
+  ],
+  "tutor_models": [
+    {
+      "id": "openai-community/gpt2",
+      "license": "MIT",
+      "role": "local teacher only; never transfer weights to student"
+    },
+    {
+      "id": "EleutherAI/gpt-neo-125m",
+      "license": "MIT",
+      "role": "local teacher only; never transfer weights to student"
+    },
+    {
+      "id": "microsoft/Phi-4-mini-instruct",
+      "license": "MIT",
+      "revision": "cfbefacb99257ffa30c83adab238a50856ac3083",
+      "trust_remote_code": true,
+      "role": "optional local teacher; generated output license not asserted; REF structural audit does not prove factual truth"
+    }
+  ],
+  "specialist_material": [
+    {
+      "id": "cryptography-obfuscation-library",
+      "sources": 6,
+      "case_records": 506,
+      "partitions": {
+        "train": 404,
+        "validation": 50,
+        "test": 52
+      },
+      "status": "excluded_pending_manual_review",
+      "reason": "OCR, edition/source alignment, rights and epistemic review required before training admission"
+    },
+    {
+      "id": "synthetic-pseudowords",
+      "generated_sentences": {
+        "train": 12000,
+        "validation": 2000
+      },
+      "seed": 8675309,
+      "status": "excluded_from_general_training",
+      "purpose": "pipeline smoke only; no linguistic knowledge"
+    }
+  ],
+  "evaluation_only": [
+    {
+      "id": "TIGER-Lab/MMLU-Pro",
+      "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+      "default_limit": 140,
+      "split": "test",
+      "training_use": false
+    },
+    {
+      "id": "ronin-domains-v1",
+      "questions": 23,
+      "domains": 15,
+      "training_use": false,
+      "purpose": "small smoke benchmark only"
+    },
+    {
+      "id": "open-literature-validation",
+      "documents": 18,
+      "training_use": false
+    },
+    {
+      "id": "open-literature-test",
+      "documents": 18,
+      "training_use": false
+    }
+  ],
+  "quarantined_sources": [
+    {
+      "id": "project-gutenberg",
+      "status": "G0_hold_item_level_rights_review"
+    },
+    {
+      "id": "internet-archive",
+      "status": "G0_hold_item_level_rights_review"
+    },
+    {
+      "id": "pleias-common-corpus",
+      "status": "G0_hold_document_level_license_and_jurisdiction_audit"
+    },
+    {
+      "id": "bookcorpusopen",
+      "status": "G0_hold_no_general_reuse_license"
+    },
+    {
+      "id": "pleias-spanish-public-domain-books",
+      "status": "candidate_PR_13_open_not_integrated"
+    },
+    {
+      "id": "mozilla-finance-sentences",
+      "status": "requires_account_terms_acceptance_and_API_key_not_in_integrated_pipeline"
+    },
+    {
+      "id": "other_historical_open_corpora",
+      "status": "catalogued_candidate_not_downloaded"
+    }
+  ],
+  "mixture_rules": [
+    "Only approved train partitions enter the general training mixture.",
+    "Never mix validation, test, eval or benchmark paths into train.",
+    "Do not concatenate corpus-v2 twice when source and partition SHA-256 values match.",
+    "Keep Portfolio, literature and tutor output provenance independently identifiable.",
+    "Tutor output is optional and must be audited; if generation fails, record no augmentation.",
+    "Keep cryptography library and synthetic pseudowords outside general pretraining."
+  ]
+}

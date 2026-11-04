@@ -146,7 +146,7 @@ def load_external_dataset(revision: str = DATASET_REVISION) -> list[dict[str, An
         from datasets import load_dataset
     except ImportError as exc:
         raise RuntimeError(
-            "Instala el extra de benchmarks: pip install 'datasets>=3.1'"
+            "Instala el extra de benchmarks: pip install 'datasets==3.6.0' 'huggingface_hub==0.36.0'"
         ) from exc
     dataset = load_dataset(DATASET_ID, split="test", revision=revision)
     return normalize_rows(dataset)
