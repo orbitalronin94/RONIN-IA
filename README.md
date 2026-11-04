@@ -318,4 +318,4 @@ Este inventario no significa que los 21 corpus estén descargados o admitidos: d
 
 El historial cronológico de experimentos, validaciones e ingestas está en el [Libro de runs](docs/RUNS.md). Los workflows enlazan allí desde su resumen y el registrador automático añade cada ejecución al terminar, incluidos fallos y cancelaciones.
 
-El inventario externo contiene ahora 22 fuentes. Se añade una primera ingesta automatizada y versionada de muestras CC0 de Wikidata y abstracts CC BY/CC0 de Europe PMC; ambas permanecen fuera del entrenamiento hasta superar la revisión G-0. Consulta [el pipeline de muestras](docs/INGESTA_AMPLIA_DATASETS_EXTERNOS.md#primera-ingesta-automatizada-de-muestras).
+El inventario externo contiene ahora 22 fuentes. Se añade una primera ingesta automatizada y versionada de muestras filtradas de Common Corpus (dominio público/CC0/CC BY/MIT), datos CC0 de Wikidata y abstracts CC BY/CC0 de Europe PMC; permanecen fuera del entrenamiento hasta superar la revisión G-0. Consulta [el pipeline de muestras](docs/INGESTA_AMPLIA_DATASETS_EXTERNOS.md#primera-ingesta-automatizada-de-muestras).
