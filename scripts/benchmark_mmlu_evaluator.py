@@ -33,6 +33,7 @@ def run_case(
     rows: list[dict],
     dataset_hash: str,
     budget: int,
+    context_length: int,
     last_token_only: bool,
 ) -> tuple[dict, float]:
     started = time.perf_counter()
@@ -41,7 +42,7 @@ def run_case(
         rows=rows,
         all_rows_sha256=dataset_hash,
         profile="tiny",
-        context_length=2048,
+        context_length=context_length,
         device="cpu",
         batch_token_budget=budget,
         last_token_only=last_token_only,
@@ -84,6 +85,7 @@ def main() -> None:
             rows=rows,
             dataset_hash=dataset_hash,
             budget=args.baseline_token_budget,
+            context_length=args.context_length,
             last_token_only=False,
         )
         reports["single_full_logits"] = baseline
@@ -110,6 +112,7 @@ def main() -> None:
                 rows=rows,
                 dataset_hash=dataset_hash,
                 budget=budget,
+                context_length=args.context_length,
                 last_token_only=True,
             )
             reports[name] = report
@@ -136,6 +139,7 @@ def main() -> None:
                 rows=rows,
                 dataset_hash=dataset_hash,
                 budget=best_budget,
+                context_length=args.context_length,
                 last_token_only=False,
             )
             reports["best_budget_full_logits"] = best_full
