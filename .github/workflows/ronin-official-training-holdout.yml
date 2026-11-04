@@ -19,11 +19,6 @@ on:
         default: "0"
         type: string
       mmlu_batch_token_budget:
-        description: Presupuesto de tokens padded por lote del evaluador optimizado
-        required: true
-        default: "8192"
-        type: string
-      mmlu_batch_token_budget:
         description: Presupuesto de tokens padded por lote del evaluador (512-32768)
         required: false
         default: "8192"
@@ -48,7 +43,6 @@ jobs:
       STEPS: ${{ inputs.steps || '1000' }}
       SEEDS: ${{ inputs.seeds || '1337' }}
       MMLU_LIMIT: ${{ inputs.mmlu_limit || '0' }}
-      MMLU_BATCH_TOKEN_BUDGET: ${{ inputs.mmlu_batch_token_budget || '8192' }}
       MMLU_BATCH_TOKEN_BUDGET: ${{ inputs.mmlu_batch_token_budget || '8192' }}
     steps:
       - name: Obtener RONIN IA
@@ -122,10 +116,6 @@ jobs:
           fi
           if ! [[ "$MMLU_LIMIT" =~ ^[0-9]+$ ]] || [ "$MMLU_LIMIT" -gt 12032 ]; then
             echo "::error::MMLU_LIMIT debe ser 0 o estar entre 1 y 12032."
-            exit 1
-          fi
-          if ! [[ "$MMLU_BATCH_TOKEN_BUDGET" =~ ^[0-9]+$ ]] || [ "$MMLU_BATCH_TOKEN_BUDGET" -lt 1 ] || [ "$MMLU_BATCH_TOKEN_BUDGET" -gt 65536 ]; then
-            echo "::error::MMLU_BATCH_TOKEN_BUDGET debe estar entre 1 y 65536."
             exit 1
           fi
           if ! [[ "$MMLU_BATCH_TOKEN_BUDGET" =~ ^[0-9]+$ ]] || [ "$MMLU_BATCH_TOKEN_BUDGET" -lt 512 ] || [ "$MMLU_BATCH_TOKEN_BUDGET" -gt 32768 ]; then
