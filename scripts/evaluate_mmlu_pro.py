@@ -166,6 +166,31 @@ def _aggregate(details: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     }
 
 
+def _make_batches(
+    indexed_prompts: list[tuple[int, dict[str, Any], list[int]]],
+    token_budget: int,
+) -> list[list[tuple[int, dict[str, Any], list[int]]]]:
+    """Agrupa por longitud y limita tokens padded por lote."""
+    if token_budget < 1:
+        raise ValueError("batch_token_budget debe ser positivo")
+    ordered = sorted(indexed_prompts, key=lambda item: (-len(item[2]), item[0]))
+    batches: list[list[tuple[int, dict[str, Any], list[int]]]] = []
+    current: list[tuple[int, dict[str, Any], list[int]]] = []
+    current_max = 0
+    for item in ordered:
+        length = len(item[2])
+        proposed_max = max(current_max, length)
+        if current and (len(current) + 1) * proposed_max > token_budget:
+            batches.append(current)
+            current = []
+            current_max = 0
+        current.append(item)
+        current_max = max(current_max, length)
+    if current:
+        batches.append(current)
+    return batches
+
+
 @torch.no_grad()
 def evaluate_rows(
     checkpoint: Path,
@@ -174,10 +199,13 @@ def evaluate_rows(
     profile: str = "tiny",
     context_length: int = 2048,
     device: str = "cpu",
+    batch_token_budget: int = 8192,
 ) -> dict[str, Any]:
-    """Puntúa sin recortar: las preguntas que no caben quedan contabilizadas."""
+    """Evalúa por lotes sin truncar: el padding derecho no altera tokens previos."""
     if context_length < 1:
         raise ValueError("context_length debe ser positivo")
+    if batch_token_budget < 1:
+        raise ValueError("batch_token_budget debe ser positivo")
     base_config, _ = get_profile(profile)
     config = replace(base_config, context_length=context_length)
     target_device = torch.device(device)
@@ -186,10 +214,9 @@ def evaluate_rows(
     model.to(target_device)
     model.eval()
 
-    details = []
+    indexed_prompts: list[tuple[int, dict[str, Any], list[int]]] = []
     skipped = []
-    chance_rates = []
-    for row in rows:
+    for index, row in enumerate(rows):
         prompt_ids = list(format_prompt(row).encode("utf-8"))
         if len(prompt_ids) > context_length:
             skipped.append({
@@ -199,32 +226,63 @@ def evaluate_rows(
                 "reason": "exceeds_context_without_truncation",
             })
             continue
-        input_ids = torch.tensor(
-            [prompt_ids], dtype=torch.long, device=target_device
-        )
-        logits, _ = model(input_ids)
-        log_probs = F.log_softmax(logits[0, -1].float(), dim=-1)
-        labels = LABELS[: len(row["options"])]
-        scores = [float(log_probs[ord(label)]) for label in labels]
-        predicted = max(range(len(scores)), key=lambda index: scores[index])
-        details.append({
-            "id": row["id"],
-            "category": row["category"],
-            "source": row["source"],
-            "options": len(labels),
-            "prompt_bytes": len(prompt_ids),
-            "correct_index": row["correct_index"],
-            "predicted_index": predicted,
-            "correct": predicted == row["correct_index"],
-            "candidate_log_probabilities": scores,
-        })
-        chance_rates.append(1.0 / len(labels))
+        indexed_prompts.append((index, row, prompt_ids))
 
-    if not details:
+    if not indexed_prompts:
         raise ValueError(
             "Ninguna pregunta cabe en el contexto configurado; "
             "aumenta --context-length. No se ha truncado ninguna."
         )
+
+    details_by_index: dict[int, dict[str, Any]] = {}
+    chance_rates = []
+    batch_count = 0
+    for batch in _make_batches(indexed_prompts, batch_token_budget):
+        batch_count += 1
+        max_length = max(len(item[2]) for item in batch)
+        # Padding exclusivamente a la derecha: la máscara causal impide que
+        # las posiciones añadidas afecten al último token real de cada prompt.
+        input_ids = torch.zeros(
+            (len(batch), max_length), dtype=torch.long, device=target_device
+        )
+        lengths = []
+        for batch_index, (_, _, prompt_ids) in enumerate(batch):
+            length = len(prompt_ids)
+            lengths.append(length)
+            input_ids[batch_index, :length] = torch.tensor(
+                prompt_ids, dtype=torch.long, device=target_device
+            )
+        logits, _ = model(input_ids)
+        last_positions = torch.tensor(
+            [length - 1 for length in lengths],
+            dtype=torch.long,
+            device=target_device,
+        )
+        row_indices = torch.arange(len(batch), device=target_device)
+        final_logits = logits[row_indices, last_positions].float()
+        log_probs = F.log_softmax(final_logits, dim=-1)
+
+        for batch_index, (original_index, row, prompt_ids) in enumerate(batch):
+            labels = LABELS[: len(row["options"])]
+            scores = [
+                float(log_probs[batch_index, ord(label)].item())
+                for label in labels
+            ]
+            predicted = max(range(len(scores)), key=lambda index: scores[index])
+            details_by_index[original_index] = {
+                "id": row["id"],
+                "category": row["category"],
+                "source": row["source"],
+                "options": len(labels),
+                "prompt_bytes": len(prompt_ids),
+                "correct_index": row["correct_index"],
+                "predicted_index": predicted,
+                "correct": predicted == row["correct_index"],
+                "candidate_log_probabilities": scores,
+            }
+            chance_rates.append(1.0 / len(labels))
+
+    details = [details_by_index[index] for index, _, _ in indexed_prompts]
     correct = sum(row["correct"] for row in details)
     evaluated = len(details)
     selected = len(rows)
@@ -259,6 +317,11 @@ def evaluate_rows(
             "accuracy": correct / evaluated,
         },
         "by_domain": _aggregate(details),
+        "batching": {
+            "strategy": "right-padding with causal attention; length-sorted token-budget batches",
+            "token_budget": batch_token_budget,
+            "batches": batch_count,
+        },
         "skipped": skipped,
         "details": details,
         "limitations": [
@@ -267,9 +330,9 @@ def evaluate_rows(
             "Las preguntas que superan el contexto se excluyen y se informan; nunca se truncan silenciosamente.",
             "Ampliar el contexto en inferencia no significa que el modelo haya sido entrenado para esa longitud.",
             "El split test se utiliza solo para evaluación, nunca como corpus de entrenamiento.",
+            "El padding derecho se mantiene después de cada prompt; la atención causal evita que afecte a los logits evaluados.",
         ],
     }
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -285,6 +348,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--revision", default=DATASET_REVISION)
     parser.add_argument("--device", default="cpu")
+    parser.add_argument("--batch-token-budget", type=int, default=8192)
     parser.add_argument("--require-full-coverage", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -300,6 +364,7 @@ def main() -> None:
         profile=args.profile,
         context_length=args.context_length,
         device=args.device,
+        batch_token_budget=args.batch_token_budget,
     )
     report["dataset_revision"] = args.revision
     report["sampling"] = {
@@ -318,6 +383,7 @@ def main() -> None:
         "selected_items": report["selected_items"],
         "evaluated_items": report["evaluated_items"],
         "coverage": report["coverage"],
+        "batching": report["batching"],
         "accuracy": report["overall"]["accuracy"],
         "by_domain": report["by_domain"],
         "output": str(args.output),
