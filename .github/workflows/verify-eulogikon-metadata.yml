@@ -1,0 +1,29 @@
+name: Verify Eulogikon CC0 metadata source
+
+on:
+  push:
+    paths:
+      - "scripts/ingest_eulogikon_metadata.py"
+      - ".github/workflows/verify-eulogikon-metadata.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch pinned metadata and verify rights scope and hashes
+        run: python scripts/ingest_eulogikon_metadata.py
+      - name: Upload reproducible metadata candidate and rights record
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-eulogikon-metadata-level-a-candidate
+          path: artifacts/eulogikon/
+          if-no-files-found: error
+          retention-days: 90
