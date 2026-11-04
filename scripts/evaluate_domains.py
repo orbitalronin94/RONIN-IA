@@ -68,10 +68,14 @@ def evaluate(
     details = []
     for item in items:
         prompt_ids = list(item["prompt"].encode("utf-8"))
-        # El candidato es un único byte ASCII. Reservamos una posición para él.
-        prompt_ids = prompt_ids[-(config.context_length - 1):]
+        # No truncar silenciosamente: podría eliminar el enunciado y falsear la medida.
         if not prompt_ids:
             raise ValueError(f"Prompt vacío: {item['id']}")
+        if len(prompt_ids) >= config.context_length:
+            raise ValueError(
+                f"Prompt {item['id']} ocupa {len(prompt_ids)} bytes; "
+                f"el límite es {config.context_length - 1}"
+            )
         input_ids = torch.tensor([prompt_ids], dtype=torch.long, device=target_device)
         logits, _ = model(input_ids)
         log_probs = F.log_softmax(logits[0, -1].float(), dim=-1)
