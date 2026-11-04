@@ -433,15 +433,15 @@ def domain_kind_name(domain: str, kind: str) -> str:
 
 
 def expected_library_count(domain: str | None) -> int:
-    """A domain worker emits base+HKD; the aggregate emits all 32."""
-    return 2 if domain else 32
+    """A domain worker emits General+HKD; the aggregate emits all 64."""
+    return 2 if domain else 64
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=Path("/tmp/ronin-run5-candidates"))
     parser.add_argument("--max-rows", type=int, default=5_000_000)
-    parser.add_argument("--domain", choices=DOMAIN_PRIORITY, help="Process one of 16 domains per runner to scale storage horizontally")
+    parser.add_argument("--domain", choices=DOMAIN_PRIORITY, help="Process one of 32 domains per runner to scale storage horizontally")
     parser.add_argument("--max-input-bytes", type=int, default=6 * 1024**3)
     parser.add_argument("--min-train-bytes", type=int, default=1 * 1024**2)
     parser.add_argument("--hkd-fraction", type=float, default=HKD_FRACTION)
