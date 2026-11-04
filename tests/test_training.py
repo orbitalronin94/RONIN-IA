@@ -65,11 +65,16 @@ def test_resume_restores_checkpoint_and_sampler_state(tmp_path):
 
 def test_vectorized_batches_preserve_sampler_values():
     tokens = torch.arange(64, dtype=torch.long)
-    batches_a = iter(NextTokenBatches(tokens, 3, 7, seed=42))
-    batches_b = iter(NextTokenBatches(tokens, 3, 7, seed=42))
+    batches = iter(NextTokenBatches(tokens, 3, 7, seed=42))
+    reference_generator = torch.Generator(device="cpu").manual_seed(42)
+    offsets = torch.arange(7)
+    max_start = tokens.numel() - 7 - 1
     for _ in range(4):
-        inputs_a, targets_a = next(batches_a)
-        inputs_b, targets_b = next(batches_b)
-        assert torch.equal(inputs_a, inputs_b)
-        assert torch.equal(targets_a, targets_b)
-        assert torch.equal(inputs_a[:, 1:], targets_a[:, :-1])
+        inputs, targets = next(batches)
+        starts = torch.randint(0, max_start + 1, (3,), generator=reference_generator)
+        expected_inputs = torch.stack([tokens[i : i + 7] for i in starts.tolist()])
+        expected_targets = torch.stack([tokens[i + 1 : i + 8] for i in starts.tolist()])
+        assert torch.equal(inputs, expected_inputs)
+        assert torch.equal(targets, expected_targets)
+        assert torch.equal(inputs[:, 1:], targets[:, :-1])
+        assert offsets.numel() == 7
