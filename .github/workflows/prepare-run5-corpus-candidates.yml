@@ -49,6 +49,7 @@ jobs:
       HF_HUB_DISABLE_TELEMETRY: "1"
       HF_DATASETS_CACHE: /tmp/hf-datasets-cache
       HF_HOME: /tmp/hf-home
+      PYTHONPATH: ${{ github.workspace }}
       DOMAIN: ${{ matrix.domain }}
       MAX_ROWS: ${{ inputs.max_rows }}
       MAX_INPUT_GIB: ${{ inputs.max_input_gib }}
@@ -174,7 +175,7 @@ jobs:
               "note": "Snapshot of all available output, not an admission or training-eligibility decision."
           }
           (root / f"index-{os.environ['DOMAIN']}.json").write_text(
-              json.dumps(index, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8"
+              json.dumps(index, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
           )
           PY
 
@@ -183,7 +184,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: ronin-datasets-run5-library-${{ matrix.domain }}
-          path: datasets/run5/${{ matrix.domain }}/
+          path: datasets/run5/${{ matrix.domain }}/${{ matrix.domain }}/
           if-no-files-found: warn
           compression-level: 1
           retention-days: 90
@@ -226,7 +227,6 @@ jobs:
           pattern: ronin-datasets-run5-library-*
           path: datasets/run5
           merge-multiple: false
-          if-no-artifact-found: ignore
       - name: Descargar índices parciales de todos los dominios
         if: always()
         uses: actions/download-artifact@v6
