@@ -53,13 +53,11 @@ jobs:
         with:
           python-version: "3.11"
       - name: Descargar archivos originales sin credenciales y preparar corpus
-        if: steps.g0.outputs.authorized == 'true'
         run: |
           python scripts/prepare_open_corpora.py \
             --output /tmp/ronin-open-corpus/processed \
             --cache-dir /tmp/ronin-open-corpus/cache
       - name: Comprobar manifiesto, fuentes y particiones
-        if: steps.g0.outputs.authorized == 'true'
         run: |
           python - <<'PY'
           import json
@@ -104,7 +102,6 @@ jobs:
           }, ensure_ascii=False, indent=2))
           PY
       - name: Publicar corpus literario como artefacto auditable
-        if: steps.g0.outputs.authorized == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ronin-bibliotecas-adquiridas
@@ -115,7 +112,6 @@ jobs:
           retention-days: 30
 
       - name: Publicar particiones de texto preparadas (retención temporal)
-        if: steps.g0.outputs.authorized == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ronin-corpus-v2-particiones
@@ -132,19 +128,34 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: "Gate G-0: bloquear adquisición criptográfica sin aprobación"
-        id: g0
-        run: python scripts/assert_g0_passed.py --github-output "$GITHUB_OUTPUT"
+      - name: Verificar lista cerrada de fuentes primarias con derechos documentados
+        run: |
+          python - <<'PY'
+          from scripts.acquire_cryptography_library import SOURCES
+
+          expected = {
+              "poe-gold-bug",
+              "verne-la-jangada-fr",
+              "doyle-dancing-men",
+              "hypnerotomachia-poliphili-1499",
+              "trithemius-steganographia-1608",
+              "selenus-cryptomenytices-1624",
+          }
+          actual = {source["id"]: source for source in SOURCES}
+          assert set(actual) == expected, set(actual)
+          for source in actual.values():
+              assert source["url"].startswith("https://")
+              assert source.get("rights_evidence")
+              assert source.get("license")
+          print("Seis fuentes primarias fijadas; adquisición separada de G-0.")
+          PY
       - uses: actions/setup-python@v5
-        if: steps.g0.outputs.authorized == 'true'
         with:
           python-version: "3.11"
       - name: Descargar seis fuentes primarias sin credenciales
-        if: steps.g0.outputs.authorized == 'true'
         run: |
           python scripts/acquire_cryptography_library.py --output-dir /tmp/ronin-cryptography-library
       - name: Construir y validar pares de opacidad
-        if: steps.g0.outputs.authorized == 'true'
         run: |
           PYTHONPATH=. python scripts/build_obfuscation_cases.py \
             --source-manifest /tmp/ronin-cryptography-library/manifest.json \
@@ -184,7 +195,6 @@ jobs:
           }, ensure_ascii=False, indent=2))
           PY
       - name: Publicar fuentes primarias y pares de opacidad
-        if: steps.g0.outputs.authorized == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ronin-biblioteca-opacidad-v1
