@@ -553,3 +553,11 @@ Estado: workflow y pruebas añadidos en la rama `feat/phi4-mmlu-pro-rationale-di
 - [Run #41919967815](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41919967815): el primer arreglo de importación permitió pasar la suite de tests, pero Ruff del job principal rechazó el bloque condicional de imports (`I001`). La generación y el entrenamiento se omitieron; no hubo evaluación MMLU-Pro test.
 - Corrección añadida: resolución del módulo evaluador mediante `importlib`, compatible con ejecución directa e importación desde tests y sin bloque de imports condicional.
 - Se vuelve a ejecutar tras el commit de corrección. Phi-4 ya se descargó y verificó en el intento 1; la caché de Actions todavía no se había guardado porque el job acabó fallando.
+
+
+## Destilación tutorizada Phi-4 — diagnóstico de intentos iniciales
+
+- [Run #41919601882](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41919601882): Phi-4 se descargó y verificó; falló la importación del evaluador al ejecutar el script directamente. No se generaron ejemplos ni se entrenó.
+- [Run #41919967815](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41919967815): los tests pasaron, pero Ruff rechazó el bloque condicional de imports; generación y entrenamiento omitidos.
+- [Run #41920221125](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41920221125): Ruff seguía detectando la separación ausente entre el import local y la función auxiliar; no hubo generación ni entrenamiento.
+- PR #93 quedó fusionada por el usuario antes de aplicar el último arreglo. Esta corrección se prepara sobre main en una PR de seguimiento; el workflow de destilación también se ejecuta en pull_request para verificar la generación antes de fusionar.
