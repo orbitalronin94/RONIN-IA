@@ -2,19 +2,31 @@
 
 ## Objetivo
 
-Ejecutar RONIN tiny desde pesos aleatorios y medir el cambio en un conjunto de evaluación independiente. La primera referencia usa el corpus **Finance Sentences - North American Spanish** de Mozilla Data Collective, con licencia CC0-1.0.
+Ejecutar RONIN tiny desde pesos aleatorios y medir el cambio en un conjunto de evaluación independiente. La primera referencia usa tres repositorios literarios públicos:
 
-Este conjunto es pequeño y especializado en español financiero norteamericano. Sirve para comprobar el ciclo de entrenamiento y fijar una primera referencia reproducible; no es un benchmark general de español ni mide conversación, razonamiento o conocimiento general.
+- CLiGS Textbox: novelas españolas e hispanoamericanas.
+- CoNSSA: novelas del Siglo de Oro.
+- ELTeC-spa: novelas españolas.
 
-## Preparación obligatoria
+Los textos se declaran de dominio público; el marcado TEI y los metadatos se distribuyen bajo CC BY 4.0. Los repositorios y commits concretos están fijados en `scripts/prepare_open_corpora.py` y descritos en `docs/FUENTES_CORPUS_ABIERTOS.md`.
 
-1. Abre la ficha del conjunto en Mozilla Data Collective y acepta sus condiciones.
-2. Crea una credencial de API en tu cuenta de Mozilla.
-3. En GitHub, entra en **Settings → Secrets and variables → Actions → New repository secret**.
-4. Crea el secreto `MDC_API_KEY` con la clave. No la escribas en el repositorio ni en esta conversación.
-5. En **Actions**, ejecuta **Primera iteración y benchmark interno**. Elige entre 1 y 1000 pasos; la primera ejecución recomendada es de 1000.
+## Acceso y preparación
 
-La ejecución descarga y prepara el corpus, crea una referencia del modelo inicial aleatorio, entrena tiny en CPU y evalúa tanto el modelo inicial como el entrenado sobre validation y test.
+No se necesita cuenta, aceptación de términos mediante registro, token, clave API ni secreto de GitHub. El workflow descarga archivos ZIP públicos por HTTPS desde GitHub, fijados a commits inmutables.
+
+La preparación:
+
+1. Extrae únicamente el contenido textual del elemento TEI `text`, no las cabeceras de metadatos.
+2. Conserva repositorio, commit, rutas, licencia declarada y SHA-256 de cada archivo comprimido.
+3. Excluye documentos cortos, XML inválido, duplicados exactos y textos con patrones de credenciales.
+4. Divide documentos completos en train, validation y test de forma determinista; no reparte fragmentos de una misma obra entre particiones.
+5. Publica manifiesto y hashes de las particiones.
+
+La descarga se ejecuta en el runner efímero. No se suben los textos ni los checkpoints al repositorio o al artefacto.
+
+## Ejecución
+
+En **Actions**, ejecuta **Primera iteración y benchmark interno**. Elige entre 1 y 1000 pasos; la primera ejecución recomendada es de 1000. Se entrena el perfil tiny en CPU desde inicialización aleatoria.
 
 ## Qué se mide
 
@@ -22,21 +34,22 @@ La ejecución descarga y prepara el corpus, crea una referencia del modelo inici
 - Perplejidad byte-level.
 - Bits por byte (BPB).
 - Diferencia inicial → entrenado en validation y test.
-- Huellas SHA-256 del archivo de origen, particiones y checkpoints evaluados.
-- Parámetros, pasos, tokens presentados aproximados, tiempo de entrenamiento y entorno de ejecución.
+- Procedencia, commits, SHA-256 de los archivos de origen y particiones.
+- Número de documentos por fuente y partición, documentos excluidos.
+- Parámetros, pasos, tokens presentados aproximados, tiempo de entrenamiento y entorno.
 
-El artefacto contiene solo informes JSON y el tiempo de entrenamiento. Los textos del corpus y los checkpoints permanecen en el runner efímero y no se publican ni se guardan en Git.
+El artefacto contiene solo informes JSON y el tiempo de entrenamiento. Los textos del corpus y los checkpoints permanecen en el runner efímero.
 
 ## Protocolo para iterar
 
-- Mantener el mismo conjunto, hashes, tokenizador, perfil y protocolo de evaluación al comparar ejecuciones.
+- Mantener el mismo conjunto, hashes, tokenizador, perfil y protocolo al comparar ejecuciones.
 - Ajustar hiperparámetros usando validation.
-- No usar repetidamente test para elegir configuraciones; reservarlo para comparaciones finales.
+- Reservar test para comparaciones finales.
 - Registrar cada experimento con su configuración y SHA-256.
 - No comparar directamente perplejidades de tokenizadores distintos; BPB es la métrica principal de esta primera referencia.
 
 ## Límites
 
-El modelo tiny usa un tokenizador byte-level y un contexto corto. La mejora en BPB solo indica mejor predicción del siguiente byte en este corpus concreto. No demuestra comprensión, calidad de respuestas ni superioridad frente a modelos externos.
+La primera referencia es literaria e histórica. No representa por sí sola el español contemporáneo, oral, técnico ni todas sus variedades. La mejora en BPB solo indica mejor predicción del siguiente byte en este corpus concreto. No demuestra comprensión, calidad conversacional ni razonamiento.
 
-La primera ejecución es una referencia experimental pequeña para iterar, no una afirmación de que RONIN ya sea un modelo útil.
+Esta ejecución es una referencia experimental pequeña para iterar, no una afirmación de que RONIN ya sea un modelo útil.
