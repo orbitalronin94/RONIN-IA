@@ -10,8 +10,6 @@ from pathlib import Path
 
 import torch
 
-from ronin.config import get_profile
-from ronin.models.transformer import RoninLM
 from evaluate_mmlu_pro import (
     DATASET_REVISION,
     evaluate_rows,
@@ -19,6 +17,9 @@ from evaluate_mmlu_pro import (
     rows_sha256,
     select_stratified,
 )
+
+from ronin.config import get_profile
+from ronin.models.transformer import RoninLM
 
 
 def prediction_signature(report: dict) -> list[tuple[str, int, bool]]:
