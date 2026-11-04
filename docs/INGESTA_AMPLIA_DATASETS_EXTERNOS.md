@@ -86,3 +86,15 @@ El informe contabiliza candidatos por estado/prioridad y enumera qué registros 
 - CLiGS Textbox: https://github.com/cligs/textbox
 - CoNSSA: https://github.com/cligs/conssa
 - ELTeC-spa: https://github.com/COST-ELTeC/ELTeC-spa
+
+
+## Primera ingesta automatizada de muestras
+
+Se incorpora un primer flujo real y reproducible de descarga acotada:
+
+- **Wikidata CC0**: declaraciones estructuradas de entidades, tipos, propiedades y valores, con identificadores y etiquetas en español/inglés. No se convierte artificialmente en prosa ni se confunde con un corpus narrativo.
+- **Europe PMC**: resúmenes de artículos que declaran expresamente CC0 o CC BY. Se excluyen licencias no comerciales, sin obras derivadas y etiquetas desconocidas. Se conserva DOI/PMID/PMCID, autores, fecha, licencia y URL de origen.
+
+El workflow [Ingesta de muestras CC0/CC-BY — Wikidata + Europe PMC](../.github/workflows/external-sample-ingestion.yml) se ejecuta al integrar cambios en su pipeline, mensualmente y manualmente. Por defecto obtiene hasta 500 registros por fuente, calcula SHA-256, versiona los ficheros bajo `data/external_samples/` y publica un artefacto. Los registros continúan con `training_eligible=false`: esta ingesta es una muestra de adquisición, no una autorización para incorporarla automáticamente a train.
+
+Para pasar de muestra a corpus se requiere revisión de calidad semántica, deduplicación, licencias por registro y contenido de terceros. Los abstracts no equivalen a texto completo ni sustituyen la auditoría del artículo.
