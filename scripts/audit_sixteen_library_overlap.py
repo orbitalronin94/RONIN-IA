@@ -11,7 +11,7 @@ import tempfile
 from collections import Counter
 from pathlib import Path
 
-from scripts.select_knowledge_dense_corpus import simhash64, tokens
+from select_knowledge_dense_corpus import simhash64, tokens
 
 LIBRARIES = (
     "mathematics", "logic_epistemology", "philosophy", "physics",
