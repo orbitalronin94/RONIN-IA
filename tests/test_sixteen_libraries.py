@@ -86,3 +86,20 @@ def test_gate_requires_density_report_and_human_review_for_each_hkd_library(tmp_
     manifest_path.write_text(json.dumps(data), encoding="utf-8")
     errors = validate(manifest_path, require_ready=True, corpus_root=tmp_path, portfolio_root=portfolio_root)
     assert any("missing semantic-density selection report hash" in error for error in errors)
+
+
+def test_official_training_workflow_consumes_exactly_the_32_manifest_ids():
+    workflow = (Path(__file__).parents[1] / ".github" / "workflows" / "ronin-official-training-holdout.yml").read_text(encoding="utf-8")
+    data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    for item in data["libraries"]:
+        library_id = item["id"]
+        assert f'"{library_id}"' in workflow
+        assert f"--input {library_id}=/tmp/ronin-sixteen-libraries/{library_id}/train.txt" in workflow
+    assert "pattern: ronin-datasets-run5-library-*" in workflow
+    assert "pattern: ronin-run5-library-*" not in workflow
+
+
+def test_preflight_default_matches_manifest_bootstrap_floor():
+    from scripts.check_run5_preflight import MINIMUM_DEFAULT
+
+    assert MINIMUM_DEFAULT == 1024**2
