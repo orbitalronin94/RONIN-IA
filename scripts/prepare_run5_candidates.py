@@ -354,6 +354,29 @@ def main() -> int:
         domain: db.execute("SELECT COUNT(*) FROM docs WHERE domain=?", (domain,)).fetchone()[0]
         for domain in DOMAIN_PRIORITY
     }
+
+    # Recompute RONIN-HKD with corpus-level document frequency, per domain.
+    for domain in DOMAIN_PRIORITY:
+        total_docs = domain_counts[domain]
+        if not total_docs:
+            continue
+        document_frequency: Counter[str] = Counter()
+        for (document_text,) in db.execute("SELECT text FROM docs WHERE domain=?", (domain,)):
+            document_frequency.update(set(tokens(document_text)))
+        for doc_id, document_text in db.execute(
+            "SELECT id, text FROM docs WHERE domain=?", (domain,)
+        ):
+            components = score_record(document_text, domain, document_frequency, total_docs)
+            db.execute(
+                "UPDATE docs SET score=?, components=? WHERE id=?",
+                (
+                    components["semantic_density"],
+                    json.dumps(components, sort_keys=True),
+                    doc_id,
+                ),
+            )
+        db.commit()
+
     libraries: list[dict[str, Any]] = []
     sample_root = args.output_root / "human_review"
     global_seen_simhash: dict[int, dict[int, list[int]]] = {i: {} for i in range(4)}
@@ -363,14 +386,17 @@ def main() -> int:
             rejected[f"{domain}_insufficient_documents"] += 1
             continue
         hkd_count = max(1, int(count * args.hkd_fraction))
-        rows = db.execute(
+        base_count = count - hkd_count
+        hkd_rows = db.execute(
             "SELECT id, text, license, provenance, score, components FROM docs "
-            "WHERE domain=? ORDER BY score DESC, id ASC",
-            (domain,),
+            "WHERE domain=? ORDER BY score DESC, id ASC LIMIT ?",
+            (domain, hkd_count),
         )
-        ranked = list(rows)
-        hkd_rows = ranked[:hkd_count]
-        base_rows = ranked[hkd_count:]
+        base_rows = db.execute(
+            "SELECT id, text, license, provenance, score, components FROM docs "
+            "WHERE domain=? ORDER BY score ASC, id ASC LIMIT ?",
+            (domain, base_count),
+        )
         for kind, selected in (("base", base_rows), ("hkd", hkd_rows)):
             output = args.output_root / domain_kind_name(domain, kind)
             metadata = write_split(
