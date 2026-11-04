@@ -3,7 +3,7 @@ from pathlib import Path
 import yaml
 
 
-def test_official_training_workflow_excludes_portfolio_and_requires_eight_libraries():
+def test_official_training_workflow_excludes_portfolio_and_requires_sixteen_libraries():
     workflow_path = (
         Path(__file__).parents[1]
         / ".github"
@@ -27,9 +27,9 @@ def test_official_training_workflow_excludes_portfolio_and_requires_eight_librar
     assert "Obtener Portfolio en revisión inmutable" not in by_name
     assert "Preparar corpus de Portfolio" not in by_name
     assert "Verificar autorización, finalidad y hash del corpus" not in by_name
-    assert "Gate obligatorio: ocho bibliotecas admitidas antes de RUN #5" in by_name
+    assert "Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial" in by_name
     gate = by_name["Gate obligatorio: ocho bibliotecas admitidas antes de RUN #5"]["run"]
-    assert "validate_eight_libraries.py --require-ready --corpus-root /tmp/ronin-eight-libraries" in gate
+    assert "validate_sixteen_libraries.py --require-ready --corpus-root /tmp/ronin-sixteen-libraries" in gate
 
     cycle = by_name["Entrenar desde cero y evaluar el test externo completo antes/después"]["run"]
     assert "--text /tmp/ronin-training/combined-train.txt" in cycle
@@ -38,8 +38,16 @@ def test_official_training_workflow_excludes_portfolio_and_requires_eight_librar
     assert "mmlu-inicial.json" in cycle
     assert "mmlu-final.json" in cycle
 
-    mixture = by_name["Construir mezcla balanceada de las ocho bibliotecas admitidas"]["run"]
+    mixture = by_name["Construir mezcla balanceada de las dieciséis bibliotecas admitidas"]["run"]
     assert "--input portfolio=" not in mixture
+    assert "--input mathematics_hkd=" in mixture
+    assert "--input logic_epistemology_hkd=" in mixture
+    assert "--input philosophy_hkd=" in mixture
+    assert "--input physics_hkd=" in mixture
+    assert "--input chemistry_hkd=" in mixture
+    assert "--input biology_medicine_hkd=" in mixture
+    assert "--input computer_science_hkd=" in mixture
+    assert "--input law_economics_social_sciences_hkd=" in mixture
     for library in ["mathematics", "logic_epistemology", "philosophy", "physics", "chemistry", "biology_medicine", "computer_science", "law_economics_social_sciences"]:
         assert f"--input {library}=" in mixture
     assert "--input phi4_tutor=" not in mixture
