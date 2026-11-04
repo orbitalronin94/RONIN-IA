@@ -1,7 +1,6 @@
 import json
 import subprocess
 import sys
-from pathlib import Path
 
 from scripts.select_knowledge_dense_corpus import DOMAIN_TERMS, score_record
 
