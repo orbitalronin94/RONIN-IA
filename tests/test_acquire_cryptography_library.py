@@ -42,7 +42,7 @@ def test_adquisicion_guarda_archivos_hashes_y_exclusion_de_entrenamiento(
 
     manifest = library.acquire(tmp_path)
 
-    assert manifest["source_count"] == 4
+    assert manifest["source_count"] == 5
     assert manifest["credential_free"] is True
     for source in manifest["sources"]:
         downloaded = tmp_path / source["local_filename"]
