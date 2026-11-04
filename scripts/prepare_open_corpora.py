@@ -12,8 +12,8 @@ import json
 import re
 import urllib.request
 from pathlib import Path, PurePosixPath
-from urllib.parse import quote
 from typing import Any
+from urllib.parse import quote
 from xml.etree import ElementTree as ET
 
 SOURCES = (
