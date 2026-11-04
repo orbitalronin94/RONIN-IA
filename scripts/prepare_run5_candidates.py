@@ -31,6 +31,19 @@ DATASET_REVISION = "307910e4c5d040d6f318e6edf2a2b97849155771"
 MIN_DOCUMENT_BYTES = 300
 MAX_DOCUMENT_BYTES = 2 * 1024 * 1024
 HKD_FRACTION = 0.40
+# Avoid prefix bias in a streamed dataset: early shards must not monopolize RUN 5.
+SHUFFLE_SEED = 20261104
+SHUFFLE_BUFFER_SIZE = 10_000
+
+
+def shuffle_dataset_stream(dataset: Any, *, seed: int = SHUFFLE_SEED, buffer_size: int = SHUFFLE_BUFFER_SIZE) -> Any:
+    """Return a reproducibly shuffled HF stream using a bounded row buffer."""
+    if buffer_size < 2:
+        raise ValueError("shuffle buffer_size must be at least 2")
+    shuffle = getattr(dataset, "shuffle", None)
+    if not callable(shuffle):
+        raise TypeError("streaming dataset must expose shuffle(seed, buffer_size)")
+    return shuffle(seed=seed, buffer_size=buffer_size)
 ALLOWED_LICENSES = {
     "CC0", "CC0 1.0", "CC0-1.0",
     "CC BY 2.0", "CC BY 3.0", "CC BY 4.0",
@@ -459,12 +472,12 @@ def main() -> int:
     scanned_rows = 0
     accepted_bytes = 0
     scanned_text_bytes = 0
-    dataset = load_dataset(
+    dataset = shuffle_dataset_stream(load_dataset(
         DATASET_ID,
         split="train",
         streaming=True,
         revision=DATASET_REVISION,
-    )
+    ))
 
     for row in dataset:
         scanned_rows += 1
@@ -658,12 +671,17 @@ def main() -> int:
             "document_license_allowlist": sorted(ALLOWED_LICENSES),
             "language_allowlist": sorted(LANGUAGES),
             "max_document_bytes": MAX_DOCUMENT_BYTES,
+            "stream_order": "deterministic_buffer_shuffle",
+            "shuffle_seed": SHUFFLE_SEED,
+            "shuffle_buffer_rows": SHUFFLE_BUFFER_SIZE,
         },
         "limits": {
             "max_rows": args.max_rows,
             "max_input_bytes": args.max_input_bytes,
             "minimum_train_bytes_per_library": args.min_train_bytes,
             "hkd_fraction": args.hkd_fraction,
+            "stream_shuffle_seed": SHUFFLE_SEED,
+            "stream_shuffle_buffer_rows": SHUFFLE_BUFFER_SIZE,
         },
         "ingestion": {
             "rows_scanned": scanned_rows,
