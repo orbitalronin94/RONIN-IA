@@ -1,0 +1,302 @@
+name: Ciclo de entrenamiento autorizado y evaluación MMLU-Pro
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/portfolio-training-cycle.yml"
+      - "scripts/prepare_portfolio_corpus.py"
+      - "scripts/train_text.py"
+      - "scripts/evaluate_mmlu_pro.py"
+      - "ronin/models/**"
+      - "ronin/training/**"
+      - "ronin/config.py"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/portfolio-training-cycle.yml"
+      - "scripts/prepare_portfolio_corpus.py"
+      - "scripts/train_text.py"
+      - "scripts/evaluate_mmlu_pro.py"
+      - "ronin/**"
+      - "pyproject.toml"
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: Pasos de entrenamiento (1-1000)
+        required: true
+        default: "1000"
+        type: string
+      seeds:
+        description: Semillas separadas por comas (máximo 5)
+        required: true
+        default: "1337,2027,42"
+        type: string
+      mmlu_limit:
+        description: Preguntas MMLU-Pro (140 por defecto; 0 usa todo el test)
+        required: true
+        default: "140"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-portfolio-mmlu-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  portfolio-training:
+    name: Entrenar con corpus autorizado y medir antes/después
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUNBUFFERED: "1"
+      PORTFOLIO_REVISION: "fffc234fdf3f82b6a90d56ae9b190d1c0de79690"
+      MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+      STEPS: ${{ github.event_name == 'pull_request' && '100' || inputs.steps || '1000' }}
+      SEEDS: ${{ github.event_name == 'pull_request' && '1337' || inputs.seeds || '1337,2027,42' }}
+      MMLU_LIMIT: ${{ github.event_name == 'pull_request' && '140' || inputs.mmlu_limit || '140' }}
+    steps:
+      - name: Obtener RONIN IA
+        uses: actions/checkout@v4
+
+      - name: Obtener Portfolio en revisión inmutable
+        uses: actions/checkout@v4
+        with:
+          repository: orbitalronin94/Portfolio
+          ref: fffc234fdf3f82b6a90d56ae9b190d1c0de79690
+          path: data/source/portfolio
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar PyTorch CPU, RONIN y evaluador externo
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "pypdf>=5" "datasets>=3.1"
+
+      - name: Preparar corpus de Portfolio
+        run: |
+          python scripts/prepare_portfolio_corpus.py \
+            --source-dir data/source/portfolio/Papers \
+            --output-dir /tmp/ronin-portfolio/processed \
+            --source-revision "$PORTFOLIO_REVISION"
+
+      - name: Verificar autorización, finalidad y hash del corpus
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path("/tmp/ronin-portfolio/processed")
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          corpus = root / "train.txt"
+          authorization = manifest.get("authorization", {})
+          assert authorization.get("status", "").startswith("autorización expresa")
+          assert "Portfolio/Papers" in authorization.get("scope", "")
+          assert manifest.get("purpose") == "entrenamiento únicamente; no usar como conjunto de validación ni prueba"
+          assert manifest.get("source_revision") == os.environ["PORTFOLIO_REVISION"]
+          assert manifest.get("document_count", 0) > 0
+          digest = hashlib.sha256(corpus.read_bytes()).hexdigest()
+          assert digest == manifest.get("corpus_sha256")
+          print(json.dumps({
+              "source_revision": manifest["source_revision"],
+              "authorization": authorization,
+              "purpose": manifest["purpose"],
+              "document_count": manifest["document_count"],
+              "skipped_count": manifest["skipped_count"],
+              "corpus_bytes": manifest["corpus_bytes"],
+              "corpus_sha256": digest,
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Validar presupuesto, semillas y muestra externa
+        run: |
+          if ! [[ "$STEPS" =~ ^[0-9]+$ ]] || [ "$STEPS" -lt 1 ] || [ "$STEPS" -gt 1000 ]; then
+            echo "::error::Los pasos deben estar entre 1 y 1000."
+            exit 1
+          fi
+          if ! [[ "$MMLU_LIMIT" =~ ^[0-9]+$ ]] || [ "$MMLU_LIMIT" -gt 12032 ]; then
+            echo "::error::MMLU_LIMIT debe ser 0 o estar entre 1 y 12032."
+            exit 1
+          fi
+          if ! [[ "$SEEDS" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
+            echo "::error::Formato de semillas no válido."
+            exit 1
+          fi
+          IFS=',' read -ra seed_values <<< "$SEEDS"
+          if [ "${#seed_values[@]}" -gt 5 ]; then
+            echo "::error::Máximo cinco semillas."
+            exit 1
+          fi
+          if [ "$MMLU_LIMIT" -eq 0 ] && [ "${#seed_values[@]}" -ne 1 ]; then
+            echo "::error::El test completo de MMLU-Pro requiere una sola semilla por ejecución."
+            exit 1
+          fi
+          declare -A seen
+          for seed in "${seed_values[@]}"; do
+            if [ -n "${seen[$seed]+x}" ]; then
+              echo "::error::Semilla duplicada: $seed"
+              exit 1
+            fi
+            seen[$seed]=1
+          done
+          mkdir -p reports
+
+      - name: Entrenar cada semilla y evaluar MMLU-Pro antes/después
+        run: |
+          IFS=',' read -ra seed_values <<< "$SEEDS"
+          for seed in "${seed_values[@]}"; do
+            echo "::group::Semilla $seed"
+            report_dir="reports/seed-$seed"
+            checkpoint_dir="/tmp/ronin-portfolio/checkpoints/seed-$seed"
+            initial_checkpoint="/tmp/ronin-portfolio/inicial-seed-$seed.pt"
+            mkdir -p "$report_dir" "$checkpoint_dir"
+
+            SEED="$seed" INITIAL_CHECKPOINT="$initial_checkpoint" python - <<'PY'
+          import os
+          import torch
+          from ronin.config import get_profile
+          from ronin.models.transformer import RoninLM
+          from ronin.utils.repro import seed_everything
+
+          config, _ = get_profile("tiny")
+          seed = int(os.environ["SEED"])
+          seed_everything(seed)
+          model = RoninLM(config)
+          torch.save(
+              {"model": model.state_dict(), "step": 0},
+              os.environ["INITIAL_CHECKPOINT"],
+          )
+          print(f"Referencia inicial: seed={seed}, parámetros={model.parameter_count}")
+          PY
+
+            python scripts/evaluate_mmlu_pro.py \
+              --checkpoint "$initial_checkpoint" \
+              --profile tiny --context-length 2048 \
+              --limit "$MMLU_LIMIT" --seed 2026 \
+              --revision "$MMLU_REVISION" --device cpu \
+              --output "$report_dir/mmlu-inicial.json"
+
+            python scripts/train_text.py \
+              --text /tmp/ronin-portfolio/processed/train.txt \
+              --profile tiny --steps "$STEPS" --seed "$seed" \
+              --device cpu --checkpoints "$checkpoint_dir"
+
+            checkpoint="$checkpoint_dir/step-$(printf '%08d' "$STEPS").pt"
+            test -s "$checkpoint"
+
+            python scripts/evaluate_mmlu_pro.py \
+              --checkpoint "$checkpoint" \
+              --profile tiny --context-length 2048 \
+              --limit "$MMLU_LIMIT" --seed 2026 \
+              --revision "$MMLU_REVISION" --device cpu \
+              --output "$report_dir/mmlu-final.json"
+
+            echo "::endgroup::"
+          done
+
+      - name: Consolidar métricas, cobertura y procedencia
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          manifest = json.loads(
+              Path("/tmp/ronin-portfolio/processed/manifest.json").read_text(encoding="utf-8")
+          )
+          rows = []
+          for initial_path in sorted(Path("reports").glob("seed-*/mmlu-inicial.json")):
+              seed_dir = initial_path.parent
+              initial = json.loads(initial_path.read_text(encoding="utf-8"))
+              final = json.loads((seed_dir / "mmlu-final.json").read_text(encoding="utf-8"))
+              assert initial["dataset_revision"] == os.environ["MMLU_REVISION"]
+              assert final["dataset_revision"] == os.environ["MMLU_REVISION"]
+              assert initial["dataset_sha256"] == final["dataset_sha256"]
+              assert initial["selected_items"] == final["selected_items"]
+              rows.append({
+                  "seed": seed_dir.name.removeprefix("seed-"),
+                  "initial": {
+                      "accuracy": initial["overall"]["accuracy"],
+                      "correct": initial["overall"]["correct"],
+                      "evaluated": initial["evaluated_items"],
+                      "selected": initial["selected_items"],
+                      "coverage": initial["coverage"],
+                      "skipped_context_items": initial["skipped_context_items"],
+                      "by_domain": initial["by_domain"],
+                      "checkpoint_sha256": initial["checkpoint_sha256"],
+                  },
+                  "final": {
+                      "accuracy": final["overall"]["accuracy"],
+                      "correct": final["overall"]["correct"],
+                      "evaluated": final["evaluated_items"],
+                      "selected": final["selected_items"],
+                      "coverage": final["coverage"],
+                      "skipped_context_items": final["skipped_context_items"],
+                      "by_domain": final["by_domain"],
+                      "checkpoint_sha256": final["checkpoint_sha256"],
+                  },
+                  "delta_accuracy": final["overall"]["accuracy"] - initial["overall"]["accuracy"],
+              })
+
+          summary = {
+              "experiment": "ronin-portfolio-training-mmlu-pro-v1",
+              "steps_per_seed": int(os.environ["STEPS"]),
+              "seeds": os.environ["SEEDS"].split(","),
+              "training_corpus": {
+                  "source_repository": manifest["source_repository"],
+                  "source_revision": manifest["source_revision"],
+                  "authorization": manifest["authorization"],
+                  "purpose": manifest["purpose"],
+                  "document_count": manifest["document_count"],
+                  "skipped_count": manifest["skipped_count"],
+                  "corpus_sha256": manifest["corpus_sha256"],
+              },
+              "evaluation": {
+                  "dataset_id": "TIGER-Lab/MMLU-Pro",
+                  "dataset_revision": os.environ["MMLU_REVISION"],
+                  "split": "test",
+                  "limit_per_seed": int(os.environ["MMLU_LIMIT"]),
+                  "sampling_seed": 2026,
+                  "protocol": "RONIN zero-shot por probabilidad del siguiente byte A-J; no comparable con leaderboard oficial",
+                  "used_for_training": False,
+              },
+              "cycles": rows,
+              "interpretation": [
+                  "Portfolio/Papers se utiliza únicamente como corpus de entrenamiento; no se crea una partición de validación o prueba a partir de él.",
+                  "MMLU-Pro test se utiliza solo para evaluación antes/después y nunca para gradientes.",
+                  "Cada semilla parte de inicialización aleatoria y usa la misma semilla para su entrenamiento independiente.",
+                  "Se comparan exactamente los mismos ítems MMLU-Pro en el estado inicial y final.",
+                  "El protocolo de siguiente byte no es la evaluación oficial de MMLU-Pro ni permite comparar con su leaderboard.",
+                  "Una mejora o empeoramiento en esta muestra no demuestra por sí sola capacidad general ni causalidad.",
+              ],
+          }
+          Path("reports/resumen-portfolio-mmlu.json").write_text(
+              json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps({
+              "seeds": summary["seeds"],
+              "delta_accuracy": {row["seed"]: row["delta_accuracy"] for row in rows},
+              "coverage": {row["seed"]: row["final"]["coverage"] for row in rows},
+              "summary": "reports/resumen-portfolio-mmlu.json",
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Publicar informes sin corpus ni checkpoints
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-portfolio-mmlu-training-cycle
+          path: reports/
+          if-no-files-found: error
+          retention-days: 30
