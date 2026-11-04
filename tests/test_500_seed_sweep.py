@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import yaml
+
 from scripts.prepare_large_synthetic_corpus import build
 from scripts.run_500_seed_sweep import run_sweep
 
@@ -14,6 +16,9 @@ def test_large_synthetic_corpus_is_seeded_hashed_and_source_free(tmp_path: Path)
     assert manifest["external_sources"] == []
     assert manifest["teacher_outputs"] is False
     assert manifest["third_party_text"] is False
+    assert manifest["license"] == "MIT"
+    assert manifest["license_reference"] == "LICENSE"
+    assert len(manifest["generator_script_sha256"]) == 64
     assert len(manifest["sha256"]) == 64
     assert manifest["records"] > 0
     assert len(manifest["records_by_domain"]) == 8
@@ -59,3 +64,5 @@ def test_seed_sweep_workflow_is_500_seed_validation_only():
     assert '--split", "validation"' in workflow
     assert '--split", "test"' not in workflow
     assert "MMLU_REVISION" in workflow
+    parsed = yaml.load(workflow, Loader=yaml.BaseLoader)
+    assert parsed["jobs"]["seed-sweep"]["timeout-minutes"] == "360"
