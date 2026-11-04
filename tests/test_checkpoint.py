@@ -23,5 +23,5 @@ def test_loading_for_evaluation_does_not_require_training_sampler(tmp_path):
     step = load_checkpoint(checkpoint, restored, restore_rng=False)
 
     assert step == 3
-    for expected, actual in zip(model.parameters(), restored.parameters()):
+    for expected, actual in zip(model.parameters(), restored.parameters(), strict=True):
         assert torch.equal(expected, actual)
