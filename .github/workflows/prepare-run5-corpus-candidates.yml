@@ -1,0 +1,143 @@
+name: Preparar 16 bibliotecas candidatas para RUN 5
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_rows:
+        description: Máximo de documentos examinados en una pasada
+        required: true
+        default: "250000"
+        type: string
+      max_input_gib:
+        description: Límite de texto admitido en staging (GiB)
+        required: true
+        default: "20"
+        type: string
+      min_train_mib:
+        description: Mínimo de train por biblioteca (MiB)
+        required: true
+        default: "256"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-run5-corpus-candidates
+  cancel-in-progress: false
+
+jobs:
+  prepare-candidates:
+    name: Una pasada de ingesta, 8 dominios y 8 bibliotecas HKD
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONUNBUFFERED: "1"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      HF_DATASETS_CACHE: /tmp/hf-datasets-cache
+      HF_HOME: /tmp/hf-home
+    steps:
+      - name: Checkout RONIN
+        uses: actions/checkout@v5
+
+      - name: Validar parámetros de adquisición
+        env:
+          MAX_ROWS: ${{ inputs.max_rows }}
+          MAX_INPUT_GIB: ${{ inputs.max_input_gib }}
+          MIN_TRAIN_MIB: ${{ inputs.min_train_mib }}
+        run: |
+          for value in "$MAX_ROWS" "$MAX_INPUT_GIB" "$MIN_TRAIN_MIB"; do
+            if ! [[ "$value" =~ ^[0-9]+$ ]]; then
+              echo "::error::Los límites deben ser enteros positivos."
+              exit 1
+            fi
+          done
+          [ "$MAX_ROWS" -ge 1000 ] && [ "$MAX_ROWS" -le 500000 ]
+          [ "$MAX_INPUT_GIB" -ge 1 ] && [ "$MAX_INPUT_GIB" -le 40 ]
+          [ "$MIN_TRAIN_MIB" -ge 64 ] && [ "$MIN_TRAIN_MIB" -le 1024 ]
+
+      - name: Preparar Python y dependencias de streaming
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Instalar lector público sin credenciales
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "datasets==3.6.0" "huggingface_hub==0.36.0" "pyarrow>=18,<20"
+
+      - name: Validar G-0 y autorización limitada de Common Corpus
+        run: |
+          python scripts/validate_license_audit.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          audit = json.loads(Path("reports/license_audit.json").read_text(encoding="utf-8"))
+          assert audit["gate"]["status"] == "FAIL"
+          assert audit["gate"]["downloads_authorized"] is False
+          auth = next(
+              item for item in audit["candidate_intake_authorizations"]
+              if item["source_id"] == "PleIAs/common_corpus"
+          )
+          assert auth["status"] == "LIMITED_PASS"
+          assert auth["candidate_text_downloads_authorized"] is True
+          assert auth["training_eligible"] is False
+          assert auth["admitted"] is False
+          print("G-0 global sigue FAIL; solo se permite la allowlist documental limitada.")
+          PY
+
+      - name: Construir 16 candidatos desde Common Corpus fijado
+        id: ingestion
+        continue-on-error: true
+        env:
+          MAX_ROWS: ${{ inputs.max_rows }}
+          MAX_INPUT_GIB: ${{ inputs.max_input_gib }}
+          MIN_TRAIN_MIB: ${{ inputs.min_train_mib }}
+        run: |
+          python scripts/prepare_run5_candidates.py \
+            --max-rows "$MAX_ROWS" \
+            --max-input-bytes "$((MAX_INPUT_GIB * 1024 * 1024 * 1024))" \
+            --min-train-bytes "$((MIN_TRAIN_MIB * 1024 * 1024))" \
+            --output-root /tmp/ronin-run5-candidates
+
+      - name: Publicar candidatos, sidecars, escaneos y muestras humanas
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-run5-16-library-candidates
+          path: /tmp/ronin-run5-candidates/
+          if-no-files-found: warn
+          compression-level: 1
+          retention-days: 30
+
+      - name: Resumen de preparación (no equivale a admisión)
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("/tmp/ronin-run5-candidates/run5-candidate-manifest.json")
+          if not path.is_file():
+              print("No se produjo manifiesto; revisar fallo de adquisición.")
+              raise SystemExit(1)
+          report = json.loads(path.read_text(encoding="utf-8"))
+          rows = report["libraries"]
+          print(json.dumps({
+              "rows_scanned": report["ingestion"]["rows_scanned"],
+              "libraries_built": len(rows),
+              "libraries_meeting_256MiB": sum(x["train_bytes"] >= 256 * 1024**2 for x in rows),
+              "train_bytes_by_library": {x["id"]: x["train_bytes"] for x in rows},
+              "ready_for_human_review": report["ready_for_human_review"],
+              "training_eligible": report["training_eligible"],
+              "admitted": report["admitted"],
+              "rejected": report["ingestion"]["rejected"],
+          }, ensure_ascii=False, indent=2))
+          if len(rows) != 16:
+              raise SystemExit("No se han producido las 16 bibliotecas candidatas.")
+          if not all(x["train_bytes"] >= 256 * 1024**2 for x in rows):
+              raise SystemExit("Al menos una biblioteca no alcanza 256 MiB de train.")
+          PY
+
+      - name: Enlazar libro de runs
+        if: always()
+        uses: ./.github/actions/run-ledger-link
