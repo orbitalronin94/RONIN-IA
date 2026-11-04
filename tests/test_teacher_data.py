@@ -121,7 +121,7 @@ def test_teacher_manifest_rejects_untracked_and_unsafe_files(tmp_path):
 
 
 def test_phi4_mini_instruct_is_pinned_as_mit_remote_code_teacher():
-    from scripts.download_teacher_models import ALLOWED_MODELS, ALLOW_PATTERNS
+    from scripts.download_teacher_models import ALLOW_PATTERNS, ALLOWED_MODELS
 
     model = ALLOWED_MODELS["phi-4-mini-instruct"]
     assert model["repo_id"] == "microsoft/Phi-4-mini-instruct"
