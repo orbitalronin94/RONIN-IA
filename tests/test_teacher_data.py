@@ -166,3 +166,11 @@ def test_generation_uses_isolated_seed_without_generator_argument():
 
     assert first == second
     assert "generator" not in model.generate_kwargs
+
+
+def test_phi4_teacher_revision_is_pinned_and_does_not_execute_remote_code():
+    from scripts.download_teacher_models import ALLOWED_MODELS
+
+    config = ALLOWED_MODELS["phi-4-mini-instruct"]
+    assert config["revision"] == "cfbefacb99257ffa30c83adab238a50856ac3083"
+    assert config["trust_remote_code"] is False
