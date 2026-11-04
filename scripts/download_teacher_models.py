@@ -18,11 +18,17 @@ ALLOWED_MODELS = {
         "repo_id": "EleutherAI/gpt-neo-125m",
         "license_url": "https://huggingface.co/EleutherAI/gpt-neo-125m",
     },
+    "phi-4-mini-instruct": {
+        "repo_id": "microsoft/Phi-4-mini-instruct",
+        "license_url": "https://huggingface.co/microsoft/Phi-4-mini-instruct",
+        "trust_remote_code": True,
+    },
 }
 ALLOW_PATTERNS = [
-    "config.json", "generation_config.json", "model.safetensors",
-    "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json",
-    "vocab.json", "merges.txt", "added_tokens.json", "README.md", "LICENSE*",
+    "config.json", "generation_config.json", "model*.safetensors",
+    "model.safetensors.index.json", "tokenizer.json", "tokenizer_config.json",
+    "special_tokens_map.json", "vocab.json", "merges.txt", "added_tokens.json",
+    "chat_template.jinja", "*.py", "README.md", "LICENSE*", "NOTICE.md",
 ]
 
 
@@ -51,8 +57,9 @@ def download_model(name: str, destination: Path) -> Path:
         raise RuntimeError(
             f"{repo_id}: licencia declarada {license_id!r}; se exige MIT exacta. No se descarga."
         )
-    if not any(item.rfilename == "model.safetensors" for item in info.siblings):
-        raise RuntimeError(f"{repo_id}: no se encontró model.safetensors; descarga cancelada.")
+    weight_files = [item.rfilename for item in info.siblings if item.rfilename.endswith(".safetensors")]
+    if not weight_files:
+        raise RuntimeError(f"{repo_id}: no se encontraron pesos safetensors; descarga cancelada.")
 
     model_dir = destination / name
     snapshot_download(
@@ -61,6 +68,9 @@ def download_model(name: str, destination: Path) -> Path:
         local_dir=model_dir,
         allow_patterns=ALLOW_PATTERNS,
     )
+    missing_weights = [name for name in weight_files if not (model_dir / name).is_file()]
+    if missing_weights:
+        raise RuntimeError(f"{repo_id}: faltan pesos safetensors tras la descarga: {missing_weights}")
     files = {}
     for path in sorted(model_dir.rglob("*")):
         if path.is_file() and path.name != "ronin-teacher-manifest.json":
@@ -73,6 +83,7 @@ def download_model(name: str, destination: Path) -> Path:
         "license_url": selected["license_url"],
         "verified_at": datetime.now(UTC).isoformat(),
         "weights_format": "safetensors",
+        "trust_remote_code": bool(selected.get("trust_remote_code", False)),
         "files_sha256": files,
         "note": "Modelo auxiliar local; sus pesos no se copian ni se cargan en RONIN.",
     }
