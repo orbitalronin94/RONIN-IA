@@ -53,3 +53,10 @@ El ciclo actual concatena Portfolio/Papers, el split train de CLiGS/CoNSSA/ELTeC
 ## Selección histórica ampliada — 4 de noviembre de 2026
 
 El catálogo de autores castellanos, obras candidatas y fuentes históricas de criptografía se mantiene en [historical_text_candidates.json](../data/manifests/historical_text_candidates.json), con validación automática en CI. Añade 19 autores (11 clásicos y 8 de la selección BNE 2026), 22 obras clásicas iniciales, candidatos BNE, ocho vías institucionales de descubrimiento y seis fuentes primarias de criptografía ya descargadas. **Todas siguen excluidas del entrenamiento** hasta revisión G-0 por obra, edición, traducción, objeto digital, OCR/transcripción, procedencia y SHA-256. La ampliación del inventario no cambia las particiones ni incorpora automáticamente los 506 casos especializados.
+
+
+## Política vigente desde la auditoría de ocho bibliotecas — 4 de noviembre de 2026
+
+La mezcla de Portfolio + literatura descrita arriba corresponde a ejecuciones históricas RUN #3/#4; no representa la política futura. Portfolio/Papers queda excluido de pretraining y SFT y reservado para recuperación documental RAG con citas. No cuenta como una de las ocho bibliotecas. Su incorporación a pesos requerirá una carencia demostrada, evaluación controlada y aprobación explícita.
+
+RUN #5 no puede comenzar hasta que ocho bibliotecas independientes (matemáticas; lógica/epistemología; filosofía; física; química/materiales; biología/medicina; informática/software; derecho/economía/ciencias sociales) superen el gate. Mínimo 256 MiB train por biblioteca, objetivo 1 GiB, procedencia y licencia por documento, revisión inmutable, hashes SHA-256, deduplicación, calidad, PII/secretos y splits por documento. Ver docs/AUDITORIA_OCHO_BIBLIOTECAS_MASIVAS.md y data/manifests/eight_libraries.json.
