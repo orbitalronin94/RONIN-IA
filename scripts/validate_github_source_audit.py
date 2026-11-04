@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Validate the manually audited GitHub dataset source register."""
 from __future__ import annotations
+
 import json
 import re
 from pathlib import Path
 
 PATH = Path("data/datasets/candidates/github-source-audit.json")
 SHA = re.compile(r"^[0-9a-f]{40}$")
+
 
 def main() -> int:
     data = json.loads(PATH.read_text(encoding="utf-8"))
