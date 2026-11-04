@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:43 | [Integración continua #982 (run 41935904888)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935904888) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Trigger source-link-aware expanded registry validation. Trigger: push; rama: main; intento: 1. | 182eee0a |
 | 2026-11-04 23:43 | [Integración continua #981 (run 41935891793)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935891793) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add CI validation for 32-domain 64-library source mappings. Trigger: push; rama: main; intento: 1. | cb521be4 |
 | 2026-11-04 23:42 | [Integración continua #980 (run 41935881265)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935881265) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Validate 64-library candidate source links against source audit registry. Trigger: push; rama: main; intento: 1. | 9bea9be1 |
 | 2026-11-04 23:42 | [Integración continua #977 (run 41935714803)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935714803) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Read DReaM token and sentence totals from Korp corpus-info schema. Trigger: push; rama: main; intento: 1. | 58171876 |
