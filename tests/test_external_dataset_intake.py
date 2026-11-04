@@ -64,3 +64,47 @@ def test_pmc_oa_preflight_is_metadata_only():
     assert '"abstract"' not in source
     assert '"full_text"' not in source
     assert '"candidate_text_downloads_authorized": False' in source
+
+
+
+def test_pmc_s3_version_prefix_parser_and_license_families():
+    from scripts.preflight_pmc_oa import (
+        license_family,
+        parse_s3_version_prefixes,
+    )
+
+    xml = b"""<?xml version="1.0" encoding="UTF-8"?>
+    <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+      <CommonPrefixes><Prefix>PMC12345.1/</Prefix></CommonPrefixes>
+      <CommonPrefixes><Prefix>PMC12345.2/</Prefix></CommonPrefixes>
+    </ListBucketResult>"""
+    assert parse_s3_version_prefixes(xml) == ["PMC12345.1", "PMC12345.2"]
+    assert license_family("cc by 4.0") == "CC BY"
+    assert license_family("CC0-1.0") == "CC0"
+    assert license_family("CC BY-SA 4.0") == "CC BY SA 4.0"
+
+
+def test_pmc_s3_metadata_verification_is_per_version(monkeypatch):
+    from scripts import preflight_pmc_oa
+
+    monkeypatch.setattr(
+        preflight_pmc_oa,
+        "list_s3_version_prefixes",
+        lambda pmcid: ["PMC12345.1"],
+    )
+    monkeypatch.setattr(
+        preflight_pmc_oa,
+        "_http_json",
+        lambda url: ({
+            "license_code": "CC BY 4.0",
+            "is_pmc_openaccess": "yes",
+            "is_retracted": "no",
+            "xml_url": "https://example.invalid/article.xml",
+            "text_url": "https://example.invalid/article.txt",
+        }, "etag-123"),
+    )
+    result = preflight_pmc_oa.verify_s3_metadata("PMC12345")
+    assert result[0]["license_allowlisted"] is True
+    assert result[0]["metadata_etag"] == "etag-123"
+    assert result[0]["xml_url_present"] is True
+    assert result[0]["text_url_present"] is True
