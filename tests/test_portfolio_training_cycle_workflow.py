@@ -20,6 +20,7 @@ def test_official_training_workflow_excludes_portfolio_and_requires_sixteen_libr
     assert job["env"]["STEPS"] == "${{ inputs.steps || '1000' }}"
     assert job["env"]["SEEDS"] == "${{ inputs.seeds || '1337' }}"
     assert job["env"]["MMLU_LIMIT"] == "${{ inputs.mmlu_limit || '0' }}"
+    assert job["env"]["MMLU_BATCH_TOKEN_BUDGET"] == "${{ inputs.mmlu_batch_token_budget || '8192' }}"
     assert job["timeout-minutes"] == "360"
 
     steps = job["steps"]
@@ -35,6 +36,7 @@ def test_official_training_workflow_excludes_portfolio_and_requires_sixteen_libr
     assert "--text /tmp/ronin-training/combined-train.txt" in cycle
     assert '--revision "$MMLU_REVISION"' in cycle
     assert '--limit "$MMLU_LIMIT"' in cycle
+    assert cycle.count('--batch-token-budget "$MMLU_BATCH_TOKEN_BUDGET"') == 2
     assert "mmlu-inicial.json" in cycle
     assert "mmlu-final.json" in cycle
 
