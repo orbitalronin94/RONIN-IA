@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 BASE = "https://data.goveasy.eu"
-FILES = ("datasets/tramites.json", "datasets/organismos.json")
+FILES = ("api/tramites.json", "api/organismos.json", "api/provincias.json")
 DATASET_META = "dataset.jsonld"
 LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 USER_AGENT = "RONIN-IA-goveasy-candidate/1.0"
@@ -55,7 +55,7 @@ def main() -> int:
         obj = json.loads(raw)
         if not isinstance(obj, (list, dict)):
             raise ValueError(f"unexpected JSON root for {rel}")
-        records = obj if isinstance(obj, list) else obj.get("data", obj.get("items", obj))
+        records = obj if isinstance(obj, list) else obj.get("items", obj.get("data", obj.get("results", obj)))
         if isinstance(records, dict):
             records = [records]
         if not isinstance(records, list):
@@ -94,9 +94,9 @@ def main() -> int:
     record = {
         "record_id": "goveasy-candidate-" + payload_sha[:16],
         "source_id": "goveasy-open-dataset",
-        "source_item_id": "datasets/tramites.json + datasets/organismos.json",
+        "source_item_id": "api/tramites.json + api/organismos.json + api/provincias.json",
         "source_version": "2026-07-11; metadata-sha256:" + meta_sha,
-        "source_url": f"{BASE}/datasets/tramites.json",
+        "source_url": f"{BASE}/api/tramites.json",
         "rights_statement_uri": f"{BASE}/en",
         "license_id": "CC-BY-4.0",
         "license_uri": LICENSE,
