@@ -84,3 +84,10 @@ Initial audit results:
 - Four entries are explicitly excluded or quarantined: HAGRID and FiNER-139 (ShareAlike), NVD (underlying CVE-TOU terms unresolved), and CFPB complaint narratives (privacy review required).
 
 At this stage, **zero payloads were downloaded, zero new level-A rights records were created, and zero GitHub candidates became training-eligible**. Every candidate still needs immutable source revision, exact license scope, payload SHA-256, third-party rights review, privacy/quality checks, cross-library deduplication, split-integrity checks and global G-0. This deliberately conservative result prevents a catalog's blanket license claim from being mistaken for rights clearance of every underlying record.
+
+
+## Eulogikon CC0 metadata candidate (2026-11-05)
+
+A separate adapter now pins `eulogikon/ancient-greek-texts` at commit `97d5e15939c858ff047a576633255c923b8fb6f8`. The upstream `NOTICE` explicitly places Eulogikon's preparation layer, manifests and metadata under CC0-1.0; the underlying Greek texts are separately marked Public Domain Mark 1.0 and are **not** covered by that CC0 declaration. The adapter exports only structured metadata fields from `manifest.works.min.csv`; it does not fetch any text payload.
+
+The adapter verifies upstream Git blob SHA-1 values for the manifest, NOTICE and LICENSE before producing a JSONL metadata candidate, SHA-256 hashes, and a proposed rights record. Its workflow is `.github/workflows/verify-eulogikon-metadata.yml`. A rights record is not considered registered until the workflow has completed successfully and its generated hash-bearing record has been reviewed and appended to `rights_registry/records.jsonl`. Even then, rights level A for this metadata export does not imply dataset admission or training eligibility: quality, privacy, deduplication, split integrity and global G-0 remain separate gates. The underlying Greek texts remain unadmitted pending per-work edition/source evidence.
