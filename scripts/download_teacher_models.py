@@ -22,6 +22,7 @@ ALLOWED_MODELS = {
         "repo_id": "microsoft/Phi-4-mini-instruct",
         "license_url": "https://huggingface.co/microsoft/Phi-4-mini-instruct",
         "trust_remote_code": False,
+        "revision": "cfbefacb99257ffa30c83adab238a50856ac3083",
     },
 }
 ALLOW_PATTERNS = [
@@ -48,7 +49,7 @@ def download_model(name: str, destination: Path) -> Path:
 
     selected = ALLOWED_MODELS[name]
     repo_id = selected["repo_id"]
-    info = HfApi().model_info(repo_id, files_metadata=True)
+    info = HfApi().model_info(repo_id, revision=selected.get("revision"), files_metadata=True)
     card_data = info.card_data
     license_id = getattr(card_data, "license", None) if card_data is not None else None
     if license_id is None and isinstance(card_data, dict):
