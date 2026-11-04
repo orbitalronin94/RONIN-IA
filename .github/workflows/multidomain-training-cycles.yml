@@ -1,0 +1,176 @@
+name: Ciclos de entrenamiento y evaluación multidominio
+
+on:
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: Pasos por ciclo (1-1000)
+        required: true
+        default: "1000"
+        type: string
+      seeds:
+        description: Semillas separadas por comas
+        required: true
+        default: "1337,2027,42"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-multidomain-training
+  cancel-in-progress: false
+
+jobs:
+  ciclos:
+    name: Entrenar y evaluar cada semilla
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - name: Obtener RONIN IA
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66"
+
+      - name: Validar experimento
+        env:
+          STEPS: ${{ inputs.steps }}
+          SEEDS: ${{ inputs.seeds }}
+        run: |
+          if ! [[ "$STEPS" =~ ^[0-9]+$ ]] || [ "$STEPS" -lt 1 ] || [ "$STEPS" -gt 1000 ]; then
+            echo "::error::Los pasos deben estar entre 1 y 1000."
+            exit 1
+          fi
+          if ! [[ "$SEEDS" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
+            echo "::error::Semillas inválidas."
+            exit 1
+          fi
+          IFS=',' read -ra values <<< "$SEEDS"
+          if [ "${#values[@]}" -gt 5 ]; then
+            echo "::error::Máximo cinco semillas por ejecución."
+            exit 1
+          fi
+          mkdir -p reports checkpoints
+
+      - name: Preparar corpus público con manifiesto
+        run: |
+          python scripts/prepare_open_corpora.py \
+            --output /tmp/ronin-multidomain/processed \
+            --cache-dir /tmp/ronin-multidomain/cache
+
+      - name: Ejecutar ciclos independientes
+        env:
+          STEPS: ${{ inputs.steps }}
+          SEEDS: ${{ inputs.seeds }}
+        run: |
+          IFS=',' read -ra seed_values <<< "$SEEDS"
+          for seed in "${seed_values[@]}"; do
+            echo "::group::Semilla $seed"
+            checkpoint_dir="checkpoints/seed-$seed"
+            report_dir="reports/seed-$seed"
+            mkdir -p "$checkpoint_dir" "$report_dir"
+
+            python scripts/train_text.py \
+              --text /tmp/ronin-multidomain/processed/train.txt \
+              --profile tiny --steps "$STEPS" --seed "$seed" \
+              --device cpu --checkpoints "$checkpoint_dir"
+
+            checkpoint="$checkpoint_dir/step-$(printf '%08d' "$STEPS").pt"
+            test -s "$checkpoint"
+
+            python scripts/evaluate_text.py \
+              --checkpoint "$checkpoint" \
+              --validation-text /tmp/ronin-multidomain/processed/validation.txt \
+              --profile tiny --batches 128 --batch-size 2 --seed 2026 \
+              --device cpu --output "$report_dir/language-model.json"
+
+            python scripts/evaluate_domains.py \
+              --checkpoint "$checkpoint" \
+              --dataset benchmarks/domains_v1.jsonl \
+              --profile tiny --device cpu \
+              --output "$report_dir/domains-v1.json"
+
+            echo "::endgroup::"
+          done
+
+      - name: Consolidar resultados y hashes
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          import os
+
+          def sha(path):
+              h = hashlib.sha256()
+              with path.open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          root = Path("reports")
+          rows = []
+          for domain_report in sorted(root.glob("seed-*/domains-v1.json")):
+              seed_dir = domain_report.parent
+              lm_report = json.loads((seed_dir / "language-model.json").read_text())
+              domain = json.loads(domain_report.read_text())
+              rows.append({
+                  "seed": seed_dir.name.removeprefix("seed-"),
+                  "language_model": lm_report,
+                  "domains": domain,
+              })
+          dataset = Path("benchmarks/domains_v1.jsonl")
+          manifest_path = Path("/tmp/ronin-multidomain/processed/manifest.json")
+          manifest = json.loads(manifest_path.read_text())
+          result = {
+              "experiment": "ronin-multidomain-independent-seeds-v1",
+              "steps_per_cycle": int(os.environ.get("STEPS", "1000")),
+              "seeds": [row["seed"] for row in rows],
+              "dataset_sha256": sha(dataset),
+              "corpus_manifest": manifest,
+              "cycles": rows,
+              "interpretation": [
+                  "Los ciclos son entrenamientos independientes desde inicialización aleatoria.",
+                  "La exactitud multidominio usa un piloto pequeño de 23 preguntas y elección del siguiente byte; no mide razonamiento abierto.",
+                  "BPB mide modelado del corpus de validación, no competencia por dominio.",
+                  "No se ha evaluado el holdout reservado.",
+              ],
+          }
+          Path("reports/resumen-multidominio.json").write_text(
+              json.dumps(result, ensure_ascii=False, indent=2) + "\\n",
+              encoding="utf-8",
+          )
+          print(json.dumps({
+              "cycles": len(rows),
+              "seeds": result["seeds"],
+              "accuracy": {
+                  row["seed"]: row["domains"]["overall"]["accuracy"]
+                  for row in rows
+              },
+              "bpb": {
+                  row["seed"]: row["language_model"]["bits_per_byte"]
+                  for row in rows
+              },
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Publicar solo informes (nunca checkpoints)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-ciclos-multidominio
+          path: reports/
+          if-no-files-found: error
+          retention-days: 30
