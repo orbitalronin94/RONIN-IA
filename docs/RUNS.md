@@ -12,6 +12,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 17:46 | [Integración continua #588 (run 41879417060)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41879417060) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Crear ingesta streaming auditada para candidatos de RUN 5. Trigger: push; rama: main; intento: 1. | 6271e79c |
 | 2026-11-04 17:46 | [Integración continua #587 (run 41878972009)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41878972009) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Probar gate fail-closed de RUN 5. Trigger: push; rama: main; intento: 1. | 72f7fc4c |
 | 2026-11-04 17:46 | [Integración continua #603 (run 41879866433)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41879866433) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Ajustar presupuesto de staging al disco del runner gratuito. Trigger: push; rama: main; intento: 1. | 8ffe467a |
 | 2026-11-04 17:45 | [Integración continua #586 (run 41878864622)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41878864622) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Ejecutar gate RUN 5 antes de descargas e instalaciones. Trigger: push; rama: main; intento: 1. | c53b273a |
