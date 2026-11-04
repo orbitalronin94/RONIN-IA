@@ -21,6 +21,7 @@ jobs:
   download-teachers:
     name: Descargar y verificar tutores MIT
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -48,11 +49,13 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+          from ronin.data.teacher import verify_teacher_manifest
           for name in ("gpt2", "gpt-neo-125m", "phi-4-mini-instruct"):
               folder = Path("models/teachers") / name
               manifest = json.loads((folder / "ronin-teacher-manifest.json").read_text())
               assert manifest["license"] == "mit" and manifest["license_verified"] is True
               assert manifest["revision"] and manifest["files_sha256"]
               assert any(folder.rglob("*.safetensors"))
+              verify_teacher_manifest(folder, manifest)
               print(name, manifest["revision"], len(manifest["files_sha256"]), "archivos verificados")
           PY
