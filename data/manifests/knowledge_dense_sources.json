@@ -9,7 +9,7 @@
     "reject_unknown_license": true,
     "no_credentials": true,
     "no_auto_training_admission": true,
-    "note": "Every adapter is disabled until its actual schema, pinned revision and legal allowlist are reviewed. Source presence in this file is not authorization. Only the eight Common Corpus adapters are enabled for limited candidate extraction under the exact scoped authorization in reports/license_audit.json; no adapter is training-admitted. PMC OA legacy distribution files were retired 2026-08-26; new adapters must use the current PMC Cloud Service metadata."
+    "note": "The eight Common Corpus adapters remain enabled for limited candidate extraction. The biology/medicine and chemistry PMC Cloud adapters are also enabled for limited candidate extraction under their exact per-version CC0/CC BY authorization. No adapter is training-admitted; source presence or candidate generation never bypasses global G-0 or human review."
   },
   "metric": {
     "id": "RONIN-HKD-0.1",
@@ -230,19 +230,24 @@
     {
       "id": "pmc_oa_chemistry_hkd",
       "domain": "chemistry",
-      "adapter": "jsonl",
-      "path": "data/staging/pmc_oa_chemistry_records.jsonl",
-      "revision": null,
-      "text_field": "full_text",
-      "license_field": "license",
-      "provenance_field": "pmcid",
+      "adapter": "pmc_oa_cloud",
+      "path": "scripts/pmc_oa_source.py",
+      "revision": "per-article-version-etag-v1",
+      "text_field": "text",
+      "license_field": "license_code",
+      "provenance_field": "source_identifier",
       "allowed_licenses": [
-        "CC0-1.0",
-        "CC-BY-4.0"
+        "CC0",
+        "CC0 1.0",
+        "CC BY",
+        "CC BY 2.0",
+        "CC BY 3.0",
+        "CC BY 4.0"
       ],
-      "enabled": false,
-      "license_audit": null,
-      "notes": "Use the post-2026-08-26 PMC Cloud Service (world-readable AWS bucket pmc-oa-opendata), not legacy FTP bulk packages. Resolve each article version through its JSON metadata and require license_code CC0 or CC BY only; exclude CC BY-SA, CC BY-ND, NC, TDM, custom and unknown. Preserve PMCID/version/DOI, metadata ETag, content hash and source URLs. Remove or exclude figures, tables and supplementary/third-party components. This manifest entry remains disabled until a pinned inventory, schema tests and scoped rights review exist."
+      "enabled": true,
+      "license_audit": "reports/license_audit.json",
+      "notes": "Use current PMC Cloud Service; resolve every article version via metadata JSON, require exact CC0/CC BY and open-access/non-retracted/non-OCR/non-manuscript flags, verify XML MD5, strip figures/tables/supplements/references, retain per-version ETag and SHA-256. Candidate-only; no training admission.",
+      "dataset_id": "pmc-oa-opendata"
     },
     {
       "id": "patentsview_chemistry_hkd",
@@ -263,19 +268,24 @@
     {
       "id": "pmc_oa_biology_hkd",
       "domain": "biology_medicine",
-      "adapter": "jsonl",
-      "path": "data/staging/pmc_oa_biology_records.jsonl",
-      "revision": null,
-      "text_field": "full_text",
-      "license_field": "license",
-      "provenance_field": "pmcid",
+      "adapter": "pmc_oa_cloud",
+      "path": "scripts/pmc_oa_source.py",
+      "revision": "per-article-version-etag-v1",
+      "text_field": "text",
+      "license_field": "license_code",
+      "provenance_field": "source_identifier",
       "allowed_licenses": [
-        "CC0-1.0",
-        "CC-BY-4.0"
+        "CC0",
+        "CC0 1.0",
+        "CC BY",
+        "CC BY 2.0",
+        "CC BY 3.0",
+        "CC BY 4.0"
       ],
-      "enabled": false,
-      "license_audit": null,
-      "notes": "Use the post-2026-08-26 PMC Cloud Service (world-readable AWS bucket pmc-oa-opendata), not legacy FTP bulk packages. Resolve each article version through its JSON metadata and require license_code CC0 or CC BY only; exclude CC BY-SA, CC BY-ND, NC, TDM, custom and unknown. Preserve PMCID/version/DOI, metadata ETag, content hash and source URLs. Remove or exclude figures, tables and supplementary/third-party components. This manifest entry remains disabled until a pinned inventory, schema tests and scoped rights review exist."
+      "enabled": true,
+      "license_audit": "reports/license_audit.json",
+      "notes": "Use current PMC Cloud Service; resolve every article version via metadata JSON, require exact CC0/CC BY and open-access/non-retracted/non-OCR/non-manuscript flags, verify XML MD5, strip figures/tables/supplements/references, retain per-version ETag and SHA-256. Candidate-only; no training admission.",
+      "dataset_id": "pmc-oa-opendata"
     },
     {
       "id": "europe_pmc_oa_hkd",

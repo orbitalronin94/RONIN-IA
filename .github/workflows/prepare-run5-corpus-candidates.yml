@@ -9,6 +9,8 @@ on:
     paths:
       - .github/workflows/prepare-run5-corpus-candidates.yml
       - scripts/prepare_run5_candidates.py
+      - scripts/pmc_oa_source.py
+      - scripts/prepare_pmc_oa_candidates.py
       - scripts/validate_license_audit.py
       - data/manifests/common_corpus_sources.json
       - data/manifests/knowledge_dense_sources.json
@@ -111,12 +113,21 @@ jobs:
 
       - name: Crear las dos bibliotecas del dominio con RONIN-HKD-0.1
         run: |
-          python scripts/prepare_run5_candidates.py \
-            --domain "$DOMAIN" \
-            --max-rows "$MAX_ROWS" \
-            --max-input-bytes "$((MAX_INPUT_GIB * 1024 * 1024 * 1024))" \
-            --min-train-bytes "$((MIN_TRAIN_MIB * 1024 * 1024))" \
-            --output-root "/tmp/ronin-run5-candidates/$DOMAIN"
+          if [ "$DOMAIN" = "biology_medicine" ] || [ "$DOMAIN" = "chemistry" ]; then
+            python scripts/prepare_pmc_oa_candidates.py \
+              --domain "$DOMAIN" \
+              --max-documents "$MAX_ROWS" \
+              --max-text-bytes "$((MAX_INPUT_GIB * 1024 * 1024 * 1024))" \
+              --min-train-bytes "$((MIN_TRAIN_MIB * 1024 * 1024))" \
+              --output-root "/tmp/ronin-run5-candidates/$DOMAIN"
+          else
+            python scripts/prepare_run5_candidates.py \
+              --domain "$DOMAIN" \
+              --max-rows "$MAX_ROWS" \
+              --max-input-bytes "$((MAX_INPUT_GIB * 1024 * 1024 * 1024))" \
+              --min-train-bytes "$((MIN_TRAIN_MIB * 1024 * 1024))" \
+              --output-root "/tmp/ronin-run5-candidates/$DOMAIN"
+          fi
 
       - name: Validar tamaño x10 de ambas bibliotecas
         id: validate_size
@@ -179,11 +190,20 @@ jobs:
                       "train_bytes": 0,
                       "manifest": None,
                   })
+          source_report_path = root / os.environ["DOMAIN"] / "run5-candidate-manifest.json"
+          source_report = None
+          if source_report_path.is_file():
+              source_report = json.loads(source_report_path.read_text(encoding="utf-8"))
           index = {
               "schema_version": 1,
               "run_id": os.environ.get("GITHUB_RUN_ID"),
               "domain": os.environ["DOMAIN"],
               "libraries": entries,
+              "source_report_path": str(source_report_path) if source_report is not None else None,
+              "source_dataset": (source_report or {}).get("source", {}).get("dataset_id"),
+              "accepted_documents": (source_report or {}).get("ingestion", {}).get("accepted_documents"),
+              "accepted_text_bytes": (source_report or {}).get("ingestion", {}).get("accepted_text_bytes"),
+              "source_counters": (source_report or {}).get("ingestion", {}).get("source_counters"),
               "note": "Snapshot of all available output, not an admission or training-eligibility decision."
           }
           (root / f"index-{os.environ['DOMAIN']}.json").write_text(
@@ -216,7 +236,9 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: ronin-datasets-run5-index-${{ matrix.domain }}
-          path: datasets/run5/index-${{ matrix.domain }}.json
+          path: |
+            datasets/run5/index-${{ matrix.domain }}.json
+            datasets/run5/${{ matrix.domain }}/run5-candidate-manifest.json
           if-no-files-found: warn
           retention-days: 90
 

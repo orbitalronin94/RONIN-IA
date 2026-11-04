@@ -59,12 +59,29 @@
         "multilingual_subset"
       ],
       "priority": "P0",
-      "access": "PMC Cloud Service (AWS world-readable, anonymous HTTPS/S3) and Europe PMC REST metadata; no credentials",
-      "license_policy": "per_article",
+      "access": "PMC Cloud Service AWS world-readable bucket pmc-oa-opendata; anonymous HTTPS/S3, no credentials; legacy FTP packages retired 2026-08-26",
+      "license_policy": {
+        "allowed": [
+          "CC0",
+          "CC0 1.0",
+          "CC BY",
+          "CC BY 2.0",
+          "CC BY 3.0",
+          "CC BY 4.0"
+        ],
+        "excluded": [
+          "CC BY-SA",
+          "CC BY-ND",
+          "CC BY-NC",
+          "TDM",
+          "custom",
+          "unknown"
+        ]
+      },
       "status": "candidate_high_priority",
       "training_eligible": false,
-      "ingest_mode": "per_article_version_json_metadata_license_code_then_CC0_or_CC_BY_only",
-      "notes": "The legacy PMC FTP/cloud article dataset distribution was retired in August 2026. Use the current pmc-oa-opendata AWS bucket and per-version JSON metadata (license_code, is_pmc_openaccess, is_retracted, xml_url/text_url, checksums), or Europe PMC metadata APIs. Download only article versions with CC0 or CC BY; exclude CC BY-SA, CC BY-ND, NC, TDM, custom and unknown. Preserve version, PMCID, DOI, ETag/MD5 and source metadata; do not download images/supplementary files by default."
+      "ingest_mode": "PMC Cloud per-version JSON metadata -> exact CC0/CC BY gate -> JATS XML with MD5 verification -> text-only extraction",
+      "notes": "Resolve every article version using its JSON metadata object. Require is_pmc_openaccess=true, is_manuscript=false, is_historical_ocr=false, is_retracted=false, exact allowlisted license_code, and non-retracted publication type from Europe PMC. Convert official s3:// XML URL to HTTPS, verify URL MD5 and retain metadata ETag plus XML/text SHA-256. Exclude figures, tables, media, supplementary material, references and acknowledgements. Candidate-only; no training admission."
     },
     {
       "id": "caselaw_access_project",

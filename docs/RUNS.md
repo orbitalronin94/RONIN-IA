@@ -6,6 +6,13 @@ Registro cronológico de GitHub Actions. Cada entrada enlaza al run original, re
 
 La cobertura automática incluye CI, entrenamiento oficial y reducido, preparación del corpus Portfolio, auditoría de corpus y biblioteca criptográfica, calibración REF, benchmark inicial, ciclos sintéticos, auditoría Supra, generación de candidatos Phi-4, caché de tutores, comparativa A/B, validación de manifiestos e ingesta de muestras externas.
 
+## RUN 5 — topografía de rechazo y ampliación de fuentes (4 de noviembre de 2026)
+
+- [Preparación RUN 5 #41901963970](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41901963970): **fallida; 0/16 bibliotecas válidas**. Ocho workers inspeccionaron 69.907 filas de PleIAs Common Corpus. La allowlist rechazó 42.920 registros por licencia y el filtro de idioma 9.484; el enrutado resultante produjo 14.545 documentos de Open Source (computer science) y solo 43 de Open Government (ley/economía/ciencias sociales). No hubo candidatos para matemáticas, lógica, filosofía, física, química o biología/medicina.
+- Los dos únicos dominios que materializaron base+HKD fueron computer science (39.308.151 bytes) y law/economics/social sciences (9.019 bytes). Ambos fallaron el mínimo de 2.684.354.560 bytes por biblioteca. La auditoría global encontró 0 bibliotecas escaneables y falló correctamente por inventario incompleto.
+- [Preflight PMC OA #41902046191](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41902046191): **éxito de metadatos, sin descargar textos**. Consulta estimada: 2.683.199 registros biomédicos y 471.257 de química; muestra de 500 por dominio, con 493 y 498 registros CC BY/CC0 respectivamente. Se verificaron metadatos por versión en PMC Cloud sin errores (21 versiones biomédicas y 22 químicas). El nuevo adaptador de PR #76 convierte esta cobertura en candidatos con gate por versión, pero no autoriza admisión ni entrenamiento.
+- Causa raíz: Common Corpus es insuficiente para seis dominios con la política actual de licencias/idiomas. No se amplía la allowlist para aceptar etiquetas genéricas de dominio público, ShareAlike, NC, ND o derechos desconocidos. G-0 global sigue FAIL.
+
 ## Historial importado
 
 Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al 4 de noviembre de 2026. A partir de la integración de este mecanismo, los nuevos runs se añaden automáticamente.
