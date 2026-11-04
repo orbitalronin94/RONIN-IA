@@ -1,5 +1,7 @@
 import json
 
+import yaml
+
 from scripts.audit_run5_cross_library_dedup import audit
 from scripts.prepare_run5_candidates import (
     ALLOWED_LICENSES,
@@ -327,3 +329,18 @@ def test_library_floor_budget_rejects_invalid_fraction():
         assert "fraction" in str(exc)
     else:
         raise AssertionError("invalid HKD fraction must fail closed")
+
+
+def test_run5_workflow_yaml_parses_and_expands_sixteen_domain_workers():
+    workflow_path = (
+        Path(__file__).parents[1]
+        / ".github"
+        / "workflows"
+        / "prepare-run5-corpus-candidates.yml"
+    )
+    workflow = yaml.load(workflow_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+    assert "prepare-domain" in workflow["jobs"]
+    assert "aggregate-and-gate" in workflow["jobs"]
+    domains = workflow["jobs"]["prepare-domain"]["strategy"]["matrix"]["domain"]
+    assert len(domains) == 16
+    assert workflow["jobs"]["aggregate-and-gate"]["needs"] == "prepare-domain"
