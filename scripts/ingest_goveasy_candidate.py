@@ -16,7 +16,7 @@ from pathlib import Path
 
 BASE = "https://data.goveasy.eu"
 FILES = ("datasets/tramites.json", "datasets/organismos.json", "datasets/provincias.json")
-DATASET_META = "dataset.jsonld"
+DATASET_META = "en"
 AI_POLICY = "ai.txt"
 LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 USER_AGENT = "RONIN-IA-goveasy-candidate/1.0"
