@@ -34,7 +34,7 @@ def test_selector_rejects_sources_without_explicit_legal_approval(tmp_path):
         "text": text,
         "license": "UNKNOWN",
         "document_id": "paper-001",
-    }) + "\\n", encoding="utf-8")
+    }) + "\n", encoding="utf-8")
     audit = tmp_path / "license-audit.json"
     audit.write_text('{"reviewed": true}', encoding="utf-8")
     spec = tmp_path / "sources.json"
@@ -75,7 +75,7 @@ def test_selector_keeps_document_level_license_provenance_and_scores(tmp_path):
         "text": text,
         "license": "CC-BY-4.0",
         "document_id": "paper-002",
-    }) + "\\n", encoding="utf-8")
+    }) + "\n", encoding="utf-8")
     audit = tmp_path / "license-audit.json"
     audit.write_text('{"reviewed": true}', encoding="utf-8")
     spec = tmp_path / "sources.json"
