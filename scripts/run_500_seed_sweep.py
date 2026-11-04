@@ -22,7 +22,9 @@ from ronin.utils.repro import seed_everything
 try:
     from scripts.evaluate_domains import evaluate as evaluate_domains
     from scripts.evaluate_text import evaluate_checkpoint as evaluate_text
-except ModuleNotFoundError:
+except ModuleNotFoundError as exc:
+    if exc.name != "scripts":
+        raise
     from evaluate_domains import evaluate as evaluate_domains
     from evaluate_text import evaluate_checkpoint as evaluate_text
 
