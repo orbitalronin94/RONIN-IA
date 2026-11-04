@@ -85,7 +85,7 @@ El workflow reducido se ejecutará después de integrar los cambios y lanzarlo m
 
 - [Experimento oficial #1](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377): completado; 1.000 pasos, loss final 1,98638 y resultado MMLU-Pro documentado arriba.
 - [Primera iteración y benchmark interno (completado)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41840992712): completado correctamente en la revisión con el sampler vectorizado.
-- [CI #409](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41840646080): correcta en la revisión `d41e5a5`, que ya incluía el sampler vectorizado y la instrumentación de métricas. La prueba adicional de paridad del sampler se añadió después; su CI final todavía no está confirmado.
+- [CI #415](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41841250219): correcta; valida también la prueba de paridad del sampler vectorizado y las métricas del bucle. El último cambio posterior fue únicamente documental.
 - La [PR #44](https://github.com/orbitalronin94/RONIN-IA/pull/44) continúa sin fusionar. No se ha iniciado el workflow reducido.
 
 El inventario completo, con procedencia, revisiones, licencias, particiones, exclusiones y hashes, está en [Inventario de corpus y materiales](docs/INVENTARIO_CORPUS_Y_MATERIALES.md) y en el [manifiesto JSON](data/manifests/corpus_inventory.json).
