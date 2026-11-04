@@ -131,3 +131,48 @@ def test_preflight_writes_partial_report_when_one_set_times_out(tmp_path, monkey
     assert report["errors"][0]["set_spec"] == "math:math:AG"
     assert report["text_downloaded"] is False
     assert report["candidate_text_downloads_authorized"] is False
+
+
+def test_sample_set_follows_oai_resumption_token_until_sample_limit(monkeypatch):
+    from scripts import preflight_arxiv_oai as module
+
+    def page(identifier, token=None):
+        token_xml = (
+            f"<resumptionToken>{token}</resumptionToken>" if token else ""
+        )
+        return ET.fromstring(f"""<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+            xmlns:a="http://arxiv.org/OAI/arXiv/">
+          <ListRecords>
+            <record><header><datestamp>2026-01-01</datestamp></header>
+              <metadata><a:arXiv><a:id>{identifier}</a:id>
+                <a:title>Paper {identifier}</a:title>
+                <a:categories>math.AG</a:categories>
+                <a:license>https://creativecommons.org/licenses/by/4.0/</a:license>
+              </a:arXiv></metadata>
+            </record>
+            {token_xml}
+          </ListRecords>
+        </OAI-PMH>""")
+
+    calls = []
+    pages = [
+        page("2601.00001", "next-page"),
+        page("2601.00002"),
+    ]
+
+    def fake_request(params):
+        calls.append(params)
+        return pages.pop(0)
+
+    monkeypatch.setattr(module, "request_oai", fake_request)
+    records, stats = module.sample_set("math:math:AG", max_records=2)
+
+    assert [item["identifier"] for item in records] == ["2601.00001", "2601.00002"]
+    assert calls[0] == {
+        "verb": "ListRecords", "metadataPrefix": "arXiv", "set": "math:math:AG"
+    }
+    assert calls[1] == {"verb": "ListRecords", "resumptionToken": "next-page"}
+    assert stats["pages_fetched"] == 2
+    assert stats["sampled_records"] == 2
+    assert stats["has_more_records"] is False
+    assert stats["complete_set_harvest"] is False
