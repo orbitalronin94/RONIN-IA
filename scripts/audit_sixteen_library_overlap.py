@@ -66,7 +66,7 @@ def main() -> None:
                     candidates = db.execute(
                         "SELECT signature, library FROM bands WHERE band=? AND key=?",
                         (band, key),
-                    )
+                    ).fetchall()
                     for prior_hex, prior_library in candidates:
                         prior = int(prior_hex, 16)
                         if prior_library != library and (signature ^ prior).bit_count() <= 3:
