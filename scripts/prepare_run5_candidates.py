@@ -13,7 +13,6 @@ import json
 import re
 import sqlite3
 import sys
-import tempfile
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
@@ -407,7 +406,7 @@ def main() -> int:
             rejected["other_domain"] += 1
             continue
         doc_id = hashlib.sha256(
-            f"{DATASET_REVISION}\0{provenance}\0{license_name}".encode("utf-8")
+            f"{DATASET_REVISION}\0{provenance}\0{license_name}".encode()
         ).hexdigest()
         if doc_id in seen_ids:
             rejected["duplicate_identifier"] += 1
