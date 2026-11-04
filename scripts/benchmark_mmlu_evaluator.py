@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mide por separado batching y proyección final del evaluador MMLU-Pro."""
+"""Busca el presupuesto de lote más rápido y separa batching de proyección."""
 from __future__ import annotations
 
 import argparse
@@ -16,7 +16,6 @@ from evaluate_mmlu_pro import (
     rows_sha256,
     select_stratified,
 )
-
 from ronin.config import get_profile
 from ronin.models.transformer import RoninLM
 
@@ -26,6 +25,29 @@ def prediction_signature(report: dict) -> list[tuple[str, int, bool]]:
         (row["id"], row["predicted_index"], row["correct"])
         for row in report["details"]
     ]
+
+
+def run_case(
+    *,
+    checkpoint: Path,
+    rows: list[dict],
+    dataset_hash: str,
+    budget: int,
+    context_length: int,
+    last_token_only: bool,
+) -> tuple[dict, float]:
+    started = time.perf_counter()
+    report = evaluate_rows(
+        checkpoint=checkpoint,
+        rows=rows,
+        all_rows_sha256=dataset_hash,
+        profile="tiny",
+        context_length=context_length,
+        device="cpu",
+        batch_token_budget=budget,
+        last_token_only=last_token_only,
+    )
+    return report, time.perf_counter() - started
 
 
 def main() -> None:
@@ -40,8 +62,11 @@ def main() -> None:
     args = parser.parse_args()
     if args.limit < 1:
         parser.error("--limit debe ser positivo")
+    if args.optimized_token_budget < 1:
+        parser.error("--optimized-token-budget debe ser positivo")
 
     torch.set_num_threads(min(2, torch.get_num_threads()))
+    torch.manual_seed(args.seed)
     all_rows = load_external_dataset(args.revision)
     rows = select_stratified(all_rows, args.limit, args.seed)
     dataset_hash = rows_sha256(all_rows)
@@ -52,83 +77,134 @@ def main() -> None:
         checkpoint = Path(temp_dir) / "random-initialized.pt"
         torch.save({"model": model.state_dict(), "step": 0}, checkpoint)
 
-        cases = (
-            ("single_full_logits", args.baseline_token_budget, False),
-            ("batched_full_logits", args.optimized_token_budget, False),
-            ("batched_last_position", args.optimized_token_budget, True),
+        reports: dict[str, dict] = {}
+        results: dict[str, dict] = {}
+
+        baseline, elapsed = run_case(
+            checkpoint=checkpoint,
+            rows=rows,
+            dataset_hash=dataset_hash,
+            budget=args.baseline_token_budget,
+            context_length=args.context_length,
+            last_token_only=False,
         )
-        results = {}
-        reports = {}
-        for name, budget, last_token_only in cases:
-            started = time.perf_counter()
-            report = evaluate_rows(
+        reports["single_full_logits"] = baseline
+        results["single_full_logits"] = {
+            "seconds": elapsed,
+            "batching": baseline["batching"],
+            "inference_path": baseline["inference_path"],
+            "correct": baseline["overall"]["correct"],
+            "evaluated": baseline["evaluated_items"],
+            "coverage": baseline["coverage"],
+        }
+
+        candidate_budgets = [
+            budget for budget in (256, 512, 1024, 2048, 4096, 8192)
+            if budget <= args.optimized_token_budget
+        ]
+        if not candidate_budgets:
+            candidate_budgets = [args.optimized_token_budget]
+
+        for budget in candidate_budgets:
+            name = f"last_position_budget_{budget}"
+            report, elapsed = run_case(
                 checkpoint=checkpoint,
                 rows=rows,
-                all_rows_sha256=dataset_hash,
-                profile="tiny",
+                dataset_hash=dataset_hash,
+                budget=budget,
                 context_length=args.context_length,
-                device="cpu",
-                batch_token_budget=budget,
-                last_token_only=last_token_only,
+                last_token_only=True,
             )
-            elapsed = time.perf_counter() - started
             reports[name] = report
             results[name] = {
                 "seconds": elapsed,
                 "batching": report["batching"],
                 "inference_path": report["inference_path"],
-                "accuracy": report["overall"]["accuracy"],
                 "correct": report["overall"]["correct"],
                 "evaluated": report["evaluated_items"],
                 "coverage": report["coverage"],
             }
 
-        reference = reports["single_full_logits"]
-        signatures = {
-            name: prediction_signature(report) for name, report in reports.items()
-        }
-        parity = all(signature == signatures["single_full_logits"] for signature in signatures.values())
-        coverage_parity = all(
-            report["selected_items"] == reference["selected_items"]
-            and report["dataset_sha256"] == reference["dataset_sha256"]
-            and report["skipped"] == reference["skipped"]
+        best_name = min(
+            (f"last_position_budget_{budget}" for budget in candidate_budgets),
+            key=lambda name: results[name]["seconds"],
+        )
+        best_budget = reports[best_name]["batching"]["token_budget"]
+        if best_budget == args.baseline_token_budget:
+            best_full = baseline
+            best_full_seconds = results["single_full_logits"]["seconds"]
+        else:
+            best_full, best_full_seconds = run_case(
+                checkpoint=checkpoint,
+                rows=rows,
+                dataset_hash=dataset_hash,
+                budget=best_budget,
+                context_length=args.context_length,
+                last_token_only=False,
+            )
+            reports["best_budget_full_logits"] = best_full
+            results["best_budget_full_logits"] = {
+                "seconds": best_full_seconds,
+                "batching": best_full["batching"],
+                "inference_path": best_full["inference_path"],
+                "correct": best_full["overall"]["correct"],
+                "evaluated": best_full["evaluated_items"],
+                "coverage": best_full["coverage"],
+            }
+
+        reference_signature = prediction_signature(baseline)
+        prediction_parity = all(
+            prediction_signature(report) == reference_signature
             for report in reports.values()
         )
-        if not parity or not coverage_parity:
+        coverage_parity = all(
+            report["selected_items"] == baseline["selected_items"]
+            and report["dataset_sha256"] == baseline["dataset_sha256"]
+            and report["skipped"] == baseline["skipped"]
+            for report in reports.values()
+        )
+        if not prediction_parity or not coverage_parity:
             raise SystemExit("La optimización alteró predicciones o cobertura")
 
-        batching_speedup = results["single_full_logits"]["seconds"] / max(
-            results["batched_full_logits"]["seconds"], 1e-9
-        )
-        last_position_speedup = results["batched_full_logits"]["seconds"] / max(
-            results["batched_last_position"]["seconds"], 1e-9
-        )
-        total_speedup = results["single_full_logits"]["seconds"] / max(
-            results["batched_last_position"]["seconds"], 1e-9
-        )
+        best_last_seconds = results[best_name]["seconds"]
+        speedups = {
+            "batching_at_best_budget": results["single_full_logits"]["seconds"]
+            / max(best_full_seconds, 1e-9),
+            "last_position_projection_at_best_budget": best_full_seconds
+            / max(best_last_seconds, 1e-9),
+            "combined": results["single_full_logits"]["seconds"]
+            / max(best_last_seconds, 1e-9),
+        }
         output = {
-            "benchmark": "ronin-mmlu-evaluator-optimization-v2",
-            "dataset_id": reference["dataset_id"],
+            "benchmark": "ronin-mmlu-evaluator-budget-sweep-v3",
+            "dataset_id": baseline["dataset_id"],
             "dataset_revision": args.revision,
             "dataset_sha256": dataset_hash,
             "split": "test",
             "selected_items": len(rows),
             "sampling_seed": args.seed,
             "context_length": args.context_length,
-            "protocol": reference["protocol"],
+            "protocol": baseline["protocol"],
             "official_score_comparable": False,
-            "prediction_parity": parity,
+            "prediction_parity": prediction_parity,
             "coverage_parity": coverage_parity,
-            "speedups": {
-                "batching": batching_speedup,
-                "last_position_projection": last_position_speedup,
-                "combined": total_speedup,
-            },
+            "best_token_budget": best_budget,
+            "best_candidate": best_name,
+            "speedups": speedups,
+            "budget_sweep": [
+                {
+                    "token_budget": budget,
+                    "seconds": results[f"last_position_budget_{budget}"]["seconds"],
+                    "batches": results[f"last_position_budget_{budget}"]["batching"]["batches"],
+                }
+                for budget in candidate_budgets
+            ],
             "runs": results,
             "interpretation": (
-                "Comparación con checkpoint aleatorio sobre los mismos ítems. "
-                "Aísla el efecto de batching y de proyectar logits solo en la última "
-                "posición. No mide mejora de inteligencia ni entrenamiento."
+                "Checkpoint aleatorio y mismos ítems/revisión/protocolo. Se barre el "
+                "presupuesto de tokens para limitar padding y se compara el mejor lote "
+                "con logits completos y con proyección solo en la última posición. "
+                "No mide mejora de inteligencia ni entrenamiento."
             ),
         }
         args.output.parent.mkdir(parents=True, exist_ok=True)
