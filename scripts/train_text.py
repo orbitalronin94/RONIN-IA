@@ -26,6 +26,7 @@ def main() -> None:
     parser.add_argument("--text", type=Path, required=True, help="approved UTF-8 corpus file")
     parser.add_argument("--profile", choices=["tiny"], default="tiny")
     parser.add_argument("--steps", type=int, default=None)
+    parser.add_argument("--context-length", type=int, default=None, help="Contexto en bytes; permite alinear el entrenamiento con el evaluador")
     parser.add_argument("--seed", type=int, default=None, help="semilla de inicialización y muestreo")
     parser.add_argument(
         "--init-checkpoint",
@@ -50,6 +51,10 @@ def main() -> None:
         torch.set_num_interop_threads(args.interop_threads)
 
     model_config, training_config = get_profile(args.profile)
+    if args.context_length is not None:
+        if not 128 <= args.context_length <= 8192:
+            parser.error("--context-length must be between 128 and 8192")
+        model_config = replace(model_config, context_length=args.context_length)
     if args.steps is not None:
         if not 1 <= args.steps <= 1_000:
             parser.error("--steps must be between 1 and 1000 for the tiny profile")
