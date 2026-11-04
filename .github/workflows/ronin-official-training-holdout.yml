@@ -215,6 +215,21 @@ jobs:
             echo "::endgroup::"
           done
 
+      - name: Exportar pesos finales y manifiestos de procedencia por semilla
+        run: |
+          IFS=',' read -ra seed_values <<< "$SEEDS"
+          for seed in "${seed_values[@]}"; do
+            checkpoint="/tmp/ronin-training/checkpoints/seed-$seed/step-$(printf '%08d' "$STEPS").pt"
+            python scripts/export_run5_weights.py \
+              --checkpoint "$checkpoint" \
+              --output "artifacts/weights/seed-$seed/ronin-tiny-seed-$seed-step-$STEPS.pt" \
+              --manifest "artifacts/weights/seed-$seed/weights-manifest.json" \
+              --training-manifest reports/training-mixture.json \
+              --initial-eval "reports/seed-$seed/mmlu-inicial.json" \
+              --final-eval "reports/seed-$seed/mmlu-final.json" \
+              --profile tiny --seed "$seed" --steps "$STEPS"
+          done
+
       - name: Consolidar métricas, cobertura y procedencia
         run: |
           python - <<'PY'
@@ -319,6 +334,15 @@ jobs:
               "summary": "reports/resumen-ronin-mmlu.json",
           }, ensure_ascii=False, indent=2))
           PY
+
+      - name: Publicar pesos finales reproducibles del estudiante
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-run5-model-weights
+          path: artifacts/weights/
+          if-no-files-found: error
+          compression-level: 6
+          retention-days: 90
 
       - name: Publicar informes y manifiestos sin corpus ni checkpoints
         uses: actions/upload-artifact@v6
