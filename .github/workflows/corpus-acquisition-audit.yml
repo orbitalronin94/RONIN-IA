@@ -111,34 +111,46 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-            - name: Descargar fuentes criptográficas históricas y literarias sin credenciales
-              run: |
-                python scripts/acquire_cryptography_library.py --output-dir /tmp/ronin-cryptography-library
-            - name: Construir biblioteca de patrones con pares y controles negativos
-              run: |
-                PYTHONPATH=. python scripts/build_obfuscation_cases.py \
-                  --source-manifest /tmp/ronin-cryptography-library/manifest.json \
-                  --output /tmp/ronin-obfuscation-library/cases.jsonl \
-                  --noise-count 500
-                python - <<'PY'
-                import json
-                from pathlib import Path
-                from ronin.epistemic.obfuscation import validate_obfuscation_case
-      
-                root = Path("/tmp/ronin-obfuscation-library")
-                rows = [json.loads(line) for line in (root / "cases.jsonl").read_text(encoding="utf-8").splitlines()]
-                errors = [(row["record_id"], validate_obfuscation_case(row)) for row in rows]
-                errors = [(record_id, error) for record_id, messages in errors for error in messages]
-                assert not errors, errors[:10]
-                summary = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
-                assert summary["counts_by_type"]["B"] == 500
-                assert summary["counts_by_label"]["NO_MESSAGE_IN_CONTROL"] == 500
-                assert summary["counts_by_type"]["A"] >= 2
-                assert summary["counts_by_type"]["C"] >= 1
-                assert summary["counts_by_type"]["D"] >= 1
-                print(json.dumps(summary, ensure_ascii=False, indent=2))
-                PY
-      
+      - name: Descargar seis fuentes primarias sin credenciales
+        run: |
+          python scripts/acquire_cryptography_library.py --output-dir /tmp/ronin-cryptography-library
+      - name: Construir y validar pares de opacidad
+        run: |
+          PYTHONPATH=. python scripts/build_obfuscation_cases.py \
+            --source-manifest /tmp/ronin-cryptography-library/manifest.json \
+            --output /tmp/ronin-obfuscation-library/cases.jsonl \
+            --noise-count 500
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from ronin.epistemic.obfuscation import validate_obfuscation_case
+
+          source_root = Path("/tmp/ronin-cryptography-library")
+          source_manifest = json.loads((source_root / "manifest.json").read_text(encoding="utf-8"))
+          assert source_manifest["credential_free"] is True
+          assert source_manifest["source_count"] == 6
+          for source in source_manifest["sources"]:
+              assert source["training_status"] == "excluded_pending_manual_review"
+              assert len(source["sha256"]) == 64
+              assert (source_root / source["local_filename"]).is_file()
+
+          root = Path("/tmp/ronin-obfuscation-library")
+          rows = [json.loads(line) for line in (root / "cases.jsonl").read_text(encoding="utf-8").splitlines()]
+          errors = [(row["record_id"], validate_obfuscation_case(row)) for row in rows]
+          errors = [(record_id, error) for record_id, messages in errors for error in messages]
+          assert not errors, errors[:10]
+          summary = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          assert summary["counts_by_type"]["B"] == 500
+          assert summary["counts_by_label"]["NO_MESSAGE_IN_CONTROL"] == 500
+          assert summary["counts_by_type"]["A"] >= 3
+          assert summary["counts_by_type"]["C"] >= 1
+          assert summary["counts_by_type"]["D"] >= 1
+          print(json.dumps({
+              "source_count": source_manifest["source_count"],
+              "source_sizes": {item["id"]: item["size_bytes"] for item in source_manifest["sources"]},
+              "dataset": summary,
+          }, ensure_ascii=False, indent=2))
+          PY
       - name: Publicar fuentes primarias y pares de opacidad
         uses: actions/upload-artifact@v4
         with:
