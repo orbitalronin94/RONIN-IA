@@ -14,9 +14,10 @@ import re
 import sqlite3
 import sys
 from collections import Counter
+from collections.abc import Iterable
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from scripts.select_knowledge_dense_corpus import (
     DOMAIN_TERMS,
