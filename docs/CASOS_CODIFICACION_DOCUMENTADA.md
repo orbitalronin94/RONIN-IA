@@ -109,21 +109,29 @@ relato y no el caso del criptograma de los bailarines.
 La clave es una invención literaria de Doyle, no un criptograma histórico
 descubierto en un manuscrito anterior.
 
-Referencia de identificación de la obra:
-- The Arthur Conan Doyle Encyclopedia, colección de relatos de Sherlock Holmes:
-  https://www.arthur-conan-doyle.com/
+Edición digital de acceso abierto:
+- Project Gutenberg Australia, texto de *The Return of Sherlock Holmes*,
+  con “The Adventure of the Dancing Men” y su publicación original en 1903:
+  https://gutenberg.net.au/ebooks/c00016.html
 
 ### 6. Julio Verne — *La Jangada* (1881)
 
-**Estado:** `claim_needs_verification` para la afirmación específica sobre
-la primera exposición del “método de la palabra probable” aplicado a un
-cifrado de Gronsfeld.
+**Estado:** `fictional_cipher_solved_in_narrative` para la presencia y solución
+narrativa del criptograma; afirmación histórica sobre el método: refutada en
+la formulación inicial.
 
-La novela incluye un problema criptográfico que se resuelve dentro de la
-narración. Antes de etiquetarla como prioridad histórica del método, hay que
-comprobar la edición, el pasaje exacto, el tipo de cifrado y la atribución de
-“primera exposición” con bibliografía especializada. Hasta entonces se
-mantiene como candidato de investigación, no como hecho confirmado.
+La novela incluye un criptograma cuya solución se desarrolla dentro de la
+narración. Sin embargo, no debe atribuirse a Verne la invención ni la primera
+exposición del método de solución. Un estudio histórico de la NSA sobre los
+criptogramas de Verne señala que el procedimiento de análisis era anterior y
+que Verne no lo inventó; también cuestiona su pretensión de haber resuelto el
+cifrado por un método nuevo. La obra sigue siendo útil como ejemplo de
+criptografía ficcional, no como prioridad histórica del método.
+
+Referencia especializada:
+- William F. Friedman, estudio histórico sobre criptogramas en la obra de
+  Verne, documento desclasificado de la NSA:
+  https://www.nsa.gov/portals/75/documents/news-features/declassified-documents/friedman-documents/publications/FOLDER_205/41762559080174.pdf
 
 ## Reglas de adquisición y anotación
 
