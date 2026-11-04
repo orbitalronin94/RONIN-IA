@@ -1,6 +1,13 @@
 name: Preparar caché de tutores locales
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/cache-teachers.yml"
+      - "scripts/download_teacher_models.py"
+      - "ronin/data/teacher.py"
+      - "pyproject.toml"
   workflow_dispatch:
 
 permissions:
@@ -14,6 +21,7 @@ jobs:
   download-teachers:
     name: Descargar y verificar tutores MIT
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -30,21 +38,24 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
           python -m pip install -e ".[teachers]" --no-deps
-          python -m pip install "transformers>=4.45" "huggingface_hub>=0.24" "safetensors>=0.4"
-      - name: Descargar o completar GPT-2 y GPT-Neo
+          python -m pip install "transformers>=4.49.0" "huggingface_hub>=0.24" "safetensors>=0.4" "accelerate>=1.3"
+      - name: Descargar o completar GPT-2, GPT-Neo y Phi-4
         run: |
           python scripts/download_teacher_models.py --model gpt2
           python scripts/download_teacher_models.py --model gpt-neo-125m
+          python scripts/download_teacher_models.py --model phi-4-mini-instruct
       - name: Comprobar manifiestos y pesos locales
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          for name in ("gpt2", "gpt-neo-125m"):
+          from ronin.data.teacher import verify_teacher_manifest
+          for name in ("gpt2", "gpt-neo-125m", "phi-4-mini-instruct"):
               folder = Path("models/teachers") / name
               manifest = json.loads((folder / "ronin-teacher-manifest.json").read_text())
               assert manifest["license"] == "mit" and manifest["license_verified"] is True
               assert manifest["revision"] and manifest["files_sha256"]
-              assert any(folder.glob("*.safetensors"))
+              assert any(folder.rglob("*.safetensors"))
+              verify_teacher_manifest(folder, manifest)
               print(name, manifest["revision"], len(manifest["files_sha256"]), "archivos verificados")
           PY

@@ -5,7 +5,7 @@ import pytest
 
 from ronin.data.corpus import prepare
 from ronin.data.prompts import build_prompts
-from ronin.data.teacher import generate_completion, write_teacher_dataset
+from ronin.data.teacher import generate_completion, verify_teacher_manifest, write_teacher_dataset
 
 
 def test_prompt_curriculum_is_deterministic_and_validated():
@@ -38,6 +38,7 @@ def test_teacher_record_has_provenance_and_student_stays_random(tmp_path, monkey
         "license": "mit",
         "license_verified": True,
         "license_url": "https://huggingface.co/openai-community/gpt2",
+        "trust_remote_code": True,
     }
     output = tmp_path / "teacher.jsonl"
     count = write_teacher_dataset(["Explica una idea."], output, object(), object(), manifest)
@@ -51,6 +52,7 @@ def test_teacher_record_has_provenance_and_student_stays_random(tmp_path, monkey
     assert record["student_initialization"] == "random"
     assert record["teacher_weights_imported_into_student"] is False
     assert record["teacher_license_verified"] is True
+    assert record["teacher_trust_remote_code"] is True
 
 
 def test_prepared_corpus_accepts_only_verified_local_mit_records(tmp_path, monkeypatch):
@@ -72,3 +74,58 @@ def test_prepared_corpus_accepts_only_verified_local_mit_records(tmp_path, monke
     assert "### Instrucción" in corpus
     assert "### Respuesta del tutor" in corpus
     assert "Respuesta local." in corpus
+
+
+
+def test_teacher_manifest_verifies_every_local_file(tmp_path):
+    weights = tmp_path / "model.safetensors"
+    weights.write_bytes(b"verified model bytes")
+    manifest = {
+        "model_id": "openai-community/gpt2",
+        "revision": "a" * 40,
+        "license": "mit",
+        "license_verified": True,
+        "license_url": "https://huggingface.co/openai-community/gpt2",
+        "weights_format": "safetensors",
+        "files_sha256": {
+            "model.safetensors": hashlib.sha256(weights.read_bytes()).hexdigest(),
+        },
+    }
+    verify_teacher_manifest(tmp_path, manifest)
+
+    weights.write_bytes(b"tampered model bytes")
+    with pytest.raises(ValueError, match="SHA-256"):
+        verify_teacher_manifest(tmp_path, manifest)
+
+
+def test_teacher_manifest_rejects_untracked_and_unsafe_files(tmp_path):
+    weights = tmp_path / "model.safetensors"
+    weights.write_bytes(b"model")
+    digest = hashlib.sha256(weights.read_bytes()).hexdigest()
+    manifest = {
+        "model_id": "openai-community/gpt2",
+        "revision": "a" * 40,
+        "license": "mit",
+        "license_verified": True,
+        "license_url": "https://huggingface.co/openai-community/gpt2",
+        "weights_format": "safetensors",
+        "files_sha256": {"../model.safetensors": digest},
+    }
+    with pytest.raises(ValueError, match="inventario|Ruta insegura"):
+        verify_teacher_manifest(tmp_path, manifest)
+
+    manifest["files_sha256"] = {"model.safetensors": digest}
+    (tmp_path / "unexpected.bin").write_bytes(b"extra")
+    with pytest.raises(ValueError, match="inventario"):
+        verify_teacher_manifest(tmp_path, manifest)
+
+
+def test_phi4_mini_instruct_is_pinned_as_mit_remote_code_teacher():
+    from scripts.download_teacher_models import ALLOW_PATTERNS, ALLOWED_MODELS
+
+    model = ALLOWED_MODELS["phi-4-mini-instruct"]
+    assert model["repo_id"] == "microsoft/Phi-4-mini-instruct"
+    assert model["license_url"] == "https://huggingface.co/microsoft/Phi-4-mini-instruct"
+    assert model["trust_remote_code"] is True
+    assert "model*.safetensors" in ALLOW_PATTERNS
+    assert "*.py" in ALLOW_PATTERNS
