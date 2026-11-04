@@ -59,16 +59,13 @@ COLLECTIONS = {
     "Open Science": {
         "mathematics", "physics", "chemistry_materials", "biology",
         "medicine_health", "statistics_probability", "astronomy_earth_science",
-        "engineering_robotics", "geography", "geology", "climate_meteorology", "oceanography",
-        "electrical_engineering", "mechanical_engineering", "civil_engineering", "data_science", "psychology",
+        "engineering_robotics",
     },
     # Common Corpus's semantic-data collection is reserved for logic.
     "Semantic data": {"logic_epistemology"},
-    "Open Culture": {"philosophy", "humanities", "history", "linguistics", "literature", "art_architecture", "education"},
-    "Open Source": {"computer_science", "software_engineering", "cybersecurity", "data_science"},
-    "Open Government": {"law", "economics", "social_sciences", "political_science", "geography"},
-    # Additional subject buckets routed from the same explicitly licensed collections.
-
+    "Open Culture": {"philosophy", "humanities"},
+    "Open Source": {"computer_science", "software_engineering"},
+    "Open Government": {"law", "economics", "social_sciences"},
 }
 DOMAIN_SOURCE_PARENT = {
     "mathematics": "mathematics",
@@ -87,24 +84,9 @@ DOMAIN_SOURCE_PARENT = {
     "astronomy_earth_science": "physics",
     "engineering_robotics": "physics",
     "humanities": "philosophy",
-    "history": "philosophy",
-    "linguistics": "philosophy",
-    "literature": "philosophy",
-    "art_architecture": "philosophy",
-    "geography": "physics",
-    "geology": "physics",
-    "climate_meteorology": "physics",
-    "oceanography": "physics",
-    "electrical_engineering": "physics",
-    "mechanical_engineering": "physics",
-    "civil_engineering": "physics",
-    "cybersecurity": "computer_science",
-    "data_science": "computer_science",
-    "education": "philosophy",
-    "psychology": "biology_medicine",
-    "political_science": "law_economics_social_sciences",
-
 }
+DOMAIN_PRIORITY = tuple(dict.fromkeys(domain for group in COLLECTIONS.values() for domain in group))
+
 LANGUAGES = {"en", "es"}
 LANGUAGE_ALIASES = {"en": "en", "english": "en", "es": "es", "spanish": "es"}
 # Common Corpus uses the "language" field as a programming-language label for
