@@ -392,8 +392,8 @@ def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
     (output_dir / "documents.jsonl").write_bytes(document_manifest_bytes)
     output_hashes["documents.jsonl"] = sha256(document_manifest_bytes)
     manifest = {
-        "schema_version": 1,
-        "dataset_id": "ronin-spanish-public-domain-literature-v1",
+        "schema_version": 2,
+        "dataset_id": "ronin-spanish-public-domain-literature-v2",
         "license": "textos de dominio público; marcado TEI/metadatos CC-BY-4.0",
         "access": "descarga HTTPS pública sin cuenta, token ni clave API",
         "sources": source_manifest,
