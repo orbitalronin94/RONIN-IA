@@ -50,6 +50,16 @@ def normalized_hash(text: str) -> str:
     return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
 
+def simhash64(text: str) -> int:
+    vector = [0] * 64
+    for token in set(tokens(text)):
+        digest = hashlib.blake2b(token.encode("utf-8"), digest_size=8).digest()
+        value = int.from_bytes(digest, "big")
+        for bit in range(64):
+            vector[bit] += 1 if value & (1 << bit) else -1
+    return sum((1 << bit) for bit, weight in enumerate(vector) if weight >= 0)
+
+
 def score_record(text: str, domain: str, df: Counter[str], total_docs: int) -> dict[str, float]:
     words = tokens(text)
     if not words:
@@ -141,6 +151,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--max-documents", type=int, default=2_000_000)
+    parser.add_argument("--max-source-rows", type=int, default=5_000_000)
     parser.add_argument("--top-percent", type=float, default=20.0)
     parser.add_argument("--min-score", type=float, default=30.0)
     args = parser.parse_args()
@@ -172,7 +183,7 @@ def main() -> None:
             rejected["empty_license_allowlist"] += 1
             continue
         for index, row in enumerate(source_rows(spec)):
-            if accepted >= args.max_documents:
+            if accepted >= args.max_documents or index >= args.max_source_rows:
                 break
             license_value = get_field(row, spec.get("license_field"), spec.get("fixed_license"))
             if license_value not in allowed:
@@ -232,10 +243,24 @@ def main() -> None:
         rows = db.execute(
             "SELECT docs.text, docs.license, docs.provenance, ranked.score "
             "FROM ranked JOIN docs ON docs.id=ranked.doc_id "
-            "ORDER BY ranked.score DESC, docs.id LIMIT ?",
-            (keep_n,),
+            "ORDER BY ranked.score DESC, docs.id",
         )
+        selected_bands: dict[int, dict[int, list[int]]] = {i: {} for i in range(4)}
+        near_duplicate_removed = 0
         for text, license_value, provenance, score in rows:
+            signature = simhash64(text)
+            duplicate = False
+            for band in range(4):
+                key = (signature >> (band * 16)) & 0xFFFF
+                for previous in selected_bands[band].get(key, []):
+                    if (signature ^ previous).bit_count() <= 3:
+                        duplicate = True
+                        break
+                if duplicate:
+                    break
+            if duplicate:
+                near_duplicate_removed += 1
+                continue
             line = text + "\n"
             out.write(line)
             encoded = line.encode("utf-8")
@@ -244,6 +269,11 @@ def main() -> None:
             selected_count += 1
             score_total += score
             score_min = min(score_min, score)
+            for band in range(4):
+                key = (signature >> (band * 16)) & 0xFFFF
+                selected_bands[band].setdefault(key, []).append(signature)
+            if selected_count >= keep_n:
+                break
 
     report = {
         "schema_version": 1,
@@ -260,6 +290,7 @@ def main() -> None:
         "documents_seen": total,
         "candidates_above_threshold": scored_count,
         "selected_documents": selected_count,
+        "near_duplicates_removed": near_duplicate_removed,
         "selected_bytes_utf8": bytes_written,
         "selected_sha256": hashes.hexdigest(),
         "rejected": dict(rejected),
