@@ -254,14 +254,34 @@ def test_run5_stream_shuffle_rejects_invalid_buffer():
         raise AssertionError("shuffle buffer must be bounded and at least two")
 
 
-def test_run5_default_split_is_eighty_percent_base_and_twenty_percent_hkd():
+def test_run5_default_split_is_half_base_and_half_hkd_to_meet_x10_minimums():
     from scripts.prepare_pmc_oa_candidates import HKD_FRACTION as PMC_HKD_FRACTION
     from scripts.prepare_run5_candidates import HKD_FRACTION
 
-    assert HKD_FRACTION == 0.20
-    assert PMC_HKD_FRACTION == 0.20
+    assert HKD_FRACTION == 0.50
+    assert PMC_HKD_FRACTION == 0.50
     total = 1000
     hkd_count = int(total * HKD_FRACTION)
     base_count = total - hkd_count
-    assert base_count == 800
-    assert hkd_count == 200
+    assert base_count == 500
+    assert hkd_count == 500
+
+
+def test_domain_workers_use_distinct_reproducible_shuffle_seeds():
+    from scripts.prepare_run5_candidates import domain_shuffle_seed
+
+    first = domain_shuffle_seed("mathematics")
+    second = domain_shuffle_seed("physics")
+    assert first == domain_shuffle_seed("mathematics")
+    assert first != second
+    assert 0 <= first < 2**32
+
+
+def test_half_hkd_split_has_a_feasible_input_budget_for_x10_minimum():
+    from scripts.prepare_run5_candidates import HKD_FRACTION
+
+    minimum_train_bytes = 2_560 * 1024**2
+    train_fraction = 0.90
+    required_accepted_bytes = int(minimum_train_bytes / (HKD_FRACTION * train_fraction)) + 1
+    assert required_accepted_bytes < 8 * 1024**3
+    assert required_accepted_bytes > 5 * 1024**3
