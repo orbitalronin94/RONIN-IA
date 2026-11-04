@@ -28,7 +28,7 @@ def test_manifest_has_32_libraries_across_16_domains_and_portfolio_is_retrieval_
 
 def test_official_training_gate_blocks_all_unadmitted_libraries(tmp_path):
     errors = validate(MANIFEST, require_ready=True, corpus_root=tmp_path)
-    assert sum("not admitted" in error for error in errors) == 64
+    assert sum("not admitted" in error for error in errors) == 32
 
 
 def test_gate_requires_density_report_and_human_review_for_each_hkd_library(tmp_path):
