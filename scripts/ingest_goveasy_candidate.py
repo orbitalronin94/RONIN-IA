@@ -16,7 +16,7 @@ from pathlib import Path
 
 BASE = "https://data.goveasy.eu"
 FILES = ("api/tramites.json", "api/organismos.json", "api/provincias.json")
-DATASET_META = "dataset.jsonld"
+DATASET_META = "en"
 LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 USER_AGENT = "RONIN-IA-goveasy-candidate/1.0"
 
@@ -40,10 +40,6 @@ def main() -> int:
     limit = args.max_file_mib * 1024 * 1024
 
     metadata = fetch(f"{BASE}/{DATASET_META}", 4 * 1024 * 1024)
-    try:
-        metadata_json = json.loads(metadata)
-    except json.JSONDecodeError as exc:
-        raise ValueError("dataset.jsonld is not valid JSON") from exc
     metadata_text = metadata.decode("utf-8")
     if "CC BY 4.0" not in metadata_text and "CC-BY-4.0" not in metadata_text and "creativecommons.org/licenses/by/4.0" not in metadata_text:
         raise ValueError("dataset metadata does not expose the expected CC BY 4.0 declaration")
