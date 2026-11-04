@@ -18,11 +18,11 @@ No se admiten licencias NC o ND. Una licencia de metadatos no se confunde con la
 
 | Fuente | Contenido | Licencia declarada | Acceso | Estado |
 |---|---|---|---|---|
-| [CLiGS Textbox](https://github.com/cligs/textbox) | Novelas españolas (39) e hispanoamericanas (24), en TEI | Textos de dominio público; marcado/metadatos CC BY 4.0 | ZIP/HTTPS público | Integrada en el preparador |
+| [CLiGS Textbox](https://github.com/cligs/textbox) | Novelas españolas e hispanoamericanas y cuentos españoles (colección de 302 cuentos individuales en 20 colecciones), en TEI | Textos de dominio público; marcado/metadatos CC BY 4.0 | ZIP/HTTPS público | Integrada; ampliación de cuentos incluida en la siguiente descarga verificada |
 | [CoNSSA](https://github.com/cligs/conssa) | Novelas del Siglo de Oro | Textos de dominio público; TEI/metadatos CC BY 4.0 | ZIP/HTTPS público | Integrada en el preparador |
 | [ELTeC-spa](https://github.com/COST-ELTeC/ELTeC-spa) | Colección de 84 novelas españolas | Textos de dominio público; marcado CC BY 4.0 | ZIP/HTTPS público | Integrada en el preparador |
 
-Los repositorios de la primera integración se fijan a commits concretos en `scripts/prepare_open_corpora.py`. El preparador descarga archivos desde `codeload.github.com` sin enviar credenciales, extrae únicamente el elemento TEI `text`, deduplica por SHA-256 y divide documentos de forma determinista. La primera referencia es literaria e histórica; no debe presentarse como corpus general o representativo del español actual.
+Los repositorios se fijan a commits concretos en `scripts/prepare_open_corpora.py`. CLiGS Textbox incorpora ahora también `spanish/cuentos-espanoles/tei/`, además de las dos colecciones de novelas. El preparador descarga archivos desde `codeload.github.com` sin enviar credenciales, extrae únicamente el elemento TEI `text`, deduplica por SHA-256 y divide documentos de forma determinista. La primera referencia es literaria e histórica; no debe presentarse como corpus general o representativo del español actual.
 
 ## Candidatas para siguientes iteraciones
 
