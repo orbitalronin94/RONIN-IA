@@ -55,3 +55,13 @@ The global G-0 gate remains independent. A local level-A record cannot override 
 - `scripts/validate_rights_registry.py`: deterministic structural and policy validator.
 
 No candidate is silently promoted. Missing evidence means not A.
+
+
+## Current exact-scope records
+
+The append-only ledger currently contains two level-A rights records:
+
+- CoVoST 2 translation-field export only (CC0; pinned dataset README and archive/payload hashes).
+- OpenAlex JSONL works metadata export only (CC0; pinned official OpenAlex license document, public snapshot manifest, exact shard and export hashes; MAG-format exception is not in scope).
+
+These are rights certifications for the exact candidate exports. They are **not** dataset admission, do not authorize use of other fields/assets from the same upstream sources, and do not override G-0, quality, privacy, deduplication or split gates.
