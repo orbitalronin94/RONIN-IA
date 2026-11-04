@@ -216,7 +216,7 @@ def main() -> None:
     print(json.dumps({
         "dataset": manifest["dataset_id"],
         "documentos": manifest["document_count"],
-        "particiones": manifest["sentence_counts"],
+        "particiones": manifest["document_counts"],
         "sha256": manifest["output_sha256"],
     }, ensure_ascii=False, indent=2))
 
