@@ -127,6 +127,10 @@ jobs:
             echo "::error::Máximo cinco semillas."
             exit 1
           fi
+          if [ "$MMLU_LIMIT" -eq 0 ] && [ "${#seed_values[@]}" -ne 1 ]; then
+            echo "::error::El test completo de MMLU-Pro requiere una sola semilla por ejecución."
+            exit 1
+          fi
           declare -A seen
           for seed in "${seed_values[@]}"; do
             if [ -n "${seen[$seed]+x}" ]; then
@@ -191,12 +195,6 @@ jobs:
           done
 
       - name: Consolidar métricas, cobertura y procedencia
-        env:
-          PORTFOLIO_REVISION: ${{ env.PORTFOLIO_REVISION }}
-          MMLU_REVISION: ${{ env.MMLU_REVISION }}
-          STEPS: ${{ env.STEPS }}
-          SEEDS: ${{ env.SEEDS }}
-          MMLU_LIMIT: ${{ env.MMLU_LIMIT }}
         run: |
           python - <<'PY'
           import hashlib
