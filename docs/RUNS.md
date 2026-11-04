@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 22:41 | [Integración continua #783 (run 41927501563)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927501563) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: feat\(data\): extend RONIN semantic taxonomy to 32 domains. Trigger: push; rama: main; intento: 1. | 3d1e4ad4 |
 | 2026-11-04 22:41 | [Integración continua #782 (run 41927383236)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927383236) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(data\): retire broken legacy RUN5 entrypoint. Trigger: push; rama: main; intento: 1. | 3c27af85 |
 | 2026-11-04 22:40 | [Integración continua #777 (run 41927258361)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927258361) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Clarify 32-library manifest reference in README. Trigger: pull_request; rama: fix/run5-32-current-main; intento: 1. | 22d0c5f0 |
 | 2026-11-04 22:40 | [Integración continua #780 (run 41927354199)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927354199) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(ci\): apply 1000-row weekly sample default. Trigger: push; rama: main; intento: 1. | 80b13947 |
