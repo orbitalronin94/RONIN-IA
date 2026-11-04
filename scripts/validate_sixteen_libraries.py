@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 
 
@@ -37,8 +38,14 @@ def validate(
             errors.append(f"{name}: not admitted for training")
             continue
 
-        if not item.get("revision") or not item.get("manifest_sha256") or not item.get("license_audit"):
-            errors.append(f"{name}: missing immutable revision, manifest hash or license audit")
+        if not item.get("revision") or not item.get("license_audit"):
+            errors.append(f"{name}: missing immutable revision or license audit")
+        for field in ("manifest_sha256", "train_sha256", "sensitive_scan_sha256", "split_manifest_sha256", "dedup_report_sha256"):
+            value = item.get(field)
+            if not value or not re.fullmatch(r"[0-9a-f]{64}", str(value)):
+                errors.append(f"{name}: missing or invalid {field}")
+        if not item.get("quality_review"):
+            errors.append(f"{name}: missing quality review")
         if item.get("source_type") == "high_knowledge_density_extraction":
             if not item.get("selection_report_sha256"):
                 errors.append(f"{name}: missing semantic-density selection report hash")
