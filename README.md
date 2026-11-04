@@ -32,24 +32,21 @@ Workflow principal: [Experimento oficial RONIN desde cero + MMLU-Pro completo](h
 
 La [PR #39](https://github.com/orbitalronin94/RONIN-IA/pull/39) ya está fusionada en `main` (merge commit `ba22ed03fd76b3543f32ce301b8bbd0da6a714f9`).
 
-### Datos y ocho bibliotecas masivas
+### Dieciséis bibliotecas masivas + Portfolio experto
 
-**Nueva política de entrenamiento:** Portfolio/Papers queda fuera de pretraining y SFT. No cuenta como biblioteca y no se añade a los pesos preventivamente. Se reservará como índice RAG de experto: RONIN lo consulta cuando detecte incertidumbre o una pregunta especializada, recupera fragmentos con procedencia y responde con citas. Solo se reconsiderará entrenamiento con esos documentos si una carencia demostrada no se resuelve mediante recuperación y un A/B controlado demuestra mejora, con aprobación explícita.
+**Portfolio/Papers queda fuera de pretraining y SFT.** Se reserva como índice RAG de experto: RONIN lo consulta cuando detecte incertidumbre, recupera fragmentos con procedencia y cita la fuente. No cuenta entre las bibliotecas ni se añade a los pesos preventivamente. Solo se reconsideraría su entrenamiento si una carencia demostrada no se resuelve con recuperación y un A/B controlado prueba mejora, con aprobación explícita.
 
-El objetivo previo a RUN #5 son ocho bibliotecas independientes y masivas: matemáticas; lógica y epistemología; filosofía; física; química y materiales; biología y medicina; informática y software; derecho, economía y ciencias sociales. El umbral inicial es 256 MiB de texto train normalizado por biblioteca, con objetivo de 1 GiB, hashes y balance de volumen. Bytes no sustituyen la evaluación de calidad ni de cobertura.
+El gate previo al próximo entrenamiento exige **16 bibliotecas independientes**: ocho base (matemáticas; lógica/epistemología; filosofía; física; química/materiales; biología/medicina; informática/software; derecho/economía/ciencias sociales) y otras ocho derivadas de fuentes masivas mediante selección de conocimiento de alta densidad, una por cada dominio. Cada una necesita al menos 256 MiB de train normalizado y deduplicado; objetivo 1 GiB. Bytes no sustituyen calidad, cobertura ni diversidad.
 
-**No hay ocho bibliotecas admitidas todavía.** El manifiesto las registra como candidatas; el gate exige revisión de licencia por documento, procedencia, revisión inmutable, SHA-256, deduplicación, calidad, escaneo de PII/secretos y splits sin fugas. RUN #5 permanece bloqueada hasta que las ocho tengan sus ficheros train preparados y sus hashes verificados.
+Las ocho adicionales se construirán con `RONIN-HKD-0.1`: relevancia del dominio, densidad de unidades de conocimiento, especificidad, contenido informativo IDF y estructura. La métrica está inspirada en HKS (AAAI 2025), DSIR (NeurIPS 2023) y métricas de diversidad/densidad/homogeneidad (LREC 2020); es un prototipo heurístico propio y debe validarse con revisión humana y ablaciones antes de admitir datos.
 
-- **Matemáticas:** OpenWebMath (14,7B tokens declarados, ODC-By-1.0 y términos de Common Crawl) es prioridad condicional. MathPile y ProofPile-2 no se admiten como paquetes completos porque heredan licencias de múltiples fuentes.
-- **Lógica y epistemología:** Lean mathlib4 (Apache-2.0, dependencias a revisar) aporta pruebas formales; Common Corpus puede aportar prosa científica solo con filtro temático y licencia documental.
-- **Filosofía:** Spanish Public Domain Books de PleIAs es candidato masivo, sujeto a revisión obra/edición/traducción/jurisdicción y OCR.
-- **Física:** arXiv y OpenScience de Common Corpus requieren filtro por artículo/documento y licencia.
-- **Química y materiales:** PMC OA y PatentsView, con licencia por artículo y revisión de contenido incrustado.
-- **Biología y medicina:** PMC Open Access Subset y Europe PMC OA; nunca se descarga indiscriminadamente todo PMC.
-- **Informática y software:** The Stack v1/v2 con SPDX por archivo, opt-outs, atribución y escaneo de secretos/malware. The Stack v2 es demasiado grande para descargarlo completo en Actions.
-- **Derecho, economía y ciencias sociales:** OpenGovernment de Common Corpus, Harvard Caselaw Access Project y Europarl, sujetos a licencia, jurisdicción, vigencia y PII.
+**Estado real: 0/16 bibliotecas admitidas para el nuevo ciclo.** Los adaptadores de fuentes HKD están desactivados hasta verificar esquema, revisión inmutable y licencia por documento/archivo. El gate exige corpus reales, hashes, auditoría legal, deduplicación cruzada, calidad, PII/secretos y splits sin fugas. No se inicia el entrenamiento oficial ni se mergea la PR antes de superar el gate.
 
-La auditoría completa, decisiones y bloqueos están en [Auditoría de ocho bibliotecas masivas](docs/AUDITORIA_OCHO_BIBLIOTECAS_MASIVAS.md) y [manifiesto de admisión](data/manifests/eight_libraries.json). La aceleración del entrenamiento CPU se documenta en [Plan de aceleración CPU](docs/PLAN_ACELERACION_ENTRENAMIENTO_CPU.md).
+- Manifiesto de las 16: [sixteen_libraries.json](data/manifests/sixteen_libraries.json).
+- Adaptadores y allowlists: [knowledge_dense_sources.json](data/manifests/knowledge_dense_sources.json).
+- [Métrica y protocolo HKD](docs/METRICA_DENSIDAD_SEMANTICA.md).
+- [Auditoría de las fuentes masivas](docs/AUDITORIA_OCHO_BIBLIOTECAS_MASIVAS.md).
+- [Plan de aceleración CPU](docs/PLAN_ACELERACION_ENTRENAMIENTO_CPU.md).
 
 Los tutores GPT-2, GPT-Neo y Phi-4 pueden descargarse y ejecutarse localmente con licencias verificadas, pero sus pesos no se transfieren al estudiante. El nuevo workflow oficial no depende de que un tutor genere texto.
 
