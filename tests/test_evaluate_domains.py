@@ -6,7 +6,6 @@ import torch
 
 from ronin.config import get_profile
 from ronin.models.transformer import RoninLM
-from ronin.training.checkpoint import save_checkpoint
 from scripts.evaluate_domains import evaluate, load_items
 
 
@@ -26,7 +25,7 @@ def test_domain_benchmark_reports_domain_and_capability_metrics(tmp_path: Path):
     config, _ = get_profile("tiny")
     model = RoninLM(config)
     checkpoint = tmp_path / "model.pt"
-    save_checkpoint(checkpoint, model, step=0)
+    torch.save({"model": model.state_dict(), "step": 0}, checkpoint)
     row = {
         "id": "math-01", "domain": "matematicas", "capability": "razonamiento",
         "prompt": "2+2? A) 3 B) 4 C) 5 D) 6 Respuesta:",
