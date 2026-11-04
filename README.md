@@ -92,7 +92,7 @@ Consulta el [artefacto de la ejecución](https://github.com/orbitalronin94/RONIN
 
 ### Siguiente ciclo: benchmark reducido e instrumentación CPU
 
-El workflow [RONIN + MMLU-Pro reducido](.github/workflows/ronin-small-mmlu-pro.yml) está preparado en la rama de trabajo de la [PR #44](https://github.com/orbitalronin94/RONIN-IA/pull/44), todavía abierta como borrador. Sus valores manuales por defecto son 1.000 pasos, semilla 1337 y muestra estratificada de 1.400 preguntas. **Todavía no se ha lanzado.**
+El workflow [RONIN + MMLU-Pro reducido](.github/workflows/ronin-small-mmlu-pro.yml) ya está integrado en `main` mediante la [PR #44](https://github.com/orbitalronin94/RONIN-IA/pull/44). Sus valores manuales por defecto son 1.000 pasos, semilla 1337 y muestra estratificada de 1.400 preguntas. **El workflow reducido todavía no se ha lanzado; requiere `Run workflow` manual.**
 
 La preparación técnica incorpora:
 
@@ -103,17 +103,16 @@ La preparación técnica incorpora:
 - Prueba de regresión para comprobar que el sampler vectorizado conserva las mismas muestras.
 - [Diseño técnico, métricas y criterios A/B de aceleración CPU](docs/OPTIMIZACION_ENTRENAMIENTO_CPU.md).
 
-Estas modificaciones aún deben superar CI y medirse en el runner. No se afirma un factor de aceleración antes de disponer de una comparación reproducible con el mismo hardware, corpus, semilla y presupuesto. El cambio acelera el muestreo de batches y hace visible el coste del entrenamiento; no implica por sí solo que el forward/backward del Transformer sea más rápido.
+Los cambios están integrados y la CI de la revisión fusionada ha pasado. Aún no existe una medición A/B del speedup en el runner. No se afirma un factor de aceleración antes de comparar el mismo hardware, corpus, semilla y presupuesto. El sampler vectorizado reduce trabajo Python; las métricas y el control explícito de hilos quedan instrumentados en el workflow reducido, cuyo rendimiento todavía debe medirse. Esto no demuestra por sí solo que el forward/backward del Transformer sea más rápido.
 
-El workflow reducido se ejecutará después de integrar los cambios y lanzarlo manualmente desde Actions. El test MMLU-Pro sigue siendo solo evaluación, nunca datos de entrenamiento. El artefacto publicará métricas e informes, no checkpoints.
+Los cambios ya están integrados. El workflow reducido se inicia manualmente desde Actions; el test MMLU-Pro sigue siendo solo evaluación, nunca datos de entrenamiento. El artefacto publicará métricas e informes, no checkpoints.
 
 ### Últimas ejecuciones observadas
 
-- [Experimento oficial #1](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377): completado; 1.000 pasos, loss final 1,98638 y resultado MMLU-Pro documentado arriba.
-- [Primera iteración y benchmark interno (completado)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41840992712): completado correctamente en la revisión con el sampler vectorizado.
-- [CI #415](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41841250219): correcta; valida también la prueba de paridad del sampler vectorizado y las métricas del bucle. El último cambio posterior fue únicamente documental.
-- La [PR #44](https://github.com/orbitalronin94/RONIN-IA/pull/44) continúa sin fusionar. No se ha iniciado el workflow reducido.
-
+- [Experimento oficial #2](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41842575826): iniciado automáticamente al fusionar la PR #44; entrenamiento desde cero con 1.000 pasos y test MMLU-Pro completo. Está en curso. Este workflow oficial no pasa todavía `--metrics-out` ni los argumentos de hilos; las métricas nuevas están activadas en el workflow reducido, pendiente de dispatch manual.
+- [CI #420](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41842364060): correcta sobre la revisión final de la PR #44.
+- [PR #44](https://github.com/orbitalronin94/RONIN-IA/pull/44): fusionada en `main`; merge commit `3a47956f130262916e558094b4b09c9498f2bb3f`.
+- El workflow reducido MMLU-Pro de 1.400 preguntas está integrado, pero sigue pendiente de ejecución manual.
 El inventario completo, con procedencia, revisiones, licencias, particiones, exclusiones y hashes, está en [Inventario de corpus y materiales](docs/INVENTARIO_CORPUS_Y_MATERIALES.md) y en el [manifiesto JSON](data/manifests/corpus_inventory.json).
 
 ## Principios irrenunciables
