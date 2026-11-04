@@ -262,3 +262,10 @@ En los workflows de GitHub Actions se han producido estos artefactos candidatos 
 | ROR, metadatos CC0 sin campo `locations` | 144.717 | 87.981.707 bytes | `a717800a198694c7fdd6aff6759c4dbb4984d53f0f3ef92046eb7523aa3c7f3f` | Artefacto candidato; validador de propuesta de derechos pasó |
 
 Los tres artefactos están en GitHub Actions con retención de 90 días (CoVoST run `41932647180`, OpenAlex `41932684850`, ROR `41932866226`). No he copiado cientos de MB al historial Git. Los bytes de OpenAlex y ROR son metadatos estructurados y no cuentan como texto de preentrenamiento; CoVoST son traducciones cortas, no prosa general. Ninguno está todavía admitido en las bibliotecas ni en el split de entrenamiento: la validación de la propuesta de derechos solo comprueba el esquema y la política, y no sustituye G-0, privacidad, calidad, deduplicación, atribución ni revisión humana.
+
+
+## Fuentes adicionales registradas (49 candidatas en el inventario)
+
+Se han añadido también **NASA NTRS** como descubrimiento de literatura técnica (solo documento a documento con prueba de obra gubernamental y revisión de material de terceros), **OpenStax** como exclusión explícita por CC BY-NC-SA 4.0 y **The Stack v2** como exclusión por exigir acuerdo para descarga masiva, tener licencias de repositorio heterogéneas y reconocer riesgo de datos personales/secretos en código. No se utilizarán rutas con credenciales ni acuerdos de acceso para sortear esas restricciones.
+
+El registro incluye ahora 49 entradas entre candidatas, metadatos y exclusiones. No significa 49 datasets descargados ni 49 bibliotecas utilizables: únicamente CoVoST, OpenAlex y ROR han producido hasta ahora artefactos verificables en Actions. Las otras fuentes necesitan adaptador, versión exacta, hashes, evaluación de calidad y/o prueba de derechos por elemento.
