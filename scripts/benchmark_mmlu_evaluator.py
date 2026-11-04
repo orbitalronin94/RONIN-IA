@@ -9,7 +9,6 @@ import time
 from pathlib import Path
 
 import torch
-
 from evaluate_mmlu_pro import (
     DATASET_REVISION,
     evaluate_rows,
