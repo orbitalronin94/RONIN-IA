@@ -65,8 +65,9 @@
       "base_url": "https://archive.org/",
       "declared_license": "Variable por ítem. La presencia de metadata licenseurl o una etiqueta public domain no constituye por sí sola una verificación jurídica independiente.",
       "verified_facts": [
-        "La colección contiene materiales con estados de derechos heterogéneos.",
-        "La propuesta de filtrar por licenseurl necesita una segunda comprobación de la ficha, la procedencia y los componentes del objeto."
+        "La documentación del esquema de metadatos define licenseurl como una URL de la licencia que cubre los trabajos incluidos en el ítem; también existe un campo rights para declaraciones de derechos.",
+        "Internet Archive explica que licenseurl puede utilizarse para buscar ítems por tipo de licencia, pero el campo es metadato del ítem y no acredita por sí solo la titularidad ni los derechos de cada archivo contenido.",
+        "Por tanto, licenseurl es una pista de selección y trazabilidad, no una certificación independiente de dominio público."
       ],
       "jurisdiction_status": {
         "US": "No verificado globalmente; revisión por identificador y obra.",
@@ -82,7 +83,9 @@
       ],
       "sources": [
         "https://archive.org/advancedsearch.php",
-        "https://archive.org/services/docs/api/metadata.html"
+        "https://archive.org/services/docs/api/metadata.html",
+        "https://internetarchive.readthedocs.io/en/stable/metadata.html",
+        "https://archivesupport.zendesk.com/hc/en-us/articles/360018359991-Search-A-Basic-Guide"
       ]
     },
     {
@@ -116,24 +119,28 @@
       "id": "bookcorpusopen",
       "name": "BookCorpusOpen",
       "base_url": "https://huggingface.co/datasets/bookcorpusopen",
-      "declared_license": "No se ha encontrado en esta auditoría una declaración primaria y verificable que acredite que los 17.868 libros son de dominio público y reutilizables en las jurisdicciones objetivo.",
+      "declared_license": "No es un corpus de dominio público acreditado. La ficha de distribución describe los 17.868 elementos como textos de ediciones Smashwords; no aporta una licencia de reutilización general. Los términos de Smashwords reservan los derechos de las obras a autores/editoriales y limitan la redistribución de copias gratuitas o adquiridas.",
       "verified_facts": [
-        "La afirmación de dominio público y el recuento de 17.868 obras no quedan acreditados por la documentación primaria examinada en esta fase."
+        "La ficha de datos disponible describe los textos como libros/ediciones Smashwords y no aporta licencia de dominio público por obra.",
+        "Una revisión académica del panorama de corpus identifica BookCorpusOpen como ampliación del Toronto Book Corpus a partir de Smashwords y registra como protocolo los términos de servicio de Smashwords, no dominio público.",
+        "Los términos actuales de Draft2Digital/Smashwords y los avisos de licencia de ediciones Smashwords no convierten la gratuidad de descarga en dominio público ni en autorización general de redistribución."
       ],
       "jurisdiction_status": {
         "US": "No verificado.",
         "Spain_EU": "No verificado."
       },
-      "acquisition_status": "EXCLUDED_PENDING_PRIMARY_EVIDENCE",
+      "acquisition_status": "EXCLUDED_COPYRIGHT_AND_REDISTRIBUTION_NOT_CLEARED",
       "available_text_count": null,
-      "count_note": "No se ha verificado el número de obras elegibles ni la licencia a nivel de obra.",
+      "count_note": "La cifra de 17.868 describe entradas del dataset, no obras elegibles para reutilización. No se ha verificado una licencia que autorice su inclusión.",
       "conditions": [
-        "No descargar ni incorporar hasta localizar la fuente primaria, licencia expresa y procedencia de cada obra.",
-        "Acreditar derechos de cada texto, traducción y edición.",
-        "Si no puede reconstruirse la cadena de derechos, excluir la fuente."
+        "Excluir de la ingesta propuesta.",
+        "Solo reconsiderar una obra concreta si se obtiene permiso escrito expreso del titular que cubra el uso previsto o se acredita de forma independiente que la obra y la edición concreta están en dominio público.",
+        "No inferir autorización de entrenamiento a partir de que el archivo sea gratuito o esté alojado públicamente."
       ],
       "sources": [
-        "https://huggingface.co/datasets/bookcorpusopen"
+        "https://github.com/aiinnova/huggingface_datasets/blob/master/datasets/bookcorpusopen/README.md",
+        "https://link.springer.com/article/10.1007/s10462-025-11403-7",
+        "https://draft2digital.com/terms-of-service/"
       ]
     }
   ],
@@ -141,14 +148,16 @@
     "id": "G-0",
     "status": "FAIL",
     "passed": false,
-    "reason": "Ninguna de las cuatro fuentes queda aprobada como colección completa bajo el criterio exigido. Gutenberg e Internet Archive requieren revisión por obra; Common Corpus requiere filtro documental por licencia y procedencia; BookCorpusOpen carece aquí de evidencia primaria suficiente para la afirmación de dominio público.",
+    "reason": "Ninguna de las cuatro fuentes queda aprobada como colección completa. Gutenberg e Internet Archive requieren revisión por obra y edición; Common Corpus requiere filtro documental por licencia y procedencia; BookCorpusOpen se excluye porque la evidencia disponible lo vincula a ediciones Smashwords y no acredita dominio público ni redistribución general.",
     "downloads_authorized": false,
     "next_allowed_action": "Completar una matriz de evidencias y, cuando proceda, un pequeño inventario de metadatos/licencias sin descargar textos de corpus. Repetir G-0 antes de cualquier adquisición."
   },
   "notes": [
     "El recuento de textos disponibles por fuente queda deliberadamente sin declarar: no se ha ejecutado una enumeración verificable y los totales brutos no equivalen a obras jurídicamente elegibles.",
     "La afirmación de que Harvard Classics (1909–1914) es dominio público en EE. UU. aparece respaldada para el conjunto catalogado por Library of Congress, pero no forma parte de las cuatro fuentes autorizadas y no se incorpora a esta auditoría de adquisición.",
-    "La especificación REF propuesta no coincide literalmente con ronin/epistemic/schema.py: el repositorio exige record_id, text, source_id, source_sha256, license, encoding_status, annotator y policy_version; usa descriptive/unknown y genre unknown, y exige potential_falsifier para falsifiable. No iniciar FASE 5 hasta diseñar un mapeo versionado o una migración del esquema."
+    "La especificación REF propuesta no coincide literalmente con ronin/epistemic/schema.py: el repositorio exige record_id, text, source_id, source_sha256, license, encoding_status, annotator y policy_version; usa descriptive/unknown y genre unknown, y exige potential_falsifier para falsifiable. No iniciar FASE 5 hasta diseñar un mapeo versionado o una migración del esquema.",
+    "BookCorpusOpen no debe describirse como PD: la documentación disponible lo vincula a libros Smashwords y los términos de la plataforma no equivalen a una licencia pública. Se excluye, no solo se deja pendiente.",
+    "En Internet Archive, licenseurl es un campo de metadatos útil para búsqueda y procedencia; no sustituye la comprobación de los derechos de cada obra y de cada fichero del ítem."
   ],
   "references": [
     "https://www.gutenberg.org/policy/terms_of_use.html",
@@ -158,6 +167,11 @@
     "https://www.cultura.gob.es/cultura/propiedadintelectual/la-propiedad-intelectual/preguntas-mas-frecuentes/derechos-duracion-y-transmision.html",
     "https://www.bne.es/es/preguntas-frecuentes/obras-considera-encuentran-dominio-publico",
     "https://archive.org/advancedsearch.php",
-    "https://archive.org/services/docs/api/metadata.html"
+    "https://archive.org/services/docs/api/metadata.html",
+    "https://internetarchive.readthedocs.io/en/stable/metadata.html",
+    "https://archivesupport.zendesk.com/hc/en-us/articles/360018359991-Search-A-Basic-Guide",
+    "https://github.com/aiinnova/huggingface_datasets/blob/master/datasets/bookcorpusopen/README.md",
+    "https://link.springer.com/article/10.1007/s10462-025-11403-7",
+    "https://draft2digital.com/terms-of-service/"
   ]
 }
