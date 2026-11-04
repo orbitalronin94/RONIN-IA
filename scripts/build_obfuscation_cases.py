@@ -73,6 +73,16 @@ def record(**values: Any) -> dict[str, Any]:
 
 def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dict[str, Any]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    required_sources = (
+        "poe-gold-bug",
+        "verne-la-jangada-fr",
+        "doyle-dancing-men",
+        "hypnerotomachia-poliphili-1499",
+        "trithemius-steganographia-1608",
+        "selenus-cryptomenytices-1624",
+    )
+    for source_id in required_sources:
+        source_hash(manifest, source_id)
     rows: list[dict[str, Any]] = []
     common = {
         "source_license": "Dominio público; ejemplar primario registrado en manifiesto",
@@ -219,7 +229,8 @@ def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dic
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8") as stream:
         for row in rows:
-            stream.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+            stream.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "
+")
 
     summary = {
         "schema_version": 1,
@@ -246,7 +257,8 @@ def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dic
         ),
     }
     (output_path.parent / "manifest.json").write_text(
-        json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+        json.dumps(summary, ensure_ascii=False, indent=2) + "
+",
         encoding="utf-8",
     )
     return summary
