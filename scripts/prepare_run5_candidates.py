@@ -108,9 +108,16 @@ DOMAIN_HINTS = {
     "philosophy": "philosophy ontology metaphysics ethics epistemology causality knowledge truth",
     "physics": "physics quantum mechanics particle field energy momentum thermodynamics relativity",
     "chemistry_materials": "chemistry molecule compound reaction catalyst synthesis spectroscopy polymer atom",
-    "biology": "biology cell gene protein genome organism enzyme ecology evolution",\n    "medicine_health": "medicine health clinical diagnosis treatment patient disease epidemiology",
+    "biology": "biology cell gene protein genome organism enzyme ecology evolution",
+    "medicine_health": "medicine health clinical diagnosis treatment patient disease epidemiology",
     "computer_science": "algorithm data structure complexity compiler operating system database software",
-    "law": "law statute regulation court judgment contract liability jurisprudence",\n    "economics": "economics market inflation econometrics regression monetary fiscal trade",\n    "social_sciences": "sociology anthropology psychology political science institution society policy",\n    "statistics_probability": "statistics probability stochastic distribution estimator hypothesis variance",\n    "astronomy_earth_science": "astronomy astrophysics cosmology planet star galaxy geology climate",\n    "engineering_robotics": "engineering robotics control systems circuit mechanical electrical materials",\n    "humanities": "history linguistics literature language philology culture art historical text",
+    "law": "law statute regulation court judgment contract liability jurisprudence",
+    "economics": "economics market inflation econometrics regression monetary fiscal trade",
+    "social_sciences": "sociology anthropology psychology political science institution society policy",
+    "statistics_probability": "statistics probability stochastic distribution estimator hypothesis variance",
+    "astronomy_earth_science": "astronomy astrophysics cosmology planet star galaxy geology climate",
+    "engineering_robotics": "engineering robotics control systems circuit mechanical electrical materials",
+    "humanities": "history linguistics literature language philology culture art historical text",
 }
 DOMAIN_PRIORITY = tuple(DOMAIN_TERMS)
 
