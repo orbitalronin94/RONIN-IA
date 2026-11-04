@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Validate RONIN's item-level rights evidence registry without external dependencies."""
 from __future__ import annotations
+
 import argparse
 import json
 import re
