@@ -189,7 +189,7 @@ def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
         "access": "descarga HTTPS pública sin cuenta, token ni clave API",
         "sources": source_manifest,
         "document_count": total,
-        "sentence_counts": {key: len(value) for key, value in partitions.items()},
+        "document_counts": {key: len(value) for key, value in partitions.items()},
         "source_document_counts": {
             source["id"]: sum(1 for item in candidates if item["source"] == source["id"])
             for source in SOURCES
