@@ -235,19 +235,21 @@ def main() -> None:
     keep_n = max(1, int(scored_count * min(100.0, max(0.1, args.top_percent)) / 100.0))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     hashes = hashlib.sha256()
+    sidecar_hashes = hashlib.sha256()
     bytes_written = 0
     selected_count = 0
     score_total = 0.0
     score_min = float("inf")
-    with args.output.open("w", encoding="utf-8", newline="\n") as out:
+    sidecar_path = args.output.with_suffix(".manifest.jsonl")
+    with args.output.open("w", encoding="utf-8", newline="\n") as out, sidecar_path.open("w", encoding="utf-8", newline="\n") as sidecar:
         rows = db.execute(
-            "SELECT docs.text, docs.license, docs.provenance, ranked.score "
+            "SELECT docs.id, docs.source, docs.text, docs.license, docs.provenance, docs.sha, ranked.score, ranked.scores "
             "FROM ranked JOIN docs ON docs.id=ranked.doc_id "
             "ORDER BY ranked.score DESC, docs.id",
         )
         selected_bands: dict[int, dict[int, list[int]]] = {i: {} for i in range(4)}
         near_duplicate_removed = 0
-        for text, license_value, provenance, score in rows:
+        for doc_id, source_id, text, license_value, provenance, text_sha, score, score_json in rows:
             signature = simhash64(text)
             duplicate = False
             for band in range(4):
@@ -266,6 +268,17 @@ def main() -> None:
             encoded = line.encode("utf-8")
             hashes.update(encoded)
             bytes_written += len(encoded)
+            sidecar_line = json.dumps({
+                "document_id": doc_id,
+                "source_id": source_id,
+                "provenance": provenance,
+                "license": license_value,
+                "normalized_text_sha256": text_sha,
+                "semantic_density": score,
+                "component_scores": json.loads(score_json),
+            }, ensure_ascii=False, sort_keys=True) + "\n"
+            sidecar.write(sidecar_line)
+            sidecar_hashes.update(sidecar_line.encode("utf-8"))
             selected_count += 1
             score_total += score
             score_min = min(score_min, score)
@@ -293,6 +306,8 @@ def main() -> None:
         "near_duplicates_removed": near_duplicate_removed,
         "selected_bytes_utf8": bytes_written,
         "selected_sha256": hashes.hexdigest(),
+        "selected_manifest_path": str(sidecar_path),
+        "selected_manifest_sha256": sidecar_hashes.hexdigest(),
         "rejected": dict(rejected),
         "score_mean": round(score_total / max(1, selected_count), 4),
         "score_min": round(0 if selected_count == 0 else score_min, 4),
