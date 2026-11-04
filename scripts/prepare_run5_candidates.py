@@ -30,10 +30,16 @@ DATASET_ID = "PleIAs/common_corpus"
 DATASET_REVISION = "307910e4c5d040d6f318e6edf2a2b97849155771"
 MIN_DOCUMENT_BYTES = 300
 MAX_DOCUMENT_BYTES = 2 * 1024 * 1024
-HKD_FRACTION = 0.20
+HKD_FRACTION = 0.50
 # Avoid prefix bias in a streamed dataset: early shards must not monopolize RUN 5.
 SHUFFLE_SEED = 20261104
 SHUFFLE_BUFFER_SIZE = 10_000
+
+
+def domain_shuffle_seed(domain: str) -> int:
+    """Stable, domain-specific seed so parallel workers do not scan the same prefix."""
+    digest = hashlib.sha256(f"{SHUFFLE_SEED}:{domain}".encode()).digest()
+    return int.from_bytes(digest[:4], "big")
 
 
 def shuffle_dataset_stream(dataset: Any, *, seed: int = SHUFFLE_SEED, buffer_size: int = SHUFFLE_BUFFER_SIZE) -> Any:
@@ -89,6 +95,14 @@ DOMAIN_HINTS = {
     "law_economics_social_sciences": "law statute regulation court judgment contract liability economics market inflation",
 }
 DOMAIN_PRIORITY = tuple(DOMAIN_TERMS)
+
+
+def minimum_scanned_bytes_for_library_floor(min_train_bytes: int, hkd_fraction: float) -> int:
+    """Conservative byte budget needed for both disjoint libraries' 90% train splits."""
+    if min_train_bytes < 1 or not 0.0 < hkd_fraction < 1.0:
+        raise ValueError("minimum bytes must be positive and HKD fraction must be between 0 and 1")
+    smallest_partition = min(hkd_fraction, 1.0 - hkd_fraction)
+    return int((min_train_bytes / (smallest_partition * 0.90)) + 0.999999)
 
 
 def normalize_license(value: Any) -> str:
@@ -396,8 +410,16 @@ def main() -> int:
     parser.add_argument("--license-audit", type=Path, default=Path("reports/license_audit.json"))
     parser.add_argument("--source-manifest", type=Path, default=Path("data/manifests/knowledge_dense_sources.json"))
     args = parser.parse_args()
-    if not 0.05 <= args.hkd_fraction <= 0.20:
-        parser.error("--hkd-fraction must be between 0.05 and 0.20")
+    if not 0.05 <= args.hkd_fraction <= 0.50:
+        parser.error("--hkd-fraction must be between 0.05 and 0.50")
+    required_input_bytes = minimum_scanned_bytes_for_library_floor(
+        args.min_train_bytes, args.hkd_fraction
+    )
+    if args.max_input_bytes < required_input_bytes:
+        parser.error(
+            f"--max-input-bytes must be at least {required_input_bytes} bytes "
+            "for both disjoint libraries to possibly meet the train floor"
+        )
 
     try:
         from datasets import load_dataset
@@ -472,12 +494,13 @@ def main() -> int:
     scanned_rows = 0
     accepted_bytes = 0
     scanned_text_bytes = 0
+    stream_seed = domain_shuffle_seed(args.domain or "all-domains")
     dataset = shuffle_dataset_stream(load_dataset(
         DATASET_ID,
         split="train",
         streaming=True,
         revision=DATASET_REVISION,
-    ))
+    ), seed=stream_seed)
 
     for row in dataset:
         scanned_rows += 1
@@ -672,15 +695,16 @@ def main() -> int:
             "language_allowlist": sorted(LANGUAGES),
             "max_document_bytes": MAX_DOCUMENT_BYTES,
             "stream_order": "deterministic_buffer_shuffle",
-            "shuffle_seed": SHUFFLE_SEED,
+            "shuffle_seed": stream_seed,
             "shuffle_buffer_rows": SHUFFLE_BUFFER_SIZE,
         },
         "limits": {
             "max_rows": args.max_rows,
             "max_input_bytes": args.max_input_bytes,
             "minimum_train_bytes_per_library": args.min_train_bytes,
+            "minimum_scanned_bytes_for_both_libraries": required_input_bytes,
             "hkd_fraction": args.hkd_fraction,
-            "stream_shuffle_seed": SHUFFLE_SEED,
+            "stream_shuffle_seed": stream_seed,
             "stream_shuffle_buffer_rows": SHUFFLE_BUFFER_SIZE,
         },
         "ingestion": {
