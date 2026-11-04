@@ -97,6 +97,7 @@ def write_split(
     library_kind: str,
     source_revision: str,
     sample_dir: Path,
+    global_seen_simhash: dict[int, dict[int, list[int]]],
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     sample_dir.mkdir(parents=True, exist_ok=True)
@@ -109,7 +110,6 @@ def write_split(
     sidecar_hash = hashlib.sha256()
     sidecar_handle = sidecar_path.open("wb")
     review_samples: list[dict[str, Any]] = []
-    seen_simhash: dict[int, list[int]] = {i: {} for i in range(4)}
     near_dupes = 0
     paths = {name: path.open("wb") for name, path in split_paths.items()}
     try:
@@ -120,7 +120,7 @@ def write_split(
                 key = (signature >> (band * 16)) & 0xFFFF
                 if any(
                     (signature ^ previous).bit_count() <= 3
-                    for previous in seen_simhash[band].get(key, [])
+                    for previous in global_seen_simhash[band].get(key, [])
                 ):
                     duplicate = True
                     break
@@ -129,7 +129,7 @@ def write_split(
                 continue
             for band in range(4):
                 key = (signature >> (band * 16)) & 0xFFFF
-                seen_simhash[band].setdefault(key, []).append(signature)
+                global_seen_simhash[band].setdefault(key, []).append(signature)
 
             # Stable document-level split; same document can never cross splits.
             bucket = int(hashlib.sha256(doc_id.encode("utf-8")).hexdigest()[:8], 16) % 100
@@ -148,7 +148,7 @@ def write_split(
                 "license": license_name,
                 "partition": split,
                 "semantic_density": round(score, 6),
-                "component_scores": components,
+                "component_scores": json.loads(components) if isinstance(components, str) else components,
             }
             encoded = (json.dumps(sidecar, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
             sidecar_handle.write(encoded)
@@ -330,10 +330,11 @@ def main() -> int:
         score = float(components.get("semantic_density", 0.0))
         try:
             db.execute(
-                "INSERT INTO docs VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO docs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     doc_id, domain, text, license_name, provenance, byte_count,
                     score, json.dumps(components, sort_keys=True),
+                    hashlib.sha256(" ".join(text.casefold().split()).encode("utf-8")).hexdigest(),
                 ),
             )
         except sqlite3.IntegrityError:
@@ -355,6 +356,7 @@ def main() -> int:
     }
     libraries: list[dict[str, Any]] = []
     sample_root = args.output_root / "human_review"
+    global_seen_simhash: dict[int, dict[int, list[int]]] = {i: {} for i in range(4)}
     for domain in DOMAIN_PRIORITY:
         count = domain_counts[domain]
         if count < 2:
@@ -378,6 +380,7 @@ def main() -> int:
                 library_kind=kind,
                 source_revision=DATASET_REVISION,
                 sample_dir=sample_root,
+                global_seen_simhash=global_seen_simhash,
             )
             metadata["meets_minimum_size"] = metadata["train_bytes"] >= args.min_train_bytes
             libraries.append(metadata)
