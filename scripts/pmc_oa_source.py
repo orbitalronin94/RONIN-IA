@@ -83,7 +83,7 @@ def extract_node_text(node: ET.Element | None) -> str:
                 parts.append(child.tail)
 
     walk(node)
-    return re.sub(r"\\s+", " ", " ".join(parts)).strip()
+    return re.sub(r"\s+", " ", " ".join(parts)).strip()
 
 
 def extract_article_text(xml_payload: bytes, fallback_language: Any = None) -> tuple[str, str | None]:
@@ -97,8 +97,8 @@ def extract_article_text(xml_payload: bytes, fallback_language: Any = None) -> t
     abstract = extract_node_text(first_descendant(article_meta, "abstract")) if article_meta is not None else ""
     keywords = extract_node_text(first_descendant(article_meta, "kwd-group")) if article_meta is not None else ""
     body_text = extract_node_text(body)
-    text = "\\n\\n".join(part for part in (title, abstract, keywords, body_text) if part)
-    text = re.sub(r"\\s+", " ", text).strip()
+    text = "\n\n".join(part for part in (title, abstract, keywords, body_text) if part)
+    text = re.sub(r"\s+", " ", text).strip()
     return text, language
 
 
