@@ -45,7 +45,7 @@ def main() -> int:
         raise RuntimeError(f"Korp does not expose corpus {CORPUS}; available matching keys: {list(corpora)[:30]}")
     query_raw = get("/query_sample", {
         "corpus": CORPUS,
-        "cqp": '[word=".*"]',
+        "cqp": '[]+',
         "start": 0,
         "end": max(0, a.sample_hits - 1),
         "default_context": "1 sentence",
