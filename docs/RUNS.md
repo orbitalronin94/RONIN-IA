@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:27 | [Integración continua #933 (run 41933797158)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933797158) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Trigger and version OpenCitations metadata candidate workflow. Trigger: push; rama: main; intento: 1. | f33546c0 |
 | 2026-11-04 23:27 | [Integración continua #934 (run 41933824990)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933824990) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Record Crossref and DataCite successful metadata exports and OpenCitations adapter. Trigger: push; rama: main; intento: 1. | 15431b46 |
 | 2026-11-04 23:27 | [Integración continua #932 (run 41933788549)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933788549) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add scheduled/manual OpenCitations CC0 candidate workflow. Trigger: push; rama: main; intento: 1. | 35c92eb7 |
 | 2026-11-04 23:26 | [Integración continua #930 (run 41933745406)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933745406) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document Crossref, DataCite and corrected Common Corpus candidate results. Trigger: push; rama: main; intento: 1. | b3a64622 |
