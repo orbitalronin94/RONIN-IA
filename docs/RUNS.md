@@ -172,3 +172,17 @@ Si una ejecución cambia datos, código o documentación, la descripción debe i
 RUN #5 queda **bloqueada intencionalmente**. No hay ocho bibliotecas nuevas admitidas ni ocho ficheros train con hashes verificados. El manifiesto data/manifests/eight_libraries.json mantiene las ocho áreas en estado candidate y training_eligible=false. El validador scripts/validate_eight_libraries.py --require-ready exige ocho manifiestos, hashes, licencias y ficheros train preparados con un mínimo de 256 MiB por biblioteca y balance de bytes.
 
 Portfolio/Papers deja de ser dato de entrenamiento. Se reserva para recuperación RAG de experto y no cuenta como biblioteca. No se lanzará un entrenamiento hasta que la ingesta de las ocho bibliotecas esté completa y el gate pase.
+
+
+## Estado del gate 16 bibliotecas — 4 de noviembre de 2026
+
+La exigencia de RUN #5 se amplió a **16 bibliotecas masivas**: 8 base + 8 HKD (una por dominio). Portfolio/Papers es RAG experto, no training y no cuenta como biblioteca.
+
+Se añadieron:
+- scripts/select_knowledge_dense_corpus.py: selección reproducible con RONIN-HKD-0.1, licencia allowlist, IDF y SQLite temporal en disco.
+- scripts/harvest_knowledge_dense_libraries.py: orquestación de las ocho bibliotecas derivadas.
+- data/manifests/knowledge_dense_sources.json: fuentes/adaptadores y allowlists; todos desactivados por defecto.
+- data/manifests/sixteen_libraries.json y scripts/validate_sixteen_libraries.py: gate de 16 con hashes exactos, revisión humana y 256 MiB mínimo por biblioteca.
+- docs/METRICA_DENSIDAD_SEMANTICA.md: papers base, fórmula, pesos y protocolo de validación.
+
+Estado: 0/16 admitidas; las ocho bases y ocho HKD siguen candidatas. No se ha descargado ni admitido ningún texto nuevo por esta implementación. No se lanza entrenamiento ni se mergea la PR hasta que el gate completo pase.
