@@ -28,10 +28,15 @@ def test_language_aliases_accept_actual_manifest_labels():
     assert LANGUAGE_ALIASES["spanish"] == "es"
 
 
-def test_domain_collections_are_disjoint_and_explicit():
+def test_domain_collections_cover_eight_domains_with_explicit_alias():
     flattened = [domain for values in COLLECTIONS.values() for domain in values]
-    assert len(flattened) == len(set(flattened))
-    assert len(flattened) == 8
+    assert set(flattened) == {
+        "mathematics", "logic_epistemology", "philosophy", "physics",
+        "chemistry", "biology_medicine", "computer_science",
+        "law_economics_social_sciences",
+    }
+    # Logic/epistemology is represented both in OpenScience and Semantic data.
+    assert flattened.count("logic_epistemology") == 2
 
 
 def test_open_science_domain_classifier_distinguishes_math_and_physics():
@@ -56,6 +61,16 @@ def test_collection_filter_prevents_wrong_domain_fallback():
     assert domain is None
 
 
+def test_semantic_data_collection_feeds_logic_epistemology_domain():
+    domain, scores = choose_domain(
+        "Logical inference establishes validity: every proposition follows by proof "
+        "from a premise, using predicate quantifiers and epistemic reasoning.",
+        "Semantic data",
+    )
+    assert domain == "logic_epistemology"
+    assert scores["domain_relevance"] > 0
+
+
 def test_global_cross_library_dedup_blocks_repeated_document(tmp_path):
     first = tmp_path / "library-one"
     second = tmp_path / "library-two"
@@ -69,7 +84,7 @@ def test_global_cross_library_dedup_blocks_repeated_document(tmp_path):
     (first / "documents.jsonl").write_text(json.dumps(record) + "\n", encoding="utf-8")
     record2 = {**record, "document_id": "doc-2"}
     (second / "documents.jsonl").write_text(json.dumps(record2) + "\n", encoding="utf-8")
-    report = audit(tmp_path, tmp_path / "dedup-report.json")
+    report = audit(tmp_path, tmp_path / "dedup-report.json", expected_libraries=2)
     assert report["status"] == "fail"
     assert report["exact_cross_library_duplicates_detected"] == 1
     assert report["near_cross_library_duplicates_detected"] == 1
@@ -88,5 +103,13 @@ def test_global_cross_library_dedup_passes_distinct_documents(tmp_path):
         json.dumps({"document_id": "b", "text_sha256": "b" * 64, "simhash64": 18446744073709551615}) + "\n",
         encoding="utf-8",
     )
-    report = audit(tmp_path, tmp_path / "dedup-report.json")
+    report = audit(tmp_path, tmp_path / "dedup-report.json", expected_libraries=2)
     assert report["status"] == "pass"
+
+
+def test_global_cross_library_dedup_fails_closed_on_empty_inventory(tmp_path):
+    report = audit(tmp_path, tmp_path / "dedup-report.json")
+    assert report["status"] == "fail"
+    assert report["libraries_scanned"] == 0
+    assert report["documents_scanned"] == 0
+    assert report["incomplete_inventory"] is True
