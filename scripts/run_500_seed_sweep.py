@@ -19,8 +19,12 @@ from ronin.data.batches import NextTokenBatches, encode_text_file
 from ronin.models.transformer import RoninLM
 from ronin.training.loop import train
 from ronin.utils.repro import seed_everything
-from scripts.evaluate_domains import evaluate as evaluate_domains
-from scripts.evaluate_text import evaluate_checkpoint as evaluate_text
+try:
+    from scripts.evaluate_domains import evaluate as evaluate_domains
+    from scripts.evaluate_text import evaluate_checkpoint as evaluate_text
+except ModuleNotFoundError:
+    from evaluate_domains import evaluate as evaluate_domains
+    from evaluate_text import evaluate_checkpoint as evaluate_text
 
 
 def run_sweep(
