@@ -97,7 +97,7 @@ El cierre es la única línea que no es arcaica, y está puesta a propósito: el
 
 ## Modelos auxiliares MIT
 
-El punto de partida incluye dos modelos de tamaño reducido, disponibles en Hugging Face bajo licencia MIT:
+El ecosistema incluye tres modelos auxiliares descargables, con licencia MIT verificada:
 
 | Alias | Modelo | Parámetros aproximados | Licencia declarada |
 |---|---|---:|---|
@@ -107,7 +107,7 @@ El punto de partida incluye dos modelos de tamaño reducido, disponibles en Hugg
 
 Fichas oficiales: [GPT-2](https://huggingface.co/openai-community/gpt2) · [GPT-Neo 125M](https://huggingface.co/EleutherAI/gpt-neo-125m).
 
-**Advertencia:** ambos son modelos de base principalmente anglófonos. Sirven para probar la descarga, inferencia local, generación y trazabilidad; no se debe presuponer que producirán buenas explicaciones en castellano. La calidad de cada corpus generado debe revisarse antes de entrenar.
+**Advertencia:** GPT-2 y GPT-Neo son modelos de base principalmente anglófonos; Phi-4 es instruct y multilingüe, pero su calidad en castellano debe medirse. Todos sirven como tutores auxiliares locales, no como pesos del estudiante. La calidad y los derechos de cualquier texto generado deben revisarse antes de entrenar.
 
 Los modelos se descargan una vez en `models/teachers/` y se reutilizan desde disco. No se consulta ninguna API de generación durante el entrenamiento. Las dependencias de tutores son opcionales:
 
@@ -115,6 +115,7 @@ Los modelos se descargan una vez en `models/teachers/` y se reutilizan desde dis
 pip install -e '.[teachers]'
 python scripts/download_teacher_models.py --model gpt2
 python scripts/download_teacher_models.py --model gpt-neo-125m
+python scripts/download_teacher_models.py --model phi-4-mini-instruct
 ```
 
 La guía completa está en [Modelos auxiliares locales](docs/TEACHER_WORKFLOW.md). Phi-4 utiliza `trust_remote_code=True`; su código remoto requiere revisión y aislamiento. La licencia MIT del modelo no se atribuye automáticamente al texto generado.
