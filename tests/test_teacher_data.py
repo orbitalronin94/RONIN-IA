@@ -122,12 +122,12 @@ def test_teacher_manifest_rejects_untracked_and_unsafe_files(tmp_path):
         verify_teacher_manifest(tmp_path, manifest)
 
 
-def test_phi4_mini_instruct_is_pinned_as_mit_remote_code_teacher():
+def test_phi4_mini_instruct_uses_builtin_transformers_model():
     from scripts.download_teacher_models import ALLOW_PATTERNS, ALLOWED_MODELS
 
     model = ALLOWED_MODELS["phi-4-mini-instruct"]
     assert model["repo_id"] == "microsoft/Phi-4-mini-instruct"
     assert model["license_url"] == "https://huggingface.co/microsoft/Phi-4-mini-instruct"
-    assert model["trust_remote_code"] is True
+    assert model["trust_remote_code"] is False
     assert "model*.safetensors" in ALLOW_PATTERNS
-    assert "*.py" in ALLOW_PATTERNS
+    assert "*.py" not in ALLOW_PATTERNS
