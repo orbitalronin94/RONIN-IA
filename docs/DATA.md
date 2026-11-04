@@ -1,6 +1,6 @@
 # Gobernanza y canalización de datos
 
-Este repositorio no incluye corpus de entrenamiento. Los datos los aporta el operador y deben describirse mediante un manifiesto antes de entrenar.
+Los corpus completos no se versionan en Git: se preparan localmente o como artefactos temporales de GitHub Actions y deben tener manifiesto, procedencia, licencia, particiones y SHA-256. El inventario actual está en [Inventario de corpus y materiales](INVENTARIO_CORPUS_Y_MATERIALES.md). La PR #39 integra en revisión Portfolio/Papers y las tres fuentes literarias abiertas; no asumir que la integración está fusionada en main hasta que se cierre esa PR.
 
 ## Corpus inicial: español financiero CC0 de Mozilla
 
