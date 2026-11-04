@@ -257,7 +257,7 @@ def write_split(
         json.dumps(metadata, ensure_ascii=False, sort_keys=True).encode("utf-8")
     ).hexdigest()
     (output_dir / "candidate-manifest.json").write_text(
-        json.dumps(metadata, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8"
+        json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     return metadata
 
