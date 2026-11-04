@@ -67,8 +67,6 @@ def main() -> int:
 
     output = args.out / "openalex-works-metadata.jsonl"
     count = 0
-    with gzip.decompress(shard) as _unused:
-        pass
     import io
     with gzip.GzipFile(fileobj=io.BytesIO(shard), mode="rb") as gz, output.open("w", encoding="utf-8") as dst:
         for raw in gz:
@@ -79,7 +77,7 @@ def main() -> int:
             row = {key: work[key] for key in ALLOW if key in work}
             if not row.get("id"):
                 continue
-            dst.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\\n")
+            dst.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
             count += 1
             if count >= args.max_rows:
                 break
