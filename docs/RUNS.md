@@ -12,6 +12,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 17:50 | [Integración continua #594 (run 41879595120)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41879595120) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Probar autorización limitada de ingesta sin admisión automática. Trigger: push; rama: main; intento: 1. | 94d22f5d |
 | 2026-11-04 17:49 | [Integración continua #604 (run 41879880160)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41879880160) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Limitar staging a 6 GiB por el almacenamiento del runner gratuito. Trigger: push; rama: main; intento: 1. | 8b71242d |
 | 2026-11-04 17:48 | [Integración continua #602 (run 41879856530)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41879856530) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Precisar que la revisión jurídica humana sigue pendiente. Trigger: push; rama: main; intento: 1. | 84d03328 |
 | 2026-11-04 17:48 | [Integración continua #590 (run 41879476320)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41879476320) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Autorizar intake limitado Common Corpus con allowlist documental. Trigger: push; rama: main; intento: 1. | 24e6779b |
