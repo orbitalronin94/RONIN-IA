@@ -32,6 +32,7 @@ class NextTokenBatches:
         self.tokens = tokens
         self.batch_size = batch_size
         self.sequence_length = sequence_length
+        self.offsets = torch.arange(sequence_length)
         self.generator = torch.Generator(device="cpu").manual_seed(seed)
         self.max_start = tokens.numel() - sequence_length - 1
 
@@ -40,8 +41,9 @@ class NextTokenBatches:
             starts = torch.randint(
                 0, self.max_start + 1, (self.batch_size,), generator=self.generator
             )
-            x = torch.stack([self.tokens[i : i + self.sequence_length] for i in starts.tolist()])
-            y = torch.stack(
-                [self.tokens[i + 1 : i + self.sequence_length + 1] for i in starts.tolist()]
-            )
+            # Indexación vectorizada: evita dos bucles Python y torch.stack por batch.
+            # Conserva exactamente los mismos starts y, por tanto, la secuencia aleatoria.
+            indices = starts.unsqueeze(1) + self.offsets.unsqueeze(0)
+            x = self.tokens[indices]
+            y = self.tokens[indices + 1]
             yield x, y

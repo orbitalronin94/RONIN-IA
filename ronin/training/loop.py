@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import json
 import math
 import random
+import statistics
+import time
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -80,6 +83,7 @@ def train(
     device: torch.device | str = "cpu",
     checkpoint_dir: str | Path = "checkpoints",
     resume_from: str | Path | None = None,
+    metrics_path: str | Path | None = None,
 ) -> list[float]:
     """Train to config.max_steps; optionally resume from a full checkpoint.
 
@@ -113,8 +117,12 @@ def train(
             raise ValueError("checkpoint step exceeds configured max_steps")
     iterator = iter(batches)
     losses: list[float] = []
+    step_seconds: list[float] = []
+    checkpoint_seconds = 0.0
+    training_started = time.perf_counter()
 
     for step in range(start_step, config.max_steps):
+        step_started = time.perf_counter()
         lr = learning_rate_at(step, config)
         for group in optimizer.param_groups:
             group["lr"] = lr
@@ -141,6 +149,7 @@ def train(
         losses.append(accumulated / config.gradient_accumulation_steps)
 
         if (step + 1) % config.checkpoint_every == 0 or step + 1 == config.max_steps:
+            checkpoint_started = time.perf_counter()
             save_checkpoint(
                 Path(checkpoint_dir) / f"step-{step + 1:08d}.pt",
                 model,
@@ -150,4 +159,42 @@ def train(
                 config,
                 batch_generator if isinstance(batch_generator, torch.Generator) else None,
             )
+            checkpoint_seconds += time.perf_counter() - checkpoint_started
+        step_seconds.append(time.perf_counter() - step_started)
+
+    total_seconds = time.perf_counter() - training_started
+    if metrics_path is not None:
+        ordered = sorted(step_seconds)
+        warmup_count = min(10, max(0, len(step_seconds) - 1))
+        steady = sorted(step_seconds[warmup_count:]) or ordered
+        p95_index = min(len(ordered) - 1, math.ceil(0.95 * len(ordered)) - 1)
+        batch_size = int(getattr(batches, "batch_size", config.batch_size))
+        sequence_length = int(getattr(batches, "sequence_length", 0))
+        examples = len(step_seconds) * batch_size * config.gradient_accumulation_steps
+        metrics = {
+            "steps_completed": len(step_seconds),
+            "start_step": start_step,
+            "target_steps": config.max_steps,
+            "total_training_seconds": total_seconds,
+            "step_seconds_mean": statistics.mean(step_seconds) if step_seconds else 0.0,
+            "step_seconds_median": statistics.median(step_seconds) if step_seconds else 0.0,
+            "step_seconds_p95": ordered[p95_index] if ordered else 0.0,
+            "steady_state_step_seconds_median": statistics.median(steady) if steady else 0.0,
+            "checkpoint_seconds_total": checkpoint_seconds,
+            "examples_processed": examples,
+            "tokens_processed": examples * sequence_length,
+            "examples_per_second": examples / total_seconds if total_seconds else 0.0,
+            "tokens_per_second": examples * sequence_length / total_seconds if total_seconds else 0.0,
+            "batch_size": batch_size,
+            "sequence_length": sequence_length,
+            "gradient_accumulation_steps": config.gradient_accumulation_steps,
+            "device": str(device),
+            "torch_num_threads": torch.get_num_threads(),
+            "torch_num_interop_threads": torch.get_num_interop_threads(),
+        }
+        destination = Path(metrics_path)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        temporary = destination.with_suffix(destination.suffix + ".tmp")
+        temporary.write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        temporary.replace(destination)
     return losses
