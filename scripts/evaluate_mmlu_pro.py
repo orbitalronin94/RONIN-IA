@@ -13,7 +13,6 @@ import json
 import random
 from collections import defaultdict
 from collections.abc import Iterable
-from collections.abc import Iterable
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -27,6 +26,7 @@ from ronin.training.checkpoint import load_checkpoint
 
 LABELS = "ABCDEFGHIJ"
 DATASET_ID = "TIGER-Lab/MMLU-Pro"
+DATASET_REVISION = "b189ec765aa7ed75c8acfea42df31fdae71f97be"
 
 
 def normalize_rows(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -140,7 +140,7 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def load_external_dataset(revision: str = "main") -> list[dict[str, Any]]:
+def load_external_dataset(revision: str = DATASET_REVISION) -> list[dict[str, Any]]:
     """Carga exclusivamente el split test; no se usa para entrenamiento."""
     try:
         from datasets import load_dataset
@@ -283,7 +283,7 @@ def main() -> None:
         help="Preguntas seleccionadas en rondas por dominio; 0 usa el test completo.",
     )
     parser.add_argument("--seed", type=int, default=2026)
-    parser.add_argument("--revision", default="main")
+    parser.add_argument("--revision", default=DATASET_REVISION)
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--require-full-coverage", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
