@@ -16,7 +16,7 @@ on:
       min_train_mib:
         description: Mínimo de train por biblioteca (MiB)
         required: true
-        default: "256"
+        default: "2560"
         type: string
 
 permissions:
@@ -54,7 +54,7 @@ jobs:
           done
           [ "$MAX_ROWS" -ge 1000 ] && [ "$MAX_ROWS" -le 500000 ]
           [ "$MAX_INPUT_GIB" -ge 1 ] && [ "$MAX_INPUT_GIB" -le 8 ]
-          [ "$MIN_TRAIN_MIB" -ge 64 ] && [ "$MIN_TRAIN_MIB" -le 1024 ]
+          [ "$MIN_TRAIN_MIB" -ge 2560 ] && [ "$MIN_TRAIN_MIB" -le 10240 ]
 
       - name: Preparar Python y dependencias de streaming
         uses: actions/setup-python@v6
@@ -125,7 +125,7 @@ jobs:
           print(json.dumps({
               "rows_scanned": report["ingestion"]["rows_scanned"],
               "libraries_built": len(rows),
-              "libraries_meeting_256MiB": sum(x["train_bytes"] >= 256 * 1024**2 for x in rows),
+              "libraries_meeting_2_5GiB": sum(x["train_bytes"] >= 2560 * 1024**2 for x in rows),
               "train_bytes_by_library": {x["id"]: x["train_bytes"] for x in rows},
               "ready_for_human_review": report["ready_for_human_review"],
               "training_eligible": report["training_eligible"],
@@ -134,10 +134,108 @@ jobs:
           }, ensure_ascii=False, indent=2))
           if len(rows) != 16:
               raise SystemExit("No se han producido las 16 bibliotecas candidatas.")
-          if not all(x["train_bytes"] >= 256 * 1024**2 for x in rows):
-              raise SystemExit("Al menos una biblioteca no alcanza 256 MiB de train.")
+          if not all(x["train_bytes"] >= 2560 * 1024**2 for x in rows):
+              raise SystemExit("Al menos una biblioteca no alcanza 2.5 GiB de train.")
           PY
 
       - name: Enlazar libro de runs
         if: always()
         uses: ./.github/actions/run-ledger-link
+
+  prepare-hkd-libraries:
+    name: Extraer biblioteca HKD — ${{ matrix.domain }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        domain:
+          - mathematics
+          - logic_epistemology
+          - philosophy
+          - physics
+          - chemistry
+          - biology_medicine
+          - computer_science
+          - law_economics_social_sciences
+    env:
+      PYTHONUNBUFFERED: "1"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      HF_DATASETS_CACHE: /tmp/hf-datasets-cache
+      HF_HOME: /tmp/hf-home
+      DOMAIN: ${{ matrix.domain }}
+    steps:
+      - name: Checkout RONIN
+        uses: actions/checkout@v5
+
+      - name: Validar auditoría y autorización documental limitada
+        run: |
+          python scripts/validate_license_audit.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          audit = json.loads(Path("reports/license_audit.json").read_text(encoding="utf-8"))
+          auth = next(x for x in audit["candidate_intake_authorizations"]
+                      if x["source_id"] == "PleIAs/common_corpus")
+          assert audit["gate"]["status"] == "FAIL"
+          assert auth["status"] == "LIMITED_PASS"
+          assert auth["candidate_text_downloads_authorized"] is True
+          assert auth["training_eligible"] is False and auth["admitted"] is False
+          print("Solo extracción de candidatos; G-0 global sigue bloqueando entrenamiento.")
+          PY
+
+      - name: Preparar Python y lector de datasets
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "datasets==3.6.0" "huggingface_hub==0.36.0" "pyarrow>=18,<20"
+
+      - name: Ejecutar RONIN-HKD-0.1 sobre fuentes autorizadas del dominio
+        id: extraction
+        run: |
+          python scripts/select_knowledge_dense_corpus.py \
+            --source-spec data/manifests/knowledge_dense_sources.json \
+            --domain "$DOMAIN" \
+            --output "/tmp/ronin-run5-hkd/${DOMAIN}_hkd/train.txt" \
+            --report "/tmp/ronin-run5-hkd/${DOMAIN}_hkd/selection-report.json" \
+            --max-documents 2000000 \
+            --max-source-rows 5000000 \
+            --top-percent 20 \
+            --min-score 30
+          python scripts/scan_corpus_sensitive_content.py \
+            --input "/tmp/ronin-run5-hkd/${DOMAIN}_hkd/train.txt" \
+            --report "/tmp/ronin-run5-hkd/${DOMAIN}_hkd/sensitive-scan.json"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          domain = os.environ["DOMAIN"]
+          root = Path("/tmp/ronin-run5-hkd") / f"{domain}_hkd"
+          report = json.loads((root / "selection-report.json").read_text(encoding="utf-8"))
+          size = (root / "train.txt").stat().st_size
+          report["minimum_train_bytes"] = 2684354560
+          report["meets_x10_minimum"] = size >= report["minimum_train_bytes"]
+          report["training_eligible"] = False
+          report["admitted"] = False
+          (root / "candidate-status.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps({"domain": report["domain"], "selected_bytes": size,
+                            "meets_x10_minimum": report["meets_x10_minimum"],
+                            "training_eligible": False}, indent=2))
+          if not report["meets_x10_minimum"]:
+              raise SystemExit("HKD candidate below 2.5 GiB x10 minimum; keep RUN 5 blocked.")
+          PY
+
+      - name: Publicar candidato HKD, sidecar, selección y escaneo
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-run5-hkd-${{ matrix.domain }}
+          path: /tmp/ronin-run5-hkd/${{ matrix.domain }}_hkd/
+          if-no-files-found: warn
+          compression-level: 1
+          retention-days: 30
