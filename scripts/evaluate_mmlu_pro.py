@@ -140,7 +140,9 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def load_external_dataset(revision: str = DATASET_REVISION) -> list[dict[str, Any]]:
+def load_external_dataset(
+    revision: str = DATASET_REVISION, split: str = "test"
+) -> list[dict[str, Any]]:
     """Carga exclusivamente el split test; no se usa para entrenamiento."""
     try:
         from datasets import load_dataset
@@ -148,7 +150,9 @@ def load_external_dataset(revision: str = DATASET_REVISION) -> list[dict[str, An
         raise RuntimeError(
             "Instala el extra de benchmarks: pip install 'datasets==3.6.0' 'huggingface_hub==0.36.0'"
         ) from exc
-    dataset = load_dataset(DATASET_ID, split="test", revision=revision)
+    if split not in {"validation", "test"}:
+        raise ValueError("split debe ser validation o test")
+    dataset = load_dataset(DATASET_ID, split=split, revision=revision)
     return normalize_rows(dataset)
 
 
@@ -201,6 +205,8 @@ def evaluate_rows(
     device: str = "cpu",
     batch_token_budget: int = 8192,
     last_token_only: bool = True,
+    dataset_split: str = "test",
+    dataset_split_size: int | None = None,
 ) -> dict[str, Any]:
     """Evalúa por lotes sin truncar: el padding derecho no altera tokens previos."""
     if context_length < 1:
@@ -293,7 +299,7 @@ def evaluate_rows(
         "benchmark": "MMLU-Pro",
         "dataset_id": DATASET_ID,
         "dataset_revision": "see_dataset_revision",
-        "dataset_split": "test",
+        "dataset_split": dataset_split,
         "dataset_license": "MIT (declarada en la ficha de Hugging Face)",
         "protocol": (
             "RONIN zero-shot: log-probabilidad del siguiente byte de la letra "
@@ -312,7 +318,8 @@ def evaluate_rows(
         "evaluated_items": evaluated,
         "skipped_context_items": len(skipped),
         "coverage": evaluated / selected,
-        "complete_test_set": selected == 12032 and not skipped,
+        "complete_dataset_split": dataset_split_size is not None and selected == dataset_split_size and not skipped,
+        "complete_test_set": dataset_split == "test" and selected == 12032 and not skipped,
         "chance_accuracy_mean": sum(chance_rates) / evaluated,
         "overall": {
             "correct": correct,
@@ -351,13 +358,14 @@ def main() -> None:
     )
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--revision", default=DATASET_REVISION)
+    parser.add_argument("--split", choices=["validation", "test"], default="test")
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--batch-token-budget", type=int, default=8192)
     parser.add_argument("--require-full-coverage", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
-    all_rows = load_external_dataset(args.revision)
+    all_rows = load_external_dataset(args.revision, split=args.split)
     selected = select_stratified(
         all_rows, None if args.limit == 0 else args.limit, args.seed
     )
@@ -369,12 +377,15 @@ def main() -> None:
         context_length=args.context_length,
         device=args.device,
         batch_token_budget=args.batch_token_budget,
+        dataset_split=args.split,
+        dataset_split_size=len(all_rows),
     )
     report["dataset_revision"] = args.revision
     report["sampling"] = {
         "method": "deterministic round-robin stratified by category",
         "seed": args.seed,
         "limit": args.limit,
+        "split": args.split,
         "total_available": len(all_rows),
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)

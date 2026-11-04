@@ -1,0 +1,170 @@
+name: Ciclos rápidos RONIN — corpus abierto con gate y mejora de validación
+on:
+  # Arranque y recuperación automáticos; el dispatcher separado
+  # encadena la siguiente ejecución al completarse una tanda válida.
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ronin-rapid-open-training
+  cancel-in-progress: false
+jobs:
+  rapid-cycles:
+    name: Entrenamiento incremental con validación independiente
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      PYTHONUNBUFFERED: "1"
+      CYCLES: "3"
+      STEPS: "100"
+      MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+    steps:
+      - name: Obtener RONIN
+        uses: actions/checkout@v5
+      - name: Gate G-0 — exigir autorización legal explícita
+        id: g0
+        run: python scripts/assert_g0_passed.py --github-output "$GITHUB_OUTPUT"
+      - name: Detener la cadena si G-0 no autoriza
+        if: steps.g0.outputs.authorized != 'true'
+        run: |
+          echo "::error::G-0 no autoriza entrenamiento documental. Se detiene la cadena; el arranque periódico reintentará."
+          exit 1
+      - name: Preparar Python
+        if: steps.g0.outputs.authorized == 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Restaurar último checkpoint aceptado
+        if: steps.g0.outputs.authorized == 'true'
+        uses: actions/cache/restore@v5
+        with:
+          path: /tmp/ronin-open-warmstart
+          key: ronin-open-warmstart-${{ github.run_id }}
+          restore-keys: |
+            ronin-open-warmstart-
+      - name: Instalar dependencias
+        if: steps.g0.outputs.authorized == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "huggingface_hub==0.36.0"
+      - name: Validar presupuesto
+        if: steps.g0.outputs.authorized == 'true'
+        run: |
+          [[ "$CYCLES" =~ ^[1-3]$ ]] || { echo "::error::cycles debe ser 1-3"; exit 1; }
+          [[ "$STEPS" =~ ^[1-9][0-9]*$ ]] && [ "$STEPS" -le 300 ] || { echo "::error::steps debe ser 1-300"; exit 1; }
+          mkdir -p reports checkpoints /tmp/ronin-open-warmstart
+      - name: Preparar corpus abierto admitido y splits por obra
+        if: steps.g0.outputs.authorized == 'true'
+        run: |
+          python scripts/prepare_open_corpora.py --output /tmp/ronin-open-corpus --cache-dir /tmp/ronin-open-cache
+          test -s /tmp/ronin-open-corpus/train.txt
+          test -s /tmp/ronin-open-corpus/validation.txt
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          m = json.loads(Path("/tmp/ronin-open-corpus/manifest.json").read_text())
+          if m["document_counts"]["train"] < 8 or m["document_counts"]["validation"] < 1:
+              raise SystemExit("Corpus/splits insuficientes para un ciclo")
+          print(json.dumps({"dataset_id": m["dataset_id"], "document_counts": m["document_counts"],
+              "source_document_counts": m["source_document_counts"], "output_sha256": m["output_sha256"]}, indent=2))
+          PY
+      - name: Ejecutar ciclos rápidos con promoción conservadora
+        if: steps.g0.outputs.authorized == 'true'
+        run: |
+          python - <<'PY'
+          import json, os, shutil, subprocess
+          from pathlib import Path
+          import torch
+          from ronin.config import get_profile
+          from ronin.models.transformer import RoninLM
+          from ronin.utils.repro import seed_everything
+          root = Path("reports")
+          warm = Path("/tmp/ronin-open-warmstart/model.pt")
+          train = Path("/tmp/ronin-open-corpus/train.txt")
+          validation = Path("/tmp/ronin-open-corpus/validation.txt")
+          cycles, steps = int(os.environ["CYCLES"]), int(os.environ["STEPS"])
+          config, _ = get_profile("tiny")
+          if not warm.is_file():
+              seed_everything(1337)
+              model = RoninLM(config)
+              warm.parent.mkdir(parents=True, exist_ok=True)
+              torch.save({"model": model.state_dict(), "step": 0}, warm)
+          history = []
+          for index in range(1, cycles + 1):
+              folder = root / f"cycle-{index:02d}"
+              ckpt_dir = Path("checkpoints") / f"cycle-{index:02d}"
+              folder.mkdir(parents=True, exist_ok=True)
+              initial = folder / "initial.pt"
+              shutil.copy2(warm, initial)
+              def run(*args): subprocess.run(args, check=True)
+              common = ["--profile", "tiny", "--context-length", "2048", "--split", "validation",
+                  "--limit", "0", "--seed", "2026", "--revision", os.environ["MMLU_REVISION"],
+                  "--device", "cpu", "--batch-token-budget", "8192"]
+              run("python", "scripts/evaluate_text.py", "--checkpoint", str(initial),
+                  "--validation-text", str(validation), "--profile", "tiny", "--batches", "64",
+                  "--batch-size", "2", "--seed", "2026", "--output", str(folder / "lm-before.json"))
+              run("python", "scripts/evaluate_mmlu_pro.py", "--checkpoint", str(initial),
+                  *common, "--output", str(folder / "mmlu-before.json"))
+              run("python", "scripts/train_text.py", "--text", str(train), "--profile", "tiny",
+                  "--steps", str(steps), "--seed", str(1337 + index), "--init-checkpoint", str(initial),
+                  "--device", "cpu", "--checkpoints", str(ckpt_dir))
+              candidate = ckpt_dir / f"step-{steps:08d}.pt"
+              if not candidate.is_file(): raise SystemExit(f"Checkpoint ausente: {candidate}")
+              run("python", "scripts/evaluate_text.py", "--checkpoint", str(candidate),
+                  "--validation-text", str(validation), "--profile", "tiny", "--batches", "64",
+                  "--batch-size", "2", "--seed", "2026", "--output", str(folder / "lm-after.json"))
+              run("python", "scripts/evaluate_mmlu_pro.py", "--checkpoint", str(candidate),
+                  *common, "--output", str(folder / "mmlu-after.json"))
+              lm0, lm1 = [json.loads((folder / f"lm-{phase}.json").read_text()) for phase in ("before", "after")]
+              m0, m1 = [json.loads((folder / f"mmlu-{phase}.json").read_text()) for phase in ("before", "after")]
+              same_eval = (m0["dataset_revision"] == m1["dataset_revision"]
+                  and m0["dataset_split"] == m1["dataset_split"] == "validation"
+                  and m0["dataset_sha256"] == m1["dataset_sha256"]
+                  and m0["selected_items"] == m1["selected_items"]
+                  and m0["evaluated_items"] == m1["evaluated_items"])
+              improved = (same_eval and m1["overall"]["accuracy"] > m0["overall"]["accuracy"]
+                  and lm1["bits_per_byte"] <= lm0["bits_per_byte"])
+              if improved:
+                  payload = torch.load(candidate, map_location="cpu", weights_only=False)
+                  torch.save({"model": payload["model"], "step": payload["step"]}, warm)
+              history.append({"cycle": index, "accepted": improved,
+                  "validation_accuracy_before": m0["overall"]["accuracy"],
+                  "validation_accuracy_after": m1["overall"]["accuracy"],
+                  "bits_per_byte_before": lm0["bits_per_byte"],
+                  "bits_per_byte_after": lm1["bits_per_byte"],
+                  "evaluated_items": m1["evaluated_items"], "dataset_sha256": m1["dataset_sha256"],
+                  "checkpoint_sha256": m1["checkpoint_sha256"],
+                  "promotion_rule": "strict validation accuracy increase AND BPB non-regression"})
+              print(json.dumps(history[-1], indent=2))
+          summary = {"experiment": "ronin-rapid-open-corpus-loop-v1",
+              "dataset_kind": "pinned open-domain public-domain corpus; G-0 gated",
+              "training_steps_per_cycle": steps, "cycles": history,
+              "accepted_cycles": sum(x["accepted"] for x in history),
+              "model_ref": "cache:ronin-open-warmstart (latest accepted checkpoint)",
+              "final_holdout_policy": "MMLU-Pro test split is never used in this loop; reserved for final release evaluation.",
+              "limitations": ["MMLU-Pro validation is a development gate, not the final test holdout.",
+                  "Repeated selection on validation can overfit it; release promotion requires untouched MMLU-Pro test evaluation.",
+                  "RONIN next-byte multiple-choice accuracy is not official MMLU-Pro scoring or open-ended reasoning.",
+                  "No cycle runs unless the versioned G-0 audit explicitly authorizes document training."]}
+          Path("reports/rapid-training-summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+      - name: Guardar pesos aceptados para el siguiente ciclo programado
+        if: success() && steps.g0.outputs.authorized == 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: /tmp/ronin-open-warmstart
+          key: ronin-open-warmstart-${{ github.run_id }}
+      - name: Publicar informes y manifiesto del modelo
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-rapid-open-training-${{ github.run_id }}
+          path: reports/
+          if-no-files-found: ignore
+          retention-days: 30

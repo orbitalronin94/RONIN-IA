@@ -39,3 +39,16 @@ La promoción del warm-start exige simultáneamente:
 - exactitud no inferior en el piloto multidominio de 23 preguntas.
 
 Si cualquiera de las dos condiciones falla, no se guarda el checkpoint nuevo y la siguiente iteración conserva el último estado aceptado. El optimizador se reinicia entre ciclos; solo se transfieren los pesos. Esto es un experimento de currículo sintético y continuidad técnica, no aprendizaje de conocimiento externo ni una evaluación de razonamiento general. La caché de Actions es almacenamiento experimental, no un release del modelo.
+
+
+## Ciclos rápidos con corpus abierto y promoción por validación
+
+El workflow `rapid-open-training-cycles.yml` ejecuta hasta tres ciclos cortos consecutivos y, cuando una ejecución termina correctamente, el workflow separado `rapid-open-training-dispatcher.yml` recibe el evento `workflow_run` y solicita automáticamente la siguiente tanda mediante `workflow_dispatch`. Separar el dispatcher evita que el workflow de entrenamiento se dispare a sí mismo en una cadena recursiva. No requiere activación manual entre ciclos. Un `cron` cada seis horas sirve solo como arranque/recuperación si la cadena se detiene. Usa el corpus público fijado por `prepare_open_corpora.py`, con partición por obra; conserva el último checkpoint aceptado y hace warm-start del siguiente ciclo.
+
+**Gate obligatorio:** el workflow llama a `assert_g0_passed.py` antes de descargar textos o entrenar. Si G-0 no está en PASS, la ejecución falla de forma cerrada, no descarga textos ni modifica pesos y corta la cadena; el arranque periódico vuelve a intentarlo más tarde. Una etiqueta de licencia o la disponibilidad pública no sustituyen la revisión humana.
+
+**Regla de promoción:** solo acepta el checkpoint si mejora estrictamente la accuracy de MMLU-Pro `validation` y no empeora bits-per-byte en el split de validación textual. Si no cumple ambas condiciones, restaura el checkpoint anterior y continúa desde él. El test de MMLU-Pro permanece fuera de este bucle y se reserva para evaluación final no usada en selección.
+
+La referencia operativa del último modelo aceptado por estos ciclos es la caché `ronin-open-warmstart` de GitHub Actions; no es todavía un release descargable ni una referencia inmutable a largo plazo. Cada ejecución publica el informe de ciclos, hashes, split y checkpoint. La promoción a versión pública exige después el test completo y actualización explícita del model card/README.
+
+La validación recurrente puede sobreajustarse con el tiempo; por ello, una subida en validation no se presenta como mejora general ni como aprobación de release. El test final intacto sigue siendo la barrera de publicación.
