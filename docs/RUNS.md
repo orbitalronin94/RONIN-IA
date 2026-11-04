@@ -165,3 +165,12 @@ Si una ejecución cambia datos, código o documentación, la descripción debe i
 - [Manifiesto de datasets externos](../data/manifests/external_datasets.json)
 - [Política de ingesta y derechos G-0](INGESTA_AMPLIA_DATASETS_EXTERNOS.md)
 - [README del proyecto](../README.md)
+
+
+## Bloqueo deliberado de RUN #5: ocho bibliotecas técnicas
+
+**Estado: pendiente; no se ha creado ni lanzado RUN #5.**
+
+Se fija como condición previa disponer de ocho bibliotecas independientes y aprobadas, con 8.118.117 bytes de `train.txt` cada una (tolerancia ±10 %), más Portfolio/Papers como corpus experto adicional y separado. La lista, los candidatos, el currículo bibliográfico de matemáticas/lógica y el glosario REF están en [Bibliotecas técnicas balanceadas](BIBLIOTECAS_TECNICAS_BALANCEADAS.md).
+
+El gate estricto `scripts/validate_balanced_libraries.py --require-ready` se ejecuta antes de la adquisición y del entrenamiento en el workflow oficial. En la creación de este registro el inventario está en 0/8 bibliotecas admitidas; por tanto, cualquier ejecución oficial se detendrá inmediatamente. No se reutilizan MMLU-Pro, validation/test, corpus sintético ni trazas de tutor no verificadas para completar bytes.
