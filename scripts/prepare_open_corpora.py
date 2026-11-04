@@ -102,6 +102,24 @@ def _download_source(source: dict[str, Any], cache_dir: Path) -> tuple[Path, str
     return archive_path, sha256(archive_path.read_bytes())
 
 
+
+def _partition_documents(
+    documents: list[dict[str, str]],
+) -> dict[str, list[dict[str, str]]]:
+    """Asigna documentos completos a particiones reproducibles sin solapamiento."""
+    ordered = sorted(documents, key=lambda item: item["sha256"])
+    total = len(ordered)
+    test_count = max(1, round(total * 0.05))
+    validation_count = max(1, round(total * 0.05))
+    if test_count + validation_count >= total:
+        raise ValueError("No hay suficientes documentos para separar train/validation/test")
+    return {
+        "test": ordered[:test_count],
+        "validation": ordered[test_count:test_count + validation_count],
+        "train": ordered[test_count + validation_count:],
+    }
+
+
 def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
     candidates: list[dict[str, str]] = []
     archive_hashes: dict[str, str] = {}
@@ -148,18 +166,8 @@ def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
     if len(candidates) < 10:
         raise ValueError(f"Corpus insuficiente: solo {len(candidates)} documentos válidos")
 
-    # Asignación determinista por hash del documento para evitar fuga entre particiones.
-    candidates.sort(key=lambda item: item["sha256"])
-    total = len(candidates)
-    test_count = max(1, round(total * 0.05))
-    validation_count = max(1, round(total * 0.05))
-    if test_count + validation_count >= total:
-        raise ValueError("No hay suficientes documentos para separar train/validation/test")
-    partitions = {
-        "test": candidates[:test_count],
-        "validation": candidates[test_count:test_count + validation_count],
-        "train": candidates[test_count + validation_count:],
-    }
+    # El holdout test se asigna por obra y no se entrega al entrenador.
+    partitions = _partition_documents(candidates)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     output_hashes: dict[str, str] = {}
@@ -198,6 +206,7 @@ def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
         "skipped_count": len(skipped),
         "skipped": skipped,
         "partitioning": "determinista por SHA-256 del documento; 90/5/5 aproximado",
+        "holdout_policy": "test no se usa para gradientes ni ajuste; solo benchmark explícito",
         "purpose": "entrenamiento y evaluación interna inicial; revisar los límites de dominio literario",
     }
     (output_dir / "manifest.json").write_text(
