@@ -7,8 +7,8 @@ import argparse
 import hashlib
 import json
 import re
-from pathlib import Path
 from collections.abc import Iterable
+from pathlib import Path
 
 _NAME = re.compile(r"^[a-z0-9][a-z0-9_-]{0,63}$")
 _HOLDOUT_MARKERS = {"validation", "valid", "test", "eval", "benchmark"}
