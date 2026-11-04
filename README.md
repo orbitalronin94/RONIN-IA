@@ -49,14 +49,16 @@ Todos los pesos se inicializan localmente. No se cargan pesos de tutores ni chec
 
 ## Escalera de desarrollo de RONIN
 
-| Perfil | Recuento analítico objetivo | Hardware previsto | Propósito |
-|---|---:|---|---|
-| tiny | 9.922.880 | CPU | Pruebas rápidas y validación de la canalización |
-| seed-0 | 147.092.736 | 1× RTX 4090 | Primer experimento relevante desde cero |
-| seed-1 | 955.221.504 | 2× A100 40 GB | Experimento de mayor escala |
-| seed-2 | 6.976.598.016 | 4× A100 80 GB | Escala superior |
+El entorno operativo de referencia es GitHub Actions estándar para repositorios públicos (`ubuntu-latest`): 4 vCPU, 16 GB de RAM y 14 GB SSD nominales, sin GPU CUDA. Cada trabajo usa una máquina virtual nueva y efímera. Las cifras publicadas son especificaciones de referencia; el workflow registra los recursos observados en cada ejecución. Consulta [Hardware y runners gratuitos](docs/HARDWARE.md).
 
-Son objetivos de planificación, no garantías de ajuste en memoria. Los recuentos deben verificarse con `ronin count-params --profile PERFIL`. El concepto MoE de 2,8 billones de parámetros queda fuera de la primera escalera.
+| Perfil | Parámetros objetivo | Situación actual |
+|---|---:|---|
+| tiny | 9.922.880 | Perfil de referencia para pruebas y experimentos CPU pequeños |
+| seed-0 | 147.092.736 | No validado para entrenamiento en el runner gratuito |
+| seed-1 | 955.221.504 | Fuera del entorno operativo actual |
+| seed-2 | 6.976.598.016 | Fuera del entorno operativo actual |
+
+Los perfiles son objetivos de arquitectura, no garantías de memoria, duración ni rendimiento. Los recuentos deben verificarse con `ronin count-params --profile PERFIL`. El concepto MoE de 2,8 billones de parámetros queda fuera de la primera escalera.
 
 ## Implementación inicial
 
