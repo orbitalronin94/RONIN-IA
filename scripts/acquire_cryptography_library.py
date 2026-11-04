@@ -7,6 +7,7 @@ no mezcla automáticamente estos textos con el corpus de entrenamiento general.
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import hashlib
 import json
 import urllib.request
@@ -141,6 +142,7 @@ def acquire(output_dir: Path) -> dict[str, Any]:
         "schema_version": 1,
         "library_id": "ronin-verified-cryptography-primary-sources-v1",
         "credential_free": True,
+        "retrieved_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "training_policy": (
             "Fuentes auxiliares para investigación y evaluación de codificación; "
             "no se incorporan al entrenamiento general automáticamente."
