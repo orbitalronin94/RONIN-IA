@@ -8,7 +8,7 @@ import json
 import time
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -271,7 +271,7 @@ def main() -> int:
     if not 1 <= args.limit_per_source <= 1000:
         parser.error("--limit-per-source must be between 1 and 1000")
 
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = datetime.now(UTC).isoformat()
     reports = []
     for folder, fetcher in (
         ("wikidata_cc0", wikidata_sample),
