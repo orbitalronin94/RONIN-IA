@@ -33,8 +33,8 @@ def test_adquisicion_guarda_archivos_hashes_y_exclusion_de_entrenamiento(
             data = b"%PDF-1.7\nmock-pdf-content"
         elif "2147" in url:
             data = b"THE GOLD-BUG\nEDGAR ALLAN POE"
-        elif "3091" in url:
-            data = b"THE GIANT RAFT\nJULES VERNE"
+        elif "14806" in url:
+            data = b"LA JANGADA\nJULES VERNE"
         else:
             data = b"THE ADVENTURE OF THE DANCING MEN\nARTHUR CONAN DOYLE"
         return FakeResponse(data, url)
