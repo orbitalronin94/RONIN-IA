@@ -56,11 +56,8 @@ def test_pmc_oa_preflight_excludes_sharealike_nd_nc_and_tdm():
 
 
 def test_pmc_oa_preflight_is_metadata_only():
-    from scripts.preflight_pmc_oa import preflight_domain
-
-    # No remote call is made by this test; the source contract is enforced
-    # by the workflow's report validation and this output-field allowlist.
     import inspect
+
     from scripts import preflight_pmc_oa
 
     source = inspect.getsource(preflight_pmc_oa.preflight_domain)
