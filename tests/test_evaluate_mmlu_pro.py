@@ -8,6 +8,7 @@ from ronin.models.transformer import RoninLM
 from scripts.evaluate_mmlu_pro import (
     DATASET_REVISION,
     evaluate_rows,
+    load_external_dataset,
     format_prompt,
     normalize_rows,
     rows_sha256,
@@ -219,3 +220,25 @@ def test_last_position_only_and_full_logits_evaluation_have_identical_prediction
         assert optimized_row["candidate_log_probabilities"] == pytest.approx(
             full_row["candidate_log_probabilities"], abs=1e-5
         )
+
+
+def test_external_loader_supports_validation_without_touching_test(monkeypatch):
+    import sys
+    import types
+
+    calls = []
+    class FakeDataset:
+        def __iter__(self):
+            return iter(sample_rows())
+
+    def fake_load_dataset(dataset_id, *, split, revision):
+        calls.append((dataset_id, split, revision))
+        return FakeDataset()
+
+    monkeypatch.setitem(sys.modules, "datasets", types.SimpleNamespace(load_dataset=fake_load_dataset))
+    validation = load_external_dataset(DATASET_REVISION, split="validation")
+    assert len(validation) == 8
+    assert calls == [("TIGER-Lab/MMLU-Pro", "validation", DATASET_REVISION)]
+
+    with pytest.raises(ValueError, match="split"):
+        load_external_dataset(DATASET_REVISION, split="train")
