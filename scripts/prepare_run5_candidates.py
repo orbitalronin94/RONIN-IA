@@ -397,6 +397,7 @@ def main() -> int:
     raw_language_values: Counter[str] = Counter()
     collection_values: Counter[str] = Counter()
     collection_domain_values: Counter[str] = Counter()
+    accepted_code_documents = 0
     scanned_rows = 0
     accepted_bytes = 0
     scanned_text_bytes = 0
