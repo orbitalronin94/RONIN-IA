@@ -55,6 +55,7 @@ def test_exports_only_train_and_keeps_holdouts_out(tmp_path, monkeypatch):
     assert report["train_records"] == 1
     assert report["validation_reserved"] == 1
     assert report["test_reserved"] == 1
+    assert report["holdout_reserved"] == 0
     assert report["training_text_sha256"] == hashlib.sha256(output.read_bytes()).hexdigest()
 
 
