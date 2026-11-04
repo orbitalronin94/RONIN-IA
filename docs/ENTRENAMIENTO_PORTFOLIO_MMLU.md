@@ -37,6 +37,31 @@ Se seleccionaron 140 preguntas estratificadas; 9 se excluyeron por exceder el co
 
 Este resultado es un smoke de 100 pasos, no la conclusión del proyecto. El workflow reserva los ciclos largos (hasta 1000 pasos y cinco semillas) para ejecución manual; los eventos de PR y push usan un smoke corto de 100 pasos y una semilla.
 
+
+### Desglose por dominio
+
+| Dominio | Inicial | Tras 100 pasos | Cambio de aciertos |
+|---|---:|---:|---:|
+| Biología | 0/10 | 0/10 | 0 |
+| Empresa | 1/10 | 1/10 | 0 |
+| Química | 2/10 | 0/10 | -2 |
+| Informática | 1/10 | 0/10 | -1 |
+| Economía | 0/10 | 1/10 | +1 |
+| Ingeniería | 0/10 | 2/10 | +2 |
+| Salud | 0/10 | 0/10 | 0 |
+| Historia | 1/6 | 1/6 | 0 |
+| Derecho | 0/6 | 0/6 | 0 |
+| Matemáticas | 1/10 | 1/10 | 0 |
+| Otros | 1/9 | 2/9 | +1 |
+| Filosofía | 2/10 | 0/10 | -2 |
+| Física | 1/10 | 1/10 | 0 |
+| Psicología | 1/10 | 1/10 | 0 |
+
+### Comparación pareada
+
+La comparación por identificador confirma que 110 de los 131 ítems mantuvieron el mismo resultado. En los 21 discordantes, 11 pasaron de correcto a incorrecto y 10 de incorrecto a correcto. La prueba exacta binomial bilateral equivalente al contraste de McNemar da **p = 1,00**. No hay señal estadística de cambio en esta muestra; el signo negativo de un acierto no debe presentarse como regresión demostrada.
+
+
 ## Interpretación
 
 El resultado es un experimento de entrenamiento sobre un corpus concreto, no una prueba de conocimiento general. Una subida o bajada de la exactitud en la muestra puede reflejar variación, especialización o regresión; debe contrastarse entre semillas y con otras evaluaciones independientes antes de extraer conclusiones sobre la arquitectura.
