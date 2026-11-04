@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:29 | [Integración continua #942 (run 41934043172)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934043172) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Expose exact CoVoST TSV headers before bilingual field-scope decision. Trigger: push; rama: main; intento: 1. | c1c4c897 |
 | 2026-11-04 23:28 | [Integración continua #936 (run 41933921854)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933921854) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Record OpenCitations candidate output and eighth exact-scope rights record. Trigger: push; rama: main; intento: 1. | d5f78cf9 |
 | 2026-11-04 23:28 | [Integración continua #939 (run 41933988211)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933988211) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add scheduled/manual CoVoST bilingual text candidate workflow. Trigger: push; rama: main; intento: 1. | 54d4bdbc |
 | 2026-11-04 23:28 | [Integración continua #935 (run 41933910185)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933910185) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Certify exact OpenCitations CC0 citation graph export in rights ledger. Trigger: push; rama: main; intento: 1. | 8318d402 |
