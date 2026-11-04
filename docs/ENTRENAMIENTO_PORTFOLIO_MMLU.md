@@ -59,7 +59,7 @@ Este resultado es un smoke de 100 pasos, no la conclusión del proyecto. El work
 
 ### Comparación pareada
 
-La comparación por identificador confirma que 110 de los 131 ítems mantuvieron el mismo resultado. En los 21 discordantes, 11 pasaron de correcto a incorrecto y 10 de incorrecto a correcto. La prueba exacta binomial bilateral equivalente al contraste de McNemar da **p = 1,00**. No hay señal estadística de cambio en esta muestra; el signo negativo de un acierto no debe presentarse como regresión demostrada.
+La comparación por identificador confirma que 110 de los 131 ítems permanecieron incorrectos en ambos estados; no hubo ningún ítem correcto en ambos. En los 21 discordantes, 11 pasaron de correcto a incorrecto y 10 de incorrecto a correcto. La prueba exacta binomial bilateral equivalente al contraste de McNemar da **p = 1,00**. No hay señal estadística de cambio en esta muestra; el signo negativo de un acierto no debe presentarse como regresión demostrada.
 
 
 ## Interpretación
