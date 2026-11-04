@@ -42,3 +42,13 @@ A dataset being listed here is not proof that all of its upstream sources are le
 ## RONIN library mapping
 
 The target remains 16 domains × General/HKD = 32 libraries. This literature mixture is an initial Spanish-language general-literature pool; it does **not** automatically fill all 32 libraries or count toward unrelated domains. Domain assignment and HKD ranking require a separate, reproducible selection report.
+
+
+## Expanded domain acquisition
+
+The acquisition catalogue now tracks 32 subject areas and 64 planned General/HKD partitions:
+`catalog/expanded-domain-registry.json`.
+
+This is an expansion roadmap, not a claim that 64 libraries have already been populated or admitted. The operational Common Corpus RUN5 pipeline currently builds candidate partitions for its original 16 domains. A weekly bounded refresh is enabled (1,000,000 rows / 1 GiB input per domain by default). A second weekly lane acquires PMC OA scientific article candidates in biology/medicine and chemistry, requiring the exact per-version CC0/CC BY allowlist, public anonymous access, XML MD5 verification, source metadata ETags and SHA-256, and sensitive-content scans.
+
+The PMC lane and Common Corpus lane remain candidate-only. The separate mathlib4 workflow continues its pinned Apache-2.0 candidate preparation. No schedule can override G-0 or promote candidates to training. The additional 16 domains are catalogued and await dedicated adapters, source-specific authorization, and tests before they count as operational libraries.
