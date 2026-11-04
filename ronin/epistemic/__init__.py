@@ -5,10 +5,10 @@ la falsabilidad ni el significado de un texto.
 """
 
 from ronin.epistemic.schema import (
-    EPISTEMIC_CLASSES,
-    ENCODING_STATUSES,
-    GENRES,
     CLAIM_TYPES,
+    ENCODING_STATUSES,
+    EPISTEMIC_CLASSES,
+    GENRES,
     validate_annotation,
 )
 
