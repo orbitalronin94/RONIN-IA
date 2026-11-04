@@ -1,0 +1,32 @@
+name: ParlaIbero-ES Dataverse metadata preflight
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/preflight_parlaibero_dataverse.py"
+      - ".github/workflows/preflight-parlaibero-dataverse.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "31 5 11 * *"
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Resolve pinned Dataverse v2.0 file manifest
+        run: python scripts/preflight_parlaibero_dataverse.py
+      - uses: actions/upload-artifact@v6
+        with:
+          name: ronin-parlaibero-es-v2-dataverse-manifest
+          path: artifacts/parlaibero/
+          if-no-files-found: error
+          retention-days: 90
