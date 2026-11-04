@@ -57,7 +57,7 @@ Las particiones HKD se construirán con `RONIN-HKD-0.1`: relevancia del dominio,
 
 **Estado real: 0/32 bibliotecas admitidas para entrenamiento.** Common Corpus y PMC Cloud están habilitados solo para extraer candidatos bajo autorizaciones limitadas; PMC aporta texto JATS CC0/CC BY por versión para biología/medicina y química. La última ejecución de RUN 5 no llegó a crear jobs por un error YAML en un nombre de paso; la PR de integración añade `actionlint` y corrige ese nombre antes de relanzar la matriz. Sus salidas seguirán bloqueadas hasta revisión humana, hashes, auditoría legal, deduplicación cruzada, calidad, PII/secretos y splits sin fugas. G-0 global continúa FAIL: no se entrena con estos textos.
 
-- Manifiesto de las 16: [sixteen_libraries.json](data/manifests/sixteen_libraries.json).
+- Manifiesto de las 32 bibliotecas (16 dominios): [sixteen_libraries.json](data/manifests/sixteen_libraries.json).
 - Adaptadores y allowlists: [knowledge_dense_sources.json](data/manifests/knowledge_dense_sources.json).
 - [Ingesta PMC Cloud por versión y licencia](docs/FUENTE_PMC_OA.md).
 - [Métrica y protocolo HKD](docs/METRICA_DENSIDAD_SEMANTICA.md).
