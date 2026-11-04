@@ -322,3 +322,18 @@ The BOE (BOE-A-2025-12053) lists both GPLSI collections as CC BY 4.0, but their 
 - [Workflow and artifact](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935114828).
 
 The source register now has 64 entries. It includes acquisition-ready candidates, metadata-only resources, sources awaiting item-level checks, and explicit exclusions. It is not a count of 64 admitted datasets or 64 training-eligible libraries. The rights ledger remains at eight exact-scope Level A records; GPLSI ClearText has not been added to that ledger because third-party source rights still need review.
+
+
+## SINAI-UJA licensing and privacy audit
+
+The source register also records SINAI-UJA resources from BOE-A-2025-12053 and their more specific provider/Hugging Face terms:
+
+- **Emoti-SP**: 111-row emoticon lexicon; Hugging Face declares Apache-2.0 while BOE lists CC BY 4.0. Both are permissive, but the exact dual-license scope still needs reconciliation. Auxiliary lexicon only.
+- **iSOL and CRiSOL**: BOE lists CC BY 4.0, but Hugging Face dataset cards declare CC BY-NC-SA 4.0 and identify upstream lexicon dependencies. Excluded until the conflict and upstream rights are resolved.
+- **COAH**: TripAdvisor hotel reviews; quarantined pending platform/source rights and privacy review.
+- **MentalRiskES**: excluded from training ingestion because it contains mental-health-related social-media data.
+- **ALIA corpora** (legal, synthetic legal instructions, biomedical, cultural heritage and legal hard negatives): their dataset cards declare CC BY-SA 4.0, outside the current allowlist; biomedical content also needs sensitive-data review.
+
+## Immutable run ledger
+
+The exact workflow IDs, artifact IDs, row counts, payload byte counts, SHA-256 values, source revisions and admission decisions are stored in `candidates/ingestion-runs/2026-11-05.json`. The source register has 64 entries; the rights ledger has eight exact-scope Level A records. The global G-0 gate remains FAIL, and no new payload in this report is admitted or training-eligible.
