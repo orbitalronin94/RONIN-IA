@@ -139,3 +139,26 @@ These are registered as candidates, not admissions. No license on a repository's
 Other leads were deliberately not promoted: C4 grammatical-error edits and ImPaKT snippets inherit source text from C4/Common Crawl whose item-level reuse rights were not established; they remain excluded from the Level-A pipeline until the original text provenance is cleared. HPLT's CC0 release statement is not treated as proof of every crawled source's copyright status. This is why the candidate count can grow without relaxing the rights policy.
 
 All four additions have `training_eligible=false` and `admission_eligible=false`. They do not count toward the 32/64 library size targets or the admitted text-byte totals.
+
+
+## Expanded source discovery (2026-11-05)
+
+The source audit is maintained in `candidates/github-source-audit.json`. It is a discovery register, not an admission list. Current new lanes and decisions:
+
+| Source | License / rights position | RONIN decision |
+|---|---|---|
+| ROR v2 registry dump | CC0 for IDs and metadata; GeoNames-derived locations are CC BY 4.0 | Adapter added; location fields excluded; candidate artifact + hash required |
+| MathemAct | CC BY 4.0 for published export | Quarantined pending privacy/consent review; no profiles/comments ingestion |
+| PleIAs Common Corpus | Mixed document-level provenance/licensing | High-priority discovery; only exact per-document CC0/allowlisted CC BY subsets may pass |
+| HPLT v2 | Site labels cleaned corpora CC0; source origin includes Common Crawl/Internet Archive | Pending document-level origin and rights checks; no bulk ingestion |
+| Project Gutenberg | Public domain is item-, edition- and jurisdiction-specific | Per-work clearance only; exclude modern editorial matter and copyrighted translations |
+| ScienceVerse papers | Per-paper original licenses reportedly retained | Pending repository pin and article-by-article license audit |
+| Hlido agent benchmark | CC BY 4.0 declared, manifest + SHA-256 published | Small candidate; privacy and third-party quote review required |
+| Correlation Studio | CC BY 4.0 declared for public corpus | Pending author-rights and per-record provenance audit |
+| Perseus Greek/Latin | CC BY-SA 4.0 repository default; item-level variation | Excluded from current Level A allowlist |
+| UD Spanish AnCora | README conflicts: machine metadata says CC BY 4.0, body says inherited GNU license | Quarantined until original provider resolves conflict |
+| UD English EWT | CC BY-SA annotations; underlying texts from mixed third-party sources | Excluded from Level A text ingestion |
+
+ROR adapter: `scripts/ingest_ror_cc0_metadata.py`; workflow: `.github/workflows/ingest-ror-cc0-metadata.yml`. It pins Zenodo record `23187250`, verifies the record's declared CC0 identifier, downloads a bounded archive, supports JSON-array/JSONL source layouts, exports an explicit field allowlist, removes the `locations` field (GeoNames-derived CC BY 4.0), and emits a proposed rights record with SHA-256 values. It does not append the rights ledger or make the dataset training-eligible.
+
+Important: source catalogs such as OpenCorpus, Open Trusted Data Initiative, and general dataset indexes are discovery aids only. Their license metadata does not replace the original provider's rights statement, item-level provenance, privacy checks, or exact payload hashes. Dataset volume is never a reason to relax those gates.
