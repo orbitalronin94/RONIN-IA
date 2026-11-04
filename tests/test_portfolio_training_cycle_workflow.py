@@ -47,7 +47,7 @@ def test_official_training_workflow_excludes_portfolio_and_requires_eight_librar
     assert "mmlu-inicial.json" in cycle
     assert "mmlu-final.json" in cycle
 
-    mixture = by_name["Construir corpus provisional (solo para validar el pipeline)"]["run"]
+    mixture = by_name["Construir mezcla balanceada de las ocho bibliotecas admitidas"]["run"]
     assert "--input portfolio=" not in mixture
     for library in ["mathematics", "logic_epistemology", "philosophy", "physics", "chemistry", "biology_medicine", "computer_science", "law_economics_social_sciences"]:
         assert f"--input {library}=" in mixture
