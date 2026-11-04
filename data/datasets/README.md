@@ -56,7 +56,7 @@ The PMC lane and Common Corpus lane remain candidate-only. The separate mathlib4
 
 ## Rights level A — evidence ledger
 
-The item-level rights evidence ledger is maintained in `rights_registry/`. Its policy, JSON schema, append-only records file and deterministic validator define the only route to rights level A. The registry currently contains **2 exact-scope level-A rights records** (CoVoST 2 translation-only and OpenAlex metadata-only). The existing 608-document Spanish literature artifact remains separately admitted under its original manifest and checks; it has not been silently re-labelled under the new policy. The existing 608-document Spanish literature artifact remains separately admitted under its original manifest and checks; it has not been silently re-labelled under the new policy.
+The item-level rights evidence ledger is maintained in `rights_registry/`. Its policy, JSON schema, append-only records file and deterministic validator define the only route to rights level A. The registry currently contains **2 exact-scope level-A rights records** (CoVoST 2 translation-only and OpenAlex metadata-only). The existing 608-document Spanish literature artifact remains separately admitted under its original manifest and checks; it has not been silently re-labelled under the new policy.
 
 A source-level license field, public repository, AWS catalogue entry, SPDX identifier, Europeana rights statement, Crossref deposit, or PMC OA article label is evidence to inspect—not independent proof of ownership. Every candidate must carry item/version-level rights evidence and exact payload/metadata hashes. Public-domain claims need territorial and edition-specific evidence. Level A still does not bypass quality, privacy, deduplication, attribution, split-integrity, or global G-0 gates.
 
@@ -123,3 +123,19 @@ The Actions artifacts are retained for 90 days. The source adapters and pinned m
 - **MathemAct:** reviewed its pinned 2026-11-03 export manifest. It declares CC-BY 4.0 for public contributions, but the current snapshot contains only 1 report and 1 claim (plus tags, profile and comment metadata). It is too small to prioritize now; user-submitted content and quoted third-party transcript excerpts need filtering before any future use.
 
 The ScienceVerse and Hlido candidates are registered in `candidates/github-source-audit.json`; neither has been downloaded or rights-certified by RONIN yet.
+
+
+## Additional multilingual and specialist source candidates (2026-11-05)
+
+The GitHub source audit now tracks 17 candidate sources. Four additional sources have been added after inspecting their public dataset documentation and recording the scope limitations:
+
+- **VoxPopuli** — text-only ASR transcript candidate across European languages, including Spanish. Its README explicitly separates the VoxPopuli data (CC0) from Europarl-derived LM data (separate terms), and the repository's own LICENSE is CC-BY-NC 4.0. Therefore only exact VoxPopuli ASR transcript manifests may be considered; no audio, speaker identifiers, code, model weights or Europarl text.
+- **DReaM-es-open** — Spanish corpus declared CC-BY-4.0, reported as 9,115,151 tokens and 717,854 sentences. The currently listed 9.23 MB downloadable file is word statistics, not proof of a full-text corpus export. The actual corpus endpoint and payload manifest must be identified before ingestion.
+- **HTRogène Occitan** — 65 manuscript pages with normalized XML ground truth and a CC-BY-4.0 dataset declaration. Candidate scope is transcription text only; modern transcription/editorial rights and manuscript provenance must be retained, and images are excluded from the text-only lane.
+- **DFKI SmartData German corpus** — approximately 2,600 German documents with NER and relation annotations, declared CC-BY-4.0. It remains pending pinned license-file evidence and privacy/source review because its source mix includes web, RSS and social content.
+
+These are registered as candidates, not admissions. No license on a repository's code is applied to its data. Mixed-license collections remain filtered by the exact subcorpus or record; for example, the ScienceVerse Collabra subcorpus is isolated from its mixed-license sibling corpora, and VoxPopuli's CC0 data is isolated from the repository's NC code/models and separately licensed LM material.
+
+Other leads were deliberately not promoted: C4 grammatical-error edits and ImPaKT snippets inherit source text from C4/Common Crawl whose item-level reuse rights were not established; they remain excluded from the Level-A pipeline until the original text provenance is cleared. HPLT's CC0 release statement is not treated as proof of every crawled source's copyright status. This is why the candidate count can grow without relaxing the rights policy.
+
+All four additions have `training_eligible=false` and `admission_eligible=false`. They do not count toward the 32/64 library size targets or the admitted text-byte totals.
