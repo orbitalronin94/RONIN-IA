@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 USER_AGENT = "RONIN-IA-dataset-ingestion/1.0 (research; contact: repository maintainers)"
 WIKIDATA_ENDPOINT = "https://query.wikidata.org/sparql"
 EUROPE_PMC_ENDPOINT = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
+HF_DATASET_VIEWER = "https://datasets-server.huggingface.co/filter"
 
 
 def request_json(url: str, *, accept: str = "application/sparql-results+json", retries: int = 4) -> dict[str, Any]:
@@ -154,6 +155,114 @@ def europe_pmc_sample(limit: int) -> tuple[list[dict[str, Any]], dict[str, Any]]
     }
 
 
+
+def is_approved_common_corpus_license(value: str) -> bool:
+    normalized = " ".join(value.upper().replace("-", " ").replace("_", " ").split())
+    return normalized in {
+        "PUBLIC DOMAIN",
+        "PUBLIC DOMAIN US",
+        "US FEDERAL PUBLIC DOMAIN",
+        "CC0",
+        "CC0 1.0",
+        "CC BY",
+        "CC BY 2.0",
+        "CC BY 3.0",
+        "CC BY 4.0",
+        "MIT",
+    }
+
+
+def common_corpus_sample(limit: int) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    # Use the dataset viewer's indexed filter API so we do not stream or clone
+    # the multi-terabyte corpus. Keep only short Spanish/English records with
+    # exact public-domain/CC0/CC-BY/MIT labels.
+    licenses = [
+        "Public Domain",
+        "public domain",
+        "US Federal Public Domain",
+        "CC0",
+        "CC0 1.0",
+        "CC BY",
+        "CC BY 2.0",
+        "CC BY 3.0",
+        "CC BY 4.0",
+        "MIT",
+    ]
+    license_predicate = " OR ".join(
+        '"license"=' + "'" + license_name.replace("'", "''") + "'"
+        for license_name in licenses
+    )
+    where = (
+        '("language"=\'es\' OR "language"=\'en\') '
+        'AND "word_count"<=5000 AND (' + license_predicate + ")"
+    )
+    rows: list[dict[str, Any]] = []
+    offset = 0
+    scanned = 0
+    partial = False
+    while len(rows) < limit and offset < 2000:
+        page_length = min(100, max(1, limit - len(rows)))
+        url = HF_DATASET_VIEWER + "?" + urllib.parse.urlencode({
+            "dataset": "PleIAs/common_corpus",
+            "config": "default",
+            "split": "train",
+            "where": where,
+            "offset": offset,
+            "length": page_length,
+        })
+        response = request_json(url, accept="application/json")
+        partial = bool(response.get("partial", partial))
+        page = response.get("rows", [])
+        scanned += len(page)
+        for entry in page:
+            item = entry.get("row", {})
+            license_name = str(item.get("license") or "").strip()
+            language = str(item.get("language") or "").strip().lower()
+            text = str(item.get("text") or "").strip()
+            if not is_approved_common_corpus_license(license_name):
+                continue
+            if not (language == "es" or language.startswith("es-") or language == "en" or language.startswith("en-")):
+                continue
+            if not text or len(text.encode("utf-8")) > 200_000:
+                continue
+            identifier = item.get("identifier")
+            rows.append({
+                "source_id": "pleias_common_corpus",
+                "identifier": identifier,
+                "collection": item.get("collection"),
+                "open_type": item.get("open type"),
+                "license": license_name,
+                "date": item.get("date"),
+                "title": item.get("title"),
+                "creator": item.get("creator"),
+                "language": item.get("language"),
+                "word_count": item.get("word_count"),
+                "token_count": item.get("token_count"),
+                "source_url": identifier if isinstance(identifier, str) and identifier.startswith("https://") else None,
+                "text": text,
+            })
+            if len(rows) >= limit:
+                break
+        if not page:
+            break
+        offset += len(page)
+    return rows, {
+        "dataset_id": "pleias_common_corpus_filtered",
+        "source": "https://huggingface.co/datasets/PleIAs/common_corpus",
+        "dataset_viewer_endpoint": HF_DATASET_VIEWER,
+        "query": where,
+        "license_allowlist": licenses,
+        "languages": ["es", "en"],
+        "max_word_count": 5000,
+        "max_text_bytes": 200000,
+        "records": len(rows),
+        "rows_scanned": scanned,
+        "partial_index": partial,
+        "content_type": "short_multidisciplinary_text_documents",
+        "training_eligible": False,
+        "reason_not_training_eligible": "Filtered sample only; source URL, collection and license are retained, but per-document rights, provenance and third-party content still require G-0 review.",
+    }
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=ROOT / "data/external_samples")
@@ -167,8 +276,19 @@ def main() -> int:
     for folder, fetcher in (
         ("wikidata_cc0", wikidata_sample),
         ("europe_pmc_cc_by_cc0", europe_pmc_sample),
+        ("pleias_common_corpus", common_corpus_sample),
     ):
-        rows, metadata = fetcher(args.limit_per_source)
+        try:
+            rows, metadata = fetcher(args.limit_per_source)
+        except Exception as exc:
+            rows = []
+            metadata = {
+                "dataset_id": folder,
+                "records": 0,
+                "status": "unavailable",
+                "error": str(exc),
+                "training_eligible": False,
+            }
         output = args.output_dir / folder / "sample.jsonl"
         digest = write_jsonl(output, rows)
         manifest = {
