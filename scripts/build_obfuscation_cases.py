@@ -10,6 +10,8 @@ import hashlib
 import json
 import random
 from pathlib import Path
+
+from ronin.epistemic.obfuscation import validate_obfuscation_case
 from typing import Any
 
 POE_CIPHER = (
@@ -191,6 +193,18 @@ def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dic
             split=("train" if index % 10 < 8 else "validation" if index % 10 == 8 else "test"),
         ))
 
+    validation_errors = [
+        (row["record_id"], validate_obfuscation_case(row))
+        for row in rows
+    ]
+    validation_errors = [
+        (record_id, error)
+        for record_id, messages in validation_errors
+        for error in messages
+    ]
+    if validation_errors:
+        raise ValueError(f"Anotaciones no válidas: {validation_errors[:10]}")
+
     # Se fija una partición por caso fuente, no por fragmento, para evitar fuga.
     fixed_splits = {
         "poe-goldbug-cipher-001": "train",
@@ -205,7 +219,8 @@ def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dic
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8") as stream:
         for row in rows:
-            stream.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+            stream.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "
+")
 
     summary = {
         "schema_version": 1,
@@ -232,7 +247,8 @@ def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dic
         ),
     }
     (output_path.parent / "manifest.json").write_text(
-        json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+        json.dumps(summary, ensure_ascii=False, indent=2) + "
+",
         encoding="utf-8",
     )
     return summary
