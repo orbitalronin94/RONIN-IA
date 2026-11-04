@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import statistics
+import re
 from pathlib import Path
 from typing import Any
 
@@ -40,6 +41,13 @@ def validate(data: dict[str, Any], *, require_ready: bool) -> dict[str, Any]:
             if require_ready:
                 errors.append(f"{library_id}: not admitted with a non-empty approved train corpus")
             continue
+        for field in ("train_sha256", "manifest_sha256"):
+            if not isinstance(item.get(field), str) or not re.fullmatch(r"[0-9a-f]{64}", item[field]):
+                errors.append(f"{library_id}: missing/invalid {field}")
+        if item.get("document_count", 0) < 1 or item.get("rights_reviewed_documents", 0) < 1:
+            errors.append(f"{library_id}: document and rights-review counts must be positive")
+        elif item["rights_reviewed_documents"] != item["document_count"]:
+            errors.append(f"{library_id}: every document must have a rights review")
         sizes.append(size)
     if len(sizes) == 8:
         mean = statistics.mean(sizes)
@@ -55,15 +63,25 @@ def validate(data: dict[str, Any], *, require_ready: bool) -> dict[str, Any]:
     portfolio = data.get("expert_extra", {})
     if portfolio.get("id") != "portfolio_expert":
         errors.append("Portfolio must remain the separately identified expert extra")
-    if portfolio.get("training_eligible") is not True and require_ready:
-        errors.append("Portfolio expert corpus is not admitted")
+    portfolio_size = portfolio.get("actual_train_bytes", 0)
+    if require_ready:
+        if portfolio.get("training_eligible") is not True or not isinstance(portfolio_size, int) or portfolio_size <= 0:
+            errors.append("Portfolio expert corpus is not admitted with non-empty bytes")
+        for field in ("train_sha256", "manifest_sha256"):
+            if not isinstance(portfolio.get(field), str) or not re.fullmatch(r"[0-9a-f]{64}", portfolio[field]):
+                errors.append(f"Portfolio: missing/invalid {field}")
+        if portfolio.get("document_count", 0) < 1 or portfolio.get("rights_reviewed_documents") != portfolio.get("document_count"):
+            errors.append("Portfolio: all training documents require document-level rights review")
+        if isinstance(portfolio_size, int) and portfolio_size > 0 and target > 0:
+            if abs(portfolio_size - target) / target > tolerance:
+                errors.append("Portfolio expert corpus must remain within the byte budget")
     return {
         "valid": not errors,
         "ready": len(sizes),
         "required": 8,
         "target_bytes_per_library": target,
         "actual_ready_bytes": sizes,
-        "portfolio_extra_bytes": portfolio.get("reference_train_bytes"),
+        "portfolio_extra_bytes": portfolio_size,
         "errors": errors,
     }
 
