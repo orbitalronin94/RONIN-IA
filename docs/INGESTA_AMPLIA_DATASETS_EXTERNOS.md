@@ -99,3 +99,17 @@ Se incorpora un primer flujo real y reproducible de descarga acotada:
 El workflow [Ingesta de muestras CC0/CC-BY — Wikidata + Europe PMC](../.github/workflows/external-sample-ingestion.yml) se ejecuta al integrar cambios en su pipeline, mensualmente y manualmente. Por defecto obtiene hasta 500 registros por fuente, calcula SHA-256, versiona los ficheros bajo `data/external_samples/` y publica un artefacto. Los registros continúan con `training_eligible=false`: esta ingesta es una muestra de adquisición, no una autorización para incorporarla automáticamente a train.
 
 Para pasar de muestra a corpus se requiere revisión de calidad semántica, deduplicación, licencias por registro y contenido de terceros. Los abstracts no equivalen a texto completo ni sustituyen la auditoría del artículo.
+
+
+## Actualización crítica de PMC OA (agosto de 2026)
+
+La distribución antigua de PMC Article Datasets fue retirada durante la semana del 24 de agosto de 2026. No se deben construir nuevos descargadores contra los antiguos paquetes FTP `oa_comm` / `oa_noncomm`.
+
+La vía vigente es el bucket público `pmc-oa-opendata` (AWS, acceso anónimo HTTPS/S3) y su inventario diario. Cada versión de artículo tiene JSON con `license_code`, PMCID, DOI, estado de retractación y URLs de XML/texto. El código de licencia debe comprobarse por versión, no inferirse de que un artículo esté en PMC OA. RONIN solo considera CC0 y CC BY para candidatos; excluye ShareAlike, NoDerivatives, NC, TDM, licencias personalizadas y desconocidas. Las figuras, tablas, suplementos y componentes de terceros quedan fuera del primer adaptador.
+
+Se añade un preflight de metadatos que consulta Europe PMC por dominios de biología/medicina y química, registra recuentos y una muestra de identificadores/licencias y **no descarga texto completo**. Su salida no autoriza adquisición ni entrenamiento; sirve para medir si la fuente puede cubrir los dominios antes de construir el adaptador de texto.
+
+Referencias oficiales:
+- PMC AWS / nueva distribución: https://pmc.ncbi.nlm.nih.gov/tools/pmcaws/
+- README técnico del bucket: https://pmc-oa-opendata.s3.amazonaws.com/README.txt
+- PMC OA y licencias por artículo: https://pmc.ncbi.nlm.nih.gov/tools/openftlist/
