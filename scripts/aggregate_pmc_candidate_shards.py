@@ -45,10 +45,11 @@ def aggregate(input_root: Path, output_root: Path, run_id: str, minimum: int) ->
         for library in data.get("libraries", []):
             library_count += 1
             sidecar = Path(library["documents_manifest"])
-            if not sidecar.is_absolute():
-                sidecar = manifest_path.parent / sidecar.name
             if not sidecar.is_file():
-                raise SystemExit("Missing document sidecar: " + str(sidecar))
+                matches = list(manifest_path.parent.rglob(sidecar.name))
+                if not matches:
+                    raise SystemExit("Missing document sidecar: " + str(sidecar))
+                sidecar = matches[0]
             expected_sidecar_hash = library.get("documents_manifest_sha256")
             if expected_sidecar_hash and digest(sidecar) != expected_sidecar_hash:
                 raise SystemExit("Sidecar SHA-256 mismatch: " + str(sidecar))
