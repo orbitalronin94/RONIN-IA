@@ -206,6 +206,7 @@ def evaluate_rows(
     batch_token_budget: int = 8192,
     last_token_only: bool = True,
     dataset_split: str = "test",
+    dataset_split_size: int | None = None,
 ) -> dict[str, Any]:
     """Evalúa por lotes sin truncar: el padding derecho no altera tokens previos."""
     if context_length < 1:
@@ -317,7 +318,7 @@ def evaluate_rows(
         "evaluated_items": evaluated,
         "skipped_context_items": len(skipped),
         "coverage": evaluated / selected,
-        "complete_dataset_split": selected == len(all_rows) and not skipped,
+        "complete_dataset_split": dataset_split_size is not None and selected == dataset_split_size and not skipped,
         "complete_test_set": dataset_split == "test" and selected == 12032 and not skipped,
         "chance_accuracy_mean": sum(chance_rates) / evaluated,
         "overall": {
@@ -377,6 +378,7 @@ def main() -> None:
         device=args.device,
         batch_token_budget=args.batch_token_budget,
         dataset_split=args.split,
+        dataset_split_size=len(all_rows),
     )
     report["dataset_revision"] = args.revision
     report["sampling"] = {
