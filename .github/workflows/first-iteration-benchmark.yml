@@ -1,6 +1,15 @@
 name: Primera iteración y benchmark interno
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/first-iteration-benchmark.yml"
+      - "ronin/**"
+      - "scripts/**"
+      - "configs/**"
+      - "pyproject.toml"
+      - "requirements*.txt"
   workflow_dispatch:
     inputs:
       steps:
@@ -53,7 +62,7 @@ jobs:
 
       - name: Validar presupuesto de entrenamiento
         env:
-          STEPS: ${{ inputs.steps }}
+          STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
         run: |
           if ! [[ "$STEPS" =~ ^[0-9]+$ ]] || [ "$STEPS" -lt 1 ] || [ "$STEPS" -gt 1000 ]; then
             echo "::error::Los pasos deben estar entre 1 y 1000."
@@ -86,7 +95,7 @@ jobs:
             --output /tmp/ronin-first/reports/inicial-validation.json
 
       - name: Medir referencia inicial en holdout reservado
-        if: ${{ inputs.benchmark_holdout }}
+        if: ${{ inputs.benchmark_holdout || false }}
         run: |
           python scripts/evaluate_text.py \
             --checkpoint /tmp/ronin-first/inicial.pt \
@@ -96,7 +105,7 @@ jobs:
 
       - name: Entrenar RONIN desde cero
         env:
-          STEPS: ${{ inputs.steps }}
+          STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
         run: |
           inicio=$(date +%s)
           python scripts/train_text.py \
@@ -110,7 +119,7 @@ jobs:
 
       - name: Evaluar modelo entrenado en validación
         env:
-          STEPS: ${{ inputs.steps }}
+          STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
         run: |
           checkpoint="/tmp/ronin-first/checkpoints/step-$(printf '%08d' "$STEPS").pt"
           test -s "$checkpoint"
@@ -121,9 +130,9 @@ jobs:
             --output /tmp/ronin-first/reports/entrenado-validation.json
 
       - name: Evaluar una sola vez el holdout reservado
-        if: ${{ inputs.benchmark_holdout }}
+        if: ${{ inputs.benchmark_holdout || false }}
         env:
-          STEPS: ${{ inputs.steps }}
+          STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
         run: |
           checkpoint="/tmp/ronin-first/checkpoints/step-$(printf '%08d' "$STEPS").pt"
           python scripts/evaluate_text.py \
@@ -134,8 +143,8 @@ jobs:
 
       - name: Construir informe reproducible
         env:
-          STEPS: ${{ inputs.steps }}
-          BENCHMARK_HOLDOUT: ${{ inputs.benchmark_holdout }}
+          STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
+          BENCHMARK_HOLDOUT: ${{ inputs.benchmark_holdout || false }}
         run: |
           python - <<'PY'
           import json
