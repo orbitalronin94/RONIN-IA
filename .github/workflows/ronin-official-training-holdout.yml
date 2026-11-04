@@ -18,6 +18,11 @@ on:
         required: true
         default: "0"
         type: string
+      mmlu_batch_token_budget:
+        description: Presupuesto de tokens padded por lote del evaluador (512-32768)
+        required: false
+        default: "8192"
+        type: string
 
 permissions:
   contents: read
@@ -38,6 +43,7 @@ jobs:
       STEPS: ${{ inputs.steps || '1000' }}
       SEEDS: ${{ inputs.seeds || '1337' }}
       MMLU_LIMIT: ${{ inputs.mmlu_limit || '0' }}
+      MMLU_BATCH_TOKEN_BUDGET: ${{ inputs.mmlu_batch_token_budget || '8192' }}
     steps:
       - name: Obtener RONIN IA
         uses: actions/checkout@v5
@@ -112,6 +118,10 @@ jobs:
             echo "::error::MMLU_LIMIT debe ser 0 o estar entre 1 y 12032."
             exit 1
           fi
+          if ! [[ "$MMLU_BATCH_TOKEN_BUDGET" =~ ^[0-9]+$ ]] || [ "$MMLU_BATCH_TOKEN_BUDGET" -lt 512 ] || [ "$MMLU_BATCH_TOKEN_BUDGET" -gt 32768 ]; then
+            echo "::error::MMLU_BATCH_TOKEN_BUDGET debe estar entre 512 y 32768."
+            exit 1
+          fi
           if ! [[ "$SEEDS" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
             echo "::error::Formato de semillas no válido."
             exit 1
@@ -168,6 +178,7 @@ jobs:
               --profile tiny --context-length 2048 \
               --limit "$MMLU_LIMIT" --seed 2026 \
               --revision "$MMLU_REVISION" --device cpu \
+              --batch-token-budget "$MMLU_BATCH_TOKEN_BUDGET" \
               --output "$report_dir/mmlu-inicial.json"
 
             python scripts/train_text.py \
@@ -183,6 +194,7 @@ jobs:
               --profile tiny --context-length 2048 \
               --limit "$MMLU_LIMIT" --seed 2026 \
               --revision "$MMLU_REVISION" --device cpu \
+              --batch-token-budget "$MMLU_BATCH_TOKEN_BUDGET" \
               --output "$report_dir/mmlu-final.json"
 
             echo "::endgroup::"
@@ -239,6 +251,7 @@ jobs:
           summary = {
               "experiment": "ronin-official-training-mmlu-pro-full-v1",
               "steps_per_seed": int(os.environ["STEPS"]),
+              "mmlu_batch_token_budget": int(os.environ["MMLU_BATCH_TOKEN_BUDGET"]),
               "seeds": os.environ["SEEDS"].split(","),
               "training_corpora": {
                   "libraries": [
