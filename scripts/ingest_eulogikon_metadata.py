@@ -20,7 +20,7 @@ OUT = Path(os.environ.get("OUT_DIR", "artifacts/eulogikon"))
 OUT.mkdir(parents=True, exist_ok=True)
 
 def git_blob_sha1(data: bytes) -> str:
-    return hashlib.sha1(f"blob {len(data)}\\0".encode() + data).hexdigest()
+    return hashlib.sha1(f"blob {len(data)}\0".encode() + data).hexdigest()
 
 def fetch(name: str) -> bytes:
     req = urllib.request.Request(f"{BASE}/{name}", headers={"User-Agent": "RONIN-IA-level-a-audit/1.0"})
@@ -59,7 +59,7 @@ def main() -> None:
             "source_commit": REV,
             "source_manifest": "manifest.works.min.csv",
         })
-    payload = "".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\\n" for r in exported).encode("utf-8")
+    payload = "".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n" for r in exported).encode("utf-8")
     (OUT / "metadata.train-candidate.jsonl").write_bytes(payload)
     record = {
         "record_id": "eulogikon-works-metadata-" + REV[:12],
@@ -85,7 +85,7 @@ def main() -> None:
         "admission_status": "candidate_pending_quality_privacy_dedup_split_and_g0",
         "training_eligible": False
     }
-    (OUT / "rights-record.candidate.json").write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    (OUT / "rights-record.candidate.json").write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     summary = {
         "source": REPO, "commit": REV, "works_in_manifest": len(rows),
         "unique_work_ids": len(set(ids)), "candidate_metadata_records": len(exported),
@@ -94,7 +94,7 @@ def main() -> None:
         "rights_level": "A_for_metadata_export_only",
         "underlying_texts_downloaded": 0, "admitted": False, "training_eligible": False
     }
-    (OUT / "summary.json").write_text(json.dumps(summary, indent=2) + "\\n", encoding="utf-8")
+    (OUT / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(summary, indent=2))
 
 if __name__ == "__main__":
