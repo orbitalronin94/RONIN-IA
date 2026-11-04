@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:20 | [Integración continua #902 (run 41932849665)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932849665) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Record verified ParlaIbero Dataverse file inventory and metadata checksums. Trigger: push; rama: main; intento: 1. | 2d015049 |
 | 2026-11-04 23:19 | [Integración continua #894 (run 41932671013)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932671013) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Pin OpenCorpus catalog to its immutable GitHub commit. Trigger: push; rama: main; intento: 1. | 8dbe0c97 |
 | 2026-11-04 23:19 | [Integración continua #898 (run 41932729616)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932729616) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Use live GovEasy English dataset landing page as license evidence. Trigger: push; rama: main; intento: 1. | ccfc8beb |
 | 2026-11-04 23:19 | [Integración continua #897 (run 41932708608)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932708608) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Use supported Hugging Face download helper for pinned dataset card. Trigger: push; rama: main; intento: 1. | a9b7f5e0 |
