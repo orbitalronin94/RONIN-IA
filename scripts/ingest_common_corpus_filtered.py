@@ -123,55 +123,33 @@ def main() -> int:
     for handle in handles.values():
         handle.close()
 
-    records = []
+    review_queue = []
     for license_id, count in counts.items():
         if not count:
             continue
         payload_path = a.out / f"common-corpus-{license_id.lower()}.jsonl"
         payload = payload_path.read_bytes()
-        payload_sha = sha(payload)
-        manifest = {
+        review_queue.append({
             "dataset_id": f"pleias-common-corpus-{license_id.lower()}",
-            "status": "candidate_not_admitted",
+            "candidate_status": "pending_human_rights_privacy_and_quality_review",
             "training_eligible": False,
             "admission_eligible": False,
             "upstream_revision": revision,
-            "dataset_card_url": CARD_URL,
-            "dataset_card_sha256": card_sha,
             "license_id": license_id,
             "rows": count,
             "payload_path": payload_path.name,
             "payload_bytes": len(payload),
-            "payload_sha256": payload_sha,
-            "max_scan": a.max_scan,
-            "scanned_rows": scanned,
-            "privacy_policy": "exclude OpenGovernment and rows matching basic email/phone patterns; still requires human privacy review",
-            "rights_policy": "exact allowlisted document license only; Public Domain, SA, NC, ND, mixed and unknown labels rejected",
-        }
-        (a.out / f"manifest-{license_id.lower()}.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        records.append({
-            "record_id": f"common-corpus-{license_id.lower()}-" + payload_sha[:16],
-            "source_id": "pleias-common-corpus",
-            "source_item_id": f"filtered train rows with exact {license_id} label",
-            "source_version": revision + "; dataset-card-sha256:" + card_sha + "; payload-sha256:" + payload_sha,
-            "source_url": CARD_URL,
-            "rights_statement_uri": CARD_URL,
-            "license_id": license_id,
-            "license_uri": LICENSE_URLS[license_id],
-            "rights_holder_or_provider": "PleIAs Common Corpus and the respective document rights holders as identified by per-document provenance",
-            "rights_assertion_scope": "exact_text_and_version",
-            "attribution": "Per-document attribution is preserved in each JSONL row (creator, title, source_identifier); apply source-specific attribution before redistribution.",
-            "retrieved_at": datetime.now(timezone.utc).isoformat(),
-            "metadata_snapshot_sha256": card_sha,
-            "payload_sha256": payload_sha,
-            "provenance_uri": CARD_URL,
-            "third_party_content_review": "pending",
-            "jurisdictions_cleared": ["ES", "EU", "US"],
-            "rights_level": "B",
-            "decision_reason": "Candidate-only filtered export. Per-document license labels are exact-matched to the RONIN allowlist; mixed, unknown, SA, NC, ND and Public Domain labels are excluded. OpenGovernment is excluded and basic email/phone patterns are screened, but human privacy and source-rights review remains mandatory. No automatic admission or training.",
-            "policy_version": "RONIN-RIGHTS-A-1"
+            "payload_sha256": sha(payload),
+            "dataset_card_sha256": card_sha,
+            "required_review": [
+                "verify the original source rights for each document and jurisdiction",
+                "check creator/title/source_identifier attribution requirements",
+                "perform multilingual PII and sensitive-data review beyond regex screening",
+                "deduplicate against existing admitted corpora and evaluation holdouts",
+                "review content quality, domain, language and split assignment"
+            ]
         })
-    (a.out / "rights-records.candidate.json").write_text(json.dumps(records, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (a.out / "rights-review-queue.json").write_text(json.dumps(review_queue, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
     summary = {
         "dataset": REPO, "revision": revision, "dataset_card_sha256": card_sha,
         "scanned": scanned, "accepted": accepted, "rejected_license": rejected_license,
