@@ -701,7 +701,6 @@ def main() -> int:
         "limits": {
             "max_rows": args.max_rows,
             "max_input_bytes": args.max_input_bytes,
-            "minimum_scanned_bytes_for_both_libraries": required_input_bytes,
             "minimum_train_bytes_per_library": args.min_train_bytes,
             "minimum_scanned_bytes_for_both_libraries": required_input_bytes,
             "hkd_fraction": args.hkd_fraction,
