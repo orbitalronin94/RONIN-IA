@@ -140,3 +140,242 @@ jobs:
       - name: Link run ledger
         if: always()
         uses: ./.github/actions/run-ledger-link
+
+  aggregate-and-index:
+    name: Assemble 32 libraries, audit duplicates and publish master index
+    needs: prepare
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download every available domain shard
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@v6
+        with:
+          pattern: ronin-common-corpus-*-candidates
+          path: /tmp/ronin-common-corpus-shards
+          merge-multiple: false
+
+      - name: Assemble datasets/run5 and the 32-library master index
+        if: always()
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import shutil
+          from pathlib import Path
+
+          domains = [
+              "mathematics", "logic_epistemology", "philosophy", "physics",
+              "chemistry_materials", "biology", "medicine_health",
+              "computer_science", "software_engineering", "law", "economics",
+              "social_sciences", "statistics_probability",
+              "astronomy_earth_science", "engineering_robotics", "humanities",
+          ]
+          expected = {
+              f"{domain}_{kind}"
+              for domain in domains
+              for kind in ("general", "hkd")
+          }
+          shard_root = Path("/tmp/ronin-common-corpus-shards")
+          output_root = Path("datasets/run5")
+          source_reports = output_root / "_source_reports"
+          review_root = output_root / "_human_review"
+          reports_root = Path("reports")
+          output_root.mkdir(parents=True, exist_ok=True)
+          source_reports.mkdir(parents=True, exist_ok=True)
+          review_root.mkdir(parents=True, exist_ok=True)
+          reports_root.mkdir(parents=True, exist_ok=True)
+
+          libraries = {
+              library_id: {
+                  "id": library_id,
+                  "domain": library_id.rsplit("_", 1)[0],
+                  "kind": library_id.rsplit("_", 1)[1],
+                  "status": "missing",
+                  "train_bytes": 0,
+                  "train_sha256": None,
+                  "manifest_sha256": None,
+                  "documents_manifest_sha256": None,
+                  "source_revision": None,
+                  "training_eligible": False,
+                  "admitted": False,
+              }
+              for library_id in sorted(expected)
+          }
+          source_report_summaries = []
+          unexpected_ids = []
+          for shard in sorted(shard_root.glob("ronin-common-corpus-*-candidates")):
+              report_path = shard / "run5-candidate-manifest.json"
+              if not report_path.is_file():
+                  continue
+              report = json.loads(report_path.read_text(encoding="utf-8"))
+              for metadata in report.get("libraries", []):
+                  library_id = str(metadata.get("id", ""))
+                  if library_id not in expected:
+                      unexpected_ids.append(library_id)
+                      continue
+                  source_dir = shard / library_id
+                  destination = output_root / library_id
+                  if source_dir.is_dir():
+                      shutil.copytree(source_dir, destination, dirs_exist_ok=True)
+                  train_path = destination / "train.txt"
+                  manifest_path = destination / "candidate-manifest.json"
+                  sidecar_path = destination / "documents.jsonl"
+                  entry = libraries[library_id]
+                  entry["source_revision"] = metadata.get("source_revision")
+                  entry["source_dataset"] = metadata.get("source_dataset")
+                  if manifest_path.is_file():
+                      manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                      entry["manifest_sha256"] = manifest.get("manifest_sha256")
+                      entry["documents_manifest_sha256"] = manifest.get("documents_manifest_sha256")
+                  if train_path.is_file():
+                      content = train_path.read_bytes()
+                      actual_hash = hashlib.sha256(content).hexdigest()
+                      entry["train_bytes"] = len(content)
+                      entry["train_sha256"] = actual_hash
+                      if metadata.get("train_sha256") != actual_hash:
+                          entry["status"] = "hash_mismatch"
+                      elif len(content) < 1024 * 1024:
+                          entry["status"] = "undersized"
+                      elif not manifest_path.is_file() or not sidecar_path.is_file():
+                          entry["status"] = "incomplete_provenance"
+                      else:
+                          entry["status"] = "candidate_ready"
+                  else:
+                      entry["status"] = "missing_train"
+                  entry["training_eligible"] = False
+                  entry["admitted"] = False
+              domain = next(
+                  (item.get("domain") for item in report.get("libraries", []) if item.get("domain")),
+                  None,
+              )
+              if domain:
+                  target_report = source_reports / f"{domain}.json"
+                  shutil.copy2(report_path, target_report)
+                  review_source = shard / "human-review-samples"
+                  if review_source.is_dir():
+                      shutil.copytree(
+                          review_source,
+                          review_root / domain,
+                          dirs_exist_ok=True,
+                      )
+                  source_report_summaries.append({
+                      "domain": domain,
+                      "path": str(target_report),
+                      "source": report.get("source", {}),
+                      "ingestion": report.get("ingestion", {}),
+                  })
+
+          entries = [libraries[key] for key in sorted(libraries)]
+          ready = [item for item in entries if item["status"] == "candidate_ready"]
+          index = {
+              "schema_version": 1,
+              "dataset_id": "ronin-run5-16-domain-32-library-candidates",
+              "run_id": __import__("os").environ.get("GITHUB_RUN_ID"),
+              "expected_domains": 16,
+              "expected_libraries": 32,
+              "libraries_found": len(ready),
+              "total_train_bytes": sum(item["train_bytes"] for item in entries),
+              "minimum_train_bytes_per_library": 1024 * 1024,
+              "minimum_total_train_bytes": 32 * 1024 * 1024,
+              "inventory_complete": len(ready) == 32 and not unexpected_ids,
+              "unexpected_library_ids": unexpected_ids,
+              "libraries": entries,
+              "source_reports": source_report_summaries,
+              "global_g0_status": "FAIL",
+              "source_authorization": "LIMITED_PASS candidate extraction only",
+              "training_eligible": False,
+              "admitted": False,
+              "blockers": [
+                  "G-0 global rights gate remains FAIL.",
+                  "Human document-level rights and quality review is mandatory.",
+                  "Cross-library deduplication, sensitive-content triage and final hash/split sign-off are mandatory.",
+                  "Candidate-only output is never an automatic training admission.",
+              ],
+          }
+          payload = json.dumps(index, ensure_ascii=False, indent=2) + "\n"
+          (output_root / "INDEX.json").write_text(payload, encoding="utf-8")
+          (reports_root / "run5-32-library-index.json").write_text(payload, encoding="utf-8")
+          markdown = [
+              "# RUN 5 — índice de las 32 bibliotecas",
+              "",
+              f"- Bibliotecas completas: {index['libraries_found']}/32",
+              f"- Bytes train acumulados: {index['total_train_bytes']}",
+              "- Suelo bootstrap: 1 MiB por biblioteca (32 MiB total)",
+              "- Estado legal: candidato solamente; G-0 sigue en FAIL",
+              "- Ninguna entrada queda admitida ni training-eligible por esta extracción",
+              "",
+              "| Biblioteca | Estado | Train (bytes) | SHA-256 |",
+              "|---|---:|---:|---|",
+          ]
+          for item in entries:
+              markdown.append(
+                  f"| {item['id']} | {item['status']} | {item['train_bytes']} | {item['train_sha256'] or '—'} |"
+              )
+          (output_root / "INDEX.md").write_text("\n".join(markdown) + "\n", encoding="utf-8")
+          print(payload)
+          PY
+
+      - name: Audit exact and near duplicates across all 32 libraries
+        if: always()
+        continue-on-error: true
+        run: |
+          python scripts/audit_run5_cross_library_dedup.py \
+            --corpus-root datasets/run5 \
+            --report reports/run5-cross-library-dedup.json
+
+      - name: Enforce 32-library bootstrap floor without admitting candidates
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          index = json.loads(Path("datasets/run5/INDEX.json").read_text(encoding="utf-8"))
+          dedup_path = Path("reports/run5-cross-library-dedup.json")
+          dedup = json.loads(dedup_path.read_text(encoding="utf-8")) if dedup_path.is_file() else {}
+          missing = [
+              item["id"] for item in index["libraries"]
+              if item["status"] != "candidate_ready"
+              or item["train_bytes"] < 1024 * 1024
+          ]
+          report = {
+              "expected_libraries": 32,
+              "ready_libraries": index["libraries_found"],
+              "total_train_bytes": index["total_train_bytes"],
+              "minimum_total_train_bytes": 32 * 1024 * 1024,
+              "missing_or_invalid": missing,
+              "cross_library_dedup_status": dedup.get("status", "missing"),
+              "training_eligible": False,
+              "admitted": False,
+          }
+          Path("reports/run5-32-library-gate.json").write_text(
+              json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          if missing or dedup.get("status") != "pass":
+              raise SystemExit("RUN5 incomplete: master index is published; admission remains blocked.")
+          PY
+
+      - name: Upload datasets/run5, master index and audit reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-run5-32-library-index-${{ github.run_id }}
+          path: |
+            datasets/run5/
+            reports/run5-32-library-index.json
+            reports/run5-cross-library-dedup.json
+            reports/run5-32-library-gate.json
+          if-no-files-found: warn
+          compression-level: 1
+          retention-days: 90
+
+      - name: Link aggregate run ledger
+        if: always()
+        uses: ./.github/actions/run-ledger-link

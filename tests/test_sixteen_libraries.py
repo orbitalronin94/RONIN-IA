@@ -7,19 +7,19 @@ from scripts.validate_sixteen_libraries import validate
 MANIFEST = Path(__file__).parents[1] / "data" / "manifests" / "sixteen_libraries.json"
 
 
-def test_manifest_has_64_libraries_across_32_domains_and_portfolio_is_retrieval_only():
+def test_manifest_has_32_libraries_across_16_domains_and_portfolio_is_retrieval_only():
     data = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    assert len(data["libraries"]) == 64
+    assert len(data["libraries"]) == 32
     assert data["policy"]["minimum_train_bytes_per_library"] == 1024**2
     assert data["policy"]["target_train_bytes_per_library"] == 10 * 1024**3
-    assert data["policy"]["minimum_total_train_bytes"] == 64 * 1024**2
-    assert data["policy"]["target_total_train_bytes"] == 64 * 10 * 1024**3
+    assert data["policy"]["minimum_total_train_bytes"] == 32 * 1024**2
+    assert data["policy"]["target_total_train_bytes"] == 32 * 10 * 1024**3
     assert data["policy"]["hkd_fraction"] == 0.5
     assert "1 MiB" in data["policy"]["hkd_scale_rationale"]
-    assert len({item["id"] for item in data["libraries"]}) == 64
-    assert len({item["domain"].split(" — ")[0] for item in data["libraries"]}) == 32
-    assert data["policy"]["required_library_count"] == 64
-    assert data["policy"]["domain_count"] == 32
+    assert len({item["id"] for item in data["libraries"]}) == 32
+    assert len({item["domain"].split(" — ")[0] for item in data["libraries"]}) == 16
+    assert data["policy"]["required_library_count"] == 32
+    assert data["policy"]["domain_count"] == 16
     assert data["portfolio"]["role"] == "retrieval_only_fallback"
     assert data["portfolio"]["training_eligible"] is False
     assert data["portfolio"]["counted_as_library"] is False
@@ -28,7 +28,7 @@ def test_manifest_has_64_libraries_across_32_domains_and_portfolio_is_retrieval_
 
 def test_official_training_gate_blocks_all_unadmitted_libraries(tmp_path):
     errors = validate(MANIFEST, require_ready=True, corpus_root=tmp_path)
-    assert sum("not admitted" in error for error in errors) == 64
+    assert sum("not admitted" in error for error in errors) == 32
 
 
 def test_gate_requires_density_report_and_human_review_for_each_hkd_library(tmp_path):
@@ -86,3 +86,20 @@ def test_gate_requires_density_report_and_human_review_for_each_hkd_library(tmp_
     manifest_path.write_text(json.dumps(data), encoding="utf-8")
     errors = validate(manifest_path, require_ready=True, corpus_root=tmp_path, portfolio_root=portfolio_root)
     assert any("missing semantic-density selection report hash" in error for error in errors)
+
+
+def test_official_training_workflow_consumes_exactly_the_32_manifest_ids():
+    workflow = (Path(__file__).parents[1] / ".github" / "workflows" / "ronin-official-training-holdout.yml").read_text(encoding="utf-8")
+    data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    for item in data["libraries"]:
+        library_id = item["id"]
+        assert f'"{library_id}"' in workflow
+        assert f"--input {library_id}=/tmp/ronin-sixteen-libraries/{library_id}/train.txt" in workflow
+    assert "pattern: ronin-datasets-run5-library-*" in workflow
+    assert "pattern: ronin-run5-library-*" not in workflow
+
+
+def test_preflight_default_matches_manifest_bootstrap_floor():
+    from scripts.check_run5_preflight import MINIMUM_DEFAULT
+
+    assert MINIMUM_DEFAULT == 1024**2

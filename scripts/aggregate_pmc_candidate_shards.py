@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """Aggregate PMC OA candidate shards and audit cross-domain document uniqueness."""
 from __future__ import annotations
+
 import argparse
 import hashlib
 import json
-import shutil
 from collections import Counter
 from pathlib import Path
+
 
 ALLOW = {"CC0", "CC0 1.0", "CC BY", "CC BY 2.0", "CC BY 3.0", "CC BY 4.0"}
 SOURCE = "pmc-oa-opendata"
 REVISION = "per-article-version-etag-v1"
+
 
 def digest(path: Path) -> str:
     h = hashlib.sha256()
@@ -18,6 +20,7 @@ def digest(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             h.update(chunk)
     return h.hexdigest()
+
 
 def aggregate(input_root: Path, output_root: Path, run_id: str, minimum: int) -> dict:
     manifests = sorted(input_root.glob("*/run5-candidate-manifest.json"))
