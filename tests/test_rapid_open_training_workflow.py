@@ -35,4 +35,4 @@ def test_rapid_training_dispatcher_chains_only_successful_main_runs():
     job = workflow["jobs"]["dispatch-next"]
     assert job["if"] == "github.event.workflow_run.conclusion == 'success'"
     assert "actions: write" in workflow["permissions"]
-    assert "workflow_dispatch" in job["steps"][0]["run"]
+    assert "rapid-open-training-cycles.yml/dispatches" in job["steps"][0]["run"]
