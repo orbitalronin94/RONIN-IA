@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from scripts.prepare_synthetic_corpus import make_text
 
 
