@@ -224,3 +224,14 @@ The source register also tracks three non-prose but useful domain sources:
 - **Eurostat open statistics** — useful for multilingual statistical metadata and structured observations. The current candidate is marked policy-pending because reuse statements and exceptions vary by resource; do not download into training until the exact Eurostat reuse terms and any third-party restrictions are resolved.
 
 These sources can strengthen factual coverage, statistics, domain routing and tool grounding. Their structured rows are not counted as natural-language text bytes unless a separate, rights-cleared text field is explicitly identified and hashed.
+
+
+## Nuevas fuentes CC0 verificadas a nivel de declaración del proveedor (2026-11-05)
+
+Estas fuentes se registran como candidatas y todavía no son bibliotecas admitidas:
+
+- **DBLP** — metadatos bibliográficos de informática (XML, JSON, RDF y exportaciones): DBLP declara expresamente CC0 1.0 para todos sus metadatos. Uso previsto: grafo de publicaciones, autores, venues y citas/relaciones; nunca seguir enlaces para descargar textos de terceros. Antes de cualquier incorporación se fijarán snapshot, fecha, tamaño y SHA-256.
+- **Wikidata** — datos estructurados de los espacios Main, Property, Lexeme y EntitySchema: CC0. Los demás espacios de nombres son CC BY-SA y los ficheros multimedia tienen licencias propias; quedan fuera. Se priorizarán volcados RDF truthy o subconjuntos filtrados, no descargar el volcado JSON completo de más de cien GiB.
+- **Mozilla Common Voice** — términos de contribución de Mozilla establecen CC0 para contribuciones originales y la colección etiqueta sus releases como CC0-1.0. Se registra como corpus de voz/transcripción, separado del corpus de prosa. Cada versión requiere datasheet, acceso público confirmado, hash, auditoría de privacidad y decisión explícita sobre identificadores de hablante. No se asume que la existencia de una página de descarga implica acceso anónimo.
+
+Las referencias primarias y los límites de alcance están en `candidates/github-source-audit.json`. Las declaraciones de licencia de DBLP y Wikidata cubren sus metadatos/datos estructurados, no el contenido de webs enlazadas ni namespaces/media excluidos. Common Voice requiere validar la versión exacta descargada antes de crear un registro de derechos con hash.
