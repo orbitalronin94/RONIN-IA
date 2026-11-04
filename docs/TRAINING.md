@@ -28,3 +28,14 @@ La reanudación actual admite el muestreador determinista de lotes de siguiente 
 ## Seguridad operativa
 
 Los cálculos de adecuación al hardware y coste se etiquetan como estimaciones hasta que se contrasten con benchmarks en el equipo de destino. Incluir parámetros, gradientes, estados del optimizador, activaciones, búferes temporales de atención, fragmentación y comunicación distribuida. Una estimación simple basada solo en parámetros no garantiza que el modelo quepa.
+
+
+## Ciclo sintético recurrente con warm-start
+
+El workflow `synthetic-training-cycles.yml` puede ejecutarse manualmente, al modificar el pipeline en `main` y cada seis horas. La primera semilla de cada ciclo recupera los últimos pesos sintéticos aceptados desde la caché de Actions; las demás semillas siguen siendo controles independientes desde inicialización reproducible.
+
+La promoción del warm-start exige simultáneamente:
+- menor bits-per-byte en la validación sintética fija;
+- exactitud no inferior en el piloto multidominio de 23 preguntas.
+
+Si cualquiera de las dos condiciones falla, no se guarda el checkpoint nuevo y la siguiente iteración conserva el último estado aceptado. El optimizador se reinicia entre ciclos; solo se transfieren los pesos. Esto es un experimento de currículo sintético y continuidad técnica, no aprendizaje de conocimiento externo ni una evaluación de razonamiento general. La caché de Actions es almacenamiento experimental, no un release del modelo.

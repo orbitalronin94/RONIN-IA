@@ -68,3 +68,15 @@ def test_official_training_workflow_excludes_portfolio_and_requires_sixteen_libr
     artifact = by_name["Publicar informes y manifiestos sin corpus ni checkpoints"]
     assert artifact["with"]["path"] == "reports/"
     assert artifact["with"]["name"] == "ronin-official-full-mmlu-training-cycle"
+
+
+
+def test_synthetic_training_workflow_has_guarded_recurring_warmstart():
+    from pathlib import Path
+
+    workflow = Path(".github/workflows/synthetic-training-cycles.yml").read_text(encoding="utf-8")
+    assert 'cron: "17 */6 * * *"' in workflow
+    assert "actions/cache/restore@v4" in workflow
+    assert "actions/cache/save@v4" in workflow
+    assert "WARMSTART_REJECTED" in workflow
+    assert 'after_domain["overall"]["accuracy"] >= before_domain["overall"]["accuracy"]' in workflow
