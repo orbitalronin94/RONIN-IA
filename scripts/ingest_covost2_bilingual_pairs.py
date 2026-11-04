@@ -5,6 +5,7 @@ import argparse, csv, hashlib, io, json, tarfile, urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+ADAPTER_VERSION = "1.0.1"
 COMMIT = "4cddf32dedd6bfef86ca3a40f49b27e252650f3f"
 README_BLOB_SHA1 = "f29667eaacba91d35de372001ebc793adb2b5530"
 README_URL = f"https://raw.githubusercontent.com/facebookresearch/covost/{COMMIT}/README.md"
