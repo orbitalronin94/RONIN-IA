@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mide la aceleración del evaluador MMLU-Pro sin cambiar su protocolo."""
+"""Mide por separado batching y proyección final del evaluador MMLU-Pro."""
 from __future__ import annotations
 
 import argparse
@@ -19,6 +19,13 @@ from evaluate_mmlu_pro import (
     rows_sha256,
     select_stratified,
 )
+
+
+def prediction_signature(report: dict) -> list[tuple[str, int, bool]]:
+    return [
+        (row["id"], row["predicted_index"], row["correct"])
+        for row in report["details"]
+    ]
 
 
 def main() -> None:
@@ -45,12 +52,14 @@ def main() -> None:
         checkpoint = Path(temp_dir) / "random-initialized.pt"
         torch.save({"model": model.state_dict(), "step": 0}, checkpoint)
 
+        cases = (
+            ("single_full_logits", args.baseline_token_budget, False),
+            ("batched_full_logits", args.optimized_token_budget, False),
+            ("batched_last_position", args.optimized_token_budget, True),
+        )
         results = {}
         reports = {}
-        for name, budget in (
-            ("single_item", args.baseline_token_budget),
-            ("batched", args.optimized_token_budget),
-        ):
+        for name, budget, last_token_only in cases:
             started = time.perf_counter()
             report = evaluate_rows(
                 checkpoint=checkpoint,
@@ -60,57 +69,66 @@ def main() -> None:
                 context_length=args.context_length,
                 device="cpu",
                 batch_token_budget=budget,
+                last_token_only=last_token_only,
             )
             elapsed = time.perf_counter() - started
             reports[name] = report
             results[name] = {
                 "seconds": elapsed,
                 "batching": report["batching"],
+                "inference_path": report["inference_path"],
                 "accuracy": report["overall"]["accuracy"],
                 "correct": report["overall"]["correct"],
                 "evaluated": report["evaluated_items"],
                 "coverage": report["coverage"],
             }
 
-        baseline = reports["single_item"]
-        optimized = reports["batched"]
-        baseline_predictions = [
-            (row["id"], row["predicted_index"], row["correct"])
-            for row in baseline["details"]
-        ]
-        optimized_predictions = [
-            (row["id"], row["predicted_index"], row["correct"])
-            for row in optimized["details"]
-        ]
-        parity = (
-            baseline_predictions == optimized_predictions
-            and baseline["selected_items"] == optimized["selected_items"]
-            and baseline["dataset_sha256"] == optimized["dataset_sha256"]
-            and baseline["skipped"] == optimized["skipped"]
+        reference = reports["single_full_logits"]
+        signatures = {
+            name: prediction_signature(report) for name, report in reports.items()
+        }
+        parity = all(signature == signatures["single_full_logits"] for signature in signatures.values())
+        coverage_parity = all(
+            report["selected_items"] == reference["selected_items"]
+            and report["dataset_sha256"] == reference["dataset_sha256"]
+            and report["skipped"] == reference["skipped"]
+            for report in reports.values()
         )
-        if not parity:
-            raise SystemExit("La evaluación por lotes no conserva las predicciones/cobertura")
+        if not parity or not coverage_parity:
+            raise SystemExit("La optimización alteró predicciones o cobertura")
 
-        speedup = results["single_item"]["seconds"] / max(
-            results["batched"]["seconds"], 1e-9
+        batching_speedup = results["single_full_logits"]["seconds"] / max(
+            results["batched_full_logits"]["seconds"], 1e-9
+        )
+        last_position_speedup = results["batched_full_logits"]["seconds"] / max(
+            results["batched_last_position"]["seconds"], 1e-9
+        )
+        total_speedup = results["single_full_logits"]["seconds"] / max(
+            results["batched_last_position"]["seconds"], 1e-9
         )
         output = {
-            "benchmark": "ronin-mmlu-evaluator-batching-v1",
-            "dataset_id": baseline["dataset_id"],
+            "benchmark": "ronin-mmlu-evaluator-optimization-v2",
+            "dataset_id": reference["dataset_id"],
             "dataset_revision": args.revision,
             "dataset_sha256": dataset_hash,
             "split": "test",
             "selected_items": len(rows),
             "sampling_seed": args.seed,
             "context_length": args.context_length,
-            "protocol": baseline["protocol"],
+            "protocol": reference["protocol"],
             "official_score_comparable": False,
-            "metric_parity": parity,
-            "speedup": speedup,
+            "prediction_parity": parity,
+            "coverage_parity": coverage_parity,
+            "speedups": {
+                "batching": batching_speedup,
+                "last_position_projection": last_position_speedup,
+                "combined": total_speedup,
+            },
             "runs": results,
             "interpretation": (
-                "Comparación de rendimiento del evaluador con un checkpoint aleatorio; "
-                "no mide mejora de inteligencia ni entrenamiento."
+                "Comparación con checkpoint aleatorio sobre los mismos ítems. "
+                "Aísla el efecto de batching y de proyectar logits solo en la última "
+                "posición. No mide mejora de inteligencia ni entrenamiento."
             ),
         }
         args.output.parent.mkdir(parents=True, exist_ok=True)
