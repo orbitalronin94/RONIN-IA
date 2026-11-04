@@ -66,3 +66,25 @@ Detectar AVX512-BF16/AMX o soporte real del backend. Ejecutar autocast CPU BF16 
 8. Repetir la auditoría de rendimiento con el corpus de ocho bibliotecas y el presupuesto de tokens definitivo.
 
 El objetivo es reducir tiempo por paso y tiempo de preparación, no simplemente reducir pasos o evaluar menos. Ninguna optimización se considera válida si altera el protocolo o empeora la capacidad medida.
+
+## Perfilado real del RUN #4 (4 de noviembre de 2026)
+
+Se inspeccionó el log del job 126652067687, ejecución 41852455682. El job completo duró aproximadamente 46 min 51 s:
+
+| Fase | Duración observada | Peso del total |
+|---|---:|---:|
+| Evaluación inicial MMLU-Pro (12.032 preguntas seleccionadas) | 22 min 07 s | 47,2 % |
+| Entrenamiento (1.000 pasos) | 2 min 26 s | 5,2 % |
+| Evaluación final MMLU-Pro | 20 min 45 s | 44,3 % |
+| Preparación, dependencias y consolidación | ~1 min 33 s | 3,3 % |
+
+Las dos evaluaciones consumieron aproximadamente **42 min 52 s (91,5 % del wall-clock)**. El entrenamiento real consumió alrededor del 5,2 %. Por tanto, la mejora más dramática del tiempo total no vendrá primero de optimizar AdamW o el Transformer: vendrá de acelerar la evaluación, que hoy hace un forward por pregunta y se ejecuta dos veces.
+
+### Prioridad corregida
+
+1. **P0 evaluación batched**: implementar batching con bucketing por longitud y padding/attention mask correcto, primero con un subset fijo y equivalencia de logits/predicciones. El test completo sigue siendo la auditoría final, no se elimina.
+2. **P1 evitar repetir evaluación completa en cada experimento**: durante iteración usar un subset estratificado congelado; ejecutar full MMLU-Pro al cerrar una tanda. No usar full test para seleccionar hiperparámetros ni reportar el subset como resultado completo.
+3. **P2 entrenamiento**: cache RoPE y fusionar QKV/SwiGLU; medir hilos 1/2/4.
+4. **P3**: GQA nativo, AdamW foreach, torch.compile y BF16 CPU como A/B independientes.
+
+El resultado de este perfilado cambia la prioridad: el pipeline actual no tarda 47 minutos en aprender; tarda unos 2,5 minutos en entrenar y más de 42 minutos en evaluar dos veces. Reducir evaluación puede recortar radicalmente el tiempo de pared sin cambiar el número de pasos ni la cantidad de datos entrenados.
