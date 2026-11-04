@@ -293,6 +293,8 @@ transcripciones sin licencia compatible quedan fuera del entrenamiento.
 
 ## Cierre: la advertencia del README
 
+> Nota editorial: se conserva aquí como texto satírico heredado, no como especificación técnica. La referencia histórica a «cuarenta y cuatro millones» no describe el perfil tiny actual, que tiene 9.922.880 parámetros.
+
 > Sepan cuantos este repositorio vieren que aquí se hace escarnio de cuanto los doctos predicaron sobre acrecentar modelos. Non hay hueste de tarjetas gráficas, nin caudal de dineros, nin ley del escalado que valga. Hay un ingenio de cuarenta y cuatro millones que apenas distingue el saludo del mandado, y un artificio de trazas que non se rompe.
 >
 > Al modelo non le tengo ley, ca es ruin y él lo sabe. Al artificio se la tengo entera.
