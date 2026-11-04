@@ -1,10 +1,10 @@
 from scripts.prepare_open_corpora import (
+    SOURCES,
     _document_manifest_rows,
     _extract_tei,
     _extract_tei_documents,
     _is_source_path,
     _safe_member,
-    SOURCES,
 )
 
 
