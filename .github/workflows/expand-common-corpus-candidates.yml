@@ -300,6 +300,23 @@ jobs:
           payload = json.dumps(index, ensure_ascii=False, indent=2) + "\n"
           (output_root / "INDEX.json").write_text(payload, encoding="utf-8")
           (reports_root / "run5-32-library-index.json").write_text(payload, encoding="utf-8")
+          markdown = [
+              "# RUN 5 — índice de las 32 bibliotecas",
+              "",
+              f"- Bibliotecas completas: {index['libraries_found']}/32",
+              f"- Bytes train acumulados: {index['total_train_bytes']}",
+              "- Suelo bootstrap: 1 MiB por biblioteca (32 MiB total)",
+              "- Estado legal: candidato solamente; G-0 sigue en FAIL",
+              "- Ninguna entrada queda admitida ni training-eligible por esta extracción",
+              "",
+              "| Biblioteca | Estado | Train (bytes) | SHA-256 |",
+              "|---|---:|---:|---|",
+          ]
+          for item in entries:
+              markdown.append(
+                  f"| {item['id']} | {item['status']} | {item['train_bytes']} | {item['train_sha256'] or '—'} |"
+              )
+          (output_root / "INDEX.md").write_text("\\n".join(markdown) + "\\n", encoding="utf-8")
           print(payload)
           PY
 
