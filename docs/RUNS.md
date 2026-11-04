@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 22:49 | [Integración continua #795 (run 41928616374)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41928616374) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: establish conservative level-A rights registry. Trigger: push; rama: main; intento: 1. | 4c4664f1 |
 | 2026-11-04 22:46 | [Integración continua #793 (run 41928065252)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41928065252) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): define 3040-document audited PMC expansion target. Trigger: push; rama: main; intento: 1. | a8938496 |
 | 2026-11-04 22:45 | [Integración continua #791 (run 41927991572)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927991572) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(data\): consolidate PMC domain shards and enforce 3040 unique-document target. Trigger: push; rama: main; intento: 1. | c8c7e7ff |
 | 2026-11-04 22:45 | [Integración continua #792 (run 41928038680)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41928038680) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): map each PMC library to its own document sidecar. Trigger: push; rama: main; intento: 1. | 7ae87a00 |
