@@ -212,8 +212,10 @@ jobs:
             --report "/tmp/ronin-run5-hkd/${DOMAIN}_hkd/sensitive-scan.json"
           python - <<'PY'
           import json
+          import os
           from pathlib import Path
-          root = Path("/tmp/ronin-run5-hkd") / (Path(__import__("os").environ["DOMAIN"]) .name + "_hkd")
+          domain = os.environ["DOMAIN"]
+          root = Path("/tmp/ronin-run5-hkd") / f"{domain}_hkd"
           report = json.loads((root / "selection-report.json").read_text(encoding="utf-8"))
           size = (root / "train.txt").stat().st_size
           report["minimum_train_bytes"] = 2684354560
