@@ -110,3 +110,54 @@ def test_mmlu_evaluation_never_truncates_long_prompts(tmp_path: Path):
 
 def test_dataset_revision_is_pinned():
     assert DATASET_REVISION == "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+
+
+
+def test_batched_evaluation_matches_single_item_batches(tmp_path: Path):
+    config, _ = get_profile("tiny")
+    model = RoninLM(config)
+    checkpoint = tmp_path / "model.pt"
+    torch.save({"model": model.state_dict(), "step": 0}, checkpoint)
+    rows = normalize_rows(sample_rows())
+    single = evaluate_rows(
+        checkpoint=checkpoint,
+        rows=rows,
+        all_rows_sha256=rows_sha256(rows),
+        context_length=128,
+        batch_token_budget=1,
+    )
+    batched = evaluate_rows(
+        checkpoint=checkpoint,
+        rows=rows,
+        all_rows_sha256=rows_sha256(rows),
+        context_length=128,
+        batch_token_budget=8192,
+    )
+    assert batched["overall"] == single["overall"]
+    assert batched["by_domain"] == single["by_domain"]
+    assert [row["id"] for row in batched["details"]] == [
+        row["id"] for row in single["details"]
+    ]
+    assert [row["predicted_index"] for row in batched["details"]] == [
+        row["predicted_index"] for row in single["details"]
+    ]
+    for batched_row, single_row in zip(batched["details"], single["details"]):
+        assert batched_row["candidate_log_probabilities"] == pytest.approx(
+            single_row["candidate_log_probabilities"], abs=1e-5
+        )
+    assert batched["batching"]["batches"] < single["batching"]["batches"]
+
+
+def test_batch_token_budget_must_be_positive(tmp_path: Path):
+    config, _ = get_profile("tiny")
+    model = RoninLM(config)
+    checkpoint = tmp_path / "model.pt"
+    torch.save({"model": model.state_dict(), "step": 0}, checkpoint)
+    rows = normalize_rows(sample_rows())
+    with pytest.raises(ValueError, match="batch_token_budget"):
+        evaluate_rows(
+            checkpoint=checkpoint,
+            rows=rows[:1],
+            all_rows_sha256=rows_sha256(rows),
+            batch_token_budget=0,
+        )
