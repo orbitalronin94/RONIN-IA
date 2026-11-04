@@ -62,10 +62,11 @@ El punto de partida incluye dos modelos de tamaño reducido, disponibles en Hugg
 |---|---|---:|---|
 | `gpt2` | `openai-community/gpt2` | 124 M | MIT |
 | `gpt-neo-125m` | `EleutherAI/gpt-neo-125m` | 125 M | MIT |
+| `phi-4-mini-instruct` | `microsoft/Phi-4-mini-instruct` | 3,8 B | MIT |
 
-Fichas oficiales: [GPT-2](https://huggingface.co/openai-community/gpt2) · [GPT-Neo 125M](https://huggingface.co/EleutherAI/gpt-neo-125m).
+Fichas oficiales: [GPT-2](https://huggingface.co/openai-community/gpt2) · [GPT-Neo 125M](https://huggingface.co/EleutherAI/gpt-neo-125m) · [Phi-4 mini instruct](https://huggingface.co/microsoft/Phi-4-mini-instruct).
 
-**Advertencia:** ambos son modelos de base principalmente anglófonos. Sirven para probar la descarga, inferencia local, generación y trazabilidad; no se debe presuponer que producirán buenas explicaciones en castellano. La calidad de cada corpus generado debe revisarse antes de entrenar.
+**Advertencia:** GPT-2 y GPT-Neo 125M son modelos de base principalmente anglófonos. Phi-4 mini instruct está ajustado para seguir instrucciones y declara soporte para español, pero su entrenamiento también es predominantemente inglés y no es un experto infalible. Las salidas son propuestas sintéticas: REF solo comprueba su estructura, no su verdad. La licencia MIT corresponde al modelo y no se atribuye automáticamente al texto generado; no se publican esos lotes sin una revisión independiente de sus derechos.
 
 Los modelos se descargan una vez en `models/teachers/` y se reutilizan desde disco. No se consulta ninguna API de generación durante el entrenamiento. Las dependencias de tutores son opcionales:
 
@@ -73,6 +74,7 @@ Los modelos se descargan una vez en `models/teachers/` y se reutilizan desde dis
 pip install -e '.[teachers]'
 python scripts/download_teacher_models.py --model gpt2
 python scripts/download_teacher_models.py --model gpt-neo-125m
+python scripts/download_teacher_models.py --model phi-4-mini-instruct
 ```
 
 La guía completa está en [Modelos auxiliares locales](docs/TEACHER_WORKFLOW.md).
