@@ -312,3 +312,10 @@ El cierre es la única línea que no es arcaica, y está puesta a propósito: el
 Se ha añadido un inventario de **21 fuentes** para ampliar la cobertura semántica en ciencia, medicina, derecho, ingeniería, código, humanidades, economía, lingüística, traducción y conocimiento estructurado. Consulta el [manifiesto](data/manifests/external_datasets.json) y la [política de ingesta y derechos](docs/INGESTA_AMPLIA_DATASETS_EXTERNOS.md).
 
 Este inventario no significa que los 21 corpus estén descargados o admitidos: distingue fuentes ya presentes, candidatos, índices y recursos condicionados por licencia. Todos permanecen con `training_eligible=false` hasta superar la puerta G-0. El validador [scripts/validate_external_datasets.py](scripts/validate_external_datasets.py) comprueba el manifiesto sin descargar datos ni iniciar entrenamiento.
+
+
+## Libro de ejecuciones y nuevas ingestas
+
+El historial cronológico de experimentos, validaciones e ingestas está en el [Libro de runs](docs/RUNS.md). Los workflows enlazan allí desde su resumen y el registrador automático añade cada ejecución al terminar, incluidos fallos y cancelaciones.
+
+El inventario externo contiene ahora 22 fuentes. Se añade una primera ingesta automatizada y versionada de muestras CC0 de Wikidata y abstracts CC BY/CC0 de Europe PMC; ambas permanecen fuera del entrenamiento hasta superar la revisión G-0. Consulta [el pipeline de muestras](docs/INGESTA_AMPLIA_DATASETS_EXTERNOS.md#primera-ingesta-automatizada-de-muestras).
