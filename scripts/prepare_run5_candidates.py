@@ -47,6 +47,7 @@ COLLECTIONS = {
     "OpenGovernment": {"law_economics_social_sciences"},
 }
 LANGUAGES = {"en", "es"}
+LANGUAGE_ALIASES = {"en": "en", "english": "en", "es": "es", "spanish": "es"}
 DOMAIN_HINTS = {
     "mathematics": "theorem equation algebra calculus geometry probability statistics",
     "logic_epistemology": "logic inference proposition predicate proof epistemology falsifiability",
@@ -276,6 +277,7 @@ def main() -> int:
     parser.add_argument("--min-train-bytes", type=int, default=2_560 * 1024**2)
     parser.add_argument("--hkd-fraction", type=float, default=HKD_FRACTION)
     parser.add_argument("--license-audit", type=Path, default=Path("reports/license_audit.json"))
+    parser.add_argument("--source-manifest", type=Path, default=Path("data/manifests/knowledge_dense_sources.json"))
     args = parser.parse_args()
     if not 0.05 <= args.hkd_fraction <= 0.40:
         parser.error("--hkd-fraction must be between 0.05 and 0.40")
@@ -303,6 +305,27 @@ def main() -> int:
             "No existe autorización G-0 de alcance limitado para descargar "
             "candidatos Common Corpus en esta revisión y allowlist."
         )
+
+    source_manifest = json.loads(args.source_manifest.read_text(encoding="utf-8"))
+    enabled_specs = [
+        spec for spec in source_manifest.get("sources", [])
+        if spec.get("enabled") is True
+    ]
+    active_domains = (args.domain,) if args.domain else DOMAIN_PRIORITY
+    for domain_name in active_domains:
+        domain_specs = [spec for spec in enabled_specs if spec.get("domain") == domain_name]
+        if not domain_specs:
+            raise SystemExit(f"No hay adaptador habilitado en el manifiesto para {domain_name}.")
+        for spec in domain_specs:
+            if (
+                spec.get("dataset_id") != DATASET_ID
+                or spec.get("revision") != DATASET_REVISION
+                or spec.get("license_audit") != str(args.license_audit)
+                or not set(spec.get("allowed_licenses", [])).issubset(ALLOWED_LICENSES)
+            ):
+                raise SystemExit(f"El adaptador {spec.get('id')} no coincide con la autorización auditada.")
+    if len({spec["domain"] for spec in enabled_specs}) != 8:
+        raise SystemExit("Se requieren adaptadores Common Corpus autorizados para los ocho dominios.")
 
     args.output_root.mkdir(parents=True, exist_ok=True)
     database_path = args.output_root / "run5-candidates.sqlite3"
@@ -340,7 +363,8 @@ def main() -> int:
         if license_name not in ALLOWED_LICENSES:
             rejected["license_not_allowlisted"] += 1
             continue
-        language = str(row_value(row, "language") or "").lower().split("-")[0]
+        language_raw = str(row_value(row, "language") or "").strip().lower().split("-")[0]
+        language = LANGUAGE_ALIASES.get(language_raw, language_raw)
         if language not in LANGUAGES:
             rejected["language_not_allowlisted"] += 1
             continue
