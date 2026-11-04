@@ -305,3 +305,10 @@ transcripciones sin licencia compatible quedan fuera del entrenamiento.
 *Sepan cuantos… vieren* abre como las cartas de privilegio y las Partidas, y avisa de que lo que sigue no es un README sino un edicto. *Escarnio* es burla pública, no ironía fina. *Non* en vez de *no* es licencia arcaizante, no error: aparece en Berceo y en el Cantar. *Ca* por *porque* es la conjunción causal del mester de clerecía. *Do vino* por *de donde vino*. *Aderezar* por *arreglar o maquillar* es el uso de los plateros y los cocineros del XVII. Y *tener ley a alguien* es tenerle lealtad, que es lo que se le niega al modelo y se le concede al pipeline.
 
 El cierre es la única línea que no es arcaica, y está puesta a propósito: el que llega al final ya no necesita el disfraz. 
+
+
+## Registro ampliado de datasets externos (4 de noviembre de 2026)
+
+Se ha añadido un inventario de **21 fuentes** para ampliar la cobertura semántica en ciencia, medicina, derecho, ingeniería, código, humanidades, economía, lingüística, traducción y conocimiento estructurado. Consulta el [manifiesto](data/manifests/external_datasets.json) y la [política de ingesta y derechos](docs/INGESTA_AMPLIA_DATASETS_EXTERNOS.md).
+
+Este inventario no significa que los 21 corpus estén descargados o admitidos: distingue fuentes ya presentes, candidatos, índices y recursos condicionados por licencia. Todos permanecen con `training_eligible=false` hasta superar la puerta G-0. El validador [scripts/validate_external_datasets.py](scripts/validate_external_datasets.py) comprueba el manifiesto sin descargar datos ni iniciar entrenamiento.
