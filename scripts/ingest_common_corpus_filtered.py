@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse, hashlib, json, re
 from datetime import datetime, timezone
 from pathlib import Path
-from huggingface_hub import HfApi
+from huggingface_hub import HfApi, hf_hub_download
 from datasets import load_dataset
 
 ADAPTER_VERSION = "1.0.1"
@@ -52,7 +52,7 @@ def main() -> int:
     revision = info.sha
     if not revision or len(revision) < 40:
         raise ValueError("could not resolve immutable Hugging Face dataset revision")
-    card = api.hf_hub_download(REPO, "README.md", repo_type="dataset", revision=revision)
+    card = hf_hub_download(REPO, "README.md", repo_type="dataset", revision=revision)
     card_bytes = Path(card).read_bytes()
     card_sha = sha(card_bytes)
 
