@@ -24,30 +24,50 @@ REUSABLE_LICENSES = {
     "https://creativecommons.org/publicdomain/zero/1.0/": "CC0-1.0",
     "http://creativecommons.org/publicdomain/zero/1.0/": "CC0-1.0",
 }
+REQUEST_TIMEOUT_SECONDS = 45
+REQUEST_ATTEMPTS = 2
 _last_request_at = 0.0
 
 
 def request_oai(params: dict[str, str], *, min_interval: float = 3.0) -> ET.Element:
+    """Make a polite OAI request with bounded retries for transient failures."""
     global _last_request_at
-    wait = min_interval - (time.monotonic() - _last_request_at)
-    if wait > 0:
-        time.sleep(wait)
     url = OAI_ENDPOINT + "?" + urllib.parse.urlencode(params)
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    try:
-        with urllib.request.urlopen(request, timeout=90) as response:
-            payload = response.read()
-    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as exc:
-        raise RuntimeError(f"arXiv OAI request failed: {exc}") from exc
-    _last_request_at = time.monotonic()
-    root = ET.fromstring(payload)
-    errors = root.findall(f".//{OAI_NS}error")
-    if errors:
-        detail = "; ".join(
-            f"{item.attrib.get('code', 'unknown')}: {item.text or ''}" for item in errors
-        )
-        raise RuntimeError(f"arXiv OAI returned an error: {detail}")
-    return root
+    last_error: Exception | None = None
+    for attempt in range(REQUEST_ATTEMPTS):
+        wait = min_interval - (time.monotonic() - _last_request_at)
+        if wait > 0:
+            time.sleep(wait)
+        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        try:
+            with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
+                payload = response.read()
+            _last_request_at = time.monotonic()
+            root = ET.fromstring(payload)
+            errors = root.findall(f".//{OAI_NS}error")
+            if errors:
+                detail = "; ".join(
+                    f"{item.attrib.get('code', 'unknown')}: {item.text or ''}" for item in errors
+                )
+                raise RuntimeError(f"arXiv OAI returned an error: {detail}")
+            return root
+        except urllib.error.HTTPError as exc:
+            last_error = exc
+            if exc.code not in {408, 429, 500, 502, 503, 504}:
+                raise
+        except (urllib.error.URLError, TimeoutError) as exc:
+            last_error = exc
+        if attempt + 1 < REQUEST_ATTEMPTS:
+            retry_after = 0
+            if isinstance(last_error, urllib.error.HTTPError):
+                try:
+                    retry_after = int(last_error.headers.get("Retry-After", "0"))
+                except (TypeError, ValueError):
+                    retry_after = 0
+            time.sleep(max(retry_after, 2 ** (attempt + 1)))
+    raise RuntimeError(
+        f"arXiv OAI request failed after {REQUEST_ATTEMPTS} bounded attempts: {last_error}"
+    ) from last_error
 
 
 def list_category_sets() -> list[dict[str, str]]:
@@ -77,11 +97,7 @@ def select_sets(
         values = item["set_spec"].split(":")
         return values[0], values[1], values[2]
 
-    categories = {
-        key: item for key, item in (
-            (item["set_spec"], item) for item in sets
-        )
-    }
+    categories = {item["set_spec"]: item for item in sets}
     rules = {
         "mathematics": lambda p: p[0] == "math" and p[2] not in {"LO"},
         "logic_epistemology": lambda p: p[0] in {"math", "cs"} and p[2].endswith("LO"),
@@ -107,9 +123,11 @@ def parse_record(record: ET.Element) -> dict[str, str] | None:
     article = metadata.find(f"{ARXIV_NS}arXiv")
     if article is None:
         return None
+
     def value(name: str) -> str:
         node = article.find(f"{ARXIV_NS}{name}")
         return " ".join("".join(node.itertext()).split()) if node is not None else ""
+
     license_uri = value("license")
     return {
         "identifier": value("id"),
@@ -152,7 +170,13 @@ def run_preflight(
     if max_records_per_set < 1 or max_records_per_set > 1000:
         raise ValueError("max_records_per_set must be between 1 and 1000")
 
-    available_sets = list_category_sets()
+    errors: list[dict[str, str]] = []
+    try:
+        available_sets = list_category_sets()
+    except Exception as exc:  # Keep a machine-readable diagnostic even during source outages.
+        available_sets = []
+        errors.append({"stage": "list_category_sets", "error": f"{type(exc).__name__}: {exc}"})
+
     selected_sets = select_sets(available_sets, max_sets_per_domain)
     domain_reports: dict[str, Any] = {}
     all_samples: list[dict[str, str]] = []
@@ -161,9 +185,20 @@ def run_preflight(
         sampled = []
         set_reports = []
         for item in sets:
-            records, stats = sample_set(
-                item["set_spec"], max_records=max_records_per_set
-            )
+            try:
+                records, stats = sample_set(
+                    item["set_spec"], max_records=max_records_per_set
+                )
+            except Exception as exc:
+                error = f"{type(exc).__name__}: {exc}"
+                errors.append({"stage": "sample_set", "domain": domain, "set_spec": item["set_spec"], "error": error})
+                records = []
+                stats = {
+                    "sampled_records": 0,
+                    "has_more_records": None,
+                    "complete_set_harvest": False,
+                    "request_error": error,
+                }
             for record in records:
                 license_counts[record["license_class"]] += 1
                 if len(sampled) < 30:
@@ -184,15 +219,17 @@ def run_preflight(
 
     report = {
         "schema_version": 1,
-        "experiment": "RONIN-ARXIV-OAI-LICENSE-PREFLIGHT-1",
+        "experiment": "RONIN-ARXIV-OAI-LICENSE-PREFLIGHT-2",
         "created_at_utc": datetime.now(UTC).isoformat(),
+        "status": "partial_source_unavailable" if errors else "completed",
+        "errors": errors,
         "source": {
             "dataset_id": "arxiv",
             "endpoint": OAI_ENDPOINT,
             "metadata_prefix": "arXiv",
             "metadata_rights": "CC0-1.0",
             "content_rights_policy": "per-article license URI only; default arXiv distribution license is not reusable",
-            "retrieval_policy": "one sequential OAI request per 3 seconds; metadata only; no PDF, e-print, source archive or article body downloaded",
+            "retrieval_policy": "bounded retry; one sequential OAI request per 3 seconds; metadata only; no PDF, e-print, source archive or article body downloaded",
             "official_documentation": [
                 "https://info.arxiv.org/help/oa/index.html",
                 "https://info.arxiv.org/help/license/reuse.html",
@@ -203,6 +240,8 @@ def run_preflight(
             "max_sets_per_domain": max_sets_per_domain,
             "max_records_per_set": max_records_per_set,
             "complete_harvest": False,
+            "request_timeout_seconds": REQUEST_TIMEOUT_SECONDS,
+            "request_attempts": REQUEST_ATTEMPTS,
         },
         "available_category_sets": len(available_sets),
         "selected_sets": sum(len(items) for items in selected_sets.values()),
@@ -231,6 +270,8 @@ def main() -> None:
     )
     print(json.dumps({
         "experiment": report["experiment"],
+        "status": report["status"],
+        "errors": report["errors"],
         "available_category_sets": report["available_category_sets"],
         "selected_sets": report["selected_sets"],
         "domains": {
