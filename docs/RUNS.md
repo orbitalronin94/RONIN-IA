@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 22:40 | [Integración continua #776 (run 41927185438)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927185438) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(data\): cover expanded dataset registry invariants. Trigger: push; rama: main; intento: 1. | 95364ba0 |
 | 2026-11-04 22:39 | [Integración continua #775 (run 41927180007)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927180007) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(data\): validate expanded 32-domain dataset registry. Trigger: push; rama: main; intento: 1. | e2d8dc84 |
 | 2026-11-04 22:39 | [Integración continua #773 (run 41927029355)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927029355) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(ci\): expose repository package for PMC candidate runner. Trigger: push; rama: main; intento: 1. | 99dd1b31 |
 | 2026-11-04 22:38 | [Integración continua #769 (run 41926931159)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41926931159) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(data\): schedule bounded weekly 16-domain corpus expansion. Trigger: push; rama: main; intento: 1. | d910e5b2 |
