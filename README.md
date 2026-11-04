@@ -5,7 +5,27 @@
 - Repositorio: https://github.com/orbitalronin94/RONIN-IA
 - Rama principal: `main`
 - Fuente de verdad: este repositorio. El código, las pruebas, las configuraciones y la documentación operativa viven aquí.
-- Estado: implementación inicial. Ninguna función se considera terminada sin código, pruebas y evidencias.
+- Estado: ya existe un modelo estudiante propio, implementado en PyTorch, y se ha completado un primer ciclo de entrenamiento experimental. El proyecto sigue en fase de investigación; no se afirma todavía competencia general.
+
+## Estado actual del modelo
+
+**RONIN ya tiene modelo propio.** No es únicamente una hoja de ruta ni una colección de especificaciones: el repositorio contiene un Transformer causal decoder-only implementado en PyTorch, con inicialización propia y **9.922.880 parámetros en el perfil `tiny`**. Su arquitectura actual combina RoPE, RMSNorm, SwiGLU y GQA configurable.
+
+También se ha ejecutado un primer ciclo reproducible de entrenamiento desde inicialización aleatoria. En el smoke test de CI (100 pasos, CPU, una semilla y corpus artificial aislado) se observó:
+
+| Medición | Antes | Después |
+|---|---:|---:|
+| Bits por byte (BPB) | 7,9281 | 2,2395 |
+| Aciertos en el piloto multidominio | 0/23 | 8/23 (34,78 %) |
+
+La evaluación de lenguaje utilizó 32.768 bytes de validación. El benchmark multidominio contiene 23 preguntas de opción múltiple y se puntúa mediante predicción del siguiente byte.
+
+**Cómo interpretar estos datos:** son evidencia de que el código de entrenamiento y evaluación funciona y de que el modelo aprende regularidades del corpus sintético. No demuestran conocimiento general, razonamiento, dominio de 15 disciplinas ni rendimiento comparable al de otros modelos. El corpus artificial y el benchmark pequeño no permiten esas conclusiones. Hace falta repetir con varias semillas, ampliar las pruebas independientes y evaluar tareas abiertas con criterios explícitos.
+
+Los ciclos sintéticos no descargan corpus externos y no eluden el bloqueo G-0 de licencias. Los informes se publican como artefactos de GitHub Actions; los checkpoints no se publican ni se conservan como pesos descargables. Por tanto, **hay un modelo implementado y entrenado experimentalmente, pero todavía no distribuimos un checkpoint entrenado como versión utilizable**.
+
+Workflow: [Ciclos sintéticos de entrenamiento RONIN](https://github.com/orbitalronin94/RONIN-IA/actions/workflows/synthetic-training-cycles.yml). Para lanzar experimentos más largos, abre el workflow en GitHub Actions y usa «Run workflow» (hasta 1.000 pasos y cinco semillas).
+
 
 ## Principios irrenunciables
 
