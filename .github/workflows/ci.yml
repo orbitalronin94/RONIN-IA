@@ -21,8 +21,8 @@ jobs:
     name: Análisis estático y comprobación del paquete
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
@@ -44,8 +44,8 @@ jobs:
     name: Pruebas unitarias y de integración
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
@@ -57,6 +57,8 @@ jobs:
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "pytest>=8.0" "pytest-cov>=5.0" "ruff>=0.5"
       - name: Validar el gate de licencias sin descargar corpus
         run: python scripts/validate_license_audit.py
+      - name: Validar catálogo histórico sin admitirlo a entrenamiento
+        run: python scripts/validate_historical_candidates.py
       - name: Ejecutar la suite de pruebas
         run: pytest --cov=ronin --cov-report=term-missing
       - name: Enlazar libro de runs
@@ -67,8 +69,8 @@ jobs:
     name: Prueba mínima de entrenamiento desde cero
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip

@@ -71,3 +71,23 @@ Cada registro del catálogo debe contener, como mínimo:
 ## Primer objetivo técnico
 
 La primera entrega será un catálogo auditable y un pequeño lote piloto de obras con derechos verificados. No se ejecutará una ingesta masiva ni se declarará entrenamiento histórico hasta que existan archivos descargados, hashes, manifiestos y pruebas de calidad.
+
+## Catálogo ampliado de candidatos (iteración 2026-11-04)
+
+Se ha convertido la selección histórica en un manifiesto verificable:
+`data/manifests/historical_text_candidates.json`. Incluye once autores clásicos y ocho autores cuya obra entra en dominio público en 2026 según la selección de la BNE, seis fuentes primarias relacionadas con criptografía/esteganografía y siete vías institucionales de descubrimiento (BNE, BDH, BVPH, Europeana, Project Gutenberg y Wikisource, incluida la selección BNE 2026).
+
+**Selección de autores:** Cervantes, Lope de Vega, Quevedo, Góngora, Tirso de Molina, Calderón de la Barca, Santa Teresa, Feijoo, Cadalso, Jovellanos y Moratín. Se proponen dos obras por autor para comenzar la localización documental. Se añaden ocho autores de la selección BNE 2026: José Gutiérrez Solana, María de la Concepción Alfaya López, Odón de Buen, Blas Cabrera, Telésforo de Aranzadi, Joaquín Gimeno Riera, Mariano Gómez Ulla y Antonio de Zayas. La BNE informa de más de 600 obras digitalizadas de 154 autores fallecidos en 1945 que pasan a dominio público en 2026; el registro exacto de cada obra sigue requiriendo revisión de edición, colaboradores y objeto digital. Las fechas biográficas sirven para orientar la investigación, no como aprobación legal automática.
+
+**Selección criptográfica:** *The Gold-Bug*, *La Jangada*, *The Adventure of the Dancing Men*, *Hypnerotomachia Poliphili*, *Steganographia* y *Cryptomenytices et cryptographiae libri IX*. Estas seis fuentes ya cuentan con una vía de adquisición reproducible, pero siguen fuera del entrenamiento hasta revisar edición, objeto digital, OCR/transcripción, derechos y evidencia histórica de cada afirmación.
+
+### Estado y siguiente filtro
+
+- 11 autores / 22 obras candidatas registradas.
+- 6 fuentes institucionales de descubrimiento registradas.
+- 6 fuentes criptográficas históricas mantenidas en revisión manual.
+- 0 documentos nuevos admitidos automáticamente al entrenamiento.
+- Cada obra requiere comprobar autoría/coautoría, fecha de edición, traductor, aparato editorial, condiciones del objeto digital, SHA-256 y calidad de OCR.
+- Se conserva el corpus existente y sus particiones; no se recalculan ni se reutilizan sus validation/test.
+
+La validación automática `python scripts/validate_historical_candidates.py` comprueba el catálogo y bloquea cualquier auto-admisión. El gate está conectado a CI. La ampliación actual es una expansión auditable de la selección, no una afirmación de que las 22 obras ya estén descargadas o autorizadas.

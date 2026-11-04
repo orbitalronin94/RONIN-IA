@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -92,7 +92,11 @@ def main() -> int:
             "|---|---|---|---|---|\n"
         )
 
-    if re.search(r"\b" + re.escape(run_id) + r"\b", content):
+    if re.search(
+        r"^\|[^\n]*\(run " + re.escape(run_id) + r"\)\]\(",
+        content,
+        re.MULTILINE,
+    ):
         print("Run already recorded: " + run_id)
         return 0
 
@@ -104,10 +108,10 @@ def main() -> int:
     try:
         stamp = datetime.fromisoformat(
             completed.replace("Z", "+00:00")
-        ).astimezone(timezone.utc)
+        ).astimezone(UTC)
         date_text = stamp.strftime("%Y-%m-%d %H:%M")
     except (ValueError, AttributeError):
-        date_text = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+        date_text = datetime.now(UTC).strftime("%Y-%m-%d %H:%M")
 
     raw_name = str(run.get("name") or "Workflow")
     name = safe(raw_name)

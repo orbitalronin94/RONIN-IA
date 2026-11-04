@@ -41,4 +41,4 @@ def test_run_ledger_is_idempotent_and_records_failure(tmp_path, monkeypatch):
 
     assert append_run_ledger.main() == 0
     second = runbook.read_text(encoding="utf-8")
-    assert second.count("123456789") == 1
+    assert sum("(run 123456789)" in line for line in second.splitlines()) == 1
