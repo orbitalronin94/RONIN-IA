@@ -6,6 +6,7 @@ import torch
 from ronin.config import get_profile
 from ronin.models.transformer import RoninLM
 from scripts.evaluate_mmlu_pro import (
+    DATASET_REVISION,
     evaluate_rows,
     format_prompt,
     normalize_rows,
@@ -105,3 +106,7 @@ def test_mmlu_evaluation_never_truncates_long_prompts(tmp_path: Path):
     assert report["skipped_context_items"] == 1
     assert report["coverage"] == 0.5
     assert report["skipped"][0]["reason"] == "exceeds_context_without_truncation"
+
+
+def test_dataset_revision_is_pinned():
+    assert DATASET_REVISION == "b189ec765aa7ed75c8acfea42df31fdae71f97be"
