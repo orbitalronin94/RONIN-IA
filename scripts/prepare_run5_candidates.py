@@ -400,13 +400,14 @@ def main() -> int:
         if not source_filter_match:
             rejected["source_manifest_filter"] += 1
             continue
-        # The per-domain byte budget counts only documents that pass the
-        # source's configured domain/language filters and explicit license gate.
-        if isinstance(raw_text, str):
-            scanned_text_bytes += len(raw_text.encode())
         if args.domain and domain != args.domain:
             rejected["other_domain"] += 1
             continue
+        # Each matrix job gets its own byte budget for its target domain.
+        # Counting other domains here would let unrelated rows exhaust the
+        # budget before this worker had enough material for its two libraries.
+        if isinstance(raw_text, str):
+            scanned_text_bytes += len(raw_text.encode())
         doc_id = hashlib.sha256(
             f"{DATASET_REVISION}\0{provenance}\0{license_name}".encode()
         ).hexdigest()
