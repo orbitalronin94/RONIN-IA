@@ -43,7 +43,7 @@ def main() -> int:
     match = next((v for k,v in corpora.items() if k.lower() == CORPUS.lower()), None)
     if match is None:
         raise RuntimeError(f"Korp does not expose corpus {CORPUS}; available matching keys: {list(corpora)[:30]}")
-    query_raw = get("/query", {
+    query_raw = get("/query_sample", {
         "corpus": CORPUS,
         "cqp": '[word=".*"]',
         "start": 0,
@@ -55,6 +55,14 @@ def main() -> int:
     })
     query = json.loads(query_raw)
     kwic = query.get("kwic", [])
+    sample_languages = {}
+    sample_documents = {}
+    for hit in kwic:
+        structs = hit.get("structs", {})
+        lang = str(structs.get("doc_lgcode", "unknown"))
+        sample_languages[lang] = sample_languages.get(lang, 0) + 1
+        title = str(structs.get("doc_title", "unknown"))
+        sample_documents[title] = structs.get("page_page_url", "")
     (a.out / "corpus-info.json").write_bytes(info_raw)
     (a.out / "sample-query.json").write_bytes(query_raw)
     manifest = {
@@ -69,6 +77,8 @@ def main() -> int:
         "reported_corpus_info": match,
         "sample_hits_requested": a.sample_hits,
         "sample_hits_returned": len(kwic),
+        "sample_document_language_counts": sample_languages,
+        "sample_document_sources": sample_documents,
         "retrieved_at": datetime.now(timezone.utc).isoformat(),
         "status": "access_preflight_only",
         "training_eligible": False,
