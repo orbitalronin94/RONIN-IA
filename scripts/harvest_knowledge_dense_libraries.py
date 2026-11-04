@@ -33,8 +33,8 @@ def main() -> None:
     outputs = []
     failed = []
     for domain in DOMAINS:
-        output = args.output_root / domain / "train.txt"
-        report = args.output_root / domain / "selection-report.json"
+        output = args.output_root / f"{domain}_hkd" / "train.txt"
+        report = args.output_root / f"{domain}_hkd" / "selection-report.json"
         command = [
             sys.executable,
             "scripts/select_knowledge_dense_corpus.py",
