@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import sqlite3
-import sys
 import zlib
 from collections import Counter
 from datetime import UTC, datetime
@@ -19,10 +17,8 @@ from scripts.pmc_oa_source import (
     iter_pmc_records,
 )
 from scripts.prepare_run5_candidates import (
-    DOMAIN_PRIORITY,
     domain_kind_name,
     score_record,
-    simhash64,
     tokens,
     write_split,
 )
@@ -96,6 +92,7 @@ def rows_from_db(
         ) = row
         extra = {
             "source_version_prefix": doc_id,
+            "source_metadata_url": f"https://pmc-oa-opendata.s3.amazonaws.com/metadata/{doc_id}.json",
             "pmcid": pmcid,
             "doi": doi,
             "title": title,
@@ -320,7 +317,7 @@ def prepare(
             ],
         }
         report_path = output_root / "run5-candidate-manifest.json"
-        report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+        report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         print(json.dumps({
             "domain": domain,
             "accepted_documents": accepted_documents,
