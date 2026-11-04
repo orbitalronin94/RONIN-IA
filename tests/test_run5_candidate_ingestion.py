@@ -255,8 +255,8 @@ def test_run5_stream_shuffle_rejects_invalid_buffer():
 
 
 def test_run5_default_split_is_eighty_percent_base_and_twenty_percent_hkd():
-    from scripts.prepare_run5_candidates import HKD_FRACTION
     from scripts.prepare_pmc_oa_candidates import HKD_FRACTION as PMC_HKD_FRACTION
+    from scripts.prepare_run5_candidates import HKD_FRACTION
 
     assert HKD_FRACTION == 0.20
     assert PMC_HKD_FRACTION == 0.20
