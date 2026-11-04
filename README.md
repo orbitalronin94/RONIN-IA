@@ -28,6 +28,12 @@ Workflow principal: [Experimento oficial RONIN desde cero + MMLU-Pro completo](h
 
 **Ritmo de iteración:** el ciclo programado ejecuta 500 pasos por semilla (tres semillas) y evalúa la semilla principal antes/después en una muestra estratificada de 140 preguntas de `validation` de MMLU-Pro. Un checkpoint solo se conserva si reduce bits por byte en la validación sintética y no empeora ni el benchmark multidominio interno ni MMLU-Pro `validation`. El split `test` queda reservado para la verificación final y nunca guía selección de pesos. La métrica de MMLU-Pro sigue siendo el protocolo propio de RONIN por siguiente byte, no el leaderboard oficial.
 
+### Barrido experimental de 500 semillas
+
+Se añade un experimento independiente para medir la sensibilidad a la inicialización del mejor modelo propio disponible: `tiny`, **9.922.880 parámetros**. El workflow genera un corpus sintético original de **1 GiB**, sin descargas, textos de terceros ni salidas de tutores, y ejecuta 500 inicializaciones independientes con 100 pasos por semilla (50.000 actualizaciones en total). Compara BPB y el benchmark multidominio interno antes/después; conserva los cinco candidatos mejor situados y los contrasta en una muestra fija de 140 preguntas de **MMLU-Pro validation**. El split `test` no se consulta.
+
+**Límite esencial:** este corpus es legalmente controlable porque se genera desde plantillas procedurales propias, pero es un currículo sintético, no un gran corpus factual externo. El resultado mide aprendizaje de tareas sintéticas y variación entre semillas; no demuestra adquisición de conocimiento general. El entrenamiento documental externo seguirá dependiendo de G-0 y de la admisión de las bibliotecas.
+
 ### Ciclos rápidos de aprendizaje abierto
 
 Se incorpora un segundo carril experimental: [Ciclos rápidos RONIN — corpus abierto](.github/workflows/rapid-open-training-cycles.yml). Ejecuta hasta tres iteraciones cortas por tanda y, al terminar correctamente, **se relanza automáticamente** mediante `workflow_run`: no hay que activar cada ciclo manualmente. Un arranque periódico de recuperación evita que la cadena quede abandonada tras una interrupción. Recupera el último checkpoint aceptado y solo promueve uno nuevo si mejora la accuracy de MMLU-Pro validation sin empeorar BPB. El test final de MMLU-Pro queda fuera del bucle y reservado para la evaluación de release.
