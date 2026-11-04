@@ -1,0 +1,32 @@
+name: Preflight DReaM-es-open public corpus access
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/preflight_dream_es_open.py"
+      - ".github/workflows/preflight-dream-es-open.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "31 7 21 * *"
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Check public corpus endpoint without credentials
+        run: python scripts/preflight_dream_es_open.py --sample-hits 100
+      - uses: actions/upload-artifact@v6
+        with:
+          name: ronin-dream-es-open-access-preflight
+          path: artifacts/dream-preflight/
+          if-no-files-found: error
+          retention-days: 30
