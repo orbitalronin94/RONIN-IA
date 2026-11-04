@@ -16,6 +16,9 @@ def test_large_synthetic_corpus_is_seeded_hashed_and_source_free(tmp_path: Path)
     assert manifest["external_sources"] == []
     assert manifest["teacher_outputs"] is False
     assert manifest["third_party_text"] is False
+    assert manifest["license"] == "MIT"
+    assert manifest["license_reference"] == "LICENSE"
+    assert len(manifest["generator_script_sha256"]) == 64
     assert len(manifest["sha256"]) == 64
     assert manifest["records"] > 0
     assert len(manifest["records_by_domain"]) == 8
