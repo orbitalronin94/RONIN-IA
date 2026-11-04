@@ -39,7 +39,7 @@ def test_portfolio_training_cycle_is_reproducible_and_separates_evaluation():
     assert "--input phi4_tutor=" in mixture
     assert "train.txt" in mixture
 
-    teacher = by_name["Generar respuestas propuestas con Phi-4 y auditar estructura REF"]["run"]
+    teacher = by_name["Generar propuestas Phi-4 y auditar REF sin publicar salidas"]["run"]
     assert "--model-dir models/teachers/phi-4-mini-instruct" in teacher
     assert "valid_records" in teacher
     assert "phi-4-ref-audit.json" in teacher
