@@ -119,7 +119,7 @@ def europe_pmc_sample(limit: int) -> tuple[list[dict[str, Any]], dict[str, Any]]
             continue
         rows.append({
             "source_id": "europe_pmc_open_abstracts",
-            "pmid": item.get(" PMID") or item.get("pmid"),
+            "pmid": item.get("pmid"),
             "pmcid": item.get("pmcid"),
             "doi": item.get("doi"),
             "title": item.get("title"),
