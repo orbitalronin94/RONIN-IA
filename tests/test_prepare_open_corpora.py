@@ -1,4 +1,9 @@
-from scripts.prepare_open_corpora import (\n    _document_manifest_rows,\n    _extract_tei,\n    _is_source_path,\n    _safe_member,\n)
+from scripts.prepare_open_corpora import (
+    _document_manifest_rows,
+    _extract_tei,
+    _is_source_path,
+    _safe_member,
+)
 
 
 def test_extrae_solo_el_contenido_tei_y_omite_cabecera():
