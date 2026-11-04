@@ -25,3 +25,28 @@ Una ejecución de entrenamiento solo es válida si:
 6. La evaluación se realiza sobre datos no vistos y sus resultados se guardan con los metadatos de la ejecución.
 
 No se inventarán puntuaciones de benchmarks, afirmaciones de calidad ni indicadores de preparación.
+
+
+## Línea base reproducible para tiny
+
+El evaluador `scripts/evaluate_text.py` mide un checkpoint sobre un archivo de validación separado del corpus de entrenamiento. No crea particiones automáticamente: el operador debe reservar documentos completos y comprobar que no hay solapamiento ni duplicados entre entrenamiento y validación.
+
+Ejemplo, una vez entrenado el perfil tiny:
+
+```bash
+python scripts/evaluate_text.py \
+  --checkpoint checkpoints/tiny/step-00000100.pt \
+  --validation-text /ruta/validacion-reservada.txt \
+  --profile tiny \
+  --batches 128 \
+  --batch-size 2 \
+  --seed 2026 \
+  --device cpu \
+  --output reports/tiny-baseline.json
+```
+
+El informe JSON registra las huellas SHA-256 del checkpoint y del archivo de validación, paso de entrenamiento, perfil, tokenizador, semilla, dimensiones de evaluación, cantidad de tokens, parámetros, entropía cruzada, perplejidad y BPB. Como el tokenizador provisional es de bytes, cada token evaluado representa un byte y BPB se calcula como entropía cruzada en nats dividida por ln(2).
+
+Para comparar dos ejecuciones, mantener idénticos el archivo reservado, su SHA-256, el perfil, el tokenizador, el número de lotes, el tamaño de lote, la longitud de secuencia, la semilla y el dispositivo/precisión. Una reducción de pérdida de entrenamiento no cuenta como mejora. No cambiar ni reutilizar el conjunto reservado para ajustar hiperparámetros.
+
+**Estado:** el evaluador y el formato del informe están implementados; todavía no hay corpus autorizado reservado ni resultados reales versionados. Por tanto, no existe aún una línea base de calidad de RONIN ni una mejora demostrada. Los informes experimentales deben publicarse como artefactos o adjuntos de ejecución, no junto con corpus, datos privados ni checkpoints en Git.
