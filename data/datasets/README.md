@@ -150,7 +150,7 @@ The source audit is maintained in `candidates/github-source-audit.json`. It is a
 | ROR v2 registry dump | CC0 for IDs and metadata; GeoNames-derived locations are CC BY 4.0 | Adapter added; location fields excluded; candidate artifact + hash required |
 | MathemAct | CC BY 4.0 for published export | Quarantined pending privacy/consent review; no profiles/comments ingestion |
 | PleIAs Common Corpus | Mixed document-level provenance/licensing | High-priority discovery; only exact per-document CC0/allowlisted CC BY subsets may pass |
-| HPLT v2 | Site labels cleaned corpora CC0; source origin includes Common Crawl/Internet Archive | Pending document-level origin and rights checks; no bulk ingestion |
+| HPLT v2 | CC0 applies to packaging only, not extracted text | Text excluded until independent item-level rights are proven |
 | Project Gutenberg | Public domain is item-, edition- and jurisdiction-specific | Per-work clearance only; exclude modern editorial matter and copyrighted translations |
 | ScienceVerse papers | Per-paper original licenses reportedly retained | Pending repository pin and article-by-article license audit |
 | Hlido agent benchmark | CC BY 4.0 declared, manifest + SHA-256 published | Small candidate; privacy and third-party quote review required |
@@ -190,3 +190,18 @@ Three further high-value sources have been registered:
 - **GovEasy** — 438 Spanish administrative procedures, 17 public agencies and 52 territories, six official languages, published as static JSON/CSV/JSON-LD under CC-BY-4.0. Useful for procedural and administrative language, but original government-source facts and publisher-authored/generated summaries must remain separately attributed and labelled.
 
 These additions bring the discovery register to **34 candidate sources**. They are not 34 downloaded or admitted corpora: the audit distinguishes catalogued leads, downloaded candidate artifacts, Level-A rights evidence, quality-passed partitions and admitted training data. Only the last category contributes to training-eligible corpus size.
+
+
+## Common Corpus: filtered candidate pipeline
+
+`scripts/ingest_common_corpus_filtered.py` and `.github/workflows/prepare-common-corpus-filtered.yml` add a bounded streaming pass over PleIAs Common Corpus. At runtime the adapter resolves and records an immutable Hugging Face dataset revision and the dataset-card SHA-256. It accepts only exact per-document labels mapped to CC0-1.0, CC-BY-2.0/3.0/4.0 or MIT; it rejects ShareAlike, NC, ND, mixed, unknown, OpenGovernment and generic Public Domain labels. It preserves source identifier, collection, creator, title, language, date and license per row, deduplicates exact text hashes, and screens basic email/phone patterns.
+
+This is deliberately **not a rights clearance**: Common Corpus is 4.49 TB on the current Hugging Face repository, and its live preview demonstrates many distinct license values plus legal records containing personal information. The workflow inspects a bounded stream only and emits candidate JSONL shards plus a human `rights-review-queue.json`; no rights record is appended and no output is training-eligible. A human review must still verify original source rights, attribution, PII, quality, deduplication and split contamination.
+
+## Additional structured-data sources
+
+- **Wikidata**: only structured data in the main, Property, Lexeme and EntitySchema namespaces is CC0. Text in other namespaces is CC BY-SA and is excluded. Candidate pending a pinned dump and a namespace-aware parser.
+- **World Bank Open Data**: World Bank-produced open datasets default to CC BY 4.0, but third-party datasets and microdata can have different or restricted terms. Admit only individually checked catalog items, never the whole catalog.
+- **Eurostat**: statistical data and metadata may be reused with attribution, but dataset-specific notices and third-party exceptions apply. Its general reuse policy is not automatically converted to an SPDX license or Level A record.
+
+These structured sources can enrich RONIN's domain libraries and factual grounding, but they are not counted as natural-language training text unless an actual text payload independently passes the rights and quality gates.
