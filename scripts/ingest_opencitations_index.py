@@ -5,6 +5,7 @@ import argparse, hashlib, json, time, urllib.parse, urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+ADAPTER_VERSION = "1.0.1"
 CROSSREF = "https://api.crossref.org/works"
 OC = "https://api.opencitations.net/index/v2"
 RIGHTS = "https://opencitations.net/"
