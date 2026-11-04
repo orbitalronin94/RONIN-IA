@@ -161,3 +161,26 @@ def test_batch_token_budget_must_be_positive(tmp_path: Path):
             all_rows_sha256=rows_sha256(rows),
             batch_token_budget=0,
         )
+
+
+
+def test_forward_last_logits_matches_full_forward_for_each_sequence():
+    config, _ = get_profile("tiny")
+    model = RoninLM(config).eval()
+    input_ids = torch.randint(0, config.vocab_size, (3, 37))
+    positions = torch.tensor([36, 21, 9], dtype=torch.long)
+    with torch.no_grad():
+        full_logits, _ = model(input_ids)
+        selected_logits = model.forward_last_logits(input_ids, positions)
+    expected = full_logits[torch.arange(3), positions]
+    torch.testing.assert_close(selected_logits, expected, rtol=1e-5, atol=1e-6)
+
+
+def test_forward_last_logits_rejects_invalid_positions():
+    config, _ = get_profile("tiny")
+    model = RoninLM(config).eval()
+    input_ids = torch.randint(0, config.vocab_size, (2, 8))
+    with pytest.raises(ValueError, match="last_positions"):
+        model.forward_last_logits(input_ids, torch.tensor([7], dtype=torch.long))
+    with pytest.raises(ValueError, match="fuera de secuencia"):
+        model.forward_last_logits(input_ids, torch.tensor([7, 8], dtype=torch.long))
