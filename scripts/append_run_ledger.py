@@ -93,7 +93,7 @@ def main() -> int:
         )
 
     if re.search(
-        r"^\\|[^\\n]*\\(run " + re.escape(run_id) + r"\\)\\]\\(",
+        r"^\|[^\n]*\(run " + re.escape(run_id) + r"\)\]\(",
         content,
         re.MULTILINE,
     ):
