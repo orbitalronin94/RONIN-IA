@@ -304,7 +304,7 @@ def main() -> int:
         reports.append(manifest)
         print(json.dumps(manifest, ensure_ascii=False))
     if not any(item["records"] for item in reports):
-        raise RuntimeError("Both sources returned zero records; refusing to publish empty samples.")
+        raise RuntimeError("All configured sources returned zero records; refusing to publish empty samples.")
     return 0
 
 
