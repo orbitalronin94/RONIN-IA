@@ -371,6 +371,7 @@ def write_split(
     metadata = {
         "id": domain_kind_name(domain, library_kind),
         "domain": domain,
+        "source_domain_family": DOMAIN_SOURCE_PARENT[domain],
         "kind": library_kind,
         "source_type": "high_knowledge_density_extraction" if library_kind == "hkd" else "general_domain_corpus",
         "status": "candidate_pending_human_review",
@@ -746,6 +747,7 @@ def main() -> int:
                 "note": "Counts contain metadata labels only; document text and excerpts are never emitted.",
             },
         },
+        "domain_routing": DOMAIN_SOURCE_PARENT,
         "libraries": libraries,
         "ready_for_human_review": len(libraries) == 32 and all(
             item["meets_minimum_size"] for item in libraries
