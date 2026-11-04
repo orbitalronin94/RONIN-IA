@@ -65,3 +65,8 @@ The append-only ledger currently contains two level-A rights records:
 - OpenAlex JSONL works metadata export only (CC0; pinned official OpenAlex license document, public snapshot manifest, exact shard and export hashes; MAG-format exception is not in scope).
 
 These are rights certifications for the exact candidate exports. They are **not** dataset admission, do not authorize use of other fields/assets from the same upstream sources, and do not override G-0, quality, privacy, deduplication or split gates.
+
+
+## Current ledger status (2026-11-05)
+
+The ledger contains eight exact-scope Level A metadata/text-export records: CoVoST 2 translation-only, OpenAlex metadata, ROR v2.14 metadata, Crossref metadata, DataCite DOI metadata and OpenCitations Index metadata, plus the two earlier exact-scope source versions already recorded. These rights records do not admit any dataset or grant training eligibility. Global G-0 remains FAIL; quality, privacy, deduplication and split gates are independent.
