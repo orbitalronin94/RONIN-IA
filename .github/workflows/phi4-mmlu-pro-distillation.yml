@@ -1,0 +1,184 @@
+name: RONIN — destilación tutorizada Phi-4 + MMLU-Pro
+
+on:
+  workflow_dispatch:
+    inputs:
+      examples:
+        description: Preguntas de validation que resolverá el tutor
+        required: true
+        default: "48"
+        type: choice
+        options: ["24", "48", "64"]
+      steps:
+        description: Pasos de entrenamiento del estudiante
+        required: true
+        default: "250"
+        type: choice
+        options: ["100", "250", "500"]
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/phi4-mmlu-pro-distillation.yml"
+      - "scripts/distill_mmlu_pro_tutor.py"
+      - "scripts/train_text.py"
+      - "tests/test_tutor_distillation.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-phi4-distillation
+  cancel-in-progress: false
+
+jobs:
+  distill-train-evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONUNBUFFERED: "1"
+      EXAMPLES: ${{ inputs.examples || '48' }}
+      STEPS: ${{ inputs.steps || '250' }}
+      TEACHER_DIR: models/teachers/phi-4-mini-instruct
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Instalar PyTorch CPU, RONIN y tutor
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "huggingface_hub==0.36.0" "transformers==4.53.3" "safetensors>=0.5" "accelerate>=1.0" pytest ruff
+      - name: Probar contrato de destilación
+        run: |
+          ruff check scripts/distill_mmlu_pro_tutor.py scripts/train_text.py tests/test_tutor_distillation.py
+          pytest -q tests/test_tutor_distillation.py tests/test_teacher_data.py
+      - name: Restaurar caché Phi-4 verificada
+        id: teacher-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: models/teachers/phi-4-mini-instruct
+          key: ronin-phi4-mini-instruct-cbefacb99257ffa30c83adab238a50856ac3083
+      - name: Descargar y verificar Phi-4 si la caché no existe
+        if: steps.teacher-cache.outputs.cache-hit != 'true'
+        run: python scripts/download_teacher_models.py --model phi-4-mini-instruct --output-dir models/teachers
+      - name: Comprobar integridad de la caché
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from ronin.data.teacher import verify_teacher_manifest
+          root = Path("models/teachers/phi-4-mini-instruct")
+          manifest = json.loads((root / "ronin-teacher-manifest.json").read_text())
+          verify_teacher_manifest(root, manifest)
+          assert manifest["revision"] == "cfbefacb99257ffa30c83adab238a50856ac3083"
+          print("Phi-4 verificado:", manifest["model_id"], manifest["revision"])
+          PY
+      - name: Generar explicaciones tutorizadas solo desde MMLU-Pro validation
+        run: |
+          python scripts/distill_mmlu_pro_tutor.py \
+            --model-dir "$TEACHER_DIR" \
+            --output-dir artifacts/distillation \
+            --count "$EXAMPLES" --max-new-tokens 128
+      - name: Crear referencia inicial del estudiante (misma arquitectura y semilla)
+        run: |
+          mkdir -p checkpoints reports
+          python - <<'PY'
+          import torch
+          from dataclasses import replace
+          from ronin.config import get_profile
+          from ronin.models.transformer import RoninLM
+          from ronin.utils.repro import seed_everything
+          config, _ = get_profile("tiny")
+          config = replace(config, context_length=2048)
+          seed_everything(1337)
+          model = RoninLM(config)
+          torch.save({"model": model.state_dict(), "step": 0}, "checkpoints/initial.pt")
+          print("Parámetros:", model.parameter_count, "contexto:", config.context_length)
+          PY
+      - name: Evaluar MMLU-Pro test completo antes (intacto)
+        run: |
+          python scripts/evaluate_mmlu_pro.py \
+            --checkpoint checkpoints/initial.pt --profile tiny --context-length 2048 \
+            --limit 0 --split test --seed 2026 --revision b189ec765aa7ed75c8acfea42df31fdae71f97be \
+            --device cpu --batch-token-budget 8192 --output reports/mmlu-before.json
+      - name: Entrenar el estudiante desde su propia inicialización
+        run: |
+          python scripts/train_text.py \
+            --text artifacts/distillation/train.txt --profile tiny --context-length 2048 \
+            --steps "$STEPS" --seed 1338 --init-checkpoint checkpoints/initial.pt \
+            --device cpu --checkpoints checkpoints/candidate
+      - name: Evaluar MMLU-Pro test completo después
+        run: |
+          python scripts/evaluate_mmlu_pro.py \
+            --checkpoint "checkpoints/candidate/step-$(printf '%08d' "$STEPS").pt" \
+            --profile tiny --context-length 2048 --limit 0 --split test --seed 2026 \
+            --revision b189ec765aa7ed75c8acfea42df31fdae71f97be \
+            --device cpu --batch-token-budget 8192 --output reports/mmlu-after.json
+      - name: Aplicar gate de promoción y consolidar resultado
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          before = json.loads(Path("reports/mmlu-before.json").read_text())
+          after = json.loads(Path("reports/mmlu-after.json").read_text())
+          teacher = json.loads(Path("artifacts/distillation/teacher-distillation-summary.json").read_text())
+          assert before["dataset_sha256"] == after["dataset_sha256"]
+          assert before["selected_items"] == after["selected_items"] == 12032
+          assert before["evaluated_items"] == after["evaluated_items"]
+          assert before["coverage"] == after["coverage"] == 1.0
+          delta = after["overall"]["accuracy"] - before["overall"]["accuracy"]
+          accepted = delta > 0
+          summary = {
+              "experiment": "ronin-phi4-mmlu-pro-rationale-distillation-v1",
+              "teacher": teacher,
+              "mmlu_pro_test": {
+                  "revision": after["dataset_revision"],
+                  "sha256": after["dataset_sha256"],
+                  "items": after["evaluated_items"],
+                  "before_correct": before["overall"]["correct"],
+                  "after_correct": after["overall"]["correct"],
+                  "before_accuracy": before["overall"]["accuracy"],
+                  "after_accuracy": after["overall"]["accuracy"],
+                  "delta_percentage_points": delta * 100,
+                  "coverage_before": before["coverage"],
+                  "coverage_after": after["coverage"],
+                  "untouched_during_generation_and_training": True
+              },
+              "student_promotion_candidate": accepted,
+              "promotion_rule": "strict full-test accuracy improvement with identical 12032 items and coverage",
+              "limitations": [
+                  "MMLU-Pro test was not used for gradients, but repeated promotion decisions on it can cause adaptive test leakage.",
+                  "Tutor rationales are explicit generated explanations, not private chain-of-thought.",
+                  "Only answers matching MMLU-Pro validation gold labels enter the training corpus.",
+                  "Generated-output license is not asserted; the dataset artifact remains an internal experiment and is not published as an open corpus.",
+                  "This byte-level answer-letter protocol is not comparable to the official MMLU-Pro leaderboard."
+              ]
+          }
+          Path("reports/distillation-result.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          if not accepted:
+              print("NO PROMOTION: candidate did not strictly improve full MMLU-Pro test.")
+          PY
+      - name: Publicar métricas, corpus de auditoría y checkpoint candidato
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-phi4-distillation-${{ github.run_id }}
+          path: |
+            reports/
+            artifacts/distillation/
+            checkpoints/candidate/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Guardar caché Phi-4 verificada
+        if: success() && steps.teacher-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: models/teachers/phi-4-mini-instruct
+          key: ronin-phi4-mini-instruct-cbefacb99257ffa30c83adab238a50856ac3083
+      - name: Enlazar libro de runs
+        if: always()
+        uses: ./.github/actions/run-ledger-link
