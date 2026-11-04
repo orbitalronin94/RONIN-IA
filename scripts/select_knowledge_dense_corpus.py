@@ -1,0 +1,258 @@
+#!/usr/bin/env python3
+"""Deterministic, auditable high-knowledge-density selection for RONIN corpora.
+
+No teacher model, network call, or opaque embedding model is required.
+Input records are supplied by a source adapter and must carry explicit rights.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import heapq
+import json
+import math
+import re
+import sqlite3
+import sys
+from collections import Counter
+from pathlib import Path
+from typing import Any, Iterable, Iterator
+
+TOKEN_RE = re.compile(r"[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_+.-]{1,}|\d+(?:[.,]\d+)?|[=<>≤≥∑∫√∞→↔]")
+SENTENCE_RE = re.compile(r"(?<=[.!?])\s+")
+KNOWLEDGE_PATTERNS = {
+    "definition": re.compile(r"\b(?:is defined as|means|denotes|se define como|se denomina|se define|consiste en)\b", re.I),
+    "causal": re.compile(r"\b(?:because|therefore|thus|hence|causes?|leads? to|debido a|por tanto|por consiguiente|provoca|produce)\b", re.I),
+    "conditional": re.compile(r"\b(?:if .* then|when .* then|si .* entonces|siempre que|necesario y suficiente|iff)\b", re.I),
+    "proof": re.compile(r"\b(?:theorem|lemma|corollary|proof|proposition|axiom|demostración|teorema|lema|corolario|proposición|axioma)\b", re.I),
+    "procedure": re.compile(r"\b(?:algorithm|procedure|步骤|algorithm|paso|iteración|complexity|complejidad|input|output|return)\b", re.I),
+    "evidence": re.compile(r"\b(?:doi:|https?://|arxiv:|isbn|table \d|figure \d|eq\. \(?\d+|referencias|bibliography)\b", re.I),
+}
+DOMAIN_TERMS = {
+    "mathematics": "theorem proof lemma corollary algebra calculus topology number theory probability statistics optimization equation matrix integral derivative vector espacio vectorial teorema demostración lema álgebra cálculo probabilidad estadística",
+    "logic_epistemology": "logic inference proposition predicate quantifier entailment validity soundness proof epistemology falsifiability induction deduction bayesian modal epistemic deontic modus ponens falacia inferencia cuantificador validez",
+    "philosophy": "philosophy ontology metaphysics ethics epistemology causality knowledge truth argumentation realism empiricism rationalism filosofía ontología metafísica ética epistemología causalidad conocimiento verdad",
+    "physics": "physics quantum mechanics particle field energy momentum thermodynamics relativity electromagnetism spectroscopy force mass wave física cuántica mecánica energía momento termodinámica relatividad campo",
+    "chemistry": "chemistry molecule compound reaction catalyst synthesis spectroscopy polymer material stoichiometry bond atom química molécula compuesto reacción catalizador síntesis polímero enlace átomo",
+    "biology_medicine": "biology cell gene protein genome organism pathway enzyme disease clinical trial cohort organism biology biología célula gen proteína genoma organismo enzima enfermedad ensayo clínico",
+    "computer_science": "algorithm data structure complexity compiler operating system database protocol network type system program software code function memory concurrency algoritmo estructura de datos compilador sistema operativo base de datos",
+    "law_economics_social_sciences": "statute regulation court judgment contract liability jurisdiction theorem market elasticity inflation econometrics regression institution policy derecho ley tribunal sentencia contrato responsabilidad jurisdicción economía mercado inflación regresión política pública",
+}
+STOP = set(("the and for with that this from into over under about have has had are was were which whose where when what como para desde entre sobre una uno unos unas los las del por con sin que este esta estos estas".split()))
+
+
+def tokens(text: str) -> list[str]:
+    return [t.lower() for t in TOKEN_RE.findall(text)]
+
+
+def normalized_hash(text: str) -> str:
+    normalized = " ".join(tokens(text))
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
+def score_record(text: str, domain: str, df: Counter[str], total_docs: int) -> dict[str, float]:
+    words = tokens(text)
+    if not words:
+        return {k: 0.0 for k in ("domain_relevance", "knowledge_density", "specificity", "information_content", "structure", "semantic_density")}
+    unique = set(words)
+    domain_terms = set(tokens(DOMAIN_TERMS[domain]))
+    relevant = len(unique & domain_terms)
+    relevance = min(1.0, relevant / 8.0)
+    pattern_hits = sum(bool(pattern.search(text)) for pattern in KNOWLEDGE_PATTERNS.values())
+    equations = len(re.findall(r"(?:=|≤|≥|∑|∫|√|\frac|\begin\{equation\})", text))
+    numeric = len(re.findall(r"\b\d+(?:[.,]\d+)?(?:%|\s?(?:kg|mg|m|s|Hz|Pa|mol|°C|USD|EUR))?\b", text))
+    relations = len(re.findall(r"\b(?:is a|consists of|depends on|defined by|causes|implies|equivalent to|es un|se compone de|depende de|implica|equivale a|produce)\b", text, re.I))
+    units = pattern_hits + min(4, equations) + min(4, numeric / 2) + min(4, relations)
+    density = min(1.0, units / max(2.0, len(words) / 45.0))
+    specificity = min(1.0, (numeric + 2 * equations + 2 * relations) / max(4.0, len(words) / 20.0))
+    idfs = [math.log((1 + total_docs) / (1 + df[t])) for t in unique if t not in STOP and len(t) > 2]
+    information = min(1.0, (sum(idfs) / max(1, len(idfs))) / 7.0) if idfs else 0.0
+    sentence_count = max(1, len(SENTENCE_RE.split(text.strip())))
+    avg_sentence = len(words) / sentence_count
+    structure = min(1.0, (1.0 if 8 <= len(words) <= 900 else 0.5) * min(1.0, avg_sentence / 12.0))
+    score = 100 * (
+        0.25 * relevance
+        + 0.30 * density
+        + 0.15 * specificity
+        + 0.15 * information
+        + 0.15 * structure
+    )
+    return {
+        "domain_relevance": round(relevance, 6),
+        "knowledge_density": round(density, 6),
+        "specificity": round(specificity, 6),
+        "information_content": round(information, 6),
+        "structure": round(structure, 6),
+        "semantic_density": round(score, 6),
+    }
+
+
+def iter_jsonl(path: Path) -> Iterator[dict[str, Any]]:
+    with path.open(encoding="utf-8") as handle:
+        for line_no, line in enumerate(handle, 1):
+            if line.strip():
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    raise ValueError(f"{path}:{line_no}: invalid JSONL: {exc}") from exc
+                if isinstance(row, dict):
+                    yield row
+
+
+def load_hf(spec: dict[str, Any]) -> Iterable[dict[str, Any]]:
+    try:
+        from datasets import load_dataset
+    except ImportError as exc:
+        raise RuntimeError("Install the optional 'datasets' package to read Hugging Face sources") from exc
+    dataset = load_dataset(
+        spec["dataset_id"],
+        spec.get("config"),
+        split=spec.get("split", "train"),
+        streaming=True,
+        revision=spec["revision"],
+    )
+    return dataset
+
+
+def source_rows(spec: dict[str, Any]) -> Iterable[dict[str, Any]]:
+    kind = spec.get("adapter", "jsonl")
+    if kind == "jsonl":
+        return iter_jsonl(Path(spec["path"]))
+    if kind == "huggingface":
+        return load_hf(spec)
+    raise ValueError(f"Unsupported adapter {kind!r}; use jsonl or huggingface")
+
+
+def get_field(row: dict[str, Any], key: str | None, default: Any = None) -> Any:
+    if not key:
+        return default
+    value: Any = row
+    for part in key.split("."):
+        if not isinstance(value, dict) or part not in value:
+            return default
+        value = value[part]
+    return value
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source-spec", type=Path, required=True)
+    parser.add_argument("--domain", choices=sorted(DOMAIN_TERMS), required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument("--max-documents", type=int, default=2_000_000)
+    parser.add_argument("--top-percent", type=float, default=20.0)
+    parser.add_argument("--min-score", type=float, default=30.0)
+    args = parser.parse_args()
+
+    spec_doc = json.loads(args.source_spec.read_text(encoding="utf-8"))
+    sources = [s for s in spec_doc["sources"] if s["domain"] == args.domain]
+    if not sources:
+        raise SystemExit(f"No source adapters configured for {args.domain}")
+    db = sqlite3.connect(":memory:")
+    db.execute("CREATE TABLE docs (id TEXT PRIMARY KEY, source TEXT, text TEXT, license TEXT, provenance TEXT, sha TEXT)")
+    db.execute("CREATE TABLE df (term TEXT PRIMARY KEY, n INTEGER)")
+    rejected: Counter[str] = Counter()
+    accepted = 0
+
+    for spec in sources:
+        if spec.get("enabled") is not True:
+            rejected["source_disabled_pending_audit"] += 1
+            continue
+        if not spec.get("immutable_revision") or not spec.get("license_audit"):
+            rejected["missing_revision_or_license_audit"] += 1
+            continue
+        allowed = set(spec.get("allowed_licenses", []))
+        if not allowed:
+            rejected["empty_license_allowlist"] += 1
+            continue
+        for index, row in enumerate(source_rows(spec)):
+            if accepted >= args.max_documents:
+                break
+            license_value = get_field(row, spec.get("license_field"), spec.get("fixed_license"))
+            if license_value not in allowed:
+                rejected["license_not_allowlisted"] += 1
+                continue
+            text_value = get_field(row, spec.get("text_field"))
+            if not isinstance(text_value, str) or len(text_value.strip()) < 300:
+                rejected["missing_or_short_text"] += 1
+                continue
+            provenance = get_field(row, spec.get("provenance_field"), f"{spec['id']}:{index}")
+            if not provenance:
+                rejected["missing_provenance"] += 1
+                continue
+            clean = re.sub(r"\s+", " ", text_value).strip()
+            digest = normalized_hash(clean)
+            try:
+                db.execute(
+                    "INSERT INTO docs VALUES (?, ?, ?, ?, ?, ?)",
+                    (f"{spec['id']}:{provenance}", spec["id"], clean, license_value, str(provenance), digest),
+                )
+            except sqlite3.IntegrityError:
+                rejected["duplicate_document_id"] += 1
+                continue
+            for term in set(tokens(clean)):
+                if len(term) > 2 and term not in STOP:
+                    db.execute(
+                        "INSERT INTO df VALUES (?, 1) ON CONFLICT(term) DO UPDATE SET n=n+1",
+                        (term,),
+                    )
+            accepted += 1
+
+    total = db.execute("SELECT COUNT(*) FROM docs").fetchone()[0]
+    if not total:
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        args.report.write_text(json.dumps({"domain": args.domain, "accepted": 0, "rejected": dict(rejected), "status": "blocked_no_admitted_sources"}, indent=2) + "\n", encoding="utf-8")
+        raise SystemExit("No source passed explicit license/revision gates; no library written.")
+
+    df = Counter(dict(db.execute("SELECT term, n FROM df")))
+    candidates: list[tuple[float, str, str, str, str, dict[str, float]]] = []
+    for doc_id, source, text, license_value, provenance, digest in db.execute("SELECT * FROM docs"):
+        scores = score_record(text, args.domain, df, total)
+        if scores["semantic_density"] >= args.min_score:
+            candidates.append((scores["semantic_density"], doc_id, text, license_value, provenance, scores))
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    keep_n = max(1, int(len(candidates) * min(100.0, max(0.1, args.top_percent)) / 100.0))
+    selected = candidates[:keep_n]
+
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    hashes = hashlib.sha256()
+    bytes_written = 0
+    with args.output.open("w", encoding="utf-8", newline="\n") as out:
+        for score, doc_id, text, license_value, provenance, scores in selected:
+            line = text + "\n"
+            out.write(line)
+            encoded = line.encode("utf-8")
+            hashes.update(encoded)
+            bytes_written += len(encoded)
+
+    report = {
+        "schema_version": 1,
+        "domain": args.domain,
+        "metric": "RONIN-HKD-0.1",
+        "formula": "100*(0.25*domain_relevance+0.30*knowledge_density+0.15*specificity+0.15*information_content+0.15*structure)",
+        "method": "deterministic lexical/propositional scoring; corpus IDF; exact normalized deduplication; explicit document-level license allowlist",
+        "papers": [
+            "Duan et al. 2025, Enhancing LLMs via High-Knowledge Data Selection, AAAI, DOI 10.1609/aaai.v39i22.34555",
+            "Xie et al. 2023, Data Selection for Language Models via Importance Resampling, NeurIPS, DOI 10.52202/075280-1482",
+            "Lai et al. 2020, Diversity, Density, and Homogeneity, LREC"
+        ],
+        "sources": [s["id"] for s in sources if s.get("enabled") is True],
+        "documents_seen": total,
+        "candidates_above_threshold": len(candidates),
+        "selected_documents": len(selected),
+        "selected_bytes_utf8": bytes_written,
+        "selected_sha256": hashes.hexdigest(),
+        "rejected": dict(rejected),
+        "score_mean": round(sum(x[0] for x in selected) / max(1, len(selected)), 4),
+        "score_min": round(min((x[0] for x in selected), default=0), 4),
+        "status": "candidate_not_admitted_until_human_license_and_quality_audit",
+    }
+    args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()
