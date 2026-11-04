@@ -56,6 +56,16 @@ def test_collection_filter_prevents_wrong_domain_fallback():
     assert domain is None
 
 
+def test_semantic_data_collection_feeds_logic_epistemology_domain():
+    domain, scores = choose_domain(
+        "Logical inference establishes validity: every proposition follows by proof "
+        "from a premise, using predicate quantifiers and epistemic reasoning.",
+        "Semantic data",
+    )
+    assert domain == "logic_epistemology"
+    assert scores["domain_relevance"] > 0
+
+
 def test_global_cross_library_dedup_blocks_repeated_document(tmp_path):
     first = tmp_path / "library-one"
     second = tmp_path / "library-two"
