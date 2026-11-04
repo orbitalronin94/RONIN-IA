@@ -77,12 +77,14 @@ Referencias:
 
 **Estado:** `historical_explanation_available`.
 
-La obra de 1624 incluye una explicación del sistema de esteganografía de
-Trithemius. El título correcto es *Cryptomenytices et Cryptographiae libri IX*;
-no “Cryptomenytics”. Selenus es el seudónimo tradicionalmente asociado con
-Augustus, duque de Brunswick-Lüneburg. Registrar este libro como testimonio
-histórico y explicación temprana del sistema, no como el descifrado moderno
-del Libro III que publicó Reeds en 1998.
+La obra de 1624 explica y reorganiza los procedimientos de la *Clavis* para
+los Libros I y II de Trithemius. Selenus también reproduce el Libro III
+completo, pero no proporciona una interpretación criptográfica de sus tablas;
+Reeds lo señala expresamente. El título correcto es *Cryptomenytices et
+Cryptographiae libri IX*; no “Cryptomenytics”. Selenus es el seudónimo
+tradicionalmente asociado con Augustus, duque de Brunswick-Lüneburg. Registrar
+este libro como testimonio histórico y explicación temprana de los Libros I y
+II, no como el descifrado moderno del Libro III.
 
 Referencias de orientación:
 - Transcripción y bibliografía de Trithemius:
