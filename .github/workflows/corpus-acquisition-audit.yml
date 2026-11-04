@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "scripts/prepare_open_corpora.py"
+      - "scripts/acquire_cryptography_library.py"
+      - "docs/CASOS_CODIFICACION_DOCUMENTADA.md"
       - ".github/workflows/corpus-acquisition-audit.yml"
   workflow_dispatch:
 
@@ -74,13 +76,17 @@ jobs:
               "skipped_count": manifest["skipped_count"],
           }, ensure_ascii=False, indent=2))
           PY
-      - name: Publicar manifiesto de adquisición (sin textos ni corpus)
+      - name: Descargar fuentes criptográficas históricas y literarias sin credenciales
+        run: |
+          python scripts/acquire_cryptography_library.py --output-dir /tmp/ronin-cryptography-library
+      - name: Publicar corpus y fuentes primarias como artefactos auditables
         uses: actions/upload-artifact@v4
         with:
-          name: ronin-corpus-acquisition-manifest
+          name: ronin-bibliotecas-adquiridas
           path: |
             /tmp/ronin-open-corpus/processed/manifest.json
             /tmp/ronin-open-corpus/processed/documents.jsonl
+            /tmp/ronin-cryptography-library/
           if-no-files-found: error
           retention-days: 30
 
