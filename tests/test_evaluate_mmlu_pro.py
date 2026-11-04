@@ -141,7 +141,7 @@ def test_batched_evaluation_matches_single_item_batches(tmp_path: Path):
     assert [row["predicted_index"] for row in batched["details"]] == [
         row["predicted_index"] for row in single["details"]
     ]
-    for batched_row, single_row in zip(batched["details"], single["details"]):
+    for batched_row, single_row in zip(batched["details"], single["details"], strict=True):
         assert batched_row["candidate_log_probabilities"] == pytest.approx(
             single_row["candidate_log_probabilities"], abs=1e-5
         )
