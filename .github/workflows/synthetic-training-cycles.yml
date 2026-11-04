@@ -203,7 +203,7 @@ jobs:
 
             if [ "$seed" = "${seed_values[0]}" ]; then
               mkdir -p /tmp/ronin-warmstart
-              python - <<'PY'
+              PRIMARY_SEED="$seed" python - <<'PY'
           import json
           from pathlib import Path
 
@@ -289,7 +289,8 @@ jobs:
           val_path = Path("/tmp/ronin-synthetic/validation.txt")
           dataset = Path("benchmarks/domains_v1.jsonl")
           summary = {
-              "experiment": "ronin-synthetic-pipeline-smoke-v1",
+              "experiment": "ronin-synthetic-warmstart-cycle-v2",
+              "warmstart_promoted": Path("reports/warmstart-accepted.flag").is_file(),
               "data_kind": "synthetic_artificial_text_not_a_knowledge_corpus",
               "steps_per_seed": int(os.environ["STEPS"]),
               "seeds": [x["seed"] for x in cycles],
