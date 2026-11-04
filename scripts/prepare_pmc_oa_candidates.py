@@ -7,9 +7,10 @@ import json
 import sqlite3
 import zlib
 from collections import Counter
+from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 from scripts.pmc_oa_source import (
     SOURCE_DATASET,
@@ -111,10 +112,6 @@ def rows_from_db(
             "text_sha256": text_sha256,
             "pmid": pmid,
             "citation": citation,
-            "source_is_pmc_openaccess": True,
-            "source_is_manuscript": False,
-            "source_is_historical_ocr": False,
-            "source_is_retracted": False,
         }
         yield (
             doc_id,
