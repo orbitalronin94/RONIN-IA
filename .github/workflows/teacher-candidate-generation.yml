@@ -35,7 +35,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: models/teachers
-          key: ronin-teachers-\${{ runner.os }}-\${{ hashFiles('scripts/download_teacher_models.py') }}
+          key: ronin-teachers-${{ runner.os }}-${{ hashFiles('scripts/download_teacher_models.py') }}
 
       - name: Instalar entorno nativo Phi-4
         run: |
@@ -65,6 +65,7 @@ jobs:
           assert manifest["model_id"] == "microsoft/Phi-4-mini-instruct"
           assert manifest["license"] == "mit" and manifest["license_verified"] is True
           assert manifest["trust_remote_code"] is False
+          assert manifest["revision"] == "cfbefacb99257ffa30c83adab238a50856ac3083"
           assert any(Path("models/teachers/phi-4-mini-instruct").rglob("*.safetensors"))
           print("Phi-4 verificado:", manifest["revision"])
           PY
