@@ -48,11 +48,13 @@ def test_teacher_record_has_provenance_and_student_stays_random(tmp_path, monkey
         b"Explica una idea.\nRespuesta local."
     ).hexdigest()
     assert record["sha256"] == expected
-    assert record["teacher_license"] == "MIT"
+    assert record["teacher_model_license"] == "MIT"
     assert record["student_initialization"] == "random"
     assert record["teacher_weights_imported_into_student"] is False
-    assert record["teacher_license_verified"] is True
+    assert record["teacher_model_license_verified"] is True
     assert record["teacher_trust_remote_code"] is True
+    assert record["generated_output_license"] == "not_asserted"
+    assert record["generated_output_redistribution"] == "not_published"
 
 
 def test_prepared_corpus_accepts_only_verified_local_mit_records(tmp_path, monkeypatch):
@@ -120,15 +122,15 @@ def test_teacher_manifest_rejects_untracked_and_unsafe_files(tmp_path):
         verify_teacher_manifest(tmp_path, manifest)
 
 
-def test_phi4_mini_instruct_is_pinned_as_mit_remote_code_teacher():
+def test_phi4_mini_instruct_uses_builtin_transformers_model():
     from scripts.download_teacher_models import ALLOW_PATTERNS, ALLOWED_MODELS
 
     model = ALLOWED_MODELS["phi-4-mini-instruct"]
     assert model["repo_id"] == "microsoft/Phi-4-mini-instruct"
     assert model["license_url"] == "https://huggingface.co/microsoft/Phi-4-mini-instruct"
-    assert model["trust_remote_code"] is True
+    assert model["trust_remote_code"] is False
     assert "model*.safetensors" in ALLOW_PATTERNS
-    assert "*.py" in ALLOW_PATTERNS
+    assert "*.py" not in ALLOW_PATTERNS
 
 
 def test_generation_uses_isolated_seed_without_generator_argument():
@@ -164,3 +166,11 @@ def test_generation_uses_isolated_seed_without_generator_argument():
 
     assert first == second
     assert "generator" not in model.generate_kwargs
+
+
+def test_phi4_teacher_revision_is_pinned_and_does_not_execute_remote_code():
+    from scripts.download_teacher_models import ALLOWED_MODELS
+
+    config = ALLOWED_MODELS["phi-4-mini-instruct"]
+    assert config["revision"] == "cfbefacb99257ffa30c83adab238a50856ac3083"
+    assert config["trust_remote_code"] is False

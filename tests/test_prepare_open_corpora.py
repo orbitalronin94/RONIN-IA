@@ -3,6 +3,7 @@ from scripts.prepare_open_corpora import (
     _document_manifest_rows,
     _extract_tei,
     _extract_tei_documents,
+    _github_api_headers,
     _is_source_path,
     _safe_member,
 )
@@ -142,3 +143,15 @@ def test_fuentes_admitidas_estan_fijadas_y_separadas_de_g0():
         assert source["revision"] == revision
         assert source["license_text"] == "dominio público"
         assert source["license_metadata"] == "CC-BY-4.0"
+
+
+def test_github_api_headers_uses_actions_token_without_exposing_it_elsewhere(monkeypatch):
+    monkeypatch.setenv("GITHUB_TOKEN", "test-token")
+    headers = _github_api_headers()
+    assert headers["Authorization"] == "Bearer test-token"
+    assert headers["Accept"] == "application/vnd.github+json"
+
+
+def test_github_api_headers_without_token_omits_authorization(monkeypatch):
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    assert "Authorization" not in _github_api_headers()
