@@ -12,6 +12,9 @@ def test_portfolio_training_cycle_is_reproducible_and_separates_evaluation():
     job = workflow["jobs"]["portfolio-training"]
     assert job["env"]["PORTFOLIO_REVISION"] == "fffc234fdf3f82b6a90d56ae9b190d1c0de79690"
     assert job["env"]["MMLU_REVISION"] == "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+    assert job["env"]["STEPS"] == "${{ github.event_name == 'workflow_dispatch' && inputs.steps || '100' }}"
+    assert job["env"]["SEEDS"] == "${{ github.event_name == 'workflow_dispatch' && inputs.seeds || '1337' }}"
+    assert job["env"]["MMLU_LIMIT"] == "${{ github.event_name == 'workflow_dispatch' && inputs.mmlu_limit || '140' }}"
 
     steps = job["steps"]
     by_name = {step.get("name"): step for step in steps}
