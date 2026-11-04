@@ -14,11 +14,24 @@ def test_two_step_cpu_training_and_checkpoint(tmp_path):
     model = RoninLM(model_config)
     tokens = torch.randint(0, 16, (128,))
     batches = NextTokenBatches(tokens, 2, 8, seed=1)
-    losses = train(model, batches, training_config, device="cpu", checkpoint_dir=tmp_path)
+    metrics_path = tmp_path / "training-metrics.json"
+    losses = train(
+        model,
+        batches,
+        training_config,
+        device="cpu",
+        checkpoint_dir=tmp_path,
+        metrics_path=metrics_path,
+    )
     assert len(losses) == 2
     assert all(torch.isfinite(torch.tensor(loss)) for loss in losses)
     assert (tmp_path / "step-00000001.pt").exists()
     assert (tmp_path / "step-00000002.pt").exists()
+    metrics = __import__("json").loads(metrics_path.read_text(encoding="utf-8"))
+    assert metrics["steps_completed"] == 2
+    assert metrics["tokens_processed"] == 2 * 2 * 8
+    assert metrics["tokens_per_second"] > 0
+    assert metrics["checkpoint_seconds_total"] >= 0
 
 
 def test_resume_restores_checkpoint_and_sampler_state(tmp_path):
