@@ -50,6 +50,7 @@ DOMAIN_TERMS = {
 DOMAIN_ALIASES = {
     "chemistry": "chemistry_materials",
     "biology_medicine": "biology",
+    "law_economics_social_sciences": "law",
 }
 
 STOP = set("the and for with that this from into over under about have has had are was were which whose where when what como para desde entre sobre una uno unos unas los las del por con sin que este esta estos estas".split())
@@ -171,7 +172,7 @@ def passes_filters(row: dict[str, Any], filters: dict[str, Any]) -> bool:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-spec", type=Path, required=True)
-    parser.add_argument("--domain", choices=sorted(DOMAIN_TERMS), required=True)
+    parser.add_argument("--domain", choices=sorted(set(DOMAIN_TERMS) | set(DOMAIN_ALIASES)), required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--max-documents", type=int, default=2_000_000)
