@@ -33,7 +33,7 @@ def test_missing_section_and_invalid_enum_are_rejected():
 
 
 def test_confidence_is_required_and_bounded():
-    for invalid in ("1.4", "0,75", "-0.1", "+0.5"):
+    for invalid in ("1.4", "0,75", "-0.1", "+0.5", "10", "00.5"):
         result = parse_ref_completion(VALID.replace("0.75", invalid))
         assert not result.valid
         assert any("confianza" in issue for issue in result.issues)
