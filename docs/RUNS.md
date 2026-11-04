@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 22:54 | [Integración continua #794 (run 41928611942)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41928611942) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: establish conservative level-A rights registry. Trigger: push; rama: main; intento: 1. | b596d022 |
 | 2026-11-04 22:54 | [Integración continua #811 (run 41929270768)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41929270768) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(ci\): correct arXiv shell continuation. Trigger: push; rama: main; intento: 1. | 4bd2d9e6 |
 | 2026-11-04 22:54 | [Integración continua #810 (run 41929253432)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41929253432) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs: distinguish CC0 arXiv abstracts from per-paper full-text rights. Trigger: push; rama: main; intento: 1. | 400615f0 |
 | 2026-11-04 22:54 | [Integración continua #809 (run 41929219758)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41929219758) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): write compressed arXiv CC0 metadata records. Trigger: push; rama: main; intento: 1. | 0cc771e1 |
