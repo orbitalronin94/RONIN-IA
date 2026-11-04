@@ -1,0 +1,32 @@
+name: Validar manifiesto de datasets externos
+
+on:
+  pull_request:
+    paths:
+      - "data/manifests/external_datasets.json"
+      - "scripts/validate_external_datasets.py"
+      - ".github/workflows/external-dataset-manifest.yml"
+  push:
+    branches: [main]
+    paths:
+      - "data/manifests/external_datasets.json"
+      - "scripts/validate_external_datasets.py"
+      - ".github/workflows/external-dataset-manifest.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate external dataset registry
+        run: python scripts/validate_external_datasets.py
