@@ -40,6 +40,7 @@ jobs:
     timeout-minutes: 360
     env:
       PYTHONUNBUFFERED: "1"
+      PYTHONPATH: .
       SEED_COUNT: ${{ inputs.seed_count || '500' }}
       STEPS_PER_SEED: ${{ inputs.steps_per_seed || '100' }}
       CORPUS_GIB: ${{ inputs.corpus_gib || '1' }}
@@ -75,7 +76,7 @@ jobs:
             --output /tmp/ronin-seed-sweep-train.txt \
             --target-bytes "$((CORPUS_GIB * 1024 * 1024 * 1024))" \
             --seed 8675309
-          python scripts/prepare_large_synthetic_corpus.py \
+          PYTHONPATH=. python scripts/prepare_large_synthetic_corpus.py \
             --output /tmp/ronin-seed-sweep-validation.txt \
             --target-bytes $((16 * 1024 * 1024)) \
             --seed 8675310

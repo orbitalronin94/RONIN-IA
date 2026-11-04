@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Validate the expanded acquisition catalogue without claiming admission."""
 from __future__ import annotations
+
 import argparse
 import json
 from pathlib import Path
+
 
 DEFAULT = Path("data/datasets/catalog/expanded-domain-registry.json")
 

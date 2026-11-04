@@ -3,7 +3,7 @@ from pathlib import Path
 import yaml
 
 
-def test_official_training_workflow_excludes_portfolio_and_requires_sixteen_libraries():
+def test_official_training_workflow_excludes_portfolio_and_requires_32_libraries():
     workflow_path = (
         Path(__file__).parents[1]
         / ".github"
@@ -28,8 +28,8 @@ def test_official_training_workflow_excludes_portfolio_and_requires_sixteen_libr
     assert "Obtener Portfolio en revisión inmutable para recuperación" in by_name
     assert "Preparar Portfolio como índice RAG (nunca como entrenamiento)" in by_name
     
-    assert "Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial" in by_name
-    gate = by_name["Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial"]["run"]
+    assert "Gate obligatorio: 32 bibliotecas admitidas antes del entrenamiento oficial" in by_name
+    gate = by_name["Gate obligatorio: 32 bibliotecas admitidas antes del entrenamiento oficial"]["run"]
     assert "validate_sixteen_libraries.py --require-ready --corpus-root /tmp/ronin-sixteen-libraries --portfolio-root /tmp/ronin-portfolio-rag" in gate
 
     cycle = by_name["Entrenar desde cero y evaluar el test externo completo antes/después"]["run"]
@@ -40,18 +40,40 @@ def test_official_training_workflow_excludes_portfolio_and_requires_sixteen_libr
     assert "mmlu-inicial.json" in cycle
     assert "mmlu-final.json" in cycle
 
-    mixture = by_name["Construir mezcla balanceada de las dieciséis bibliotecas admitidas"]["run"]
+    mixture = by_name["Construir mezcla balanceada de las 32 bibliotecas admitidas"]["run"]
     assert "--input portfolio=" not in mixture
+    assert "--input mathematics_general=" in mixture
+    assert "--input logic_epistemology_general=" in mixture
+    assert "--input philosophy_general=" in mixture
+    assert "--input physics_general=" in mixture
+    assert "--input chemistry_materials_general=" in mixture
+    assert "--input biology_general=" in mixture
+    assert "--input medicine_health_general=" in mixture
+    assert "--input computer_science_general=" in mixture
+    assert "--input software_engineering_general=" in mixture
+    assert "--input law_general=" in mixture
+    assert "--input economics_general=" in mixture
+    assert "--input social_sciences_general=" in mixture
+    assert "--input statistics_probability_general=" in mixture
+    assert "--input astronomy_earth_science_general=" in mixture
+    assert "--input engineering_robotics_general=" in mixture
+    assert "--input humanities_general=" in mixture
     assert "--input mathematics_hkd=" in mixture
     assert "--input logic_epistemology_hkd=" in mixture
     assert "--input philosophy_hkd=" in mixture
     assert "--input physics_hkd=" in mixture
-    assert "--input chemistry_hkd=" in mixture
-    assert "--input biology_medicine_hkd=" in mixture
+    assert "--input chemistry_materials_hkd=" in mixture
+    assert "--input biology_hkd=" in mixture
+    assert "--input medicine_health_hkd=" in mixture
     assert "--input computer_science_hkd=" in mixture
-    assert "--input law_economics_social_sciences_hkd=" in mixture
-    for library in ["mathematics", "logic_epistemology", "philosophy", "physics", "chemistry", "biology_medicine", "computer_science", "law_economics_social_sciences"]:
-        assert f"--input {library}=" in mixture
+    assert "--input software_engineering_hkd=" in mixture
+    assert "--input law_hkd=" in mixture
+    assert "--input economics_hkd=" in mixture
+    assert "--input social_sciences_hkd=" in mixture
+    assert "--input statistics_probability_hkd=" in mixture
+    assert "--input astronomy_earth_science_hkd=" in mixture
+    assert "--input engineering_robotics_hkd=" in mixture
+    assert "--input humanities_hkd=" in mixture
     assert "--input phi4_tutor=" not in mixture
 
     assert "Generar propuestas Phi-4 y auditar REF sin publicar salidas" not in by_name
