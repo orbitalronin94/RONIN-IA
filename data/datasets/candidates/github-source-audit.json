@@ -1,0 +1,272 @@
+{
+  "schema_version": "1.0",
+  "audit_id": "RONIN-GITHUB-SOURCES-2026-11-05",
+  "audited_at": "2026-11-05",
+  "audit_method": "Manual inspection of public GitHub repository metadata, pinned README/source-catalog text, license declarations, and source-manifest references. This is a discovery/candidate register, not legal sign-off.",
+  "policy": {
+    "repo_license_is_not_dataset_license": true,
+    "require_original_dataset_license": true,
+    "require_immutable_upstream_revision": true,
+    "require_item_or_shard_level_provenance": true,
+    "require_payload_sha256": true,
+    "require_privacy_quality_dedup_split_gates": true,
+    "no_auto_admission": true,
+    "no_auto_training": true,
+    "excluded_classes": [
+      "CC-BY-SA",
+      "CC-BY-NC",
+      "CC-BY-ND",
+      "unknown",
+      "mixed",
+      "publisher-copyrighted",
+      "CVE-TOU-unresolved"
+    ]
+  },
+  "audited_catalogs": [
+    {
+      "id": "decision-bench-source-catalog",
+      "repository": "atlanai/decision-bench",
+      "repository_url": "https://github.com/atlanai/decision-bench",
+      "repository_license": "MIT",
+      "repository_license_scope": "code_only",
+      "audited_commit": "f1187f9b9ed6369a4006a48663436a5eb6c3f457",
+      "evidence_file": "data/SOURCES.md",
+      "evidence_file_url": "https://github.com/atlanai/decision-bench/blob/f1187f9b9ed6369a4006a48663436a5eb6c3f457/data/SOURCES.md",
+      "evidence_file_sha": "3fcc226e1a64fcc54059d0ca0ba405de1591959f",
+      "corpus_rows": 1071,
+      "use_decision_bench_rows": "evaluation_only_never_training",
+      "source_manifest": "data/sources/manifest.json",
+      "source_manifest_url": "https://github.com/atlanai/decision-bench/blob/f1187f9b9ed6369a4006a48663436a5eb6c3f457/data/sources/manifest.json",
+      "source_manifest_sha": "e99246451c3a5bb3d180f709e3eb04c4a33cc423",
+      "status": "catalog_verified_source_rights_not_independently_reaudited",
+      "notes": "The source catalog explicitly says each row retains its original dataset license and that code MIT does not relicense the corpus. Good discovery index. Do not import the benchmark rows into training."
+    },
+    {
+      "id": "govdatahub-open-data-index",
+      "repository": "GovDataHub/open-data-index",
+      "repository_url": "https://github.com/GovDataHub/open-data-index",
+      "repository_license": "not_declared_in_repository_metadata",
+      "audited_commit": "629e1e259b6259ed4143a4d0f705254cc6865007",
+      "evidence_file": "README.md",
+      "evidence_file_url": "https://github.com/GovDataHub/open-data-index/blob/629e1e259b6259ed4143a4d0f705254cc6865007/README.md",
+      "evidence_file_sha": "737a2e0836f474036b49227b821fa90b6815f9eb",
+      "license_register": "LICENSES.md",
+      "license_register_url": "https://github.com/GovDataHub/open-data-index/blob/629e1e259b6259ed4143a4d0f705254cc6865007/LICENSES.md",
+      "license_register_sha": "c9807f9cedc1876f4b7913efd23bd876785f0d07",
+      "export_manifest": "export-manifest.json",
+      "export_manifest_url": "https://github.com/GovDataHub/open-data-index/blob/629e1e259b6259ed4143a4d0f705254cc6865007/export-manifest.json",
+      "export_manifest_sha": "2fdfd5551690698f0534ffdfaf3e9952fc67d686",
+      "claimed_catalog_rows": 5245,
+      "status": "discovery_index_only",
+      "notes": "Catalog contains per-dataset license fields and attribution guidance. It mixes explicit CC0/CC-BY/OGL with inferred US federal public-domain classification. README says 2,239 unlicensed datasets quarantined while export-manifest says 2,994; discrepancy unresolved. Repository metadata reports no repository-level license. Never bulk-admit from its allowlist; inspect each underlying record, publisher terms, and payload."
+    }
+  ],
+  "candidate_datasets": [
+    {
+      "id": "decisionbench-sec-edgar-filings",
+      "domain": "law_finance_business",
+      "dataset_name": "SEC EDGAR 10-K / 8-K filings",
+      "upstream_url": "https://www.sec.gov/edgar",
+      "license_id": "US-PUBLIC-DOMAIN",
+      "rights_evidence_url": "https://www.sec.gov/privacy",
+      "evidence_source": "Decision Bench data/SOURCES.md",
+      "evidence_note": "Decision Bench identifies SEC EDGAR filing text as public domain and labels filing headings/SIC codes as source-derived objective labels.",
+      "status": "candidate_pending_source_version_and_payload_manifest",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "verify SEC access and fair-use/robots requirements",
+        "pin filing accession numbers and filing versions",
+        "remove personal data where applicable",
+        "no Decision Bench benchmark rows or labels in training"
+      ]
+    },
+    {
+      "id": "decisionbench-civil-comments",
+      "domain": "safety_language",
+      "dataset_name": "Civil Comments",
+      "upstream_url": "https://huggingface.co/datasets/google/civil_comments",
+      "license_id": "CC0-1.0",
+      "rights_evidence_url": "https://huggingface.co/datasets/google/civil_comments",
+      "evidence_source": "Decision Bench data/SOURCES.md",
+      "evidence_note": "Source catalog lists CC0-1.0 and crowd toxicity scores; original source license must be checked at pinned revision.",
+      "status": "candidate_pending_revision_privacy_and_payload_hash",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "user-generated text",
+        "PII and sensitive-language scan",
+        "confirm license applies to all selected splits and annotations"
+      ]
+    },
+    {
+      "id": "decisionbench-contractnli",
+      "domain": "law",
+      "dataset_name": "ContractNLI",
+      "upstream_url": "https://stanfordnlp.github.io/contract-nli/resources/contract-nli.zip",
+      "license_id": "CC-BY-4.0",
+      "rights_evidence_url": "https://stanfordnlp.github.io/contract-nli/resources/contract-nli.zip",
+      "evidence_source": "Decision Bench data/SOURCES.md",
+      "evidence_note": "Source catalog declares CC-BY-4.0 for dataset and text; verify current upstream license and exact archive hash before retrieval.",
+      "status": "candidate_pending_exact_archive_and_rights_recheck",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "contracts may contain third-party copyrighted text",
+        "confirm redistribution scope and attribution requirements"
+      ]
+    },
+    {
+      "id": "decisionbench-cuad",
+      "domain": "law",
+      "dataset_name": "CUAD v1",
+      "upstream_url": "https://huggingface.co/datasets/theatticusproject/cuad",
+      "license_id": "CC-BY-4.0",
+      "rights_evidence_url": "https://huggingface.co/datasets/theatticusproject/cuad",
+      "evidence_source": "Decision Bench data/SOURCES.md",
+      "evidence_note": "Source catalog declares CC-BY-4.0 for dataset and contract text; exact upstream version and third-party text rights remain to be rechecked.",
+      "status": "candidate_pending_exact_revision_and_rights_recheck",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "contract text provenance",
+        "third-party copyrighted clauses",
+        "attribution bundle required"
+      ]
+    },
+    {
+      "id": "decisionbench-cord-v2",
+      "domain": "finance_documents",
+      "dataset_name": "CORD-v2",
+      "upstream_url": "https://huggingface.co/datasets/naver-clova-ix/cord-v2",
+      "upstream_revision": "7f0115a4b758a71d6473b8d085751692da2fef98",
+      "license_id": "CC-BY-4.0",
+      "rights_evidence_url": "https://huggingface.co/datasets/naver-clova-ix/cord-v2/blob/7f0115a4b758a71d6473b8d085751692da2fef98/README.md",
+      "evidence_source": "Decision Bench data/SOURCES.md",
+      "evidence_note": "Source catalog pins a dataset revision and declares CC-BY-4.0; document-image privacy and exact payload hashes still required.",
+      "status": "candidate_pending_payload_hash_privacy_and_quality",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "receipt images may contain personal or transactional information",
+        "OCR quality review",
+        "attribution required"
+      ]
+    },
+    {
+      "id": "decisionbench-mtbench-human-judgments",
+      "domain": "language_evaluation",
+      "dataset_name": "MT-Bench human judgments",
+      "upstream_url": "https://huggingface.co/datasets/lmsys/mt_bench_human_judgments",
+      "upstream_revision": "f7d2896d2cc5d80f8b55c2bbc722613555233c25",
+      "license_id": "CC-BY-4.0",
+      "rights_evidence_url": "https://huggingface.co/datasets/lmsys/mt_bench_human_judgments/blob/f7d2896d2cc5d80f8b55c2bbc722613555233c25/README.md",
+      "evidence_source": "Decision Bench data/SOURCES.md",
+      "evidence_note": "Source catalog identifies CC-BY-4.0 and expert judgments. Use only after verifying exact revision, question/answer provenance, and contamination risk.",
+      "status": "candidate_evaluation_or_training_after_audit",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "possible benchmark contamination",
+        "human judgment data provenance",
+        "attribution required"
+      ]
+    },
+    {
+      "id": "decisionbench-prompt-injections",
+      "domain": "cybersecurity_safety",
+      "dataset_name": "deepset/prompt-injections",
+      "upstream_url": "https://huggingface.co/datasets/deepset/prompt-injections",
+      "upstream_revision": "4f61ecb038e9c3fb77e21034b22511b523772cdd",
+      "license_id": "Apache-2.0",
+      "rights_evidence_url": "https://huggingface.co/datasets/deepset/prompt-injections/blob/4f61ecb038e9c3fb77e21034b22511b523772cdd/README.md",
+      "evidence_source": "Decision Bench data/SOURCES.md",
+      "evidence_note": "Source catalog identifies Apache-2.0 for dataset and prompt text. Verify upstream card, exact split, and payload hashes.",
+      "status": "candidate_pending_revision_and_payload_hash",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "adversarial text must be isolated and labeled",
+        "prevent evaluation split leakage"
+      ]
+    },
+    {
+      "id": "decisionbench-amazon-esci",
+      "domain": "commerce",
+      "dataset_name": "Amazon Shopping Queries Dataset (ESCI)",
+      "upstream_url": "https://github.com/amazon-science/esci-data",
+      "license_id": "Apache-2.0",
+      "rights_evidence_url": "https://github.com/amazon-science/esci-data/blob/main/LICENSE",
+      "evidence_source": "Decision Bench data/SOURCES.md",
+      "evidence_note": "Source catalog identifies Apache-2.0; pin exact commit and recheck source files and product-data terms.",
+      "status": "candidate_pending_commit_and_content_rights_review",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "product descriptions/images may have separate rights",
+        "third-party content review"
+      ]
+    },
+    {
+      "id": "decisionbench-amazon-berkeley-objects",
+      "domain": "commerce_vision",
+      "dataset_name": "Amazon Berkeley Objects",
+      "upstream_url": "https://amazon-berkeley-objects.s3.amazonaws.com/",
+      "license_id": "CC-BY-4.0",
+      "rights_evidence_url": "https://amazon-berkeley-objects.s3.amazonaws.com/LICENSE-CC-BY-4.0.txt",
+      "evidence_source": "Decision Bench data/SOURCES.md",
+      "evidence_note": "Source catalog identifies CC-BY-4.0; verify asset-level terms, image attribution, and current archive hashes.",
+      "status": "candidate_pending_asset_rights_and_payload_hash",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "images and seller content",
+        "asset-level attribution",
+        "large binary payloads"
+      ]
+    }
+  ],
+  "excluded_or_quarantined": [
+    {
+      "id": "decisionbench-hagrid",
+      "dataset_name": "HAGRID",
+      "declared_dataset_license": "Apache-2.0",
+      "declared_text_license": "CC-BY-SA-3.0",
+      "status": "excluded_sharealike",
+      "reason": "Text content has ShareAlike terms excluded by current RONIN level-A policy."
+    },
+    {
+      "id": "decisionbench-finer-139",
+      "dataset_name": "FiNER-139",
+      "declared_dataset_license": "CC-BY-SA-4.0",
+      "declared_text_license": "Public domain",
+      "status": "excluded_dataset_sharealike",
+      "reason": "Dataset redistribution terms include ShareAlike; no exception approved."
+    },
+    {
+      "id": "decisionbench-nvd",
+      "dataset_name": "NVD",
+      "declared_dataset_license": "Public domain",
+      "declared_text_license": "CVE-TOU",
+      "status": "quarantine_terms_conflict",
+      "reason": "Underlying text is marked CVE-TOU; public-domain label for other NVD fields does not resolve those terms."
+    },
+    {
+      "id": "decisionbench-cfpb-complaints",
+      "dataset_name": "CFPB Consumer Complaint Database",
+      "declared_dataset_license": "CC0-1.0",
+      "declared_text_license": "Public domain",
+      "status": "quarantine_privacy_review",
+      "reason": "Consumer complaint narratives may contain personal information; no bulk ingestion before robust PII/privacy filtering and source-level review."
+    }
+  ],
+  "integration_decision": {
+    "catalogs_integrated": 2,
+    "candidate_sources_registered": 9,
+    "excluded_or_quarantined": 4,
+    "payloads_downloaded": 0,
+    "level_a_records_created": 0,
+    "training_eligible_records": 0,
+    "reason": "Manual source audit is not a substitute for per-version rights proof, immutable payload hashes, privacy/quality checks, deduplication, split integrity, and global G-0."
+  }
+}
