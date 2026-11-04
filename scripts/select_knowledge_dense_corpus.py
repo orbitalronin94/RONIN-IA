@@ -9,12 +9,10 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import heapq
 import json
 import math
 import re
 import sqlite3
-import sys
 import tempfile
 from collections import Counter
 from pathlib import Path
