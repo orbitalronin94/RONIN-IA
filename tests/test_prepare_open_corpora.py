@@ -1,4 +1,5 @@
 from scripts.prepare_open_corpora import (
+    SOURCES,
     _document_manifest_rows,
     _extract_tei,
     _extract_tei_documents,
@@ -125,3 +126,19 @@ def test_particiones_no_separan_fragmentos_de_una_misma_obra():
         assert all(owners[group] == next(
             split for split, candidates in partitions.items() if candidates is items
         ) for group in groups)
+
+
+def test_fuentes_admitidas_estan_fijadas_y_separadas_de_g0():
+    expected = {
+        "cligs-textbox": ("cligs/textbox", "1b91e940475c8a7e866457a3953fed5edb0a29f1"),
+        "cligs-conssa": ("cligs/conssa", "8fccf669ed1bdbad309ff190f5afb0d6066d70a3"),
+        "eltec-spa": ("COST-ELTeC/ELTeC-spa", "83e2a22d5ef66f96e59f47f7ef810358c4236322"),
+    }
+    actual = {source["id"]: source for source in SOURCES}
+    assert set(actual) == set(expected)
+    for name, (repository, revision) in expected.items():
+        source = actual[name]
+        assert source["repository"] == repository
+        assert source["revision"] == revision
+        assert source["license_text"] == "dominio público"
+        assert source["license_metadata"] == "CC-BY-4.0"
