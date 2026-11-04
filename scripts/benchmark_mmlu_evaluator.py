@@ -12,7 +12,7 @@ import torch
 
 from ronin.config import get_profile
 from ronin.models.transformer import RoninLM
-from scripts.evaluate_mmlu_pro import (
+from evaluate_mmlu_pro import (
     DATASET_REVISION,
     evaluate_rows,
     load_external_dataset,
