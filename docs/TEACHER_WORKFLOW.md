@@ -60,3 +60,6 @@ El corpus generado por Phi-4 puede incorporarse como augmentación experimental 
 - RONIN se construye con inicialización aleatoria.
 - El entrenador solo recibe texto tokenizado.
 - No se realiza fine-tuning, fusión ni destilación de parámetros.
+
+
+La revisión de Phi-4 queda fijada en `cfbefacb99257ffa30c83adab238a50856ac3083`; no se descarga la rama móvil `main`. La carga usa el soporte Phi-3/Phi-4 integrado en Transformers 4.53.3 y mantiene `trust_remote_code=False`.
