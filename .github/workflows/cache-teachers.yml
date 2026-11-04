@@ -1,0 +1,50 @@
+name: Preparar caché de tutores locales
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-teacher-cache
+  cancel-in-progress: false
+
+jobs:
+  download-teachers:
+    name: Descargar y verificar tutores MIT
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Restaurar caché de modelos
+        uses: actions/cache@v4
+        with:
+          path: models/teachers
+          key: ronin-teachers-${{ runner.os }}-${{ hashFiles('scripts/download_teacher_models.py') }}
+      - name: Instalar PyTorch CPU y dependencias de tutores
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e ".[teachers]" --no-deps
+          python -m pip install "transformers>=4.45" "huggingface_hub>=0.24" "safetensors>=0.4"
+      - name: Descargar o completar GPT-2 y GPT-Neo
+        run: |
+          python scripts/download_teacher_models.py --model gpt2
+          python scripts/download_teacher_models.py --model gpt-neo-125m
+      - name: Comprobar manifiestos y pesos locales
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for name in ("gpt2", "gpt-neo-125m"):
+              folder = Path("models/teachers") / name
+              manifest = json.loads((folder / "ronin-teacher-manifest.json").read_text())
+              assert manifest["license"] == "mit" and manifest["license_verified"] is True
+              assert manifest["revision"] and manifest["files_sha256"]
+              assert any(folder.glob("*.safetensors"))
+              print(name, manifest["revision"], len(manifest["files_sha256"]), "archivos verificados")
+          PY

@@ -2,32 +2,39 @@
 
 Este repositorio no incluye corpus de entrenamiento. Los datos los aporta el operador y deben describirse mediante un manifiesto antes de entrenar.
 
-Cada manifiesto de origen debe registrar:
+## Corpus inicial: español financiero CC0 de Mozilla
 
-- identificador estable del conjunto de datos y versión o fecha de obtención;
-- URL de origen o método de adquisición;
-- licencia y usos permitidos, incluidas las restricciones de entrenamiento y uso comercial;
-- idioma y tamaño aproximado;
-- pasos de preprocesamiento y filtrado;
-- método de deduplicación y recuentos resultantes;
-- asignación a entrenamiento, validación y prueba, con semilla aleatoria;
-- suma de comprobación criptográfica de cada fragmento inmutable.
+Se ha seleccionado **Finance Sentences - North American Spanish**, conjunto cmm3gntdp00jymn07zjetwkyy, publicado bajo licencia CC0-1.0. La ficha informa de 79.655 frases limpias (1.325.013 tokens) procedentes de nueve dominios federales estadounidenses, además de una variante sin limpiar. Es un corpus pequeño y especializado: no representa el español general.
+
+La ficha advierte que no se hizo análisis sintáctico y que puede contener títulos o fragmentos. La procedencia se registra mediante file_hash, que el publicador define como MD5 del nombre de archivo; no es un hash del contenido. El script calcula SHA-256 del archivo comprimido y de cada partición.
+
+Antes de descargar, el operador debe entrar en la ficha de Mozilla y aceptar las condiciones aplicables, y crear una clave de API. La API exige credenciales y aceptación previa de términos en la web; no se debe eludir ese paso. Después, define MDC_API_KEY en el entorno e instala el extra opcional:
+
+    python -m pip install -e '.[corpus]'
+    export MDC_API_KEY='clave-de-api'
+    python scripts/download_mozilla_corpus.py
+
+Si ya tienes el archivo comprimido, puedes omitir la descarga y preparar directamente las particiones:
+
+    python scripts/prepare_mozilla_corpus.py --archive /ruta/finance-sentences-north-american-spanish.tar.gz --output data/processed/mozilla-spanish-finance
+
+El preparador lee corpus.tsv directamente del archivo, conserva frases con puntuación no negativa, elimina duplicados exactos por documento y frase, y separa por file_hash de forma determinista (80/10/10). Genera train.txt, validation.txt, test.txt y manifest.json. Falla si no puede producir las tres particiones o si detecta fuga de documentos. Los datos quedan fuera de Git.
+
+El corpus no debe usarse como benchmark general: su dominio, geografía y calidad limitan las conclusiones posibles.
 
 ## Etapas obligatorias
 
 1. Incorporar solo fuentes aprobadas; rechazar licencias desconocidas o incompatibles.
-2. Normalizar el texto de forma determinista conservando la procedencia del original.
-3. Eliminar registros mal formados, vacíos o no permitidos por las políticas del proyecto.
-4. Aplicar deduplicación exacta y después aproximada, documentando los umbrales.
-5. Detectar el idioma y calcular resúmenes estadísticos y de calidad.
-6. Separar por documento u origen para evitar filtraciones entre entrenamiento, validación y prueba.
-7. Crear fragmentos deterministas y un manifiesto de mezcla con pesos explícitos.
-8. Tokenizar con un tokenizador versionado y guardar recuentos y sumas de comprobación.
+2. Normalizar el texto de forma determinista conservando la procedencia.
+3. Eliminar registros mal formados, vacíos o no permitidos.
+4. Aplicar deduplicación exacta y aproximada, documentando umbrales.
+5. Detectar idioma y calcular estadísticas de calidad.
+6. Separar por documento u origen para evitar filtraciones.
+7. Crear fragmentos deterministas y un manifiesto de mezcla.
+8. Tokenizar con un tokenizador versionado y guardar recuentos y SHA-256.
 
-Los corpus originales y procesados son artefactos locales de ejecución. No se deben subir a Git datos privados ni corpus sujetos a licencias. El tokenizador de bytes y el lector de archivos de texto actuales son provisionales; la canalización completa con trazabilidad sigue pendiente.
+Los corpus originales y procesados son artefactos locales. No se deben subir a Git datos privados ni corpus sujetos a licencias.
 
 ## Texto generado por tutores
 
-Los modelos auxiliares se descargan desde repositorios públicos cuya ficha declare licencia MIT. El descargador fija la revisión, guarda la ficha de licencia y calcula SHA-256 de los archivos. Cada ejemplo generado registra el modelo, revisión, licencia y huella del texto.
-
-La licencia MIT del modelo auxiliar no concede automáticamente derechos sobre los datos con los que fue entrenado ni sobre cualquier texto que genere. La procedencia y los permisos del corpus resultante se deben revisar por separado. La revisión humana y la deduplicación siguen siendo obligatorias.
+Los modelos auxiliares se descargan desde repositorios públicos cuya ficha declare licencia MIT. El descargador fija la revisión y calcula SHA-256 de los archivos. La licencia del modelo no concede derechos sobre sus datos de entrenamiento ni sobre cualquier texto generado. La procedencia y los permisos del corpus resultante se deben revisar por separado. La revisión humana y la deduplicación siguen siendo obligatorias.
