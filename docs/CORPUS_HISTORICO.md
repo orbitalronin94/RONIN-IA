@@ -19,7 +19,7 @@ RONIN se entrena desde pesos aleatorios. Los tutores locales, cuando se usen, so
 
 Enlaces de consulta:
 
-- BNE, autores en dominio público: https://www.bne.es/es/catalogos/autores-dominio-publico
+- BNE, autores en dominio público: https://www.bne.es/es/servicios/autores-dominio-publico
 - Biblioteca Digital Hispánica: https://www.bne.es/es/catalogos/biblioteca-digital-hispanica
 - BVPH: https://bvpb.mcu.es/
 - Europeana: https://www.europeana.eu/
