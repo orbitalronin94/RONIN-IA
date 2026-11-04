@@ -12,6 +12,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 17:47 | [Integración continua #585 (run 41878845265)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41878845265) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Añadir preflight fail-fast para RUN 5 oficial. Trigger: push; rama: main; intento: 1. | f662ffdd |
 | 2026-11-04 17:46 | [Integración continua #593 (run 41879565902)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41879565902) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Validar autorizaciones limitadas de adquisición G-0. Trigger: push; rama: main; intento: 1. | 2cd6cc72 |
 | 2026-11-04 17:46 | [Integración continua #588 (run 41879417060)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41879417060) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Crear ingesta streaming auditada para candidatos de RUN 5. Trigger: push; rama: main; intento: 1. | 6271e79c |
 | 2026-11-04 17:46 | [Integración continua #587 (run 41878972009)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41878972009) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Probar gate fail-closed de RUN 5. Trigger: push; rama: main; intento: 1. | 72f7fc4c |
