@@ -6,8 +6,8 @@ import argparse
 import json
 from pathlib import Path
 
-
 DEFAULT = Path("data/datasets/catalog/expanded-domain-registry.json")
+
 
 def validate(path: Path) -> list[str]:
     data = json.loads(path.read_text(encoding="utf-8"))
