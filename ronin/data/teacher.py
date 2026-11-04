@@ -53,6 +53,7 @@ def verify_teacher_manifest(root: str | Path, manifest: dict) -> None:
     if not any(Path(name).name.endswith(".safetensors") for name in expected):
         raise ValueError("No hay pesos safetensors verificados")
 
+
 def load_local_teacher(model_dir: str | Path, device: str = "auto") -> tuple[Any, Any, dict]:
     """Carga desde disco un modelo cuyo manifiesto acredita licencia MIT."""
     try:
@@ -181,6 +182,7 @@ def write_teacher_dataset(
                     "teacher_license": "MIT",
                     "teacher_license_verified": True,
                     "teacher_license_url": manifest["license_url"],
+                    "teacher_trust_remote_code": bool(manifest.get("trust_remote_code", False)),
                     "teacher_weights_loaded_locally": True,
                     "generated_at": datetime.now(UTC).isoformat(),
                     "sha256": digest,
