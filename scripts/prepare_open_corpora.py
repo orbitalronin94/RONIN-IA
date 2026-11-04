@@ -217,7 +217,7 @@ def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
     ]
     document_rows = _document_manifest_rows(partitions)
     document_manifest_bytes = (
-        "".join(json.dumps(row, ensure_ascii=False) + "\\n" for row in document_rows)
+        "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in document_rows)
     ).encode("utf-8")
     (output_dir / "documents.jsonl").write_bytes(document_manifest_bytes)
     output_hashes["documents.jsonl"] = sha256(document_manifest_bytes)
