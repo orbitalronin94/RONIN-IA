@@ -28,7 +28,7 @@ permissions:
 
 concurrency:
   group: ronin-architecture-ab-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   architecture-ab:
@@ -40,6 +40,9 @@ jobs:
     steps:
       - name: Obtener RONIN IA
         uses: actions/checkout@v4
+
+      - name: "Gate G-0: bloquear si no hay derechos acreditados"
+        run: python scripts/assert_g0_passed.py
 
       - name: Preparar Python
         uses: actions/setup-python@v5
