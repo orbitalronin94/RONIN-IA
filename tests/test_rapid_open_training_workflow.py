@@ -7,6 +7,8 @@ def test_rapid_open_training_loop_is_gated_and_keeps_final_test_unseen():
     path = Path(__file__).parents[1] / ".github" / "workflows" / "rapid-open-training-cycles.yml"
     workflow = yaml.load(path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
     assert workflow["on"]["schedule"][0]["cron"] == "17 */6 * * *"
+    assert workflow["on"]["push"]["branches"] == ["main"]
+    assert workflow["on"]["push"]["paths"] == [".github/workflows/rapid-open-training-cycles.yml"]
     assert workflow["concurrency"]["cancel-in-progress"] == "false"
     job = workflow["jobs"]["rapid-cycles"]
     assert job["concurrency"] if "concurrency" in job else workflow["concurrency"]["cancel-in-progress"] == "false"
