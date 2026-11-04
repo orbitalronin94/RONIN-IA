@@ -1,6 +1,11 @@
 name: RONIN — continuar bootstrap y medir MMLU-Pro
 
 on:
+  # Bootstrap 41908363009 predates this workflow; trigger once when this fix reaches main.
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/synthetic-bootstrap-mmlu-pro.yml
   workflow_run:
     workflows: ["RONIN — bootstrap rápido sin corpus"]
     types: [completed]
@@ -25,6 +30,7 @@ jobs:
   continue-and-evaluate:
     if: >-
       github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.name == 'RONIN — bootstrap rápido sin corpus')
     runs-on: ubuntu-latest
@@ -32,7 +38,7 @@ jobs:
     env:
       PYTHONUNBUFFERED: "1"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
-      SOURCE_RUN_ID: ${{ github.event_name == 'workflow_dispatch' && inputs.source_run_id || github.event.workflow_run.id }}
+      SOURCE_RUN_ID: ${{ github.event_name == 'workflow_dispatch' && inputs.source_run_id || (github.event_name == 'workflow_run' && github.event.workflow_run.id) || '41908363009' }}
       CONTINUATION_STEPS: "100"
     steps:
       - name: Checkout RONIN
@@ -120,6 +126,7 @@ jobs:
         run: |
           python - <<'PY'
           import json
+          import os
           from pathlib import Path
           before = json.loads(Path("reports/mmlu-pro-before.json").read_text())
           after = json.loads(Path("reports/mmlu-pro-after.json").read_text())
@@ -132,7 +139,7 @@ jobs:
           delta = after["overall"]["accuracy"] - before["overall"]["accuracy"]
           summary = {
               "experiment": "ronin-synthetic-bootstrap-continuation-mmlu-pro-v1",
-              "source_run_id": ${{ github.event_name == 'workflow_dispatch' && inputs.source_run_id || github.event.workflow_run.id }},
+              "source_run_id": int(os.environ["SOURCE_RUN_ID"]),
               "initial_checkpoint": "accepted synthetic bootstrap checkpoint",
               "continuation_steps": 100,
               "dataset_id": "TIGER-Lab/MMLU-Pro",
