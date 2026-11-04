@@ -69,7 +69,7 @@ def test_global_cross_library_dedup_blocks_repeated_document(tmp_path):
     (first / "documents.jsonl").write_text(json.dumps(record) + "\n", encoding="utf-8")
     record2 = {**record, "document_id": "doc-2"}
     (second / "documents.jsonl").write_text(json.dumps(record2) + "\n", encoding="utf-8")
-    report = audit(tmp_path, tmp_path / "dedup-report.json")
+    report = audit(tmp_path, tmp_path / "dedup-report.json", expected_libraries=2)
     assert report["status"] == "fail"
     assert report["exact_cross_library_duplicates_detected"] == 1
     assert report["near_cross_library_duplicates_detected"] == 1
@@ -90,3 +90,11 @@ def test_global_cross_library_dedup_passes_distinct_documents(tmp_path):
     )
     report = audit(tmp_path, tmp_path / "dedup-report.json")
     assert report["status"] == "pass"
+
+
+def test_global_cross_library_dedup_fails_closed_on_empty_inventory(tmp_path):
+    report = audit(tmp_path, tmp_path / "dedup-report.json")
+    assert report["status"] == "fail"
+    assert report["libraries_scanned"] == 0
+    assert report["documents_scanned"] == 0
+    assert report["incomplete_inventory"] is True
