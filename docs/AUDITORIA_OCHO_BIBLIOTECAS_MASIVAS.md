@@ -68,3 +68,26 @@ El índice RAG debe guardar document_id, source_path, title, sha256, chunk_id, o
 ## Estado del gate
 
 El manifiesto data/manifests/eight_libraries.json registra ocho áreas y sus fuentes candidatas. Todas permanecen candidate, training_eligible=false y train_bytes=0. El gate --require-ready debe fallar: una ficha de dataset no demuestra que la biblioteca esté descargada, licenciada y lista.
+
+
+## Segunda tanda: ocho bibliotecas extraídas por densidad de conocimiento
+
+La petición evoluciona el objetivo de ocho a **dieciséis bibliotecas**: las ocho bases de la tabla anterior más ocho bibliotecas HKD, una por dominio, extraídas de las fuentes masivas con alta concentración de conocimiento. Las segundas no se admiten por el mero hecho de ejecutar el selector.
+
+Fuentes candidatas adicionales y adaptadores:
+- Matemáticas: OpenWebMath; MathPile solo shards con licencia heredada trazable.
+- Lógica/epistemología: ProofPile-2 solo por fuente; Lean mathlib4 con Apache-2.0 y dependencias auditadas.
+- Filosofía: PleIAs Spanish-PD-Books y Common Corpus OpenCulture, obra/edición/licencia verificadas.
+- Física: arXiv por artículo y Common Corpus OpenScience.
+- Química: PMC OA y PatentsView.
+- Biología/medicina: PMC OA y Europe PMC OA.
+- Informática: The Stack v2 por archivo SPDX/SWHID y Common Corpus OpenSource.
+- Derecho/economía/social: Common Corpus OpenGovernment y Harvard Caselaw Access Project.
+
+El inventario ejecutable está en data/manifests/knowledge_dense_sources.json. Todos los adaptadores empiezan desactivados; cada uno requiere revisión de campos reales, revisión inmutable y allowlist legal antes de habilitarlo. Los paquetes de licencia heterogénea no se admiten enteros.
+
+La métrica RONIN-HKD-0.1 y su protocolo están en docs/METRICA_DENSIDAD_SEMANTICA.md. El selector usa SQLite temporal en disco, IDF de corpus, deduplicación normalizada y puntuación por dominio. No usa tutores ni credenciales. El constructor produce ocho salidas `<dominio>_hkd/train.txt` y reportes hashados. Las ocho deben superar revisión humana, calidad, licencias, 256 MiB train y balance antes de contar como admitidas.
+
+## Gate de dieciséis bibliotecas
+
+El manifiesto oficial pasa a data/manifests/sixteen_libraries.json. El workflow oficial exige scripts/validate_sixteen_libraries.py y 16 ficheros train con hashes exactos. Portfolio/Papers sigue exclusivamente como RAG experto, fuera de las 16 y de los gradientes. No se autoriza RUN #5 ni merge de la PR hasta que las 16 bibliotecas reales pasen el gate.
