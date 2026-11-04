@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+
 from scripts import acquire_cryptography_library as library
 
 
