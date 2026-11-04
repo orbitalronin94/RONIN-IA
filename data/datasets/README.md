@@ -286,3 +286,13 @@ The discovery register currently contains 49 candidate source entries. This is n
 | Common Corpus filtered sample | First run: 3,000 candidates; 1,243 CC0, 3 CC-BY-3.0, 2 CC-BY-4.0, 1,752 MIT; 470 privacy-pattern rejections | [Workflow + artifact](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932708586) |
 
 CoVoST, OpenAlex and ROR exact payload versions have corresponding rights-ledger records. The Common Corpus sample remains review-only; MIT code rows are excluded in the follow-up acquisition until source-specific copyright/license notice bundles can be preserved. The OpenAlex and ROR outputs are bibliographic/registry metadata, not counted as substantive text-training corpora. No candidate output is admitted or training-eligible.
+
+
+## Additional metadata and filtered-corpus runs
+
+- **Crossref**: 1,000 CC0 bibliographic records, 679,289 bytes, SHA-256 `a3a19cb17378e8d6e68d8263f9207a786106beddd82ffa0a95916f8cbf75d4a0`.
+- **DataCite**: 1,000 CC0 dataset-DOI metadata records, 6,786,926 bytes, SHA-256 `5d514bda3c9452e6f0042f05c4aab37ec5aa291bbb71f17896bf31b7c80058e9`.
+- Both are metadata-only, omit abstracts/descriptions and all content payloads, and their exact-scope Level A rights records are now in `rights_registry/records.jsonl`. [Run and artifact](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933591839).
+- **Common Corpus follow-up**: 2,159 candidate rows after excluding MIT-labelled source-code rows: 2,149 CC0, 4 CC-BY-3.0 and 6 CC-BY-4.0; 5,971,320 bytes total. It rejected 17,472 non-allowlisted license rows, 311 rows matching basic email/phone patterns and 8 invalid/oversized rows. The review queue and JSONL files were independently parsed after the newline fix. [Corrected run and artifact](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933372089).
+
+The source register now contains 52 candidate entries. The rights ledger contains seven exact-scope Level A records, but these certify only the recorded metadata/text payload rights. They do not change the global G-0 status or make any of the newly harvested sources training-eligible.
