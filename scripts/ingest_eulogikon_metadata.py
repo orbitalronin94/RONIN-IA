@@ -5,9 +5,15 @@ This adapter exports only metadata fields from the upstream work manifest.
 It never downloads the underlying Greek texts and never marks the export admitted.
 """
 from __future__ import annotations
-import csv, hashlib, json, os, urllib.request
+
+import csv
+import hashlib
+import json
+import os
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
+
 
 REPO = "eulogikon/ancient-greek-texts"
 REV = "97d5e15939c858ff047a576633255c923b8fb6f8"
