@@ -539,3 +539,10 @@ Estado: workflow y pruebas añadidos en la rama `feat/phi4-mmlu-pro-rationale-di
 - [Run #41919601882](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41919601882): instalación y tests de contrato correctos; Phi-4 mini instruct descargado desde la revisión fijada y manifiesto/hash verificados.
 - La generación no llegó a ejecutarse: al invocar `python scripts/distill_mmlu_pro_tutor.py`, Python no encontraba `scripts.evaluate_mmlu_pro` porque `scripts/` era `sys.path[0]`. No se generaron ejemplos, no hubo entrenamiento y no se evaluó MMLU-Pro test.
 - Corrección añadida en la rama: fallback de importación compatible con ejecución directa y con importación desde pytest. Se repite el workflow al actualizar la PR; no se relajan filtros ni se promocionan pesos.
+
+
+### Intento 2 de destilación Phi-4 — contrato Ruff/importación (4 de noviembre de 2026)
+
+- [Run #41919967815](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41919967815): el primer arreglo de importación permitió pasar la suite de tests, pero Ruff del job principal rechazó el bloque condicional de imports (`I001`). La generación y el entrenamiento se omitieron; no hubo evaluación MMLU-Pro test.
+- Corrección añadida: resolución del módulo evaluador mediante `importlib`, compatible con ejecución directa e importación desde tests y sin bloque de imports condicional.
+- Se vuelve a ejecutar tras el commit de corrección. Phi-4 ya se descargó y verificó en el intento 1; la caché de Actions todavía no se había guardado porque el job acabó fallando.
