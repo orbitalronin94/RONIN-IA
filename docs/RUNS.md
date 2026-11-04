@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:15 | [Integración continua #853 (run 41931950718)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41931950718) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document first two rights-certified candidate exports. Trigger: push; rama: main; intento: 1. | 3a9a7e78 |
 | 2026-11-04 23:14 | [Integración continua #857 (run 41932162380)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932162380) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Strengthen OpenAlex rights record with pinned official CC0 license evidence. Trigger: push; rama: main; intento: 1. | 8368054b |
 | 2026-11-04 23:14 | [Integración continua #854 (run 41932076308)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932076308) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add ScienceVerse and Hlido candidates and separate candidate/admission counters. Trigger: push; rama: main; intento: 1. | 201ddbab |
 | 2026-11-04 23:14 | [Integración continua #851 (run 41931935802)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41931935802) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Certify exact CoVoST and OpenAlex CC0 payload rights evidence. Trigger: push; rama: main; intento: 1. | 2d43b095 |
