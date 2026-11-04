@@ -188,6 +188,12 @@ def fetch_article_versions(item: dict[str, Any], domain: str) -> tuple[list[dict
             stats["s3_metadata_error"] += 1
             continue
 
+        metadata_pmcid = str(metadata.get("pmcid") or pmcid).strip()
+        metadata_version = str(metadata.get("version") or "").strip()
+        expected_version = version_prefix.rsplit(".", 1)[-1]
+        if metadata_pmcid != pmcid or (metadata_version and metadata_version != expected_version):
+            stats["metadata_identity_mismatch"] += 1
+            continue
         license_code = str(metadata.get("license_code") or "").strip()
         if not approved_license(license_code):
             stats["license_not_allowlisted"] += 1
