@@ -4,7 +4,6 @@ import hashlib
 import json
 from pathlib import Path
 
-import pytest
 
 
 REVISION = "a84939a26903163e1b98ee002bc94e9563e75c12"
@@ -65,5 +64,9 @@ def test_mathlib_rejects_non_apache_root_license(tmp_path: Path):
     root = tmp_path / "mathlib4"
     (root / "Mathlib").mkdir(parents=True)
     (root / "LICENSE").write_text("MIT License", encoding="utf-8")
-    with pytest.raises(ValueError, match="not Apache-2.0"):
+    try:
         prepare(root, REVISION, tmp_path / "records.jsonl")
+    except ValueError as exc:
+        assert "not Apache-2.0" in str(exc)
+    else:
+        raise AssertionError("expected the non-Apache license to be rejected")
