@@ -1,0 +1,478 @@
+{
+  "schema_version": 1,
+  "title": "External dataset intake registry for RONIN-IA",
+  "policy": {
+    "admission_gate": "G-0",
+    "default_training_eligible": false,
+    "required_for_training": [
+      "document_level_source",
+      "document_level_license_or_public_domain_basis",
+      "license_compatible_with_project_use",
+      "third_party_material_review",
+      "content_quality_review",
+      "deduplication",
+      "sha256"
+    ],
+    "rule": "Availability, free download, open access, dataset-level labels, or metadata licenses do not by themselves authorize training on full text.",
+    "commercial_use_assumption": "Treat commercial use as possible; exclude non-commercial-only and no-derivatives material unless project scope is explicitly changed and approved.",
+    "quarantine": "Unknown, mixed, publisher-specific, missing, or ambiguous rights remain quarantined.",
+    "no_automatic_training": true,
+    "no_full_corpus_download_in_ci": true
+  },
+  "datasets": [
+    {
+      "id": "common_corpus",
+      "name": "PleIAs Common Corpus",
+      "url": "https://huggingface.co/datasets/PleIAs/common_corpus",
+      "domains": [
+        "multidisciplinary",
+        "science",
+        "law",
+        "government",
+        "literature",
+        "code",
+        "semantic"
+      ],
+      "languages": [
+        "multilingual",
+        "es"
+      ],
+      "priority": "P0",
+      "access": "Hugging Face dataset; filter metadata before streaming",
+      "license_policy": "per_document",
+      "status": "candidate_high_priority",
+      "training_eligible": false,
+      "ingest_mode": "metadata_filter_then_stream_approved_documents",
+      "notes": "2.27T tokens declared; document fields include collection, license, language, creator, identifier and text. Admit only explicitly approved license classes and preserve source metadata. Exclude ambiguous or incompatible records."
+    },
+    {
+      "id": "pmc_oa",
+      "name": "PubMed Central Open Access Subset",
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/tools/openftlist/",
+      "domains": [
+        "medicine",
+        "biology",
+        "biomedical_science"
+      ],
+      "languages": [
+        "en",
+        "multilingual_subset"
+      ],
+      "priority": "P0",
+      "access": "NCBI official OA bulk/API",
+      "license_policy": "per_article",
+      "status": "candidate_high_priority",
+      "training_eligible": false,
+      "ingest_mode": "oa_subset_only",
+      "notes": "Never bulk-download all PMC. OA Subset only; article license and reuse conditions must be checked individually."
+    },
+    {
+      "id": "caselaw_access_project",
+      "name": "Harvard Caselaw Access Project",
+      "url": "https://case.law/",
+      "domains": [
+        "law",
+        "history",
+        "public_policy"
+      ],
+      "languages": [
+        "en"
+      ],
+      "priority": "P0",
+      "access": "Official bulk data/API",
+      "license_policy": "dataset_open_use_claim_verify_release_terms",
+      "status": "candidate_high_priority",
+      "training_eligible": false,
+      "ingest_mode": "bulk_after_terms_snapshot",
+      "notes": "Harvard Library describes CAP data as open use without limitations; capture the exact release terms and provenance. Cases run through 2020."
+    },
+    {
+      "id": "patentsview",
+      "name": "USPTO PatentsView",
+      "url": "https://www.uspto.gov/ip-policy/economic-research/patentsview",
+      "domains": [
+        "engineering",
+        "chemistry",
+        "physics",
+        "computing",
+        "biotechnology",
+        "technical_reasoning"
+      ],
+      "languages": [
+        "en"
+      ],
+      "priority": "P1",
+      "access": "Official downloads",
+      "license_policy": "government_record_and_embedded_material_review",
+      "status": "candidate",
+      "training_eligible": false,
+      "ingest_mode": "structured_and_long_text_after_rights_review",
+      "notes": "Patent records and derived files are useful technical text; do not assume every embedded figure or third-party component is unrestricted."
+    },
+    {
+      "id": "project_gutenberg",
+      "name": "Project Gutenberg",
+      "url": "https://www.gutenberg.org/",
+      "domains": [
+        "literature",
+        "history",
+        "philosophy",
+        "humanities"
+      ],
+      "languages": [
+        "multilingual",
+        "es"
+      ],
+      "priority": "P1",
+      "access": "Official catalog and ebook downloads",
+      "license_policy": "per_work_public_domain_or_permission_jurisdiction_specific",
+      "status": "candidate",
+      "training_eligible": false,
+      "ingest_mode": "catalog_filter_then_download",
+      "notes": "Verify public-domain status in the project's applicable jurisdiction, edition, translation, and any editorial apparatus."
+    },
+    {
+      "id": "openalex_metadata",
+      "name": "OpenAlex snapshot (metadata)",
+      "url": "https://help.openalex.org/access/snapshot/",
+      "domains": [
+        "multidisciplinary",
+        "research_graph",
+        "bibliography"
+      ],
+      "languages": [
+        "multilingual"
+      ],
+      "priority": "P1",
+      "access": "Free snapshot",
+      "license_policy": "cc0_metadata_not_fulltext",
+      "status": "candidate_metadata_only",
+      "training_eligible": false,
+      "ingest_mode": "metadata_index_only",
+      "notes": "CC0 metadata can support discovery, deduplication and domain mapping; it does not grant rights to linked papers."
+    },
+    {
+      "id": "openalex_fulltext",
+      "name": "OpenAlex full-text corpus",
+      "url": "https://help.openalex.org/access/fulltext/",
+      "domains": [
+        "multidisciplinary",
+        "science",
+        "humanities"
+      ],
+      "languages": [
+        "multilingual"
+      ],
+      "priority": "P1",
+      "access": "Fulltext service/archive; pricing/access varies",
+      "license_policy": "per_location_per_work",
+      "status": "candidate_conditional",
+      "training_eligible": false,
+      "ingest_mode": "only_verified_license_locations",
+      "notes": "Use work/location license fields. Exclude no-derivatives, non-commercial, other-OA and publisher-specific unknown terms under current default policy."
+    },
+    {
+      "id": "the_stack",
+      "name": "The Stack v1.2 / BigCode",
+      "url": "https://www.bigcode-project.org/docs/about/the-stack/",
+      "domains": [
+        "software_engineering",
+        "programming_languages",
+        "code_reasoning"
+      ],
+      "languages": [
+        "358_programming_languages"
+      ],
+      "priority": "P1",
+      "access": "Hugging Face / BigCode",
+      "license_policy": "per_file_spdx_plus_optout_and_security_review",
+      "status": "candidate_separate_pipeline",
+      "training_eligible": false,
+      "ingest_mode": "code_only_license_allowlist",
+      "notes": "Code must retain repository/file provenance and original license obligations. Respect opt-outs, malicious-file exclusions, and keep code separate from natural-language corpus."
+    },
+    {
+      "id": "wikimedia_dumps",
+      "name": "Wikimedia project dumps (Wikipedia etc.)",
+      "url": "https://dumps.wikimedia.org/",
+      "domains": [
+        "general_knowledge",
+        "history",
+        "science",
+        "geography",
+        "culture"
+      ],
+      "languages": [
+        "multilingual",
+        "es"
+      ],
+      "priority": "P1",
+      "access": "Official dumps",
+      "license_policy": "per_project_and_content_cc_by_sa_attribution",
+      "status": "candidate",
+      "training_eligible": false,
+      "ingest_mode": "project_dump_with_attribution_and_sharealike_review",
+      "notes": "Check project-specific terms, attribution and share-alike requirements; exclude non-text/media and material with incompatible rights."
+    },
+    {
+      "id": "wikidata",
+      "name": "Wikidata dumps",
+      "url": "https://www.wikidata.org/wiki/Wikidata:Database_download",
+      "domains": [
+        "knowledge_graph",
+        "entities",
+        "relations",
+        "multilingual_semantics"
+      ],
+      "languages": [
+        "multilingual"
+      ],
+      "priority": "P1",
+      "access": "Official dumps",
+      "license_policy": "cc0_database",
+      "status": "candidate_high_priority",
+      "training_eligible": false,
+      "ingest_mode": "structured_facts_and_verified_textualization",
+      "notes": "CC0 structured data is valuable for entity/relation grounding; generated natural-language verbalizations must be tagged as derived synthetic text, not source quotations."
+    },
+    {
+      "id": "stack_exchange",
+      "name": "Stack Exchange Data Dump",
+      "url": "https://archive.org/details/stackexchange",
+      "domains": [
+        "programming",
+        "mathematics",
+        "science",
+        "law",
+        "language",
+        "practical_reasoning"
+      ],
+      "languages": [
+        "en",
+        "multilingual_sites"
+      ],
+      "priority": "P1",
+      "access": "Archive.org data dump",
+      "license_policy": "per_post_cc_by_sa_version_and_attribution",
+      "status": "candidate",
+      "training_eligible": false,
+      "ingest_mode": "post_level_license_and_attribution",
+      "notes": "Preserve author/post attribution and applicable CC BY-SA version; verify dump snapshot and terms."
+    },
+    {
+      "id": "arxiv",
+      "name": "arXiv bulk papers and source",
+      "url": "https://info.arxiv.org/help/bulk_data/index.html",
+      "domains": [
+        "physics",
+        "mathematics",
+        "computer_science",
+        "quantitative_biology",
+        "economics",
+        "statistics"
+      ],
+      "languages": [
+        "en"
+      ],
+      "priority": "P1",
+      "access": "Official bulk/API",
+      "license_policy": "per_article_license_or_rights_statement",
+      "status": "candidate_conditional",
+      "training_eligible": false,
+      "ingest_mode": "metadata_then_license_filtered_articles",
+      "notes": "Do not infer a blanket training license from public availability. Article and source-package rights vary."
+    },
+    {
+      "id": "harvard_dataverse",
+      "name": "Harvard Dataverse",
+      "url": "https://dataverse.harvard.edu/",
+      "domains": [
+        "social_sciences",
+        "economics",
+        "political_science",
+        "health",
+        "environment",
+        "multidisciplinary"
+      ],
+      "languages": [
+        "multilingual"
+      ],
+      "priority": "P2",
+      "access": "Repository API/download",
+      "license_policy": "per_dataset_and_file",
+      "status": "candidate_discovery",
+      "training_eligible": false,
+      "ingest_mode": "metadata_discovery_then_file_level_license_review",
+      "notes": "Each deposit has its own terms; many records are data rather than high-density prose."
+    },
+    {
+      "id": "core",
+      "name": "CORE",
+      "url": "https://core.ac.uk/services#api",
+      "domains": [
+        "multidisciplinary",
+        "science",
+        "research_discovery"
+      ],
+      "languages": [
+        "multilingual"
+      ],
+      "priority": "P2",
+      "access": "API; access conditions vary",
+      "license_policy": "per_item_source_license",
+      "status": "candidate_discovery",
+      "training_eligible": false,
+      "ingest_mode": "discovery_only_until_source_license_verified",
+      "notes": "Aggregator access is not a blanket reuse license. Follow source repository license for every full text."
+    },
+    {
+      "id": "common_crawl",
+      "name": "Common Crawl",
+      "url": "https://commoncrawl.org/",
+      "domains": [
+        "web",
+        "general_language",
+        "multidisciplinary"
+      ],
+      "languages": [
+        "multilingual"
+      ],
+      "priority": "P3",
+      "access": "Public crawl archives",
+      "license_policy": "heterogeneous_source_rights",
+      "status": "candidate_discovery_only",
+      "training_eligible": false,
+      "ingest_mode": "source_discovery_not_bulk_training",
+      "notes": "Use to discover sources or public-domain collections; do not train on raw crawl at scale without source-level rights and provenance."
+    },
+    {
+      "id": "opus",
+      "name": "OPUS parallel corpora",
+      "url": "https://opus.nlpl.eu/",
+      "domains": [
+        "translation",
+        "linguistics",
+        "multilingual_semantics"
+      ],
+      "languages": [
+        "multilingual",
+        "es"
+      ],
+      "priority": "P1",
+      "access": "Subcorpus downloads",
+      "license_policy": "per_subcorpus_and_source",
+      "status": "candidate_conditional",
+      "training_eligible": false,
+      "ingest_mode": "subcorpus_allowlist",
+      "notes": "Each subcorpus has its own source and license. Keep parallel alignment and provenance; do not treat OPUS as one licensed corpus."
+    },
+    {
+      "id": "iula_es_en",
+      "name": "IULA Spanish-English Technical Corpus",
+      "url": "https://legacy.lt-innovate.org/lt-observe/resources/iula-es-en-technical-corpus",
+      "domains": [
+        "law",
+        "economics",
+        "medicine",
+        "environment",
+        "computing",
+        "technical_language"
+      ],
+      "languages": [
+        "es",
+        "en"
+      ],
+      "priority": "P1",
+      "access": "Research resource download",
+      "license_policy": "terms_and_underlying_text_rights_to_verify",
+      "status": "candidate_conditional",
+      "training_eligible": false,
+      "ingest_mode": "manual_terms_review_then_sample",
+      "notes": "High-value technical domains; free access is not sufficient evidence of training rights. Verify corpus terms and underlying texts."
+    },
+    {
+      "id": "europarl",
+      "name": "Europarl parallel corpus",
+      "url": "https://www.statmt.org/europarl/",
+      "domains": [
+        "politics",
+        "law",
+        "public_policy",
+        "translation"
+      ],
+      "languages": [
+        "multilingual",
+        "es"
+      ],
+      "priority": "P2",
+      "access": "Research corpus downloads",
+      "license_policy": "source_and_release_terms_review",
+      "status": "candidate_conditional",
+      "training_eligible": false,
+      "ingest_mode": "release_specific_license_review",
+      "notes": "Useful institutional argumentation and multilingual alignment; verify release-specific rights and source terms."
+    },
+    {
+      "id": "cligs_textbox",
+      "name": "CLiGS Textbox",
+      "url": "https://github.com/cligs/textbox",
+      "domains": [
+        "literature",
+        "spanish_humanities",
+        "historical_language"
+      ],
+      "languages": [
+        "es",
+        "de",
+        "fr"
+      ],
+      "priority": "P0",
+      "access": "Git repository",
+      "license_policy": "already_ingested_existing_project_manifest",
+      "status": "already_in_project",
+      "training_eligible": false,
+      "ingest_mode": "reuse_existing_split_only",
+      "notes": "Already represented in current literature corpus; do not duplicate."
+    },
+    {
+      "id": "conssa",
+      "name": "CoNSSA",
+      "url": "https://github.com/cligs/conssa",
+      "domains": [
+        "literature",
+        "spanish_humanities",
+        "historical_language"
+      ],
+      "languages": [
+        "es"
+      ],
+      "priority": "P0",
+      "access": "Git repository",
+      "license_policy": "per_work_public_domain_and_project_markup_terms",
+      "status": "already_in_project",
+      "training_eligible": false,
+      "ingest_mode": "reuse_existing_split_only",
+      "notes": "Already represented in current literature corpus; not all source material is redistributable."
+    },
+    {
+      "id": "eltec_spa",
+      "name": "ELTeC-spa",
+      "url": "https://github.com/COST-ELTeC/ELTeC-spa",
+      "domains": [
+        "literature",
+        "spanish_humanities",
+        "historical_language"
+      ],
+      "languages": [
+        "es"
+      ],
+      "priority": "P0",
+      "access": "Git repository",
+      "license_policy": "per_text_public_domain_and_repository_terms",
+      "status": "already_in_project",
+      "training_eligible": false,
+      "ingest_mode": "reuse_existing_split_only",
+      "notes": "Already represented in current literature corpus; preserve existing train/validation/test split."
+    }
+  ]
+}
