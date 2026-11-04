@@ -8,6 +8,11 @@ on:
         required: true
         default: "1000"
         type: string
+      benchmark_holdout:
+        description: Evaluar también el test reservado (solo para una medición de referencia)
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -18,7 +23,7 @@ concurrency:
 
 jobs:
   entrenar-y-evaluar:
-    name: Entrenar tiny desde cero y medir sobre literatura de dominio público
+    name: Entrenar tiny desde cero y medir literatura de dominio público
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
@@ -59,7 +64,6 @@ jobs:
         run: |
           mkdir -p /tmp/ronin-first/reports
           python - <<'PY'
-          from pathlib import Path
           import torch
           from ronin.config import get_profile
           from ronin.models.transformer import RoninLM
@@ -73,15 +77,22 @@ jobs:
           print("Semilla de inicialización:", training_config.seed)
           PY
 
-      - name: Medir modelo sin entrenar
+      - name: Medir referencia inicial en validación
         run: |
-          for split in validation test; do
-            python scripts/evaluate_text.py \
-              --checkpoint /tmp/ronin-first/inicial.pt \
-              --validation-text "/tmp/ronin-open-corpus/processed/$split.txt" \
-              --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu \
-              --output "/tmp/ronin-first/reports/inicial-$split.json"
-          done
+          python scripts/evaluate_text.py \
+            --checkpoint /tmp/ronin-first/inicial.pt \
+            --validation-text /tmp/ronin-open-corpus/processed/validation.txt \
+            --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu \
+            --output /tmp/ronin-first/reports/inicial-validation.json
+
+      - name: Medir referencia inicial en holdout reservado
+        if: ${{ inputs.benchmark_holdout }}
+        run: |
+          python scripts/evaluate_text.py \
+            --checkpoint /tmp/ronin-first/inicial.pt \
+            --validation-text /tmp/ronin-open-corpus/processed/test.txt \
+            --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu \
+            --output /tmp/ronin-first/reports/inicial-test.json
 
       - name: Entrenar RONIN desde cero
         env:
@@ -97,45 +108,62 @@ jobs:
           fin=$(date +%s)
           echo "$((fin - inicio))" > /tmp/ronin-first/reports/tiempo_entrenamiento_segundos.txt
 
-      - name: Evaluar modelo entrenado
+      - name: Evaluar modelo entrenado en validación
         env:
           STEPS: ${{ inputs.steps }}
         run: |
           checkpoint="/tmp/ronin-first/checkpoints/step-$(printf '%08d' "$STEPS").pt"
           test -s "$checkpoint"
-          for split in validation test; do
-            python scripts/evaluate_text.py \
-              --checkpoint "$checkpoint" \
-              --validation-text "/tmp/ronin-open-corpus/processed/$split.txt" \
-              --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu \
-              --output "/tmp/ronin-first/reports/entrenado-$split.json"
-          done
+          python scripts/evaluate_text.py \
+            --checkpoint "$checkpoint" \
+            --validation-text /tmp/ronin-open-corpus/processed/validation.txt \
+            --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu \
+            --output /tmp/ronin-first/reports/entrenado-validation.json
+
+      - name: Evaluar una sola vez el holdout reservado
+        if: ${{ inputs.benchmark_holdout }}
+        env:
+          STEPS: ${{ inputs.steps }}
+        run: |
+          checkpoint="/tmp/ronin-first/checkpoints/step-$(printf '%08d' "$STEPS").pt"
+          python scripts/evaluate_text.py \
+            --checkpoint "$checkpoint" \
+            --validation-text /tmp/ronin-open-corpus/processed/test.txt \
+            --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu \
+            --output /tmp/ronin-first/reports/entrenado-test.json
 
       - name: Construir informe reproducible
         env:
           STEPS: ${{ inputs.steps }}
+          BENCHMARK_HOLDOUT: ${{ inputs.benchmark_holdout }}
         run: |
           python - <<'PY'
           import json
           import os
           import platform
-          from pathlib import Path
           from dataclasses import replace
+          from pathlib import Path
+
           import torch
           from ronin.config import get_profile
-          
+
           root = Path("/tmp/ronin-open-corpus/processed")
           reports = Path("/tmp/ronin-first/reports")
           manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
           model_config, training_config = get_profile("tiny")
           steps = int(os.environ["STEPS"])
+          benchmark_holdout = os.environ["BENCHMARK_HOLDOUT"].lower() == "true"
           training_config = replace(
               training_config,
               max_steps=steps,
               warmup_steps=min(training_config.warmup_steps, max(1, steps // 10)),
           )
+
+          splits = ["validation"]
+          if benchmark_holdout:
+              splits.append("test")
           metrics = {}
-          for split in ("validation", "test"):
+          for split in splits:
               initial = json.loads((reports / f"inicial-{split}.json").read_text())
               trained = json.loads((reports / f"entrenado-{split}.json").read_text())
               before = initial["bits_per_byte"]
@@ -144,11 +172,19 @@ jobs:
                   "inicial": initial,
                   "entrenado": trained,
                   "delta_bits_per_byte": after - before,
-                  "reduccion_porcentual_bits_per_byte": (100.0 * (before - after) / before) if before else None,
+                  "reduccion_porcentual_bits_per_byte": (
+                      100.0 * (before - after) / before if before else None
+                  ),
               }
+
           summary = {
               "proyecto": "RONIN IA",
-              "tipo": "primera iteración; benchmark interno, no benchmark general",
+              "tipo": (
+                  "medición de referencia con holdout reservado"
+                  if benchmark_holdout
+                  else "experimento de entrenamiento; solo validación"
+              ),
+              "holdout_evaluado": benchmark_holdout,
               "dataset": {
                   "id": manifest["dataset_id"],
                   "licencia": manifest["license"],
@@ -167,8 +203,14 @@ jobs:
                   "parametros": metrics["validation"]["entrenado"]["parameter_count"],
                   "configuracion_entrenamiento": training_config.__dict__,
                   "pasos_ejecutados": steps,
-                  "tokens_presentados_aproximados": steps * training_config.batch_size * training_config.gradient_accumulation_steps * model_config.context_length,
-                  "tiempo_entrenamiento_segundos": int((reports / "tiempo_entrenamiento_segundos.txt").read_text()),
+                  "tokens_presentados_aproximados": (
+                      steps * training_config.batch_size
+                      * training_config.gradient_accumulation_steps
+                      * model_config.context_length
+                  ),
+                  "tiempo_entrenamiento_segundos": int(
+                      (reports / "tiempo_entrenamiento_segundos.txt").read_text()
+                  ),
               },
               "entorno": {
                   "python": platform.python_version(),
@@ -183,18 +225,33 @@ jobs:
                   "semilla_muestreo": 2026,
                   "lotes_por_particion": 128,
                   "tamano_lote": 2,
-                  "tokens_evaluados_por_particion": 128 * 2 * model_config.context_length,
+                  "tokens_evaluados_por_particion": (
+                      128 * 2 * model_config.context_length
+                  ),
                   "metricas": metrics,
               },
               "limitaciones": [
                   "El conjunto inicial está formado por literatura histórica; no representa por sí solo el español contemporáneo ni todas sus variedades.",
                   "Las métricas son comparables solo manteniendo idénticos corpus, tokenizador, perfil y protocolo.",
-                  "La partición test se reserva para comparaciones finales; las iteraciones de ajuste deben usar validation.",
+                  "La partición test nunca se usa para gradientes ni ajuste de hiperparámetros; solo se evalúa si se solicita explícitamente una medición de referencia.",
                   "La perplejidad byte-level no equivale a calidad conversacional ni a razonamiento.",
               ],
           }
-          (reports / "resumen.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-          print(json.dumps({"resumen": str(reports / "resumen.json"), "metricas": {k: {"bpb_inicial": v["inicial"]["bits_per_byte"], "bpb_entrenado": v["entrenado"]["bits_per_byte"]} for k,v in metrics.items()}}, ensure_ascii=False, indent=2))
+          (reports / "resumen.json").write_text(
+              json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps({
+              "resumen": str(reports / "resumen.json"),
+              "holdout_evaluado": benchmark_holdout,
+              "metricas": {
+                  key: {
+                      "bpb_inicial": value["inicial"]["bits_per_byte"],
+                      "bpb_entrenado": value["entrenado"]["bits_per_byte"],
+                  }
+                  for key, value in metrics.items()
+              },
+          }, ensure_ascii=False, indent=2))
           PY
 
       - name: Publicar solo métricas y manifiesto resumido
