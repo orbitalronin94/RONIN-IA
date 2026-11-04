@@ -131,3 +131,38 @@ def test_phi4_mini_instruct_uses_builtin_transformers_model():
     assert model["trust_remote_code"] is False
     assert "model*.safetensors" in ALLOW_PATTERNS
     assert "*.py" not in ALLOW_PATTERNS
+
+
+def test_generation_uses_isolated_seed_without_generator_argument():
+    import torch
+
+    class FakeTokenizer:
+        chat_template = None
+        eos_token_id = 0
+
+        def __call__(self, prompt, **kwargs):
+            return {"input_ids": torch.tensor([[1]])}
+
+        def decode(self, tokens, **kwargs):
+            return str(int(tokens[-1]))
+
+    class FakeModel:
+        def __init__(self):
+            self.parameter = torch.nn.Parameter(torch.zeros(1))
+            self.generate_kwargs = None
+
+        def parameters(self):
+            return iter([self.parameter])
+
+        def generate(self, **kwargs):
+            self.generate_kwargs = kwargs
+            token = torch.randint(1, 100000, (1, 1))
+            return torch.cat((kwargs["input_ids"], token), dim=1)
+
+    model = FakeModel()
+    tokenizer = FakeTokenizer()
+    first = generate_completion(model, tokenizer, "Explica.", seed=404)
+    second = generate_completion(model, tokenizer, "Explica.", seed=404)
+
+    assert first == second
+    assert "generator" not in model.generate_kwargs
