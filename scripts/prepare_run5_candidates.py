@@ -37,16 +37,16 @@ ALLOWED_LICENSES = {
     "MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause",
 }
 COLLECTIONS = {
-    "OpenScience": {
+    "Open Science": {
         "mathematics", "logic_epistemology", "physics",
         "chemistry", "biology_medicine",
     },
     # Common Corpus stores formal/relational semantic records under a distinct
     # open_type; this is the explicitly authorized logic/epistemology adapter.
     "Semantic data": {"logic_epistemology"},
-    "OpenCulture": {"philosophy"},
-    "OpenSource": {"computer_science"},
-    "OpenGovernment": {"law_economics_social_sciences"},
+    "Open Culture": {"philosophy"},
+    "Open Source": {"computer_science"},
+    "Open Government": {"law_economics_social_sciences"},
 }
 LANGUAGES = {"en", "es"}
 LANGUAGE_ALIASES = {"en": "en", "english": "en", "es": "es", "spanish": "es"}
@@ -555,6 +555,7 @@ def main() -> int:
     print(json.dumps({
         "rows_scanned": scanned_rows,
         "accepted_documents_by_domain": domain_counts,
+        "rejected": dict(rejected),
         "libraries_built": len(libraries),
         "libraries_meeting_minimum": sum(1 for item in libraries if item["meets_minimum_size"]),
         "ready_for_human_review": report["ready_for_human_review"],
