@@ -133,6 +133,33 @@ Referencia especializada:
   Verne, documento desclasificado de la NSA:
   https://www.nsa.gov/portals/75/documents/news-features/declassified-documents/friedman-documents/publications/FOLDER_205/41762559080174.pdf
 
+## Descargas primarias incorporadas a la adquisición automatizada
+
+El flujo de auditoría descarga, sin autenticación y fuera de Git, cuatro fuentes
+concretas. Verifica formato o marcadores de contenido, calcula SHA-256 y publica
+los originales junto con un manifiesto de procedencia como artefacto temporal:
+
+- Poe, *The Works of Edgar Allan Poe*, vol. 1 (incluye “The Gold-Bug”):
+  https://www.gutenberg.org/cache/epub/2147/pg2147.txt
+- Verne, *The Giant Raft* / *La Jangada*:
+  https://www.gutenberg.org/cache/epub/3091/pg3091.txt
+- Doyle, *The Return of Sherlock Holmes* (incluye “The Adventure of the Dancing
+  Men”):
+  https://gutenberg.net.au/ebooks/c00016.html
+- Selenus, ejemplar de 1624 de Wellcome Collection, 550 imágenes, descarga PDF
+  con Public Domain Mark:
+  https://iiif.wellcomecollection.org/pdf/b12946308
+
+La descarga no significa que estos materiales ya formen parte del entrenamiento:
+el manifiesto los marca como `excluded_pending_manual_review`. El PDF latino
+de Selenus requiere OCR/transcripción revisada antes de usarlo como texto.
+La *Hypnerotomachia Poliphili* permanece en el catálogo bibliográfico, pero no
+se incorpora hasta fijar un ejemplar digital y derechos verificables.
+
+El código de adquisición está en `scripts/acquire_cryptography_library.py`;
+las pruebas automatizadas verifican el manifiesto, los hashes y la exclusión
+del entrenamiento general.
+
 ## Reglas de adquisición y anotación
 
 1. Descargar solo ediciones con acceso anónimo directo y derechos claros.
