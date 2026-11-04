@@ -87,7 +87,7 @@ def validate(
     if portfolio.get("training_eligible") is not False:
         errors.append("Portfolio must remain excluded from training")
     if portfolio.get("counted_as_library") is not False:
-        errors.append("Portfolio must not count as one of the sixteen libraries")
+        errors.append("Portfolio must not count as one of the 32 libraries")
     if portfolio.get("role") != "retrieval_only_fallback":
         errors.append("Portfolio role must be retrieval_only_fallback")
     if require_ready:
