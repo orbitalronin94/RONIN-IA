@@ -33,16 +33,24 @@ sustituyen la descarga y verificación del ejemplar fuente.
 
 **Estado:** `decoded_documented`.
 
-El Libro III contiene criptogramas que Jim Reeds identificó y resolvió en un
-artículo de *Cryptologia* (1998). La presencia de cifrados en los Libros I y II
-ya era conocida desde 1606; no atribuir a Reeds el descubrimiento de esos dos
-libros. El caso muestra cómo un texto que aparenta ser mágico puede contener
-un procedimiento criptográfico real.
+El Libro III contiene criptogramas que Jim Reeds analizó y resolvió en un
+artículo de *Cryptologia* (1998). Hay una precisión histórica importante: en
+la nota «Added in proof», Reeds reconoce que Thomas Ernst había llegado a las
+mismas conclusiones tres años antes, en su estudio de 1996, con más detalle y
+una edición crítica de manuscritos. Por tanto, el descifrado del Libro III
+cuenta con dos análisis independientes; no debe atribuirse su primacía a
+Reeds. La presencia de cifrados en los Libros I y II ya era conocida desde
+1606 por la *Clavis*. El caso muestra cómo un texto presentado como magia
+puede contener mecanismos criptográficos reales, pero también que hay que
+separar los tres libros y la cronología de sus soluciones.
 
 Referencia principal:
 - Jim Reeds, “Solved: The Ciphers in Book III of Trithemius's
   *Steganographia*”, *Cryptologia* 22 (1998), 291–317.
   DOI: https://doi.org/10.1080/0161-119891886948
+- Thomas Ernst, “Schwarzweiße Magie: Der Schlüssel zum dritten Buch der
+  *Steganographia* des Trithemius”, *Daphnis* 25.1 (1996), 1–205. Reeds lo
+  identifica expresamente como solución independiente anterior.
 
 ### 2. *Hypnerotomachia Poliphili* (Venecia, 1499)
 
@@ -69,12 +77,14 @@ Referencias:
 
 **Estado:** `historical_explanation_available`.
 
-La obra de 1624 incluye una explicación del sistema de esteganografía de
-Trithemius. El título correcto es *Cryptomenytices et Cryptographiae libri IX*;
-no “Cryptomenytics”. Selenus es el seudónimo tradicionalmente asociado con
-Augustus, duque de Brunswick-Lüneburg. Registrar este libro como testimonio
-histórico y explicación temprana del sistema, no como el descifrado moderno
-del Libro III que publicó Reeds en 1998.
+La obra de 1624 explica y reorganiza los procedimientos de la *Clavis* para
+los Libros I y II de Trithemius. Selenus también reproduce el Libro III
+completo, pero no proporciona una interpretación criptográfica de sus tablas;
+Reeds lo señala expresamente. El título correcto es *Cryptomenytices et
+Cryptographiae libri IX*; no “Cryptomenytics”. Selenus es el seudónimo
+tradicionalmente asociado con Augustus, duque de Brunswick-Lüneburg. Registrar
+este libro como testimonio histórico y explicación temprana de los Libros I y
+II, no como el descifrado moderno del Libro III.
 
 Referencias de orientación:
 - Transcripción y bibliografía de Trithemius:
@@ -196,3 +206,50 @@ afirmaciones empíricas y texto cifrado en diferentes fragmentos.
 No penalizar el lenguaje mágico, religioso, alegórico o arcaico como si fuera
 ruido. Tampoco inferir que todo pasaje oscuro oculta un cifrado. La etiqueta
 debe describir la evidencia disponible, no la fascinación del lector.
+
+## Biblioteca de patrones: versión inicial
+
+El conjunto estructurado se genera en CI con
+`scripts/build_obfuscation_cases.py`. Cada registro contiene el fragmento
+opaco, tipo A/B/C/D, etiqueta, mecanismo, explicación/solución cuando existe,
+procedencia, SHA-256, referencias, confianza y partición. La descarga de fuentes
+es anónima y sus originales se publican como artefactos temporales; no se
+almacenan libros ni escaneos en Git.
+
+La primera tanda incluye:
+
+- **A:** el criptograma de *The Gold-Bug* (sustitución monoalfabética) y el de
+  *La Jangada* (Gronsfeld, clave numérica y palabra probable).
+- **C:** las iniciales de la *Hypnerotomachia Poliphili*. El patrón se registra
+  como estructura confirmada; no como prueba concluyente de autoría.
+- **D:** una paráfrasis propia de la afirmación de que la clave biliteral de
+  Gallup demuestra la autoría baconiana de Shakespeare. Se etiqueta como
+  afirmación no sustentada por el análisis de los Friedmans; no se generaliza
+  esa conclusión a cualquier posible código en cualquier edición.
+- **B:** 500 controles sintéticos reproducibles generados con semilla fija.
+  Son secuencias sin carga útil insertada, no ejemplos históricos que se
+  declaren universalmente carentes de significado.
+
+La *Steganographia* de Trithemius (edición de 1608), *Cryptomenytices* de
+Selenus (1624), y los demás originales se descargan como fuentes primarias de
+dominio público o con Public Domain Mark explícita. La
+primera se cotejará con Reeds (1998) antes de producir pares de entrenamiento
+del Libro III; el escaneo por sí solo no se etiqueta como una muestra ya
+descifrada.
+
+El manuscrito Voynich se mantiene como **no resuelto**. No se incorpora su
+transcripción al corpus de entrenamiento mientras no se verifique una licencia
+compatible: el manuscrito histórico es de dominio público, pero las
+transcripciones modernas consultadas no declaran una licencia abierta clara.
+No se convierte la falta de descifrado en una etiqueta negativa.
+
+El *Codex Seraphinianus* queda fuera: obra contemporánea protegida y no
+necesaria para generar controles negativos, que podemos construir de forma
+reproducible sin redistribuir sus páginas. Los controles sintéticos no deben
+confundirse con glosolalia humana ni con lenguaje natural no comprendido.
+
+**Límite de esta versión:** 500 controles sintéticos no equivalen a 500 casos
+independientes del mundo real. El conjunto no se considera listo para un
+entrenamiento general ni para medir capacidad de descifrado. Los positivos
+históricos son escasos y deben ampliarse con más pares validados, y el test
+debe reservar casos completos por obra y mecanismo.

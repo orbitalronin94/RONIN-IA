@@ -164,3 +164,18 @@ Consultar [LICENSE](LICENSE). Las licencias de los datos y de cada modelo auxili
 ## Biblioteca de codificación documentada
 
 El catálogo crítico de criptografía, esteganografía y acrósticos históricos y literarios está en [`docs/CASOS_CODIFICACION_DOCUMENTADA.md`](docs/CASOS_CODIFICACION_DOCUMENTADA.md). Distingue descifrados documentados, interpretaciones de acrósticos, criptogramas ficticios y afirmaciones pendientes de verificación; no es todavía un corpus de entrenamiento.
+
+## Biblioteca de patrones de opacidad y codificación
+
+RONIN mantiene una biblioteca separada del corpus lingüístico general y del
+router. Su unidad es el par **fragmento opaco + evidencia de interpretación**,
+con mecanismo, estado de evidencia, procedencia, licencia, SHA-256, confianza
+y partición. El contrato está en `ronin/epistemic/obfuscation.py` y la primera
+construcción reproducible en
+`scripts/build_obfuscation_cases.py`. Consulta
+[la documentación de casos y criterios](docs/CASOS_CODIFICACION_DOCUMENTADA.md).
+
+Los negativos de esta primera tanda son controles sintéticos con semilla
+reproducible y sin carga útil insertada. Un texto histórico no resuelto —como
+el manuscrito Voynich— no se convierte en negativo por defecto. Las
+transcripciones sin licencia compatible quedan fuera del entrenamiento.

@@ -29,7 +29,7 @@ def test_adquisicion_guarda_archivos_hashes_y_exclusion_de_entrenamiento(
 ):
     def fake_urlopen(request, timeout):
         url = request.full_url
-        if "iiif.wellcomecollection.org/pdf/" in url or "A336080.pdf" in url:
+        if "iiif.wellcomecollection.org/pdf/" in url or "A336080.pdf" in url or "e-rara.ch/zuz/download/pdf/" in url:
             data = b"%PDF-1.7\nmock-pdf-content"
         elif "2147" in url:
             data = b"THE GOLD-BUG\nEDGAR ALLAN POE"
@@ -48,7 +48,7 @@ def test_adquisicion_guarda_archivos_hashes_y_exclusion_de_entrenamiento(
 
     manifest = library.acquire(tmp_path)
 
-    assert manifest["source_count"] == 5
+    assert manifest["source_count"] == 6
     assert manifest["credential_free"] is True
     for source in manifest["sources"]:
         downloaded = tmp_path / source["local_filename"]
