@@ -171,6 +171,12 @@ def fetch_article_versions(item: dict[str, Any], domain: str) -> tuple[list[dict
     if any("retracted" in str(value).casefold() for value in pub_types) or "retracted article" in title_for_retraction:
         stats["retracted_by_europe_pmc"] += 1
         return records, stats
+    metadata_language = item.get("language")
+    if metadata_language and normalize_language(metadata_language) is None:
+        # Europe PMC's explicit language metadata is enough to reject a
+        # non-en/es record before listing versions or downloading its XML.
+        stats["language_not_allowlisted_metadata"] += 1
+        return records, stats
     try:
         versions = list_s3_version_prefixes(pmcid)
     except Exception:
