@@ -24,7 +24,7 @@ on:
         default: "8192"
         type: string
       candidate_run_id:
-        description: ID del workflow RUN 5 que publicó las 16 bibliotecas admitidas
+        description: ID del workflow RUN 5 que publicó las 32 bibliotecas admitidas
         required: true
         type: string
 
@@ -37,13 +37,13 @@ concurrency:
 
 jobs:
   ronin-training:
-    name: Entrenar solo después de admitir las dieciséis bibliotecas
+    name: Entrenar solo después de admitir las 32 bibliotecas
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
       PYTHONUNBUFFERED: "1"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
-      # Ejecución manual: test externo completo con una semilla tras superar el gate de 16 bibliotecas.
+      # Ejecución manual: test externo completo con una semilla tras superar el gate de 32 bibliotecas.
       STEPS: ${{ inputs.steps || '1000' }}
       SEEDS: ${{ inputs.seeds || '1337' }}
       MMLU_LIMIT: ${{ inputs.mmlu_limit || '0' }}
@@ -64,7 +64,7 @@ jobs:
       - name: Descargar los 16 artefactos de bibliotecas de esa ejecución
         uses: actions/download-artifact@v6
         with:
-          pattern: ronin-run5-library-*
+          pattern: ronin-datasets-run5-library-*
           path: /tmp/ronin-run5-library-artifacts
           merge-multiple: false
           github-token: ${{ github.token }}
@@ -82,12 +82,38 @@ jobs:
           target = Path("/tmp/ronin-sixteen-libraries")
           target.mkdir(parents=True, exist_ok=True)
           expected = {
-              "mathematics", "logic_epistemology", "philosophy", "physics",
-              "chemistry", "biology_medicine", "computer_science",
-              "law_economics_social_sciences",
-              "mathematics_hkd", "logic_epistemology_hkd", "philosophy_hkd",
-              "physics_hkd", "chemistry_hkd", "biology_medicine_hkd",
-              "computer_science_hkd", "law_economics_social_sciences_hkd",
+              "mathematics_general",
+              "logic_epistemology_general",
+              "philosophy_general",
+              "physics_general",
+              "chemistry_materials_general",
+              "biology_general",
+              "medicine_health_general",
+              "computer_science_general",
+              "software_engineering_general",
+              "law_general",
+              "economics_general",
+              "social_sciences_general",
+              "statistics_probability_general",
+              "astronomy_earth_science_general",
+              "engineering_robotics_general",
+              "humanities_general",
+              "mathematics_hkd",
+              "logic_epistemology_hkd",
+              "philosophy_hkd",
+              "physics_hkd",
+              "chemistry_materials_hkd",
+              "biology_hkd",
+              "medicine_health_hkd",
+              "computer_science_hkd",
+              "software_engineering_hkd",
+              "law_hkd",
+              "economics_hkd",
+              "social_sciences_hkd",
+              "statistics_probability_hkd",
+              "astronomy_earth_science_hkd",
+              "engineering_robotics_hkd",
+              "humanities_hkd",
           }
           found = set()
           for artifact in source.iterdir():
@@ -103,7 +129,7 @@ jobs:
           missing = sorted(expected - found)
           if missing:
               raise SystemExit(f"Faltan bibliotecas del run {__import__('os').environ.get('CANDIDATE_RUN_ID','')}: {missing}")
-          print(f"Materializadas {len(found)}/16 bibliotecas.")
+          print(f"Materializadas {len(found)}/32 bibliotecas.")
           PY
 
       - name: Preflight fail-fast de RUN 5 antes de descargar dependencias
@@ -157,28 +183,44 @@ jobs:
             --source-dir /tmp/ronin-portfolio-rag/source \
             --output-dir /tmp/ronin-portfolio-rag
 
-      - name: "Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial"
+      - name: "Gate obligatorio: 32 bibliotecas admitidas antes del entrenamiento oficial"
         run: python scripts/validate_sixteen_libraries.py --require-ready --corpus-root /tmp/ronin-sixteen-libraries --portfolio-root /tmp/ronin-portfolio-rag
 
-      - name: Construir mezcla balanceada de las dieciséis bibliotecas admitidas
+      - name: Construir mezcla balanceada de las 32 bibliotecas admitidas
         run: |
           python scripts/prepare_training_mixture.py \
-            --input mathematics=/tmp/ronin-sixteen-libraries/mathematics/train.txt \
-            --input logic_epistemology=/tmp/ronin-sixteen-libraries/logic_epistemology/train.txt \
-            --input philosophy=/tmp/ronin-sixteen-libraries/philosophy/train.txt \
-            --input physics=/tmp/ronin-sixteen-libraries/physics/train.txt \
-            --input chemistry=/tmp/ronin-sixteen-libraries/chemistry/train.txt \
-            --input biology_medicine=/tmp/ronin-sixteen-libraries/biology_medicine/train.txt \
-            --input computer_science=/tmp/ronin-sixteen-libraries/computer_science/train.txt \
-            --input law_economics_social_sciences=/tmp/ronin-sixteen-libraries/law_economics_social_sciences/train.txt \
+                        --input mathematics_general=/tmp/ronin-sixteen-libraries/mathematics_general/train.txt \
+            --input logic_epistemology_general=/tmp/ronin-sixteen-libraries/logic_epistemology_general/train.txt \
+            --input philosophy_general=/tmp/ronin-sixteen-libraries/philosophy_general/train.txt \
+            --input physics_general=/tmp/ronin-sixteen-libraries/physics_general/train.txt \
+            --input chemistry_materials_general=/tmp/ronin-sixteen-libraries/chemistry_materials_general/train.txt \
+            --input biology_general=/tmp/ronin-sixteen-libraries/biology_general/train.txt \
+            --input medicine_health_general=/tmp/ronin-sixteen-libraries/medicine_health_general/train.txt \
+            --input computer_science_general=/tmp/ronin-sixteen-libraries/computer_science_general/train.txt \
+            --input software_engineering_general=/tmp/ronin-sixteen-libraries/software_engineering_general/train.txt \
+            --input law_general=/tmp/ronin-sixteen-libraries/law_general/train.txt \
+            --input economics_general=/tmp/ronin-sixteen-libraries/economics_general/train.txt \
+            --input social_sciences_general=/tmp/ronin-sixteen-libraries/social_sciences_general/train.txt \
+            --input statistics_probability_general=/tmp/ronin-sixteen-libraries/statistics_probability_general/train.txt \
+            --input astronomy_earth_science_general=/tmp/ronin-sixteen-libraries/astronomy_earth_science_general/train.txt \
+            --input engineering_robotics_general=/tmp/ronin-sixteen-libraries/engineering_robotics_general/train.txt \
+            --input humanities_general=/tmp/ronin-sixteen-libraries/humanities_general/train.txt \
             --input mathematics_hkd=/tmp/ronin-sixteen-libraries/mathematics_hkd/train.txt \
             --input logic_epistemology_hkd=/tmp/ronin-sixteen-libraries/logic_epistemology_hkd/train.txt \
             --input philosophy_hkd=/tmp/ronin-sixteen-libraries/philosophy_hkd/train.txt \
             --input physics_hkd=/tmp/ronin-sixteen-libraries/physics_hkd/train.txt \
-            --input chemistry_hkd=/tmp/ronin-sixteen-libraries/chemistry_hkd/train.txt \
-            --input biology_medicine_hkd=/tmp/ronin-sixteen-libraries/biology_medicine_hkd/train.txt \
+            --input chemistry_materials_hkd=/tmp/ronin-sixteen-libraries/chemistry_materials_hkd/train.txt \
+            --input biology_hkd=/tmp/ronin-sixteen-libraries/biology_hkd/train.txt \
+            --input medicine_health_hkd=/tmp/ronin-sixteen-libraries/medicine_health_hkd/train.txt \
             --input computer_science_hkd=/tmp/ronin-sixteen-libraries/computer_science_hkd/train.txt \
-            --input law_economics_social_sciences_hkd=/tmp/ronin-sixteen-libraries/law_economics_social_sciences_hkd/train.txt \
+            --input software_engineering_hkd=/tmp/ronin-sixteen-libraries/software_engineering_hkd/train.txt \
+            --input law_hkd=/tmp/ronin-sixteen-libraries/law_hkd/train.txt \
+            --input economics_hkd=/tmp/ronin-sixteen-libraries/economics_hkd/train.txt \
+            --input social_sciences_hkd=/tmp/ronin-sixteen-libraries/social_sciences_hkd/train.txt \
+            --input statistics_probability_hkd=/tmp/ronin-sixteen-libraries/statistics_probability_hkd/train.txt \
+            --input astronomy_earth_science_hkd=/tmp/ronin-sixteen-libraries/astronomy_earth_science_hkd/train.txt \
+            --input engineering_robotics_hkd=/tmp/ronin-sixteen-libraries/engineering_robotics_hkd/train.txt \
+            --input humanities_hkd=/tmp/ronin-sixteen-libraries/humanities_hkd/train.txt \ \
             --output /tmp/ronin-training/combined-train.txt \
             --manifest reports/training-mixture.json
       - name: Validar presupuesto, semillas y muestra externa
@@ -370,9 +412,9 @@ jobs:
               "cycles": rows,
               "interpretation": [
                   "Portfolio/Papers está excluido de pretraining y SFT; queda reservado para recuperación RAG con citas.",
-                  "El entrenamiento oficial está bloqueado hasta que las dieciséis bibliotecas independientes superen el gate de licencia, procedencia, tamaño y calidad.",
+                  "El entrenamiento oficial está bloqueado hasta que las 32 bibliotecas independientes superen el gate de licencia, procedencia, tamaño y calidad.",
                   "MMLU-Pro test se utiliza solo para evaluación antes/después y nunca para gradientes.",
-                  "La mezcla contiene exclusivamente las dieciséis bibliotecas admitidas y hasheadas; Portfolio queda fuera.",
+                  "La mezcla contiene exclusivamente las 32 bibliotecas admitidas y hasheadas; Portfolio queda fuera.",
                   "Los splits validation/test de literatura, MMLU-Pro test, el piloto interno y los casos criptográficos pendientes de revisión no se mezclan con train.",
                   "La biblioteca criptográfica sigue en cuarentena manual; los datos sintéticos y las generaciones de tutores no se consideran corpus de conocimiento para esta primera prueba.",
                   "Cada semilla parte de inicialización aleatoria y usa la misma semilla para su entrenamiento independiente.",
