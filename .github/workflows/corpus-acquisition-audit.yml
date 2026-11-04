@@ -47,7 +47,13 @@ jobs:
           rows = [json.loads(line) for line in (root / "documents.jsonl").read_text(encoding="utf-8").splitlines()]
           assert len(rows) == manifest["document_count"]
           assert {row["partition"] for row in rows} == {"train", "validation", "test"}
-          assert all(row["source_id"] and row["source_revision"] and row["license_text"] for row in rows)
+          assert all(
+              row["source_id"]
+              and row["source_revision"]
+              and row["license_text"]
+              and len(row["source_file_sha256"]) == 64
+              for row in rows
+          )
           assert sum(manifest["document_counts"].values()) == manifest["document_count"]
           assert all(len(value) == 64 for value in manifest["output_sha256"].values())
           for name in ("train.txt", "validation.txt", "test.txt"):
