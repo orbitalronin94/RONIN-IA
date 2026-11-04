@@ -24,20 +24,50 @@ La evaluación de lenguaje utilizó 32.768 bytes de validación. El benchmark mu
 
 Los ciclos sintéticos no descargan corpus externos y no eluden el bloqueo G-0 de licencias. Los informes se publican como artefactos de GitHub Actions; los checkpoints no se publican ni se conservan como pesos descargables. Por tanto, **hay un modelo implementado y entrenado experimentalmente, pero todavía no distribuimos un checkpoint entrenado como versión utilizable**.
 
-Workflow: [Ciclos sintéticos de entrenamiento RONIN](https://github.com/orbitalronin94/RONIN-IA/actions/workflows/synthetic-training-cycles.yml). Para lanzar experimentos más largos, abre el workflow en GitHub Actions y usa «Run workflow» (hasta 1.000 pasos y cinco semillas).
+Workflow principal: [Experimento oficial RONIN desde cero + MMLU-Pro completo](https://github.com/orbitalronin94/RONIN-IA/actions/workflows/ronin-official-training-holdout.yml). Los ciclos sintéticos quedan como smoke técnico, no como entrenamiento oficial.
 
 
 
-## Estado de datos y experimentos (4 de noviembre de 2026)
+## Estado de datos y experimento oficial (4 de noviembre de 2026)
 
-La integración de corpus y tutoría está en revisión en la [PR #39](https://github.com/orbitalronin94/RONIN-IA/pull/39). No debe confundirse una PR con una integración ya fusionada en `main`.
+La [PR #39](https://github.com/orbitalronin94/RONIN-IA/pull/39) ya está fusionada en `main` (merge commit `ba22ed03fd76b3543f32ce301b8bbd0da6a714f9`).
 
-- La auditoría de adquisición de la PR #39 terminó correctamente: 644 documentos literarios verificados (608 train, 18 validation y 18 test).
-- La CI de esa rama terminó correctamente: 100 pruebas pasadas, Ruff limpio y smoke de entrenamiento.
-- La biblioteca de codificación se descargó y validó estructuralmente, pero sus fuentes y casos siguen excluidos del preentrenamiento general hasta revisión manual.
-- El ciclo largo Portfolio + literatura + Phi-4 terminó con fallo en la ejecución #59: Phi-4 pasó la descarga/verificación, pero la generación falla porque Transformers rechaza el argumento `generator`; además, el entorno de `datasets` y `huggingface_hub` es incompatible (`BucketNotFoundError`). No hay métricas MMLU-Pro finales ni artefacto combinado de ese ciclo.
+### Datos que entran en el nuevo entrenamiento
 
-El inventario operativo, con procedencia, revisiones, licencias, particiones, exclusiones y enlaces a artefactos, está en [Inventario de corpus y materiales](docs/INVENTARIO_CORPUS_Y_MATERIALES.md) y en su [manifiesto JSON](data/manifests/corpus_inventory.json). Es la guía de qué puede entrenar, qué solo puede evaluar y qué permanece en cuarentena.
+- **Portfolio/Papers:** 48 documentos utilizables, con autorización expresa para las aportaciones originales. Se usa solo como entrenamiento; el material de terceros incrustado requiere revisión propia.
+- **Literatura abierta:** 644 documentos preparados de CLiGS Textbox, CoNSSA y ELTeC-spa: 608 train, 18 validation y 18 test. Solo la partición train entra en la mezcla.
+- **Mezcla oficial:** Portfolio + train de las tres colecciones literarias, con manifiestos y SHA-256 separados.
+- **Fuera del entrenamiento general:** la biblioteca criptográfica (6 fuentes/506 casos) sigue pendiente de revisión manual; los pseudodatos sintéticos son solo smoke; los textos generados por tutores no se incluyen hasta superar revisión de calidad y derechos. Los splits validation/test nunca se mezclan con train.
+
+Los tutores GPT-2, GPT-Neo y Phi-4 pueden descargarse y ejecutarse localmente con licencias verificadas, pero sus pesos no se transfieren al estudiante. El nuevo workflow oficial no depende de que un tutor genere texto.
+
+### Workflow oficial: entrenamiento desde cero + holdout externo
+
+<badge color="success">Workflow creado y lanzado</badge>
+
+[Experimento oficial RONIN desde cero + MMLU-Pro completo](https://github.com/orbitalronin94/RONIN-IA/actions/workflows/ronin-official-training-holdout.yml)
+
+La ejecución inicial es la [run #1](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377), actualmente en curso al actualizar este README.
+
+- Entrena el estudiante RONIN desde inicialización aleatoria, perfil `tiny`, 1.000 pasos y semilla 1337.
+- Usa únicamente los corpus autorizados indicados arriba.
+- Evalúa antes y después en el split **test completo de MMLU-Pro** (12.032 preguntas esperadas), un benchmark externo multidominio.
+- Mantiene el test fuera de los gradientes y de la mezcla de entrenamiento.
+- Registra exactitud por dominio, cobertura, ítems omitidos por exceder el contexto, hashes del checkpoint, dataset y mezcla.
+- No publica corpus ni checkpoints; el artefacto de Actions contiene informes y manifiestos.
+
+**Límite de interpretación:** RONIN puntúa la letra de respuesta por probabilidad del siguiente byte (A–J). Es un protocolo propio, no el protocolo oficial de MMLU-Pro ni una puntuación comparable con su leaderboard. El evaluador no trunca preguntas largas: informa cobertura y omisiones. La primera prueba es una sola semilla y un modelo de 9,9 M de parámetros en CPU; es una línea base experimental, no una afirmación de competencia general.
+
+### Últimas ejecuciones observadas
+
+- [CI #376](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976091): correcta.
+- [Preparación Portfolio #25](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976274): correcta.
+- [Experimento oficial #1](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377): en curso.
+- [Caché de tutores #2](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41826972273): correcta.
+
+El ciclo anterior con Phi-4/MMLU-Pro falló en la ejecución histórica [#59](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919709). El workflow nuevo evita entrenar con salidas de tutor no revisadas y fija explícitamente las dependencias del evaluador. No se anunciarán métricas del experimento nuevo hasta que termine y se compruebe el artefacto.
+
+El inventario completo, con procedencia, revisiones, licencias, particiones, exclusiones y hashes, está en [Inventario de corpus y materiales](docs/INVENTARIO_CORPUS_Y_MATERIALES.md) y en el [manifiesto JSON](data/manifests/corpus_inventory.json).
 
 ## La advertencia del README
 
@@ -73,6 +103,7 @@ El punto de partida incluye dos modelos de tamaño reducido, disponibles en Hugg
 |---|---|---:|---|
 | `gpt2` | `openai-community/gpt2` | 124 M | MIT |
 | `gpt-neo-125m` | `EleutherAI/gpt-neo-125m` | 125 M | MIT |
+| `phi-4-mini-instruct` | `microsoft/Phi-4-mini-instruct` | 3,8 B | MIT |
 
 Fichas oficiales: [GPT-2](https://huggingface.co/openai-community/gpt2) · [GPT-Neo 125M](https://huggingface.co/EleutherAI/gpt-neo-125m).
 
@@ -86,7 +117,7 @@ python scripts/download_teacher_models.py --model gpt2
 python scripts/download_teacher_models.py --model gpt-neo-125m
 ```
 
-La guía completa está en [Modelos auxiliares locales](docs/TEACHER_WORKFLOW.md).
+La guía completa está en [Modelos auxiliares locales](docs/TEACHER_WORKFLOW.md). Phi-4 utiliza `trust_remote_code=True`; su código remoto requiere revisión y aislamiento. La licencia MIT del modelo no se atribuye automáticamente al texto generado.
 
 ## Arquitectura del estudiante
 
