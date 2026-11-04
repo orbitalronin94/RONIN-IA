@@ -52,7 +52,7 @@ def main() -> int:
     data = json.loads(args.manifest.read_text(encoding="utf-8"))
     errors = validate(data)
     if errors:
-        raise SystemExit("\\n".join(errors))
+        raise SystemExit("\n".join(errors))
     print(json.dumps({
         "authors": len(data["historical_authors"]),
         "discovery_sources": len(data["discovery_sources"]),
