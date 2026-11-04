@@ -95,7 +95,6 @@ def _download(source: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     digest = hashlib.sha256()
     size = 0
     with urllib.request.urlopen(request, timeout=180) as response:
-        final_url = response.geturl()
         content_type = response.headers.get("Content-Type", "")
         with destination.open("wb") as target:
             while chunk := response.read(1024 * 1024):
@@ -139,7 +138,7 @@ def _download(source: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     record = {
         **source,
         "url": url,
-        "final_url": final_url,
+        "url": url,
         "content_type": content_type,
         "size_bytes": size,
         "sha256": actual_sha256,
@@ -152,6 +151,7 @@ def _download(source: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         "maximum_text_characters": maximum_characters,
         "training_status": "acquired_pending_ocr_quality_review",
     }
+    destination.unlink()
     destination.unlink()
     print(
         f"{source['id']}: {row_count} filas, {nonempty_rows} textos, "
