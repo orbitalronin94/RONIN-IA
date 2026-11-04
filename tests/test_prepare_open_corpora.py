@@ -1,4 +1,10 @@
-from scripts.prepare_open_corpora import _extract_tei, _is_source_path, _safe_member
+from scripts.prepare_open_corpora import (
+    _document_manifest_rows,
+    _extract_tei,
+    _extract_tei_documents,
+    _is_source_path,
+    _safe_member,
+)
 
 
 def test_extrae_solo_el_contenido_tei_y_omite_cabecera():
@@ -44,3 +50,78 @@ def test_particiones_holdout_son_deterministas_y_no_se_solapan():
     assert hashes["train"].isdisjoint(hashes["test"])
     assert hashes["validation"].isdisjoint(hashes["test"])
     assert set.union(*hashes.values()) == {item["sha256"] for item in documents}
+
+
+
+def test_manifiesto_por_documento_conserva_procedencia_licencia_y_particion():
+    digest = "a" * 64
+    partitions = {
+        "train": [{
+            "source": "cligs-textbox",
+            "path": "spanish/cuentos-espanoles/tei/cuento.xml",
+            "sha256": digest,
+            "source_file_sha256": "b" * 64,
+            "fragment_index": 1,
+            "fragment_title": "Cuento de prueba",
+            "group_sha256": "c" * 64,
+            "text": "Texto de prueba",
+        }],
+        "validation": [],
+        "test": [],
+    }
+
+    rows = _document_manifest_rows(partitions)
+
+    assert len(rows) == 1
+    assert rows[0]["record_id"] == digest
+    assert rows[0]["source_id"] == "cligs-textbox"
+    assert rows[0]["source_path"].endswith("cuento.xml")
+    assert rows[0]["license_text"] == "dominio público"
+    assert rows[0]["license_metadata"] == "CC-BY-4.0"
+    assert rows[0]["source_fragment_index"] == 1
+    assert rows[0]["source_fragment_title"] == "Cuento de prueba"
+    assert rows[0]["partition_group_sha256"] == "c" * 64
+    assert rows[0]["partition"] == "train"
+    assert rows[0]["character_count"] == len("Texto de prueba")
+
+
+
+def test_separa_cuentos_tei_en_documentos_individuales():
+    tei = b"""<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <text><body>
+      <div type="short-story"><head>Relato uno</head><p>Texto primero.</p></div>
+      <div type="short-story"><head>Relato dos</head><p>Texto segundo.</p></div>
+    </body></text></TEI>"""
+
+    documents = _extract_tei_documents(tei)
+
+    assert len(documents) == 2
+    assert documents[0]["fragment_title"] == "Relato uno"
+    assert documents[1]["fragment_title"] == "Relato dos"
+    assert documents[0]["text"] == "Relato uno Texto primero."
+    assert documents[1]["text"] == "Relato dos Texto segundo."
+
+
+def test_particiones_no_separan_fragmentos_de_una_misma_obra():
+    from scripts.prepare_open_corpora import _partition_documents
+
+    documents = [
+        {
+            "sha256": f"{index:064x}",
+            "group_sha256": f"{index // 2:064x}",
+            "text": f"fragmento-{index}",
+        }
+        for index in range(100)
+    ]
+    partitions = _partition_documents(documents)
+    owners = {
+        item["group_sha256"]: split
+        for split, items in partitions.items()
+        for item in items
+    }
+
+    for items in partitions.values():
+        groups = {item["group_sha256"] for item in items}
+        assert all(owners[group] == next(
+            split for split, candidates in partitions.items() if candidates is items
+        ) for group in groups)

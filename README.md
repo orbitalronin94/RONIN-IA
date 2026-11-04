@@ -159,3 +159,8 @@ Trabajar en ramas pequeñas y commits secuenciales. Leer el contenido actual ant
 ## Licencia
 
 Consultar [LICENSE](LICENSE). Las licencias de los datos y de cada modelo auxiliar son independientes de la licencia del software y deben registrarse por separado.
+
+
+## Biblioteca de codificación documentada
+
+El catálogo crítico de criptografía, esteganografía y acrósticos históricos y literarios está en [`docs/CASOS_CODIFICACION_DOCUMENTADA.md`](docs/CASOS_CODIFICACION_DOCUMENTADA.md). Distingue descifrados documentados, interpretaciones de acrósticos, criptogramas ficticios y afirmaciones pendientes de verificación; no es todavía un corpus de entrenamiento.

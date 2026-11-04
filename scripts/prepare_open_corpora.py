@@ -11,9 +11,9 @@ import hashlib
 import json
 import re
 import urllib.request
-import zipfile
 from pathlib import Path, PurePosixPath
 from typing import Any
+from urllib.parse import quote
 from xml.etree import ElementTree as ET
 
 SOURCES = (
@@ -26,6 +26,7 @@ SOURCES = (
         "paths": (
             "spanish/novela-espanola/tei/",
             "spanish/novela-hispanoamericana/tei/",
+            "spanish/cuentos-espanoles/tei/",
         ),
         "url": "https://github.com/cligs/textbox",
     },
@@ -72,15 +73,49 @@ def _is_source_path(name: str, prefixes: tuple[str, ...]) -> bool:
     return name.lower().endswith(".xml") and any(name.startswith(p) for p in prefixes)
 
 
-def _extract_tei(data: bytes) -> str:
+def _extract_tei_documents(data: bytes) -> list[dict[str, Any]]:
+    """Extrae obras completas y separa relatos cuando TEI los identifica."""
     root = ET.fromstring(data)
     text_node = next(
         (node for node in root.iter() if node.tag.rsplit("}", 1)[-1] == "text"),
         None,
     )
     if text_node is None:
-        return ""
-    return clean_text(" ".join(part.strip() for part in text_node.itertext() if part.strip()))
+        return []
+
+    stories = [
+        node for node in text_node.iter()
+        if node.tag.rsplit("}", 1)[-1] == "div"
+        and node.attrib.get("type") == "short-story"
+    ]
+    if stories:
+        documents = []
+        for index, story in enumerate(stories, start=1):
+            title_node = next(
+                (node for node in story if node.tag.rsplit("}", 1)[-1] == "head"),
+                None,
+            )
+            title = clean_text(" ".join(title_node.itertext())) if title_node is not None else ""
+            text = clean_text(
+                " ".join(part.strip() for part in story.itertext() if part.strip())
+            )
+            if text:
+                documents.append({
+                    "text": text,
+                    "fragment_index": index,
+                    "fragment_title": title,
+                })
+        return documents
+
+    text = clean_text(
+        " ".join(part.strip() for part in text_node.itertext() if part.strip())
+    )
+    return [{"text": text, "fragment_index": 1, "fragment_title": ""}] if text else []
+
+
+def _extract_tei(data: bytes) -> str:
+    """Compatibilidad: devuelve el texto TEI completo como una sola cadena."""
+    return " ".join(item["text"] for item in _extract_tei_documents(data))
 
 
 def _safe_member(name: str) -> bool:
@@ -88,80 +123,240 @@ def _safe_member(name: str) -> bool:
     return not path.is_absolute() and ".." not in path.parts
 
 
-def _download_source(source: dict[str, Any], cache_dir: Path) -> tuple[Path, str]:
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    archive_path = cache_dir / f"{source['id']}.zip"
-    url = (
-        f"https://codeload.github.com/{source['repository']}/zip/"
-        f"{source['revision']}"
+def _download_source_files(
+    source: dict[str, Any],
+    cache_dir: Path,
+) -> tuple[list[dict[str, Any]], str]:
+    """Descarga solo los TEI seleccionados, nunca el ZIP completo del repositorio."""
+    tree_url = (
+        f"https://api.github.com/repos/{source['repository']}/git/trees/"
+        f"{source['revision']}?recursive=1"
     )
-    if not archive_path.exists():
-        request = urllib.request.Request(url, headers={"User-Agent": "RONIN-IA-corpus-preparer/1.0"})
-        with urllib.request.urlopen(request, timeout=60) as response:
-            archive_path.write_bytes(response.read())
-    return archive_path, sha256(archive_path.read_bytes())
+    request = urllib.request.Request(
+        tree_url,
+        headers={
+            "User-Agent": "RONIN-IA-corpus-preparer/1.0",
+            "Accept": "application/vnd.github+json",
+        },
+    )
+    with urllib.request.urlopen(request, timeout=60) as response:
+        tree_data = json.loads(response.read().decode("utf-8"))
+    if tree_data.get("truncated"):
+        raise ValueError(f"Árbol GitHub truncado para {source['id']}")
+
+    selected = [
+        item for item in tree_data.get("tree", [])
+        if item.get("type") == "blob"
+        and _safe_member(item["path"])
+        and _is_source_path(item["path"], source["paths"])
+    ]
+    selected.sort(key=lambda item: item["path"])
+    source_cache = cache_dir / source["id"] / source["revision"]
+    downloaded: list[dict[str, Any]] = []
+    print(
+        f"{source['id']}: {len(selected)} archivos TEI seleccionados",
+        flush=True,
+    )
+
+    for item in selected:
+        relative = item["path"]
+        if item.get("size", 0) > 20 * 1024 * 1024:
+            downloaded.append({
+                "path": relative,
+                "size": item["size"],
+                "sha256": "",
+                "local_path": "",
+                "skipped": "archivo mayor de 20 MiB",
+            })
+            continue
+
+        local_path = source_cache / relative
+        local_path.parent.mkdir(parents=True, exist_ok=True)
+        if not local_path.exists():
+            raw_url = (
+                f"https://raw.githubusercontent.com/{source['repository']}/"
+                f"{source['revision']}/{quote(relative, safe='/')}"
+            )
+            raw_request = urllib.request.Request(
+                raw_url,
+                headers={"User-Agent": "RONIN-IA-corpus-preparer/1.0"},
+            )
+            with urllib.request.urlopen(raw_request, timeout=60) as response:
+                data = response.read()
+            if len(data) != item["size"]:
+                raise ValueError(f"Tamaño inesperado al descargar {source['id']}:{relative}")
+            local_path.write_bytes(data)
+
+        data = local_path.read_bytes()
+        if len(data) != item["size"]:
+            raise ValueError(f"Archivo de caché incompleto: {source['id']}:{relative}")
+        git_blob_sha1 = hashlib.sha1(
+            f"blob {len(data)}\0".encode("ascii") + data
+        ).hexdigest()
+        if git_blob_sha1 != item["sha"]:
+            raise ValueError(f"SHA Git no coincide: {source['id']}:{relative}")
+        downloaded.append({
+            "path": relative,
+            "size": len(data),
+            "git_blob_sha1": git_blob_sha1,
+            "sha256": sha256(data),
+            "local_path": str(local_path),
+            "skipped": "",
+        })
+
+    return downloaded, tree_data.get("sha", "")
 
 
 
 def _partition_documents(
-    documents: list[dict[str, str]],
-) -> dict[str, list[dict[str, str]]]:
-    """Asigna documentos completos a particiones reproducibles sin solapamiento."""
-    ordered = sorted(documents, key=lambda item: item["sha256"])
-    total = len(ordered)
+    documents: list[dict[str, Any]],
+) -> dict[str, list[dict[str, Any]]]:
+    """Divide grupos de origen completos para evitar fuga entre particiones."""
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for item in documents:
+        group_id = item.get("group_sha256", item["sha256"])
+        groups.setdefault(group_id, []).append(item)
+
+    ordered_groups = [
+        groups[key] for key in sorted(groups)
+    ]
+    total = len(ordered_groups)
     test_count = max(1, round(total * 0.05))
     validation_count = max(1, round(total * 0.05))
     if test_count + validation_count >= total:
-        raise ValueError("No hay suficientes documentos para separar train/validation/test")
+        raise ValueError("No hay suficientes grupos para train/validation/test")
+
     return {
-        "test": ordered[:test_count],
-        "validation": ordered[test_count:test_count + validation_count],
-        "train": ordered[test_count + validation_count:],
+        "test": [item for group in ordered_groups[:test_count] for item in group],
+        "validation": [
+            item for group in ordered_groups[test_count:test_count + validation_count]
+            for item in group
+        ],
+        "train": [
+            item for group in ordered_groups[test_count + validation_count:]
+            for item in group
+        ],
     }
+
+
+def _document_manifest_rows(
+    partitions: dict[str, list[dict[str, Any]]],
+) -> list[dict[str, Any]]:
+    """Conserva procedencia y licencia de cada obra sin duplicar su texto."""
+    source_by_id = {item["id"]: item for item in SOURCES}
+    rows: list[dict[str, Any]] = []
+    for split, documents in partitions.items():
+        for item in documents:
+            source = source_by_id[item["source"]]
+            rows.append({
+                "record_id": item["sha256"],
+                "source_id": item["source"],
+                "source_path": item["path"],
+                "source_url": source["url"],
+                "source_revision": source["revision"],
+                "source_file_sha256": item["source_file_sha256"],
+                "source_fragment_index": item["fragment_index"],
+                "source_fragment_title": item["fragment_title"],
+                "partition_group_sha256": item["group_sha256"],
+                "license_text": source["license_text"],
+                "license_metadata": source["license_metadata"],
+                "text_sha256": item["sha256"],
+                "character_count": len(item["text"]),
+                "partition": split,
+            })
+    return rows
 
 
 def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
     candidates: list[dict[str, str]] = []
-    archive_hashes: dict[str, str] = {}
+    source_downloads: dict[str, dict[str, Any]] = {}
     skipped: list[dict[str, str]] = []
     seen: set[str] = set()
 
     for source in SOURCES:
-        archive_path, archive_hash = _download_source(source, cache_dir)
-        archive_hashes[source["id"]] = archive_hash
-        with zipfile.ZipFile(archive_path) as archive:
-            for member in sorted(archive.infolist(), key=lambda item: item.filename):
-                name = member.filename
-                if member.is_dir() or not _safe_member(name):
-                    continue
-                relative = name.split("/", 1)[-1]
-                if not _is_source_path(relative, source["paths"]):
-                    continue
-                if member.file_size > 20 * 1024 * 1024:
-                    skipped.append({"source": source["id"], "path": relative, "reason": "archivo mayor de 20 MiB"})
-                    continue
-                try:
-                    text = _extract_tei(archive.read(member))
-                except (ET.ParseError, UnicodeDecodeError, ValueError) as exc:
-                    skipped.append({"source": source["id"], "path": relative, "reason": f"TEI no válido: {exc}"})
-                    continue
+        downloaded, tree_sha = _download_source_files(source, cache_dir)
+        file_rows = [
+            {"path": item["path"], "size": item["size"], "sha256": item["sha256"]}
+            for item in downloaded
+        ]
+        aggregate = sha256(
+            "\n".join(
+                f"{item['path']}:{item['sha256']}" for item in file_rows
+            ).encode("utf-8")
+        )
+        source_downloads[source["id"]] = {
+            "tree_sha": tree_sha,
+            "downloaded_file_count": sum(1 for item in downloaded if item["sha256"]),
+            "downloaded_files_sha256": aggregate,
+            "downloaded_files": [
+                {
+                    "path": item["path"],
+                    "size": item["size"],
+                    "git_blob_sha1": item.get("git_blob_sha1", ""),
+                    "sha256": item["sha256"],
+                    "skipped": item["skipped"],
+                }
+                for item in downloaded
+            ],
+        }
+
+        for item in downloaded:
+            relative = item["path"]
+            if item["skipped"]:
+                skipped.append({
+                    "source": source["id"],
+                    "path": relative,
+                    "reason": item["skipped"],
+                })
+                continue
+            try:
+                fragments = _extract_tei_documents(
+                    Path(item["local_path"]).read_bytes()
+                )
+            except (ET.ParseError, UnicodeDecodeError, ValueError) as exc:
+                skipped.append({
+                    "source": source["id"],
+                    "path": relative,
+                    "reason": f"TEI no válido: {exc}",
+                })
+                continue
+
+            for fragment in fragments:
+                text = fragment["text"]
                 if len(text) < MIN_DOCUMENT_CHARACTERS:
-                    skipped.append({"source": source["id"], "path": relative, "reason": "texto demasiado corto"})
+                    skipped.append({
+                        "source": source["id"],
+                        "path": relative,
+                        "reason": "fragmento demasiado corto",
+                    })
                     continue
                 if any(pattern.search(text) for pattern in SECRET_PATTERNS):
-                    skipped.append({"source": source["id"], "path": relative, "reason": "patrón de credencial detectado"})
+                    skipped.append({
+                        "source": source["id"],
+                        "path": relative,
+                        "reason": "patrón de credencial detectado",
+                    })
                     continue
                 digest = sha256(text.encode("utf-8"))
                 if digest in seen:
-                    skipped.append({"source": source["id"], "path": relative, "reason": "duplicado exacto"})
+                    skipped.append({
+                        "source": source["id"],
+                        "path": relative,
+                        "reason": "duplicado exacto",
+                    })
                     continue
                 seen.add(digest)
                 candidates.append({
                     "source": source["id"],
                     "path": relative,
+                    "source_file_sha256": item["sha256"],
+                    "group_sha256": item["sha256"],
+                    "fragment_index": fragment["fragment_index"],
+                    "fragment_title": fragment["fragment_title"],
                     "sha256": digest,
                     "text": text,
                 })
+
 
     if len(candidates) < 10:
         raise ValueError(f"Corpus insuficiente: solo {len(candidates)} documentos válidos")
@@ -186,17 +381,24 @@ def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
             "license_text": item["license_text"],
             "license_metadata": item["license_metadata"],
             "selected_paths": list(item["paths"]),
-            "archive_sha256": archive_hashes[item["id"]],
+            **source_downloads[item["id"]],
         }
         for item in SOURCES
     ]
+    document_rows = _document_manifest_rows(partitions)
+    document_manifest_bytes = (
+        "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in document_rows)
+    ).encode("utf-8")
+    (output_dir / "documents.jsonl").write_bytes(document_manifest_bytes)
+    output_hashes["documents.jsonl"] = sha256(document_manifest_bytes)
     manifest = {
-        "schema_version": 1,
-        "dataset_id": "ronin-spanish-public-domain-literature-v1",
+        "schema_version": 2,
+        "dataset_id": "ronin-spanish-public-domain-literature-v2",
         "license": "textos de dominio público; marcado TEI/metadatos CC-BY-4.0",
         "access": "descarga HTTPS pública sin cuenta, token ni clave API",
         "sources": source_manifest,
         "document_count": len(candidates),
+        "document_manifest": "documents.jsonl",
         "document_counts": {key: len(value) for key, value in partitions.items()},
         "source_document_counts": {
             source["id"]: sum(1 for item in candidates if item["source"] == source["id"])
