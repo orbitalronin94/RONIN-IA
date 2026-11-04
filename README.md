@@ -32,14 +32,24 @@ Workflow principal: [Experimento oficial RONIN desde cero + MMLU-Pro completo](h
 
 La [PR #39](https://github.com/orbitalronin94/RONIN-IA/pull/39) ya está fusionada en `main` (merge commit `ba22ed03fd76b3543f32ce301b8bbd0da6a714f9`).
 
-### Datos que entran en el nuevo entrenamiento
+### Datos y ocho bibliotecas masivas
 
-**Puerta G-0 — licencias y derechos:** ningún material entra en entrenamiento por el mero hecho de estar disponible. Cada recurso debe tener procedencia, licencia o autorización compatible y revisión de los materiales de terceros; lo que no supera esa puerta queda excluido o en cuarentena. La autorización del Portfolio cubre las aportaciones originales, no concede automáticamente derechos sobre material de terceros incrustado.
+**Nueva política de entrenamiento:** Portfolio/Papers queda fuera de pretraining y SFT. No cuenta como biblioteca y no se añade a los pesos preventivamente. Se reservará como índice RAG de experto: RONIN lo consulta cuando detecte incertidumbre o una pregunta especializada, recupera fragmentos con procedencia y responde con citas. Solo se reconsiderará entrenamiento con esos documentos si una carencia demostrada no se resuelve mediante recuperación y un A/B controlado demuestra mejora, con aprobación explícita.
 
-- **Portfolio/Papers:** 48 documentos utilizables, con autorización expresa para las aportaciones originales. Se usa solo como entrenamiento; el material de terceros incrustado requiere revisión propia.
-- **Literatura abierta:** 644 documentos preparados de CLiGS Textbox, CoNSSA y ELTeC-spa: 608 train, 18 validation y 18 test. Solo la partición train entra en la mezcla.
-- **Mezcla oficial:** Portfolio + train de las tres colecciones literarias, con manifiestos y SHA-256 separados.
-- **Fuera del entrenamiento general:** la biblioteca criptográfica (6 fuentes/506 casos) sigue pendiente de revisión manual; los pseudodatos sintéticos son solo smoke; los textos generados por tutores no se incluyen hasta superar revisión de calidad y derechos. Los splits validation/test nunca se mezclan con train.
+El objetivo previo a RUN #5 son ocho bibliotecas independientes y masivas: matemáticas; lógica y epistemología; filosofía; física; química y materiales; biología y medicina; informática y software; derecho, economía y ciencias sociales. El umbral inicial es 256 MiB de texto train normalizado por biblioteca, con objetivo de 1 GiB, hashes y balance de volumen. Bytes no sustituyen la evaluación de calidad ni de cobertura.
+
+**No hay ocho bibliotecas admitidas todavía.** El manifiesto las registra como candidatas; el gate exige revisión de licencia por documento, procedencia, revisión inmutable, SHA-256, deduplicación, calidad, escaneo de PII/secretos y splits sin fugas. RUN #5 permanece bloqueada hasta que las ocho tengan sus ficheros train preparados y sus hashes verificados.
+
+- **Matemáticas:** OpenWebMath (14,7B tokens declarados, ODC-By-1.0 y términos de Common Crawl) es prioridad condicional. MathPile y ProofPile-2 no se admiten como paquetes completos porque heredan licencias de múltiples fuentes.
+- **Lógica y epistemología:** Lean mathlib4 (Apache-2.0, dependencias a revisar) aporta pruebas formales; Common Corpus puede aportar prosa científica solo con filtro temático y licencia documental.
+- **Filosofía:** Spanish Public Domain Books de PleIAs es candidato masivo, sujeto a revisión obra/edición/traducción/jurisdicción y OCR.
+- **Física:** arXiv y OpenScience de Common Corpus requieren filtro por artículo/documento y licencia.
+- **Química y materiales:** PMC OA y PatentsView, con licencia por artículo y revisión de contenido incrustado.
+- **Biología y medicina:** PMC Open Access Subset y Europe PMC OA; nunca se descarga indiscriminadamente todo PMC.
+- **Informática y software:** The Stack v1/v2 con SPDX por archivo, opt-outs, atribución y escaneo de secretos/malware. The Stack v2 es demasiado grande para descargarlo completo en Actions.
+- **Derecho, economía y ciencias sociales:** OpenGovernment de Common Corpus, Harvard Caselaw Access Project y Europarl, sujetos a licencia, jurisdicción, vigencia y PII.
+
+La auditoría completa, decisiones y bloqueos están en [Auditoría de ocho bibliotecas masivas](docs/AUDITORIA_OCHO_BIBLIOTECAS_MASIVAS.md) y [manifiesto de admisión](data/manifests/eight_libraries.json). La aceleración del entrenamiento CPU se documenta en [Plan de aceleración CPU](docs/PLAN_ACELERACION_ENTRENAMIENTO_CPU.md).
 
 Los tutores GPT-2, GPT-Neo y Phi-4 pueden descargarse y ejecutarse localmente con licencias verificadas, pero sus pesos no se transfieren al estudiante. El nuevo workflow oficial no depende de que un tutor genere texto.
 
