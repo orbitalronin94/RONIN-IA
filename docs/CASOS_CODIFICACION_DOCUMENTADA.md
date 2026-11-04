@@ -33,16 +33,24 @@ sustituyen la descarga y verificación del ejemplar fuente.
 
 **Estado:** `decoded_documented`.
 
-El Libro III contiene criptogramas que Jim Reeds identificó y resolvió en un
-artículo de *Cryptologia* (1998). La presencia de cifrados en los Libros I y II
-ya era conocida desde 1606; no atribuir a Reeds el descubrimiento de esos dos
-libros. El caso muestra cómo un texto que aparenta ser mágico puede contener
-un procedimiento criptográfico real.
+El Libro III contiene criptogramas que Jim Reeds analizó y resolvió en un
+artículo de *Cryptologia* (1998). Hay una precisión histórica importante: en
+la nota «Added in proof», Reeds reconoce que Thomas Ernst había llegado a las
+mismas conclusiones tres años antes, en su estudio de 1996, con más detalle y
+una edición crítica de manuscritos. Por tanto, el descifrado del Libro III
+cuenta con dos análisis independientes; no debe atribuirse su primacía a
+Reeds. La presencia de cifrados en los Libros I y II ya era conocida desde
+1606 por la *Clavis*. El caso muestra cómo un texto presentado como magia
+puede contener mecanismos criptográficos reales, pero también que hay que
+separar los tres libros y la cronología de sus soluciones.
 
 Referencia principal:
 - Jim Reeds, “Solved: The Ciphers in Book III of Trithemius's
   *Steganographia*”, *Cryptologia* 22 (1998), 291–317.
   DOI: https://doi.org/10.1080/0161-119891886948
+- Thomas Ernst, “Schwarzweiße Magie: Der Schlüssel zum dritten Buch der
+  *Steganographia* des Trithemius”, *Daphnis* 25.1 (1996), 1–205. Reeds lo
+  identifica expresamente como solución independiente anterior.
 
 ### 2. *Hypnerotomachia Poliphili* (Venecia, 1499)
 
@@ -220,8 +228,9 @@ La primera tanda incluye:
   Son secuencias sin carga útil insertada, no ejemplos históricos que se
   declaren universalmente carentes de significado.
 
-La *Steganographia* de Trithemius (edición de 1608) y *Cryptomenytices* de
-Selenus (1624) se descargan como fuentes primarias de dominio público. La
+La *Steganographia* de Trithemius (edición de 1608), *Cryptomenytices* de
+Selenus (1624), y los demás originales se descargan como fuentes primarias de
+dominio público o con Public Domain Mark explícita. La
 primera se cotejará con Reeds (1998) antes de producir pares de entrenamiento
 del Libro III; el escaneo por sí solo no se etiqueta como una muestra ya
 descifrada.
