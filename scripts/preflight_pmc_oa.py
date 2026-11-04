@@ -41,7 +41,7 @@ DOMAIN_QUERIES = {
 
 
 def normalize_license(value: Any) -> str:
-    return re.sub(r"\\s+", " ", str(value or "").strip().upper().replace("-", " "))
+    return re.sub(r"\s+", " ", str(value or "").strip().upper().replace("-", " "))
 
 
 def approved_license(value: Any) -> bool:
@@ -143,7 +143,7 @@ def main() -> None:
     summaries = []
     for domain in DOMAIN_QUERIES:
         report = preflight_domain(domain, args.sample_limit)
-        encoded = (json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2) + "\\n").encode("utf-8")
+        encoded = (json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8")
         report_path = args.output / f"{domain}.json"
         report_path.write_bytes(encoded)
         summaries.append({
@@ -163,7 +163,7 @@ def main() -> None:
         "note": "Metadata preflight only. No article full text was downloaded.",
     }
     (args.output / "INDEX.json").write_text(
-        json.dumps(index, ensure_ascii=False, indent=2) + "\\n",
+        json.dumps(index, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     print(json.dumps(index, ensure_ascii=False, indent=2))
