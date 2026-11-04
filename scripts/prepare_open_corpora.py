@@ -73,15 +73,49 @@ def _is_source_path(name: str, prefixes: tuple[str, ...]) -> bool:
     return name.lower().endswith(".xml") and any(name.startswith(p) for p in prefixes)
 
 
-def _extract_tei(data: bytes) -> str:
+def _extract_tei_documents(data: bytes) -> list[dict[str, Any]]:
+    """Extrae obras completas y separa relatos cuando TEI los identifica."""
     root = ET.fromstring(data)
     text_node = next(
         (node for node in root.iter() if node.tag.rsplit("}", 1)[-1] == "text"),
         None,
     )
     if text_node is None:
-        return ""
-    return clean_text(" ".join(part.strip() for part in text_node.itertext() if part.strip()))
+        return []
+
+    stories = [
+        node for node in text_node.iter()
+        if node.tag.rsplit("}", 1)[-1] == "div"
+        and node.attrib.get("type") == "short-story"
+    ]
+    if stories:
+        documents = []
+        for index, story in enumerate(stories, start=1):
+            title_node = next(
+                (node for node in story if node.tag.rsplit("}", 1)[-1] == "head"),
+                None,
+            )
+            title = clean_text(" ".join(title_node.itertext())) if title_node is not None else ""
+            text = clean_text(
+                " ".join(part.strip() for part in story.itertext() if part.strip())
+            )
+            if text:
+                documents.append({
+                    "text": text,
+                    "fragment_index": index,
+                    "fragment_title": title,
+                })
+        return documents
+
+    text = clean_text(
+        " ".join(part.strip() for part in text_node.itertext() if part.strip())
+    )
+    return [{"text": text, "fragment_index": 1, "fragment_title": ""}] if text else []
+
+
+def _extract_tei(data: bytes) -> str:
+    """Compatibilidad: devuelve el texto TEI completo como una sola cadena."""
+    return " ".join(item["text"] for item in _extract_tei_documents(data))
 
 
 def _safe_member(name: str) -> bool:
@@ -175,19 +209,33 @@ def _download_source_files(
 
 
 def _partition_documents(
-    documents: list[dict[str, str]],
-) -> dict[str, list[dict[str, str]]]:
-    """Asigna documentos completos a particiones reproducibles sin solapamiento."""
-    ordered = sorted(documents, key=lambda item: item["sha256"])
-    total = len(ordered)
+    documents: list[dict[str, Any]],
+) -> dict[str, list[dict[str, Any]]]:
+    """Divide grupos de origen completos para evitar fuga entre particiones."""
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for item in documents:
+        group_id = item.get("group_sha256", item["sha256"])
+        groups.setdefault(group_id, []).append(item)
+
+    ordered_groups = [
+        groups[key] for key in sorted(groups)
+    ]
+    total = len(ordered_groups)
     test_count = max(1, round(total * 0.05))
     validation_count = max(1, round(total * 0.05))
     if test_count + validation_count >= total:
-        raise ValueError("No hay suficientes documentos para separar train/validation/test")
+        raise ValueError("No hay suficientes grupos para train/validation/test")
+
     return {
-        "test": ordered[:test_count],
-        "validation": ordered[test_count:test_count + validation_count],
-        "train": ordered[test_count + validation_count:],
+        "test": [item for group in ordered_groups[:test_count] for item in group],
+        "validation": [
+            item for group in ordered_groups[test_count:test_count + validation_count]
+            for item in group
+        ],
+        "train": [
+            item for group in ordered_groups[test_count + validation_count:]
+            for item in group
+        ],
     }
 
 
@@ -207,6 +255,9 @@ def _document_manifest_rows(
                 "source_url": source["url"],
                 "source_revision": source["revision"],
                 "source_file_sha256": item["source_file_sha256"],
+                "source_fragment_index": item["fragment_index"],
+                "source_fragment_title": item["fragment_title"],
+                "partition_group_sha256": item["group_sha256"],
                 "license_text": source["license_text"],
                 "license_metadata": source["license_metadata"],
                 "text_sha256": item["sha256"],
@@ -259,7 +310,9 @@ def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
                 })
                 continue
             try:
-                text = _extract_tei(Path(item["local_path"]).read_bytes())
+                fragments = _extract_tei_documents(
+                    Path(item["local_path"]).read_bytes()
+                )
             except (ET.ParseError, UnicodeDecodeError, ValueError) as exc:
                 skipped.append({
                     "source": source["id"],
@@ -267,36 +320,43 @@ def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
                     "reason": f"TEI no válido: {exc}",
                 })
                 continue
-            if len(text) < MIN_DOCUMENT_CHARACTERS:
-                skipped.append({
+
+            for fragment in fragments:
+                text = fragment["text"]
+                if len(text) < MIN_DOCUMENT_CHARACTERS:
+                    skipped.append({
+                        "source": source["id"],
+                        "path": relative,
+                        "reason": "fragmento demasiado corto",
+                    })
+                    continue
+                if any(pattern.search(text) for pattern in SECRET_PATTERNS):
+                    skipped.append({
+                        "source": source["id"],
+                        "path": relative,
+                        "reason": "patrón de credencial detectado",
+                    })
+                    continue
+                digest = sha256(text.encode("utf-8"))
+                if digest in seen:
+                    skipped.append({
+                        "source": source["id"],
+                        "path": relative,
+                        "reason": "duplicado exacto",
+                    })
+                    continue
+                seen.add(digest)
+                candidates.append({
                     "source": source["id"],
                     "path": relative,
-                    "reason": "texto demasiado corto",
+                    "source_file_sha256": item["sha256"],
+                    "group_sha256": item["sha256"],
+                    "fragment_index": fragment["fragment_index"],
+                    "fragment_title": fragment["fragment_title"],
+                    "sha256": digest,
+                    "text": text,
                 })
-                continue
-            if any(pattern.search(text) for pattern in SECRET_PATTERNS):
-                skipped.append({
-                    "source": source["id"],
-                    "path": relative,
-                    "reason": "patrón de credencial detectado",
-                })
-                continue
-            digest = sha256(text.encode("utf-8"))
-            if digest in seen:
-                skipped.append({
-                    "source": source["id"],
-                    "path": relative,
-                    "reason": "duplicado exacto",
-                })
-                continue
-            seen.add(digest)
-            candidates.append({
-                "source": source["id"],
-                "path": relative,
-                "source_file_sha256": item["sha256"],
-                "sha256": digest,
-                "text": text,
-            })
+
 
     if len(candidates) < 10:
         raise ValueError(f"Corpus insuficiente: solo {len(candidates)} documentos válidos")
