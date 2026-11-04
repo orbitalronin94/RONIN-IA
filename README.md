@@ -60,7 +60,7 @@ La ejecución inicial es la [run #1](https://github.com/orbitalronin94/RONIN-IA/
 
 ### Últimas ejecuciones observadas
 
-- [CI #376](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976091): correcta.
+- [CI #387](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41828782413): correcta; 101 pruebas pasadas, análisis estático y smoke de entrenamiento en verde.
 - [Preparación Portfolio #25](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976274): correcta.
 - [Experimento oficial #1](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377): en curso.
 - [Caché de tutores #2](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41826972273): correcta.
