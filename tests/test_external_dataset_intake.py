@@ -22,3 +22,13 @@ def test_write_jsonl_is_deterministic_and_hashes_exact_bytes(tmp_path):
 
     assert digest == hashlib.sha256(path.read_bytes()).hexdigest()
     assert json.loads(path.read_text(encoding="utf-8")) == rows[0]
+
+
+def test_common_corpus_license_allowlist_is_narrow():
+    assert is_approved_common_corpus_license("Public Domain")
+    assert is_approved_common_corpus_license("CC0")
+    assert is_approved_common_corpus_license("CC BY 4.0")
+    assert is_approved_common_corpus_license("MIT")
+    assert not is_approved_common_corpus_license("CC BY-NC 4.0")
+    assert not is_approved_common_corpus_license("CC BY-ND 4.0")
+    assert not is_approved_common_corpus_license("unknown")
