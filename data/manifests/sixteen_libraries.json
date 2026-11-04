@@ -1,0 +1,602 @@
+{
+  "schema_version": 2,
+  "title": "RONIN sixteen-domain corpus admission gate",
+  "policy": {
+    "required_library_count": 16,
+    "minimum_train_bytes_per_library": 268435456,
+    "target_train_bytes_per_library": 1073741824,
+    "balance_ratio_min": 0.75,
+    "balance_ratio_max": 1.25,
+    "portfolio_policy": "retrieval_only_not_pretraining",
+    "admission_requires": [
+      "immutable_revision",
+      "anonymous_download",
+      "document_level_license",
+      "compatible_license",
+      "document_provenance",
+      "sha256",
+      "deduplication",
+      "quality_review",
+      "pii_and_secret_scan",
+      "document_level_split",
+      "train_bytes",
+      "semantic_density_selection_report",
+      "human_sample_quality_review",
+      "cross_library_near_deduplication"
+    ],
+    "no_run_5_until_all_sixteen_admitted": true,
+    "no_official_training_until_all_sixteen_admitted": true
+  },
+  "libraries": [
+    {
+      "id": "mathematics",
+      "domain": "Mathematics",
+      "status": "candidate",
+      "training_eligible": false,
+      "sources": [
+        {
+          "id": "openwebmath",
+          "url": "https://huggingface.co/datasets/open-web-math/open-web-math",
+          "published_scale": "14.7B tokens; 6.3M documents",
+          "license": "ODC-By-1.0; Common Crawl terms also apply",
+          "language": "English",
+          "decision": "priority_conditional",
+          "blockers": [
+            "audit upstream rights and Common Crawl terms",
+            "pin dataset revision",
+            "verify source-level exclusions and quality"
+          ]
+        },
+        {
+          "id": "mathpile",
+          "url": "https://huggingface.co/datasets/GAIR/MathPile",
+          "published_scale": "9.5B tokens",
+          "license": "underlying source licenses are not replaced by MathPile",
+          "language": "English",
+          "decision": "quarantine_as_whole",
+          "blockers": [
+            "source-level license allowlist required"
+          ]
+        },
+        {
+          "id": "proofpile2",
+          "url": "https://huggingface.co/datasets/EleutherAI/proof-pile-2",
+          "published_scale": "large mixed proof, code and math collection",
+          "license": "inherited per-source licenses",
+          "language": "English and formal languages",
+          "decision": "quarantine_as_whole",
+          "blockers": [
+            "derive eligible shards from source manifests and licenses"
+          ]
+        }
+      ],
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null
+    },
+    {
+      "id": "logic_epistemology",
+      "domain": "Logic and epistemology",
+      "status": "candidate",
+      "training_eligible": false,
+      "sources": [
+        {
+          "id": "lean_mathlib",
+          "url": "https://github.com/leanprover-community/mathlib4",
+          "published_scale": "large formal mathematics/proof library",
+          "license": "Apache-2.0 repository license; verify vendored dependencies",
+          "language": "Lean",
+          "decision": "priority_conditional",
+          "blockers": [
+            "pin commit",
+            "exclude generated/vendor files",
+            "formal proofs do not replace natural-language explanations"
+          ]
+        },
+        {
+          "id": "common_corpus_open_science",
+          "url": "https://huggingface.co/datasets/PleIAs/common_corpus",
+          "published_scale": "subset of 2.27T-token multilingual corpus",
+          "license": "document-level; exact allowlist only",
+          "language": "multilingual",
+          "decision": "priority_conditional",
+          "blockers": [
+            "filter logic/epistemology topic and exact license",
+            "retain document provenance"
+          ]
+        }
+      ],
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null
+    },
+    {
+      "id": "philosophy",
+      "domain": "Philosophy",
+      "status": "candidate",
+      "training_eligible": false,
+      "sources": [
+        {
+          "id": "pleias_spanish_pd_books",
+          "url": "https://huggingface.co/datasets/PleIAs/Spanish-PD-Books",
+          "published_scale": "302,640 works; 52.1 GB reported",
+          "license": "public-domain claim requires work/edition/jurisdiction verification",
+          "language": "Spanish",
+          "decision": "priority_conditional",
+          "blockers": [
+            "filter philosophy titles",
+            "verify work, translation, edition and jurisdiction",
+            "audit OCR and deduplicate"
+          ]
+        },
+        {
+          "id": "common_corpus_openculture",
+          "url": "https://huggingface.co/datasets/PleIAs/common_corpus",
+          "published_scale": "large cultural heritage collection",
+          "license": "document-level; exact allowlist only",
+          "language": "multilingual",
+          "decision": "priority_conditional",
+          "blockers": [
+            "filter philosophy works and Spanish",
+            "verify document license and edition"
+          ]
+        }
+      ],
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null
+    },
+    {
+      "id": "physics",
+      "domain": "Physics",
+      "status": "candidate",
+      "training_eligible": false,
+      "sources": [
+        {
+          "id": "arxiv_physics",
+          "url": "https://info.arxiv.org/help/bulk_data/index.html",
+          "published_scale": "very large scientific archive",
+          "license": "per-paper license/rights statement",
+          "language": "mostly English",
+          "decision": "priority_conditional",
+          "blockers": [
+            "filter physics categories",
+            "admit only compatible explicit licenses",
+            "exclude embedded third-party material where rights unclear"
+          ]
+        },
+        {
+          "id": "common_corpus_openscience_physics",
+          "url": "https://huggingface.co/datasets/PleIAs/common_corpus",
+          "published_scale": "large OpenScience collection",
+          "license": "document-level; exact allowlist only",
+          "language": "multilingual",
+          "decision": "priority_conditional",
+          "blockers": [
+            "verify physics labels, source and document license"
+          ]
+        }
+      ],
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null
+    },
+    {
+      "id": "chemistry",
+      "domain": "Chemistry and materials",
+      "status": "candidate",
+      "training_eligible": false,
+      "sources": [
+        {
+          "id": "pmc_oa_chemistry",
+          "url": "https://www.ncbi.nlm.nih.gov/pmc/tools/openftlist/",
+          "published_scale": "large OA subset; size varies by license filter",
+          "license": "per-article; CC0/CC-BY compatible subset only",
+          "language": "mostly English",
+          "decision": "priority_conditional",
+          "blockers": [
+            "use official PMC OA bulk/API only",
+            "filter chemistry/materials",
+            "exclude NC/ND and third-party content"
+          ]
+        },
+        {
+          "id": "uspto_patentsview_chemistry",
+          "url": "https://www.uspto.gov/ip-policy/economic-research/patentsview",
+          "published_scale": "large US patent corpus",
+          "license": "government records generally reusable; embedded third-party content needs review",
+          "language": "English",
+          "decision": "priority_conditional",
+          "blockers": [
+            "verify release terms",
+            "filter chemistry patents",
+            "remove embedded content with uncertain rights"
+          ]
+        }
+      ],
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null
+    },
+    {
+      "id": "biology_medicine",
+      "domain": "Biology and medicine",
+      "status": "candidate",
+      "training_eligible": false,
+      "sources": [
+        {
+          "id": "pmc_oa_biomed",
+          "url": "https://www.ncbi.nlm.nih.gov/pmc/tools/openftlist/",
+          "published_scale": "large official Open Access Subset",
+          "license": "per-article; CC0/CC-BY compatible subset only",
+          "language": "mostly English",
+          "decision": "priority_conditional",
+          "blockers": [
+            "never bulk-download all PMC",
+            "use only OA Subset",
+            "check article license and third-party content"
+          ]
+        },
+        {
+          "id": "europe_pmc_oa",
+          "url": "https://europepmc.org/downloads",
+          "published_scale": "large open-access full-text collection",
+          "license": "per-article; reuse terms vary",
+          "language": "multilingual subset",
+          "decision": "priority_conditional",
+          "blockers": [
+            "filter explicit CC0/CC-BY licenses",
+            "pin release and retain source IDs"
+          ]
+        }
+      ],
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null
+    },
+    {
+      "id": "computer_science",
+      "domain": "Computer science and software engineering",
+      "status": "candidate",
+      "training_eligible": false,
+      "sources": [
+        {
+          "id": "the_stack_v1",
+          "url": "https://huggingface.co/datasets/bigcode/the-stack",
+          "published_scale": "multi-terabyte code corpus",
+          "license": "per-file SPDX allowlist plus opt-out and attribution obligations",
+          "language": "hundreds of programming languages",
+          "decision": "priority_conditional",
+          "blockers": [
+            "pin reproducible snapshot",
+            "preserve per-file provenance",
+            "honor opt-outs",
+            "scan secrets and malware"
+          ]
+        },
+        {
+          "id": "the_stack_v2",
+          "url": "https://huggingface.co/datasets/bigcode/the-stack-v2",
+          "published_scale": "67.5 TB full; 32.1 TB deduplicated reported",
+          "license": "per-file original license; SWHID content retrieval",
+          "language": "600+ languages",
+          "decision": "conditional_high_scale",
+          "blockers": [
+            "resolve SWHID blobs",
+            "large storage/network costs",
+            "per-file licensing and opt-out checks"
+          ]
+        },
+        {
+          "id": "common_corpus_opensource",
+          "url": "https://huggingface.co/datasets/PleIAs/common_corpus",
+          "published_scale": "283B tokens OpenSource collection reported",
+          "license": "per-document/per-file",
+          "language": "multilingual code",
+          "decision": "priority_conditional",
+          "blockers": [
+            "code-specific license allowlist",
+            "secret/malware scan",
+            "separate code tokenizer or modality-aware packing"
+          ]
+        }
+      ],
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null
+    },
+    {
+      "id": "law_economics_social_sciences",
+      "domain": "Law, economics and social sciences",
+      "status": "candidate",
+      "training_eligible": false,
+      "sources": [
+        {
+          "id": "common_corpus_opengovernment",
+          "url": "https://huggingface.co/datasets/PleIAs/common_corpus",
+          "published_scale": "579B tokens OpenGovernment collection reported",
+          "license": "document-level; exact allowlist only",
+          "language": "multilingual",
+          "decision": "priority_conditional",
+          "blockers": [
+            "split legal/economic/social subdomains",
+            "filter Spanish and compatible licenses",
+            "remove personal data and stale law"
+          ]
+        },
+        {
+          "id": "harvard_caselaw_access_project",
+          "url": "https://case.law/",
+          "published_scale": "large US case-law collection",
+          "license": "capture and verify exact release terms",
+          "language": "English",
+          "decision": "conditional",
+          "blockers": [
+            "verify release terms and jurisdiction",
+            "do not represent US law as Spanish law"
+          ]
+        },
+        {
+          "id": "europarl",
+          "url": "https://www.statmt.org/europarl/",
+          "published_scale": "large multilingual parliamentary proceedings",
+          "license": "verify current source terms and version",
+          "language": "EU languages including Spanish",
+          "decision": "conditional",
+          "blockers": [
+            "verify reuse license and release",
+            "preserve dates and language"
+          ]
+        }
+      ],
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null
+    },
+    {
+      "id": "mathematics_hkd",
+      "domain": "Mathematics — high-knowledge density",
+      "status": "candidate",
+      "training_eligible": false,
+      "source_type": "high_knowledge_density_extraction",
+      "sources": [
+        {
+          "id": "openwebmath_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        },
+        {
+          "id": "mathpile_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        }
+      ],
+      "selection_metric": "RONIN-HKD-0.1",
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null,
+      "selection_report_sha256": null,
+      "human_quality_review": null,
+      "metric_version": "RONIN-HKD-0.1"
+    },
+    {
+      "id": "logic_epistemology_hkd",
+      "domain": "Logic and epistemology — high-knowledge density",
+      "status": "candidate",
+      "training_eligible": false,
+      "source_type": "high_knowledge_density_extraction",
+      "sources": [
+        {
+          "id": "proofpile2_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        },
+        {
+          "id": "lean_mathlib_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        }
+      ],
+      "selection_metric": "RONIN-HKD-0.1",
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null,
+      "selection_report_sha256": null,
+      "human_quality_review": null,
+      "metric_version": "RONIN-HKD-0.1"
+    },
+    {
+      "id": "philosophy_hkd",
+      "domain": "Philosophy — high-knowledge density",
+      "status": "candidate",
+      "training_eligible": false,
+      "source_type": "high_knowledge_density_extraction",
+      "sources": [
+        {
+          "id": "pleias_spanish_pd_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        },
+        {
+          "id": "common_corpus_openculture_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        }
+      ],
+      "selection_metric": "RONIN-HKD-0.1",
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null,
+      "selection_report_sha256": null,
+      "human_quality_review": null,
+      "metric_version": "RONIN-HKD-0.1"
+    },
+    {
+      "id": "physics_hkd",
+      "domain": "Physics — high-knowledge density",
+      "status": "candidate",
+      "training_eligible": false,
+      "source_type": "high_knowledge_density_extraction",
+      "sources": [
+        {
+          "id": "arxiv_physics_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        },
+        {
+          "id": "common_corpus_openscience_physics_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        }
+      ],
+      "selection_metric": "RONIN-HKD-0.1",
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null,
+      "selection_report_sha256": null,
+      "human_quality_review": null,
+      "metric_version": "RONIN-HKD-0.1"
+    },
+    {
+      "id": "chemistry_hkd",
+      "domain": "Chemistry and materials — high-knowledge density",
+      "status": "candidate",
+      "training_eligible": false,
+      "source_type": "high_knowledge_density_extraction",
+      "sources": [
+        {
+          "id": "pmc_oa_chemistry_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        },
+        {
+          "id": "patentsview_chemistry_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        }
+      ],
+      "selection_metric": "RONIN-HKD-0.1",
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null,
+      "selection_report_sha256": null,
+      "human_quality_review": null,
+      "metric_version": "RONIN-HKD-0.1"
+    },
+    {
+      "id": "biology_medicine_hkd",
+      "domain": "Biology and medicine — high-knowledge density",
+      "status": "candidate",
+      "training_eligible": false,
+      "source_type": "high_knowledge_density_extraction",
+      "sources": [
+        {
+          "id": "pmc_oa_biology_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        },
+        {
+          "id": "europe_pmc_oa_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        }
+      ],
+      "selection_metric": "RONIN-HKD-0.1",
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null,
+      "selection_report_sha256": null,
+      "human_quality_review": null,
+      "metric_version": "RONIN-HKD-0.1"
+    },
+    {
+      "id": "computer_science_hkd",
+      "domain": "Computer science and software — high-knowledge density",
+      "status": "candidate",
+      "training_eligible": false,
+      "source_type": "high_knowledge_density_extraction",
+      "sources": [
+        {
+          "id": "the_stack_v2_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        },
+        {
+          "id": "common_corpus_opensource_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        }
+      ],
+      "selection_metric": "RONIN-HKD-0.1",
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null,
+      "selection_report_sha256": null,
+      "human_quality_review": null,
+      "metric_version": "RONIN-HKD-0.1"
+    },
+    {
+      "id": "law_economics_social_sciences_hkd",
+      "domain": "Law, economics and social sciences — high-knowledge density",
+      "status": "candidate",
+      "training_eligible": false,
+      "source_type": "high_knowledge_density_extraction",
+      "sources": [
+        {
+          "id": "common_corpus_opengov_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        },
+        {
+          "id": "harvard_caselaw_hkd",
+          "decision": "conditional_disabled_until_document_license_audit"
+        }
+      ],
+      "selection_metric": "RONIN-HKD-0.1",
+      "train_bytes": 0,
+      "revision": null,
+      "manifest_sha256": null,
+      "license_audit": null,
+      "train_sha256": null,
+      "selection_report_sha256": null,
+      "human_quality_review": null,
+      "metric_version": "RONIN-HKD-0.1"
+    }
+  ],
+  "portfolio": {
+    "role": "retrieval_only_fallback",
+    "training_eligible": false,
+    "counted_as_library": false,
+    "usage": "consult when model uncertainty is high; cite retrieved source; no gradients",
+    "source_revision": "fffc234fdf3f82b6a90d56ae9b190d1c0de79690",
+    "retrieval_ready": false,
+    "index_sha256": null,
+    "document_manifest_sha256": null
+  },
+  "selection_metric": {
+    "id": "RONIN-HKD-0.1",
+    "weights": {
+      "domain_relevance": 0.25,
+      "knowledge_density": 0.3,
+      "specificity": 0.15,
+      "information_content": 0.15,
+      "structure": 0.15
+    },
+    "status": "heuristic_requires_ablation_validation"
+  }
+}

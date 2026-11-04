@@ -285,3 +285,38 @@ Si una ejecución cambia datos, código o documentación, la descripción debe i
 - [Manifiesto de datasets externos](../data/manifests/external_datasets.json)
 - [Política de ingesta y derechos G-0](INGESTA_AMPLIA_DATASETS_EXTERNOS.md)
 - [README del proyecto](../README.md)
+
+## Estado del gate 16 bibliotecas — 4 de noviembre de 2026
+
+La exigencia de RUN #5 se amplió a **16 bibliotecas masivas**: 8 base + 8 HKD (una por dominio). Portfolio/Papers es RAG experto, no training y no cuenta como biblioteca.
+
+Se añadieron:
+- scripts/select_knowledge_dense_corpus.py: selección reproducible con RONIN-HKD-0.1, licencia allowlist, IDF y SQLite temporal en disco.
+- scripts/harvest_knowledge_dense_libraries.py: orquestación de las ocho bibliotecas derivadas.
+- data/manifests/knowledge_dense_sources.json: fuentes/adaptadores y allowlists; todos desactivados por defecto.
+- data/manifests/sixteen_libraries.json y scripts/validate_sixteen_libraries.py: gate de 16 con hashes exactos, revisión humana y 256 MiB mínimo por biblioteca.
+- docs/METRICA_DENSIDAD_SEMANTICA.md: papers base, fórmula, pesos y protocolo de validación.
+
+Estado: 0/16 admitidas; las ocho bases y ocho HKD siguen candidatas. No se ha descargado ni admitido ningún texto nuevo por esta implementación. No se lanza entrenamiento ni se mergea la PR hasta que el gate completo pase.
+
+
+
+## Iteración de evaluador MMLU-Pro — 4 de noviembre de 2026
+
+En la PR #53 se incorpora evaluación por lotes con padding derecho causal y presupuesto configurable de tokens. Se añade un workflow de rendimiento activado por cambios del evaluador en PR; compara secuencial frente a batched en los mismos 140 ítems, mismo checkpoint y misma revisión inmutable del test. El artefacto registra tiempos, speedup y paridad de predicciones. La entrada de resultado se completará con el run real de Actions; no se anticipa ningún speedup.
+
+El workflow oficial de entrenamiento recibe `MMLU_BATCH_TOKEN_BUDGET=8192` por defecto y lo registra en el resumen experimental. El gate de 16 bibliotecas permanece obligatorio; este benchmark de rendimiento no lo omite ni lanza entrenamiento.
+
+
+## Iteración de optimización del evaluador — PR #53
+
+Se añade una ruta de inferencia que calcula logits solo en la última posición válida por secuencia y una extracción de scores A-J por lote. El workflow oficial recibe un presupuesto de tokens padded configurable y lo aplica a la evaluación inicial y final. Se añaden pruebas de equivalencia frente al forward completo y de configuración del workflow. Speedup pendiente de CI/benchmark real. No se ha lanzado RUN #5 ni se ha relajado el gate de 16 bibliotecas.
+
+
+## Validación de la integración consolidada #54 — 4 de noviembre de 2026
+
+| Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
+|---|---|---|---|---|
+| 2026-11-04 16:54 | [Benchmark inicial del evaluador (run 41872201685)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41872201685) | success | Benchmark A/B de la versión anterior: comparó secuencial, batching y proyección final sobre los mismos ítems. No equivale al barrido posterior de presupuestos. | f844e9b6 |
+| 2026-11-04 17:00 | [Benchmark de barrido de presupuestos (run 41873245213)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41873245213) | cancelled | La ejecución se canceló durante la sincronización de la rama con `main`; no se publica speedup ni se extrae un presupuesto ganador. Debe repetirse para validar la versión con barrido 256–8192. | cf3b64aa |
+
