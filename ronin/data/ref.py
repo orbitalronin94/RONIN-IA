@@ -13,6 +13,7 @@ ENUMS = {
 }
 _HEADING = re.compile(r"(?m)^\s*(" + "|".join(FIELDS) + r")\s*:\s*")
 _CONFIDENCE = re.compile(r"(?:confianza(?:\s+razonada)?|confidence)\s*[:=]\s*(?<![\d.,+-])(0(?:\.\d+)?|1(?:\.0+)?)(?!\d|[.,]\d)", re.IGNORECASE)
+_NEGATED_EVIDENCE = re.compile(r"\b(?:no|sin|ning[uú]n[oa]?|carece(?:n)?\s+de)\b.{0,60}\b(?:referencia|fuente|prueba|evidencia)\b", re.IGNORECASE)
 
 @dataclass(frozen=True)
 class RefValidation:
@@ -54,6 +55,8 @@ def parse_ref_completion(completion: str) -> RefValidation:
     coding = sections.get("ESTADO_DE_CODIFICACION", "").split(";", 1)[0].strip().lower()
     if coding == "decoded":
         evidence = sections.get("EVIDENCIA", "").lower()
-        if not any(term in evidence for term in ("referencia", "fuente", "prueba", "evidencia", "verific")):
+        if _NEGATED_EVIDENCE.search(evidence) or not any(
+            term in evidence for term in ("referencia", "fuente", "prueba", "evidencia", "verific")
+        ):
             issues.append("decoded requiere describir evidencia verificable en EVIDENCIA")
     return RefValidation(not issues, sections, tuple(issues), confidence)
