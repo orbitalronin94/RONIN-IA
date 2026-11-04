@@ -8,7 +8,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
-from typing import Iterable
+from collections.abc import Iterable
 
 _NAME = re.compile(r"^[a-z0-9][a-z0-9_-]{0,63}$")
 _HOLDOUT_MARKERS = {"validation", "valid", "test", "eval", "benchmark"}
@@ -60,7 +60,7 @@ def prepare_mixture(inputs: Iterable[tuple[str, Path]], output: Path, manifest_p
                 raise ValueError(f"el corpus {name} está vacío")
             data.decode("utf-8")
             digest = sha256_bytes(data)
-            header = f"\n\n=== FUENTE DE ENTRENAMIENTO: {name} ===\n\n".encode("utf-8")
+            header = f"\n\n=== FUENTE DE ENTRENAMIENTO: {name} ===\n\n".encode()
             destination.write(header)
             destination.write(data)
             if not data.endswith(b"\n"):
