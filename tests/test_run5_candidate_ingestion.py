@@ -352,6 +352,7 @@ def test_common_corpus_expansion_workflow_publishes_32_library_index():
         if step.get("name") == "Assemble 32 libraries, audit duplicates and publish master index"
     )
     assert "datasets/run5/INDEX.json" in assemble["run"]
+    assert "datasets/run5/INDEX.md" in assemble["run"]
     assert '"expected_libraries": 32' in assemble["run"]
     audit_step = next(
         step for step in aggregate["steps"]
