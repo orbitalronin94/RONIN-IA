@@ -88,3 +88,20 @@ Las dos evaluaciones consumieron aproximadamente **42 min 52 s (91,5 % del wall-
 4. **P3**: GQA nativo, AdamW foreach, torch.compile y BF16 CPU como A/B independientes.
 
 El resultado de este perfilado cambia la prioridad: el pipeline actual no tarda 47 minutos en aprender; tarda unos 2,5 minutos en entrenar y más de 42 minutos en evaluar dos veces. Reducir evaluación puede recortar radicalmente el tiempo de pared sin cambiar el número de pasos ni la cantidad de datos entrenados.
+
+
+
+## P0 implementado: evaluación MMLU-Pro por lotes (4 de noviembre de 2026)
+
+Se implementó en `scripts/evaluate_mmlu_pro.py` un camino de inferencia por lotes con estas garantías:
+
+- Ordenación temporal por longitud de prompt para reducir padding.
+- Padding exclusivamente a la derecha. Como el modelo usa atención causal, las posiciones añadidas después del prompt no pueden influir en el logit de su último byte real.
+- Extracción del logit en `length - 1` por elemento, no del último índice padded.
+- Presupuesto configurable de tokens padded por lote (`--batch-token-budget`, valor inicial 8192); el límite se puede ajustar en el workflow oficial entre 512 y 32768.
+- Los resultados vuelven al orden original del dataset; se conservan IDs, cobertura, preguntas omitidas, desglose por dominio y protocolo.
+- El test compara la ruta por lotes con la ruta secuencial, incluyendo predicciones, exactitud y log-probabilidades dentro de tolerancia.
+
+Se añade `scripts/benchmark_mmlu_evaluator.py` y el workflow `.github/workflows/mmlu-evaluator-performance.yml`. En cada actualización relevante de PR ejecuta una comparación secuencial (presupuesto 1) frente a lotes (8192), sobre los mismos 140 ítems estratificados y el mismo checkpoint aleatorio. Publica tiempos, speedup, paridad y cobertura como artefacto. Este microbenchmark mide solo el coste del evaluador; no mide inteligencia ni constituye entrenamiento.
+
+**Estado inicial:** optimización implementada; speedup todavía no declarado hasta que termine el workflow en Actions. El entrenamiento oficial reutilizará el presupuesto configurable en sus evaluaciones inicial y final, pero sigue bloqueado por el gate de 16 bibliotecas.
