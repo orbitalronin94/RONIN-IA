@@ -26,6 +26,8 @@ Los ciclos sintéticos no descargan corpus externos y no eluden el bloqueo G-0 d
 
 Workflow principal: [Experimento oficial RONIN desde cero + MMLU-Pro completo](https://github.com/orbitalronin94/RONIN-IA/actions/workflows/ronin-official-training-holdout.yml). Los ciclos sintéticos estructurados son un warm-start técnico con promoción conservadora; no sustituyen al entrenamiento oficial ni a las bibliotecas documentales autorizadas.
 
+**Ritmo de iteración:** el ciclo programado ejecuta 500 pasos por semilla (tres semillas) y evalúa la semilla principal antes/después en una muestra estratificada de 140 preguntas de `validation` de MMLU-Pro. Un checkpoint solo se conserva si reduce bits por byte en la validación sintética y no empeora ni el benchmark multidominio interno ni MMLU-Pro `validation`. El split `test` queda reservado para la verificación final y nunca guía selección de pesos. La métrica de MMLU-Pro sigue siendo el protocolo propio de RONIN por siguiente byte, no el leaderboard oficial.
+
 ### Ciclos rápidos de aprendizaje abierto
 
 Se incorpora un segundo carril experimental: [Ciclos rápidos RONIN — corpus abierto](.github/workflows/rapid-open-training-cycles.yml). Ejecuta hasta tres iteraciones cortas por tanda y, al terminar correctamente, **se relanza automáticamente** mediante `workflow_run`: no hay que activar cada ciclo manualmente. Un arranque periódico de recuperación evita que la cadena quede abandonada tras una interrupción. Recupera el último checkpoint aceptado y solo promueve uno nuevo si mejora la accuracy de MMLU-Pro validation sin empeorar BPB. El test final de MMLU-Pro queda fuera del bucle y reservado para la evaluación de release.
