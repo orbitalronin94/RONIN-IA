@@ -16,6 +16,9 @@ def test_phi4_candidate_workflow_never_trains_or_publishes_generated_text():
     assert workflow["on"]["workflow_run"]["workflows"] == ["Preparar caché de tutores locales"]
     job = workflow["jobs"]["generate-candidates"]
     steps = {step.get("name"): step for step in job["steps"]}
+    cache_key = steps["Restaurar caché verificado de tutores"]["with"]["key"]
+    assert "${{ runner.os }}" in cache_key
+    assert "\\${{" not in cache_key
     audit = steps["Auditar estructura de las propuestas; no certificar veracidad"]["run"]
     assert '"used_for_training": False' in audit
     upload = steps["Publicar solo auditoría y metadatos, no las generaciones"]["with"]["path"]
