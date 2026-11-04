@@ -41,6 +41,9 @@ COLLECTIONS = {
         "mathematics", "logic_epistemology", "physics",
         "chemistry", "biology_medicine",
     },
+    # Common Corpus stores formal/relational semantic records under a distinct
+    # open_type; this is the explicitly authorized logic/epistemology adapter.
+    "Semantic data": {"logic_epistemology"},
     "OpenCulture": {"philosophy"},
     "OpenSource": {"computer_science"},
     "OpenGovernment": {"law_economics_social_sciences"},
