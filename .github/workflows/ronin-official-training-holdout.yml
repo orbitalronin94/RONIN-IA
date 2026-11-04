@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   ronin-training:
-    name: Entrenar solo después de admitir las ocho bibliotecas
+    name: Entrenar solo después de admitir las dieciséis bibliotecas
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
@@ -61,20 +61,28 @@ jobs:
           print("Evaluador externo listo:", datasets.__version__, huggingface_hub.__version__)
           PY
 
-      - name: "Gate obligatorio: ocho bibliotecas admitidas antes de RUN #5"
-        run: python scripts/validate_eight_libraries.py --require-ready --corpus-root /tmp/ronin-eight-libraries
+      - name: "Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial"
+        run: python scripts/validate_sixteen_libraries.py --require-ready --corpus-root /tmp/ronin-sixteen-libraries
 
       - name: Construir mezcla balanceada de las ocho bibliotecas admitidas
         run: |
           python scripts/prepare_training_mixture.py \
-            --input mathematics=/tmp/ronin-eight-libraries/mathematics/train.txt \
-            --input logic_epistemology=/tmp/ronin-eight-libraries/logic_epistemology/train.txt \
-            --input philosophy=/tmp/ronin-eight-libraries/philosophy/train.txt \
-            --input physics=/tmp/ronin-eight-libraries/physics/train.txt \
-            --input chemistry=/tmp/ronin-eight-libraries/chemistry/train.txt \
-            --input biology_medicine=/tmp/ronin-eight-libraries/biology_medicine/train.txt \
-            --input computer_science=/tmp/ronin-eight-libraries/computer_science/train.txt \
-            --input law_economics_social_sciences=/tmp/ronin-eight-libraries/law_economics_social_sciences/train.txt \
+            --input mathematics=/tmp/ronin-sixteen-libraries/mathematics/train.txt \
+            --input logic_epistemology=/tmp/ronin-sixteen-libraries/logic_epistemology/train.txt \
+            --input philosophy=/tmp/ronin-sixteen-libraries/philosophy/train.txt \
+            --input physics=/tmp/ronin-sixteen-libraries/physics/train.txt \
+            --input chemistry=/tmp/ronin-sixteen-libraries/chemistry/train.txt \
+            --input biology_medicine=/tmp/ronin-sixteen-libraries/biology_medicine/train.txt \
+            --input computer_science=/tmp/ronin-sixteen-libraries/computer_science/train.txt \
+            --input law_economics_social_sciences=/tmp/ronin-sixteen-libraries/law_economics_social_sciences/train.txt \
+            --input mathematics_hkd=/tmp/ronin-sixteen-libraries/mathematics_hkd/train.txt \
+            --input logic_epistemology_hkd=/tmp/ronin-sixteen-libraries/logic_epistemology_hkd/train.txt \
+            --input philosophy_hkd=/tmp/ronin-sixteen-libraries/philosophy_hkd/train.txt \
+            --input physics_hkd=/tmp/ronin-sixteen-libraries/physics_hkd/train.txt \
+            --input chemistry_hkd=/tmp/ronin-sixteen-libraries/chemistry_hkd/train.txt \
+            --input biology_medicine_hkd=/tmp/ronin-sixteen-libraries/biology_medicine_hkd/train.txt \
+            --input computer_science_hkd=/tmp/ronin-sixteen-libraries/computer_science_hkd/train.txt \
+            --input law_economics_social_sciences_hkd=/tmp/ronin-sixteen-libraries/law_economics_social_sciences_hkd/train.txt \
             --output /tmp/ronin-training/combined-train.txt \
             --manifest reports/training-mixture.json
       - name: Validar presupuesto, semillas y muestra externa
@@ -225,7 +233,7 @@ jobs:
                           "manifest_sha256": library["manifest_sha256"],
                       }
                       for library in json.loads(
-                          Path("data/manifests/eight_libraries.json").read_text(encoding="utf-8")
+                          Path("data/manifests/sixteen_libraries.json").read_text(encoding="utf-8")
                       )["libraries"]
                   ],
                   "portfolio": {"used_for_training": False, "role": "retrieval_only_fallback"},
@@ -244,7 +252,7 @@ jobs:
               "cycles": rows,
               "interpretation": [
                   "Portfolio/Papers está excluido de pretraining y SFT; queda reservado para recuperación RAG con citas.",
-                  "RUN #5 está bloqueada hasta que las ocho bibliotecas independientes superen el gate de licencia, procedencia, tamaño y calidad.",
+                  "El entrenamiento oficial está bloqueado hasta que las dieciséis bibliotecas independientes superen el gate de licencia, procedencia, tamaño y calidad.",
                   "MMLU-Pro test se utiliza solo para evaluación antes/después y nunca para gradientes.",
                   "La mezcla contiene exclusivamente las ocho bibliotecas admitidas y hasheadas; Portfolio queda fuera.",
                   "Los splits validation/test de literatura, MMLU-Pro test, el piloto interno y los casos criptográficos pendientes de revisión no se mezclan con train.",
