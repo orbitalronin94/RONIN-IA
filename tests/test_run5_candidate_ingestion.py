@@ -1,4 +1,7 @@
 import json
+from pathlib import Path
+
+import yaml
 
 from scripts.audit_run5_cross_library_dedup import audit
 from scripts.prepare_run5_candidates import (
@@ -327,3 +330,32 @@ def test_library_floor_budget_rejects_invalid_fraction():
         assert "fraction" in str(exc)
     else:
         raise AssertionError("invalid HKD fraction must fail closed")
+
+
+def test_common_corpus_expansion_workflow_publishes_32_library_index():
+    workflow_path = (
+        Path(__file__).parents[1]
+        / ".github"
+        / "workflows"
+        / "expand-common-corpus-candidates.yml"
+    )
+    workflow = yaml.load(workflow_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+    assert "prepare" in workflow["jobs"]
+    assert "aggregate-and-index" in workflow["jobs"]
+    domains = workflow["jobs"]["prepare"]["strategy"]["matrix"]["domain"]
+    assert len(domains) == 16
+    aggregate = workflow["jobs"]["aggregate-and-index"]
+    assert aggregate["needs"] == "prepare"
+    assert aggregate["if"] == "always()"
+    assemble = next(
+        step for step in aggregate["steps"]
+        if step.get("name") == "Assemble 32 libraries and the master index"
+    )
+    assert "datasets/run5/INDEX.json" in assemble["run"]
+    assert "datasets/run5/INDEX.md" in assemble["run"]
+    assert '"expected_libraries": 32' in assemble["run"]
+    audit_step = next(
+        step for step in aggregate["steps"]
+        if step.get("name") == "Audit exact and near duplicates across all 32 libraries"
+    )
+    assert "audit_run5_cross_library_dedup.py" in audit_step["run"]
