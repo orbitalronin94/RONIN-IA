@@ -214,3 +214,19 @@ def test_pmc_europe_pmc_retraction_flag_overrides_cloud_metadata(monkeypatch):
     )
     assert records == []
     assert stats["retracted_by_europe_pmc"] == 1
+
+
+def test_pmc_explicit_unsupported_language_is_rejected_before_version_lookup(monkeypatch):
+    from scripts import pmc_oa_source
+
+    monkeypatch.setattr(
+        pmc_oa_source,
+        "list_s3_version_prefixes",
+        lambda pmcid: (_ for _ in ()).throw(AssertionError("must reject language before S3")),
+    )
+    records, stats = pmc_oa_source.fetch_article_versions(
+        {"pmcid": "PMC12345", "language": "chi"},
+        "biology_medicine",
+    )
+    assert records == []
+    assert stats["language_not_allowlisted_metadata"] == 1
