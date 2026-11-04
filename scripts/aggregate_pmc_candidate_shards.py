@@ -44,11 +44,14 @@ def aggregate(input_root: Path, output_root: Path, run_id: str, minimum: int) ->
         actual_domain_rows = 0
         for library in data.get("libraries", []):
             library_count += 1
-            sidecar = Path(library["documents_manifest"])
+            sidecar = manifest_path.parent / library["id"] / "documents.jsonl"
             if not sidecar.is_file():
-                matches = list(manifest_path.parent.rglob(sidecar.name))
+                matches = [
+                    path for path in manifest_path.parent.rglob("documents.jsonl")
+                    if path.parent.name == library["id"]
+                ]
                 if not matches:
-                    raise SystemExit("Missing document sidecar: " + str(sidecar))
+                    raise SystemExit("Missing document sidecar for " + library["id"])
                 sidecar = matches[0]
             expected_sidecar_hash = library.get("documents_manifest_sha256")
             if expected_sidecar_hash and digest(sidecar) != expected_sidecar_hash:
