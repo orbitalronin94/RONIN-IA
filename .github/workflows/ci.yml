@@ -3,6 +3,8 @@ name: Integración continua
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "docs/RUNS.md"
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -34,6 +36,9 @@ jobs:
         run: ruff check ronin tests scripts
       - name: Verificar metadatos del paquete
         run: python -m pip check
+      - name: Enlazar libro de runs
+        if: always()
+        uses: ./.github/actions/run-ledger-link
 
   tests:
     name: Pruebas unitarias y de integración
@@ -54,6 +59,9 @@ jobs:
         run: python scripts/validate_license_audit.py
       - name: Ejecutar la suite de pruebas
         run: pytest --cov=ronin --cov-report=term-missing
+      - name: Enlazar libro de runs
+        if: always()
+        uses: ./.github/actions/run-ledger-link
 
   tiny-smoke:
     name: Prueba mínima de entrenamiento desde cero
@@ -109,3 +117,6 @@ jobs:
             --checkpoints /tmp/ronin-smoke-checkpoints
       - name: Comprobar que existe el checkpoint final
         run: test -s /tmp/ronin-smoke-checkpoints/step-00000001.pt
+      - name: Enlazar libro de runs
+        if: always()
+        uses: ./.github/actions/run-ledger-link
