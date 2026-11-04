@@ -30,16 +30,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: "Gate G-0: bloquear cualquier descarga sin aprobación"
-        run: python scripts/assert_g0_passed.py
+        id: g0
+        run: python scripts/assert_g0_passed.py --github-output "$GITHUB_OUTPUT"
       - uses: actions/setup-python@v5
+        if: steps.g0.outputs.authorized == 'true'
         with:
           python-version: "3.11"
       - name: Descargar archivos originales sin credenciales y preparar corpus
+        if: steps.g0.outputs.authorized == 'true'
         run: |
           python scripts/prepare_open_corpora.py \
             --output /tmp/ronin-open-corpus/processed \
             --cache-dir /tmp/ronin-open-corpus/cache
       - name: Comprobar manifiesto, fuentes y particiones
+        if: steps.g0.outputs.authorized == 'true'
         run: |
           python - <<'PY'
           import json
@@ -84,6 +88,7 @@ jobs:
           }, ensure_ascii=False, indent=2))
           PY
       - name: Publicar corpus literario como artefacto auditable
+        if: steps.g0.outputs.authorized == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ronin-bibliotecas-adquiridas
@@ -94,6 +99,7 @@ jobs:
           retention-days: 30
 
       - name: Publicar particiones de texto preparadas (retención temporal)
+        if: steps.g0.outputs.authorized == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ronin-corpus-v2-particiones
@@ -110,15 +116,20 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        if: steps.g0.outputs.authorized == 'true'
       - name: "Gate G-0: bloquear adquisición criptográfica sin aprobación"
-        run: python scripts/assert_g0_passed.py
+        if: steps.g0.outputs.authorized == 'true'
+        run: python scripts/assert_g0_passed.py --github-output "$GITHUB_OUTPUT"
       - uses: actions/setup-python@v5
+        if: steps.g0.outputs.authorized == 'true'
         with:
           python-version: "3.11"
       - name: Descargar seis fuentes primarias sin credenciales
+        if: steps.g0.outputs.authorized == 'true'
         run: |
           python scripts/acquire_cryptography_library.py --output-dir /tmp/ronin-cryptography-library
       - name: Construir y validar pares de opacidad
+        if: steps.g0.outputs.authorized == 'true'
         run: |
           PYTHONPATH=. python scripts/build_obfuscation_cases.py \
             --source-manifest /tmp/ronin-cryptography-library/manifest.json \
@@ -158,6 +169,7 @@ jobs:
           }, ensure_ascii=False, indent=2))
           PY
       - name: Publicar fuentes primarias y pares de opacidad
+        if: steps.g0.outputs.authorized == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ronin-biblioteca-opacidad-v1
