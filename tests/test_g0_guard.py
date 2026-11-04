@@ -35,7 +35,7 @@ def test_g0_fail_blocks_corpus_operations(tmp_path: Path) -> None:
         },
     )
     assert result.returncode == 1
-    assert "bloqueados" in result.stdout
+    assert "no descargarlas ni entrenar con ellas" in result.stdout
 
 
 def test_g0_requires_all_four_authorization_conditions(tmp_path: Path) -> None:
