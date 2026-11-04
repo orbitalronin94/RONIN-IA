@@ -213,6 +213,30 @@ def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dic
         confidence=0.95,
     ))
 
+    rows.append(record(
+        record_id="hypnerotomachia-authorship-ambiguity-001",
+        case_type="C",
+        label="UNRESOLVED",
+        evidence_status="unresolved",
+        text=(
+            "El acróstico POLIAM FRATER FRANCISCVS COLVMNA PERAMAVIT "
+            "se usa como argumento para atribuir la obra a Francesco Colonna."
+        ),
+        source_id="hypnerotomachia-poliphili-1499",
+        source_sha256=source_hash(manifest, "hypnerotomachia-poliphili-1499"),
+        source_license=source_metadata(manifest, "hypnerotomachia-poliphili-1499")["license"],
+        evidence_refs=[
+            "https://www.themorgan.org/morganmobile/in-disguise/colonna",
+            "https://www.otago.ac.nz/library/exhibitions/authorship/cabinet8-1.html",
+            "https://libraetd.lib.virginia.edu/downloads/jh343s79w?filename=X004457851.pdf",
+        ],
+        mechanism=(
+            "La existencia del acróstico está documentada; su interpretación "
+            "como prueba concluyente de autoría sigue siendo discutida."
+        ),
+        confidence=0.6,
+    ))
+
     # Controles sintéticos: no contienen carga útil ni mensaje insertado.
     alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789!?#%&"
     for index in range(noise_count):
@@ -254,7 +278,8 @@ def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dic
     fixed_splits = {
         "poe-goldbug-cipher-001": "train",
         "verne-jangada-gronsfeld-001": "train",
-        "hypnerotomachia-acrostic-001": "validation",
+        "hypnerotomachia-acrostic-001": "test",
+        "hypnerotomachia-authorship-ambiguity-001": "test",
         "shakespeare-gallup-claim-001": "train",
     }
     for row in rows:
