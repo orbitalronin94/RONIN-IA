@@ -8,8 +8,9 @@ import hashlib
 import json
 import re
 import sqlite3
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 
 def sha256_file(path: Path) -> str:
