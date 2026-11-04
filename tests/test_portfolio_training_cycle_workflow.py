@@ -28,7 +28,7 @@ def test_official_training_workflow_excludes_portfolio_and_requires_sixteen_libr
     assert "Preparar corpus de Portfolio" not in by_name
     assert "Verificar autorización, finalidad y hash del corpus" not in by_name
     assert "Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial" in by_name
-    gate = by_name["Gate obligatorio: ocho bibliotecas admitidas antes de RUN #5"]["run"]
+    gate = by_name["Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial"]["run"]
     assert "validate_sixteen_libraries.py --require-ready --corpus-root /tmp/ronin-sixteen-libraries" in gate
 
     cycle = by_name["Entrenar desde cero y evaluar el test externo completo antes/después"]["run"]
