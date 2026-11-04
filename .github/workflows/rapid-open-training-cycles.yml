@@ -1,19 +1,13 @@
 name: Ciclos rápidos RONIN — corpus abierto con gate y mejora de validación
 on:
+  # Arranque y recuperación automáticos. Tras cada ejecución válida,
+  # workflow_run encadena inmediatamente la siguiente.
   schedule:
-    - cron: "23 */6 * * *"
-  workflow_dispatch:
-    inputs:
-      cycles:
-        description: Ciclos consecutivos por ejecución (1-3)
-        required: true
-        default: "3"
-        type: string
-      steps:
-        description: Pasos por ciclo rápido (1-300)
-        required: true
-        default: "100"
-        type: string
+    - cron: "17 */6 * * *"
+  workflow_run:
+    workflows: ["Ciclos rápidos RONIN — corpus abierto con gate y mejora de validación"]
+    types: [completed]
+    branches: [main]
 permissions:
   contents: read
 concurrency:
@@ -26,20 +20,25 @@ jobs:
     timeout-minutes: 240
     env:
       PYTHONUNBUFFERED: "1"
-      CYCLES: ${{ inputs.cycles || '3' }}
-      STEPS: ${{ inputs.steps || '100' }}
+      CYCLES: "3"
+      STEPS: "100"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
     steps:
+      - name: Evitar cadena tras una ejecución anterior fallida
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success'
+        run: |
+          echo "::error::La ejecución anterior no terminó correctamente; la cadena se detiene."
+          exit 1
       - name: Obtener RONIN
         uses: actions/checkout@v5
       - name: Gate G-0 — exigir autorización legal explícita
         id: g0
         run: python scripts/assert_g0_passed.py --github-output "$GITHUB_OUTPUT"
-      - name: Registrar bloqueo sin saltarse el gate
+      - name: Detener la cadena si G-0 no autoriza
         if: steps.g0.outputs.authorized != 'true'
         run: |
-          echo "::notice::Ciclo no iniciado: G-0 no autoriza entrenamiento con corpus documental."
-          echo "No se han descargado textos ni actualizado pesos."
+          echo "::error::G-0 no autoriza entrenamiento documental. Se detiene la cadena; el arranque periódico reintentará."
+          exit 1
       - name: Preparar Python
         if: steps.g0.outputs.authorized == 'true'
         uses: actions/setup-python@v6
