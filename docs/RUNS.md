@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:21 | [Integración continua #904 (run 41932918570)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932918570) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Fix ROR archive parser loop indentation. Trigger: push; rama: main; intento: 1. | 38328bb1 |
 | 2026-11-04 23:21 | [Integración continua #908 (run 41933001856)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933001856) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document additional CC0 and item-level dataset source lanes. Trigger: push; rama: main; intento: 1. | 40a62b58 |
 | 2026-11-04 23:21 | [Integración continua #907 (run 41932988600)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932988600) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Expand source registry with Dryad, Europeana, Smithsonian, Open Library and research repositories. Trigger: push; rama: main; intento: 1. | 5e134b26 |
 | 2026-11-04 23:20 | [Integración continua #906 (run 41932943340)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932943340) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document DBLP, Wikidata and Common Voice CC0 candidate sources. Trigger: push; rama: main; intento: 1. | fb1428c9 |
