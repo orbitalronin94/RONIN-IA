@@ -5,6 +5,7 @@ import argparse
 import json
 from pathlib import Path
 
+VALIDATOR_VERSION = "1.1.0"
 DEFAULT = Path("data/datasets/catalog/expanded-domain-registry.json")
 DEFAULT_AUDIT = Path("data/datasets/candidates/github-source-audit.json")
 
