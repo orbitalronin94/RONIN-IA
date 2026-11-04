@@ -15,8 +15,9 @@ import re
 import sqlite3
 import tempfile
 from collections import Counter
+from collections.abc import Iterable, Iterator
 from pathlib import Path
-from typing import Any, Iterable, Iterator
+from typing import Any
 
 TOKEN_RE = re.compile(r"[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_+.-]{1,}|\d+(?:[.,]\d+)?|[=<>≤≥∑∫√∞→↔]")
 SENTENCE_RE = re.compile(r"(?<=[.!?])\s+")
@@ -38,7 +39,7 @@ DOMAIN_TERMS = {
     "computer_science": "algorithm data structure complexity compiler operating system database protocol network type system program software code function memory concurrency algoritmo estructura de datos compilador sistema operativo base de datos",
     "law_economics_social_sciences": "statute regulation court judgment contract liability jurisdiction theorem market elasticity inflation econometrics regression institution policy derecho ley tribunal sentencia contrato responsabilidad jurisdicción economía mercado inflación regresión política pública",
 }
-STOP = set(("the and for with that this from into over under about have has had are was were which whose where when what como para desde entre sobre una uno unos unas los las del por con sin que este esta estos estas".split()))
+STOP = set("the and for with that this from into over under about have has had are was were which whose where when what como para desde entre sobre una uno unos unas los las del por con sin que este esta estos estas".split())
 
 
 def tokens(text: str) -> list[str]:
