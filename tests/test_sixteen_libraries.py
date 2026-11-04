@@ -48,12 +48,34 @@ def test_gate_requires_density_report_and_human_review_for_extra_eight(tmp_path)
         destination.parent.mkdir(parents=True)
         destination.write_bytes(content)
 
+    portfolio_root = tmp_path / "portfolio"
+    portfolio_root.mkdir()
+    index_path = portfolio_root / "portfolio.sqlite3"
+    index_path.write_bytes(b"fixture-rag-index")
+    import hashlib
+    rag_manifest = {
+        "role": "retrieval_only_fallback",
+        "retrieval_only": True,
+        "training_eligible": False,
+        "source_revision": data["portfolio"]["source_revision"],
+        "index_sha256": hashlib.sha256(index_path.read_bytes()).hexdigest(),
+        "source_document_manifest_sha256": "f" * 64,
+        "documents_jsonl_sha256": "e" * 64,
+        "document_count": 1,
+        "chunk_count": 1,
+    }
+    (portfolio_root / "rag-manifest.json").write_text(json.dumps(rag_manifest), encoding="utf-8")
     manifest_path = tmp_path / "manifest.json"
     manifest_path.write_text(json.dumps(data), encoding="utf-8")
-    assert validate(manifest_path, require_ready=True, corpus_root=tmp_path) == []
+    assert validate(
+        manifest_path,
+        require_ready=True,
+        corpus_root=tmp_path,
+        portfolio_root=portfolio_root,
+    ) == []
 
     extra = next(item for item in data["libraries"] if item.get("source_type"))
     extra.pop("selection_report_sha256")
     manifest_path.write_text(json.dumps(data), encoding="utf-8")
-    errors = validate(manifest_path, require_ready=True, corpus_root=tmp_path)
+    errors = validate(manifest_path, require_ready=True, corpus_root=tmp_path, portfolio_root=portfolio_root)
     assert any("missing semantic-density selection report hash" in error for error in errors)
