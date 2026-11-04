@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import json
-from io import BytesIO
-
 from scripts import acquire_cryptography_library as library
 
 
@@ -57,6 +55,6 @@ def test_adquisicion_guarda_archivos_hashes_y_exclusion_de_entrenamiento(
 
 
 def test_firma_sha256_es_estable():
-    assert library.sha256(b"RONIN") == (
-        "4c9f2c9d7f0c0d8f5f9b4c4e3f6a6d6c6c2c8f6f7d0b0a0a0a0a0a0a0a0a0a0a"
-    )
+    import hashlib
+
+    assert library.sha256(b"RONIN") == hashlib.sha256(b"RONIN").hexdigest()
