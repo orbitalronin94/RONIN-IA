@@ -32,8 +32,8 @@ def test_construye_pares_y_controles_con_procedencia_y_particiones(tmp_path):
     summary = build(manifest_path, output, noise_count=30)
 
     rows = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()]
-    assert len(rows) == 34
-    assert summary["counts_by_type"] == {"A": 2, "B": 30, "C": 1, "D": 1}
+    assert len(rows) == 35
+    assert summary["counts_by_type"] == {"A": 3, "B": 30, "C": 1, "D": 1}
     assert summary["counts_by_label"]["NO_MESSAGE_IN_CONTROL"] == 30
     assert all(len(row["source_sha256"]) == 64 for row in rows)
     assert all(row["evidence_refs"] for row in rows)
