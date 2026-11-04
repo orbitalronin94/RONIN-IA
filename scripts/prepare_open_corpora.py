@@ -227,7 +227,8 @@ def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
         "license": "textos de dominio público; marcado TEI/metadatos CC-BY-4.0",
         "access": "descarga HTTPS pública sin cuenta, token ni clave API",
         "sources": source_manifest,
-        "document_count": len(candidates),\n        "document_manifest": "documents.jsonl",
+        "document_count": len(candidates),
+        "document_manifest": "documents.jsonl",
         "document_counts": {key: len(value) for key, value in partitions.items()},
         "source_document_counts": {
             source["id"]: sum(1 for item in candidates if item["source"] == source["id"])
