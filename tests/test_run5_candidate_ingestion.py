@@ -7,6 +7,8 @@ from scripts.prepare_run5_candidates import (
     DATASET_REVISION,
     LANGUAGE_ALIASES,
     choose_domain,
+    domain_kind_name,
+    DOMAIN_SOURCE_PARENT,
     histogram_report,
     normalize_license,
 )
@@ -148,6 +150,17 @@ def test_collection_names_match_common_corpus_manifest_values():
         "Open Government",
     )[0] == "social_sciences"
 
+
+
+def test_general_and_hkd_ids_match_the_32_library_manifest():
+    assert len(DOMAIN_SOURCE_PARENT) == 16
+    assert domain_kind_name("mathematics", "general") == "mathematics_general"
+    assert domain_kind_name("mathematics", "hkd") == "mathematics_hkd"
+    assert set(DOMAIN_SOURCE_PARENT.values()) == {
+        "mathematics", "logic_epistemology", "philosophy", "physics",
+        "chemistry", "biology_medicine", "computer_science",
+        "law_economics_social_sciences",
+    }
 
 
 def test_domain_worker_expects_two_libraries_but_aggregate_expects_thirty_two():
