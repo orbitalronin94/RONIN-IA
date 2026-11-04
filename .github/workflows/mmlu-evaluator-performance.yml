@@ -1,0 +1,76 @@
+name: Benchmark de rendimiento del evaluador MMLU-Pro
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/evaluate_mmlu_pro.py"
+      - "scripts/benchmark_mmlu_evaluator.py"
+      - "ronin/models/**"
+      - ".github/workflows/mmlu-evaluator-performance.yml"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Preguntas estratificadas para comparar rendimiento
+        required: true
+        default: "140"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-mmlu-evaluator-performance-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evaluator-performance:
+    name: Paridad y velocidad del evaluador por lotes
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUNBUFFERED: "1"
+      MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+      MMLU_LIMIT: ${{ inputs.limit || '140' }}
+    steps:
+      - name: Obtener RONIN IA
+        uses: actions/checkout@v5
+
+      - name: Preparar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar PyTorch CPU y evaluador
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "datasets==3.6.0" "huggingface_hub==0.36.0"
+
+      - name: Validar límite
+        run: |
+          if ! [[ "$MMLU_LIMIT" =~ ^[0-9]+$ ]] || [ "$MMLU_LIMIT" -lt 1 ] || [ "$MMLU_LIMIT" -gt 12032 ]; then
+            echo "::error::MMLU_LIMIT debe estar entre 1 y 12032."
+            exit 1
+          fi
+
+      - name: Comparar evaluador secuencial y por lotes con los mismos ítems
+        run: |
+          python scripts/benchmark_mmlu_evaluator.py \
+            --limit "$MMLU_LIMIT" \
+            --seed 2026 \
+            --context-length 2048 \
+            --baseline-token-budget 1 \
+            --optimized-token-budget 8192 \
+            --revision "$MMLU_REVISION" \
+            --output reports/mmlu-evaluator-performance.json
+
+      - name: Publicar informe de rendimiento
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-mmlu-evaluator-performance
+          path: reports/mmlu-evaluator-performance.json
+          if-no-files-found: error
+          retention-days: 30
