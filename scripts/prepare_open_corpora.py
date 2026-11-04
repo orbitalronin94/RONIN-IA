@@ -26,6 +26,7 @@ SOURCES = (
         "paths": (
             "spanish/novela-espanola/tei/",
             "spanish/novela-hispanoamericana/tei/",
+            "spanish/cuentos-espanoles/tei/",
         ),
         "url": "https://github.com/cligs/textbox",
     },
