@@ -32,7 +32,7 @@ SOURCES: tuple[dict[str, Any], ...] = (
     },
     {
         "id": "verne-la-jangada-fr",
-        "expected_sha256": None,
+        "expected_sha256": "d09edf443ee49f78c336a6637b0445d8fadb9ce6806bdebf96cc04fc789480b1",
         "title": "La Jangada: Huit cent lieues sur l'Amazone",
         "author": "Jules Verne",
         "year": 1881,
