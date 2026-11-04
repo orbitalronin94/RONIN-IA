@@ -40,6 +40,8 @@ def prepare(source: str | Path, destination: str | Path) -> int:
             raise ValueError(f"El modelo tutor no acredita licencia MIT en la línea {line_number}")
         if record.get("generated_output_license") != "not_asserted":
             raise ValueError(f"No se debe atribuir licencia automática a la salida en la línea {line_number}")
+        if not record.get("teacher_model_license_url"):
+            raise ValueError(f"Falta la procedencia de licencia del modelo en la línea {line_number}")
         if record.get("teacher_weights_loaded_locally") is not True:
             raise ValueError(f"No consta que el tutor se ejecutara localmente en la línea {line_number}")
         if record.get("teacher_weights_imported_into_student") is not False:
