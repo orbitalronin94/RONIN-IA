@@ -21,3 +21,26 @@ def test_rechaza_rutas_de_zip_no_seguras():
     assert _safe_member("repo/level1/obra.xml")
     assert not _safe_member("../escape.txt")
     assert not _safe_member("/absolute/escape.txt")
+
+
+def test_particiones_holdout_son_deterministas_y_no_se_solapan():
+    from scripts.prepare_open_corpora import _partition_documents
+
+    documents = [
+        {"sha256": f"{index:064x}", "text": f"obra-{index}", "source": "test"}
+        for index in range(100)
+    ]
+    first = _partition_documents(documents)
+    second = _partition_documents(list(reversed(documents)))
+
+    assert {key: [item["sha256"] for item in value] for key, value in first.items()} == {
+        key: [item["sha256"] for item in value] for key, value in second.items()
+    }
+    hashes = {
+        key: {item["sha256"] for item in value}
+        for key, value in first.items()
+    }
+    assert hashes["train"].isdisjoint(hashes["validation"])
+    assert hashes["train"].isdisjoint(hashes["test"])
+    assert hashes["validation"].isdisjoint(hashes["test"])
+    assert set.union(*hashes.values()) == {item["sha256"] for item in documents}
