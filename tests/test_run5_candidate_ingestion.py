@@ -278,10 +278,29 @@ def test_domain_workers_use_distinct_reproducible_shuffle_seeds():
 
 
 def test_half_hkd_split_has_a_feasible_input_budget_for_x10_minimum():
-    from scripts.prepare_run5_candidates import HKD_FRACTION
+    from scripts.prepare_run5_candidates import (
+        HKD_FRACTION,
+        minimum_scanned_bytes_for_library_floor,
+    )
 
     minimum_train_bytes = 2_560 * 1024**2
-    train_fraction = 0.90
-    required_accepted_bytes = int(minimum_train_bytes / (HKD_FRACTION * train_fraction)) + 1
+    required_accepted_bytes = minimum_scanned_bytes_for_library_floor(
+        minimum_train_bytes, HKD_FRACTION
+    )
+    old_twenty_percent_budget = minimum_scanned_bytes_for_library_floor(
+        minimum_train_bytes, 0.20
+    )
     assert required_accepted_bytes < 8 * 1024**3
     assert required_accepted_bytes > 5 * 1024**3
+    assert old_twenty_percent_budget > 8 * 1024**3
+
+
+def test_library_floor_budget_rejects_invalid_fraction():
+    from scripts.prepare_run5_candidates import minimum_scanned_bytes_for_library_floor
+
+    try:
+        minimum_scanned_bytes_for_library_floor(100, 0.0)
+    except ValueError as exc:
+        assert "fraction" in str(exc)
+    else:
+        raise AssertionError("invalid HKD fraction must fail closed")
