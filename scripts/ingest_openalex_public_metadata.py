@@ -48,7 +48,7 @@ def main() -> int:
     args.out.mkdir(parents=True, exist_ok=True)
 
     rights_text = fetch(RIGHTS_RAW_URL, 1024 * 1024)
-    git_blob = b"blob " + str(len(rights_text)).encode() + b"\\0" + rights_text
+    git_blob = b"blob " + str(len(rights_text)).encode() + b"\0" + rights_text
     actual_rights_blob = hashlib.sha1(git_blob).hexdigest()
     if actual_rights_blob != RIGHTS_BLOB_SHA1:
         raise ValueError(f"pinned OpenAlex license document blob mismatch: {actual_rights_blob}")
