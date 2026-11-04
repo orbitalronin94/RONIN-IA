@@ -40,6 +40,8 @@ jobs:
       STEPS: ${{ github.event_name == 'workflow_dispatch' && inputs.steps || (github.event_name == 'push' && '1000' || '100') }}
       SEEDS: ${{ github.event_name == 'workflow_dispatch' && inputs.seeds || (github.event_name == 'push' && '1337' || '1337') }}
       MMLU_LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.mmlu_limit || (github.event_name == 'push' && '0' || '140') }}
+      RONIN_NUM_THREADS: "4"
+      RONIN_INTEROP_THREADS: "1"
     steps:
       - name: Obtener RONIN IA
         uses: actions/checkout@v4
@@ -68,6 +70,33 @@ jobs:
           import huggingface_hub
           from datasets import load_dataset
           print("Evaluador externo listo:", datasets.__version__, huggingface_hub.__version__)
+          PY
+
+      - name: Registrar hardware y configuración de CPU
+        run: |
+          python - <<'PY'
+          import os
+          import platform
+          import torch
+
+          cpu_model = "unknown"
+          try:
+              for line in open("/proc/cpuinfo", encoding="utf-8"):
+                  if line.lower().startswith("model name"):
+                      cpu_model = line.split(":", 1)[1].strip()
+                      break
+          except OSError:
+              pass
+          print({
+              "platform": platform.platform(),
+              "cpu_model": cpu_model,
+              "logical_cpus": os.cpu_count(),
+              "torch_version": torch.__version__,
+              "torch_num_threads": torch.get_num_threads(),
+              "torch_num_interop_threads": torch.get_num_interop_threads(),
+              "omp_num_threads": os.environ["RONIN_NUM_THREADS"],
+              "mkl_num_threads": os.environ["RONIN_NUM_THREADS"],
+          })
           PY
 
       - name: Preparar corpus de Portfolio
@@ -238,7 +267,10 @@ jobs:
             python scripts/train_text.py \
               --text /tmp/ronin-training/combined-train.txt \
               --profile tiny --steps "$STEPS" --seed "$seed" \
-              --device cpu --checkpoints "$checkpoint_dir"
+              --device cpu --checkpoints "$checkpoint_dir" \
+              --metrics-out "$report_dir/training-metrics.json" \
+              --num-threads "$RONIN_NUM_THREADS" \
+              --interop-threads "$RONIN_INTEROP_THREADS"
 
             checkpoint="$checkpoint_dir/step-$(printf '%08d' "$STEPS").pt"
             test -s "$checkpoint"
@@ -282,8 +314,12 @@ jobs:
               if int(os.environ["MMLU_LIMIT"]) == 0:
                   assert initial["selected_items"] == 12032, initial["selected_items"]
                   assert final["selected_items"] == 12032, final["selected_items"]
+              training_metrics = json.loads(
+                  (seed_dir / "training-metrics.json").read_text(encoding="utf-8")
+              )
               rows.append({
                   "seed": seed_dir.name.removeprefix("seed-"),
+                  "training_metrics": training_metrics,
                   "initial": {
                       "accuracy": initial["overall"]["accuracy"],
                       "correct": initial["overall"]["correct"],
