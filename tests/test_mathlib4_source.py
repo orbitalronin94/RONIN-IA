@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 
 
-
 REVISION = "a84939a26903163e1b98ee002bc94e9563e75c12"
 
 
