@@ -123,6 +123,11 @@ def main() -> int:
             "policy_version": "RONIN-RIGHTS-A-1",
         })
     (a.out / "rights-records.candidate.json").write_text(json.dumps(rights_records, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    for record in rights_records:
+        source = record["source_id"].split("-")[0]
+        (a.out / f"rights-record-{source}.candidate.json").write_text(
+            json.dumps(record, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8"
+        )
     summary = {
         "retrieved_at": retrieved,
         "status": "candidate_only",
