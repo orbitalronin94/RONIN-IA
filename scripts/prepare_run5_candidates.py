@@ -2,8 +2,8 @@
 """Build auditable, non-admitted RUN 5 candidates from the pinned Common Corpus.
 
 One streaming pass feeds sixteen domain buckets. Each bucket is split by a
-deterministic semantic-density ranking into an 80% general library and a 20%
-HKD library. This script NEVER marks data as admitted or training-eligible.
+deterministic semantic-density ranking into disjoint 50% General and 50%
+HKD libraries. This script NEVER marks data as admitted or training-eligible.
 """
 from __future__ import annotations
 
