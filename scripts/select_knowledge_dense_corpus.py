@@ -228,7 +228,7 @@ def main() -> None:
     selected_count = 0
     score_total = 0.0
     score_min = float("inf")
-    with args.output.open("w", encoding="utf-8", newline="\\n") as out:
+    with args.output.open("w", encoding="utf-8", newline="\n") as out:
         rows = db.execute(
             "SELECT docs.text, docs.license, docs.provenance, ranked.score "
             "FROM ranked JOIN docs ON docs.id=ranked.doc_id "
@@ -236,7 +236,7 @@ def main() -> None:
             (keep_n,),
         )
         for text, license_value, provenance, score in rows:
-            line = text + "\\n"
+            line = text + "\n"
             out.write(line)
             encoded = line.encode("utf-8")
             hashes.update(encoded)
