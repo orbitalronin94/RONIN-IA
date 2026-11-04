@@ -22,12 +22,10 @@ LICENSE_URLS = {
     "CC-BY-2.0": "https://creativecommons.org/licenses/by/2.0/",
     "CC-BY-3.0": "https://creativecommons.org/licenses/by/3.0/",
     "CC-BY-4.0": "https://creativecommons.org/licenses/by/4.0/",
-    "MIT": "https://opensource.org/license/mit",
 }
 LICENSE_MAP = {
     "cc0": "CC0-1.0", "cc0-1.0": "CC0-1.0",
     "cc-by-2.0": "CC-BY-2.0", "cc-by-3.0": "CC-BY-3.0", "cc-by-4.0": "CC-BY-4.0",
-    "mit": "MIT",
 }
 EMAIL = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
 PHONE = re.compile(r"(?<!\w)(?:\+?\d[\d .()/-]{7,}\d)(?!\w)")
