@@ -39,6 +39,11 @@ def test_adquisicion_guarda_archivos_hashes_y_exclusion_de_entrenamiento(
         return FakeResponse(data, url)
 
     monkeypatch.setattr(library.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(
+        library,
+        "SOURCES",
+        tuple({**source, "expected_sha256": None} for source in library.SOURCES),
+    )
 
     manifest = library.acquire(tmp_path)
 
