@@ -46,13 +46,16 @@ jobs:
           python - <<'PY'
           import hashlib, json
           from pathlib import Path
-          for folder in ("wikidata_cc0", "europe_pmc_cc_by_cc0"):
+          for folder in ("wikidata_cc0", "europe_pmc_cc_by_cc0", "pleias_common_corpus"):
               root = Path("data/external_samples") / folder
               manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
               sample = root / "sample.jsonl"
               assert manifest["training_eligible"] is False
               assert hashlib.sha256(sample.read_bytes()).hexdigest() == manifest["sha256"]
-              assert manifest["records"] > 0
+              if folder != "pleias_common_corpus":
+                  assert manifest["records"] > 0
+              else:
+                  assert manifest["records"] > 0 or manifest.get("status") == "unavailable"
               print(folder, manifest["records"], manifest["sha256"])
           PY
       - name: Commit versioned samples and manifests
