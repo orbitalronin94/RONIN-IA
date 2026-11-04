@@ -14,6 +14,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+ADAPTER_VERSION = "1.0.1"
 BASE = "https://openalex.s3.amazonaws.com/"
 MANIFEST_URL = BASE + "data/jsonl/works/manifest.json"
 LICENSE_URL = "https://creativecommons.org/publicdomain/zero/1.0/"
