@@ -163,7 +163,13 @@ def write_split(
     paths = {name: path.open("wb") for name, path in split_paths.items()}
     try:
         for row in rows:
-            if len(row) == 7:
+            document_metadata: dict[str, Any] = {}
+            if len(row) == 8:
+                (
+                    doc_id, text, license_name, provenance, score, components,
+                    document_revision, document_metadata,
+                ) = row
+            elif len(row) == 7:
                 doc_id, text, license_name, provenance, score, components, document_revision = row
             else:
                 doc_id, text, license_name, provenance, score, components = row
@@ -208,6 +214,7 @@ def write_split(
                 "semantic_density": round(score, 6),
                 "component_scores": json.loads(components) if isinstance(components, str) else components,
             }
+            sidecar.update(document_metadata)
             encoded = (json.dumps(sidecar, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
             sidecar_handle.write(encoded)
             sidecar_hash.update(encoded)
