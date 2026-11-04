@@ -1,98 +1,80 @@
-# Ciclo de entrenamiento con Portfolio y evaluación MMLU-Pro
+# Entrenamiento oficial desde cero y evaluación MMLU-Pro
 
 ## Alcance
 
-El ciclo mixto combina `Portfolio/Papers` (autorización expresa; revisión `fffc234fdf3f82b6a90d56ae9b190d1c0de79690`), el split `train` de CLiGS Textbox, CoNSSA y ELTeC-spa (644 documentos: 608 train, 18 validation y 18 test) y el split `train` del corpus auxiliar de codificación (404 casos: 400 controles sintéticos, 3 mensajes confirmados y 1 afirmación no sustentada; 50 validation y 52 test reservados). El preparador registra por fuente revisión, licencia, recuento y SHA-256. Portfolio produjo 48 documentos utilizables (8.118.117 bytes); uno de los 49 elementos se excluyó por filtros. El artefacto `ronin-corpus-v2-particiones` se verificó como duplicado exacto de las particiones actuales por SHA-256 y no se añade una segunda vez.
+La PR #39 integró en `main` la preparación de los corpus autorizados. El workflow oficial es [`ronin-official-training-holdout.yml`](../.github/workflows/ronin-official-training-holdout.yml).
 
-El manifiesto declara expresamente que Portfolio/Papers es **solo para entrenamiento**. Por tanto, el workflow no extrae de él particiones de validación o prueba ni presenta la pérdida sobre el corpus de entrenamiento como métrica de generalización.
+La mezcla de entrenamiento contiene exclusivamente:
 
-## Evaluación independiente
+1. **Portfolio/Papers:** 48 documentos utilizables, autorización expresa para las aportaciones originales, revisión fijada a `fffc234fdf3f82b6a90d56ae9b190d1c0de79690`. Se usa solo para entrenamiento; las citas, imágenes, código y otros materiales de terceros requieren revisión independiente.
+2. **CLiGS Textbox, CoNSSA y ELTeC-spa:** tres fuentes con revisiones inmutables y licencias documentadas. De los 644 documentos preparados, solo los **608 de train** entran en la mezcla.
 
-Antes de entrenar y después de cada ciclo, RONIN se evalúa sobre el split `test` de `TIGER-Lab/MMLU-Pro`, fijado a la revisión `b189ec765aa7ed75c8acfea42df31fdae71f97be`.
+Los 18 documentos validation y 18 test de literatura se reservan. La mezcla conserva manifiestos, procedencia y SHA-256 por fuente y por salida. No se concatena dos veces el corpus-v2 si sus hashes coinciden con las particiones actuales.
 
-- Se selecciona la misma muestra estratificada por dominio antes y después.
-- El benchmark externo nunca se incorpora al corpus de entrenamiento ni se usa para gradientes.
-- Las preguntas que exceden el contexto se excluyen y cuentan en el informe; nunca se truncan.
-- Se registran exactitud, cobertura, resultados por dominio, hashes de dataset y checkpoint.
-- El protocolo RONIN puntúa la probabilidad del siguiente byte de la opción A-J. Es una medición propia, zero-shot y sin CoT; **no es la puntuación oficial de MMLU-Pro ni se compara con su leaderboard**.
+Quedan fuera de este entrenamiento:
+- La biblioteca de criptografía/opacidad (6 fuentes y 506 registros) hasta terminar revisión manual de derechos, OCR, edición y evidencia.
+- El corpus sintético de pseudopalabras, reservado a smoke tests.
+- Las generaciones de Phi-4 u otros tutores hasta revisión humana de calidad y derechos. La auditoría REF valida estructura, no verdad factual ni calidad.
+- Todos los splits validation/test y los benchmarks.
 
-## Ejecución
+RONIN inicializa el estudiante desde cero. Los pesos de tutores no se cargan ni se mezclan con el estudiante.
 
-El workflow `Ciclo de entrenamiento autorizado y evaluación MMLU-Pro` ejecuta en PR un smoke de 100 pasos, una semilla y 140 preguntas. La ejecución manual admite hasta 1000 pasos, cinco semillas y `mmlu_limit=0` para recorrer el test completo.
+## Holdout externo: MMLU-Pro completo
 
-Cada semilla crea un checkpoint inicial aleatorio, mide MMLU-Pro, entrena desde cero y vuelve a medir exactamente los mismos ítems. Los informes se publican como artefacto; el corpus y los checkpoints no se suben.
+- Dataset: [TIGER-Lab/MMLU-Pro](https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro).
+- Revisión fijada: `b189ec765aa7ed75c8acfea42df31fdae71f97be`.
+- Split: `test`; esperado **12.032 preguntas**.
+- Se evalúa el mismo test antes y después del entrenamiento, sin gradientes.
+- El muestreo por defecto es el test completo (`mmlu_limit=0`). En ejecuciones parciales se admite una muestra estratificada reproducible.
+- El contexto de evaluación es 2.048 bytes. No se truncan preguntas; las que exceden el límite se cuentan como omitidas y reducen la cobertura.
+- Se registra exactitud global, desglose por dominio, cobertura, ítems omitidos, revisión y SHA-256 del dataset y checkpoint.
 
+**Importante:** RONIN usa un protocolo propio zero-shot de probabilidad del siguiente byte de la letra de respuesta (A–J), sin CoT ni ejemplos. No es el protocolo oficial de MMLU-Pro y su puntuación **no se compara con el leaderboard oficial**. El benchmark se mantiene fuera de entrenamiento, selección de corpus y ajuste de prompts.
 
-## Resultado experimental anterior: baseline solo Portfolio
+## Parámetros del primer experimento oficial
 
-Smoke de integración ejecutado el 4 de noviembre de 2026: perfil `tiny` (9.922.880 parámetros), 100 pasos, semilla 1337 y corpus de 48 documentos (uno excluido por el filtro). SHA-256 del corpus: `c03a5a2045e74edd5a3c7ff16af607f887a77204862db2be1de56a922ca2f8d0`.
+- Modelo: perfil `tiny`, aproximadamente 9.922.880 parámetros.
+- Inicialización: aleatoria, desde cero.
+- Pasos: 1.000.
+- Semilla: 1337.
+- Hardware: runner CPU de GitHub Actions.
+- Evaluación: MMLU-Pro test completo, antes/después.
+- Timeout: 6 horas.
+- Artefacto: informes y manifiestos JSON; no incluye corpus ni checkpoints.
 
-| Muestra MMLU-Pro | Inicial | Tras 100 pasos |
-|---|---:|---:|
-| Aciertos | 11/131 | 10/131 |
-| Exactitud | 8,40 % | 7,63 % |
-| Cobertura | 93,57 % | 93,57 % |
+La primera ejecución se lanzó automáticamente al incorporar el workflow: [run #1](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377). Su estado y resultados se deben consultar en Actions; no se publican métricas hasta que el trabajo finalice y el artefacto se valide.
 
-Se seleccionaron 140 preguntas estratificadas; 9 se excluyeron por exceder el contexto y no se truncaron. La diferencia es de -0,76 puntos porcentuales (un acierto menos). Con una sola semilla y 131 preguntas no hay evidencia suficiente para afirmar mejora ni regresión. La exactitud media de azar de la muestra era aproximadamente 10,97 %, por lo que ambos estados siguen siendo débiles en esta tarea.
+## Cómo lanzar el workflow
 
-Este resultado es un smoke de 100 pasos, no la conclusión del proyecto. El workflow reserva los ciclos largos (hasta 1000 pasos y cinco semillas) para ejecución manual; los eventos de PR y push usan un smoke corto de 100 pasos y una semilla.
+GitHub → Actions → **Experimento oficial RONIN desde cero + MMLU-Pro completo** → Run workflow.
 
+- Para el test completo: `mmlu_limit=0` y una sola semilla por ejecución.
+- Para una muestra de desarrollo: indicar un límite positivo y hasta cinco semillas.
+- El push a `main` que modifica componentes críticos usa por defecto 1.000 pasos, semilla 1337 y el test completo.
 
-### Desglose por dominio
+El antiguo workflow `portfolio-training-cycle.yml` se retiró para evitar dos ciclos oficiales competidores. Los ciclos sintéticos y el piloto interno de 23 preguntas permanecen como pruebas técnicas, no como benchmark oficial.
 
-| Dominio | Inicial | Tras 100 pasos | Cambio de aciertos |
-|---|---:|---:|---:|
-| Biología | 0/10 | 0/10 | 0 |
-| Empresa | 1/10 | 1/10 | 0 |
-| Química | 2/10 | 0/10 | -2 |
-| Informática | 1/10 | 0/10 | -1 |
-| Economía | 0/10 | 1/10 | +1 |
-| Ingeniería | 0/10 | 2/10 | +2 |
-| Salud | 0/10 | 0/10 | 0 |
-| Historia | 1/6 | 1/6 | 0 |
-| Derecho | 0/6 | 0/6 | 0 |
-| Matemáticas | 1/10 | 1/10 | 0 |
-| Otros | 1/9 | 2/9 | +1 |
-| Filosofía | 2/10 | 0/10 | -2 |
-| Física | 1/10 | 1/10 | 0 |
-| Psicología | 1/10 | 1/10 | 0 |
+## Resultado histórico anterior (no es el experimento oficial)
 
-### Comparación pareada
-
-La comparación por identificador confirma que 110 de los 131 ítems permanecieron incorrectos en ambos estados; no hubo ningún ítem correcto en ambos. En los 21 discordantes, 11 pasaron de correcto a incorrecto y 10 de incorrecto a correcto. La prueba exacta binomial bilateral equivalente al contraste de McNemar da **p = 1,00**. No hay señal estadística de cambio en esta muestra; el signo negativo de un acierto no debe presentarse como regresión demostrada.
-
+Un smoke anterior de 100 pasos y 131 preguntas MMLU-Pro obtuvo 11/131 (8,40 %) antes y 10/131 (7,63 %) después. La diferencia de un acierto no demuestra mejora ni regresión; el contraste pareado fue no significativo (p = 1,00). Ese resultado usó un ciclo previo y una muestra limitada, por lo que no debe confundirse con el nuevo holdout completo.
 
 ## Interpretación
 
-El resultado es un experimento de entrenamiento sobre un corpus concreto, no una prueba de conocimiento general. Una subida o bajada de la exactitud en la muestra puede reflejar variación, especialización o regresión; debe contrastarse entre semillas y con otras evaluaciones independientes antes de extraer conclusiones sobre la arquitectura.
+La primera ejecución oficial es una línea base exploratoria. Una sola semilla, un modelo de 9,9 M de parámetros y un protocolo de selección de letra no demuestran razonamiento general. Para afirmaciones más fuertes harán falta más semillas, mayor escala, tareas abiertas con rúbricas humanas, calibración, análisis de robustez y otros holdouts independientes.
 
+## Ciclo experimental mixto con REF y tutor (PR #41)
 
-## Ciclo mixto v2: fuentes de entrenamiento
+Este ciclo es **complementario** al experimento oficial anterior; no lo sustituye ni cambia su protocolo de holdout completo. Su objetivo es medir qué ocurre al añadir datos especializados y propuestas de tutor al estudiante RONIN.
 
-La siguiente versión del workflow mezcla, con manifiesto y SHA-256 por fuente:
+La mezcla experimental contiene:
 
-1. **Portfolio/Papers**: permiso expreso del titular, revisión inmutable; se usa únicamente su partición de entrenamiento.
-2. **CLiGS Textbox, CoNSSA y ELTeC-spa**: revisiones Git fijadas en `scripts/prepare_open_corpora.py`; se incorpora únicamente `train.txt`. Las particiones `validation` y `test` quedan reservadas y no se pasan al entrenador.
-3. **Phi-4-mini-instruct**: tutor MIT de 3,8B parámetros, ajustado para instrucciones y con español entre sus idiomas declarados. Se generan 16 propuestas a partir del currículo de prompts, se filtran por estructura REF y se incorpora solo la salida que supera el esquema. La auditoría REF no demuestra que las respuestas sean verdaderas ni que sus fuentes sean correctas; se registra como augmentación sintética de tutor, no como dato experto. La licencia MIT corresponde al modelo, no se atribuye automáticamente a las salidas; el lote generado permanece temporal en el runner y no se publica como artefacto.
+1. **Portfolio/Papers**: 48 documentos incorporados, con autorización expresa limitada a las aportaciones originales. Citas, imágenes, código y materiales de terceros requieren revisión independiente.
+2. **CLiGS Textbox, CoNSSA y ELTeC-spa**: solo los 608 documentos del split `train`; 18 validation y 18 test permanecen reservados.
+3. **Casos estructurados de opacidad**: solo 404 registros `train`; 50 validation y 52 test quedan fuera. El train contiene 400 controles sintéticos y cuatro casos no sintéticos, por lo que es un piloto muy desequilibrado.
+4. **Phi-4-mini-instruct**: hasta 16 propuestas de tutor, incorporadas solo si la generación nativa y la auditoría REF estructural terminan correctamente. Si falla, el ciclo continúa sin augmentación y lo deja registrado.
 
-El workflow concatena Portfolio, literatura, el split train curado de casos criptográficos y, si supera REF, las propuestas de Phi-4 en un corpus mixto reproducible y publica su manifiesto con tamaños y hashes. Cada semilla parte de inicialización aleatoria; los pesos de Phi-4 nunca se cargan en RONIN.
+Los seis libros y escaneos primarios de criptografía se descargan y verifican por SHA-256, pero no se mezclan como texto completo: siguen pendientes de OCR/transcripción y revisión documental. El corpus sintético de pseudo-palabras solo sirve para smoke tests. MMLU-Pro, benchmarks y todos los holdouts permanecen fuera de los gradientes.
 
-### Qué queda fuera y por qué
+El ciclo mixto usa 100 pasos y una semilla en PR como smoke; al integrarse en `main`, ejecuta 1000 pasos por semilla con `1337, 2027, 42` y una muestra MMLU-Pro de 140 preguntas. No es el test completo ni se compara con el leaderboard oficial. El workflow oficial mantiene el holdout completo de 12.032 preguntas y la mezcla limpia Portfolio + literatura, sin tutor ni casos criptográficos.
 
-- `benchmarks/domains_v1.jsonl` y MMLU-Pro `test`: evaluación, nunca gradientes.
-- `validation.txt` y `test.txt` de la literatura: holdouts, nunca entrenamiento.
-- El corpus sintético de pseudo-palabras: útil para probar el pipeline, no aporta conocimiento lingüístico; se reserva para smoke tests.
-- Los seis libros y escaneos criptográficos completos marcados `excluded_pending_manual_review` permanecen fuera. Solo se incorpora el split `train` curado de 404 casos de opacidad; `validation` (50) y `test` (52) quedan reservados. El train está muy desequilibrado: 400 controles sintéticos y 4 registros no sintéticos.
-- Project Gutenberg, Internet Archive, Common Corpus y BookCorpusOpen: siguen bloqueados por G-0; este ciclo no los descarga. G-0 no se considera superado por usar las tres fuentes literarias ya integradas, que pasan una lista de permitidos y una validación de procedencia separadas.
-
-El ciclo en PR conserva 100 pasos y una semilla para comprobar el circuito completo. Al integrarse en `main`, el push ejecuta 1000 pasos por semilla con `1337, 2027, 42`. MMLU-Pro sigue siendo una evaluación propia de siguiente byte A-J, no comparable con su leaderboard oficial.
-
-
-### Fuentes descargadas que se mantienen fuera de esta mezcla
-
-La biblioteca de codificación contiene cinco fuentes primarias descargadas y verificadas por SHA-256 en un artefacto anterior: Poe, Verne, Conan Doyle, *Hypnerotomachia Poliphili* y Selenus. No se mezclan en el preentrenamiento general: el manifiesto las marca `excluded_pending_manual_review`; los dos PDF latinos requieren OCR/transcripción revisada y el material debe convertirse en ejemplos de codificación con procedencia y partición propias. El workflow de adquisición criptográfica continúa bloqueado por su gate G-0 actual. Se conservarán como corpus auxiliar de REF/criptografía, no se descartarán ni se duplicarán en el corpus literario.
-
-Phi-4-mini-instruct queda descargado y verificado. Su generación se intenta con Transformers 4.53.3, versión compatible con el símbolo `LossKwargs` requerido por el código remoto fijado. Si falla la carga, generación o auditoría REF, el ciclo base continúa con Portfolio + literatura y deja el estado del tutor explícito en el manifiesto. Las respuestas del tutor no se consideran hechos verificados y su licencia de salida no se presupone.
-
-
-El conjunto auxiliar de codificación se construye desde seis fuentes primarias verificadas por SHA-256. El preprocesador valida cada registro, incorpora solo `split=train` y publica un manifiesto con hashes y recuentos por etiqueta. El entrenamiento recibe los casos como texto estructurado con su clase epistémica, estado de evidencia, mecanismo, pasos de reproducción y referencias; no recibe los libros completos ni los splits de evaluación. La distribución está muy desequilibrada (400 controles sintéticos frente a 4 casos no sintéticos), por lo que su presencia no permite afirmar que RONIN haya adquirido capacidad criptográfica general.
+El objetivo es comparar dos condiciones claramente separadas: (a) línea base limpia con test externo completo y (b) mezcla enriquecida con REF/tutor y evaluación parcial reproducible. Una diferencia no se atribuirá a la arquitectura sin controles adicionales.
