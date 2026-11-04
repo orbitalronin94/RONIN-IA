@@ -59,6 +59,7 @@ def test_manifiesto_por_documento_conserva_procedencia_licencia_y_particion():
             "source": "cligs-textbox",
             "path": "spanish/cuentos-espanoles/tei/cuento.xml",
             "sha256": digest,
+            "source_file_sha256": "b" * 64,
             "text": "Texto de prueba",
         }],
         "validation": [],
