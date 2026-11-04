@@ -42,7 +42,7 @@ concurrency:
 
 jobs:
   prepare-domain:
-    name: Preparar ${{ matrix.domain }} (base + HKD)
+    name: Preparar ${{ matrix.domain }} (General + HKD)
     runs-on: ubuntu-latest
     timeout-minutes: 360
     strategy:
@@ -220,7 +220,7 @@ jobs:
           )
           PY
 
-      - name: Publicar biblioteca base en datasets (incluso si falla la validación)
+      - name: Publicar biblioteca General en datasets (incluso si falla la validación)
         if: always()
         uses: actions/upload-artifact@v6
         with:
@@ -338,7 +338,7 @@ jobs:
                       "train_sha256": item.get("train_sha256"),
                       "source_revision": item.get("source_revision"),
                       "manifest": str(manifest_path),
-                      "artifact": f"ronin-datasets-run5-library-{library_id}",
+                      "artifact": f"ronin-datasets-run5-library-{library_id.replace('_general', '-general').replace('_hkd', '-hkd')}",
                   })
               else:
                   libraries.append({
@@ -395,12 +395,38 @@ jobs:
           root = Path("datasets/run5")
           manifests = sorted(root.glob("**/candidate-manifest.json"))
           expected = {
-              "mathematics", "logic_epistemology", "philosophy", "physics",
-              "chemistry", "biology_medicine", "computer_science",
-              "law_economics_social_sciences",
-              "mathematics_hkd", "logic_epistemology_hkd", "philosophy_hkd",
-              "physics_hkd", "chemistry_hkd", "biology_medicine_hkd",
-              "computer_science_hkd", "law_economics_social_sciences_hkd",
+              "mathematics_general",
+              "logic_epistemology_general",
+              "philosophy_general",
+              "physics_general",
+              "chemistry_materials_general",
+              "biology_general",
+              "medicine_health_general",
+              "computer_science_general",
+              "software_engineering_general",
+              "law_general",
+              "economics_general",
+              "social_sciences_general",
+              "statistics_probability_general",
+              "astronomy_earth_science_general",
+              "engineering_robotics_general",
+              "humanities_general",
+              "mathematics_hkd",
+              "logic_epistemology_hkd",
+              "philosophy_hkd",
+              "physics_hkd",
+              "chemistry_materials_hkd",
+              "biology_hkd",
+              "medicine_health_hkd",
+              "computer_science_hkd",
+              "software_engineering_hkd",
+              "law_hkd",
+              "economics_hkd",
+              "social_sciences_hkd",
+              "statistics_probability_hkd",
+              "astronomy_earth_science_hkd",
+              "engineering_robotics_hkd",
+              "humanities_hkd",
           }
           found = {}
           for path in manifests:
@@ -445,7 +471,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: ronin-run5-16-library-candidate-report
+          name: ronin-run5-32-library-candidate-report
           path: |
             run5-32-library-candidate-report.json
             run5-cross-library-dedup.json
