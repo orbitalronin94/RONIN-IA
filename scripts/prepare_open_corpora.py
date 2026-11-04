@@ -236,6 +236,16 @@ def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
             "tree_sha": tree_sha,
             "downloaded_file_count": sum(1 for item in downloaded if item["sha256"]),
             "downloaded_files_sha256": aggregate,
+            "downloaded_files": [
+                {
+                    "path": item["path"],
+                    "size": item["size"],
+                    "git_blob_sha1": item.get("git_blob_sha1", ""),
+                    "sha256": item["sha256"],
+                    "skipped": item["skipped"],
+                }
+                for item in downloaded
+            ],
         }
 
         for item in downloaded:
