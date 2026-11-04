@@ -123,14 +123,18 @@ jobs:
           root = Path("/tmp/ronin-open-corpus/processed")
           manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
           expected = {
-              "cligs-textbox": "1b91e940475c8a7e866457a3953fed5edb0a29f1",
-              "cligs-conssa": "8fccf669ed1bdbad309ff190f5afb0d6066d70a3",
-              "eltec-spa": "83e2a22d5ef66f96e59f47f7ef810358c4236322",
+              "cligs-textbox": ("cligs/textbox", "1b91e940475c8a7e866457a3953fed5edb0a29f1"),
+              "cligs-conssa": ("cligs/conssa", "8fccf669ed1bdbad309ff190f5afb0d6066d70a3"),
+              "eltec-spa": ("COST-ELTeC/ELTeC-spa", "83e2a22d5ef66f96e59f47f7ef810358c4236322"),
           }
           sources = {item["id"]: item for item in manifest["sources"]}
           assert set(sources) == set(expected), sources.keys()
           assert manifest["document_count"] >= 100
-          assert all(sources[name]["revision"] == revision for name, revision in expected.items())
+          assert all(
+              sources[name]["repository"] == repository
+              and sources[name]["revision"] == revision
+              for name, (repository, revision) in expected.items()
+          )
           assert all(sources[name]["license_text"] == "dominio público" for name in expected)
           assert all(sources[name]["license_metadata"] == "CC-BY-4.0" for name in expected)
           assert all(manifest["source_document_counts"][name] > 0 for name in expected)
