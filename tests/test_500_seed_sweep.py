@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import yaml
@@ -61,8 +64,26 @@ def test_seed_sweep_workflow_is_500_seed_validation_only():
     assert 'default: "500"' in workflow
     assert 'default: "100"' in workflow
     assert 'default: "1"' in workflow
+    assert workflow.count("PYTHONPATH=. python scripts/prepare_large_synthetic_corpus.py") == 2
     assert '--split", "validation"' in workflow
     assert '--split", "test"' not in workflow
     assert "MMLU_REVISION" in workflow
     parsed = yaml.load(workflow, Loader=yaml.BaseLoader)
     assert parsed["jobs"]["seed-sweep"]["timeout-minutes"] == "360"
+
+
+def test_seed_sweep_scripts_support_standalone_cli_without_pythonpath():
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+    for script in (
+        "scripts/prepare_large_synthetic_corpus.py",
+        "scripts/run_500_seed_sweep.py",
+    ):
+        result = subprocess.run(
+            [sys.executable, script, "--help"],
+            check=True,
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        assert "usage:" in result.stdout.lower()
