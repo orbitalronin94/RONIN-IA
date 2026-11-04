@@ -60,16 +60,41 @@ def main() -> int:
             raise ValueError("no JSON data members found in ROR release")
         for name in sorted(members):
             with zf.open(name) as stream:
-                for raw in stream:
-                    if not raw.strip():
-                        continue
-                    row = json.loads(raw)
-                    clean = {k: row[k] for k in ALLOW if k in row}
-                    if not clean.get("id"):
-                        continue
-                    dst.write(json.dumps(clean, ensure_ascii=False, sort_keys=True) + "\n")
-                    count += 1
-                    if count >= a.max_rows:
+                content = stream.read().decode("utf-8-sig")
+            try:
+                parsed = json.loads(content)
+            except json.JSONDecodeError:
+                parsed = None
+            if isinstance(parsed, list):
+                rows = iter(parsed)
+            elif isinstance(parsed, dict):
+                rows = iter(parsed.get("items", [parsed]))
+            else:
+                def decode_concatenated(payload):
+                    decoder = json.JSONDecoder()
+                    position = 0
+                    while position < len(payload):
+                        while position < len(payload) and payload[position].isspace():
+                            position += 1
+                        if position >= len(payload):
+                            break
+                        row, position = decoder.raw_decode(payload, position)
+                        if isinstance(row, list):
+                            yield from row
+                        else:
+                            yield row
+                rows = decode_concatenated(content)
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                clean = {k: row[k] for k in ALLOW if k in row}
+                if not clean.get("id"):
+                    continue
+                dst.write(json.dumps(clean, ensure_ascii=False, sort_keys=True) + "\\n")
+                count += 1
+                if count >= a.max_rows:
+                    break
+            if count >= a.max_rows:
                         break
             if count >= a.max_rows:
                 break
