@@ -12,9 +12,10 @@ import hashlib
 import json
 import random
 from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import replace
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import torch
 from torch.nn import functional as F
