@@ -13,9 +13,9 @@ from pathlib import Path
 from typing import Any
 
 from scripts.pmc_oa_source import (
+    iter_pmc_records,
     SOURCE_DATASET,
     SOURCE_REVISION,
-    iter_pmc_records,
 )
 from scripts.prepare_run5_candidates import (
     domain_kind_name,
