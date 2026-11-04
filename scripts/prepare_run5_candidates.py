@@ -410,7 +410,7 @@ def write_split(
 
 
 def domain_kind_name(domain: str, kind: str) -> str:
-    return f"{domain}_general" if kind == "general" else f"{domain}_hkd"
+    return f"{domain}_general" if kind in {"general", "base"} else f"{domain}_hkd"
 
 
 def expected_library_count(domain: str | None) -> int:
