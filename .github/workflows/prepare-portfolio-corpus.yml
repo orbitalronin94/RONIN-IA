@@ -1,16 +1,13 @@
-name: Preparar corpus propio de Portfolio
+name: Construir índice RAG experto de Portfolio
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-
 permissions:
   contents: read
 
 jobs:
   preparar:
-    name: Preparar y auditar documentos autorizados
+    name: Preparar documentos de recuperación autorizados
     runs-on: ubuntu-latest
     steps:
       - name: Obtener RONIN IA
@@ -31,17 +28,20 @@ jobs:
       - name: Instalar extractor PDF
         run: python -m pip install --upgrade pypdf
 
-      - name: Crear corpus y manifiesto
+      - name: Crear documentos de recuperación y manifiesto
         run: |
           python scripts/prepare_portfolio_corpus.py \
             --source-dir data/source/portfolio/Papers \
-            --output-dir /tmp/ronin-portfolio-corpus \
+            --output-dir /tmp/ronin-portfolio-rag/source \
             --source-revision fffc234fdf3f82b6a90d56ae9b190d1c0de79690
 
-      - name: Publicar corpus de preparación como artefacto temporal
+      - name: Construir índice de recuperación FTS5 con citas
+        run: python scripts/build_portfolio_rag_index.py --source-dir /tmp/ronin-portfolio-rag/source --output-dir /tmp/ronin-portfolio-rag/index
+
+      - name: Publicar índice RAG como artefacto temporal
         uses: actions/upload-artifact@v6
         with:
-          name: ronin-portfolio-corpus-staging
+          name: ronin-portfolio-rag-index
           path: /tmp/ronin-portfolio-corpus/
           if-no-files-found: error
           retention-days: 7
