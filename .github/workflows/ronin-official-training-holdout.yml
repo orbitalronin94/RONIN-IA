@@ -1,23 +1,6 @@
 name: Experimento oficial RONIN desde cero + MMLU-Pro completo
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/ronin-official-training-holdout.yml"
-      - "scripts/prepare_open_corpora.py"
-      - "scripts/prepare_training_mixture.py"
-      - "scripts/validate_eight_libraries.py"
-      - "data/manifests/eight_libraries.json"
-      - "scripts/generate_teacher_data.py"
-      - "scripts/audit_ref_dataset.py"
-      - "scripts/prepare_teacher_corpus.py"
-      - "scripts/download_teacher_models.py"
-      - "scripts/train_text.py"
-      - "scripts/evaluate_mmlu_pro.py"
-      - "ronin/models/**"
-      - "ronin/training/**"
-      - "ronin/config.py"
   workflow_dispatch:
     inputs:
       steps:
@@ -45,16 +28,16 @@ concurrency:
 
 jobs:
   ronin-training:
-    name: Entrenar con corpus autorizado y medir antes/después
+    name: Entrenar solo después de admitir las ocho bibliotecas
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
       PYTHONUNBUFFERED: "1"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
       # PR: smoke corto. Push a main y ejecución manual por defecto: test externo completo con una semilla.
-      STEPS: ${{ github.event_name == 'workflow_dispatch' && inputs.steps || (github.event_name == 'push' && '1000' || '100') }}
-      SEEDS: ${{ github.event_name == 'workflow_dispatch' && inputs.seeds || (github.event_name == 'push' && '1337' || '1337') }}
-      MMLU_LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.mmlu_limit || (github.event_name == 'push' && '0' || '140') }}
+      STEPS: ${{ inputs.steps || '1000' }}
+      SEEDS: ${{ inputs.seeds || '1337' }}
+      MMLU_LIMIT: ${{ inputs.mmlu_limit || '0' }}
     steps:
       - name: Obtener RONIN IA
         uses: actions/checkout@v5
