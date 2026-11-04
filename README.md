@@ -112,6 +112,7 @@ La preparación técnica incorpora:
 - Registro del hardware y de la configuración de PyTorch en el log de Actions.
 - Prueba de regresión para comprobar que el sampler vectorizado conserva las mismas muestras.
 - [Diseño técnico, métricas y criterios A/B de aceleración CPU](docs/OPTIMIZACION_ENTRENAMIENTO_CPU.md).
+- [Plan de aceleración del entrenamiento CPU](docs/PLAN_ACELERACION_ENTRENAMIENTO_CPU.md): el perfilado real de RUN #4 mostró que 42 min 52 s de 46 min 51 s (91,5 %) fueron evaluaciones MMLU-Pro; los 1.000 pasos de entrenamiento ocuparon unos 2 min 26 s. La prioridad de ahorro de tiempo es el batching de evaluación, sin reducir el holdout final.
 
 Los cambios están integrados y la CI de la revisión fusionada ha pasado. Aún no existe una medición A/B del speedup en el runner. No se afirma un factor de aceleración antes de comparar el mismo hardware, corpus, semilla y presupuesto. El sampler vectorizado reduce trabajo Python; las métricas y el control explícito de hilos quedan instrumentados en el workflow reducido, cuyo rendimiento todavía debe medirse. Esto no demuestra por sí solo que el forward/backward del Transformer sea más rápido.
 
