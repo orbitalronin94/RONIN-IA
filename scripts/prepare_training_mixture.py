@@ -77,6 +77,9 @@ def prepare_mixture(inputs: Iterable[tuple[str, Path]], output: Path, manifest_p
             })
             total_input_bytes += len(data)
 
+    for row in rows:
+        row["byte_share"] = row["bytes"] / total_input_bytes
+
     result = {
         "schema": "ronin-training-mixture-v1",
         "source_count": len(rows),
