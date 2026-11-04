@@ -200,6 +200,7 @@ def evaluate_rows(
     context_length: int = 2048,
     device: str = "cpu",
     batch_token_budget: int = 8192,
+    last_token_only: bool = True,
 ) -> dict[str, Any]:
     """Evalúa por lotes sin truncar: el padding derecho no altera tokens previos."""
     if context_length < 1:
@@ -257,8 +258,13 @@ def evaluate_rows(
             dtype=torch.long,
             device=target_device,
         )
-        final_logits = model.forward_last_logits(input_ids, last_positions).float()
-        log_probs = F.log_softmax(final_logits, dim=-1)
+        if last_token_only:
+            final_logits = model.forward_last_logits(input_ids, last_positions)
+        else:
+            full_logits, _ = model(input_ids)
+            row_indices = torch.arange(len(batch), device=target_device)
+            final_logits = full_logits[row_indices, last_positions]
+        log_probs = F.log_softmax(final_logits.float(), dim=-1)
         # Una sola conversión a listas por lote, sin .item() por opción.
         batch_scores = log_probs[:, [ord(label) for label in LABELS]].tolist()
 
@@ -319,6 +325,7 @@ def evaluate_rows(
             "token_budget": batch_token_budget,
             "batches": batch_count,
         },
+        "inference_path": "last_position_only" if last_token_only else "full_sequence_logits",
         "skipped": skipped,
         "details": details,
         "limitations": [
