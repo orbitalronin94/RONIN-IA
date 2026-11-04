@@ -24,6 +24,7 @@ def main() -> None:
     parser.add_argument("--text", type=Path, required=True, help="approved UTF-8 corpus file")
     parser.add_argument("--profile", choices=["tiny"], default="tiny")
     parser.add_argument("--steps", type=int, default=None)
+    parser.add_argument("--seed", type=int, default=None, help="semilla de inicialización y muestreo")
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--checkpoints", type=Path, default=Path("checkpoints/tiny"))
     args = parser.parse_args()
@@ -37,6 +38,8 @@ def main() -> None:
             max_steps=args.steps,
             warmup_steps=min(training_config.warmup_steps, max(1, args.steps // 10)),
         )
+    if args.seed is not None:
+        training_config = replace(training_config, seed=args.seed)
     tokens = encode_text_file(args.text, ByteTokenizer())
     if model_config.vocab_size != ByteTokenizer.vocab_size:
         raise ValueError("tiny profile and byte tokenizer vocabulary do not match")

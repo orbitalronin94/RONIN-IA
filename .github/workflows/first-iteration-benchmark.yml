@@ -41,6 +41,9 @@ jobs:
       - name: Obtener RONIN IA
         uses: actions/checkout@v4
 
+      - name: Gate G-0: bloquear si no hay derechos acreditados
+        run: python scripts/assert_g0_passed.py
+
       - name: Preparar Python
         uses: actions/setup-python@v5
         with:
@@ -140,6 +143,22 @@ jobs:
             --validation-text /tmp/ronin-open-corpus/processed/test.txt \
             --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu \
             --output /tmp/ronin-first/reports/entrenado-test.json
+
+      - name: Evaluar batería multidominio antes y después del entrenamiento
+        env:
+          STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
+        run: |
+          checkpoint="/tmp/ronin-first/checkpoints/step-$(printf '%08d' "$STEPS").pt"
+          python scripts/evaluate_domains.py \
+            --checkpoint /tmp/ronin-first/inicial.pt \
+            --dataset benchmarks/domains_v1.jsonl \
+            --profile tiny --device cpu \
+            --output /tmp/ronin-first/reports/domains-inicial.json
+          python scripts/evaluate_domains.py \
+            --checkpoint "$checkpoint" \
+            --dataset benchmarks/domains_v1.jsonl \
+            --profile tiny --device cpu \
+            --output /tmp/ronin-first/reports/domains-entrenado.json
 
       - name: Comparar arquitectura histórica y actual (A/B)
         env:
