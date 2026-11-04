@@ -24,12 +24,12 @@ def test_official_training_workflow_excludes_portfolio_and_requires_sixteen_libr
 
     steps = job["steps"]
     by_name = {step.get("name"): step for step in steps}
-    assert "Obtener Portfolio en revisión inmutable" not in by_name
-    assert "Preparar corpus de Portfolio" not in by_name
-    assert "Verificar autorización, finalidad y hash del corpus" not in by_name
+    assert "Obtener Portfolio en revisión inmutable para recuperación" in by_name
+    assert "Preparar Portfolio como índice RAG (nunca como entrenamiento)" in by_name
+    
     assert "Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial" in by_name
     gate = by_name["Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial"]["run"]
-    assert "validate_sixteen_libraries.py --require-ready --corpus-root /tmp/ronin-sixteen-libraries" in gate
+    assert "validate_sixteen_libraries.py --require-ready --corpus-root /tmp/ronin-sixteen-libraries --portfolio-root /tmp/ronin-portfolio-rag" in gate
 
     cycle = by_name["Entrenar desde cero y evaluar el test externo completo antes/después"]["run"]
     assert "--text /tmp/ronin-training/combined-train.txt" in cycle
