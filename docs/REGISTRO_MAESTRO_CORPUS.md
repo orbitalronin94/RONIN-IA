@@ -60,3 +60,12 @@ El catálogo de autores castellanos, obras candidatas y fuentes históricas de c
 La mezcla de Portfolio + literatura descrita arriba corresponde a ejecuciones históricas RUN #3/#4; no representa la política futura. Portfolio/Papers queda excluido de pretraining y SFT y reservado para recuperación documental RAG con citas. No cuenta como una de las ocho bibliotecas. Su incorporación a pesos requerirá una carencia demostrada, evaluación controlada y aprobación explícita.
 
 RUN #5 no puede comenzar hasta que ocho bibliotecas independientes (matemáticas; lógica/epistemología; filosofía; física; química/materiales; biología/medicina; informática/software; derecho/economía/ciencias sociales) superen el gate. Mínimo 256 MiB train por biblioteca, objetivo 1 GiB, procedencia y licencia por documento, revisión inmutable, hashes SHA-256, deduplicación, calidad, PII/secretos y splits por documento. Ver docs/AUDITORIA_OCHO_BIBLIOTECAS_MASIVAS.md y data/manifests/eight_libraries.json.
+
+
+## Política de dieciséis bibliotecas — actualización 4 noviembre 2026
+
+El objetivo vigente es 16 bibliotecas masivas: 8 base y 8 derivadas de fuentes de escala superior mediante RONIN-HKD. Cada una requiere mínimo 256 MiB UTF-8 train, objetivo 1 GiB, revisión de derechos por documento/archivo, procedencia, revisión inmutable, SHA-256, deduplicación exacta y aproximada, escaneo PII/secretos, calidad y splits por documento.
+
+Portfolio/Papers no forma parte de las 16: queda como RAG de experto para recuperación cuando el modelo detecta incertidumbre. No se incorpora a pretraining ni SFT sin una carencia demostrada y un experimento aprobado.
+
+Los adaptadores de alta densidad están inventariados en data/manifests/knowledge_dense_sources.json, desactivados por defecto. Ver docs/METRICA_DENSIDAD_SEMANTICA.md. RUN #5 permanece bloqueada hasta que el manifiesto data/manifests/sixteen_libraries.json y los 16 train.txt pasen scripts/validate_sixteen_libraries.py --require-ready.
