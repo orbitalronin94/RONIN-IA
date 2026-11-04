@@ -205,3 +205,11 @@ This is deliberately **not a rights clearance**: Common Corpus is 4.49 TB on the
 - **Eurostat**: statistical data and metadata may be reused with attribution, but dataset-specific notices and third-party exceptions apply. Its general reuse policy is not automatically converted to an SPDX license or Level A record.
 
 These structured sources can enrich RONIN's domain libraries and factual grounding, but they are not counted as natural-language training text unless an actual text payload independently passes the rights and quality gates.
+
+
+### Acquisition adapters added for the new Spanish sources
+
+- `scripts/ingest_goveasy_candidate.py` and `.github/workflows/ingest-goveasy-candidate.yml` fetch the public GovEasy dataset JSON-LD plus the documented `/api/tramites.json`, `/api/organismos.json` and `/api/provincias.json` endpoints. They create a JSONL candidate, snapshot hashes and a proposed **Level B** rights record because the publisher's CC-BY-4.0 statement does not by itself settle all underlying government-source text rights. No automatic admission.
+- `scripts/preflight_parlaibero_dataverse.py` and `.github/workflows/preflight-parlaibero-dataverse.yml` query the public Harvard Dataverse API for the exact v2.0 file manifest of ParlaIbero-ES. This first stage records file IDs, sizes, provider checksums, restriction flags and metadata SHA-256; it does not download the approximately 1 GB payload or invent a payload hash. A separate download/PII review follows only after the file inventory is inspected.
+
+Both workflows are public, credential-free, candidate-only lanes. Their successful execution must be confirmed from Actions artifacts before any row counts or bytes are added to the corpus totals.
