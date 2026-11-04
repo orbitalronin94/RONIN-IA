@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 22:44 | [Integración continua #774 (run 41927110815)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927110815) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(data\): refresh 1000-record open-source samples weekly. Trigger: push; rama: main; intento: 1. | a7e4809a |
 | 2026-11-04 22:44 | [Integración continua #788 (run 41927700977)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927700977) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Test standalone imports and both corpus generation commands. Trigger: pull_request; rama: fix/500-seed-validation-pythonpath; intento: 1. | 7e71893e |
 | 2026-11-04 22:42 | [Integración continua #786 (run 41927565214)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927565214) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: feat\(data\): validate expanded 32-domain library topology. Trigger: push; rama: main; intento: 1. | dac96da1 |
 | 2026-11-04 22:42 | [Integración continua #784 (run 41927508268)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927508268) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: feat\(data\): route Common Corpus into 32 subject domains. Trigger: push; rama: main; intento: 1. | 81e8a714 |
