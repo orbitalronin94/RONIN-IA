@@ -65,3 +65,24 @@ La comparación por identificador confirma que 110 de los 131 ítems permanecier
 ## Interpretación
 
 El resultado es un experimento de entrenamiento sobre un corpus concreto, no una prueba de conocimiento general. Una subida o bajada de la exactitud en la muestra puede reflejar variación, especialización o regresión; debe contrastarse entre semillas y con otras evaluaciones independientes antes de extraer conclusiones sobre la arquitectura.
+
+
+## Ciclo mixto v2: fuentes de entrenamiento
+
+La siguiente versión del workflow mezcla, con manifiesto y SHA-256 por fuente:
+
+1. **Portfolio/Papers**: permiso expreso del titular, revisión inmutable; se usa únicamente su partición de entrenamiento.
+2. **CLiGS Textbox, CoNSSA y ELTeC-spa**: revisiones Git fijadas en `scripts/prepare_open_corpora.py`; se incorpora únicamente `train.txt`. Las particiones `validation` y `test` quedan reservadas y no se pasan al entrenador.
+3. **Phi-4-mini-instruct**: tutor MIT de 3,8B parámetros, ajustado para instrucciones y con español entre sus idiomas declarados. Se generan 32 propuestas en 16 dominios, se filtran por estructura REF y se incorpora solo la salida que supera el esquema. La auditoría REF no demuestra que las respuestas sean verdaderas ni que sus fuentes sean correctas; se registra como augmentación sintética de tutor, no como dato experto.
+
+El workflow concatena esas tres entradas en un corpus mixto reproducible y publica su manifiesto con tamaños y hashes. Cada semilla parte de inicialización aleatoria; los pesos de Phi-4 nunca se cargan en RONIN.
+
+### Qué queda fuera y por qué
+
+- `benchmarks/domains_v1.jsonl` y MMLU-Pro `test`: evaluación, nunca gradientes.
+- `validation.txt` y `test.txt` de la literatura: holdouts, nunca entrenamiento.
+- El corpus sintético de pseudo-palabras: útil para probar el pipeline, no aporta conocimiento lingüístico; se reserva para smoke tests.
+- Los casos criptográficos y fuentes primarias marcados `excluded_pending_manual_review`: no se entrenan hasta revisión documental.
+- Project Gutenberg, Internet Archive, Common Corpus y BookCorpusOpen: siguen bloqueados por G-0; este ciclo no los descarga. G-0 no se considera superado por usar las tres fuentes literarias ya integradas, que pasan una lista de permitidos y una validación de procedencia separadas.
+
+El ciclo en PR conserva 100 pasos y una semilla para comprobar el circuito completo. Al integrarse en `main`, el push ejecuta 1000 pasos por semilla con `1337, 2027, 42`. MMLU-Pro sigue siendo una evaluación propia de siguiente byte A-J, no comparable con su leaderboard oficial.
