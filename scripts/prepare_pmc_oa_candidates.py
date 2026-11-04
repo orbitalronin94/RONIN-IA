@@ -28,7 +28,7 @@ PMC_DOMAINS = {"biology_medicine", "chemistry"}
 PMC_LICENSES = {
     "CC0", "CC0 1.0", "CC BY", "CC BY 2.0", "CC BY 3.0", "CC BY 4.0",
 }
-HKD_FRACTION = 0.20
+HKD_FRACTION = 0.50
 
 
 def load_authorization(path: Path) -> dict[str, Any]:
