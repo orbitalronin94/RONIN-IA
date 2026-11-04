@@ -253,3 +253,8 @@ independientes del mundo real. El conjunto no se considera listo para un
 entrenamiento general ni para medir capacidad de descifrado. Los positivos
 históricos son escasos y deben ampliarse con más pares validados, y el test
 debe reservar casos completos por obra y mecanismo.
+
+
+## Uso de los splits en el ciclo de entrenamiento
+
+El ciclo mixto incorpora exclusivamente los 404 registros de `train` como corpus auxiliar de codificación. Los 50 registros de `validation` y los 52 de `test` permanecen fuera del texto de entrenamiento. Las seis fuentes primarias se descargan y verifican por SHA-256; los libros completos no se incorporan como corpus general. La mezcla registra el hash del JSONL original, el hash del texto derivado y el reparto por etiquetas. El conjunto train contiene 400 controles sintéticos y solo cuatro casos no sintéticos (tres mensajes confirmados y una afirmación no sustentada), por lo que debe tratarse como un piloto pequeño y desequilibrado, no como prueba de competencia criptográfica.

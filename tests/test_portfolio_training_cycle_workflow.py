@@ -36,6 +36,7 @@ def test_portfolio_training_cycle_is_reproducible_and_separates_evaluation():
     mixture = by_name["Construir mezcla de todos los corpus de entrenamiento admitidos"]["run"]
     assert "--input portfolio=" in mixture
     assert "--input literatura_pd=" in mixture
+    assert "--input cryptography_ref=" in mixture
     assert "--input phi4_tutor=" in mixture
     assert "train.txt" in mixture
 
@@ -54,6 +55,7 @@ def test_portfolio_training_cycle_is_reproducible_and_separates_evaluation():
     assert '"used_for_training": False' in summary
     assert '"training_corpora"' in summary
     assert '"phi4_teacher"' in summary
+    assert '"cryptography_ref_train"' in summary
     assert 'initial["selected_items"] == final["selected_items"]' in summary
 
     artifact = by_name["Publicar informes sin corpus ni checkpoints"]

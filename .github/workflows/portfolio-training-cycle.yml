@@ -8,6 +8,11 @@ on:
       - "scripts/prepare_portfolio_corpus.py"
       - "scripts/prepare_open_corpora.py"
       - "scripts/prepare_training_mixture.py"
+      - "scripts/prepare_obfuscation_training_corpus.py"
+      - "scripts/acquire_cryptography_library.py"
+      - "scripts/build_obfuscation_cases.py"
+      - "ronin/epistemic/obfuscation.py"
+      - "tests/test_prepare_obfuscation_training_corpus.py"
       - "scripts/generate_teacher_data.py"
       - "scripts/audit_ref_dataset.py"
       - "scripts/prepare_teacher_corpus.py"
@@ -95,14 +100,16 @@ jobs:
       - name: Instalar PyTorch CPU, RONIN y evaluador externo
         run: |
           python -m pip install --upgrade pip
-          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.5.1"
           python -m pip install -e . --no-deps
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "pypdf>=5" "datasets==3.6.0" "huggingface_hub==0.36.0"
-          python -m pip install "transformers==4.53.3" "huggingface_hub==0.36.0" "safetensors>=0.4" "accelerate>=1.3"
+          python -m pip install "transformers==4.53.3" "huggingface_hub==0.36.0" "safetensors>=0.4" "accelerate==1.3.0"
           python - <<'PY'
+          import datasets
+          import huggingface_hub
           import transformers
           from transformers.utils import LossKwargs
-          print("Transformers compatible con Phi-4:", transformers.__version__, LossKwargs.__name__)
+          print("Stack:", torch.__version__, datasets.__version__, huggingface_hub.__version__, transformers.__version__, LossKwargs.__name__)
           PY
 
       - name: Preparar corpus de Portfolio
@@ -247,6 +254,14 @@ jobs:
           }, ensure_ascii=False, indent=2))
           PY
 
+      - name: Preparar split train de casos criptográficos; reservar validation y test
+        run: |
+          python scripts/prepare_obfuscation_training_corpus.py \
+            --input /tmp/ronin-obfuscation-library/cases.jsonl \
+            --case-manifest /tmp/ronin-obfuscation-library/manifest.json \
+            --output /tmp/ronin-obfuscation-library/train.txt \
+            --manifest reports/cryptography-training-corpus.json
+
       - name: Registrar corpus sintético propio como smoke, no como conocimiento
         run: |
           python scripts/prepare_synthetic_corpus.py \
@@ -290,7 +305,7 @@ jobs:
           ).read_text(encoding="utf-8"))
           assert manifest["model_id"] == "microsoft/Phi-4-mini-instruct"
           assert manifest["license"] == "mit" and manifest["license_verified"] is True
-          assert manifest["trust_remote_code"] is True
+          assert manifest["trust_remote_code"] is False
           assert any(Path("models/teachers/phi-4-mini-instruct").rglob("*.safetensors"))
           print("Tutor Phi-4 verificado:", manifest["revision"])
           PY
@@ -330,6 +345,7 @@ jobs:
           inputs=(
             --input portfolio=/tmp/ronin-portfolio/processed/train.txt
             --input literatura_pd=/tmp/ronin-open-corpus/processed/train.txt
+            --input cryptography_ref=/tmp/ronin-obfuscation-library/train.txt
           )
           if [ -s /tmp/ronin-teacher/phi-4-train.txt ]; then
             inputs+=(--input phi4_tutor=/tmp/ronin-teacher/phi-4-train.txt)
@@ -440,6 +456,9 @@ jobs:
           mixture_manifest = json.loads(
               Path("reports/training-mixture.json").read_text(encoding="utf-8")
           )
+          cryptography_training = json.loads(
+              Path("reports/cryptography-training-corpus.json").read_text(encoding="utf-8")
+          )
           teacher_manifest = json.loads(
               Path("models/teachers/phi-4-mini-instruct/ronin-teacher-manifest.json").read_text(encoding="utf-8")
           )
@@ -531,6 +550,7 @@ jobs:
                       "test_documents_reserved": open_manifest["document_counts"]["test"],
                       "train_sha256": open_manifest["output_sha256"]["train"],
                   },
+                  "cryptography_ref_train": cryptography_training,
                   "phi4_teacher": teacher_info,
                   "mixture": mixture_manifest,
               },
@@ -548,7 +568,7 @@ jobs:
                   "Portfolio/Papers se utiliza únicamente como corpus de entrenamiento; no se crea una partición de validación o prueba a partir de él.",
                   "MMLU-Pro test se utiliza solo para evaluación antes/después y nunca para gradientes.",
                   "Se entrena con Portfolio autorizado y train de CLiGS/CoNSSA/ELTeC; las propuestas Phi-4 solo se añaden si la generación y la auditoría estructural REF terminan correctamente.",
-                  "Los splits validation/test de literatura, los benchmarks internos y los casos criptográficos pendientes de revisión no se mezclan con train.",
+                  "Los splits validation/test de literatura y criptografía, los benchmarks internos y los textos completos de las fuentes primarias no se mezclan con train; solo entra el split train curado de casos criptográficos.",
                   "Las salidas de Phi-4 son datos sintéticos de tutor no verificados factualmente; la auditoría REF no certifica su verdad.",
                   "La licencia MIT corresponde al modelo, no se atribuye automáticamente a sus salidas; los textos generados se usan internamente y no se publican como artefactos.",
                   "Cada semilla parte de inicialización aleatoria y usa la misma semilla para su entrenamiento independiente.",
