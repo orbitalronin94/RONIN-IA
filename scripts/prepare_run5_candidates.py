@@ -105,7 +105,9 @@ def write_split(
     split_bytes = Counter()
     split_counts = Counter()
     sidecar_path = output_dir / "documents.jsonl"
+    sidecar_path.unlink(missing_ok=True)
     sidecar_hash = hashlib.sha256()
+    sidecar_handle = sidecar_path.open("wb")
     review_samples: list[dict[str, Any]] = []
     seen_simhash: dict[int, list[int]] = {i: {} for i in range(4)}
     near_dupes = 0
@@ -149,7 +151,7 @@ def write_split(
                 "component_scores": components,
             }
             encoded = (json.dumps(sidecar, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
-            sidecar_path.open("ab").write(encoded)
+            sidecar_handle.write(encoded)
             sidecar_hash.update(encoded)
             if len(review_samples) < 8:
                 review_samples.append({
@@ -159,6 +161,7 @@ def write_split(
     finally:
         for handle in paths.values():
             handle.close()
+        sidecar_handle.close()
 
     scan_reports = {}
     import subprocess
@@ -231,6 +234,7 @@ def main() -> int:
     parser.add_argument("--max-input-bytes", type=int, default=20 * 1024**3)
     parser.add_argument("--min-train-bytes", type=int, default=256 * 1024**2)
     parser.add_argument("--hkd-fraction", type=float, default=HKD_FRACTION)
+    parser.add_argument("--license-audit", type=Path, default=Path("reports/license_audit.json"))
     args = parser.parse_args()
     if not 0.05 <= args.hkd_fraction <= 0.40:
         parser.error("--hkd-fraction must be between 0.05 and 0.40")
@@ -239,6 +243,25 @@ def main() -> int:
         from datasets import load_dataset
     except ImportError as exc:
         raise SystemExit("Install datasets==3.6.0 before running this candidate builder") from exc
+
+    audit = json.loads(args.license_audit.read_text(encoding="utf-8"))
+    scoped = audit.get("candidate_intake_authorizations", [])
+    authorization = next(
+        (
+            item for item in scoped
+            if item.get("source_id") == DATASET_ID
+            and item.get("dataset_revision") == DATASET_REVISION
+            and item.get("status") == "LIMITED_PASS"
+            and item.get("candidate_text_downloads_authorized") is True
+            and set(item.get("allowed_licenses", [])) == ALLOWED_LICENSES
+        ),
+        None,
+    )
+    if authorization is None:
+        raise SystemExit(
+            "No existe autorización G-0 de alcance limitado para descargar "
+            "candidatos Common Corpus en esta revisión y allowlist."
+        )
 
     args.output_root.mkdir(parents=True, exist_ok=True)
     database_path = args.output_root / "run5-candidates.sqlite3"
@@ -373,6 +396,7 @@ def main() -> int:
             "revision": DATASET_REVISION,
             "url": "https://huggingface.co/datasets/PleIAs/common_corpus",
             "access": "anonymous_public_no_credentials",
+            "scoped_authorization": authorization,
             "document_license_allowlist": sorted(ALLOWED_LICENSES),
             "language_allowlist": sorted(LANGUAGES),
             "max_document_bytes": MAX_DOCUMENT_BYTES,
