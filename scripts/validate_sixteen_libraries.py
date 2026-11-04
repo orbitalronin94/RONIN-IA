@@ -26,7 +26,7 @@ def validate(
         errors.append(f"expected exactly {required} libraries, found {len(libraries)}")
     ids = [item["id"] for item in libraries]
     domains = {item.get("domain", "").split(" — ")[0] for item in libraries}
-    if len(domains) != int(policy.get("domain_count", 32)):
+    if len(domains) != int(policy.get("domain_count", 16)):
         errors.append(f"expected {policy.get('domain_count', 16)} distinct domains, found {len(domains)}")
     for domain in domains:
         partitions = [item for item in libraries if item.get("domain", "").split(" — ")[0] == domain]
