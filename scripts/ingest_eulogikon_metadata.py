@@ -6,6 +6,7 @@ It never downloads the underlying Greek texts and never marks the export admitte
 """
 from __future__ import annotations
 import csv, hashlib, json, os, urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 
 REPO = "eulogikon/ancient-greek-texts"
@@ -73,7 +74,7 @@ def main() -> None:
         "rights_holder_or_provider": "Eulogikon",
         "rights_assertion_scope": "exact_metadata_file_and_version",
         "attribution": "Eulogikon Ancient Greek Texts Corpus; DOI 10.5281/zenodo.20335421",
-        "retrieved_at": os.environ.get("RETRIEVED_AT", "2026-11-05T00:00:00+01:00"),
+        "retrieved_at": datetime.now(timezone.utc).isoformat(),
         "metadata_snapshot_sha256": hashlib.sha256(manifest).hexdigest(),
         "payload_sha256": hashlib.sha256(payload).hexdigest(),
         "provenance_uri": f"https://github.com/{REPO}/blob/{REV}/manifest.works.min.csv",
@@ -81,9 +82,7 @@ def main() -> None:
         "jurisdictions_cleared": ["ES", "EU", "US"],
         "rights_level": "A",
         "decision_reason": "Only Eulogikon-authored structured metadata fields are exported; upstream NOTICE explicitly dedicates its preparation layer, manifests and metadata to CC0-1.0. Underlying Greek text files are not downloaded or included.",
-        "policy_version": "RONIN-RIGHTS-A-1",
-        "admission_status": "candidate_pending_quality_privacy_dedup_split_and_g0",
-        "training_eligible": False
+        "policy_version": "RONIN-RIGHTS-A-1"
     }
     (OUT / "rights-record.candidate.json").write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     summary = {
