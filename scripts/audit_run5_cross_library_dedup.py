@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit exact and near-duplicate documents across all sixteen RUN 5 libraries."""
+"""Audit exact and near-duplicate documents across all thirty-two RUN 5 libraries."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from collections import Counter
 from pathlib import Path
 
 
-def audit(corpus_root: Path, report_path: Path, expected_libraries: int = 16) -> dict:
+def audit(corpus_root: Path, report_path: Path, expected_libraries: int = 32) -> dict:
     db_path = report_path.with_suffix(".sqlite3")
     db_path.parent.mkdir(parents=True, exist_ok=True)
     db_path.unlink(missing_ok=True)

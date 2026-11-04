@@ -5,8 +5,10 @@ from scripts.prepare_run5_candidates import (
     ALLOWED_LICENSES,
     COLLECTIONS,
     DATASET_REVISION,
+    DOMAIN_SOURCE_PARENT,
     LANGUAGE_ALIASES,
     choose_domain,
+    domain_kind_name,
     histogram_report,
     normalize_license,
 )
@@ -29,15 +31,17 @@ def test_language_aliases_accept_actual_manifest_labels():
     assert LANGUAGE_ALIASES["spanish"] == "es"
 
 
-def test_domain_collections_cover_eight_domains_with_explicit_alias():
+def test_domain_collections_cover_sixteen_disjoint_target_domains():
     flattened = [domain for values in COLLECTIONS.values() for domain in values]
     assert set(flattened) == {
         "mathematics", "logic_epistemology", "philosophy", "physics",
-        "chemistry", "biology_medicine", "computer_science",
-        "law_economics_social_sciences",
+        "chemistry_materials", "biology", "medicine_health",
+        "computer_science", "software_engineering", "law", "economics",
+        "social_sciences", "statistics_probability", "astronomy_earth_science",
+        "engineering_robotics", "humanities",
     }
-    # Logic/epistemology is represented both in OpenScience and Semantic data.
-    assert flattened.count("logic_epistemology") == 2
+    assert len(flattened) == 16
+    assert flattened.count("logic_epistemology") == 1
 
 
 def test_open_science_domain_classifier_distinguishes_math_and_physics():
@@ -136,15 +140,34 @@ def test_collection_names_match_common_corpus_manifest_values():
     assert choose_domain(
         "A court judgment interprets a statute, regulation and contractual liability.",
         "Open Government",
-    )[0] == "law_economics_social_sciences"
+    )[0] == "law"
+    assert choose_domain(
+        "Inflation, monetary policy, markets, econometrics and trade shape production.",
+        "Open Government",
+    )[0] == "economics"
+    assert choose_domain(
+        "Sociology, anthropology, demographic institutions and social policy.",
+        "Open Government",
+    )[0] == "social_sciences"
 
 
 
-def test_domain_worker_expects_two_libraries_but_aggregate_expects_sixteen():
+def test_general_and_hkd_ids_match_the_32_library_manifest():
+    assert len(DOMAIN_SOURCE_PARENT) == 16
+    assert domain_kind_name("mathematics", "general") == "mathematics_general"
+    assert domain_kind_name("mathematics", "hkd") == "mathematics_hkd"
+    assert set(DOMAIN_SOURCE_PARENT.values()) == {
+        "mathematics", "logic_epistemology", "philosophy", "physics",
+        "chemistry", "biology_medicine", "computer_science",
+        "law_economics_social_sciences",
+    }
+
+
+def test_domain_worker_expects_two_libraries_but_aggregate_expects_thirty_two():
     from scripts.prepare_run5_candidates import expected_library_count
 
     assert expected_library_count("philosophy") == 2
-    assert expected_library_count(None) == 16
+    assert expected_library_count(None) == 32
 
 
 
@@ -277,22 +300,22 @@ def test_domain_workers_use_distinct_reproducible_shuffle_seeds():
     assert 0 <= first < 2**32
 
 
-def test_half_hkd_split_has_a_feasible_input_budget_for_x10_minimum():
+def test_half_hkd_split_has_a_feasible_input_budget_for_one_mib_bootstrap():
     from scripts.prepare_run5_candidates import (
         HKD_FRACTION,
         minimum_scanned_bytes_for_library_floor,
     )
 
-    minimum_train_bytes = 2_560 * 1024**2
+    minimum_train_bytes = 1 * 1024**2
     required_accepted_bytes = minimum_scanned_bytes_for_library_floor(
         minimum_train_bytes, HKD_FRACTION
     )
     old_twenty_percent_budget = minimum_scanned_bytes_for_library_floor(
         minimum_train_bytes, 0.20
     )
-    assert required_accepted_bytes < 8 * 1024**3
-    assert required_accepted_bytes > 5 * 1024**3
-    assert old_twenty_percent_budget > 8 * 1024**3
+    assert required_accepted_bytes < 8 * 1024**2
+    assert required_accepted_bytes > 2 * 1024**2
+    assert old_twenty_percent_budget > required_accepted_bytes
 
 
 def test_library_floor_budget_rejects_invalid_fraction():
