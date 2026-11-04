@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:36 | [Integración continua #965 (run 41935035468)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935035468) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Trigger and version GPLSI ClearText CAS/VAL candidate workflow. Trigger: push; rama: main; intento: 1. | 16a61fa1 |
 | 2026-11-04 23:36 | [Integración continua #962 (run 41934841119)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934841119) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Capture DReaM per-document author/title/language/year metadata for rights audit. Trigger: push; rama: main; intento: 1. | c771223d |
 | 2026-11-04 23:36 | [Integración continua #963 (run 41935011670)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935011670) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add pinned GPLSI ClearText CAS and VAL candidate ingester with per-document rights quarantine. Trigger: push; rama: main; intento: 1. | 38e14c95 |
 | 2026-11-04 23:35 | [Integración continua #961 (run 41934789284)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934789284) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Use sentence-span CQP query for DReaM preflight. Trigger: push; rama: main; intento: 1. | 089a65d1 |
