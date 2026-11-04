@@ -1,0 +1,48 @@
+name: Preflight arXiv OAI — licencias por artículo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/preflight-arxiv-oai.yml"
+      - "scripts/preflight_arxiv_oai.py"
+      - "data/manifests/knowledge_dense_sources.json"
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-arxiv-oai-metadata-preflight
+  cancel-in-progress: false
+
+jobs:
+  metadata-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout RONIN
+        uses: actions/checkout@v5
+      - name: Preparar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Inspeccionar licencias OAI sin descargar artículos
+        run: |
+          python scripts/preflight_arxiv_oai.py \
+            --output reports/arxiv-oai-license-preflight.json \
+            --max-sets-per-domain 2 \
+            --max-records-per-set 250
+      - name: Publicar informe de metadatos
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-arxiv-oai-license-preflight-${{ github.run_id }}
+          path: reports/arxiv-oai-license-preflight.json
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Enlazar libro de runs
+        if: always()
+        uses: ./.github/actions/run-ledger-link
