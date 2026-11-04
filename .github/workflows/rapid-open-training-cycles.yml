@@ -1,13 +1,10 @@
 name: Ciclos rápidos RONIN — corpus abierto con gate y mejora de validación
 on:
-  # Arranque y recuperación automáticos. Tras cada ejecución válida,
-  # workflow_run encadena inmediatamente la siguiente.
+  # Arranque y recuperación automáticos; el dispatcher separado
+  # encadena la siguiente ejecución al completarse una tanda válida.
   schedule:
     - cron: "17 */6 * * *"
-  workflow_run:
-    workflows: ["Ciclos rápidos RONIN — corpus abierto con gate y mejora de validación"]
-    types: [completed]
-    branches: [main]
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
@@ -24,11 +21,6 @@ jobs:
       STEPS: "100"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
     steps:
-      - name: Evitar cadena tras una ejecución anterior fallida
-        if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success'
-        run: |
-          echo "::error::La ejecución anterior no terminó correctamente; la cadena se detiene."
-          exit 1
       - name: Obtener RONIN
         uses: actions/checkout@v5
       - name: Gate G-0 — exigir autorización legal explícita
