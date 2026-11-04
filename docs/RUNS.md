@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 22:31 | [Integración continua #752 (run 41926079167)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41926079167) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add quarantined dataset handling rules. Trigger: push; rama: main; intento: 1. | 134016a3 |
 | 2026-11-04 22:31 | [Integración continua #750 (run 41926066405)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41926066405) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Record audited Spanish public-domain literature dataset. Trigger: push; rama: main; intento: 1. | c8fd22cf |
 | 2026-11-04 22:31 | [Integración continua #746 (run 41925812913)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41925812913) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Update official workflow test for 32 library gate. Trigger: pull_request; rama: fix/run5-32-integration-and-workflow; intento: 1. | e577fcea |
 | 2026-11-04 22:27 | [Integración continua #745 (run 41925310339)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41925310339) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Correct RUN5 documentation and report actual workflow status. Trigger: pull_request; rama: fix/run5-32-integration-and-workflow; intento: 1. | f51459fd |
