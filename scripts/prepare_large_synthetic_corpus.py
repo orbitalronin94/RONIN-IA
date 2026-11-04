@@ -14,7 +14,10 @@ import random
 from collections import Counter
 from pathlib import Path
 
-from scripts.prepare_synthetic_corpus import DOMAINS, GENERATORS
+try:
+    from scripts.prepare_synthetic_corpus import DOMAINS, GENERATORS
+except ModuleNotFoundError:
+    from prepare_synthetic_corpus import DOMAINS, GENERATORS
 
 
 def build(output: Path, target_bytes: int, seed: int) -> dict[str, object]:
