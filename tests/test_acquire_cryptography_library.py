@@ -28,7 +28,7 @@ def test_adquisicion_guarda_archivos_hashes_y_exclusion_de_entrenamiento(
 ):
     def fake_urlopen(request, timeout):
         url = request.full_url
-        if "iiif.wellcomecollection.org/pdf/" in url:
+        if "iiif.wellcomecollection.org/pdf/" in url or "A336080.pdf" in url:
             data = b"%PDF-1.7\nmock-pdf-content"
         elif "2147" in url:
             data = b"THE GOLD-BUG\nEDGAR ALLAN POE"
