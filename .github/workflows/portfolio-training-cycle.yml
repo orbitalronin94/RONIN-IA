@@ -6,6 +6,12 @@ on:
     paths:
       - ".github/workflows/portfolio-training-cycle.yml"
       - "scripts/prepare_portfolio_corpus.py"
+      - "scripts/prepare_open_corpora.py"
+      - "scripts/prepare_training_mixture.py"
+      - "scripts/generate_teacher_data.py"
+      - "scripts/audit_ref_dataset.py"
+      - "scripts/prepare_teacher_corpus.py"
+      - "scripts/download_teacher_models.py"
       - "scripts/train_text.py"
       - "scripts/evaluate_mmlu_pro.py"
       - "ronin/models/**"
@@ -62,6 +68,11 @@ jobs:
       - name: Obtener RONIN IA
         uses: actions/checkout@v4
 
+      - name: Restaurar caché de tutores MIT
+        uses: actions/cache@v4
+        with:
+          path: models/teachers
+          key: ronin-teachers-${{ runner.os }}-${{ hashFiles('scripts/download_teacher_models.py') }}
       - name: Obtener Portfolio en revisión inmutable
         uses: actions/checkout@v4
         with:
@@ -81,6 +92,7 @@ jobs:
           python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
           python -m pip install -e . --no-deps
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "pypdf>=5" "datasets>=3.1"
+          python -m pip install "transformers>=4.49.0" "huggingface_hub>=0.24" "safetensors>=0.4" "accelerate>=1.3"
 
       - name: Preparar corpus de Portfolio
         run: |
