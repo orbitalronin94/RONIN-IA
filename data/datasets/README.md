@@ -74,7 +74,7 @@ Sources: [arXiv bulk data access](https://info.arxiv.org/help/bulk_data.html), [
 
 ## GitHub dataset source audit (2026-11-05)
 
-The manually reviewed discovery register is `candidates/github-source-audit.json` (31 candidate sources registered; 5 sources/classes excluded or quarantined). It records immutable catalog revisions, source-evidence links, candidate datasets, declared upstream licenses, and explicit quarantine reasons. It is a source-discovery ledger, **not** an admission manifest.
+The manually reviewed discovery register is `candidates/github-source-audit.json` (34 candidate sources registered; 5 sources/classes excluded or quarantined). It records immutable catalog revisions, source-evidence links, candidate datasets, declared upstream licenses, and explicit quarantine reasons. It is a source-discovery ledger, **not** an admission manifest.
 
 Initial audit results:
 
@@ -127,7 +127,7 @@ The ScienceVerse and Hlido candidates are registered in `candidates/github-sourc
 
 ## Additional multilingual and specialist source candidates (2026-11-05)
 
-The source audit now tracks 31 candidate sources. Four additional sources have been added after inspecting their public dataset documentation and recording the scope limitations:
+The source audit now tracks 34 candidate sources. Four additional sources have been added after inspecting their public dataset documentation and recording the scope limitations:
 
 - **VoxPopuli** — text-only ASR transcript candidate across European languages, including Spanish. Its README explicitly separates the VoxPopuli data (CC0) from Europarl-derived LM data (separate terms), and the repository's own LICENSE is CC-BY-NC 4.0. Therefore only exact VoxPopuli ASR transcript manifests may be considered; no audio, speaker identifiers, code, model weights or Europarl text.
 - **DReaM-es-open** — Spanish corpus declared CC-BY-4.0, reported as 9,115,151 tokens and 717,854 sentences. The currently listed 9.23 MB downloadable file is word statistics, not proof of a full-text corpus export. The actual corpus endpoint and payload manifest must be identified before ingestion.
@@ -179,3 +179,14 @@ The register now includes these additional source families:
 - **OpenAlex, ROR and Eulogikon metadata**: metadata-only lanes with their own narrow CC0 scope. They support retrieval, attribution, cataloguing and domain routing; they are not counted as substantive text-training bytes.
 
 **Explicit exclusions matter:** HPLT's large Spanish/Catalan web-crawl packages are quarantined because a CC0 package statement does not establish the rights of every crawled source text. C4/ImPaKT-derived snippets remain blocked for the same underlying-source reason. The ELG Spanish Wikipedia-derived corpus is not promoted because its underlying Wikipedia text carries ShareAlike terms despite the catalogue's CC-BY label. No source is admitted by association with a code repository or catalogue license.
+
+
+### Spanish public-sector, parliamentary and Galician additions
+
+Three further high-value sources have been registered:
+
+- **ParlaIbero-ES v2.0** — 562,514 rows across 3,559 sessions, including 558,940 parliamentary speeches from Spain (1977–2025), released on Harvard Dataverse under CC-BY-4.0. The ZIP is approximately 1.01 GB. This is a major Spanish-language candidate for political, institutional and argumentative language. It remains candidate-only until exact Dataverse file IDs/checksums, attribution, privacy and split/contamination checks are recorded.
+- **CorpusNÓS / Nos_Corpus_Periodistico** — 159,986 Galician documents and approximately 55.9M tokens. The university record describes CC-BY-4.0 for the corpus structure and processing, while the article texts originate from multiple publishers and agreements. Only individual documents with verifiable reuse permission can pass the rights gate; the repository-level CC-BY label is not enough.
+- **GovEasy** — 438 Spanish administrative procedures, 17 public agencies and 52 territories, six official languages, published as static JSON/CSV/JSON-LD under CC-BY-4.0. Useful for procedural and administrative language, but original government-source facts and publisher-authored/generated summaries must remain separately attributed and labelled.
+
+These additions bring the discovery register to **34 candidate sources**. They are not 34 downloaded or admitted corpora: the audit distinguishes catalogued leads, downloaded candidate artifacts, Level-A rights evidence, quality-passed partitions and admitted training data. Only the last category contributes to training-eligible corpus size.
