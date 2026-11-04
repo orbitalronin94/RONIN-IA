@@ -135,7 +135,7 @@ Referencia especializada:
 
 ## Descargas primarias incorporadas a la adquisición automatizada
 
-El flujo de auditoría descarga, sin autenticación y fuera de Git, cuatro fuentes
+El flujo de auditoría descarga, sin autenticación y fuera de Git, cinco fuentes
 concretas. Verifica formato o marcadores de contenido, calcula SHA-256 y publica
 los originales junto con un manifiesto de procedencia como artefacto temporal:
 
@@ -149,12 +149,14 @@ los originales junto con un manifiesto de procedencia como artefacto temporal:
 - Selenus, ejemplar de 1624 de Wellcome Collection, 550 imágenes, descarga PDF
   con Public Domain Mark:
   https://iiif.wellcomecollection.org/pdf/b12946308
+- Colonna, *Hypnerotomachia Poliphili* (1499), ejemplar de la Biblioteca de la
+  Universidad de Sevilla, descarga PDF con Public Domain Mark:
+  https://archive.org/download/A336080/A336080.pdf
 
 La descarga no significa que estos materiales ya formen parte del entrenamiento:
 el manifiesto los marca como `excluded_pending_manual_review`. El PDF latino
 de Selenus requiere OCR/transcripción revisada antes de usarlo como texto.
-La *Hypnerotomachia Poliphili* permanece en el catálogo bibliográfico, pero no
-se incorpora hasta fijar un ejemplar digital y derechos verificables.
+La *Hypnerotomachia Poliphili* ya tiene un ejemplar digital fijado y descargable; se conserva como imagen primaria, sin OCR ni incorporación automática al entrenamiento. El acróstico se anota como patrón documentado con interpretación de autoría no concluyente.
 
 El código de adquisición está en `scripts/acquire_cryptography_library.py`;
 las pruebas automatizadas verifican el manifiesto, los hashes y la exclusión
