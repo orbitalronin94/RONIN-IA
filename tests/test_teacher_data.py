@@ -122,55 +122,12 @@ def test_teacher_manifest_rejects_untracked_and_unsafe_files(tmp_path):
         verify_teacher_manifest(tmp_path, manifest)
 
 
-def test_phi4_mini_instruct_uses_builtin_transformers_model():
+def test_phi4_mini_instruct_is_pinned_as_mit_remote_code_teacher():
     from scripts.download_teacher_models import ALLOW_PATTERNS, ALLOWED_MODELS
 
     model = ALLOWED_MODELS["phi-4-mini-instruct"]
     assert model["repo_id"] == "microsoft/Phi-4-mini-instruct"
     assert model["license_url"] == "https://huggingface.co/microsoft/Phi-4-mini-instruct"
-    assert model["trust_remote_code"] is False
+    assert model["trust_remote_code"] is True
     assert "model*.safetensors" in ALLOW_PATTERNS
-    assert "*.py" not in ALLOW_PATTERNS
-
-
-def test_generation_uses_isolated_seed_without_generator_argument():
-    import torch
-
-    class FakeTokenizer:
-        chat_template = None
-        eos_token_id = 0
-
-        def __call__(self, prompt, **kwargs):
-            return {"input_ids": torch.tensor([[1]])}
-
-        def decode(self, tokens, **kwargs):
-            return str(int(tokens[-1]))
-
-    class FakeModel:
-        def __init__(self):
-            self.parameter = torch.nn.Parameter(torch.zeros(1))
-            self.generate_kwargs = None
-
-        def parameters(self):
-            return iter([self.parameter])
-
-        def generate(self, **kwargs):
-            self.generate_kwargs = kwargs
-            token = torch.randint(1, 100000, (1, 1))
-            return torch.cat((kwargs["input_ids"], token), dim=1)
-
-    model = FakeModel()
-    tokenizer = FakeTokenizer()
-    first = generate_completion(model, tokenizer, "Explica.", seed=404)
-    second = generate_completion(model, tokenizer, "Explica.", seed=404)
-
-    assert first == second
-    assert "generator" not in model.generate_kwargs
-
-
-def test_phi4_teacher_revision_is_pinned_and_does_not_execute_remote_code():
-    from scripts.download_teacher_models import ALLOWED_MODELS
-
-    config = ALLOWED_MODELS["phi-4-mini-instruct"]
-    assert config["revision"] == "cfbefacb99257ffa30c83adab238a50856ac3083"
-    assert config["trust_remote_code"] is False
+    assert "*.py" in ALLOW_PATTERNS

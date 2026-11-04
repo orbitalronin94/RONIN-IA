@@ -32,14 +32,21 @@ Workflow principal: [Experimento oficial RONIN desde cero + MMLU-Pro completo](h
 
 La [PR #39](https://github.com/orbitalronin94/RONIN-IA/pull/39) ya está fusionada en `main` (merge commit `ba22ed03fd76b3543f32ce301b8bbd0da6a714f9`).
 
-### Datos que entran en el nuevo entrenamiento
+### Dieciséis bibliotecas masivas + Portfolio experto
 
-**Puerta G-0 — licencias y derechos:** ningún material entra en entrenamiento por el mero hecho de estar disponible. Cada recurso debe tener procedencia, licencia o autorización compatible y revisión de los materiales de terceros; lo que no supera esa puerta queda excluido o en cuarentena. La autorización del Portfolio cubre las aportaciones originales, no concede automáticamente derechos sobre material de terceros incrustado.
+**Portfolio/Papers queda fuera de pretraining y SFT.** Se reserva como índice RAG de experto: RONIN lo consulta cuando detecte incertidumbre, recupera fragmentos con procedencia y cita la fuente. No cuenta entre las bibliotecas ni se añade a los pesos preventivamente. Solo se reconsideraría su entrenamiento si una carencia demostrada no se resuelve con recuperación y un A/B controlado prueba mejora, con aprobación explícita.
 
-- **Portfolio/Papers:** 48 documentos utilizables, con autorización expresa para las aportaciones originales. Se usa solo como entrenamiento; el material de terceros incrustado requiere revisión propia.
-- **Literatura abierta:** 644 documentos preparados de CLiGS Textbox, CoNSSA y ELTeC-spa: 608 train, 18 validation y 18 test. Solo la partición train entra en la mezcla.
-- **Mezcla oficial:** Portfolio + train de las tres colecciones literarias, con manifiestos y SHA-256 separados.
-- **Fuera del entrenamiento general:** la biblioteca criptográfica (6 fuentes/506 casos) sigue pendiente de revisión manual; los pseudodatos sintéticos son solo smoke; los textos generados por tutores no se incluyen hasta superar revisión de calidad y derechos. Los splits validation/test nunca se mezclan con train.
+El gate previo al próximo entrenamiento exige **16 bibliotecas independientes**: ocho base (matemáticas; lógica/epistemología; filosofía; física; química/materiales; biología/medicina; informática/software; derecho/economía/ciencias sociales) y otras ocho derivadas de fuentes masivas mediante selección de conocimiento de alta densidad, una por cada dominio. Cada una necesita al menos 256 MiB de train normalizado y deduplicado; objetivo 1 GiB. Bytes no sustituyen calidad, cobertura ni diversidad.
+
+Las ocho adicionales se construirán con `RONIN-HKD-0.1`: relevancia del dominio, densidad de unidades de conocimiento, especificidad, contenido informativo IDF y estructura. La métrica está inspirada en HKS (AAAI 2025), DSIR (NeurIPS 2023) y métricas de diversidad/densidad/homogeneidad (LREC 2020); es un prototipo heurístico propio y debe validarse con revisión humana y ablaciones antes de admitir datos.
+
+**Estado real: 0/16 bibliotecas admitidas para el nuevo ciclo.** Los adaptadores de fuentes HKD están desactivados hasta verificar esquema, revisión inmutable y licencia por documento/archivo. El gate exige corpus reales, hashes, auditoría legal, deduplicación cruzada, calidad, PII/secretos y splits sin fugas. No se inicia el entrenamiento oficial ni se mergea la PR antes de superar el gate.
+
+- Manifiesto de las 16: [sixteen_libraries.json](data/manifests/sixteen_libraries.json).
+- Adaptadores y allowlists: [knowledge_dense_sources.json](data/manifests/knowledge_dense_sources.json).
+- [Métrica y protocolo HKD](docs/METRICA_DENSIDAD_SEMANTICA.md).
+- [Auditoría de las fuentes masivas](docs/AUDITORIA_OCHO_BIBLIOTECAS_MASIVAS.md).
+- [Plan de aceleración CPU](docs/PLAN_ACELERACION_ENTRENAMIENTO_CPU.md).
 
 Los tutores GPT-2, GPT-Neo y Phi-4 pueden descargarse y ejecutarse localmente con licencias verificadas, pero sus pesos no se transfieren al estudiante. El nuevo workflow oficial no depende de que un tutor genere texto.
 
@@ -102,6 +109,7 @@ La preparación técnica incorpora:
 - Registro del hardware y de la configuración de PyTorch en el log de Actions.
 - Prueba de regresión para comprobar que el sampler vectorizado conserva las mismas muestras.
 - [Diseño técnico, métricas y criterios A/B de aceleración CPU](docs/OPTIMIZACION_ENTRENAMIENTO_CPU.md).
+- [Plan de aceleración del entrenamiento CPU](docs/PLAN_ACELERACION_ENTRENAMIENTO_CPU.md): el perfilado real de RUN #4 mostró que 42 min 52 s de 46 min 51 s (91,5 %) fueron evaluaciones MMLU-Pro; los 1.000 pasos de entrenamiento ocuparon unos 2 min 26 s. La prioridad de ahorro de tiempo es el batching de evaluación, sin reducir el holdout final.
 
 Los cambios están integrados y la CI de la revisión fusionada ha pasado. Aún no existe una medición A/B del speedup en el runner. No se afirma un factor de aceleración antes de comparar el mismo hardware, corpus, semilla y presupuesto. El sampler vectorizado reduce trabajo Python; las métricas y el control explícito de hilos quedan instrumentados en el workflow reducido, cuyo rendimiento todavía debe medirse. Esto no demuestra por sí solo que el forward/backward del Transformer sea más rápido.
 

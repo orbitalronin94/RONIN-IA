@@ -177,9 +177,16 @@ def prepare(source_dir: Path, output_dir: Path, source_revision: str) -> dict[st
         raise ValueError("no se ha encontrado ningún documento textual apto")
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    corpus = "\n\n".join(document["text"] for document in documents) + "\n"
-    corpus_path = output_dir / "train.txt"
-    corpus_path.write_text(corpus, encoding="utf-8")
+    documents_path = output_dir / "documents.jsonl"
+    with documents_path.open("w", encoding="utf-8", newline="\n") as handle:
+        for document in documents:
+            handle.write(json.dumps({
+                "source_path": document["path"],
+                "source_sha256": document["sha256"],
+                "source_revision": source_revision,
+                "text": document["text"],
+            }, ensure_ascii=False, sort_keys=True) + "\n")
+    documents_bytes = documents_path.read_bytes()
 
     manifest = {
         "schema_version": 1,
@@ -189,9 +196,9 @@ def prepare(source_dir: Path, output_dir: Path, source_revision: str) -> dict[st
         "source_revision": source_revision,
         "authorization": {
             "status": "autorización expresa del titular comunicada en esta conversación",
-            "scope": "uso del contenido de Portfolio/Papers para el corpus de entrenamiento de RONIN IA",
+            "scope": "uso del contenido de Portfolio/Papers para recuperación documental RAG de RONIN IA; no entrenamiento",
         },
-        "purpose": "entrenamiento únicamente; no usar como conjunto de validación ni prueba",
+        "purpose": "recuperación documental RAG únicamente; excluido de pretraining, SFT, validación y prueba",
         "policy": {
             "text_formats": sorted(TEXT_SUFFIXES),
             "pdf": "extracción de texto mediante pypdf",
@@ -201,8 +208,11 @@ def prepare(source_dir: Path, output_dir: Path, source_revision: str) -> dict[st
         },
         "document_count": len(documents),
         "skipped_count": len(skipped),
-        "corpus_sha256": _sha256(corpus.encode("utf-8")),
-        "corpus_bytes": len(corpus.encode("utf-8")),
+        "documents_jsonl": "documents.jsonl",
+        "documents_jsonl_sha256": _sha256(documents_bytes),
+        "documents_jsonl_bytes": len(documents_bytes),
+        "retrieval_only": True,
+        "training_eligible": False,
         "documents": [
             {key: document[key] for key in ("path", "sha256", "characters")}
             for document in documents
