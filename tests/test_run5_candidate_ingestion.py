@@ -175,3 +175,21 @@ def test_common_corpus_code_language_labels_are_not_mistaken_for_natural_languag
     assert not is_allowed_language("Python", "Open Culture", "philosophy")
     domain, _ = choose_domain("def add(a, b): return a + b", "Open Source", "Python")
     assert domain == "computer_science"
+
+
+def test_collection_license_language_cross_tab_is_bounded_metadata_only():
+    from collections import Counter
+
+    profiles = Counter({
+        "Open Culture | Public Domain | English": 120,
+        "Open Culture | CC0 | English": 25,
+        "Open Science | CC BY-SA 4.0 | English": 15,
+    })
+    report = histogram_report(profiles, limit=2)
+    assert report["distinct_values"] == 3
+    assert report["truncated"] is True
+    assert report["top_values"][0] == {
+        "value": "Open Culture | Public Domain | English",
+        "count": 120,
+    }
+    assert all("text" not in item for item in report["top_values"])
