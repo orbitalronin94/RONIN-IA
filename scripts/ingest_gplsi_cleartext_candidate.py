@@ -11,6 +11,7 @@ import argparse, hashlib, json, re, urllib.parse, urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+ADAPTER_VERSION = "1.0.1"
 SOURCES = {
     "cas": {
         "repo": "gplsi/corpus-cleartext-cas-v1.0",
