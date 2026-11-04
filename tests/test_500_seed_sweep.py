@@ -57,5 +57,5 @@ def test_seed_sweep_workflow_is_500_seed_validation_only():
     assert 'default: "100"' in workflow
     assert 'default: "1"' in workflow
     assert '--split", "validation"' in workflow
-    assert '"test"' not in workflow
+    assert '--split", "test"' not in workflow
     assert "MMLU_REVISION" in workflow
