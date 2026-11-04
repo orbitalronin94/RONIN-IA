@@ -21,12 +21,12 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 from scripts.preflight_pmc_oa import (
-    _http_json,
-    approved_license,
     DOMAIN_QUERIES,
-    list_s3_version_prefixes,
     S3_BASE,
     USER_AGENT,
+    _http_json,
+    approved_license,
+    list_s3_version_prefixes,
 )
 
 SOURCE_DATASET = "pmc-oa-opendata"
