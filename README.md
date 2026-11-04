@@ -109,7 +109,7 @@ Los cambios ya están integrados. El workflow reducido se inicia manualmente des
 
 ### Últimas ejecuciones observadas
 
-- [Experimento oficial #2](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41842575826): iniciado automáticamente al fusionar la PR #44; entrenamiento desde cero con 1.000 pasos y test MMLU-Pro completo. Está en curso. Este workflow oficial no pasa todavía `--metrics-out` ni los argumentos de hilos; las métricas nuevas están activadas en el workflow reducido, pendiente de dispatch manual.
+- [Experimento oficial #3](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41842575826): iniciado automáticamente al fusionar la PR #44; entrenamiento desde cero con 1.000 pasos y test MMLU-Pro completo. Está en curso. Este workflow oficial no pasa todavía `--metrics-out` ni los argumentos de hilos; las métricas nuevas están activadas en el workflow reducido, pendiente de dispatch manual.
 - [CI #420](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41842364060): correcta sobre la revisión final de la PR #44.
 - [PR #44](https://github.com/orbitalronin94/RONIN-IA/pull/44): fusionada en `main`; merge commit `3a47956f130262916e558094b4b09c9498f2bb3f`.
 - El workflow reducido MMLU-Pro de 1.400 preguntas está integrado, pero sigue pendiente de ejecución manual.
