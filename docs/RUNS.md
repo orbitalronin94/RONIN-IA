@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 22:38 | [Integración continua #769 (run 41926931159)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41926931159) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(data\): schedule bounded weekly 16-domain corpus expansion. Trigger: push; rama: main; intento: 1. | d910e5b2 |
 | 2026-11-04 22:38 | [Integración continua #768 (run 41926785651)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41926785651) | success | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Remove duplicate aggregate job condition flagged by actionlint. Trigger: pull_request; rama: fix/run5-32-integration-and-workflow; intento: 1. | c4e8ff5f |
 | 2026-11-04 22:37 | [Integración continua #770 (run 41926936882)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41926936882) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: add 32-domain open dataset expansion registry. Trigger: push; rama: main; intento: 1. | 98c0df1c |
 | 2026-11-04 22:37 | [Integración continua #761 (run 41926266247)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41926266247) | success | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Link verified train-only dataset artifact. Trigger: push; rama: main; intento: 1. | 5f59b72e |
