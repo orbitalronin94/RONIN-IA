@@ -54,8 +54,9 @@ jobs:
       PYTHONUNBUFFERED: "1"
       PORTFOLIO_REVISION: "fffc234fdf3f82b6a90d56ae9b190d1c0de79690"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
-      STEPS: ${{ github.event_name == 'workflow_dispatch' && inputs.steps || '100' }}
-      SEEDS: ${{ github.event_name == 'workflow_dispatch' && inputs.seeds || '1337' }}
+      # PR: smoke corto. Push a main: experimento reproducible con tres semillas.
+      STEPS: ${{ github.event_name == 'workflow_dispatch' && inputs.steps || (github.event_name == 'push' && '1000' || '100') }}
+      SEEDS: ${{ github.event_name == 'workflow_dispatch' && inputs.seeds || (github.event_name == 'push' && '1337,2027,42' || '1337') }}
       MMLU_LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.mmlu_limit || '140' }}
     steps:
       - name: Obtener RONIN IA
