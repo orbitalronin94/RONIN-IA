@@ -38,7 +38,7 @@ SHUFFLE_BUFFER_SIZE = 10_000
 
 def domain_shuffle_seed(domain: str) -> int:
     """Stable, domain-specific seed so parallel workers do not scan the same prefix."""
-    digest = hashlib.sha256(f"{SHUFFLE_SEED}:{domain}".encode("utf-8")).digest()
+    digest = hashlib.sha256(f"{SHUFFLE_SEED}:{domain}".encode()).digest()
     return int.from_bytes(digest[:4], "big")
 
 
