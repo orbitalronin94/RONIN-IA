@@ -206,6 +206,10 @@ def fetch_article_versions(item: dict[str, Any], domain: str) -> tuple[list[dict
             continue
 
         xml_url = str(metadata.get("xml_url") or "").strip()
+        metadata_title = str(metadata.get("title") or "").casefold()
+        if "retracted article" in metadata_title:
+            stats["retracted_by_metadata_title"] += 1
+            continue
         if not xml_url:
             stats["missing_xml_url"] += 1
             continue
@@ -319,6 +323,7 @@ def iter_pmc_records(
             if not next_cursor or next_cursor == cursor:
                 break
             cursor = next_cursor
+            time.sleep(0.4)  # Respect Europe PMC's public API request guidance.
     stats["cursor_finished"] = 1
 
 
