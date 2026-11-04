@@ -106,7 +106,7 @@ def main() -> int:
         "retrieved_at": datetime.now(timezone.utc).isoformat(),
         "metadata_snapshot_sha256": meta_sha,
         "payload_sha256": payload_sha,
-        "provenance_uri": f"{BASE}/about",
+        "provenance_uri": f"{BASE}/en/about",
         "third_party_content_review": "pending",
         "jurisdictions_cleared": [],
         "rights_level": "B",
