@@ -19,9 +19,9 @@ from scripts.pmc_oa_source import (
 )
 from scripts.prepare_run5_candidates import (
     domain_kind_name,
+    minimum_scanned_bytes_for_library_floor,
     score_record,
     tokens,
-    minimum_scanned_bytes_for_library_floor,
     write_split,
 )
 
