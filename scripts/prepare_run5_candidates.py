@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build auditable, non-admitted RUN 5 candidates from the pinned Common Corpus.
 
-One streaming pass feeds thirty-two domain buckets. Each bucket is split by a
+One streaming pass feeds the sixteen operational domain buckets. Each bucket is split by a
 deterministic semantic-density ranking into disjoint 50% General and 50% HKD libraries. This script NEVER marks data as admitted or training-eligible.
 """
 from __future__ import annotations
@@ -130,6 +130,7 @@ DOMAIN_HINTS = {
     "biology": "biology cell gene protein genome organism enzyme ecology evolution",
     "medicine_health": "medicine health clinical diagnosis treatment patient disease epidemiology",
     "computer_science": "algorithm data structure complexity compiler operating system database software",
+    "software_engineering": "software engineering codebase repository testing debugging architecture API deployment",
     "law": "law statute regulation court judgment contract liability jurisprudence",
     "economics": "economics market inflation econometrics regression monetary fiscal trade",
     "social_sciences": "sociology anthropology psychology political science institution society policy",
@@ -138,7 +139,7 @@ DOMAIN_HINTS = {
     "engineering_robotics": "engineering robotics control systems circuit mechanical electrical materials",
     "humanities": "history linguistics literature language philology culture art historical text",
 }
-DOMAIN_PRIORITY = tuple(DOMAIN_TERMS)
+DOMAIN_PRIORITY = tuple(dict.fromkeys(domain for group in COLLECTIONS.values() for domain in group))
 
 
 def minimum_scanned_bytes_for_library_floor(min_train_bytes: int, hkd_fraction: float) -> int:
@@ -440,15 +441,15 @@ def domain_kind_name(domain: str, kind: str) -> str:
 
 
 def expected_library_count(domain: str | None) -> int:
-    """A domain worker emits General+HKD; the aggregate emits all 64."""
-    return 2 if domain else 64
+    """A domain worker emits General+HKD; the operational aggregate emits all 32."""
+    return 2 if domain else 32
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=Path("/tmp/ronin-run5-candidates"))
     parser.add_argument("--max-rows", type=int, default=5_000_000)
-    parser.add_argument("--domain", choices=DOMAIN_PRIORITY, help="Process one of 32 domains per runner to scale storage horizontally")
+    parser.add_argument("--domain", choices=DOMAIN_PRIORITY, help="Process one of 16 operational domains per runner to scale storage horizontally")
     parser.add_argument("--max-input-bytes", type=int, default=6 * 1024**3)
     parser.add_argument("--min-train-bytes", type=int, default=1 * 1024**2)
     parser.add_argument("--hkd-fraction", type=float, default=HKD_FRACTION)
