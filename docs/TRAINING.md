@@ -39,3 +39,16 @@ La promoción del warm-start exige simultáneamente:
 - exactitud no inferior en el piloto multidominio de 23 preguntas.
 
 Si cualquiera de las dos condiciones falla, no se guarda el checkpoint nuevo y la siguiente iteración conserva el último estado aceptado. El optimizador se reinicia entre ciclos; solo se transfieren los pesos. Esto es un experimento de currículo sintético y continuidad técnica, no aprendizaje de conocimiento externo ni una evaluación de razonamiento general. La caché de Actions es almacenamiento experimental, no un release del modelo.
+
+
+## Ciclos rápidos con corpus abierto y promoción por validación
+
+El workflow `rapid-open-training-cycles.yml` ejecuta hasta tres ciclos cortos consecutivos y vuelve a programarse cada seis horas. Usa el corpus público fijado por `prepare_open_corpora.py`, con partición por obra; conserva el último checkpoint aceptado y hace warm-start del siguiente ciclo.
+
+**Gate obligatorio:** el workflow llama a `assert_g0_passed.py` antes de descargar textos o entrenar. Si G-0 no está en PASS, la ejecución registra el bloqueo y no modifica pesos. Una etiqueta de licencia o la disponibilidad pública no sustituyen la revisión humana.
+
+**Regla de promoción:** solo acepta el checkpoint si mejora estrictamente la accuracy de MMLU-Pro `validation` y no empeora bits-per-byte en el split de validación textual. Si no cumple ambas condiciones, restaura el checkpoint anterior y continúa desde él. El test de MMLU-Pro permanece fuera de este bucle y se reserva para evaluación final no usada en selección.
+
+La referencia operativa del último modelo aceptado por estos ciclos es la caché `ronin-open-warmstart` de GitHub Actions; no es todavía un release descargable ni una referencia inmutable a largo plazo. Cada ejecución publica el informe de ciclos, hashes, split y checkpoint. La promoción a versión pública exige después el test completo y actualización explícita del model card/README.
+
+La validación recurrente puede sobreajustarse con el tiempo; por ello, una subida en validation no se presenta como mejora general ni como aprobación de release. El test final intacto sigue siendo la barrera de publicación.
