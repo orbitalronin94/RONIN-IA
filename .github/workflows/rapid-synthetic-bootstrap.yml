@@ -1,0 +1,183 @@
+name: RONIN — bootstrap rápido sin corpus
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/rapid-synthetic-bootstrap.yml"
+      - "scripts/prepare_synthetic_bootstrap.py"
+  schedule:
+    - cron: "47 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-rapid-open-training
+  cancel-in-progress: false
+
+jobs:
+  synthetic-bootstrap:
+    name: Bootstrap sintético aislado (sin corpus documental)
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUNBUFFERED: "1"
+      SYNTHETIC_STEPS: "25"
+    steps:
+      - name: Obtener RONIN
+        uses: actions/checkout@v5
+
+      - name: Comprobar G-0 antes de elegir la vía
+        id: g0
+        run: python scripts/assert_g0_passed.py --github-output "$GITHUB_OUTPUT"
+
+      - name: Explicar el cambio de vía
+        if: steps.g0.outputs.authorized != 'true'
+        run: |
+          echo "G-0 no autoriza corpus documental."
+          echo "Se permite únicamente bootstrap procedural sintético, sin fuentes externas."
+          echo "Este resultado no se considerará conocimiento factual ni corpus admitido."
+
+      - name: No duplicar entrenamiento sintético si G-0 ya habilita la vía documental
+        if: steps.g0.outputs.authorized == 'true'
+        run: echo "G-0 está aprobado; esta vía sintética queda omitida."
+
+      - name: Preparar Python
+        if: steps.g0.outputs.authorized != 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Restaurar únicamente el checkpoint sintético
+        if: steps.g0.outputs.authorized != 'true'
+        uses: actions/cache/restore@v5
+        with:
+          path: /tmp/ronin-synthetic-warmstart
+          key: ronin-synthetic-warmstart-${{ github.run_id }}
+          restore-keys: |
+            ronin-synthetic-warmstart-
+
+      - name: Instalar PyTorch CPU y dependencias mínimas
+        if: steps.g0.outputs.authorized != 'true'
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66"
+
+      - name: Generar train y validation procedurales separados
+        if: steps.g0.outputs.authorized != 'true'
+        run: |
+          python scripts/prepare_synthetic_bootstrap.py --output /tmp/ronin-synthetic-data
+          test -s /tmp/ronin-synthetic-data/train.txt
+          test -s /tmp/ronin-synthetic-data/validation.txt
+          mkdir -p reports checkpoints /tmp/ronin-synthetic-warmstart
+          cp /tmp/ronin-synthetic-data/manifest.json reports/synthetic-dataset-manifest.json
+
+      - name: Ejecutar un ciclo corto, medir y promover solo si mejora
+        if: steps.g0.outputs.authorized != 'true'
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import shutil
+          import subprocess
+          from pathlib import Path
+
+          import torch
+
+          from ronin.config import get_profile
+          from ronin.models.transformer import RoninLM
+          from ronin.utils.repro import seed_everything
+
+          warm = Path("/tmp/ronin-synthetic-warmstart/model.pt")
+          warm.parent.mkdir(parents=True, exist_ok=True)
+          initial = Path("reports/synthetic-initial.pt")
+          candidate_dir = Path("checkpoints/synthetic")
+          candidate_dir.mkdir(parents=True, exist_ok=True)
+          candidate = candidate_dir / f"step-{int(__import__('os').environ['SYNTHETIC_STEPS']):08d}.pt"
+          steps = int(__import__("os").environ["SYNTHETIC_STEPS"])
+          if not warm.is_file():
+              config, _ = get_profile("tiny")
+              seed_everything(1337)
+              model = RoninLM(config)
+              torch.save({"model": model.state_dict(), "step": 0}, warm)
+          shutil.copy2(warm, initial)
+
+          def run(*args):
+              subprocess.run(args, check=True)
+
+          common = [
+              "python", "scripts/evaluate_text.py", "--profile", "tiny",
+              "--batches", "8", "--batch-size", "2", "--seed", "2026",
+          ]
+          run(*common, "--checkpoint", str(initial),
+              "--validation-text", "/tmp/ronin-synthetic-data/validation.txt",
+              "--output", "reports/synthetic-before.json")
+          run("python", "scripts/train_text.py",
+              "--text", "/tmp/ronin-synthetic-data/train.txt",
+              "--profile", "tiny", "--steps", str(steps), "--seed", "1338",
+              "--init-checkpoint", str(initial), "--device", "cpu",
+              "--checkpoints", str(candidate_dir),
+              "--metrics-out", "reports/synthetic-training-throughput.json")
+          if not candidate.is_file():
+              raise SystemExit(f"Checkpoint final no encontrado: {candidate}")
+          run(*common, "--checkpoint", str(candidate),
+              "--validation-text", "/tmp/ronin-synthetic-data/validation.txt",
+              "--output", "reports/synthetic-after.json")
+
+          before = json.loads(Path("reports/synthetic-before.json").read_text())
+          after = json.loads(Path("reports/synthetic-after.json").read_text())
+          improved = after["bits_per_byte"] < before["bits_per_byte"]
+          if improved:
+              payload = torch.load(candidate, map_location="cpu", weights_only=False)
+              torch.save({"model": payload["model"], "step": payload["step"]}, warm)
+          digest = hashlib.sha256(candidate.read_bytes()).hexdigest()
+          summary = {
+              "experiment": "ronin-procedural-synthetic-bootstrap-v1",
+              "mode": "synthetic_only_no_external_corpus",
+              "g0_document_training_authorized": False,
+              "steps": steps,
+              "validation_metric": "bits_per_byte",
+              "bits_per_byte_before": before["bits_per_byte"],
+              "bits_per_byte_after": after["bits_per_byte"],
+              "accepted": improved,
+              "promotion_rule": "strict synthetic validation BPB decrease",
+              "candidate_checkpoint_sha256": digest,
+              "checkpoint_step": after["checkpoint_step"],
+              "parameter_count": after["parameter_count"],
+              "knowledge_corpus_admission": False,
+              "mmlu_pro_claim": "not evaluated in this synthetic bootstrap",
+              "limitations": [
+                  "Procedural patterns only; no factual knowledge acquisition is claimed.",
+                  "Synthetic validation measures pattern generalization only.",
+                  "Checkpoint is isolated from the licensed-document training cache.",
+                  "MMLU-Pro validation and untouched test remain separate future evaluations."
+              ]
+          }
+          Path("reports/synthetic-bootstrap-summary.json").write_text(
+              json.dumps(summary, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8"
+          )
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Guardar solo el checkpoint sintético aceptado
+        if: success() && steps.g0.outputs.authorized != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: /tmp/ronin-synthetic-warmstart
+          key: ronin-synthetic-warmstart-${{ github.run_id }}
+
+      - name: Publicar manifiesto, métricas y checkpoint candidato
+        if: always() && steps.g0.outputs.authorized != 'true'
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-synthetic-bootstrap-${{ github.run_id }}
+          path: |
+            reports/
+            checkpoints/synthetic/
+          if-no-files-found: warn
+          retention-days: 30
