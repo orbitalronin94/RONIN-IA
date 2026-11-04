@@ -1,7 +1,7 @@
 import json
+from pathlib import Path
 
 import yaml
-from pathlib import Path
 
 from scripts.audit_run5_cross_library_dedup import audit
 from scripts.prepare_run5_candidates import (
