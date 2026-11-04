@@ -379,3 +379,5 @@ Límites que siguen vigentes:
 - Los pesos de mezcla de las bibliotecas modifican la exposición de entrenamiento, no el número de parámetros del modelo. El crecimiento de parámetros requiere un cambio arquitectónico explícito y un recuento de parámetros antes/después; no se atribuye crecimiento a los pesos del dataset.
 
 Estado al abrir esta iteración: código preparado en rama de trabajo; aún no hay ejecución real que demuestre 16 bibliotecas x10 ni admisión. RUN 5 oficial no debe lanzarse hasta que todos los gates pasen.
+
+Recuento de arquitectura de referencia: el perfil `tiny` actual tiene **9.922.880 parámetros entrenables** (embeddings compartidos contados una sola vez). Los pesos de mezcla de 16 bibliotecas no alteran ese número. Esta PR no añade módulos entrenables ni afirma crecimiento ficticio; una ampliación por expertos/adapters deberá tener ruta de entrenamiento condicionada por dominio y un recuento antes/después con prueba de equivalencia.
