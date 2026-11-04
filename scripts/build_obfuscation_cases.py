@@ -264,8 +264,7 @@ def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dic
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8") as stream:
         for row in rows:
-            stream.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "
-")
+            stream.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
 
     summary = {
         "schema_version": 1,
@@ -292,8 +291,7 @@ def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dic
         ),
     }
     (output_path.parent / "manifest.json").write_text(
-        json.dumps(summary, ensure_ascii=False, indent=2) + "
-",
+        json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     return summary
