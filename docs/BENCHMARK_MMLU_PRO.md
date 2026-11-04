@@ -4,7 +4,7 @@
 
 RONIN incorpora un adaptador de evaluación para [TIGER-Lab/MMLU-Pro](https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro), benchmark publicado con licencia MIT declarada en la ficha del conjunto. El test contiene aproximadamente 12.032 preguntas en 14 dominios académicos: matemáticas, física, química, biología, informática, ingeniería, economía, derecho, salud, psicología, empresa, filosofía, historia y otros.
 
-La ejecución carga únicamente el split `test`. Sus preguntas no se mezclan con corpus de entrenamiento ni se usan para actualizar pesos. Esta evaluación externa es independiente del gate G-0 de adquisición de corpus de entrenamiento.
+La ejecución carga únicamente el split `test` (12.032 preguntas en la revisión consultada). Por defecto se resuelve `main`; el informe conserva la revisión solicitada y un SHA-256 de las filas normalizadas para detectar cambios del conjunto. Sus preguntas no se mezclan con corpus de entrenamiento ni se usan para actualizar pesos. Esta evaluación externa es independiente del gate G-0 de adquisición de corpus de entrenamiento.
 
 ## Protocolo RONIN
 
