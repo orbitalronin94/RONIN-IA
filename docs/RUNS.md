@@ -12,6 +12,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 20:07 | [Integración continua #682 (run 41903390949)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41903390949) | success | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs: explain automatic first cycle and continuous chaining. Trigger: push; rama: main; intento: 1. | 51ca2bc8 |
 | 2026-11-04 20:07 | [Integración continua #679 (run 41903334254)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41903334254) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test: fix dispatcher permission mapping assertion. Trigger: push; rama: main; intento: 1. | 25e0387c |
 | 2026-11-04 20:06 | [Integración continua #677 (run 41902510390)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41902510390) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs: describe dedicated automatic training dispatcher. Trigger: pull_request; rama: feat/rapid-open-training-promotion-loop; intento: 1. | cf436c62 |
 | 2026-11-04 20:06 | [Integración continua #680 (run 41903359523)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41903359523) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: start rapid training automatically when pipeline lands on main. Trigger: push; rama: main; intento: 1. | b194809b |
