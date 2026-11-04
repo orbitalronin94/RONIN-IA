@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:22 | [Integración continua #912 (run 41933120162)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933120162) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add NASA NTRS and record explicit exclusions for OpenStax and gated The Stack v2. Trigger: push; rama: main; intento: 1. | 7c193529 |
 | 2026-11-04 23:21 | [Integración continua #911 (run 41933079970)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933079970) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Record verified dataset candidate artifacts and payload hashes. Trigger: push; rama: main; intento: 1. | fe8f89e2 |
 | 2026-11-04 23:21 | [Integración continua #904 (run 41932918570)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932918570) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Fix ROR archive parser loop indentation. Trigger: push; rama: main; intento: 1. | 38328bb1 |
 | 2026-11-04 23:21 | [Integración continua #908 (run 41933001856)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933001856) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document additional CC0 and item-level dataset source lanes. Trigger: push; rama: main; intento: 1. | 40a62b58 |
