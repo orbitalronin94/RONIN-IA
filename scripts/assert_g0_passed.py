@@ -29,7 +29,7 @@ def main() -> None:
             output.write(f"authorized={'true' if authorized else 'false'}\n")
     if not authorized:
         reason = gate.get("reason", "G-0 ausente o inválido")
-        print(f"G-0 no aprobado para las colecciones candidatas cubiertas por este informe; no descargarlas ni entrenar con ellas: {reason}")
+        print(f"G-0 no aprobado; adquisición y entrenamiento con las colecciones candidatas cubiertas por este informe bloqueados: {reason}")
         if not args.github_output:
             raise SystemExit(1)
         return
