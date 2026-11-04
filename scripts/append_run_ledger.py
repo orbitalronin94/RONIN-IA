@@ -28,7 +28,7 @@ def main():
         "# Libro de ejecuciones (runs) de RONIN-IA\n\n## Historial\n\n"
         "| Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |\n"
         "|---|---|---|---|---|\n")
-    if re.search(r"\\b" + re.escape(run_id) + r"\\b", content):
+    if re.search(r"\b" + re.escape(run_id) + r"\\b", content):
         print("Run already recorded: " + run_id); return 0
     completed = run.get("updated_at") or run.get("completed_at") or run.get("created_at")
     try:
