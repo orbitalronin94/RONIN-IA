@@ -11,8 +11,8 @@ ENUMS = {
     "GENERO": {"scientific", "historical", "religious", "literary", "legal", "technical", "philosophical", "other", "unknown"},
     "ESTADO_DE_CODIFICACION": {"clear", "possibly_encoded", "decoded", "unknown"},
 }
-_HEADING = re.compile(r"(?m)^\\s*(" + "|".join(FIELDS) + r")\\s*:\\s*")
-_CONFIDENCE = re.compile(r"(?:confianza(?:\\s+razonada)?|confidence)\\s*[:=]\\s*(0(?:\\.\\d+)?|1(?:\\.0+)?)", re.IGNORECASE)
+_HEADING = re.compile(r"(?m)^\s*(" + "|".join(FIELDS) + r")\s*:\s*")
+_CONFIDENCE = re.compile(r"(?:confianza(?:\s+razonada)?|confidence)\s*[:=]\s*(0(?:\.\\d+)?|1(?:\.0+)?)", re.IGNORECASE)
 
 @dataclass(frozen=True)
 class RefValidation:
