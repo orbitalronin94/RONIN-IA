@@ -92,7 +92,11 @@ def main() -> int:
             "|---|---|---|---|---|\n"
         )
 
-    if re.search(r"\b" + re.escape(run_id) + r"\b", content):
+    if re.search(
+        r"^\\|[^\\n]*\\(run " + re.escape(run_id) + r"\\)\\]\\(",
+        content,
+        re.MULTILINE,
+    ):
         print("Run already recorded: " + run_id)
         return 0
 
