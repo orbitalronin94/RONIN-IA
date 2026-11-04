@@ -216,3 +216,39 @@ def test_rights_review_sample_contains_only_source_metadata():
     assert sample["license_label"] == "CC-By"
     assert "text" not in sample
     assert "MUST NEVER BE COPIED" not in str(sample)
+
+
+def test_run5_stream_shuffle_is_seeded_and_uses_bounded_buffer():
+    from scripts.prepare_run5_candidates import (
+        SHUFFLE_BUFFER_SIZE,
+        SHUFFLE_SEED,
+        shuffle_dataset_stream,
+    )
+
+    class FakeStream:
+        def __init__(self):
+            self.arguments = None
+
+        def shuffle(self, *, seed, buffer_size):
+            self.arguments = (seed, buffer_size)
+            return self
+
+    stream = FakeStream()
+    assert shuffle_dataset_stream(stream) is stream
+    assert stream.arguments == (SHUFFLE_SEED, SHUFFLE_BUFFER_SIZE)
+    assert SHUFFLE_BUFFER_SIZE <= 10_000
+
+
+def test_run5_stream_shuffle_rejects_invalid_buffer():
+    from scripts.prepare_run5_candidates import shuffle_dataset_stream
+
+    class FakeStream:
+        def shuffle(self, *, seed, buffer_size):
+            return self
+
+    try:
+        shuffle_dataset_stream(FakeStream(), buffer_size=1)
+    except ValueError as exc:
+        assert "buffer_size" in str(exc)
+    else:
+        raise AssertionError("shuffle buffer must be bounded and at least two")
