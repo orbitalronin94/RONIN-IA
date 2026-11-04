@@ -27,6 +27,22 @@ Los ciclos sintéticos no descargan corpus externos y no eluden el bloqueo G-0 d
 Workflow: [Ciclos sintéticos de entrenamiento RONIN](https://github.com/orbitalronin94/RONIN-IA/actions/workflows/synthetic-training-cycles.yml). Para lanzar experimentos más largos, abre el workflow en GitHub Actions y usa «Run workflow» (hasta 1.000 pasos y cinco semillas).
 
 
+
+## La advertencia del README
+
+> Sepan cuantos este repositorio vieren que aquí se hace escarnio de cuanto los doctos predicaron sobre acrecentar modelos. Non hay hueste de tarjetas gráficas, nin caudal de dineros, nin ley del escalado que valga. Hay un ingenio de cuarenta y cuatro millones que apenas distingue el saludo del mandado, y un artificio de trazas que non se rompe.
+>
+> Al modelo non le tengo ley, ca es ruin y él lo sabe. Al artificio se la tengo entera.
+>
+> Quien viniere por el modelo, tórnese por do vino, que aquí non hay sino el método. Quien viniere por las trazas, quédese, mas sepa desde luego que el método es largo y el modelo, corto. Non me pidáis que lo aderece, que quien se consuela con el modelo es porque non ha mirado las trazas.
+
+### Nota de léxico
+
+*Sepan cuantos… vieren* abre como las cartas de privilegio y las Partidas, y avisa de que lo que sigue no es un README sino un edicto. *Escarnio* es burla pública, no ironía fina. *Non* en vez de *no* es licencia arcaizante, no error: aparece en Berceo y en el Cantar. *Ca* por *porque* es la conjunción causal del mester de clerecía. *Do vino* por *de donde vino*. *Aderezar* por *arreglar o maquillar* es el uso de los plateros y los cocineros del XVII. Y *tener ley a alguien* es tenerle lealtad, que es lo que se le niega al modelo y se le concede al pipeline.
+
+El cierre es la única línea que no es arcaica, y está puesta a propósito: el que llega al final ya no necesita el disfraz.
+
+
 ## Principios irrenunciables
 
 1. **RONIN aprende desde cero.** Todos los pesos del modelo estudiante se inicializan aleatoriamente. No se importan, mezclan ni ajustan pesos de modelos externos dentro de RONIN.
