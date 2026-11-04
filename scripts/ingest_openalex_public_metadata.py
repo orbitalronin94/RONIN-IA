@@ -129,7 +129,7 @@ def main() -> int:
         "decision_reason": "Bounded export from the anonymous public OpenAlex CC0 snapshot. Only explicitly allowlisted bibliographic/graph metadata fields are retained; abstract inverted index, full text, PDFs and content archive URLs are excluded. Candidate record awaits human review and is not appended to the ledger.",
         "policy_version": "RONIN-RIGHTS-A-1",
     }
-    (args.out / "rights-record.candidate.json").write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    (args.out / "rights-record.candidate.json").write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps({"snapshot_date": manifest_date, "rows": count, "bytes": len(payload), "sha256": sha(payload), "status": "candidate_only"}, indent=2))
     return 0
 
