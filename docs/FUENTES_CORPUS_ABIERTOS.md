@@ -18,11 +18,34 @@ No se admiten licencias NC o ND. Una licencia de metadatos no se confunde con la
 
 | Fuente | Contenido | Licencia declarada | Acceso | Estado |
 |---|---|---|---|---|
-| [CLiGS Textbox](https://github.com/cligs/textbox) | 39 novelas españolas, 24 hispanoamericanas y 302 cuentos individuales agrupados en 20 colecciones TEI | Textos de dominio público; marcado/metadatos CC BY 4.0 | ZIP/HTTPS público | Integrada en el preparador; adquisición pendiente de verificación CI |
-| [CoNSSA](https://github.com/cligs/conssa) | 217 novelas disponibles de la Edad de Plata española (1880–1939); el corpus total declara 358, pero parte no puede publicarse por derechos | Textos de dominio público; TEI/metadatos CC BY 4.0 | ZIP/HTTPS público | Integrada en el preparador |
-| [ELTeC-spa](https://github.com/COST-ELTeC/ELTeC-spa) | 83 novelas españolas en la versión 0.9.1 | Textos de dominio público; marcado CC BY 4.0 | ZIP/HTTPS público | Integrada en el preparador |
+| [CLiGS Textbox](https://github.com/cligs/textbox) | 39 novelas españolas, 24 hispanoamericanas y 302 cuentos individuales agrupados en 20 colecciones TEI | Textos de dominio público; marcado/metadatos CC BY 4.0 | HTTPS público por archivo | Integrada; 364 documentos preparados |
+| [CoNSSA](https://github.com/cligs/conssa) | 217 novelas disponibles de la Edad de Plata española (1880–1939); el corpus total declara 358, pero parte no puede publicarse por derechos | Textos de dominio público; TEI/metadatos CC BY 4.0 | HTTPS público por archivo | Integrada; 184 documentos preparados |
+| [ELTeC-spa](https://github.com/COST-ELTeC/ELTeC-spa) | 83 novelas españolas en la versión 0.9.1 | Textos de dominio público; marcado CC BY 4.0 | HTTPS público por archivo | Integrada; 96 documentos preparados |
 
 Los repositorios se fijan a commits concretos en `scripts/prepare_open_corpora.py`. CLiGS Textbox incluye también `spanish/cuentos-espanoles/tei/`, además de las colecciones de novelas. El preparador consulta el árbol Git de cada commit fijado y descarga únicamente los XML TEI seleccionados desde `raw.githubusercontent.com`, sin enviar credenciales ni bajar ZIP completos. Verifica el tamaño y el SHA-1 de objeto Git de cada archivo, calcula SHA-256, extrae el elemento TEI `text` y separa cada `div type="short-story"` como relato individual. Deduplica por contenido y asigna todos los fragmentos de un mismo archivo de origen a una sola partición para evitar fugas entre train, validation y test. El manifiesto JSONL conserva la procedencia, el hash del archivo original, la licencia y la partición de cada obra. La primera referencia es literaria e histórica; no debe presentarse como corpus general o representativo del español actual.
+
+## Resultado de adquisición reproducible
+
+La auditoría de GitHub Actions del 4 de noviembre de 2026 descargó y verificó
+las tres fuentes fijadas, sin credenciales y sin descargar archivos ZIP completos.
+Resultado medido:
+
+- **644 documentos preparados**: 364 de CLiGS Textbox, 184 de CoNSSA y 96 de
+  ELTeC-spa.
+- **608 train, 18 validation y 18 test**; las obras y colecciones se mantienen
+  agrupadas para impedir fugas entre particiones.
+- 40 archivos o fragmentos se excluyeron por los filtros de calidad, duplicación
+  o seguridad.
+- Los archivos originales se verifican por tamaño, SHA-1 de objeto Git y
+  SHA-256; el manifiesto conserva procedencia, licencia, revisión y partición.
+
+Ejecución verificable:
+- [Auditoría completa de descargas (run 41801074425)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41801074425)
+- [Artefactos de adquisición y manifiestos](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41801074425/artifacts)
+
+Los originales y particiones se conservan como artefactos temporales de Actions,
+no en Git. El corpus sigue siendo una biblioteca literaria histórica; no es una
+muestra representativa del español actual.
 
 ## Candidatas para siguientes iteraciones
 
