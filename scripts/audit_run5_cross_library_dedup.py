@@ -34,7 +34,7 @@ def audit(corpus_root: Path, report_path: Path) -> dict:
         if not sidecar.is_file():
             rejected["missing_documents_manifest"] += 1
             continue
-        for line_no, line in enumerate(sidecar.open(encoding="utf-8"), 1):
+        for _line_no, line in enumerate(sidecar.open(encoding="utf-8"), 1):
             if not line.strip():
                 continue
             try:
