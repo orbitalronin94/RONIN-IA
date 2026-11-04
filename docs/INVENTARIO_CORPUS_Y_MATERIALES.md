@@ -1,6 +1,6 @@
 # Inventario de corpus y materiales de RONIN-IA
 
-**Corte de auditoría:** 4 de noviembre de 2026, aproximadamente 12:04 UTC.  
+**Corte de auditoría:** 4 de noviembre de 2026, aproximadamente 12:24 UTC.  
 **Rama de integración:** `main`.  
 **Estado:** [PR #39](https://github.com/orbitalronin94/RONIN-IA/pull/39) fusionada el 4 de noviembre de 2026.
 
