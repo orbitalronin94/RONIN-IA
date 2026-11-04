@@ -7,6 +7,7 @@ step restricted to exact article-version CC BY 4.0 / CC0 rights.
 """
 from __future__ import annotations
 import argparse
+import gzip
 import hashlib
 import json
 import time
@@ -45,7 +46,8 @@ def text(node: ET.Element | None, path: str) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True, help="summary JSON path")
+    parser.add_argument("--records-output", type=Path, required=True, help="gzip JSONL metadata records")
     parser.add_argument("--max-records", type=int, default=0,
                         help="0 means complete OAI harvest; positive values cap records for smoke tests")
     parser.add_argument("--sleep-seconds", type=float, default=1.0,
@@ -80,6 +82,13 @@ def main() -> int:
             categories = text(meta, f"{ARXIV}categories").split()
             journal_ref = text(meta, f"{ARXIV}journal-ref")
             doi = text(meta, f"{ARXIV}doi")
+            title = text(meta, f"{ARXIV}title")
+            abstract = text(meta, f"{ARXIV}abstract")
+            authors_node = meta.find(f"{ARXIV}authors")
+            authors = [] if authors_node is None else [
+                " ".join("".join(author.itertext()).split())
+                for author in authors_node.findall(f"{ARXIV}author")
+            ]
             version = identifier.rsplit("v", 1)[-1] if "v" in identifier.rsplit("/", 1)[-1] else "latest"
             rows.append({
                 "arxiv_id": identifier,
@@ -87,6 +96,12 @@ def main() -> int:
                 "license_uri": license_uri,
                 "license_class": "CC-BY-4.0" if license_uri in CCBY4 else
                                  "CC0-1.0" if license_uri in CC0 else "NOT_REUSE_CLEARED",
+                "title": title,
+                "abstract": abstract,
+                "authors": authors,
+                "metadata_license": "CC0-1.0",
+                "metadata_rights_level": "A",
+                "metadata_rights_evidence": "arXiv license policy: CC0 applies to descriptive metadata including title, authors and abstract",
                 "categories": categories,
                 "journal_ref_present": bool(journal_ref),
                 "journal_ref": journal_ref,
@@ -140,7 +155,7 @@ def main() -> int:
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: report[k] for k in (
         "dataset_id", "pages", "records", "license_counts",
-        "peer_review_signal_counts", "metadata_only", "training_eligible", "errors"
+        "peer_review_signal_counts", "metadata_only", "training_eligible", "errors", "metadata_rights"
     )}, ensure_ascii=False, indent=2))
     return 0
 
