@@ -93,6 +93,10 @@ def rows_from_db(
         extra = {
             "source_version_prefix": doc_id,
             "source_metadata_url": f"https://pmc-oa-opendata.s3.amazonaws.com/metadata/{doc_id}.json",
+            "source_is_pmc_openaccess": True,
+            "source_is_manuscript": False,
+            "source_is_historical_ocr": False,
+            "source_is_retracted": False,
             "pmcid": pmcid,
             "doi": doi,
             "title": title,
@@ -200,7 +204,7 @@ def prepare(
                         bytes, score, components, text_sha, pmcid, doi, title,
                         publication_date, language, metadata_etag, metadata_sha256,
                         xml_url, xml_https_url, xml_md5, xml_sha256, pmid, citation
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         record["document_id"],
