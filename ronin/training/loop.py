@@ -165,8 +165,8 @@ def train(
     total_seconds = time.perf_counter() - training_started
     if metrics_path is not None:
         ordered = sorted(step_seconds)
-        warmup_count = min(10, max(0, len(ordered) - 1))
-        steady = ordered[warmup_count:] or ordered
+        warmup_count = min(10, max(0, len(step_seconds) - 1))
+        steady = sorted(step_seconds[warmup_count:]) or ordered
         p95_index = min(len(ordered) - 1, math.ceil(0.95 * len(ordered)) - 1)
         batch_size = int(getattr(batches, "batch_size", config.batch_size))
         sequence_length = int(getattr(batches, "sequence_length", 0))
