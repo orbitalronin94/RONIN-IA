@@ -35,7 +35,17 @@ def test_selector_rejects_sources_without_explicit_legal_approval(tmp_path):
         "document_id": "paper-001",
     }) + "\n", encoding="utf-8")
     audit = tmp_path / "license-audit.json"
-    audit.write_text('{"reviewed": true}', encoding="utf-8")
+    audit.write_text(json.dumps({
+        "candidate_intake_authorizations": [{
+            "source_id": "fixture",
+            "dataset_revision": "fixture-rev",
+            "status": "LIMITED_PASS",
+            "candidate_text_downloads_authorized": True,
+            "training_eligible": False,
+            "admitted": False,
+            "allowed_licenses": ["CC-BY-4.0"],
+        }]
+    }), encoding="utf-8")
     spec = tmp_path / "sources.json"
     spec.write_text(json.dumps({
         "sources": [{
@@ -76,7 +86,17 @@ def test_selector_keeps_document_level_license_provenance_and_scores(tmp_path):
         "document_id": "paper-002",
     }) + "\n", encoding="utf-8")
     audit = tmp_path / "license-audit.json"
-    audit.write_text('{"reviewed": true}', encoding="utf-8")
+    audit.write_text(json.dumps({
+        "candidate_intake_authorizations": [{
+            "source_id": "fixture",
+            "dataset_revision": "fixture-rev",
+            "status": "LIMITED_PASS",
+            "candidate_text_downloads_authorized": True,
+            "training_eligible": False,
+            "admitted": False,
+            "allowed_licenses": ["CC-BY-4.0"],
+        }]
+    }), encoding="utf-8")
     spec = tmp_path / "sources.json"
     spec.write_text(json.dumps({
         "sources": [{

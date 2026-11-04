@@ -1,27 +1,11 @@
 from pathlib import Path
 
-import yaml
 
-
-def test_phi4_candidate_workflow_never_trains_or_publishes_generated_text():
+def test_retired_phi4_candidate_workflow_is_not_scheduled():
     path = (
         Path(__file__).parents[1]
         / ".github"
         / "workflows"
         / "teacher-candidate-generation.yml"
     )
-    workflow = yaml.load(path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
-    assert "workflow_dispatch" in workflow["on"]
-    assert "workflow_run" in workflow["on"]
-    assert workflow["on"]["workflow_run"]["workflows"] == ["Preparar caché de tutores locales"]
-    job = workflow["jobs"]["generate-candidates"]
-    steps = {step.get("name"): step for step in job["steps"]}
-    cache_key = steps["Restaurar caché verificado de tutores"]["with"]["key"]
-    assert "${{ runner.os }}" in cache_key
-    assert "\\${{" not in cache_key
-    audit = steps["Auditar estructura de las propuestas; no certificar veracidad"]["run"]
-    assert '"used_for_training": False' in audit
-    upload = steps["Publicar solo auditoría y metadatos, no las generaciones"]["with"]["path"]
-    assert "teacher-candidate-summary.json" in upload
-    assert "teacher-ref-audit.json" in upload
-    assert "phi-4-mini-instruct.jsonl" not in upload
+    assert not path.exists()

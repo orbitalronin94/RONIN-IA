@@ -1,17 +1,17 @@
-name: Preparar 16 bibliotecas candidatas para RUN 5
+name: Preparar las 16 bibliotecas RUN 5 (8 base + 8 HKD, escala x10)
 
 on:
   workflow_dispatch:
     inputs:
       max_rows:
-        description: Máximo de documentos examinados en una pasada
+        description: Máximo de filas inspeccionadas por dominio
         required: true
-        default: "250000"
+        default: "5000000"
         type: string
       max_input_gib:
-        description: Límite de texto admitido en staging (GiB)
+        description: Máximo de texto inspeccionado por dominio (GiB)
         required: true
-        default: "6"
+        default: "8"
         type: string
       min_train_mib:
         description: Mínimo de train por biblioteca (MiB)
@@ -27,123 +27,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  prepare-candidates:
-    name: Una pasada de ingesta, 8 dominios y 8 bibliotecas HKD
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    env:
-      PYTHONUNBUFFERED: "1"
-      HF_HUB_DISABLE_TELEMETRY: "1"
-      HF_DATASETS_CACHE: /tmp/hf-datasets-cache
-      HF_HOME: /tmp/hf-home
-    steps:
-      - name: Checkout RONIN
-        uses: actions/checkout@v5
-
-      - name: Validar parámetros de adquisición
-        env:
-          MAX_ROWS: ${{ inputs.max_rows }}
-          MAX_INPUT_GIB: ${{ inputs.max_input_gib }}
-          MIN_TRAIN_MIB: ${{ inputs.min_train_mib }}
-        run: |
-          for value in "$MAX_ROWS" "$MAX_INPUT_GIB" "$MIN_TRAIN_MIB"; do
-            if ! [[ "$value" =~ ^[0-9]+$ ]]; then
-              echo "::error::Los límites deben ser enteros positivos."
-              exit 1
-            fi
-          done
-          [ "$MAX_ROWS" -ge 1000 ] && [ "$MAX_ROWS" -le 500000 ]
-          [ "$MAX_INPUT_GIB" -ge 1 ] && [ "$MAX_INPUT_GIB" -le 8 ]
-          [ "$MIN_TRAIN_MIB" -ge 2560 ] && [ "$MIN_TRAIN_MIB" -le 10240 ]
-
-      - name: Preparar Python y dependencias de streaming
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.11"
-          cache: pip
-      - name: Instalar lector público sin credenciales
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install "datasets==3.6.0" "huggingface_hub==0.36.0" "pyarrow>=18,<20"
-
-      - name: Validar G-0 y autorización limitada de Common Corpus
-        run: |
-          python scripts/validate_license_audit.py
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          audit = json.loads(Path("reports/license_audit.json").read_text(encoding="utf-8"))
-          assert audit["gate"]["status"] == "FAIL"
-          assert audit["gate"]["downloads_authorized"] is False
-          auth = next(
-              item for item in audit["candidate_intake_authorizations"]
-              if item["source_id"] == "PleIAs/common_corpus"
-          )
-          assert auth["status"] == "LIMITED_PASS"
-          assert auth["candidate_text_downloads_authorized"] is True
-          assert auth["training_eligible"] is False
-          assert auth["admitted"] is False
-          print("G-0 global sigue FAIL; solo se permite la allowlist documental limitada.")
-          PY
-
-      - name: Construir 16 candidatos desde Common Corpus fijado
-        id: ingestion
-        continue-on-error: true
-        env:
-          MAX_ROWS: ${{ inputs.max_rows }}
-          MAX_INPUT_GIB: ${{ inputs.max_input_gib }}
-          MIN_TRAIN_MIB: ${{ inputs.min_train_mib }}
-        run: |
-          python scripts/prepare_run5_candidates.py \
-            --max-rows "$MAX_ROWS" \
-            --max-input-bytes "$((MAX_INPUT_GIB * 1024 * 1024 * 1024))" \
-            --min-train-bytes "$((MIN_TRAIN_MIB * 1024 * 1024))" \
-            --output-root /tmp/ronin-run5-candidates
-
-      - name: Publicar candidatos, sidecars, escaneos y muestras humanas
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: ronin-run5-16-library-candidates
-          path: /tmp/ronin-run5-candidates/
-          if-no-files-found: warn
-          compression-level: 1
-          retention-days: 30
-
-      - name: Resumen de preparación (no equivale a admisión)
-        if: always()
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          path = Path("/tmp/ronin-run5-candidates/run5-candidate-manifest.json")
-          if not path.is_file():
-              print("No se produjo manifiesto; revisar fallo de adquisición.")
-              raise SystemExit(1)
-          report = json.loads(path.read_text(encoding="utf-8"))
-          rows = report["libraries"]
-          print(json.dumps({
-              "rows_scanned": report["ingestion"]["rows_scanned"],
-              "libraries_built": len(rows),
-              "libraries_meeting_2_5GiB": sum(x["train_bytes"] >= 2560 * 1024**2 for x in rows),
-              "train_bytes_by_library": {x["id"]: x["train_bytes"] for x in rows},
-              "ready_for_human_review": report["ready_for_human_review"],
-              "training_eligible": report["training_eligible"],
-              "admitted": report["admitted"],
-              "rejected": report["ingestion"]["rejected"],
-          }, ensure_ascii=False, indent=2))
-          if len(rows) != 16:
-              raise SystemExit("No se han producido las 16 bibliotecas candidatas.")
-          if not all(x["train_bytes"] >= 2560 * 1024**2 for x in rows):
-              raise SystemExit("Al menos una biblioteca no alcanza 2.5 GiB de train.")
-          PY
-
-      - name: Enlazar libro de runs
-        if: always()
-        uses: ./.github/actions/run-ledger-link
-
-  prepare-hkd-libraries:
-    name: Extraer biblioteca HKD — ${{ matrix.domain }}
+  prepare-domain:
+    name: Preparar ${{ matrix.domain }} (base + HKD)
     runs-on: ubuntu-latest
     timeout-minutes: 360
     strategy:
@@ -165,11 +50,26 @@ jobs:
       HF_DATASETS_CACHE: /tmp/hf-datasets-cache
       HF_HOME: /tmp/hf-home
       DOMAIN: ${{ matrix.domain }}
+      MAX_ROWS: ${{ inputs.max_rows }}
+      MAX_INPUT_GIB: ${{ inputs.max_input_gib }}
+      MIN_TRAIN_MIB: ${{ inputs.min_train_mib }}
     steps:
       - name: Checkout RONIN
         uses: actions/checkout@v5
 
-      - name: Validar auditoría y autorización documental limitada
+      - name: Validar parámetros x10
+        run: |
+          for value in "$MAX_ROWS" "$MAX_INPUT_GIB" "$MIN_TRAIN_MIB"; do
+            if ! [[ "$value" =~ ^[0-9]+$ ]]; then
+              echo "::error::Los límites deben ser enteros positivos."
+              exit 1
+            fi
+          done
+          [ "$MAX_ROWS" -ge 1000 ] && [ "$MAX_ROWS" -le 5000000 ]
+          [ "$MAX_INPUT_GIB" -ge 1 ] && [ "$MAX_INPUT_GIB" -le 8 ]
+          [ "$MIN_TRAIN_MIB" -eq 2560 ]
+
+      - name: Validar autorización limitada de Common Corpus
         run: |
           python scripts/validate_license_audit.py
           python - <<'PY'
@@ -179,63 +79,308 @@ jobs:
           auth = next(x for x in audit["candidate_intake_authorizations"]
                       if x["source_id"] == "PleIAs/common_corpus")
           assert audit["gate"]["status"] == "FAIL"
+          assert audit["gate"]["downloads_authorized"] is False
           assert auth["status"] == "LIMITED_PASS"
           assert auth["candidate_text_downloads_authorized"] is True
           assert auth["training_eligible"] is False and auth["admitted"] is False
-          print("Solo extracción de candidatos; G-0 global sigue bloqueando entrenamiento.")
+          print("Extracción limitada de candidatos permitida; entrenamiento global sigue bloqueado.")
           PY
 
-      - name: Preparar Python y lector de datasets
+      - name: Preparar Python y lector streaming
         uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
-      - name: Instalar dependencias
+      - name: Instalar dependencias públicas sin credenciales
         run: |
           python -m pip install --upgrade pip
           python -m pip install "datasets==3.6.0" "huggingface_hub==0.36.0" "pyarrow>=18,<20"
 
-      - name: Ejecutar RONIN-HKD-0.1 sobre fuentes autorizadas del dominio
-        id: extraction
+      - name: Crear las dos bibliotecas del dominio con RONIN-HKD-0.1
         run: |
-          python scripts/select_knowledge_dense_corpus.py \
-            --source-spec data/manifests/knowledge_dense_sources.json \
+          python scripts/prepare_run5_candidates.py \
             --domain "$DOMAIN" \
-            --output "/tmp/ronin-run5-hkd/${DOMAIN}_hkd/train.txt" \
-            --report "/tmp/ronin-run5-hkd/${DOMAIN}_hkd/selection-report.json" \
-            --max-documents 2000000 \
-            --max-source-rows 5000000 \
-            --top-percent 20 \
-            --min-score 30
-          python scripts/scan_corpus_sensitive_content.py \
-            --input "/tmp/ronin-run5-hkd/${DOMAIN}_hkd/train.txt" \
-            --report "/tmp/ronin-run5-hkd/${DOMAIN}_hkd/sensitive-scan.json"
+            --max-rows "$MAX_ROWS" \
+            --max-input-bytes "$((MAX_INPUT_GIB * 1024 * 1024 * 1024))" \
+            --min-train-bytes "$((MIN_TRAIN_MIB * 1024 * 1024))" \
+            --output-root "/tmp/ronin-run5-candidates/$DOMAIN"
+
+      - name: Validar tamaño x10 de ambas bibliotecas
+        id: validate_size
+        run: |
           python - <<'PY'
-          import json
-          import os
+          import json, os
           from pathlib import Path
-          domain = os.environ["DOMAIN"]
-          root = Path("/tmp/ronin-run5-hkd") / f"{domain}_hkd"
-          report = json.loads((root / "selection-report.json").read_text(encoding="utf-8"))
-          size = (root / "train.txt").stat().st_size
-          report["minimum_train_bytes"] = 2684354560
-          report["meets_x10_minimum"] = size >= report["minimum_train_bytes"]
-          report["training_eligible"] = False
-          report["admitted"] = False
-          (root / "candidate-status.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-          print(json.dumps({"domain": report["domain"], "selected_bytes": size,
-                            "meets_x10_minimum": report["meets_x10_minimum"],
-                            "training_eligible": False}, indent=2))
-          if not report["meets_x10_minimum"]:
-              raise SystemExit("HKD candidate below 2.5 GiB x10 minimum; keep RUN 5 blocked.")
+          root = Path("/tmp/ronin-run5-candidates") / os.environ["DOMAIN"]
+          report = json.loads((root / "run5-candidate-manifest.json").read_text(encoding="utf-8"))
+          expected = {os.environ["DOMAIN"], os.environ["DOMAIN"] + "_hkd"}
+          rows = {item["id"]: item for item in report["libraries"]}
+          assert set(rows) == expected, (expected, set(rows))
+          minimum = int(os.environ["MIN_TRAIN_MIB"]) * 1024 * 1024
+          for library_id, item in rows.items():
+              assert item["train_bytes"] >= minimum, (
+                  f"{library_id}: {item['train_bytes']} < {minimum}"
+              )
+              assert item["training_eligible"] is False
+              assert item["human_quality_review"] is None
+          print(json.dumps({
+              "domain": os.environ["DOMAIN"],
+              "libraries": {key: value["train_bytes"] for key, value in rows.items()},
+              "minimum_train_bytes": minimum,
+              "status": "candidate_only_pending_human_and_legal_review"
+          }, indent=2))
           PY
 
-      - name: Publicar candidato HKD, sidecar, selección y escaneo
+      # This snapshot/upload path is deliberately unconditional: candidate data
+      # survives later validation, deduplication, admission or training failures.
+      - name: Copiar cualquier biblioteca generada a datasets/run5
+        if: always()
+        run: |
+          mkdir -p "datasets/run5"
+          source="/tmp/ronin-run5-candidates/$DOMAIN"
+          if [ -d "$source" ]; then
+            cp -a "$source/." "datasets/run5/"
+          fi
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path("datasets/run5")
+          entries = []
+          for library_id in (os.environ["DOMAIN"], os.environ["DOMAIN"] + "_hkd"):
+              folder = root / library_id
+              manifest = folder / "candidate-manifest.json"
+              if manifest.is_file():
+                  item = json.loads(manifest.read_text(encoding="utf-8"))
+                  entries.append({
+                      "id": library_id,
+                      "status": "candidate_generated",
+                      "train_bytes": item.get("train_bytes"),
+                      "train_sha256": item.get("train_sha256"),
+                      "source_revision": item.get("source_revision"),
+                      "manifest": f"datasets/run5/{library_id}/candidate-manifest.json",
+                  })
+              else:
+                  entries.append({
+                      "id": library_id,
+                      "status": "generation_failed_or_incomplete",
+                      "train_bytes": 0,
+                      "manifest": None,
+                  })
+          index = {
+              "schema_version": 1,
+              "run_id": os.environ.get("GITHUB_RUN_ID"),
+              "domain": os.environ["DOMAIN"],
+              "libraries": entries,
+              "note": "Snapshot of all available output, not an admission or training-eligibility decision."
+          }
+          (root / f"index-{os.environ['DOMAIN']}.json").write_text(
+              json.dumps(index, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8"
+          )
+          PY
+
+      - name: Publicar biblioteca base en datasets (incluso si falla la validación)
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: ronin-run5-hkd-${{ matrix.domain }}
-          path: /tmp/ronin-run5-hkd/${{ matrix.domain }}_hkd/
+          name: ronin-datasets-run5-library-${{ matrix.domain }}
+          path: datasets/run5/${{ matrix.domain }}/
           if-no-files-found: warn
           compression-level: 1
+          retention-days: 90
+
+      - name: Publicar biblioteca HKD en datasets (incluso si falla la validación)
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-datasets-run5-library-${{ matrix.domain }}-hkd
+          path: datasets/run5/${{ matrix.domain }}_hkd/
+          if-no-files-found: warn
+          compression-level: 1
+          retention-days: 90
+
+      - name: Publicar índice del dominio y diagnóstico aunque la preparación falle
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-datasets-run5-index-${{ matrix.domain }}
+          path: datasets/run5/index-${{ matrix.domain }}.json
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Enlazar libro de runs
+        if: always()
+        uses: ./.github/actions/run-ledger-link
+
+  aggregate-and-gate:
+    name: Comprobar las 16 bibliotecas publicadas
+    needs: prepare-domain
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout RONIN
+        uses: actions/checkout@v5
+      - name: Descargar todas las bibliotecas disponibles aunque haya jobs fallidos
+        if: always()
+        uses: actions/download-artifact@v6
+        with:
+          pattern: ronin-datasets-run5-library-*
+          path: datasets/run5
+          merge-multiple: false
+          if-no-artifact-found: ignore
+      - name: Descargar índices parciales de todos los dominios
+        if: always()
+        uses: actions/download-artifact@v6
+        with:
+          pattern: ronin-datasets-run5-index-*
+          path: datasets/run5/domain-indexes
+          merge-multiple: false
+          if-no-artifact-found: ignore
+      - name: Crear índice maestro permanente del run
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path("datasets/run5")
+          expected = [
+              "mathematics", "logic_epistemology", "philosophy", "physics",
+              "chemistry", "biology_medicine", "computer_science",
+              "law_economics_social_sciences",
+              "mathematics_hkd", "logic_epistemology_hkd", "philosophy_hkd",
+              "physics_hkd", "chemistry_hkd", "biology_medicine_hkd",
+              "computer_science_hkd", "law_economics_social_sciences_hkd",
+          ]
+          libraries = []
+          all_manifests = list(root.glob("**/candidate-manifest.json"))
+          manifest_by_id = {}
+          for candidate_path in all_manifests:
+              try:
+                  candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+                  manifest_by_id.setdefault(candidate.get("id"), candidate_path)
+              except (OSError, json.JSONDecodeError):
+                  continue
+          for library_id in expected:
+              manifest_path = manifest_by_id.get(library_id)
+              if manifest_path:
+                  item = json.loads(manifest_path.read_text(encoding="utf-8"))
+                  libraries.append({
+                      "id": library_id,
+                      "status": "candidate_generated",
+                      "train_bytes": item.get("train_bytes", 0),
+                      "train_sha256": item.get("train_sha256"),
+                      "source_revision": item.get("source_revision"),
+                      "manifest": str(manifest_path),
+                      "artifact": f"ronin-datasets-run5-library-{library_id}",
+                  })
+              else:
+                  libraries.append({
+                      "id": library_id,
+                      "status": "missing_or_generation_failed",
+                      "train_bytes": 0,
+                      "train_sha256": None,
+                      "source_revision": None,
+                      "manifest": None,
+                      "artifact": f"ronin-datasets-run5-library-{library_id}",
+                  })
+          indexes = []
+          for path in sorted((root / "domain-indexes").glob("**/*.json")) if (root / "domain-indexes").exists() else []:
+              try:
+                  indexes.append(json.loads(path.read_text(encoding="utf-8")))
+              except (OSError, json.JSONDecodeError):
+                  indexes.append({"status": "unreadable", "path": str(path)})
+          index = {
+              "schema_version": 1,
+              "run_id": os.environ["GITHUB_RUN_ID"],
+              "commit": os.environ["GITHUB_SHA"],
+              "expected_libraries": 16,
+              "libraries_found": sum(x["status"] == "candidate_generated" for x in libraries),
+              "libraries": libraries,
+              "domain_diagnostics": indexes,
+              "training_started": False,
+              "admitted": False,
+              "note": "This inventory is written regardless of job/gate outcome. Candidate availability does not imply legal admission or training eligibility."
+          }
+          root.mkdir(parents=True, exist_ok=True)
+          (root / "INDEX.json").write_text(
+              json.dumps(index, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8"
+          )
+          print(json.dumps(index, ensure_ascii=False, indent=2))
+          PY
+      - name: Publicar índice maestro datasets/run5/INDEX.json siempre
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-datasets-run5-master-index
+          path: datasets/run5/INDEX.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Auditoría global de duplicados exactos y semánticos entre bibliotecas
+        run: |
+          python scripts/audit_run5_cross_library_dedup.py \
+            --corpus-root datasets/run5 \
+            --report run5-cross-library-dedup.json
+      - name: Verificar inventario, tamaño y trazabilidad de 16 bibliotecas
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("datasets/run5")
+          manifests = sorted(root.glob("**/candidate-manifest.json"))
+          expected = {
+              "mathematics", "logic_epistemology", "philosophy", "physics",
+              "chemistry", "biology_medicine", "computer_science",
+              "law_economics_social_sciences",
+              "mathematics_hkd", "logic_epistemology_hkd", "philosophy_hkd",
+              "physics_hkd", "chemistry_hkd", "biology_medicine_hkd",
+              "computer_science_hkd", "law_economics_social_sciences_hkd",
+          }
+          found = {}
+          for path in manifests:
+              item = json.loads(path.read_text(encoding="utf-8"))
+              found[item["id"]] = {
+                  "path": str(path.parent),
+                  "train_bytes": item["train_bytes"],
+                  "train_sha256": item["train_sha256"],
+                  "source_revision": item["source_revision"],
+                  "training_eligible": item["training_eligible"],
+              }
+          missing = sorted(expected - set(found))
+          unexpected = sorted(set(found) - expected)
+          minimum = 2560 * 1024 * 1024
+          undersized = {key: value["train_bytes"] for key, value in found.items()
+                        if value["train_bytes"] < minimum}
+          report = {
+              "libraries_found": len(found),
+              "expected": 16,
+              "missing": missing,
+              "unexpected": unexpected,
+              "undersized": undersized,
+              "total_train_bytes": sum(x["train_bytes"] for x in found.values()),
+              "minimum_total_train_bytes": 16 * minimum,
+              "libraries": found,
+              "training_eligible": False,
+              "admitted": False,
+              "blockers": [
+                  "G-0 global rights gate remains FAIL.",
+                  "Human document-level rights and quality review is mandatory.",
+                  "Cross-library near-deduplication, split/hash sign-off and admission remain mandatory."
+              ]
+          }
+          Path("run5-sixteen-library-candidate-report.json").write_text(
+              json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+          )
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          if missing or unexpected or undersized or len(found) != 16:
+              raise SystemExit("RUN 5 candidate corpus is incomplete; training remains blocked.")
+          PY
+      - name: Publicar informe consolidado
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-run5-16-library-candidate-report
+          path: |
+            run5-sixteen-library-candidate-report.json
+            run5-cross-library-dedup.json
+            datasets/run5/INDEX.json
+          if-no-files-found: warn
           retention-days: 30

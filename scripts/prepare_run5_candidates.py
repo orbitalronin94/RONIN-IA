@@ -13,7 +13,6 @@ import json
 import re
 import sqlite3
 import sys
-import tempfile
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
@@ -30,7 +29,7 @@ DATASET_ID = "PleIAs/common_corpus"
 DATASET_REVISION = "307910e4c5d040d6f318e6edf2a2b97849155771"
 MIN_DOCUMENT_BYTES = 300
 MAX_DOCUMENT_BYTES = 2 * 1024 * 1024
-HKD_FRACTION = 0.20
+HKD_FRACTION = 0.40
 ALLOWED_LICENSES = {
     "CC0", "CC0 1.0", "CC0-1.0",
     "CC BY 2.0", "CC BY 3.0", "CC BY 4.0",
@@ -47,6 +46,7 @@ COLLECTIONS = {
     "OpenGovernment": {"law_economics_social_sciences"},
 }
 LANGUAGES = {"en", "es"}
+LANGUAGE_ALIASES = {"en": "en", "english": "en", "es": "es", "spanish": "es"}
 DOMAIN_HINTS = {
     "mathematics": "theorem equation algebra calculus geometry probability statistics",
     "logic_epistemology": "logic inference proposition predicate proof epistemology falsifiability",
@@ -147,6 +147,7 @@ def write_split(
             sidecar = {
                 "document_id": doc_id,
                 "text_sha256": text_sha256,
+                "simhash64": simhash64(text),
                 "source_dataset": DATASET_ID,
                 "source_revision": source_revision,
                 "source_identifier": provenance,
@@ -210,10 +211,10 @@ def write_split(
         "sha256": {name: digest.hexdigest() for name, digest in split_hashes.items()},
     }
     dedup_report = {
-        "exact_deduplication": "SHA-256 sobre texto normalizado durante la ingesta, global entre dominios",
+        "exact_deduplication": "SHA-256 sobre texto normalizado; deduplicación dentro del dominio y entre sus dos bibliotecas base/HKD",
         "near_duplicates_removed": near_dupes,
         "unique_text_hashes_written": len(exact_hashes),
-        "method": "SimHash-64 con distancia de Hamming <=3, aplicado globalmente entre bibliotecas",
+        "method": "SimHash-64 con distancia de Hamming <=3 dentro del dominio; la auditoría global de las 16 bibliotecas se ejecuta después de agregar artefactos",
     }
     selection_report = {
         "metric": "RONIN-HKD-0.1",
@@ -270,11 +271,13 @@ def domain_kind_name(domain: str, kind: str) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=Path("/tmp/ronin-run5-candidates"))
-    parser.add_argument("--max-rows", type=int, default=250_000)
+    parser.add_argument("--max-rows", type=int, default=5_000_000)
+    parser.add_argument("--domain", choices=DOMAIN_PRIORITY, help="Process one domain per runner to scale storage horizontally")
     parser.add_argument("--max-input-bytes", type=int, default=6 * 1024**3)
     parser.add_argument("--min-train-bytes", type=int, default=2_560 * 1024**2)
     parser.add_argument("--hkd-fraction", type=float, default=HKD_FRACTION)
     parser.add_argument("--license-audit", type=Path, default=Path("reports/license_audit.json"))
+    parser.add_argument("--source-manifest", type=Path, default=Path("data/manifests/knowledge_dense_sources.json"))
     args = parser.parse_args()
     if not 0.05 <= args.hkd_fraction <= 0.40:
         parser.error("--hkd-fraction must be between 0.05 and 0.40")
@@ -302,6 +305,31 @@ def main() -> int:
             "No existe autorización G-0 de alcance limitado para descargar "
             "candidatos Common Corpus en esta revisión y allowlist."
         )
+
+    source_manifest = json.loads(args.source_manifest.read_text(encoding="utf-8"))
+    enabled_specs = [
+        spec for spec in source_manifest.get("sources", [])
+        if spec.get("enabled") is True
+    ]
+    active_domains = (args.domain,) if args.domain else DOMAIN_PRIORITY
+    for domain_name in active_domains:
+        domain_specs = [spec for spec in enabled_specs if spec.get("domain") == domain_name]
+        if not domain_specs:
+            raise SystemExit(f"No hay adaptador habilitado en el manifiesto para {domain_name}.")
+        for spec in domain_specs:
+            if (
+                spec.get("dataset_id") != DATASET_ID
+                or spec.get("revision") != DATASET_REVISION
+                or spec.get("license_audit") != str(args.license_audit)
+                or not set(spec.get("allowed_licenses", [])).issubset(ALLOWED_LICENSES)
+            ):
+                raise SystemExit(f"El adaptador {spec.get('id')} no coincide con la autorización auditada.")
+    if len({spec["domain"] for spec in enabled_specs}) != 8:
+        raise SystemExit("Se requieren adaptadores Common Corpus autorizados para los ocho dominios.")
+    source_specs_by_domain = {
+        domain_name: [spec for spec in enabled_specs if spec.get("domain") == domain_name]
+        for domain_name in DOMAIN_PRIORITY
+    }
 
     args.output_root.mkdir(parents=True, exist_ok=True)
     database_path = args.output_root / "run5-candidates.sqlite3"
@@ -333,13 +361,12 @@ def main() -> int:
             rejected["invalid_row"] += 1
             continue
         raw_text = row_value(row, "text")
-        if isinstance(raw_text, str):
-            scanned_text_bytes += len(raw_text.encode("utf-8"))
         license_name = normalize_license(row_value(row, "license"))
         if license_name not in ALLOWED_LICENSES:
             rejected["license_not_allowlisted"] += 1
             continue
-        language = str(row_value(row, "language") or "").lower().split("-")[0]
+        language_raw = str(row_value(row, "language") or "").strip().lower().split("-")[0]
+        language = LANGUAGE_ALIASES.get(language_raw, language_raw)
         if language not in LANGUAGES:
             rejected["language_not_allowlisted"] += 1
             continue
@@ -364,8 +391,24 @@ def main() -> int:
         if domain is None:
             rejected["domain_unclassified"] += 1
             continue
+        domain_specs = source_specs_by_domain.get(domain, [])
+        source_filter_match = any(
+            collection in spec.get("filters", {}).get("in", {}).get("open_type", [])
+            and str(row_value(row, "language") or "") in spec.get("filters", {}).get("in", {}).get("language", [])
+            for spec in domain_specs
+        )
+        if not source_filter_match:
+            rejected["source_manifest_filter"] += 1
+            continue
+        # The per-domain byte budget counts only documents that pass the
+        # source's configured domain/language filters and explicit license gate.
+        if isinstance(raw_text, str):
+            scanned_text_bytes += len(raw_text.encode())
+        if args.domain and domain != args.domain:
+            rejected["other_domain"] += 1
+            continue
         doc_id = hashlib.sha256(
-            f"{DATASET_REVISION}\0{provenance}\0{license_name}".encode("utf-8")
+            f"{DATASET_REVISION}\0{provenance}\0{license_name}".encode()
         ).hexdigest()
         if doc_id in seen_ids:
             rejected["duplicate_identifier"] += 1
@@ -394,13 +437,14 @@ def main() -> int:
             )
     db.commit()
 
+    active_domains = (args.domain,) if args.domain else DOMAIN_PRIORITY
     domain_counts = {
         domain: db.execute("SELECT COUNT(*) FROM docs WHERE domain=?", (domain,)).fetchone()[0]
-        for domain in DOMAIN_PRIORITY
+        for domain in active_domains
     }
 
     # Recompute RONIN-HKD with corpus-level document frequency, per domain.
-    for domain in DOMAIN_PRIORITY:
+    for domain in active_domains:
         total_docs = domain_counts[domain]
         if not total_docs:
             continue
@@ -424,7 +468,7 @@ def main() -> int:
     libraries: list[dict[str, Any]] = []
     sample_root = args.output_root / "human_review"
     global_seen_simhash: dict[int, dict[int, list[int]]] = {i: {} for i in range(4)}
-    for domain in DOMAIN_PRIORITY:
+    for domain in active_domains:
         count = domain_counts[domain]
         if count < 2:
             rejected[f"{domain}_insufficient_documents"] += 1

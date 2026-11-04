@@ -23,6 +23,10 @@ on:
         required: false
         default: "8192"
         type: string
+      candidate_run_id:
+        description: ID del workflow RUN 5 que publicó las 16 bibliotecas admitidas
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -48,7 +52,61 @@ jobs:
       - name: Obtener RONIN IA
         uses: actions/checkout@v5
 
-      - name: Preflight fail-fast de RUN 5 antes de descargar o instalar dependencias
+      - name: Validar ID de ejecución de preparación
+        env:
+          CANDIDATE_RUN_ID: ${{ inputs.candidate_run_id }}
+        run: |
+          if ! [[ "$CANDIDATE_RUN_ID" =~ ^[0-9]+$ ]]; then
+            echo "::error::candidate_run_id debe ser el ID numérico del workflow de preparación."
+            exit 1
+          fi
+
+      - name: Descargar los 16 artefactos de bibliotecas de esa ejecución
+        uses: actions/download-artifact@v6
+        with:
+          pattern: ronin-run5-library-*
+          path: /tmp/ronin-run5-library-artifacts
+          merge-multiple: false
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.candidate_run_id }}
+
+      - name: Materializar cada artefacto en el layout del gate oficial
+        env:
+          CANDIDATE_RUN_ID: ${{ inputs.candidate_run_id }}
+        run: |
+          python - <<'PY'
+          import json, shutil
+          from pathlib import Path
+          source = Path("/tmp/ronin-run5-library-artifacts")
+          target = Path("/tmp/ronin-sixteen-libraries")
+          target.mkdir(parents=True, exist_ok=True)
+          expected = {
+              "mathematics", "logic_epistemology", "philosophy", "physics",
+              "chemistry", "biology_medicine", "computer_science",
+              "law_economics_social_sciences",
+              "mathematics_hkd", "logic_epistemology_hkd", "philosophy_hkd",
+              "physics_hkd", "chemistry_hkd", "biology_medicine_hkd",
+              "computer_science_hkd", "law_economics_social_sciences_hkd",
+          }
+          found = set()
+          for artifact in source.iterdir():
+              manifest = artifact / "candidate-manifest.json"
+              if not manifest.is_file():
+                  continue
+              item = json.loads(manifest.read_text(encoding="utf-8"))
+              library_id = item["id"]
+              if library_id not in expected or library_id in found:
+                  raise SystemExit(f"Artefacto inesperado o duplicado: {library_id}")
+              shutil.copytree(artifact, target / library_id)
+              found.add(library_id)
+          missing = sorted(expected - found)
+          if missing:
+              raise SystemExit(f"Faltan bibliotecas del run {__import__('os').environ.get('CANDIDATE_RUN_ID','')}: {missing}")
+          print(f"Materializadas {len(found)}/16 bibliotecas.")
+          PY
+
+      - name: Preflight fail-fast de RUN 5 antes de descargar dependencias
         run: |
           python scripts/check_run5_preflight.py \
             --corpus-root /tmp/ronin-sixteen-libraries \

@@ -195,22 +195,19 @@ def main() -> None:
             rejected["empty_license_allowlist"] += 1
             continue
 
-        # Candidate extraction is currently authorized only for the exact,
-        # immutable Common Corpus revision and document-license allowlist.
-        # Other adapters remain disabled until they receive their own audited
-        # authorization; a populated license_audit path alone is not approval.
-        if spec.get("dataset_id") != "PleIAs/common_corpus":
-            rejected["source_specific_authorization_not_implemented"] += 1
-            continue
+        # A source is eligible for candidate extraction only when the audit
+        # contains a source-specific, revision-pinned LIMITED_PASS. Merely
+        # enabling an adapter or pointing at an audit file is not approval.
         try:
             audit = json.loads(audit_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             rejected["invalid_license_audit"] += 1
             continue
+        source_identifier = spec.get("dataset_id") or spec["id"]
         authorization = next(
             (
                 item for item in audit.get("candidate_intake_authorizations", [])
-                if item.get("source_id") == "PleIAs/common_corpus"
+                if item.get("source_id") == source_identifier
                 and item.get("dataset_revision") == spec.get("revision")
                 and item.get("status") == "LIMITED_PASS"
                 and item.get("candidate_text_downloads_authorized") is True

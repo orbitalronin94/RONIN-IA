@@ -376,3 +376,24 @@ La retirada del YAML impide nuevos disparos desde ese workflow, pero no garantiz
 Se incorpora `scripts/check_run5_preflight.py` al inicio de `.github/workflows/ronin-official-training-holdout.yml`. Antes de clonar Portfolio, instalar PyTorch/Transformers o descargar MMLU-Pro, el workflow comprueba G-0, las 16 admisiones, tamaño mínimo de 256 MiB por biblioteca, revisiones, hashes, revisiones de calidad y los `train.txt` exactos. Publica `ronin-run5-readiness-preflight` incluso cuando el gate bloquea. La validación oficial posterior `validate_sixteen_libraries.py --require-ready` se mantiene; no se relaja ningún requisito.
 
 Diagnóstico actual al preparar este cambio: G-0 = FAIL; bibliotecas admitidas = 0/16; `train_bytes=0` en el manifiesto; no existe una etapa que materialice `/tmp/ronin-sixteen-libraries` en el workflow actual. Por tanto, RUN 5 de entrenamiento todavía no debe lanzarse: el preflight ahora lo detectará al principio y evitará gastar tiempo de runner en dependencias, Portfolio y evaluación. La generación REF de tutores no se considera sustituto de las bibliotecas ni autoriza su admisión.
+
+## Preparación escalable de RUN 5 — PR posterior a #59
+
+Se sustituye la ingesta monolítica por ocho jobs de dominio. Cada job procesa su shard de Common Corpus y genera dos bibliotecas independientes: una base y una HKD seleccionada mediante RONIN-HKD-0.1. Los artefactos se publican por biblioteca (16 artefactos separados), evitando que el límite de tamaño de un único artefacto impida transportar el corpus completo.
+
+Cambios técnicos:
+- `scripts/prepare_run5_candidates.py` admite `--domain`, valida los adaptadores habilitados de `data/manifests/knowledge_dense_sources.json` contra la autorización limitada, aplica sus filtros y normaliza etiquetas de idioma English/Spanish.
+- Cada biblioteca mantiene train/validation/test, sidecar documental, hashes, revisión de origen, informe HKD cuando corresponde, muestra humana y escaneo sensible.
+- `scripts/audit_run5_cross_library_dedup.py` realiza auditoría exacta SHA-256 y aproximada SimHash-64 entre las 16 bibliotecas; cualquier coincidencia bloquea la admisión.
+- El workflow agregador exige 16/16, mínimo x10 de 2.5 GiB train por biblioteca y publica un informe consolidado.
+- El workflow oficial acepta `candidate_run_id`, descarga los 16 artefactos de esa ejecución y los materializa en el layout que exige el preflight antes de intentar entrenar.
+
+Límites que siguen vigentes:
+- Solo los ocho adaptadores de PleIAs Common Corpus tienen autorización limitada para extracción de candidatos. Las demás fuentes del registro permanecen deshabilitadas hasta su auditoría específica; no se infiere autorización por aparecer en el manifiesto.
+- G-0 global sigue en FAIL. Los candidatos no son datos admitidos ni training-eligible. La revisión jurídica por documento/obra, revisión humana, resolución de PII/secretos, deduplicación cruzada y firma de hashes/splits siguen siendo obligatorias.
+- El objetivo 2.5 GiB es por biblioteca; los jobs pueden fallar honestamente si el shard no alcanza el volumen. No se rellena ni duplica texto para alcanzar el umbral.
+- Los pesos de mezcla de las bibliotecas modifican la exposición de entrenamiento, no el número de parámetros del modelo. El crecimiento de parámetros requiere un cambio arquitectónico explícito y un recuento de parámetros antes/después; no se atribuye crecimiento a los pesos del dataset.
+
+Estado al abrir esta iteración: código preparado en rama de trabajo; aún no hay ejecución real que demuestre 16 bibliotecas x10 ni admisión. RUN 5 oficial no debe lanzarse hasta que todos los gates pasen.
+
+Recuento de arquitectura de referencia: el perfil `tiny` actual tiene **9.922.880 parámetros entrenables** (embeddings compartidos contados una sola vez). Los pesos de mezcla de 16 bibliotecas no alteran ese número. Esta PR no añade módulos entrenables ni afirma crecimiento ficticio; una ampliación por expertos/adapters deberá tener ruta de entrenamiento condicionada por dominio y un recuento antes/después con prueba de equivalencia.
