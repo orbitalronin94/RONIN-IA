@@ -319,3 +319,12 @@ Este inventario no significa que los 21 corpus estén descargados o admitidos: d
 El historial cronológico de experimentos, validaciones e ingestas está en el [Libro de runs](docs/RUNS.md). Los workflows enlazan allí desde su resumen y el registrador automático añade cada ejecución al terminar, incluidos fallos y cancelaciones.
 
 El inventario externo contiene ahora 22 fuentes. Se añade una primera ingesta automatizada y versionada de muestras filtradas de Common Corpus (dominio público/CC0/CC BY/MIT), datos CC0 de Wikidata y abstracts CC BY/CC0 de Europe PMC; permanecen fuera del entrenamiento hasta superar la revisión G-0. Consulta [el pipeline de muestras](docs/INGESTA_AMPLIA_DATASETS_EXTERNOS.md#primera-ingesta-automatizada-de-muestras).
+
+
+## Bibliotecas técnicas balanceadas: condición previa a RUN #5
+
+Antes de la siguiente ejecución oficial se incorporarán ocho bibliotecas técnicas de tamaño comparable —matemáticas, lógica/razonamiento, filosofía/epistemología, física, química/materiales, biología/medicina, informática/ingeniería y derecho/economía/ciencias sociales— y Portfolio/Papers se conservará como corpus experto adicional, fuera del cómputo de las ocho.
+
+El presupuesto inicial es de 8.118.117 bytes de texto de entrenamiento por biblioteca (±10 %), medidos después de normalización y deduplicación. El gate está en [el manifiesto](data/manifests/balanced_technical_libraries.json) y [su documentación](docs/BIBLIOTECAS_TECNICAS_BALANCEADAS.md). El workflow oficial se detiene antes de descargar corpus o entrenar si no están listas las ocho bibliotecas y Portfolio.
+
+Instalación selectiva de herramientas técnicas: `pip install -e '.[math,logic,statistics,corpus,books]'`; para el conjunto completo: `pip install -e '.[all-technical]'`. El núcleo del modelo no instala estas dependencias opcionales.
