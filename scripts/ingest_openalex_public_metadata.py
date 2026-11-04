@@ -26,7 +26,7 @@ USER_AGENT = "RONIN-IA-openalex-metadata-export/1.0"
 ALLOW = (
     "id", "doi", "title", "display_name", "publication_year", "publication_date",
     "type", "language", "cited_by_count", "is_retracted", "updated_date",
-    "primary_topic", "topics", "authorships", "primary_location",
+    "primary_topic", "topics", "authorships",
 )
 
 def fetch(url: str, limit: int) -> bytes:
