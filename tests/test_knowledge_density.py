@@ -19,7 +19,7 @@ def test_high_knowledge_score_rewards_domain_specific_definitions_and_relations(
 
 
 def test_unknown_domain_is_not_silently_accepted():
-    assert len(DOMAIN_TERMS) == 16
+    assert len(DOMAIN_TERMS) == 32
 
 
 def test_selector_rejects_sources_without_explicit_legal_approval(tmp_path):
