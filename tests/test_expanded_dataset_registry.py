@@ -1,5 +1,7 @@
 from pathlib import Path
+
 from scripts.validate_expanded_dataset_registry import validate
+
 
 REGISTRY = Path(__file__).parents[1] / "data/datasets/catalog/expanded-domain-registry.json"
 
