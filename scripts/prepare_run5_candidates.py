@@ -272,7 +272,7 @@ def main() -> int:
     parser.add_argument("--output-root", type=Path, default=Path("/tmp/ronin-run5-candidates"))
     parser.add_argument("--max-rows", type=int, default=250_000)
     parser.add_argument("--max-input-bytes", type=int, default=6 * 1024**3)
-    parser.add_argument("--min-train-bytes", type=int, default=256 * 1024**2)
+    parser.add_argument("--min-train-bytes", type=int, default=2_560 * 1024**2)
     parser.add_argument("--hkd-fraction", type=float, default=HKD_FRACTION)
     parser.add_argument("--license-audit", type=Path, default=Path("reports/license_audit.json"))
     args = parser.parse_args()
