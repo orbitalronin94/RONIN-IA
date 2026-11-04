@@ -15,7 +15,10 @@ SUMMARIES = {
     "Ingesta de muestras CC0/CC-BY — Wikidata + Europe PMC": "Obtención de muestras pequeñas de datos estructurados CC0 de Wikidata y resúmenes de artículos con licencia CC BY/CC0; publicación versionada y nunca admisión automática al entrenamiento.",
 }
 def safe(value):
-    return str(value or "").replace("|", "\\|").replace("\r", " ").replace("\n", " ").strip()
+    text = str(value or "").replace("\r", " ").replace("\n", " ")
+    for char in ("|", "[", "]", "(", ")", chr(96)):
+        text = text.replace(char, "\\" + char)
+    return re.sub(r"[<>]", "", text).strip()
 def main():
     event_path = os.environ.get("GITHUB_EVENT_PATH")
     if not event_path: raise SystemExit("GITHUB_EVENT_PATH is required")
