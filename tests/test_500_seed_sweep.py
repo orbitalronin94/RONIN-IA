@@ -44,3 +44,18 @@ def test_seed_sweep_retains_before_after_metrics_and_top_candidate(tmp_path: Pat
     rows = [json.loads(line) for line in (output / "seed-results.jsonl").read_text().splitlines()]
     assert [row["seed"] for row in rows] == [500, 501]
     assert all("delta_domain_accuracy" in row for row in rows)
+
+
+def test_seed_sweep_workflow_is_500_seed_validation_only():
+    workflow = (
+        Path(__file__).parents[1]
+        / ".github"
+        / "workflows"
+        / "ronin-500-seed-sweep.yml"
+    ).read_text(encoding="utf-8")
+    assert 'default: "500"' in workflow
+    assert 'default: "100"' in workflow
+    assert 'default: "1"' in workflow
+    assert '--split", "validation"' in workflow
+    assert '"test"' not in workflow
+    assert "MMLU_REVISION" in workflow
