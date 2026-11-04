@@ -9,26 +9,27 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib
 import json
 import re
 from pathlib import Path
 from typing import Any
 
 from ronin.data.teacher import generate_completion, load_local_teacher
-try:
-    from scripts.evaluate_mmlu_pro import (
-        DATASET_REVISION,
-        format_prompt,
-        load_external_dataset,
-        select_stratified,
+def _load_evaluator_api():
+    try:
+        module = importlib.import_module("scripts.evaluate_mmlu_pro")
+    except ModuleNotFoundError:
+        module = importlib.import_module("evaluate_mmlu_pro")
+    return (
+        module.DATASET_REVISION,
+        module.format_prompt,
+        module.load_external_dataset,
+        module.select_stratified,
     )
-except ModuleNotFoundError:  # ejecución directa: scripts/ es sys.path[0]
-    from evaluate_mmlu_pro import (
-        DATASET_REVISION,
-        format_prompt,
-        load_external_dataset,
-        select_stratified,
-    )
+
+
+DATASET_REVISION, format_prompt, load_external_dataset, select_stratified = _load_evaluator_api()
 
 ANSWER_RE = re.compile(r"(?im)^\s*ANSWER\s*:\s*([A-J])\b")
 RATIONALE_RE = re.compile(r"(?ims)^\s*(?:RATIONALE|JUSTIFICACION|JUSTIFICACIÓN)\s*:\s*(.+)$")
