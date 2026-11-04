@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import random
 from collections import Counter
 from pathlib import Path
@@ -53,6 +54,10 @@ def build(output: Path, target_bytes: int, seed: int) -> dict[str, object]:
         "records_by_domain": dict(sorted(counts.items())),
         "seed": seed,
         "sha256": digest.hexdigest(),
+        "license": "MIT",
+        "license_reference": "LICENSE",
+        "generator_revision": os.environ.get("GITHUB_SHA", "local-unpinned"),
+        "generator_script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "external_sources": [],
         "teacher_outputs": False,
         "third_party_text": False,
