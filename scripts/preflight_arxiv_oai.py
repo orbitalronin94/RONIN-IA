@@ -142,22 +142,37 @@ def parse_record(record: ET.Element) -> dict[str, str] | None:
 def sample_set(
     set_spec: str, *, max_records: int
 ) -> tuple[list[dict[str, str]], dict[str, Any]]:
-    root = request_oai({
-        "verb": "ListRecords",
-        "metadataPrefix": "arXiv",
-        "set": set_spec,
-    })
-    records = []
-    for record in root.findall(f".//{OAI_NS}record"):
-        parsed = parse_record(record)
-        if parsed and parsed["identifier"]:
-            records.append(parsed)
-        if len(records) >= max_records:
+    """Sample across OAI pages instead of silently truncating at page one."""
+    records: list[dict[str, str]] = []
+    token: str | None = None
+    pages_fetched = 0
+    has_more_records = False
+    while len(records) < max_records:
+        if token:
+            root = request_oai({"verb": "ListRecords", "resumptionToken": token})
+        else:
+            root = request_oai({
+                "verb": "ListRecords",
+                "metadataPrefix": "arXiv",
+                "set": set_spec,
+            })
+        pages_fetched += 1
+        for record in root.findall(f".//{OAI_NS}record"):
+            parsed = parse_record(record)
+            if parsed and parsed["identifier"]:
+                records.append(parsed)
+                if len(records) >= max_records:
+                    break
+        token_node = root.find(f".//{OAI_NS}resumptionToken")
+        next_token = (token_node.text or "").strip() if token_node is not None else ""
+        has_more_records = bool(next_token)
+        if not next_token or len(records) >= max_records:
             break
-    token = root.find(f".//{OAI_NS}resumptionToken")
+        token = next_token
     return records, {
         "sampled_records": len(records),
-        "has_more_records": bool(token is not None and (token.text or "").strip()),
+        "pages_fetched": pages_fetched,
+        "has_more_records": has_more_records,
         "complete_set_harvest": False,
     }
 

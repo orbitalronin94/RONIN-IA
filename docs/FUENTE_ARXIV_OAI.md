@@ -8,11 +8,11 @@ El adaptador usa el formato `arXiv`, que expone la URI de licencia de cada artí
 
 ## Dominios inspeccionados
 
-El selector usa los sets de categoría OAI disponibles y muestrea matemáticas, lógica, filosofía de la física/ciencias sociales, física, química, biología cuantitativa, informática y economía/finanzas. Los resultados son muestras, no un censo completo; el informe guarda los setSpec, recuentos y ejemplos de metadatos sin abstracts.
+El selector usa los sets de categoría OAI disponibles y muestrea matemáticas, lógica, filosofía de la física/ciencias sociales, física, química, biología cuantitativa, informática y economía/finanzas. Los resultados son muestras, no un censo completo; el informe guarda los setSpec, recuentos y ejemplos de metadatos sin abstracts. El muestreo sigue los `resumptionToken` OAI hasta alcanzar el límite configurado, en vez de truncar silenciosamente en la primera página. La ejecución programada inspecciona hasta cuatro sets por dominio y 1.000 registros por set.
 
 ## Límites y gates
 
-- Se respeta una separación mínima de tres segundos entre peticiones OAI y no se realizan peticiones concurrentes.
+- Se respeta una separación mínima de tres segundos entre peticiones OAI y no se realizan peticiones concurrentes. La paginación conserva el mismo control de ritmo y registra cuántas páginas se inspeccionaron por set.
 - La URI de licencia debe coincidir exactamente con CC BY 4.0 o CC0 1.0; no se infiere permiso a partir de que el artículo sea accesible.
 - El CC0 de los metadatos no se interpreta como licencia CC0 del artículo.
 - No se descarga contenido y el informe fija `candidate_text_downloads_authorized=false`, `training_eligible=false` y `admitted=false`.
