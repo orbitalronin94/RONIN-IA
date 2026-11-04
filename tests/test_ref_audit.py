@@ -55,6 +55,17 @@ def test_decoded_requires_evidence_description():
     assert any("decoded" in issue for issue in result.issues)
 
 
+def test_decoded_rejects_explicitly_negated_evidence():
+    broken = VALID.replace("ESTADO_DE_CODIFICACION: clear", "ESTADO_DE_CODIFICACION: decoded")
+    broken = broken.replace(
+        "EVIDENCIA: La fuente y la prueba experimental descritas permiten comprobarlo.",
+        "EVIDENCIA: No hay evidencia verificable ni fuente.",
+    )
+    result = parse_ref_completion(broken)
+    assert not result.valid
+    assert any("decoded" in issue for issue in result.issues)
+
+
 def test_audit_reports_structural_rate_without_claiming_truth():
     report, accepted = audit_records([
         {"id": "ok", "completion": VALID},
