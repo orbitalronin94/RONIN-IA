@@ -51,7 +51,7 @@ def main() -> int:
         "default_context": "1 sentence",
         "default_within": "sentence",
         "show": "word",
-        "show_struct": "text_author,text_title",
+        "show_struct": "doc_author,doc_title,doc_lgcode,doc_year,page_page_url",
     })
     query = json.loads(query_raw)
     kwic = query.get("kwic", [])
