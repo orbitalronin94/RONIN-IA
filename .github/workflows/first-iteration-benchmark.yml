@@ -105,7 +105,7 @@ jobs:
             --output /tmp/ronin-first/reports/inicial-validation.json
 
       - name: Medir referencia inicial en holdout reservado
-        if: steps.g0.outputs.authorized == 'true' && (${{ inputs.benchmark_holdout || false }})
+        if: steps.g0.outputs.authorized == 'true' && inputs.benchmark_holdout
         run: |
           python scripts/evaluate_text.py \
             --checkpoint /tmp/ronin-first/inicial.pt \
@@ -142,7 +142,7 @@ jobs:
             --output /tmp/ronin-first/reports/entrenado-validation.json
 
       - name: Evaluar una sola vez el holdout reservado
-        if: steps.g0.outputs.authorized == 'true' && (${{ inputs.benchmark_holdout || false }})
+        if: steps.g0.outputs.authorized == 'true' && inputs.benchmark_holdout
         env:
           STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
         run: |
