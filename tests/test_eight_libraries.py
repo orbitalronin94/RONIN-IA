@@ -4,7 +4,6 @@ from pathlib import Path
 
 from scripts.validate_eight_libraries import validate
 
-
 MANIFEST = Path(__file__).parents[1] / "data" / "manifests" / "eight_libraries.json"
 
 
