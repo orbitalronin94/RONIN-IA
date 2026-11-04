@@ -160,3 +160,18 @@ def test_run5_source_profile_is_bounded_and_metadata_only():
         {"value": "CC BY 4.0", "count": 8},
     ]
     assert "text" not in report
+
+
+
+def test_common_corpus_code_language_labels_are_not_mistaken_for_natural_languages():
+    from scripts.prepare_run5_candidates import choose_domain, is_allowed_language, is_code_language
+
+    assert is_code_language("Python")
+    assert is_code_language("TypeScript")
+    assert is_code_language("C++")
+    assert is_allowed_language("English", "Open Source", "computer_science")
+    assert is_allowed_language("Python", "Open Source", "computer_science")
+    assert not is_allowed_language("Chinese", "Open Source", "computer_science")
+    assert not is_allowed_language("Python", "Open Culture", "philosophy")
+    domain, _ = choose_domain("def add(a, b): return a + b", "Open Source", "Python")
+    assert domain == "computer_science"
