@@ -35,7 +35,7 @@ La integración de corpus y tutoría está en revisión en la [PR #39](https://g
 - La auditoría de adquisición de la PR #39 terminó correctamente: 644 documentos literarios verificados (608 train, 18 validation y 18 test).
 - La CI de esa rama terminó correctamente: 100 pruebas pasadas, Ruff limpio y smoke de entrenamiento.
 - La biblioteca de codificación se descargó y validó estructuralmente, pero sus fuentes y casos siguen excluidos del preentrenamiento general hasta revisión manual.
-- El ciclo largo Portfolio + literatura + Phi-4 estaba en curso en la última consulta; no se publican métricas finales hasta que termine y se inspeccione su informe.
+- El ciclo largo Portfolio + literatura + Phi-4 terminó con fallo en la ejecución #59: Phi-4 pasó la descarga/verificación, pero la generación falla porque Transformers rechaza el argumento `generator`; además, el entorno de `datasets` y `huggingface_hub` es incompatible (`BucketNotFoundError`). No hay métricas MMLU-Pro finales ni artefacto combinado de ese ciclo.
 
 El inventario operativo, con procedencia, revisiones, licencias, particiones, exclusiones y enlaces a artefactos, está en [Inventario de corpus y materiales](docs/INVENTARIO_CORPUS_Y_MATERIALES.md). Es la guía de qué puede entrenar, qué solo puede evaluar y qué permanece en cuarentena.
 
