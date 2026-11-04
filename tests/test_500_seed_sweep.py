@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import yaml
+
 from scripts.prepare_large_synthetic_corpus import build
 from scripts.run_500_seed_sweep import run_sweep
 
@@ -59,3 +61,5 @@ def test_seed_sweep_workflow_is_500_seed_validation_only():
     assert '--split", "validation"' in workflow
     assert '--split", "test"' not in workflow
     assert "MMLU_REVISION" in workflow
+    parsed = yaml.load(workflow, Loader=yaml.BaseLoader)
+    assert parsed["jobs"]["seed-sweep"]["timeout-minutes"] == "360"
