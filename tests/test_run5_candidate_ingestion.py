@@ -252,3 +252,16 @@ def test_run5_stream_shuffle_rejects_invalid_buffer():
         assert "buffer_size" in str(exc)
     else:
         raise AssertionError("shuffle buffer must be bounded and at least two")
+
+
+def test_run5_default_split_is_eighty_percent_base_and_twenty_percent_hkd():
+    from scripts.prepare_run5_candidates import HKD_FRACTION
+    from scripts.prepare_pmc_oa_candidates import HKD_FRACTION as PMC_HKD_FRACTION
+
+    assert HKD_FRACTION == 0.20
+    assert PMC_HKD_FRACTION == 0.20
+    total = 1000
+    hkd_count = int(total * HKD_FRACTION)
+    base_count = total - hkd_count
+    assert base_count == 800
+    assert hkd_count == 200
