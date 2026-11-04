@@ -7,6 +7,7 @@ from scripts.prepare_run5_candidates import (
     DATASET_REVISION,
     LANGUAGE_ALIASES,
     choose_domain,
+    histogram_report,
     normalize_license,
 )
 
@@ -144,3 +145,18 @@ def test_domain_worker_expects_two_libraries_but_aggregate_expects_sixteen():
 
     assert expected_library_count("philosophy") == 2
     assert expected_library_count(None) == 16
+
+
+
+def test_run5_source_profile_is_bounded_and_metadata_only():
+    from collections import Counter
+
+    counts = Counter({"CC0": 12, "CC BY 4.0": 8, "Various": 3})
+    report = histogram_report(counts, limit=2)
+    assert report["distinct_values"] == 3
+    assert report["truncated"] is True
+    assert report["top_values"] == [
+        {"value": "CC0", "count": 12},
+        {"value": "CC BY 4.0", "count": 8},
+    ]
+    assert "text" not in report
