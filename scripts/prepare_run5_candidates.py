@@ -58,15 +58,33 @@ ALLOWED_LICENSES = {
 }
 COLLECTIONS = {
     "Open Science": {
-        "mathematics", "logic_epistemology", "physics",
-        "chemistry", "biology_medicine",
+        "mathematics", "physics", "chemistry_materials", "biology",
+        "medicine_health", "statistics_probability", "astronomy_earth_science",
+        "engineering_robotics",
     },
-    # Common Corpus stores formal/relational semantic records under a distinct
-    # open_type; this is the explicitly authorized logic/epistemology adapter.
+    # Common Corpus's semantic-data collection is reserved for logic.
     "Semantic data": {"logic_epistemology"},
-    "Open Culture": {"philosophy"},
-    "Open Source": {"computer_science"},
-    "Open Government": {"law_economics_social_sciences"},
+    "Open Culture": {"philosophy", "humanities"},
+    "Open Source": {"computer_science", "software_engineering"},
+    "Open Government": {"law", "economics", "social_sciences"},
+}
+DOMAIN_SOURCE_PARENT = {
+    "mathematics": "mathematics",
+    "logic_epistemology": "logic_epistemology",
+    "philosophy": "philosophy",
+    "physics": "physics",
+    "chemistry_materials": "chemistry",
+    "biology": "biology_medicine",
+    "medicine_health": "biology_medicine",
+    "computer_science": "computer_science",
+    "software_engineering": "computer_science",
+    "law": "law_economics_social_sciences",
+    "economics": "law_economics_social_sciences",
+    "social_sciences": "law_economics_social_sciences",
+    "statistics_probability": "mathematics",
+    "astronomy_earth_science": "physics",
+    "engineering_robotics": "physics",
+    "humanities": "philosophy",
 }
 LANGUAGES = {"en", "es"}
 LANGUAGE_ALIASES = {"en": "en", "english": "en", "es": "es", "spanish": "es"}
@@ -395,15 +413,15 @@ def domain_kind_name(domain: str, kind: str) -> str:
 
 
 def expected_library_count(domain: str | None) -> int:
-    """A domain worker emits base+HKD; the aggregate emits all 16."""
-    return 2 if domain else 16
+    """A domain worker emits base+HKD; the aggregate emits all 32."""
+    return 2 if domain else 32
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=Path("/tmp/ronin-run5-candidates"))
     parser.add_argument("--max-rows", type=int, default=5_000_000)
-    parser.add_argument("--domain", choices=DOMAIN_PRIORITY, help="Process one domain per runner to scale storage horizontally")
+    parser.add_argument("--domain", choices=DOMAIN_PRIORITY, help="Process one of 16 domains per runner to scale storage horizontally")
     parser.add_argument("--max-input-bytes", type=int, default=6 * 1024**3)
     parser.add_argument("--min-train-bytes", type=int, default=2_560 * 1024**2)
     parser.add_argument("--hkd-fraction", type=float, default=HKD_FRACTION)
@@ -452,7 +470,7 @@ def main() -> int:
     ]
     active_domains = (args.domain,) if args.domain else DOMAIN_PRIORITY
     for domain_name in active_domains:
-        domain_specs = [spec for spec in enabled_specs if spec.get("domain") == domain_name]
+        domain_specs = [spec for spec in enabled_specs if spec.get("domain") == DOMAIN_SOURCE_PARENT[domain_name]]
         if not domain_specs:
             raise SystemExit(f"No hay adaptador habilitado en el manifiesto para {domain_name}.")
         for spec in domain_specs:
@@ -464,9 +482,9 @@ def main() -> int:
             ):
                 raise SystemExit(f"El adaptador {spec.get('id')} no coincide con la autorización auditada.")
     if len({spec["domain"] for spec in enabled_specs}) != 8:
-        raise SystemExit("Se requieren adaptadores Common Corpus autorizados para los ocho dominios.")
+        raise SystemExit("Se requieren las ocho familias fuente auditadas de Common Corpus.")
     source_specs_by_domain = {
-        domain_name: [spec for spec in enabled_specs if spec.get("domain") == domain_name]
+        domain_name: [spec for spec in enabled_specs if spec.get("domain") == DOMAIN_SOURCE_PARENT[domain_name]]
         for domain_name in DOMAIN_PRIORITY
     }
 
@@ -729,7 +747,7 @@ def main() -> int:
             },
         },
         "libraries": libraries,
-        "ready_for_human_review": len(libraries) == 16 and all(
+        "ready_for_human_review": len(libraries) == 32 and all(
             item["meets_minimum_size"] for item in libraries
         ),
         "training_eligible": False,
@@ -764,7 +782,7 @@ def main() -> int:
             file=sys.stderr,
         )
         return 2
-    # The aggregate workflow separately enforces the 16-library size and
+    # The aggregate workflow separately enforces the 32-library size and
     # human-review gates. A worker's successful artifact creation is not
     # equivalent to corpus sufficiency or admission.
     return 0
