@@ -22,8 +22,12 @@ def test_prepare_includes_markdown_html_and_zip_text(tmp_path: Path) -> None:
         archive.writestr("ignored.py", "print('no incluir código')")
 
     manifest = prepare(source, output, "a" * 40)
-    corpus = (output / "train.txt").read_text(encoding="utf-8")
+    documents = [
+        json.loads(line)
+        for line in (output / "documents.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
     saved_manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+    corpus = "\\n".join(document["text"] for document in documents)
 
     assert manifest["document_count"] == 3
     assert "Texto propio de investigación." in corpus
@@ -32,7 +36,10 @@ def test_prepare_includes_markdown_html_and_zip_text(tmp_path: Path) -> None:
     assert "secreto_no_visible" not in corpus
     assert "no incluir código" not in corpus
     assert saved_manifest["source_revision"] == "a" * 40
-    assert saved_manifest["purpose"].startswith("entrenamiento únicamente")
+    assert saved_manifest["purpose"].startswith("recuperación documental RAG")
+    assert saved_manifest["retrieval_only"] is True
+    assert saved_manifest["training_eligible"] is False
+    assert not (output / "train.txt").exists()
 
 
 def test_prepare_deduplicates_exact_text_and_skips_credentials(tmp_path: Path) -> None:
