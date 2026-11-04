@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:16 | [Integración continua #865 (run 41932357513)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932357513) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Expand dataset source audit with ROR, Common Corpus, HPLT and multilingual candidates. Trigger: push; rama: main; intento: 1. | 50aa372e |
 | 2026-11-04 23:15 | [Integración continua #860 (run 41932192263)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932192263) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Fix OpenAlex Git blob hashing for pinned license evidence. Trigger: push; rama: main; intento: 1. | f3fa61a3 |
 | 2026-11-04 23:15 | [Integración continua #853 (run 41931950718)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41931950718) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document first two rights-certified candidate exports. Trigger: push; rama: main; intento: 1. | 3a9a7e78 |
 | 2026-11-04 23:14 | [Integración continua #857 (run 41932162380)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932162380) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Strengthen OpenAlex rights record with pinned official CC0 license evidence. Trigger: push; rama: main; intento: 1. | 8368054b |
