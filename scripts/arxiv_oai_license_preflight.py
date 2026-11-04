@@ -57,10 +57,16 @@ def main() -> int:
         parser.error("max-records must be >=0 and sleep-seconds >=0.5")
 
     token = None
-    rows = []
     pages = 0
+    record_count = 0
+    license_counts = Counter()
+    category_licenses = {}
+    journal_ref_present = 0
+    journal_ref_absent = 0
     errors = []
-    while True:
+    args.records_output.parent.mkdir(parents=True, exist_ok=True)
+    with gzip.open(args.records_output, "wt", encoding="utf-8") as records_stream:
+      while True:
         params = {"verb": "ListRecords", "metadataPrefix": "arXiv"}
         if token:
             params = {"verb": "ListRecords", "resumptionToken": token}
@@ -90,12 +96,14 @@ def main() -> int:
                 for author in authors_node.findall(f"{ARXIV}author")
             ]
             version = identifier.rsplit("v", 1)[-1] if "v" in identifier.rsplit("/", 1)[-1] else "latest"
-            rows.append({
+            license_class = "CC-BY-4.0" if license_uri in CCBY4 else (
+                "CC0-1.0" if license_uri in CC0 else "NOT_REUSE_CLEARED"
+            )
+            row = {
                 "arxiv_id": identifier,
                 "version": version,
                 "license_uri": license_uri,
-                "license_class": "CC-BY-4.0" if license_uri in CCBY4 else
-                                 "CC0-1.0" if license_uri in CC0 else "NOT_REUSE_CLEARED",
+                "license_class": license_class,
                 "title": title,
                 "abstract": abstract,
                 "authors": authors,
@@ -110,10 +118,17 @@ def main() -> int:
                 "metadata_source": "arXiv OAI-PMH metadataPrefix=arXiv",
                 "full_text_download_authorized_by_this_report": False,
                 "training_eligible": False,
-            })
-            if args.max_records and len(rows) >= args.max_records:
+            }
+            records_stream.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
+            record_count += 1
+            license_counts[license_class] += 1
+            journal_ref_present += bool(journal_ref)
+            journal_ref_absent += not bool(journal_ref)
+            for category in categories:
+                category_licenses.setdefault(category, Counter())[license_class] += 1
+            if args.max_records and record_count >= args.max_records:
                 break
-        if args.max_records and len(rows) >= args.max_records:
+        if args.max_records and record_count >= args.max_records:
             break
         token_node = root.find(f".//{OAI}resumptionToken")
         token = (token_node.text or "").strip() if token_node is not None else ""
@@ -121,12 +136,7 @@ def main() -> int:
             break
         time.sleep(args.sleep_seconds)
 
-    licenses = Counter(row["license_class"] for row in rows)
-    category_licenses = {}
-    for row in rows:
-        for category in row["categories"]:
-            bucket = category_licenses.setdefault(category, Counter())
-            bucket[row["license_class"]] += 1
+    licenses = license_counts
     report = {
         "schema_version": 1,
         "dataset_id": "arxiv-oai-license-preflight",
@@ -134,14 +144,14 @@ def main() -> int:
         "endpoint": BASE,
         "metadata_prefix": "arXiv",
         "pages": pages,
-        "records": len(rows),
+        "records": record_count,
         "license_counts": dict(sorted(licenses.items())),
         "category_license_counts": {
             key: dict(sorted(value.items())) for key, value in sorted(category_licenses.items())
         },
         "peer_review_signal_counts": {
-            "journal_ref_present": sum(row["journal_ref_present"] for row in rows),
-            "journal_ref_absent": sum(not row["journal_ref_present"] for row in rows),
+            "journal_ref_present": journal_ref_present,
+            "journal_ref_absent": journal_ref_absent,
         },
         "important_limit": "A journal-ref is a discovery signal, not proof of peer review. Cross-check DOI/publisher metadata before assigning peer-reviewed status.",
         "rights_limit": "Only exact CC BY 4.0 and CC0 metadata identifiers are selected for subsequent full-text candidate retrieval. Default arXiv distribution license and all other licenses are excluded. Per-version metadata is required; figures/third-party content remain separately reviewable.",
@@ -149,14 +159,8 @@ def main() -> int:
         "full_text_downloaded": False,
         "training_eligible": False,
         "errors": dict(Counter(errors)),
-        "records_data": rows,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.records_output.parent.mkdir(parents=True, exist_ok=True)
-    with gzip.open(args.records_output, "wt", encoding="utf-8") as stream:
-        for row in rows:
-            stream.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
-    report.pop("records_data")
     report["records_jsonl_gzip"] = str(args.records_output)
     report["metadata_rights"] = "CC0-1.0 applies to arXiv descriptive metadata including title, authors and abstracts; full-text paper rights remain per-version and separate."
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
