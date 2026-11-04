@@ -330,3 +330,10 @@ Se añade una ruta de inferencia que calcula logits solo en la última posición
 Se elimina `.github/workflows/teacher-candidate-generation.yml`. La ejecución automática posterior a la caché de tutores duplicaba preparación de entorno y carga de Phi-4, generaba propuestas efímeras y solo publicaba metadatos; no tenía consumidor posterior ni incorporaba conocimiento al estudiante. Se conserva `scripts/generate_teacher_data.py` y la auditoría REF como capacidad reutilizable para integrarlas en una futura fase de ingesta con revisión de calidad, procedencia y derechos. No se autoriza entrenamiento con generaciones del tutor por defecto.
 
 La retirada del YAML impide nuevos disparos desde ese workflow, pero no garantiza cancelar ejecuciones ya encoladas o iniciadas. Run #4 observado al documentar el cambio: estado `pending`, conclusión `pendiente` ([run #4](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41876092755)).
+
+
+## Preparación de RUN 5 oficial — preflight fail-fast
+
+Se incorpora `scripts/check_run5_preflight.py` al inicio de `.github/workflows/ronin-official-training-holdout.yml`. Antes de clonar Portfolio, instalar PyTorch/Transformers o descargar MMLU-Pro, el workflow comprueba G-0, las 16 admisiones, tamaño mínimo de 256 MiB por biblioteca, revisiones, hashes, revisiones de calidad y los `train.txt` exactos. Publica `ronin-run5-readiness-preflight` incluso cuando el gate bloquea. La validación oficial posterior `validate_sixteen_libraries.py --require-ready` se mantiene; no se relaja ningún requisito.
+
+Diagnóstico actual al preparar este cambio: G-0 = FAIL; bibliotecas admitidas = 0/16; `train_bytes=0` en el manifiesto; no existe una etapa que materialice `/tmp/ronin-sixteen-libraries` en el workflow actual. Por tanto, RUN 5 de entrenamiento todavía no debe lanzarse: el preflight ahora lo detectará al principio y evitará gastar tiempo de runner en dependencias, Portfolio y evaluación. La generación REF de tutores no se considera sustituto de las bibliotecas ni autoriza su admisión.
