@@ -22,7 +22,7 @@ def build_record(path: Path, repo_root: Path, revision: str) -> dict[str, Any]:
     relative = path.relative_to(repo_root).as_posix()
     text = path.read_text(encoding="utf-8")
     source_sha = hashlib.sha256(path.read_bytes()).hexdigest()
-    document_id = hashlib.sha256(f"{revision}\\0{relative}".encode("utf-8")).hexdigest()
+    document_id = hashlib.sha256(f"{revision}\0{relative}".encode("utf-8")).hexdigest()
     return {
         "document_id": document_id,
         "domain": classify_path(relative),
@@ -60,7 +60,7 @@ def prepare(repo_root: Path, revision: str, output: Path) -> dict[str, Any]:
                 continue
             text = raw.decode("utf-8")
             record = build_record(path, repo_root, revision)
-            encoded = (json.dumps(record, ensure_ascii=False, sort_keys=True) + "\\n").encode("utf-8")
+            encoded = (json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
             stream.write(encoded)
             digest.update(encoded)
             counts[record["domain"]] += 1
@@ -93,7 +93,7 @@ def main() -> None:
     args = parser.parse_args()
     report = prepare(args.repo_root, args.revision, args.output)
     args.report.parent.mkdir(parents=True, exist_ok=True)
-    args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
 
