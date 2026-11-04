@@ -209,20 +209,24 @@ def write_split(
         "sha256": {name: digest.hexdigest() for name, digest in split_hashes.items()},
     }
     dedup_report = {
-        "exact_duplicates_removed_before_selection": 0,
+        "exact_deduplication": "SHA-256 sobre texto normalizado durante la ingesta, global entre dominios",
         "near_duplicates_removed": near_dupes,
-        "dedup_report": dedup_report,
-        "dedup_report_sha256": hashlib.sha256(json.dumps(dedup_report, sort_keys=True).encode("utf-8")).hexdigest(),
-        "split_manifest": split_manifest,
-        "split_manifest_sha256": hashlib.sha256(json.dumps(split_manifest, sort_keys=True).encode("utf-8")).hexdigest(),
-        "sensitive_scan_sha256": hashlib.sha256(json.dumps(scan_reports, sort_keys=True).encode("utf-8")).hexdigest(),
         "unique_text_hashes_written": len(exact_hashes),
-        "method": "SHA-256 exact dedup across candidate intake; SimHash-64 Hamming distance <=3 cross-library pass",
+        "method": "SimHash-64 con distancia de Hamming <=3, aplicado globalmente entre bibliotecas",
+    }
+    selection_report = {
+        "metric": "RONIN-HKD-0.1",
+        "formula": "100*(0.25*domain_relevance+0.30*knowledge_density+0.15*specificity+0.15*information_content+0.15*structure)",
+        "selection": "top fraction por score semántico con IDF calculado sobre el dominio",
+        "library_kind": library_kind,
+        "hkd_fraction": HKD_FRACTION,
+        "source_revision": source_revision,
     }
     metadata = {
         "id": domain_kind_name(domain, library_kind),
         "domain": domain,
         "kind": library_kind,
+        "source_type": "high_knowledge_density_extraction" if library_kind == "hkd" else "general_domain_corpus",
         "status": "candidate_pending_human_review",
         "training_eligible": False,
         "source_dataset": DATASET_ID,
@@ -235,12 +239,19 @@ def write_split(
         "train_sha256": split_hashes["train"].hexdigest(),
         "documents_manifest": str(sidecar_path),
         "documents_manifest_sha256": sidecar_hash.hexdigest(),
-        "near_duplicates_removed": near_dupes,
+        "dedup_report": dedup_report,
+        "dedup_report_sha256": hashlib.sha256(json.dumps(dedup_report, sort_keys=True).encode("utf-8")).hexdigest(),
+        "split_manifest": split_manifest,
+        "split_manifest_sha256": hashlib.sha256(json.dumps(split_manifest, sort_keys=True).encode("utf-8")).hexdigest(),
         "sensitive_scans": scan_reports,
+        "sensitive_scan_sha256": hashlib.sha256(json.dumps(scan_reports, sort_keys=True).encode("utf-8")).hexdigest(),
+        "selection_report": selection_report if library_kind == "hkd" else None,
+        "selection_report_sha256": hashlib.sha256(json.dumps(selection_report, sort_keys=True).encode("utf-8")).hexdigest() if library_kind == "hkd" else None,
         "human_review_file": str(review_path),
         "human_quality_review": None,
         "rights_review": None,
         "quality_review": None,
+        "license_audit": None,
     }
     metadata["manifest_sha256"] = hashlib.sha256(
         json.dumps(metadata, ensure_ascii=False, sort_keys=True).encode("utf-8")
