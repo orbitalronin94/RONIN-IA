@@ -240,7 +240,7 @@ def _partition_documents(
 
 
 def _document_manifest_rows(
-    partitions: dict[str, list[dict[str, str]]],
+    partitions: dict[str, list[dict[str, Any]]],
 ) -> list[dict[str, Any]]:
     """Conserva procedencia y licencia de cada obra sin duplicar su texto."""
     source_by_id = {item["id"]: item for item in SOURCES}
