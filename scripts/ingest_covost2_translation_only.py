@@ -122,7 +122,7 @@ def main() -> int:
         "metadata_snapshot_sha256": digest(readme),
         "rights_candidate_path": "rights-record.candidate.json",
     }
-    (args.out / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    (args.out / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     record = {
         "record_id": "covost2-cc0-translation-only-" + digest(payload)[:16],
         "source_id": "facebookresearch-covost2",
