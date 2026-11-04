@@ -10,7 +10,7 @@ from collections import Counter
 from pathlib import Path
 
 
-def audit(corpus_root: Path, report_path: Path) -> dict:
+def audit(corpus_root: Path, report_path: Path, expected_libraries: int = 16) -> dict:
     db_path = report_path.with_suffix(".sqlite3")
     db_path.parent.mkdir(parents=True, exist_ok=True)
     db_path.unlink(missing_ok=True)
@@ -99,18 +99,21 @@ def audit(corpus_root: Path, report_path: Path) -> dict:
     db_path.unlink(missing_ok=True)
     Path(str(db_path) + "-wal").unlink(missing_ok=True)
     Path(str(db_path) + "-shm").unlink(missing_ok=True)
+    incomplete_inventory = len(libraries) != expected_libraries or docs_seen == 0
     report = {
         "schema_version": 1,
+        "expected_libraries": expected_libraries,
         "libraries_scanned": len(libraries),
+        "incomplete_inventory": incomplete_inventory,
         "documents_scanned": docs_seen,
         "exact_cross_library_duplicate_examples": exact_cross,
         "near_cross_library_duplicate_examples": near_cross,
         "exact_cross_library_duplicates_detected": len(exact_cross),
         "near_cross_library_duplicates_detected": len(near_cross),
         "rejected": dict(rejected),
-        "status": "pass" if not exact_cross and not near_cross and not rejected else "fail",
+        "status": "pass" if not incomplete_inventory and not exact_cross and not near_cross and not rejected else "fail",
         "method": "Exact SHA-256 plus SimHash-64 four-band candidate search, Hamming distance <=3; cross-library only.",
-        "note": "Examples are capped at 100. A detected duplicate blocks admission; it must be removed and the affected manifests/hashes regenerated.",
+        "note": "An empty or incomplete inventory is a failure, never a clean dedup pass. Examples are capped at 100. A detected duplicate blocks admission; it must be removed and the affected manifests/hashes regenerated.",
     }
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return report
