@@ -79,6 +79,15 @@ def _http_json(url: str) -> tuple[dict[str, Any], str | None]:
         return payload, response.headers.get("ETag", "").strip('"') or None
 
 
+def parse_s3_version_prefixes(xml_payload: bytes) -> list[str]:
+    root = ET.fromstring(xml_payload)
+    return sorted({
+        (node.text or "").strip().rstrip("/")
+        for node in root.findall(".//{*}CommonPrefixes/{*}Prefix")
+        if (node.text or "").strip()
+    })
+
+
 def list_s3_version_prefixes(pmcid: str) -> list[str]:
     numeric_id = pmcid.removeprefix("PMC")
     params = urllib.parse.urlencode({
@@ -90,12 +99,7 @@ def list_s3_version_prefixes(pmcid: str) -> list[str]:
     url = f"{S3_BASE}/?{params}"
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(request, timeout=90) as response:
-        root = ET.fromstring(response.read())
-    return sorted({
-        (node.text or "").strip().rstrip("/")
-        for node in root.findall(".//{*}CommonPrefixes/{*}Prefix")
-        if (node.text or "").strip()
-    })
+        return parse_s3_version_prefixes(response.read())
 
 
 def license_family(value: Any) -> str:
