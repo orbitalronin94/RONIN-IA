@@ -121,6 +121,30 @@ def _partition_documents(
     }
 
 
+def _document_manifest_rows(
+    partitions: dict[str, list[dict[str, str]]],
+) -> list[dict[str, Any]]:
+    """Conserva procedencia y licencia de cada obra sin duplicar su texto."""
+    source_by_id = {item["id"]: item for item in SOURCES}
+    rows: list[dict[str, Any]] = []
+    for split, documents in partitions.items():
+        for item in documents:
+            source = source_by_id[item["source"]]
+            rows.append({
+                "record_id": item["sha256"],
+                "source_id": item["source"],
+                "source_path": item["path"],
+                "source_url": source["url"],
+                "source_revision": source["revision"],
+                "license_text": source["license_text"],
+                "license_metadata": source["license_metadata"],
+                "text_sha256": item["sha256"],
+                "character_count": len(item["text"]),
+                "partition": split,
+            })
+    return rows
+
+
 def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
     candidates: list[dict[str, str]] = []
     archive_hashes: dict[str, str] = {}
@@ -191,13 +215,19 @@ def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
         }
         for item in SOURCES
     ]
+    document_rows = _document_manifest_rows(partitions)
+    document_manifest_bytes = (
+        "".join(json.dumps(row, ensure_ascii=False) + "\\n" for row in document_rows)
+    ).encode("utf-8")
+    (output_dir / "documents.jsonl").write_bytes(document_manifest_bytes)
+    output_hashes["documents.jsonl"] = sha256(document_manifest_bytes)
     manifest = {
         "schema_version": 1,
         "dataset_id": "ronin-spanish-public-domain-literature-v1",
         "license": "textos de dominio público; marcado TEI/metadatos CC-BY-4.0",
         "access": "descarga HTTPS pública sin cuenta, token ni clave API",
         "sources": source_manifest,
-        "document_count": len(candidates),
+        "document_count": len(candidates),\n        "document_manifest": "documents.jsonl",
         "document_counts": {key: len(value) for key, value in partitions.items()},
         "source_document_counts": {
             source["id"]: sum(1 for item in candidates if item["source"] == source["id"])
