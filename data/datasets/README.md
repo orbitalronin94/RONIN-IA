@@ -74,7 +74,7 @@ Sources: [arXiv bulk data access](https://info.arxiv.org/help/bulk_data.html), [
 
 ## GitHub dataset source audit (2026-11-05)
 
-The manually reviewed discovery register is `candidates/github-source-audit.json` (34 candidate sources registered; 5 sources/classes excluded or quarantined). It records immutable catalog revisions, source-evidence links, candidate datasets, declared upstream licenses, and explicit quarantine reasons. It is a source-discovery ledger, **not** an admission manifest.
+The manually reviewed discovery register is `candidates/github-source-audit.json` (37 candidate sources registered; 5 sources/classes excluded or quarantined). It records immutable catalog revisions, source-evidence links, candidate datasets, declared upstream licenses, and explicit quarantine reasons. It is a source-discovery ledger, **not** an admission manifest.
 
 Initial audit results:
 
@@ -127,7 +127,7 @@ The ScienceVerse and Hlido candidates are registered in `candidates/github-sourc
 
 ## Additional multilingual and specialist source candidates (2026-11-05)
 
-The source audit now tracks 34 candidate sources. Four additional sources have been added after inspecting their public dataset documentation and recording the scope limitations:
+The source audit now tracks 37 candidate sources. Four additional sources have been added after inspecting their public dataset documentation and recording the scope limitations:
 
 - **VoxPopuli** — text-only ASR transcript candidate across European languages, including Spanish. Its README explicitly separates the VoxPopuli data (CC0) from Europarl-derived LM data (separate terms), and the repository's own LICENSE is CC-BY-NC 4.0. Therefore only exact VoxPopuli ASR transcript manifests may be considered; no audio, speaker identifiers, code, model weights or Europarl text.
 - **DReaM-es-open** — Spanish corpus declared CC-BY-4.0, reported as 9,115,151 tokens and 717,854 sentences. The currently listed 9.23 MB downloadable file is word statistics, not proof of a full-text corpus export. The actual corpus endpoint and payload manifest must be identified before ingestion.
@@ -189,7 +189,7 @@ Three further high-value sources have been registered:
 - **CorpusNÓS / Nos_Corpus_Periodistico** — 159,986 Galician documents and approximately 55.9M tokens. The university record describes CC-BY-4.0 for the corpus structure and processing, while the article texts originate from multiple publishers and agreements. Only individual documents with verifiable reuse permission can pass the rights gate; the repository-level CC-BY label is not enough.
 - **GovEasy** — 438 Spanish administrative procedures, 17 public agencies and 52 territories, six official languages, published as static JSON/CSV/JSON-LD under CC-BY-4.0. Useful for procedural and administrative language, but original government-source facts and publisher-authored/generated summaries must remain separately attributed and labelled.
 
-These additions bring the discovery register to **34 candidate sources**. They are not 34 downloaded or admitted corpora: the audit distinguishes catalogued leads, downloaded candidate artifacts, Level-A rights evidence, quality-passed partitions and admitted training data. Only the last category contributes to training-eligible corpus size.
+These additions bring the discovery register to **37 candidate sources**. They are not 34 downloaded or admitted corpora: the audit distinguishes catalogued leads, downloaded candidate artifacts, Level-A rights evidence, quality-passed partitions and admitted training data. Only the last category contributes to training-eligible corpus size.
 
 
 ## Common Corpus: filtered candidate pipeline
@@ -213,3 +213,14 @@ These structured sources can enrich RONIN's domain libraries and factual groundi
 - `scripts/preflight_parlaibero_dataverse.py` and `.github/workflows/preflight-parlaibero-dataverse.yml` query the public Harvard Dataverse API for the exact v2.0 file manifest of ParlaIbero-ES. This first stage records file IDs, sizes, provider checksums, restriction flags and metadata SHA-256; it does not download the approximately 1 GB payload or invent a payload hash. A separate download/PII review follows only after the file inventory is inspected.
 
 Both workflows are public, credential-free, candidate-only lanes. Their successful execution must be confirmed from Actions artifacts before any row counts or bytes are added to the corpus totals.
+
+
+### Structured knowledge and statistics catalogues
+
+The source register also tracks three non-prose but useful domain sources:
+
+- **Wikidata main structured dump** — CC0 structured entity and relation facts. Candidate scope is the JSON dump after pinning the exact dump date and schema, with property-level filtering, provenance retention and a strict distinction between factual identifiers/relations and copied text literals. Best used for knowledge graph, entity linking and retrieval augmentation rather than raw prose pretraining.
+- **World Bank Open Data** — candidate source for economic, development and demographic indicator metadata/observations. The source is registered as CC-BY-4.0, but each dataset/indicator's own terms and attribution must be checked; no blanket license is inferred from the portal.
+- **Eurostat open statistics** — useful for multilingual statistical metadata and structured observations. The current candidate is marked policy-pending because reuse statements and exceptions vary by resource; do not download into training until the exact Eurostat reuse terms and any third-party restrictions are resolved.
+
+These sources can strengthen factual coverage, statistics, domain routing and tool grounding. Their structured rows are not counted as natural-language text bytes unless a separate, rights-cleared text field is explicitly identified and hashed.
