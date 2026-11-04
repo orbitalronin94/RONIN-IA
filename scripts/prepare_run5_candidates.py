@@ -96,6 +96,7 @@ def write_split(
     domain: str,
     library_kind: str,
     source_revision: str,
+    hkd_fraction: float,
     sample_dir: Path,
     global_seen_simhash: dict[int, dict[int, list[int]]],
 ) -> dict[str, Any]:
@@ -219,7 +220,7 @@ def write_split(
         "formula": "100*(0.25*domain_relevance+0.30*knowledge_density+0.15*specificity+0.15*information_content+0.15*structure)",
         "selection": "top fraction por score semántico con IDF calculado sobre el dominio",
         "library_kind": library_kind,
-        "hkd_fraction": HKD_FRACTION,
+        "hkd_fraction": hkd_fraction,
         "source_revision": source_revision,
     }
     metadata = {
@@ -309,7 +310,7 @@ def main() -> int:
     db.execute("PRAGMA journal_mode=WAL")
     db.execute("PRAGMA synchronous=NORMAL")
     db.execute(
-        "CREATE TABLE docs (id TEXT PRIMARY KEY, domain TEXT, text TEXT, license TEXT, provenance TEXT, bytes INTEGER, score REAL, components TEXT)"
+        "CREATE TABLE docs (id TEXT PRIMARY KEY, domain TEXT, text TEXT, license TEXT, provenance TEXT, bytes INTEGER, score REAL, components TEXT, text_sha TEXT UNIQUE)"
     )
     db.execute("CREATE INDEX docs_domain_score ON docs(domain, score)")
     seen_ids: set[str] = set()
@@ -448,6 +449,7 @@ def main() -> int:
                 domain=domain,
                 library_kind=kind,
                 source_revision=DATASET_REVISION,
+                hkd_fraction=args.hkd_fraction,
                 sample_dir=sample_root,
                 global_seen_simhash=global_seen_simhash,
             )
