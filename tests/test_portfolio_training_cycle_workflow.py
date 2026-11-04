@@ -76,7 +76,7 @@ def test_synthetic_training_workflow_has_guarded_recurring_warmstart():
 
     workflow = Path(".github/workflows/synthetic-training-cycles.yml").read_text(encoding="utf-8")
     assert 'cron: "17 */6 * * *"' in workflow
-    assert "actions/cache/restore@v4" in workflow
-    assert "actions/cache/save@v4" in workflow
+    assert "actions/cache/restore@v5" in workflow
+    assert "actions/cache/save@v5" in workflow
     assert "WARMSTART_REJECTED" in workflow
     assert 'after_domain["overall"]["accuracy"] >= before_domain["overall"]["accuracy"]' in workflow
