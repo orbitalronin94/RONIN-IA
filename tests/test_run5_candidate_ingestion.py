@@ -28,10 +28,15 @@ def test_language_aliases_accept_actual_manifest_labels():
     assert LANGUAGE_ALIASES["spanish"] == "es"
 
 
-def test_domain_collections_are_disjoint_and_explicit():
+def test_domain_collections_cover_eight_domains_with_explicit_alias():
     flattened = [domain for values in COLLECTIONS.values() for domain in values]
-    assert len(flattened) == len(set(flattened))
-    assert len(flattened) == 8
+    assert set(flattened) == {
+        "mathematics", "logic_epistemology", "philosophy", "physics",
+        "chemistry", "biology_medicine", "computer_science",
+        "law_economics_social_sciences",
+    }
+    # Logic/epistemology is represented both in OpenScience and Semantic data.
+    assert flattened.count("logic_epistemology") == 2
 
 
 def test_open_science_domain_classifier_distinguishes_math_and_physics():
