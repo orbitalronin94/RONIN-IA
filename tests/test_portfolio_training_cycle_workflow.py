@@ -3,7 +3,7 @@ from pathlib import Path
 import yaml
 
 
-def test_official_training_workflow_uses_approved_corpora_and_external_holdout():
+def test_official_training_workflow_excludes_portfolio_and_requires_sixteen_libraries():
     workflow_path = (
         Path(__file__).parents[1]
         / ".github"
@@ -13,61 +13,55 @@ def test_official_training_workflow_uses_approved_corpora_and_external_holdout()
     workflow = yaml.load(workflow_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
 
     assert "workflow_dispatch" in workflow["on"]
-    assert "push" in workflow["on"]
+    assert "push" not in workflow["on"]
     assert "pull_request" not in workflow["on"]
-    job = workflow["jobs"]["portfolio-training"]
-    assert job["env"]["PORTFOLIO_REVISION"] == "fffc234fdf3f82b6a90d56ae9b190d1c0de79690"
+    job = workflow["jobs"]["ronin-training"]
     assert job["env"]["MMLU_REVISION"] == "b189ec765aa7ed75c8acfea42df31fdae71f97be"
-    assert job["env"]["STEPS"] == (
-        "${{ github.event_name == 'workflow_dispatch' && inputs.steps || "
-        "(github.event_name == 'push' && '1000' || '100') }}"
-    )
-    assert job["env"]["SEEDS"] == (
-        "${{ github.event_name == 'workflow_dispatch' && inputs.seeds || "
-        "(github.event_name == 'push' && '1337' || '1337') }}"
-    )
-    assert job["env"]["MMLU_LIMIT"] == (
-        "${{ github.event_name == 'workflow_dispatch' && inputs.mmlu_limit || "
-        "(github.event_name == 'push' && '0' || '140') }}"
-    )
+    assert job["env"]["STEPS"] == "${{ inputs.steps || '1000' }}"
+    assert job["env"]["SEEDS"] == "${{ inputs.seeds || '1337' }}"
+    assert job["env"]["MMLU_LIMIT"] == "${{ inputs.mmlu_limit || '0' }}"
+    assert job["env"]["MMLU_BATCH_TOKEN_BUDGET"] == "${{ inputs.mmlu_batch_token_budget || '8192' }}"
     assert job["timeout-minutes"] == "360"
-    assert job["env"]["GITHUB_TOKEN"] == "${{ github.token }}"
 
     steps = job["steps"]
     by_name = {step.get("name"): step for step in steps}
-    portfolio = by_name["Obtener Portfolio en revisión inmutable"]
-    assert portfolio["with"]["ref"] == job["env"]["PORTFOLIO_REVISION"]
-
-    validation = by_name["Verificar autorización, finalidad y hash del corpus"]["run"]
-    assert "autorización expresa" in validation
-    assert "entrenamiento únicamente" in validation
-    assert "corpus_sha256" in validation
+    assert "Obtener Portfolio en revisión inmutable para recuperación" in by_name
+    assert "Preparar Portfolio como índice RAG (nunca como entrenamiento)" in by_name
+    
+    assert "Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial" in by_name
+    gate = by_name["Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial"]["run"]
+    assert "validate_sixteen_libraries.py --require-ready --corpus-root /tmp/ronin-sixteen-libraries --portfolio-root /tmp/ronin-portfolio-rag" in gate
 
     cycle = by_name["Entrenar desde cero y evaluar el test externo completo antes/después"]["run"]
     assert "--text /tmp/ronin-training/combined-train.txt" in cycle
     assert '--revision "$MMLU_REVISION"' in cycle
     assert '--limit "$MMLU_LIMIT"' in cycle
+    assert cycle.count('--batch-token-budget "$MMLU_BATCH_TOKEN_BUDGET"') == 2
     assert "mmlu-inicial.json" in cycle
     assert "mmlu-final.json" in cycle
 
-    mixture = by_name["Construir mezcla de todos los corpus aprobados para entrenamiento"]["run"]
-    assert "--input portfolio=" in mixture
-    assert "--input literatura_pd=" in mixture
-    assert "train.txt" in mixture
+    mixture = by_name["Construir mezcla balanceada de las dieciséis bibliotecas admitidas"]["run"]
+    assert "--input portfolio=" not in mixture
+    assert "--input mathematics_hkd=" in mixture
+    assert "--input logic_epistemology_hkd=" in mixture
+    assert "--input philosophy_hkd=" in mixture
+    assert "--input physics_hkd=" in mixture
+    assert "--input chemistry_hkd=" in mixture
+    assert "--input biology_medicine_hkd=" in mixture
+    assert "--input computer_science_hkd=" in mixture
+    assert "--input law_economics_social_sciences_hkd=" in mixture
+    for library in ["mathematics", "logic_epistemology", "philosophy", "physics", "chemistry", "biology_medicine", "computer_science", "law_economics_social_sciences"]:
+        assert f"--input {library}=" in mixture
     assert "--input phi4_tutor=" not in mixture
 
     assert "Generar propuestas Phi-4 y auditar REF sin publicar salidas" not in by_name
     assert "Adquirir biblioteca primaria de criptografía como corpus auxiliar" not in by_name
 
-    public_corpus = by_name["Verificar fuentes permitidas, licencias declaradas y particiones"]["run"]
-    assert "cligs-textbox" in public_corpus
-    assert "cligs-conssa" in public_corpus
-    assert "eltec-spa" in public_corpus
-    assert "validation" in public_corpus and "test" in public_corpus
-
     summary = by_name["Consolidar métricas, cobertura y procedencia"]["run"]
     assert '"used_for_training": False' in summary
     assert '"training_corpora"' in summary
+    assert '"role": "retrieval_only_fallback"' in summary
+    assert '"used_for_training": False' in summary
     assert '"expected_full_test_items": 12032' in summary
     assert 'initial["selected_items"] == final["selected_items"]' in summary
 

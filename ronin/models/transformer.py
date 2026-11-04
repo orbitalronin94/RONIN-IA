@@ -130,18 +130,39 @@ class RoninLM(nn.Module):
             if isinstance(module, nn.Linear) and module.bias is not None:
                 nn.init.zeros_(module.bias)
 
-    def forward(
-        self, input_ids: torch.Tensor, targets: torch.Tensor | None = None
-    ) -> tuple[torch.Tensor, torch.Tensor | None]:
+    def _forward_hidden(self, input_ids: torch.Tensor) -> torch.Tensor:
         if input_ids.ndim != 2:
             raise ValueError("input_ids debe tener forma [batch, secuencia]")
-        batch, length = input_ids.shape
+        _, length = input_ids.shape
         if length < 1 or length > self.config.context_length:
             raise ValueError("la secuencia debe estar entre 1 y context_length")
         x = self.dropout(self.token_embedding(input_ids))
         for block in self.blocks:
             x = block(x)
-        logits = self.lm_head(self.final_norm(x))
+        return x
+
+    def forward_last_logits(
+        self, input_ids: torch.Tensor, last_positions: torch.Tensor
+    ) -> torch.Tensor:
+        """Calcula logits solo en la última posición válida de cada secuencia."""
+        hidden = self._forward_hidden(input_ids)
+        batch, length, _ = hidden.shape
+        if last_positions.ndim != 1 or last_positions.numel() != batch:
+            raise ValueError("last_positions debe tener forma [batch]")
+        if last_positions.dtype != torch.long:
+            raise ValueError("last_positions debe usar dtype torch.long")
+        if torch.any(last_positions < 0) or torch.any(last_positions >= length):
+            raise ValueError("last_positions contiene una posición fuera de secuencia")
+        rows = torch.arange(batch, device=hidden.device)
+        selected_hidden = hidden[rows, last_positions.to(hidden.device)]
+        return self.lm_head(self.final_norm(selected_hidden))
+
+    def forward(
+        self, input_ids: torch.Tensor, targets: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor | None]:
+        hidden = self._forward_hidden(input_ids)
+        batch, length, _ = hidden.shape
+        logits = self.lm_head(self.final_norm(hidden))
         loss = None
         if targets is not None:
             if targets.shape != input_ids.shape:

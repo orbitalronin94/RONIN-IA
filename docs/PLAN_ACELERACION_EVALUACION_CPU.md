@@ -2,7 +2,7 @@
 
 ## Diagnóstico verificado del código actual
 
-El cuello de botella descrito es plausible, pero la implementación actual no es NumPy puro: `scripts/evaluate_mmlu_pro.py` usa **PyTorch CPU** (`torch.no_grad`, `RoninLM`, `F.log_softmax`). El bucle actual evalúa cada pregunta individualmente: crea un tensor de batch 1 y ejecuta `model(input_ids)` una vez por pregunta. Por tanto, la hipótesis prioritaria a medir es el coste de esos 12.032 forwards secuenciales, no la tokenización.
+La ruta activa usa **PyTorch CPU** (`torch.no_grad`, `RoninLM`, `F.log_softmax`). El evaluador de esta rama ya agrupa preguntas por longitud y presupuesto de tokens padded; el diagnóstico anterior de batch=1 estaba obsoleto. Esta iteración evita además proyectar logits al vocabulario para todas las posiciones del prompt cuando solo se necesita la última posición válida de cada pregunta.
 
 El evaluador ya implementa `select_stratified()`: baraja de forma determinista cada categoría y selecciona en rondas round-robin. Así que no debe sustituirse por un `--limit` que tome las primeras filas. La limitación actual es que la selección equilibrada por categoría no garantiza que la accuracy simple del subset estime sin sesgo la accuracy global si los tamaños de las categorías son diferentes.
 
@@ -39,9 +39,10 @@ La ejecución oficial actualmente en curso no se modifica ni se cancela.
 
 ### P3 — Batching en PyTorch
 
-- El bucle actual usa batch=1. Prototipar batch 4/8/16 con agrupación por longitud (bucketing) para reducir padding.
-- Antes de activar: confirmar que `RoninLM.forward` admite padding/attention mask correctamente. Si no, añadir máscara causal + padding con tests de equivalencia.
-- Comparar batch=1 vs batch>1 sobre el mismo conjunto: logits/scores dentro de tolerancia, mismas predicciones, cobertura idéntica y mejora real de throughput.
+- Mantener bucketing por longitud y el parámetro `--batch-token-budget`; no cambiar selección, orden ni cobertura.
+- Evitar la proyección `lm_head` sobre todas las posiciones: normalizar y proyectar solo el último token válido de cada secuencia.
+- Convertir los scores A-J a listas una vez por lote, evitando llamadas repetidas a `.item()`.
+- Exigir equivalencia entre logits completos y `forward_last_logits`, además de batch unitario frente a batch agrupado.
 - Medir `torch.set_num_threads` y evitar oversubscription en matriz de jobs.
 
 ### P4 — Paralelismo por categoría
@@ -90,3 +91,12 @@ La ejecución oficial actualmente en curso no se modifica ni se cancela.
 - Un muestreo de 100 por categoría no implica por sí mismo ±2,6 puntos porcentuales para el estimador global, especialmente con pesos desiguales y heterogeneidad entre categorías.
 - El speedup de batching, paralelismo y ONNX es hardware/modelo/runtime dependiente. Los rangos propuestos se tratan como hipótesis que deben verificarse, no como promesas.
 - El holdout público completo sigue siendo útil como auditoría externa, pero no es secreto. Para evitar adaptación indirecta, se usa solo al final de una tanda y nunca para selección iterativa.
+
+
+## Implementación de aceleración en PR #53
+
+Se añade `RoninLM.forward_last_logits()`: conserva transformer y pesos, pero aplica RMSNorm y la proyección al vocabulario solo a la última posición válida por pregunta. El evaluador mantiene bucketing y padding derecho causal, y extrae los scores A-J por lote.
+
+El workflow oficial expone `mmlu_batch_token_budget` (8192 por defecto, rango 1–65536) y lo pasa a las evaluaciones inicial y final. La CI de la PR valida paridad; no se declara speedup hasta medirlo en el mismo runner, checkpoint, revisión del dataset y conjunto de preguntas.
+
+Este cambio no modifica protocolo, preguntas, semilla, cobertura ni pesos. El workflow oficial sigue siendo manual y el gate de 16 bibliotecas continúa bloqueando entrenamiento mientras esté en 0/16.
