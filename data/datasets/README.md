@@ -61,3 +61,12 @@ The item-level rights evidence ledger is maintained in `rights_registry/`. Its p
 A source-level license field, public repository, AWS catalogue entry, SPDX identifier, Europeana rights statement, Crossref deposit, or PMC OA article label is evidence to inspect—not independent proof of ownership. Every candidate must carry item/version-level rights evidence and exact payload/metadata hashes. Public-domain claims need territorial and edition-specific evidence. Level A still does not bypass quality, privacy, deduplication, attribution, split-integrity, or global G-0 gates.
 
 Run `python scripts/validate_rights_registry.py` to validate the ledger. An empty ledger is a valid state and means no new level-A admissions.
+
+
+## arXiv scholarly corpus lane
+
+The repository now has a scheduled OAI-PMH metadata preflight for the full arXiv catalogue. It records the exact per-record license URI, categories, DOI, journal-reference signal, version identifier and metadata page hash. It is intentionally metadata-only: no full text is downloaded by this job.
+
+Only exact CC BY 4.0 and CC0 article-version licenses are eligible for a later full-text candidate lane. The default arXiv non-exclusive distribution license is not a reuse license for third parties; arXiv explicitly says it cannot grant reuse rights for those full texts. The submitter's per-version license must be checked in the OAI `arXiv` metadata format. A `journal-ref` or DOI is a discovery signal, not proof that the arXiv version was peer-reviewed; confirm publication status against Crossref and publisher metadata. Exclude third-party figures, tables, supplements and quoted content unless separately cleared.
+
+Sources: [arXiv bulk data access](https://info.arxiv.org/help/bulk_data.html), [arXiv license information](https://info.arxiv.org/help/license/index.html), [OAI-PMH and license metadata procedure](https://info.arxiv.org/help/ir.html).
