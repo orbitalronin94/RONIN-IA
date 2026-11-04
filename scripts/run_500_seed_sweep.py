@@ -46,6 +46,8 @@ def run_sweep(
     checkpoint_dir.mkdir(exist_ok=True)
 
     model_config, default_training = get_profile("tiny")
+    torch.set_num_threads(4)
+    torch.set_num_interop_threads(1)
     tokens = encode_text_file(train_text)
     if tokens.numel() < model_config.context_length + 1:
         raise ValueError("training corpus is too short for the tiny profile")
@@ -57,9 +59,6 @@ def run_sweep(
             "checkpoint_every": steps,
         }
     )
-    torch.set_num_threads(4)
-    torch.set_num_interop_threads(1)
-
     rows: list[dict[str, object]] = []
     best: list[dict[str, object]] = []
     results_path = output / "seed-results.jsonl"
@@ -111,7 +110,7 @@ def run_sweep(
         }
         rows.append(row)
         with results_path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\\n")
+            handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
 
         candidate = {
             "seed": seed,
@@ -185,7 +184,7 @@ def run_sweep(
         ],
     }
     (output / "seed-sweep-summary.json").write_text(
-        json.dumps(summary, ensure_ascii=False, indent=2) + "\\n",
+        json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     shutil.rmtree(temporary, ignore_errors=True)
