@@ -74,7 +74,10 @@ def main() -> int:
     cr_meta_sha = sha(crossref_raw)
 
     datacite_url = DATACITE_BASE + "?" + urllib.parse.urlencode({
-        "page[size]": a.rows, "query": "resourceTypeGeneral:Dataset"
+        "page[size]": a.rows,
+        "resource-type-id": "dataset",
+        "disable-facets": "true",
+        "fields[dois]": ",".join(DATACITE_FIELDS),
     })
     datacite_raw = fetch(datacite_url, max_bytes)
     datacite_obj = json.loads(datacite_raw)
