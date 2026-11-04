@@ -48,10 +48,11 @@ jobs:
     timeout-minutes: 180
     env:
       PYTHONUNBUFFERED: "1"
-      STEPS: ${{ github.event_name == 'workflow_dispatch' && inputs.steps || '100' }}
-      SEEDS: ${{ github.event_name == 'workflow_dispatch' && inputs.seeds || '1337' }}
-      MMLU_LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.mmlu_limit || '0' }}
+      STEPS: ${{ github.event_name == 'workflow_dispatch' && inputs.steps || '500' }}
+      SEEDS: ${{ github.event_name == 'workflow_dispatch' && inputs.seeds || '1337,2027,42' }}
+      MMLU_LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.mmlu_limit || '140' }}
       MMLU_CONTEXT_LENGTH: ${{ github.event_name == 'workflow_dispatch' && inputs.mmlu_context_length || '2048' }}
+      CORPUS_SEED: ${{ github.run_id }}
     steps:
       - name: Obtener código
         uses: actions/checkout@v5
@@ -66,7 +67,7 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: /tmp/ronin-warmstart
-          key: ronin-synthetic-warmstart-${{ github.run_id }}
+          key: ronin-structured-warmstart-${{ github.run_id }}
           restore-keys: |
             ronin-synthetic-warmstart-
 
@@ -76,9 +77,7 @@ jobs:
           python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
           python -m pip install -e . --no-deps
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66"
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
-            python -m pip install "datasets>=3.1"
-          fi
+          python -m pip install "datasets==3.6.0" "huggingface_hub==0.36.0"
 
       - name: Validar parámetros
         run: |
@@ -120,7 +119,8 @@ jobs:
           python scripts/prepare_synthetic_corpus.py \
             --output /tmp/ronin-synthetic \
             --train-sentences 12000 \
-            --validation-sentences 2000
+            --validation-sentences 2000 \
+            --seed "$CORPUS_SEED"
 
       - name: Entrenar, medir antes y después
         run: |
@@ -166,10 +166,11 @@ jobs:
               --profile tiny --device cpu \
               --output "$report_dir/domains-inicial.json"
 
-            if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "$seed" = "${seed_values[0]}" ]; then
+            if [ "$seed" = "${seed_values[0]}" ]; then
               python scripts/evaluate_mmlu_pro.py \
                 --checkpoint "$initial_checkpoint" --profile tiny \
-                --limit "$MMLU_LIMIT" --context-length "$MMLU_CONTEXT_LENGTH" \
+                --split validation --limit "$MMLU_LIMIT" --seed 2026 \
+                --context-length "$MMLU_CONTEXT_LENGTH" \
                 --device cpu --output "$report_dir/mmlu-pro-inicial.json"
             fi
 
@@ -194,10 +195,11 @@ jobs:
               --profile tiny --device cpu \
               --output "$report_dir/domains-final.json"
 
-            if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "$seed" = "${seed_values[0]}" ]; then
+            if [ "$seed" = "${seed_values[0]}" ]; then
               python scripts/evaluate_mmlu_pro.py \
                 --checkpoint "$checkpoint" --profile tiny \
-                --limit "$MMLU_LIMIT" --context-length "$MMLU_CONTEXT_LENGTH" \
+                --split validation --limit "$MMLU_LIMIT" --seed 2026 \
+                --context-length "$MMLU_CONTEXT_LENGTH" \
                 --device cpu --output "$report_dir/mmlu-pro-final.json"
             fi
 
@@ -214,9 +216,17 @@ jobs:
           after_lm = json.loads((folder / "language-model-final.json").read_text())
           before_domain = json.loads((folder / "domains-inicial.json").read_text())
           after_domain = json.loads((folder / "domains-final.json").read_text())
+          mmlu_before = json.loads((folder / "mmlu-pro-inicial.json").read_text())
+          mmlu_after = json.loads((folder / "mmlu-pro-final.json").read_text())
+          assert mmlu_before["dataset_split"] == mmlu_after["dataset_split"] == "validation"
+          assert mmlu_before["dataset_revision"] == mmlu_after["dataset_revision"]
+          assert mmlu_before["dataset_sha256"] == mmlu_after["dataset_sha256"]
+          assert mmlu_before["selected_items"] == mmlu_after["selected_items"]
+          assert mmlu_before["evaluated_items"] == mmlu_after["evaluated_items"]
           improved = (
               after_lm["bits_per_byte"] < before_lm["bits_per_byte"]
               and after_domain["overall"]["accuracy"] >= before_domain["overall"]["accuracy"]
+              and mmlu_after["overall"]["accuracy"] >= mmlu_before["overall"]["accuracy"]
           )
           if improved:
               checkpoint = Path("checkpoints") / f"seed-{primary_seed}" / ("step-" + os.environ["STEPS"].zfill(8) + ".pt")
@@ -233,6 +243,8 @@ jobs:
               "final_bits_per_byte": after_lm["bits_per_byte"],
               "initial_domain_accuracy": before_domain["overall"]["accuracy"],
               "final_domain_accuracy": after_domain["overall"]["accuracy"],
+              "initial_mmlu_validation_accuracy": mmlu_before["overall"]["accuracy"],
+              "final_mmlu_validation_accuracy": mmlu_after["overall"]["accuracy"],
           }, indent=2))
           PY
             fi
@@ -289,18 +301,20 @@ jobs:
           val_path = Path("/tmp/ronin-synthetic/validation.txt")
           dataset = Path("benchmarks/domains_v1.jsonl")
           summary = {
-              "experiment": "ronin-synthetic-warmstart-cycle-v2",
+              "experiment": "ronin-structured-synthetic-curriculum-warmstart-v1",
+              "corpus_seed": int(os.environ["CORPUS_SEED"]),
               "warmstart_promoted": Path("reports/warmstart-accepted.flag").is_file(),
-              "data_kind": "synthetic_artificial_text_not_a_knowledge_corpus",
+              "data_kind": "synthetic_structured_algorithmic_curriculum_not_external_knowledge_corpus",
               "steps_per_seed": int(os.environ["STEPS"]),
               "seeds": [x["seed"] for x in cycles],
               "sha256": {"train": sha(train_path), "validation": sha(val_path), "domain_benchmark": sha(dataset)},
               "cycles": cycles,
-              "external_benchmark": "TIGER-Lab/MMLU-Pro; split test; MIT declarado; solo evaluación y nunca entrenamiento.",
+              "external_benchmark": "TIGER-Lab/MMLU-Pro; split validation para iteración; test reservado para verificación final; solo evaluación y nunca entrenamiento.",
               "limitations": [
-                  "El corpus artificial solo valida que entrenamiento y evaluación funcionan; no mide aprendizaje de conocimiento real.",
+                  "El currículo contiene tareas sintéticas estructuradas y respuestas calculadas; no sustituye a corpus externos ni acredita conocimiento factual amplio.",
                   "El benchmark multidominio tiene 23 preguntas y evalúa selección por siguiente byte, no razonamiento abierto.",
-                  "MMLU-Pro se evalúa en modo zero-shot por siguiente byte; no es puntuación oficial ni comparable con su leaderboard.",
+                  "MMLU-Pro validation se usa como señal de desarrollo; el split test queda reservado y no se usa para seleccionar iteraciones.",
+                  "El protocolo zero-shot por siguiente byte no es puntuación oficial ni comparable con su leaderboard.",
                   "La cobertura MMLU-Pro excluye explícitamente preguntas que superan el contexto; no se truncan.",
                   "No usar estos resultados para comparar la calidad lingüística general ni para decidir arquitectura.",
                   "No se descargan corpus externos de entrenamiento; MMLU-Pro se descarga solo para evaluación y nunca se usa para actualizar pesos.",

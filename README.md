@@ -11,7 +11,7 @@
 
 **RONIN ya tiene modelo propio.** No es únicamente una hoja de ruta ni una colección de especificaciones: el repositorio contiene un Transformer causal decoder-only implementado en PyTorch, con inicialización propia y **9.922.880 parámetros en el perfil `tiny`**. Su arquitectura actual combina RoPE, RMSNorm, SwiGLU y GQA configurable.
 
-También se ha ejecutado un primer ciclo reproducible de entrenamiento desde inicialización aleatoria. En el smoke test de CI (100 pasos, CPU, una semilla y corpus artificial aislado) se observó:
+También se ha ejecutado un primer ciclo reproducible de entrenamiento desde inicialización aleatoria. El resultado siguiente es el baseline histórico del primer smoke test (100 pasos, CPU, una semilla y corpus sintético de control); no corresponde todavía al currículo estructurado que se incorpora en el siguiente ciclo:
 
 | Medición | Antes | Después |
 |---|---:|---:|
@@ -20,11 +20,13 @@ También se ha ejecutado un primer ciclo reproducible de entrenamiento desde ini
 
 La evaluación de lenguaje utilizó 32.768 bytes de validación. El benchmark multidominio contiene 23 preguntas de opción múltiple y se puntúa mediante predicción del siguiente byte.
 
-**Cómo interpretar estos datos:** son evidencia de que el código de entrenamiento y evaluación funciona y de que el modelo aprende regularidades del corpus sintético. No demuestran conocimiento general, razonamiento, dominio de 15 disciplinas ni rendimiento comparable al de otros modelos. El corpus artificial y el benchmark pequeño no permiten esas conclusiones. Hace falta repetir con varias semillas, ampliar las pruebas independientes y evaluar tareas abiertas con criterios explícitos.
+**Cómo interpretar estos datos:** son evidencia de que el circuito de entrenamiento y evaluación funciona; no demuestran conocimiento general ni razonamiento. El siguiente ciclo sustituye el texto sin semántica por un currículo sintético estructurado, con tareas calculables de ocho dominios, corpus nuevo por ejecución y tres semillas. Es una mejora del warm-start técnico, no un corpus factual externo ni una prueba de competencia general.
 
 Los ciclos sintéticos no descargan corpus externos y no eluden el bloqueo G-0 de licencias. Los informes se publican como artefactos de GitHub Actions; los checkpoints no se publican ni se conservan como pesos descargables. Por tanto, **hay un modelo implementado y entrenado experimentalmente, pero todavía no distribuimos un checkpoint entrenado como versión utilizable**.
 
-Workflow principal: [Experimento oficial RONIN desde cero + MMLU-Pro completo](https://github.com/orbitalronin94/RONIN-IA/actions/workflows/ronin-official-training-holdout.yml). Los ciclos sintéticos quedan como smoke técnico, no como entrenamiento oficial.
+Workflow principal: [Experimento oficial RONIN desde cero + MMLU-Pro completo](https://github.com/orbitalronin94/RONIN-IA/actions/workflows/ronin-official-training-holdout.yml). Los ciclos sintéticos estructurados son un warm-start técnico con promoción conservadora; no sustituyen al entrenamiento oficial ni a las bibliotecas documentales autorizadas.
+
+**Ritmo de iteración:** el ciclo programado ejecuta 500 pasos por semilla (tres semillas) y evalúa la semilla principal antes/después en una muestra estratificada de 140 preguntas de `validation` de MMLU-Pro. Un checkpoint solo se conserva si reduce bits por byte en la validación sintética y no empeora ni el benchmark multidominio interno ni MMLU-Pro `validation`. El split `test` queda reservado para la verificación final y nunca guía selección de pesos. La métrica de MMLU-Pro sigue siendo el protocolo propio de RONIN por siguiente byte, no el leaderboard oficial.
 
 ### Ciclos rápidos de aprendizaje abierto
 
@@ -43,14 +45,15 @@ La [PR #39](https://github.com/orbitalronin94/RONIN-IA/pull/39) ya está fusiona
 
 **Portfolio/Papers queda fuera de pretraining y SFT.** Se reserva como índice RAG de experto: RONIN lo consulta cuando detecte incertidumbre, recupera fragmentos con procedencia y cita la fuente. No cuenta entre las bibliotecas ni se añade a los pesos preventivamente. Solo se reconsideraría su entrenamiento si una carencia demostrada no se resuelve con recuperación y un A/B controlado prueba mejora, con aprobación explícita.
 
-El gate previo al próximo entrenamiento exige **16 bibliotecas independientes**: ocho base (matemáticas; lógica/epistemología; filosofía; física; química/materiales; biología/medicina; informática/software; derecho/economía/ciencias sociales) y otras ocho derivadas de fuentes masivas mediante selección de conocimiento de alta densidad, una por cada dominio. Cada una necesita al menos 256 MiB de train normalizado y deduplicado; objetivo 1 GiB. Bytes no sustituyen calidad, cobertura ni diversidad.
+El gate previo al próximo entrenamiento exige **16 bibliotecas independientes**: ocho base (matemáticas; lógica/epistemología; filosofía; física; química/materiales; biología/medicina; informática/software; derecho/economía/ciencias sociales) y otras ocho derivadas de fuentes masivas mediante selección de conocimiento de alta densidad, una por cada dominio. Cada una necesita al menos **2,5 GiB de train** normalizado y deduplicado. RUN 5 limita a 8 GiB el texto candidato por dominio antes de selección base/HKD. Bytes no sustituyen calidad, cobertura, diversidad ni revisión de derechos.
 
 Las ocho adicionales se construirán con `RONIN-HKD-0.1`: relevancia del dominio, densidad de unidades de conocimiento, especificidad, contenido informativo IDF y estructura. La métrica está inspirada en HKS (AAAI 2025), DSIR (NeurIPS 2023) y métricas de diversidad/densidad/homogeneidad (LREC 2020); es un prototipo heurístico propio y debe validarse con revisión humana y ablaciones antes de admitir datos.
 
-**Estado real: 0/16 bibliotecas admitidas para el nuevo ciclo.** Los adaptadores de fuentes HKD están desactivados hasta verificar esquema, revisión inmutable y licencia por documento/archivo. El gate exige corpus reales, hashes, auditoría legal, deduplicación cruzada, calidad, PII/secretos y splits sin fugas. No se inicia el entrenamiento oficial ni se mergea la PR antes de superar el gate.
+**Estado real: 0/16 bibliotecas admitidas para entrenamiento.** Common Corpus y PMC Cloud están habilitados solo para extraer candidatos bajo autorizaciones limitadas; PMC aporta texto JATS CC0/CC BY por versión para biología/medicina y química. La [RUN 5 actual](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41904620741) está en ejecución. Sus salidas seguirán bloqueadas hasta revisión humana, hashes, auditoría legal, deduplicación cruzada, calidad, PII/secretos y splits sin fugas. G-0 global continúa FAIL: no se entrena con estos textos.
 
 - Manifiesto de las 16: [sixteen_libraries.json](data/manifests/sixteen_libraries.json).
 - Adaptadores y allowlists: [knowledge_dense_sources.json](data/manifests/knowledge_dense_sources.json).
+- [Ingesta PMC Cloud por versión y licencia](docs/FUENTE_PMC_OA.md).
 - [Métrica y protocolo HKD](docs/METRICA_DENSIDAD_SEMANTICA.md).
 - [Auditoría de las fuentes masivas](docs/AUDITORIA_OCHO_BIBLIOTECAS_MASIVAS.md).
 - [Programa bibliográfico y glosario técnico](docs/PROGRAMA_BIBLIOGRAFICO_Y_GLOSARIO.md).
@@ -334,4 +337,4 @@ Este inventario no significa que los 21 corpus estén descargados o admitidos: d
 
 El historial cronológico de experimentos, validaciones e ingestas está en el [Libro de runs](docs/RUNS.md). Los workflows enlazan allí desde su resumen y el registrador automático añade cada ejecución al terminar, incluidos fallos y cancelaciones.
 
-El inventario externo contiene ahora 22 fuentes. Se añade una primera ingesta automatizada y versionada de muestras filtradas de Common Corpus (dominio público/CC0/CC BY/MIT), datos CC0 de Wikidata y abstracts CC BY/CC0 de Europe PMC; permanecen fuera del entrenamiento hasta superar la revisión G-0. Consulta [el pipeline de muestras](docs/INGESTA_AMPLIA_DATASETS_EXTERNOS.md#primera-ingesta-automatizada-de-muestras).
+El inventario externo contiene ahora 22 fuentes. La ingesta candidata combina Common Corpus, datos CC0 de Wikidata y texto completo JATS de PMC Cloud bajo CC0/CC BY verificado por versión; los candidatos permanecen fuera del entrenamiento hasta superar la revisión G-0. Consulta [el pipeline de muestras](docs/INGESTA_AMPLIA_DATASETS_EXTERNOS.md#primera-ingesta-automatizada-de-muestras) y [el adaptador PMC](docs/FUENTE_PMC_OA.md).
