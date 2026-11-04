@@ -196,3 +196,49 @@ afirmaciones empíricas y texto cifrado en diferentes fragmentos.
 No penalizar el lenguaje mágico, religioso, alegórico o arcaico como si fuera
 ruido. Tampoco inferir que todo pasaje oscuro oculta un cifrado. La etiqueta
 debe describir la evidencia disponible, no la fascinación del lector.
+
+## Biblioteca de patrones: versión inicial
+
+El conjunto estructurado se genera en CI con
+`scripts/build_obfuscation_cases.py`. Cada registro contiene el fragmento
+opaco, tipo A/B/C/D, etiqueta, mecanismo, explicación/solución cuando existe,
+procedencia, SHA-256, referencias, confianza y partición. La descarga de fuentes
+es anónima y sus originales se publican como artefactos temporales; no se
+almacenan libros ni escaneos en Git.
+
+La primera tanda incluye:
+
+- **A:** el criptograma de *The Gold-Bug* (sustitución monoalfabética) y el de
+  *La Jangada* (Gronsfeld, clave numérica y palabra probable).
+- **C:** las iniciales de la *Hypnerotomachia Poliphili*. El patrón se registra
+  como estructura confirmada; no como prueba concluyente de autoría.
+- **D:** una paráfrasis propia de la afirmación de que la clave biliteral de
+  Gallup demuestra la autoría baconiana de Shakespeare. Se etiqueta como
+  afirmación no sustentada por el análisis de los Friedmans; no se generaliza
+  esa conclusión a cualquier posible código en cualquier edición.
+- **B:** 500 controles sintéticos reproducibles generados con semilla fija.
+  Son secuencias sin carga útil insertada, no ejemplos históricos que se
+  declaren universalmente carentes de significado.
+
+La *Steganographia* de Trithemius (edición de 1608) y *Cryptomenytices* de
+Selenus (1624) se descargan como fuentes primarias de dominio público. La
+primera se cotejará con Reeds (1998) antes de producir pares de entrenamiento
+del Libro III; el escaneo por sí solo no se etiqueta como una muestra ya
+descifrada.
+
+El manuscrito Voynich se mantiene como **no resuelto**. No se incorpora su
+transcripción al corpus de entrenamiento mientras no se verifique una licencia
+compatible: el manuscrito histórico es de dominio público, pero las
+transcripciones modernas consultadas no declaran una licencia abierta clara.
+No se convierte la falta de descifrado en una etiqueta negativa.
+
+El *Codex Seraphinianus* queda fuera: obra contemporánea protegida y no
+necesaria para generar controles negativos, que podemos construir de forma
+reproducible sin redistribuir sus páginas. Los controles sintéticos no deben
+confundirse con glosolalia humana ni con lenguaje natural no comprendido.
+
+**Límite de esta versión:** 500 controles sintéticos no equivalen a 500 casos
+independientes del mundo real. El conjunto no se considera listo para un
+entrenamiento general ni para medir capacidad de descifrado. Los positivos
+históricos son escasos y deben ampliarse con más pares validados, y el test
+debe reservar casos completos por obra y mecanismo.
