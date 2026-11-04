@@ -411,6 +411,9 @@ def main() -> int:
     raw_license_values: Counter[str] = Counter()
     raw_language_values: Counter[str] = Counter()
     collection_values: Counter[str] = Counter()
+    collection_license_values: Counter[str] = Counter()
+    collection_language_values: Counter[str] = Counter()
+    collection_license_language_values: Counter[str] = Counter()
     collection_domain_values: Counter[str] = Counter()
     accepted_code_documents = 0
     scanned_rows = 0
@@ -444,6 +447,13 @@ def main() -> int:
         raw_language_values[raw_language] += 1
         collection = str(row_value(row, "open_type", "open type") or "<missing>").strip()[:120]
         collection_values[collection] += 1
+        # Metadata-only cross-tabs show which collection/license/language
+        # combinations are rejected before semantic routing.
+        collection_license_values[f"{collection} | {raw_license}"] += 1
+        collection_language_values[f"{collection} | {raw_language}"] += 1
+        collection_license_language_values[
+            f"{collection} | {raw_license} | {raw_language}"
+        ] += 1
 
         license_name = normalize_license(row_value(row, "license"))
         if license_name not in ALLOWED_LICENSES:
@@ -623,6 +633,11 @@ def main() -> int:
                 "license_values": histogram_report(raw_license_values),
                 "language_values": histogram_report(raw_language_values),
                 "collection_values": histogram_report(collection_values),
+                "collection_license_values": histogram_report(collection_license_values, limit=100),
+                "collection_language_values": histogram_report(collection_language_values, limit=100),
+                "collection_license_language_values": histogram_report(
+                    collection_license_language_values, limit=150
+                ),
                 "collection_domain_routing": histogram_report(collection_domain_values),
                 "note": "Counts contain metadata labels only; document text and excerpts are never emitted.",
             },
