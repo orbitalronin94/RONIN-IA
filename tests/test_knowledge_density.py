@@ -33,15 +33,16 @@ def test_selector_rejects_sources_without_explicit_legal_approval(tmp_path):
         "license": "UNKNOWN",
         "document_id": "paper-001"
     }) + "\n", encoding="utf-8")
+    audit = tmp_path / "license-audit.json"
+    audit.write_text('{"reviewed": true}', encoding="utf-8")
     spec = tmp_path / "sources.json"
     spec.write_text(json.dumps({
-        "sources": [{
             "id": "fixture",
             "domain": "physics",
             "adapter": "jsonl",
             "path": str(source),
-            "immutable_revision": "fixture-rev",
-            "license_audit": "fixture-audit",
+            "revision": "fixture-rev",
+            "license_audit": str(audit),
             "allowed_licenses": ["CC-BY-4.0"],
             "license_field": "license",
             "text_field": "text",
