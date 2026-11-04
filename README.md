@@ -26,6 +26,13 @@ Los ciclos sintéticos no descargan corpus externos y no eluden el bloqueo G-0 d
 
 Workflow principal: [Experimento oficial RONIN desde cero + MMLU-Pro completo](https://github.com/orbitalronin94/RONIN-IA/actions/workflows/ronin-official-training-holdout.yml). Los ciclos sintéticos quedan como smoke técnico, no como entrenamiento oficial.
 
+### Ciclos rápidos de aprendizaje abierto
+
+Se incorpora un segundo carril experimental: [Ciclos rápidos RONIN — corpus abierto](.github/workflows/rapid-open-training-cycles.yml). Ejecuta hasta tres iteraciones cortas encadenadas, recupera el último checkpoint aceptado y solo promueve uno nuevo si mejora la accuracy de MMLU-Pro validation sin empeorar BPB. El test final de MMLU-Pro queda fuera del bucle y reservado para la evaluación de release.
+
+**Referencia experimental del modelo:** `ronin-open-warmstart` (caché de GitHub Actions; último checkpoint aceptado, no release público). Los informes de cada ejecución incluyen hashes, métricas y decisión de promoción. El workflow está automatizado cada seis horas, pero no descargará ni entrenará corpus documentales mientras G-0 no esté en PASS. Por tanto, hasta que exista aprobación legal humana, el carril documental permanecerá bloqueado y no se afirmará que ha comenzado ese entrenamiento.
+
+
 
 
 ## Estado de datos y experimento oficial (4 de noviembre de 2026)
