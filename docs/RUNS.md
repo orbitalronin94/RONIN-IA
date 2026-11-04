@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:10 | [Integración continua #840 (run 41931593196)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41931593196) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Run OpenAlex metadata adapter on relevant main updates. Trigger: push; rama: main; intento: 1. | 1ce61126 |
 | 2026-11-04 23:10 | [Integración continua #836 (run 41931536941)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41931536941) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add scheduled/manual OpenAlex metadata candidate workflow. Trigger: push; rama: main; intento: 1. | 863b6950 |
 | 2026-11-04 23:10 | [Integración continua #835 (run 41931530999)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41931530999) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add scheduled/manual CoVoST candidate workflow. Trigger: push; rama: main; intento: 1. | 8d8fbd8d |
 | 2026-11-04 23:08 | [Integración continua #831 (run 41931120442)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41931120442) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Register CoVoST CC0 translations and OpenAlex CC0 metadata candidates. Trigger: push; rama: main; intento: 1. | fac908b1 |
