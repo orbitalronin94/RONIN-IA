@@ -57,7 +57,7 @@ def main() -> int:
                     raise ValueError(f"{filename}: cannot read TSV")
                 reader = csv.DictReader(io.TextIOWrapper(stream, encoding="utf-8", newline=""), delimiter="\t")
                 if not reader.fieldnames or not {"sentence", "translation"}.issubset(reader.fieldnames):
-                    raise ValueError(f"{filename}: missing sentence/translation fields")
+                    raise ValueError(f"{filename}: missing sentence/translation fields; headers={reader.fieldnames!r}")
                 pair_count = 0
                 for source_row, row in enumerate(reader, start=1):
                     source = (row.get("sentence") or "").strip()
