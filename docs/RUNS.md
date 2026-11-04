@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:03 | [Integración continua #816 (run 41930341163)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41930341163) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add CI validation for GitHub dataset source audit. Trigger: push; rama: main; intento: 1. | 190fac44 |
 | 2026-11-04 23:02 | [Integración continua #813 (run 41930274744)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41930274744) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add manually audited GitHub dataset source register. Trigger: push; rama: main; intento: 1. | cd01d343 |
 | 2026-11-04 23:01 | [Integración continua #815 (run 41930334033)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41930334033) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add validator for GitHub dataset source audit. Trigger: push; rama: main; intento: 1. | e3972b65 |
 | 2026-11-04 23:01 | [Integración continua #814 (run 41930301353)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41930301353) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document manually audited GitHub dataset sources. Trigger: push; rama: main; intento: 1. | 6c38f7de |
