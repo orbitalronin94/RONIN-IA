@@ -176,3 +176,38 @@ def test_pmc_authorization_and_source_manifest_are_exact(tmp_path: Path):
     authorization = load_authorization(audit_path)
     spec = validate_source_spec(manifest_path, "biology_medicine", authorization)
     assert spec["enabled"] is True
+
+
+
+def test_pmc_s3_url_is_converted_to_official_https_bucket():
+    from scripts.pmc_oa_source import normalize_s3_url
+
+    assert normalize_s3_url(
+        "s3://pmc-oa-opendata/PMC123.1/PMC123.1.xml?md5=abc"
+    ) == "https://pmc-oa-opendata.s3.amazonaws.com/PMC123.1/PMC123.1.xml?md5=abc"
+    try:
+        normalize_s3_url("https://example.invalid/article.xml")
+    except ValueError as exc:
+        assert "official public S3 bucket" in str(exc)
+    else:
+        raise AssertionError("external XML hosts must be rejected")
+
+
+def test_pmc_europe_pmc_retraction_flag_overrides_cloud_metadata(monkeypatch):
+    from scripts import pmc_oa_source
+
+    monkeypatch.setattr(
+        pmc_oa_source,
+        "list_s3_version_prefixes",
+        lambda pmcid: (_ for _ in ()).throw(AssertionError("must not list S3 for retracted record")),
+    )
+    records, stats = pmc_oa_source.fetch_article_versions(
+        {
+            "pmcid": "PMC12345",
+            "title": "Retracted Article: example",
+            "pubType": ["retracted publication"],
+        },
+        "biology_medicine",
+    )
+    assert records == []
+    assert stats["retracted_by_europe_pmc"] == 1
