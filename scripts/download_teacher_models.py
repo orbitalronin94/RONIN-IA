@@ -68,6 +68,9 @@ def download_model(name: str, destination: Path) -> Path:
         local_dir=model_dir,
         allow_patterns=ALLOW_PATTERNS,
     )
+    missing_weights = [name for name in weight_files if not (model_dir / name).is_file()]
+    if missing_weights:
+        raise RuntimeError(f"{repo_id}: faltan pesos safetensors tras la descarga: {missing_weights}")
     files = {}
     for path in sorted(model_dir.rglob("*")):
         if path.is_file() and path.name != "ronin-teacher-manifest.json":
