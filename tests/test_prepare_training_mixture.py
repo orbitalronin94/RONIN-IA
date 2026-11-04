@@ -1,3 +1,4 @@
+import argparse
 import hashlib
 import json
 
@@ -31,7 +32,7 @@ def test_training_mixture_is_deterministic_and_tracks_each_source(tmp_path):
 
 
 def test_training_mixture_rejects_holdout_paths(tmp_path):
-    with pytest.raises(Exception, match="holdout"):
+    with pytest.raises(argparse.ArgumentTypeError, match="holdout"):
         parse_input(f"leak={tmp_path / 'test.txt'}")
     with pytest.raises(Exception, match="holdout"):
         parse_input(f"leak={tmp_path / 'validation' / 'train.txt'}")
