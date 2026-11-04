@@ -110,9 +110,9 @@ La clave es una invención literaria de Doyle, no un criptograma histórico
 descubierto en un manuscrito anterior.
 
 Edición digital de acceso abierto:
-- Project Gutenberg Australia, texto de *The Return of Sherlock Holmes*,
-  con “The Adventure of the Dancing Men” y su publicación original en 1903:
-  https://gutenberg.net.au/ebooks/c00016.html
+- Project Gutenberg, texto plano de *The Return of Sherlock Holmes* (ebook 108),
+  que incluye “The Adventure of the Dancing Men”:
+  https://www.gutenberg.org/cache/epub/108/pg108.txt
 
 ### 6. Julio Verne — *La Jangada* (1881)
 
