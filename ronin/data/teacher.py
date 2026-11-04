@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any
 
 
-
 def verify_teacher_manifest(root: str | Path, manifest: dict) -> None:
     """Verifica licencia, revisión, formato y SHA-256 de todos los archivos locales."""
     directory = Path(root).expanduser().resolve()
