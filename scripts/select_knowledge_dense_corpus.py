@@ -144,6 +144,16 @@ def get_field(row: dict[str, Any], key: str | None, default: Any = None) -> Any:
     return value
 
 
+def passes_filters(row: dict[str, Any], filters: dict[str, Any]) -> bool:
+    for field, expected in filters.get("equals", {}).items():
+        if get_field(row, field) != expected:
+            return False
+    for field, allowed in filters.get("in", {}).items():
+        if get_field(row, field) not in allowed:
+            return False
+    return True
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-spec", type=Path, required=True)
@@ -186,6 +196,9 @@ def main() -> None:
         for index, row in enumerate(source_rows(spec)):
             if accepted >= args.max_documents or index >= args.max_source_rows:
                 break
+            if not passes_filters(row, spec.get("filters", {})):
+                rejected["domain_or_language_filter"] += 1
+                continue
             license_value = get_field(row, spec.get("license_field"), spec.get("fixed_license"))
             if license_value not in allowed:
                 rejected["license_not_allowlisted"] += 1
