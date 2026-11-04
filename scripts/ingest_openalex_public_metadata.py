@@ -106,7 +106,7 @@ def main() -> int:
         "payload_path": output.name,
         "payload_bytes": len(payload),
         "payload_sha256": sha(payload),
-    }, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     record = {
         "record_id": "openalex-works-metadata-" + sha(payload)[:16],
         "source_id": "openalex-public-snapshot",
