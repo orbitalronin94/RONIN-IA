@@ -602,6 +602,7 @@ def main() -> int:
             "accepted_document_bytes": accepted_bytes,
             "scanned_text_bytes": scanned_text_bytes,
             "accepted_documents_by_domain": domain_counts,
+            "accepted_code_documents": accepted_code_documents,
             "rejected": dict(rejected),
             "source_profile": {
                 "license_values": histogram_report(raw_license_values),
