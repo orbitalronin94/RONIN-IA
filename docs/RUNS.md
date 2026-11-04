@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 22:50 | [Integración continua #799 (run 41928697185)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41928697185) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: validate level-A rights evidence registry. Trigger: push; rama: main; intento: 1. | 1cf2d636 |
 | 2026-11-04 22:50 | [Integración continua #798 (run 41928658530)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41928658530) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: add deterministic level-A rights registry validator. Trigger: push; rama: main; intento: 1. | 8e4de950 |
 | 2026-11-04 22:49 | [Integración continua #796 (run 41928621400)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41928621400) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: establish conservative level-A rights registry. Trigger: push; rama: main; intento: 1. | 83ade1a9 |
 | 2026-11-04 22:49 | [Integración continua #795 (run 41928616374)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41928616374) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: establish conservative level-A rights registry. Trigger: push; rama: main; intento: 1. | 4c4664f1 |
