@@ -13,6 +13,10 @@ def test_construye_pares_y_controles_con_procedencia_y_particiones(tmp_path):
                     "poe-gold-bug",
                     "verne-la-jangada-fr",
                     "hypnerotomachia-poliphili-1499",
+                "trithemius-steganographia-1608",
+                "selenus-cryptomenytices-1624",
+                    "trithemius-steganographia-1608",
+                    "selenus-cryptomenytices-1624",
                 ],
                 start=1,
             )
