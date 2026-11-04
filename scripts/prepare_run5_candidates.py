@@ -16,7 +16,7 @@ import sys
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 from scripts.select_knowledge_dense_corpus import (
     DOMAIN_TERMS,
@@ -135,7 +135,7 @@ def choose_domain(
 
 
 def write_split(
-    rows: list[tuple[str, str, str, str, float, dict[str, float]]],
+    rows: Iterable[tuple[Any, ...]],
     output_dir: Path,
     *,
     domain: str,
@@ -144,6 +144,8 @@ def write_split(
     hkd_fraction: float,
     sample_dir: Path,
     global_seen_simhash: dict[int, dict[int, list[int]]],
+    source_dataset: str = DATASET_ID,
+    license_policy: list[str] | None = None,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     sample_dir.mkdir(parents=True, exist_ok=True)
@@ -160,7 +162,18 @@ def write_split(
     exact_hashes: set[str] = set()
     paths = {name: path.open("wb") for name, path in split_paths.items()}
     try:
-        for doc_id, text, license_name, provenance, score, components in rows:
+        for row in rows:
+            document_metadata: dict[str, Any] = {}
+            if len(row) == 8:
+                (
+                    doc_id, text, license_name, provenance, score, components,
+                    document_revision, document_metadata,
+                ) = row
+            elif len(row) == 7:
+                doc_id, text, license_name, provenance, score, components, document_revision = row
+            else:
+                doc_id, text, license_name, provenance, score, components = row
+                document_revision = source_revision
             signature = simhash64(text)
             duplicate = False
             for band in range(4):
@@ -193,14 +206,15 @@ def write_split(
                 "document_id": doc_id,
                 "text_sha256": text_sha256,
                 "simhash64": simhash64(text),
-                "source_dataset": DATASET_ID,
-                "source_revision": source_revision,
+                "source_dataset": source_dataset,
+                "source_revision": document_revision,
                 "source_identifier": provenance,
                 "license": license_name,
                 "partition": split,
                 "semantic_density": round(score, 6),
                 "component_scores": json.loads(components) if isinstance(components, str) else components,
             }
+            sidecar.update(document_metadata)
             encoded = (json.dumps(sidecar, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
             sidecar_handle.write(encoded)
             sidecar_hash.update(encoded)
@@ -276,9 +290,9 @@ def write_split(
         "source_type": "high_knowledge_density_extraction" if library_kind == "hkd" else "general_domain_corpus",
         "status": "candidate_pending_human_review",
         "training_eligible": False,
-        "source_dataset": DATASET_ID,
+        "source_dataset": source_dataset,
         "source_revision": source_revision,
-        "license_policy": sorted(ALLOWED_LICENSES),
+        "license_policy": sorted(license_policy or ALLOWED_LICENSES),
         "document_count": dict(split_counts),
         "train_bytes": split_bytes["train"],
         "split_bytes": dict(split_bytes),
@@ -359,7 +373,7 @@ def main() -> int:
     source_manifest = json.loads(args.source_manifest.read_text(encoding="utf-8"))
     enabled_specs = [
         spec for spec in source_manifest.get("sources", [])
-        if spec.get("enabled") is True
+        if spec.get("enabled") is True and spec.get("dataset_id") == DATASET_ID
     ]
     active_domains = (args.domain,) if args.domain else DOMAIN_PRIORITY
     for domain_name in active_domains:
