@@ -14,6 +14,7 @@ def validate(
     path: Path,
     require_ready: bool = False,
     corpus_root: Path | None = None,
+    portfolio_root: Path | None = None,
 ) -> list[str]:
     data = json.loads(path.read_text(encoding="utf-8"))
     policy = data["policy"]
@@ -82,6 +83,31 @@ def validate(
         errors.append("Portfolio must not count as one of the sixteen libraries")
     if portfolio.get("role") != "retrieval_only_fallback":
         errors.append("Portfolio role must be retrieval_only_fallback")
+    if require_ready:
+        if portfolio_root is None:
+            errors.append("Portfolio RAG --portfolio-root is required")
+        else:
+            rag_index = portfolio_root / "portfolio.sqlite3"
+            rag_manifest_path = portfolio_root / "rag-manifest.json"
+            if not rag_index.is_file() or not rag_manifest_path.is_file():
+                errors.append("Portfolio RAG index or rag-manifest.json is missing")
+            else:
+                rag_manifest = json.loads(rag_manifest_path.read_text(encoding="utf-8"))
+                actual_index_hash = hashlib.sha256(rag_index.read_bytes()).hexdigest()
+                if rag_manifest.get("role") != "retrieval_only_fallback":
+                    errors.append("Portfolio RAG manifest has the wrong role")
+                if rag_manifest.get("retrieval_only") is not True or rag_manifest.get("training_eligible") is not False:
+                    errors.append("Portfolio must be retrieval-only and excluded from training")
+                expected_revision = portfolio.get("source_revision")
+                if expected_revision and rag_manifest.get("source_revision") != expected_revision:
+                    errors.append("Portfolio RAG source revision does not match the pinned revision")
+                if rag_manifest.get("index_sha256") != actual_index_hash:
+                    errors.append("Portfolio RAG index SHA-256 mismatch")
+                for field in ("source_document_manifest_sha256", "documents_jsonl_sha256"):
+                    if not re.fullmatch(r"[0-9a-f]{64}", str(rag_manifest.get(field, ""))):
+                        errors.append(f"Portfolio RAG missing or invalid {field}")
+                if int(rag_manifest.get("document_count", 0)) < 1 or int(rag_manifest.get("chunk_count", 0)) < 1:
+                    errors.append("Portfolio RAG index contains no documents or chunks")
 
     if require_ready and len(sizes) == required and max(sizes) > 0:
         ratio = min(sizes) / max(sizes)
@@ -100,9 +126,10 @@ def main() -> None:
     )
     parser.add_argument("--require-ready", action="store_true")
     parser.add_argument("--corpus-root", type=Path, default=None)
+    parser.add_argument("--portfolio-root", type=Path, default=None)
     args = parser.parse_args()
 
-    errors = validate(args.manifest, args.require_ready, args.corpus_root)
+    errors = validate(args.manifest, args.require_ready, args.corpus_root, args.portfolio_root)
     if errors:
         for error in errors:
             print(f"FAIL: {error}")
