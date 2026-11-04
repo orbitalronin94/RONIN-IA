@@ -14,13 +14,15 @@ import re
 import time
 import urllib.parse
 import urllib.request
+import xml.etree.ElementTree as ET
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 ENDPOINT = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
-USER_AGENT = "RONIN-IA-PMC-OA-preflight/1.0 (metadata-only)"
+S3_BASE = "https://pmc-oa-opendata.s3.amazonaws.com"
+USER_AGENT = "RONIN-IA-PMC-OA-preflight/1.1 (metadata-only)"
 LICENSE_ALLOWLIST = {
     "CC0", "CC0 1.0", "CC BY", "CC BY 2.0", "CC BY 3.0", "CC BY 4.0",
 }
@@ -67,7 +69,72 @@ def request_search(query: str, page_size: int) -> dict[str, Any]:
         return json.loads(response.read().decode("utf-8"))
 
 
-def preflight_domain(domain: str, sample_limit: int) -> dict[str, Any]:
+def _http_json(url: str) -> tuple[dict[str, Any], str | None]:
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
+    )
+    with urllib.request.urlopen(request, timeout=90) as response:
+        payload = json.loads(response.read().decode("utf-8"))
+        return payload, response.headers.get("ETag", "").strip('"') or None
+
+
+def list_s3_version_prefixes(pmcid: str) -> list[str]:
+    numeric_id = pmcid.removeprefix("PMC")
+    params = urllib.parse.urlencode({
+        "list-type": "2",
+        "prefix": f"PMC{numeric_id}.",
+        "delimiter": "/",
+        "max-keys": "100",
+    })
+    url = f"{S3_BASE}/?{params}"
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(request, timeout=90) as response:
+        root = ET.fromstring(response.read())
+    return sorted({
+        (node.text or "").strip().rstrip("/")
+        for node in root.findall(".//{*}CommonPrefixes/{*}Prefix")
+        if (node.text or "").strip()
+    })
+
+
+def license_family(value: Any) -> str:
+    normalized = normalize_license(value)
+    if normalized.startswith("CC BY"):
+        return "CC BY"
+    if normalized.startswith("CC0"):
+        return "CC0"
+    return normalized
+
+
+def verify_s3_metadata(pmcid: str) -> list[dict[str, Any]]:
+    verified = []
+    for prefix in list_s3_version_prefixes(pmcid):
+        metadata_url = f"{S3_BASE}/metadata/{prefix}.json"
+        metadata, etag = _http_json(metadata_url)
+        license_code = str(metadata.get("license_code") or "").strip()
+        verified.append({
+            "version_prefix": prefix,
+            "metadata_etag": etag,
+            "metadata_sha256": hashlib.sha256(
+                json.dumps(metadata, sort_keys=True).encode("utf-8")
+            ).hexdigest(),
+            "license_code": license_code,
+            "license_allowlisted": approved_license(license_code),
+            "is_pmc_openaccess": metadata.get("is_pmc_openaccess"),
+            "is_manuscript": metadata.get("is_manuscript"),
+            "is_historical_ocr": metadata.get("is_historical_ocr"),
+            "is_retracted": metadata.get("is_retracted"),
+            "xml_url_present": bool(metadata.get("xml_url")),
+            "text_url_present": bool(metadata.get("text_url")),
+            "license_family": license_family(license_code),
+        })
+    return verified
+
+
+def preflight_domain(
+    domain: str, sample_limit: int, s3_verify_limit: int = 20
+) -> dict[str, Any]:
     query = DOMAIN_QUERIES[domain]
     response = request_search(query, min(sample_limit, 1000))
     result_list = response.get("resultList", {})
@@ -99,6 +166,25 @@ def preflight_domain(domain: str, sample_limit: int) -> dict[str, Any]:
             "source_url": f"https://europepmc.org/articles/{pmcid}",
         })
 
+    s3_verified: list[dict[str, Any]] = []
+    for item in accepted[:s3_verify_limit]:
+        try:
+            versions = verify_s3_metadata(item["pmcid"])
+            s3_verified.append({
+                "pmcid": item["pmcid"],
+                "europe_pmc_license": item["license"],
+                "europe_pmc_license_family": license_family(item["license"]),
+                "versions": versions,
+                "version_count": len(versions),
+                "allowlisted_version_count": sum(v["license_allowlisted"] for v in versions),
+            })
+        except Exception as exc:  # report source drift instead of hiding it
+            s3_verified.append({
+                "pmcid": item["pmcid"],
+                "metadata_verification_error": f"{type(exc).__name__}: {exc}",
+            })
+        time.sleep(0.05)
+
     # Metadata only: do not include abstracts, body text, XML or article files.
     payload = {
         "schema_version": 1,
@@ -114,8 +200,16 @@ def preflight_domain(domain: str, sample_limit: int) -> dict[str, Any]:
         "sampled_records_without_pmcid": without_pmcid,
         "sampled_license_counts": dict(license_counts),
         "sample": accepted,
+        "s3_metadata_verification_limit": s3_verify_limit,
+        "s3_metadata_verified_records": s3_verified,
+        "s3_metadata_verified_versions": sum(
+            item.get("version_count", 0) for item in s3_verified
+        ),
+        "s3_metadata_verification_errors": sum(
+            "metadata_verification_error" in item for item in s3_verified
+        ),
         "retrieved_at_utc": datetime.now(UTC).isoformat(),
-        "retrieval_mode": "Europe PMC REST metadata only; no full-text requests",
+        "retrieval_mode": "Europe PMC + PMC Cloud per-version JSON metadata only; no full-text requests",
         "license_allowlist": sorted(LICENSE_ALLOWLIST),
         "training_eligible": False,
         "candidate_text_downloads_authorized": False,
@@ -135,14 +229,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=Path("reports/pmc-oa-preflight"))
     parser.add_argument("--sample-limit", type=int, default=500)
+    parser.add_argument("--s3-verify-limit", type=int, default=20)
     args = parser.parse_args()
     if not 1 <= args.sample_limit <= 1000:
         parser.error("--sample-limit must be between 1 and 1000")
+    if not 0 <= args.s3_verify_limit <= 100:
+        parser.error("--s3-verify-limit must be between 0 and 100")
     args.output.mkdir(parents=True, exist_ok=True)
 
     summaries = []
     for domain in DOMAIN_QUERIES:
-        report = preflight_domain(domain, args.sample_limit)
+        report = preflight_domain(domain, args.sample_limit, args.s3_verify_limit)
         encoded = (json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8")
         report_path = args.output / f"{domain}.json"
         report_path.write_bytes(encoded)
