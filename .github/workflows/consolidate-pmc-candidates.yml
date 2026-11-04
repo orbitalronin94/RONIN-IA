@@ -4,6 +4,12 @@ on:
   workflow_run:
     workflows: ["Expand scientific datasets — PMC OA CC0/CC-BY candidates"]
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Completed PMC candidate workflow run ID to consolidate"
+        required: true
+        type: string
 
 permissions:
   actions: read
@@ -15,9 +21,11 @@ concurrency:
 
 jobs:
   consolidate:
-    if: \${{ github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      SOURCE_RUN_ID: ${{ github.event.workflow_run.id || github.event.inputs.source_run_id }}
     steps:
       - name: Checkout main
         uses: actions/checkout@v5
@@ -25,47 +33,63 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      - name: Validate source run ID
+        run: |
+          case "$SOURCE_RUN_ID" in
+            ''|*[!0-9]*)
+              echo "Invalid PMC source run ID: $SOURCE_RUN_ID"
+              exit 1
+              ;;
+          esac
+
       - name: Download completed domain shards
+        continue-on-error: true
         uses: actions/download-artifact@v6
         with:
           pattern: ronin-pmc-oa-*-candidates
           path: incoming
           merge-multiple: false
-          run-id: \${{ github.event.workflow_run.id }}
-          github-token: \${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id || github.event.inputs.source_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Aggregate, verify and count globally unique documents
-        env:
-          SOURCE_RUN_ID: \${{ github.event.workflow_run.id }}
+        if: always()
         run: |
-          mkdir -p "data/datasets/candidates/pmc-oa-expansion-\${SOURCE_RUN_ID}" consolidated
-          cp -a incoming/. consolidated/shards/ 2>/dev/null || true
+          mkdir -p incoming "data/datasets/candidates/pmc-oa-expansion-$SOURCE_RUN_ID" "consolidated/shards/$SOURCE_RUN_ID"
+          if [ -d incoming ]; then
+            cp -a incoming/. "consolidated/shards/$SOURCE_RUN_ID/" 2>/dev/null || true
+          fi
           python scripts/aggregate_pmc_candidate_shards.py \
             --input-root incoming \
-            --output-root "data/datasets/candidates/pmc-oa-expansion-\${SOURCE_RUN_ID}" \
+            --output-root "data/datasets/candidates/pmc-oa-expansion-$SOURCE_RUN_ID" \
             --run-id "$SOURCE_RUN_ID" \
             --minimum 3040
 
-      - name: Publish complete candidate package
+      - name: Publish complete or partial candidate package
+        if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: ronin-pmc-oa-multidomain-\${{ github.event.workflow_run.id }}
+          name: ronin-pmc-oa-multidomain-${{ github.event.workflow_run.id || github.event.inputs.source_run_id }}
           path: |
             incoming/
-            data/datasets/candidates/pmc-oa-expansion-\${{ github.event.workflow_run.id }}/manifest.json
+            data/datasets/candidates/pmc-oa-expansion-${{ github.event.workflow_run.id || github.event.inputs.source_run_id }}/manifest.json
           if-no-files-found: warn
           compression-level: 1
           retention-days: 90
 
       - name: Commit dataset index to main
-        env:
-          SOURCE_RUN_ID: \${{ github.event.workflow_run.id }}
+        if: always()
         run: |
+          manifest="data/datasets/candidates/pmc-oa-expansion-$SOURCE_RUN_ID/manifest.json"
+          if [ ! -f "$manifest" ]; then
+            echo "No aggregate manifest was produced; partial artifacts remain published."
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "data/datasets/candidates/pmc-oa-expansion-\${SOURCE_RUN_ID}/manifest.json"
+          git add "$manifest"
           if git diff --cached --quiet; then
-            echo "No candidate manifest to commit."
+            echo "No candidate manifest changes to commit."
           else
             git commit -m "data: index PMC multidomain candidate expansion"
             git pull --rebase origin main
