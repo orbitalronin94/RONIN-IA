@@ -15,6 +15,7 @@ import math
 import re
 import sqlite3
 import sys
+import tempfile
 from collections import Counter
 from pathlib import Path
 from typing import Any, Iterable, Iterator
@@ -150,9 +151,14 @@ def main() -> None:
     sources = [s for s in spec_doc["sources"] if s["domain"] == args.domain]
     if not sources:
         raise SystemExit(f"No source adapters configured for {args.domain}")
-    db = sqlite3.connect(":memory:")
-    db.execute("CREATE TABLE docs (id TEXT PRIMARY KEY, source TEXT, text TEXT, license TEXT, provenance TEXT, sha TEXT)")
+    with tempfile.NamedTemporaryFile(prefix="ronin-hkd-", suffix=".sqlite3", delete=False) as tmp:
+        database_path = Path(tmp.name)
+    db = sqlite3.connect(database_path)
+    db.execute("PRAGMA journal_mode=WAL")
+    db.execute("PRAGMA synchronous=NORMAL")
+    db.execute("CREATE TABLE docs (id TEXT PRIMARY KEY, source TEXT, text TEXT, license TEXT, provenance TEXT, sha TEXT UNIQUE)")
     db.execute("CREATE TABLE df (term TEXT PRIMARY KEY, n INTEGER)")
+    db.execute("CREATE TABLE ranked (score REAL, doc_id TEXT, scores TEXT)")
     rejected: Counter[str] = Counter()
     accepted = 0
 
@@ -190,7 +196,7 @@ def main() -> None:
                     (f"{spec['id']}:{provenance}", spec["id"], clean, license_value, str(provenance), digest),
                 )
             except sqlite3.IntegrityError:
-                rejected["duplicate_document_id"] += 1
+                rejected["duplicate_document_or_content"] += 1
                 continue
             for term in set(tokens(clean)):
                 if len(term) > 2 and term not in STOP:
@@ -207,25 +213,39 @@ def main() -> None:
         raise SystemExit("No source passed explicit license/revision gates; no library written.")
 
     df = Counter(dict(db.execute("SELECT term, n FROM df")))
-    candidates: list[tuple[float, str, str, str, str, dict[str, float]]] = []
-    for doc_id, source, text, license_value, provenance, digest in db.execute("SELECT * FROM docs"):
+    scored_count = 0
+    for doc_id, text in db.execute("SELECT id, text FROM docs"):
         scores = score_record(text, args.domain, df, total)
         if scores["semantic_density"] >= args.min_score:
-            candidates.append((scores["semantic_density"], doc_id, text, license_value, provenance, scores))
-    candidates.sort(key=lambda item: item[0], reverse=True)
-    keep_n = max(1, int(len(candidates) * min(100.0, max(0.1, args.top_percent)) / 100.0))
-    selected = candidates[:keep_n]
-
+            db.execute(
+                "INSERT INTO ranked VALUES (?, ?, ?)",
+                (scores["semantic_density"], doc_id, json.dumps(scores)),
+            )
+            scored_count += 1
+    db.commit()
+    keep_n = max(1, int(scored_count * min(100.0, max(0.1, args.top_percent)) / 100.0))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     hashes = hashlib.sha256()
     bytes_written = 0
-    with args.output.open("w", encoding="utf-8", newline="\n") as out:
-        for score, doc_id, text, license_value, provenance, scores in selected:
-            line = text + "\n"
+    selected_count = 0
+    score_total = 0.0
+    score_min = float("inf")
+    with args.output.open("w", encoding="utf-8", newline="\\n") as out:
+        rows = db.execute(
+            "SELECT docs.text, docs.license, docs.provenance, ranked.score "
+            "FROM ranked JOIN docs ON docs.id=ranked.doc_id "
+            "ORDER BY ranked.score DESC, docs.id LIMIT ?",
+            (keep_n,),
+        )
+        for text, license_value, provenance, score in rows:
+            line = text + "\\n"
             out.write(line)
             encoded = line.encode("utf-8")
             hashes.update(encoded)
             bytes_written += len(encoded)
+            selected_count += 1
+            score_total += score
+            score_min = min(score_min, score)
 
     report = {
         "schema_version": 1,
@@ -240,18 +260,22 @@ def main() -> None:
         ],
         "sources": [s["id"] for s in sources if s.get("enabled") is True],
         "documents_seen": total,
-        "candidates_above_threshold": len(candidates),
-        "selected_documents": len(selected),
+        "candidates_above_threshold": scored_count,
+        "selected_documents": selected_count,
         "selected_bytes_utf8": bytes_written,
         "selected_sha256": hashes.hexdigest(),
         "rejected": dict(rejected),
-        "score_mean": round(sum(x[0] for x in selected) / max(1, len(selected)), 4),
-        "score_min": round(min((x[0] for x in selected), default=0), 4),
+        "score_mean": round(score_total / max(1, selected_count), 4),
+        "score_min": round(0 if selected_count == 0 else score_min, 4),
         "status": "candidate_not_admitted_until_human_license_and_quality_audit",
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False, indent=2))
+    db.close()
+    database_path.unlink(missing_ok=True)
+    Path(str(database_path) + "-wal").unlink(missing_ok=True)
+    Path(str(database_path) + "-shm").unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
