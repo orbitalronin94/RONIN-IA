@@ -48,3 +48,8 @@ Phi-4 es el tutor principal de esta prueba. RONIN parte de inicialización aleat
 ## Regla de mezcla
 
 El ciclo actual concatena Portfolio/Papers, el split train de CLiGS/CoNSSA/ELTeC-spa y, si la generación pasa la auditoría REF estructural, el texto de tutor Phi-4. El manifiesto registra bytes, SHA-256 y cuota real por fuente; presencia en la mezcla no implica equilibrio de contribuciones. La biblioteca criptográfica y el corpus sintético se registran como auxiliares y no se introducen en ese preentrenamiento. MMLU-Pro, benchmarks y holdouts permanecen fuera de los gradientes.
+
+
+## Selección histórica ampliada — 4 de noviembre de 2026
+
+El catálogo de autores castellanos, obras candidatas y fuentes históricas de criptografía se mantiene en [historical_text_candidates.json](../data/manifests/historical_text_candidates.json), con validación automática en CI. Añade 11 autores / 22 obras candidatas, seis fuentes institucionales de descubrimiento y seis fuentes primarias de criptografía ya descargadas. **Todas siguen excluidas del entrenamiento** hasta revisión G-0 por obra, edición, traducción, objeto digital, OCR/transcripción, procedencia y SHA-256. La ampliación del inventario no cambia las particiones ni incorpora automáticamente los 506 casos especializados.
