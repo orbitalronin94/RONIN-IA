@@ -132,7 +132,7 @@ jobs:
             initial_checkpoint="/tmp/ronin-synthetic/inicial-$seed.pt"
             mkdir -p "$checkpoint_dir" "$report_dir"
 
-            SEED="$seed" INITIAL_CHECKPOINT="$initial_checkpoint" python - <<'PY'
+            SEED="$seed" PRIMARY_SEED="${seed_values[0]}" INITIAL_CHECKPOINT="$initial_checkpoint" python - <<'PY'
           import os
           import torch
           from ronin.config import get_profile
@@ -144,7 +144,7 @@ jobs:
           seed_everything(seed)
           model = RoninLM(config)
           warmstart = "/tmp/ronin-warmstart/model.pt"
-          if seed == 1337 and os.path.isfile(warmstart):
+          if seed == int(os.environ["PRIMARY_SEED"]) and os.path.isfile(warmstart):
               payload = torch.load(warmstart, map_location="cpu", weights_only=False)
               model.load_state_dict(payload["model"], strict=True)
               print(f"Warm-start aceptado cargado desde iteración anterior (step={payload.get('step', 'unknown')})")
@@ -207,7 +207,9 @@ jobs:
           import json
           from pathlib import Path
 
-          folder = Path("reports/seed-1337")
+          import os
+          primary_seed = os.environ["PRIMARY_SEED"]
+          folder = Path("reports") / f"seed-{primary_seed}"
           before_lm = json.loads((folder / "language-model-inicial.json").read_text())
           after_lm = json.loads((folder / "language-model-final.json").read_text())
           before_domain = json.loads((folder / "domains-inicial.json").read_text())
@@ -217,11 +219,11 @@ jobs:
               and after_domain["overall"]["accuracy"] >= before_domain["overall"]["accuracy"]
           )
           if improved:
-              import os
-              checkpoint = Path("checkpoints/seed-1337/step-" + os.environ["STEPS"].zfill(8) + ".pt")
+              checkpoint = Path("checkpoints") / f"seed-{primary_seed}" / ("step-" + os.environ["STEPS"].zfill(8) + ".pt")
               import torch
               payload = torch.load(checkpoint, map_location="cpu", weights_only=False)
               torch.save({"model": payload["model"], "step": payload["step"]}, "/tmp/ronin-warmstart/model.pt")
+              Path("reports/warmstart-accepted.flag").write_text("accepted\\n", encoding="utf-8")
               print("WARMSTART_ACCEPTED: menor BPB y accuracy multidominio no inferior.")
           else:
               print("WARMSTART_REJECTED: se conserva el último checkpoint aceptado.")
@@ -308,7 +310,7 @@ jobs:
           PY
 
       - name: Guardar solo si el ciclo superó el criterio de mejora
-        if: success() && hashFiles('/tmp/ronin-warmstart/model.pt') != ''
+        if: success() && hashFiles('reports/warmstart-accepted.flag') != ''
         uses: actions/cache/save@v4
         with:
           path: /tmp/ronin-warmstart
