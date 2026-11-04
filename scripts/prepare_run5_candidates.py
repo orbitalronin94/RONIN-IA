@@ -67,6 +67,18 @@ def normalize_license(value: Any) -> str:
     return " ".join(str(value or "").strip().split())
 
 
+def histogram_report(counter: Counter[str], limit: int = 50) -> dict[str, Any]:
+    """Return bounded metadata-only value counts; never include document text."""
+    return {
+        "distinct_values": len(counter),
+        "top_values": [
+            {"value": value, "count": count}
+            for value, count in counter.most_common(limit)
+        ],
+        "truncated": len(counter) > limit,
+    }
+
+
 def row_value(row: dict[str, Any], *keys: str) -> Any:
     for key in keys:
         if key in row and row[key] not in (None, ""):
@@ -351,6 +363,10 @@ def main() -> int:
     db.execute("CREATE INDEX docs_domain_score ON docs(domain, score)")
     seen_ids: set[str] = set()
     rejected: Counter[str] = Counter()
+    raw_license_values: Counter[str] = Counter()
+    raw_language_values: Counter[str] = Counter()
+    collection_values: Counter[str] = Counter()
+    collection_domain_values: Counter[str] = Counter()
     scanned_rows = 0
     accepted_bytes = 0
     scanned_text_bytes = 0
@@ -376,16 +392,22 @@ def main() -> int:
         # Count every source text inspected, including rows later rejected by
         # license, language, length, provenance or domain filters.
         scanned_text_bytes += raw_text_bytes
+        raw_license = str(row_value(row, "license") or "<missing>").strip()[:120]
+        raw_license_values[raw_license] += 1
+        raw_language = str(row_value(row, "language") or "<missing>").strip()[:120]
+        raw_language_values[raw_language] += 1
+        collection = str(row_value(row, "open_type", "open type") or "<missing>").strip()[:120]
+        collection_values[collection] += 1
+
         license_name = normalize_license(row_value(row, "license"))
         if license_name not in ALLOWED_LICENSES:
             rejected["license_not_allowlisted"] += 1
             continue
-        language_raw = str(row_value(row, "language") or "").strip().lower().split("-")[0]
+        language_raw = raw_language.lower().split("-")[0] if raw_language != "<missing>" else ""
         language = LANGUAGE_ALIASES.get(language_raw, language_raw)
         if language not in LANGUAGES:
             rejected["language_not_allowlisted"] += 1
             continue
-        collection = str(row_value(row, "open_type", "open type") or "")
         text = raw_text
         if not isinstance(text, str):
             rejected["missing_text"] += 1
@@ -403,6 +425,7 @@ def main() -> int:
             rejected["missing_provenance"] += 1
             continue
         domain, components = choose_domain(text, collection)
+        collection_domain_values[f"{collection} -> {domain or '<unclassified>'}"] += 1
         if domain is None:
             rejected["domain_unclassified"] += 1
             continue
@@ -542,6 +565,13 @@ def main() -> int:
             "scanned_text_bytes": scanned_text_bytes,
             "accepted_documents_by_domain": domain_counts,
             "rejected": dict(rejected),
+            "source_profile": {
+                "license_values": histogram_report(raw_license_values),
+                "language_values": histogram_report(raw_language_values),
+                "collection_values": histogram_report(collection_values),
+                "collection_domain_routing": histogram_report(collection_domain_values),
+                "note": "Counts contain metadata labels only; document text and excerpts are never emitted.",
+            },
         },
         "libraries": libraries,
         "ready_for_human_review": len(libraries) == 16 and all(
@@ -563,6 +593,7 @@ def main() -> int:
         "rows_scanned": scanned_rows,
         "accepted_documents_by_domain": domain_counts,
         "rejected": dict(rejected),
+        "source_profile": report["ingestion"]["source_profile"],
         "libraries_built": len(libraries),
         "libraries_meeting_minimum": sum(1 for item in libraries if item["meets_minimum_size"]),
         "ready_for_human_review": report["ready_for_human_review"],
