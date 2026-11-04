@@ -52,3 +52,12 @@ The acquisition catalogue now tracks 32 subject areas and 64 planned General/HKD
 This is an expansion roadmap, not a claim that 64 libraries have already been populated or admitted. The operational Common Corpus RUN5 pipeline currently builds candidate partitions for its original 16 domains. A weekly bounded refresh is enabled (1,000,000 rows / 1 GiB input per domain by default). A second weekly lane acquires PMC OA scientific article candidates in biology/medicine and chemistry, requiring the exact per-version CC0/CC BY allowlist, public anonymous access, XML MD5 verification, source metadata ETags and SHA-256, and sensitive-content scans.
 
 The PMC lane and Common Corpus lane remain candidate-only. The separate mathlib4 workflow continues its pinned Apache-2.0 candidate preparation. No schedule can override G-0 or promote candidates to training. The additional 16 domains are catalogued and await dedicated adapters, source-specific authorization, and tests before they count as operational libraries.
+
+
+## Rights level A — evidence ledger
+
+The item-level rights evidence ledger is maintained in `rights_registry/`. Its policy, JSON schema, append-only records file and deterministic validator define the only route to rights level A. The registry currently starts empty: **0 documents have been certified as level A by this ledger**. The existing 608-document Spanish literature artifact remains separately admitted under its original manifest and checks; it has not been silently re-labelled under the new policy.
+
+A source-level license field, public repository, AWS catalogue entry, SPDX identifier, Europeana rights statement, Crossref deposit, or PMC OA article label is evidence to inspect—not independent proof of ownership. Every candidate must carry item/version-level rights evidence and exact payload/metadata hashes. Public-domain claims need territorial and edition-specific evidence. Level A still does not bypass quality, privacy, deduplication, attribution, split-integrity, or global G-0 gates.
+
+Run `python scripts/validate_rights_registry.py` to validate the ledger. An empty ledger is a valid state and means no new level-A admissions.
