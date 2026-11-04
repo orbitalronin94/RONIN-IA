@@ -59,6 +59,8 @@ La lista es un mapa de localización, no una declaración de que cualquier edici
 
 ## Glosario confirmado que se incorpora al currículo
 
+El currículo existente en `ronin/data/prompts.py` ya contiene **16 dominios y 64 temas (cuatro por dominio)**: matemáticas; física; química; biología y salud pública; informática y programación; inteligencia artificial; historia; filosofía y lógica; economía; derecho e instituciones; lingüística y literatura; criptografía y seguridad; estadística y método científico; geografía y clima; arte y cultura; ingeniería y sistemas. Se preservan los 64 temas existentes y se amplían con las subáreas bibliográficas de este documento. No se reemplaza el currículo ni se pierde su cobertura.
+
 Se conserva la taxonomía ejecutable REF; no se inventan etiquetas incompatibles con `ronin/epistemic/schema.py`.
 
 - **Lógica formal**: modus ponens, modus tollens, silogismo hipotético/disyuntivo, dilema constructivo, reducción al absurdo, De Morgan, contraposición, cuantificadores, variables libres/ligadas y restricciones de generalización.
@@ -66,6 +68,7 @@ Se conserva la taxonomía ejecutable REF; no se inventan etiquetas incompatibles
 - **Falacias informales**: relevancia, ambigüedad, presunción, causalidad/evidencia y estadística; ad hominem, hombre de paja, falso dilema, petición de principio, carga de prueba, post hoc, muestra sesgada, supervivencia, tasa base, falacia ecológica, p-hacking y HARKing.
 - **Lógicas no clásicas**: intuicionista, paraconsistente, modal, epistémica, deóntica y temporal.
 - **Epistemología**: falsabilidad, verificabilidad, confirmacionismo, Duhem–Quine, subdeterminación, carga teórica, inconmensurabilidad, programas de investigación, racionalidad limitada, heurísticas, calibración y actualización bayesiana.
+- **Criptografía y opacidad**: cifrado frente a codificación, hash y esteganografía; análisis de frecuencia; criptoanálisis; acrósticos; nomenclatura alquímica; hipótesis de descifrado y evidencia documental. La biblioteca existente de 506 registros (400 sintéticos y solo 6 casos históricos en el conjunto original) permanece en cuarentena: no se cuenta como biblioteca técnica admitida hasta ampliar casos históricos verificados y revisar OCR, edición, derechos y hashes.
 - **REF**: `epistemic_class` = falsifiable/non_falsifiable/mixed/undetermined; `claim_type` = empirical/causal/metaphysical/normative/metaphorical/fictional/mathematical/procedural/descriptive/mixed/unknown; `genre` y `encoding_status` se mantienen en sus vocabularios versionados.
 
 El glosario de frases filosóficas no se convierte en citas literales sin localizar obra, sección, edición y traducción. Las atribuciones apócrifas quedan fuera de entrenamiento.
@@ -101,4 +104,4 @@ La preparación por biblioteca debe:
 Comprobación del inventario: `python scripts/validate_balanced_libraries.py`.
 Gate estricto para RUN #5: `python scripts/validate_balanced_libraries.py --require-ready`.
 
-Estado inicial: 0/8 bibliotecas admitidas; gate cerrado. La documentación y el inventario no equivalen a datos descargados ni autorizados.
+Estado inicial: 0/8 bibliotecas admitidas; gate cerrado. La biblioteca criptográfica y los casos de opacidad no se usan como relleno de bytes ni se confunden con datos históricos verificados. La documentación y el inventario no equivalen a datos descargados ni autorizados.
