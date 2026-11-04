@@ -49,13 +49,17 @@ def wikidata_sample(limit: int) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     query = f"""
 SELECT ?item ?itemLabel ?itemDescription ?type ?typeLabel
        ?property ?propertyLabel ?value ?valueLabel WHERE {{
-  VALUES ?type {{
-    wd:Q5 wd:Q11173 wd:Q12136 wd:Q16521 wd:Q13442814
-    wd:Q7397 wd:Q82794 wd:Q7187 wd:Q11660 wd:Q21198
-  }}
-  VALUES ?property {{
-    wdt:P106 wdt:P36 wdt:P274 wdt:P780 wdt:P277
-    wdt:P279 wdt:P361 wdt:P101 wdt:P921 wdt:P2283
+  VALUES (?type ?property) {{
+    (wd:Q5 wdt:P106)
+    (wd:Q11173 wdt:P274)
+    (wd:Q12136 wdt:P780)
+    (wd:Q16521 wdt:P171)
+    (wd:Q13442814 wdt:P921)
+    (wd:Q7397 wdt:P277)
+    (wd:Q6256 wdt:P36)
+    (wd:Q7187 wdt:P703)
+    (wd:Q11660 wdt:P2175)
+    (wd:Q21198 wdt:P279)
   }}
   ?item wdt:P31 ?type ; ?property ?value .
   FILTER(?item != ?value)
