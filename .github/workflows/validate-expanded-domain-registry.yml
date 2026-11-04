@@ -1,0 +1,25 @@
+name: Validate expanded 32-domain 64-library registry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/datasets/catalog/expanded-domain-registry.json"
+      - "data/datasets/candidates/github-source-audit.json"
+      - "scripts/validate_expanded_dataset_registry.py"
+      - ".github/workflows/validate-expanded-domain-registry.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Validate 32 domains, 64 library IDs and source-audit links
+        run: python scripts/validate_expanded_dataset_registry.py
