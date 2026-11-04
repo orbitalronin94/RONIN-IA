@@ -63,3 +63,8 @@ El corpus generado por Phi-4 puede incorporarse como augmentación experimental 
 
 
 La revisión de Phi-4 queda fijada en `cfbefacb99257ffa30c83adab238a50856ac3083`; no se descarga la rama móvil `main`. La carga usa el soporte Phi-3/Phi-4 integrado en Transformers 4.53.3 y mantiene `trust_remote_code=False`.
+
+
+## Ejecución de candidatos en GitHub Actions
+
+Tras completar correctamente la caché de tutores, el workflow `Generar candidatos REF con Phi-4 (sin entrenar al estudiante)` genera 16 propuestas y ejecuta la auditoría estructural. Publica únicamente el resumen, el hash del lote y el informe de auditoría; no publica las generaciones. El resumen marca siempre `used_for_training=false` y exige revisión humana de calidad y derechos.
