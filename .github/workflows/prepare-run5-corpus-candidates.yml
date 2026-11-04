@@ -136,7 +136,7 @@ jobs:
           from pathlib import Path
           root = Path("/tmp/ronin-run5-candidates") / os.environ["DOMAIN"]
           report = json.loads((root / "run5-candidate-manifest.json").read_text(encoding="utf-8"))
-          expected = {os.environ["DOMAIN"], os.environ["DOMAIN"] + "_hkd"}
+          expected = {os.environ["DOMAIN"] + "_general", os.environ["DOMAIN"] + "_hkd"}
           rows = {item["id"]: item for item in report["libraries"]}
           assert set(rows) == expected, (expected, set(rows))
           minimum = int(os.environ["MIN_TRAIN_MIB"]) * 1024 * 1024
@@ -160,7 +160,7 @@ jobs:
         if: always()
         run: |
           mkdir -p datasets/run5
-          for library_id in "$DOMAIN" "${DOMAIN}_hkd"; do
+          for library_id in "${DOMAIN}_general" "${DOMAIN}_hkd"; do
             source="/tmp/ronin-run5-candidates/$library_id"
             destination="datasets/run5/$library_id"
             if [ -d "$source" ]; then
@@ -179,7 +179,7 @@ jobs:
           root = Path("datasets/run5")
           domain = os.environ["DOMAIN"]
           entries = []
-          for library_id in (domain, domain + "_hkd"):
+          for library_id in (domain + "_general", domain + "_hkd"):
               folder = root / library_id
               manifest = folder / "candidate-manifest.json"
               if manifest.is_file():
@@ -224,8 +224,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: ronin-datasets-run5-library-${{ matrix.domain }}
-          path: datasets/run5/${{ matrix.domain }}/
+          name: ronin-datasets-run5-library-${{ matrix.domain }}-general
+          path: datasets/run5/${{ matrix.domain }}_general/
           if-no-files-found: warn
           compression-level: 1
           retention-days: 90
@@ -285,22 +285,22 @@ jobs:
           from pathlib import Path
           root = Path("datasets/run5")
           expected = [
-              "mathematics",
-              "logic_epistemology",
-              "philosophy",
-              "physics",
-              "chemistry_materials",
-              "biology",
-              "medicine_health",
-              "computer_science",
-              "software_engineering",
-              "law",
-              "economics",
-              "social_sciences",
-              "statistics_probability",
-              "astronomy_earth_science",
-              "engineering_robotics",
-              "humanities",
+              "mathematics_general",
+              "logic_epistemology_general",
+              "philosophy_general",
+              "physics_general",
+              "chemistry_materials_general",
+              "biology_general",
+              "medicine_health_general",
+              "computer_science_general",
+              "software_engineering_general",
+              "law_general",
+              "economics_general",
+              "social_sciences_general",
+              "statistics_probability_general",
+              "astronomy_earth_science_general",
+              "engineering_robotics_general",
+              "humanities_general",
               "mathematics_hkd",
               "logic_epistemology_hkd",
               "philosophy_hkd",
