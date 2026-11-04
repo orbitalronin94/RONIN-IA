@@ -1,0 +1,208 @@
+name: Ciclos sintéticos de entrenamiento RONIN
+
+on:
+  pull_request:
+    paths:
+      - "scripts/prepare_synthetic_corpus.py"
+      - ".github/workflows/synthetic-training-cycles.yml"
+      - "scripts/train_text.py"
+      - "scripts/evaluate_text.py"
+      - "scripts/evaluate_domains.py"
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: Pasos por semilla (1-1000)
+        required: true
+        default: "1000"
+        type: string
+      seeds:
+        description: Semillas separadas por comas
+        required: true
+        default: "1337,2027,42"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-synthetic-cycles-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  train:
+    name: Ciclos sintéticos (sin corpus externo)
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUNBUFFERED: "1"
+      STEPS: ${{ github.event_name == 'pull_request' && '100' || inputs.steps }}
+      SEEDS: ${{ github.event_name == 'pull_request' && '1337' || inputs.seeds }}
+    steps:
+      - name: Obtener código
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar RONIN y dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66"
+
+      - name: Validar parámetros
+        run: |
+          if ! [[ "$STEPS" =~ ^[0-9]+$ ]] || [ "$STEPS" -lt 1 ] || [ "$STEPS" -gt 1000 ]; then
+            echo "::error::Pasos inválidos (1-1000)."
+            exit 1
+          fi
+          if ! [[ "$SEEDS" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
+            echo "::error::Semillas inválidas."
+            exit 1
+          fi
+          IFS=',' read -ra values <<< "$SEEDS"
+          if [ "${#values[@]}" -gt 5 ]; then
+            echo "::error::Máximo cinco semillas."
+            exit 1
+          fi
+          declare -A seen
+          for seed in "${values[@]}"; do
+            if [ -n "${seen[$seed]+x}" ]; then
+              echo "::error::Semilla duplicada: $seed"
+              exit 1
+            fi
+            seen[$seed]=1
+          done
+          mkdir -p reports checkpoints
+
+      - name: Generar corpus sintético aislado
+        run: |
+          python scripts/prepare_synthetic_corpus.py \
+            --output /tmp/ronin-synthetic \
+            --train-sentences 12000 \
+            --validation-sentences 2000
+
+      - name: Entrenar, medir antes y después
+        run: |
+          IFS=',' read -ra seed_values <<< "$SEEDS"
+          for seed in "${seed_values[@]}"; do
+            echo "::group::Semilla $seed"
+            checkpoint_dir="checkpoints/seed-$seed"
+            report_dir="reports/seed-$seed"
+            initial_checkpoint="/tmp/ronin-synthetic/inicial-$seed.pt"
+            mkdir -p "$checkpoint_dir" "$report_dir"
+
+            SEED="$seed" INITIAL_CHECKPOINT="$initial_checkpoint" python - <<'PY'
+          import os
+          import torch
+          from ronin.config import get_profile
+          from ronin.models.transformer import RoninLM
+          from ronin.utils.repro import seed_everything
+
+          config, _ = get_profile("tiny")
+          seed = int(os.environ["SEED"])
+          seed_everything(seed)
+          model = RoninLM(config)
+          torch.save({"model": model.state_dict(), "step": 0}, os.environ["INITIAL_CHECKPOINT"])
+          print(f"Checkpoint inicial: semilla={seed}, parámetros={sum(p.numel() for p in model.parameters())}")
+          PY
+
+            python scripts/evaluate_text.py \
+              --checkpoint "$initial_checkpoint" \
+              --validation-text /tmp/ronin-synthetic/validation.txt \
+              --profile tiny --batches 128 --batch-size 2 --seed 2026 \
+              --device cpu --output "$report_dir/language-model-inicial.json"
+
+            python scripts/evaluate_domains.py \
+              --checkpoint "$initial_checkpoint" \
+              --dataset benchmarks/domains_v1.jsonl \
+              --profile tiny --device cpu \
+              --output "$report_dir/domains-inicial.json"
+
+            python scripts/train_text.py \
+              --text /tmp/ronin-synthetic/train.txt \
+              --profile tiny --steps "$STEPS" --seed "$seed" \
+              --device cpu --checkpoints "$checkpoint_dir"
+
+            checkpoint="$checkpoint_dir/step-$(printf '%08d' "$STEPS").pt"
+            test -s "$checkpoint"
+
+            python scripts/evaluate_text.py \
+              --checkpoint "$checkpoint" \
+              --validation-text /tmp/ronin-synthetic/validation.txt \
+              --profile tiny --batches 128 --batch-size 2 --seed 2026 \
+              --device cpu --output "$report_dir/language-model-final.json"
+
+            python scripts/evaluate_domains.py \
+              --checkpoint "$checkpoint" \
+              --dataset benchmarks/domains_v1.jsonl \
+              --profile tiny --device cpu \
+              --output "$report_dir/domains-final.json"
+
+            echo "::endgroup::"
+          done
+
+      - name: Consolidar resultados y hashes
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          def sha(path):
+              h = hashlib.sha256()
+              with path.open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          root = Path("reports")
+          cycles = []
+          for domain_path in sorted(root.glob("seed-*/domains-final.json")):
+              folder = domain_path.parent
+              lm0 = json.loads((folder / "language-model-inicial.json").read_text())
+              lm1 = json.loads((folder / "language-model-final.json").read_text())
+              d0 = json.loads((folder / "domains-inicial.json").read_text())
+              d1 = json.loads(domain_path.read_text())
+              cycles.append({
+                  "seed": folder.name.removeprefix("seed-"),
+                  "initial": {"bits_per_byte": lm0["bits_per_byte"], "domain_accuracy": d0["overall"]["accuracy"]},
+                  "final": {"bits_per_byte": lm1["bits_per_byte"], "domain_accuracy": d1["overall"]["accuracy"]},
+                  "delta": {
+                      "bits_per_byte": lm1["bits_per_byte"] - lm0["bits_per_byte"],
+                      "domain_accuracy": d1["overall"]["accuracy"] - d0["overall"]["accuracy"],
+                  },
+              })
+          train_path = Path("/tmp/ronin-synthetic/train.txt")
+          val_path = Path("/tmp/ronin-synthetic/validation.txt")
+          dataset = Path("benchmarks/domains_v1.jsonl")
+          summary = {
+              "experiment": "ronin-synthetic-pipeline-smoke-v1",
+              "data_kind": "synthetic_artificial_text_not_a_knowledge_corpus",
+              "steps_per_seed": int(os.environ["STEPS"]),
+              "seeds": [x["seed"] for x in cycles],
+              "sha256": {"train": sha(train_path), "validation": sha(val_path), "domain_benchmark": sha(dataset)},
+              "cycles": cycles,
+              "limitations": [
+                  "El corpus artificial solo valida que entrenamiento y evaluación funcionan; no mide aprendizaje de conocimiento real.",
+                  "El benchmark multidominio tiene 23 preguntas y evalúa selección por siguiente byte, no razonamiento abierto.",
+                  "No usar estos resultados para comparar la calidad lingüística general ni para decidir arquitectura.",
+                  "No se descargan ni utilizan corpus externos en este workflow.",
+              ],
+          }
+          Path("reports/resumen-sintetico.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Publicar informes (sin checkpoints)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-ciclos-sinteticos
+          path: reports/
+          if-no-files-found: error
+          retention-days: 30
