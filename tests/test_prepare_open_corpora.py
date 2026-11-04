@@ -61,6 +61,9 @@ def test_manifiesto_por_documento_conserva_procedencia_licencia_y_particion():
             "path": "spanish/cuentos-espanoles/tei/cuento.xml",
             "sha256": digest,
             "source_file_sha256": "b" * 64,
+            "fragment_index": 1,
+            "fragment_title": "Cuento de prueba",
+            "group_sha256": "c" * 64,
             "text": "Texto de prueba",
         }],
         "validation": [],
@@ -75,6 +78,9 @@ def test_manifiesto_por_documento_conserva_procedencia_licencia_y_particion():
     assert rows[0]["source_path"].endswith("cuento.xml")
     assert rows[0]["license_text"] == "dominio público"
     assert rows[0]["license_metadata"] == "CC-BY-4.0"
+    assert rows[0]["source_fragment_index"] == 1
+    assert rows[0]["source_fragment_title"] == "Cuento de prueba"
+    assert rows[0]["partition_group_sha256"] == "c" * 64
     assert rows[0]["partition"] == "train"
     assert rows[0]["character_count"] == len("Texto de prueba")
 
