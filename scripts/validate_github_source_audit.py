@@ -37,6 +37,15 @@ def main() -> int:
             errors.append(f"{item.get('id')}: upstream_revision must be a full commit SHA")
         if not item.get("rights_evidence_url", "").startswith("https://"):
             errors.append(f"{item.get('id')}: missing HTTPS rights_evidence_url")
+    metadata_sources = data.get("metadata_sources", [])
+    for source in metadata_sources:
+        if not SHA.fullmatch(source.get("audited_commit", "")):
+            errors.append(f"{source.get('id')}: audited_commit must be a full commit SHA")
+        for key in ("manifest_blob_sha1", "rights_notice_blob_sha1"):
+            if not SHA.fullmatch(source.get(key, "")):
+                errors.append(f"{source.get('id')}: {key} must be a full Git blob SHA")
+        if source.get("license") != "CC0-1.0" or source.get("training_eligible") is not False:
+            errors.append(f"{source.get('id')}: metadata source must be CC0 and not training-eligible")
     quarantined = data.get("excluded_or_quarantined", [])
     decision = data.get("integration_decision", {})
     if decision.get("candidate_sources_registered") != len(candidates):
