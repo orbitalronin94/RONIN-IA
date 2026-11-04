@@ -132,6 +132,41 @@ def build(manifest_path: Path, output_path: Path, noise_count: int = 500) -> dic
         ],
     ))
     rows.append(record(
+        record_id="trithemius-steganographia-book1-001",
+        case_type="A",
+        label="CONFIRMED_MESSAGE",
+        evidence_status="documented",
+        text=(
+            "Padiel apsory mesarpon omeuas peludyn malpreaxo. "
+            "Condusen, vlearo thersephi bayl merphon, paroys gebuly "
+            "mailthomyon ilthear tamarson acrimy lon peatha Casmy "
+            "Chertiel, medony reabdo, lasonti iaciel mal arti "
+            "bulomeon abry pathulmon theoma pathormyn."
+        ),
+        source_id="trithemius-steganographia-1608",
+        source_sha256=source_hash(manifest, "trithemius-steganographia-1608"),
+        source_license=source_metadata(manifest, "trithemius-steganographia-1608")["license"],
+        evidence_refs=[
+            "https://doi.org/10.1080/0161-119891886948",
+            "https://www.e-rara.ch/zuz/content/titleinfo/27179737",
+        ],
+        mechanism=(
+            "Esteganografía textual: selección de letras alternas en palabras "
+            "alternas de una invocación, explicada en la Clavis de 1606."
+        ),
+        solution_summary=(
+            "Reeds ilustra la extracción con la expresión latina «primus apex» "
+            "(«primera letra»). Este ejemplo corresponde a los mecanismos de "
+            "los Libros I–II; no debe confundirse con el descifrado independiente "
+            "de las tablas del Libro III."
+        ),
+        reproduction_steps=[
+            "Fijar la edición de 1608 y la transcripción de la invocación.",
+            "Aplicar la regla de selección descrita en la Clavis de 1606.",
+            "Contrastar el resultado con la exposición de Reeds, sección 1.",
+        ],
+    ))
+    rows.append(record(
         record_id="hypnerotomachia-acrostic-001",
         case_type="C",
         label="CONFIRMED_STRUCTURE",
