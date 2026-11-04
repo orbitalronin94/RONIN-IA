@@ -1,3 +1,5 @@
+import json
+
 import torch
 
 from ronin.config import ModelConfig, TrainingConfig
@@ -27,7 +29,7 @@ def test_two_step_cpu_training_and_checkpoint(tmp_path):
     assert all(torch.isfinite(torch.tensor(loss)) for loss in losses)
     assert (tmp_path / "step-00000001.pt").exists()
     assert (tmp_path / "step-00000002.pt").exists()
-    metrics = __import__("json").loads(metrics_path.read_text(encoding="utf-8"))
+    metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
     assert metrics["steps_completed"] == 2
     assert metrics["tokens_processed"] == 2 * 2 * 8
     assert metrics["tokens_per_second"] > 0
@@ -59,3 +61,15 @@ def test_resume_restores_checkpoint_and_sampler_state(tmp_path):
     )
     assert len(resumed_losses) == 1
     assert all(torch.isfinite(torch.tensor(loss)) for loss in resumed_losses)
+
+
+def test_vectorized_batches_preserve_sampler_values():
+    tokens = torch.arange(64, dtype=torch.long)
+    batches_a = iter(NextTokenBatches(tokens, 3, 7, seed=42))
+    batches_b = iter(NextTokenBatches(tokens, 3, 7, seed=42))
+    for _ in range(4):
+        inputs_a, targets_a = next(batches_a)
+        inputs_b, targets_b = next(batches_b)
+        assert torch.equal(inputs_a, inputs_b)
+        assert torch.equal(targets_a, targets_b)
+        assert torch.equal(inputs_a[:, 1:], targets_a[:, :-1])
