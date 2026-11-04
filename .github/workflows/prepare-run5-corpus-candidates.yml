@@ -106,6 +106,7 @@ jobs:
             --output-root "/tmp/ronin-run5-candidates/$DOMAIN"
 
       - name: Validar tamaño x10 de ambas bibliotecas
+        id: validate_size
         run: |
           python - <<'PY'
           import json, os
@@ -130,33 +131,81 @@ jobs:
           }, indent=2))
           PY
 
-      - name: Publicar biblioteca base (artefacto independiente)
-        uses: actions/upload-artifact@v6
-        with:
-          name: ronin-run5-library-${{ matrix.domain }}
-          path: /tmp/ronin-run5-candidates/${{ matrix.domain }}/${{ matrix.domain }}/
-          if-no-files-found: error
-          compression-level: 1
-          retention-days: 30
+      # This snapshot/upload path is deliberately unconditional: candidate data
+      # survives later validation, deduplication, admission or training failures.
+      - name: Copiar cualquier biblioteca generada a datasets/run5
+        if: always()
+        run: |
+          mkdir -p "datasets/run5"
+          source="/tmp/ronin-run5-candidates/$DOMAIN"
+          if [ -d "$source" ]; then
+            cp -a "$source/." "datasets/run5/"
+          fi
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path("datasets/run5")
+          entries = []
+          for library_id in (os.environ["DOMAIN"], os.environ["DOMAIN"] + "_hkd"):
+              folder = root / library_id
+              manifest = folder / "candidate-manifest.json"
+              if manifest.is_file():
+                  item = json.loads(manifest.read_text(encoding="utf-8"))
+                  entries.append({
+                      "id": library_id,
+                      "status": "candidate_generated",
+                      "train_bytes": item.get("train_bytes"),
+                      "train_sha256": item.get("train_sha256"),
+                      "source_revision": item.get("source_revision"),
+                      "manifest": f"datasets/run5/{library_id}/candidate-manifest.json",
+                  })
+              else:
+                  entries.append({
+                      "id": library_id,
+                      "status": "generation_failed_or_incomplete",
+                      "train_bytes": 0,
+                      "manifest": None,
+                  })
+          index = {
+              "schema_version": 1,
+              "run_id": os.environ.get("GITHUB_RUN_ID"),
+              "domain": os.environ["DOMAIN"],
+              "libraries": entries,
+              "note": "Snapshot of all available output, not an admission or training-eligibility decision."
+          }
+          (root / f"index-{os.environ['DOMAIN']}.json").write_text(
+              json.dumps(index, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8"
+          )
+          PY
 
-      - name: Publicar biblioteca HKD (artefacto independiente)
-        uses: actions/upload-artifact@v6
-        with:
-          name: ronin-run5-library-${{ matrix.domain }}-hkd
-          path: /tmp/ronin-run5-candidates/${{ matrix.domain }}/${{ matrix.domain }}_hkd/
-          if-no-files-found: error
-          compression-level: 1
-          retention-days: 30
-
-      - name: Publicar informe de ingesta y auditoría
+      - name: Publicar biblioteca base en datasets (incluso si falla la validación)
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: ronin-run5-domain-report-${{ matrix.domain }}
-          path: /tmp/ronin-run5-candidates/${{ matrix.domain }}/
+          name: ronin-datasets-run5-library-${{ matrix.domain }}
+          path: datasets/run5/${{ matrix.domain }}/
           if-no-files-found: warn
           compression-level: 1
-          retention-days: 30
+          retention-days: 90
+
+      - name: Publicar biblioteca HKD en datasets (incluso si falla la validación)
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-datasets-run5-library-${{ matrix.domain }}-hkd
+          path: datasets/run5/${{ matrix.domain }}_hkd/
+          if-no-files-found: warn
+          compression-level: 1
+          retention-days: 90
+
+      - name: Publicar índice del dominio y diagnóstico aunque la preparación falle
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-datasets-run5-index-${{ matrix.domain }}
+          path: datasets/run5/index-${{ matrix.domain }}.json
+          if-no-files-found: warn
+          retention-days: 90
 
       - name: Enlazar libro de runs
         if: always()
@@ -170,24 +219,106 @@ jobs:
     steps:
       - name: Checkout RONIN
         uses: actions/checkout@v5
-      - name: Descargar los 16 artefactos de biblioteca
+      - name: Descargar todas las bibliotecas disponibles aunque haya jobs fallidos
+        if: always()
         uses: actions/download-artifact@v6
         with:
-          pattern: ronin-run5-library-*
-          path: /tmp/ronin-sixteen-libraries
+          pattern: ronin-datasets-run5-library-*
+          path: datasets/run5
           merge-multiple: false
+          if-no-artifact-found: ignore
+      - name: Descargar índices parciales de todos los dominios
+        if: always()
+        uses: actions/download-artifact@v6
+        with:
+          pattern: ronin-datasets-run5-index-*
+          path: datasets/run5/domain-indexes
+          merge-multiple: false
+          if-no-artifact-found: ignore
+      - name: Crear índice maestro permanente del run
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path("datasets/run5")
+          expected = [
+              "mathematics", "logic_epistemology", "philosophy", "physics",
+              "chemistry", "biology_medicine", "computer_science",
+              "law_economics_social_sciences",
+              "mathematics_hkd", "logic_epistemology_hkd", "philosophy_hkd",
+              "physics_hkd", "chemistry_hkd", "biology_medicine_hkd",
+              "computer_science_hkd", "law_economics_social_sciences_hkd",
+          ]
+          libraries = []
+          for library_id in expected:
+              manifests = list(root.glob(f"**/{library_id}/candidate-manifest.json"))
+              if manifests:
+                  manifest_path = manifests[0]
+                  item = json.loads(manifest_path.read_text(encoding="utf-8"))
+                  libraries.append({
+                      "id": library_id,
+                      "status": "candidate_generated",
+                      "train_bytes": item.get("train_bytes", 0),
+                      "train_sha256": item.get("train_sha256"),
+                      "source_revision": item.get("source_revision"),
+                      "manifest": str(manifest_path),
+                      "artifact": f"ronin-datasets-run5-library-{library_id}",
+                  })
+              else:
+                  libraries.append({
+                      "id": library_id,
+                      "status": "missing_or_generation_failed",
+                      "train_bytes": 0,
+                      "train_sha256": None,
+                      "source_revision": None,
+                      "manifest": None,
+                      "artifact": f"ronin-datasets-run5-library-{library_id}",
+                  })
+          indexes = []
+          for path in sorted((root / "domain-indexes").glob("**/*.json")) if (root / "domain-indexes").exists() else []:
+              try:
+                  indexes.append(json.loads(path.read_text(encoding="utf-8")))
+              except (OSError, json.JSONDecodeError):
+                  indexes.append({"status": "unreadable", "path": str(path)})
+          index = {
+              "schema_version": 1,
+              "run_id": os.environ["GITHUB_RUN_ID"],
+              "commit": os.environ["GITHUB_SHA"],
+              "expected_libraries": 16,
+              "libraries_found": sum(x["status"] == "candidate_generated" for x in libraries),
+              "libraries": libraries,
+              "domain_diagnostics": indexes,
+              "training_started": False,
+              "admitted": False,
+              "note": "This inventory is written regardless of job/gate outcome. Candidate availability does not imply legal admission or training eligibility."
+          }
+          root.mkdir(parents=True, exist_ok=True)
+          (root / "INDEX.json").write_text(
+              json.dumps(index, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8"
+          )
+          print(json.dumps(index, ensure_ascii=False, indent=2))
+          PY
+      - name: Publicar índice maestro datasets/run5/INDEX.json siempre
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-datasets-run5-master-index
+          path: datasets/run5/INDEX.json
+          if-no-files-found: error
+          retention-days: 90
       - name: Auditoría global de duplicados exactos y semánticos entre bibliotecas
         run: |
           python scripts/audit_run5_cross_library_dedup.py \
-            --corpus-root /tmp/ronin-sixteen-libraries \
+            --corpus-root datasets/run5 \
             --report run5-cross-library-dedup.json
       - name: Verificar inventario, tamaño y trazabilidad de 16 bibliotecas
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          root = Path("/tmp/ronin-sixteen-libraries")
-          manifests = sorted(root.glob("*/candidate-manifest.json"))
+          root = Path("datasets/run5")
+          manifests = sorted(root.glob("**/candidate-manifest.json"))
           expected = {
               "mathematics", "logic_epistemology", "philosophy", "physics",
               "chemistry", "biology_medicine", "computer_science",
@@ -243,5 +374,6 @@ jobs:
           path: |
             run5-sixteen-library-candidate-report.json
             run5-cross-library-dedup.json
+            datasets/run5/INDEX.json
           if-no-files-found: warn
           retention-days: 30
