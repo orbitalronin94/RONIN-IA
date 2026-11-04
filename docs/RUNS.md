@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:05 | [Integración continua #824 (run 41930813275)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41930813275) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Keep proposed rights record schema-compliant and timestamp retrieval. Trigger: push; rama: main; intento: 1. | 28e89103 |
 | 2026-11-04 23:05 | [Integración continua #823 (run 41930787463)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41930787463) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document Eulogikon CC0 metadata candidate lane. Trigger: push; rama: main; intento: 1. | 3275438f |
 | 2026-11-04 23:04 | [Integración continua #822 (run 41930782452)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41930782452) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Validate exact metadata file rights scope. Trigger: push; rama: main; intento: 1. | 22dc91a6 |
 | 2026-11-04 23:04 | [Integración continua #817 (run 41930676584)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41930676584) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add pinned Eulogikon CC0 metadata verifier. Trigger: push; rama: main; intento: 1. | 7a81a8a1 |
