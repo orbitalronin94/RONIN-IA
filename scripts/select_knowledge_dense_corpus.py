@@ -47,6 +47,11 @@ DOMAIN_TERMS = {
     "engineering_robotics": "engineering robotics control systems circuit mechanical electrical materials design manufacturing robot automation ingeniería robótica control circuitos mecánica eléctrica diseño fabricación automatización",
     "humanities": "history linguistics literature language philology culture art historical text humanities historia lingüística literatura lengua filología cultura arte humanidades",
 }
+DOMAIN_ALIASES = {
+    "chemistry": "chemistry_materials",
+    "biology_medicine": "biology",
+}
+
 STOP = set("the and for with that this from into over under about have has had are was were which whose where when what como para desde entre sobre una uno unos unas los las del por con sin que este esta estos estas".split())
 
 
@@ -74,7 +79,7 @@ def score_record(text: str, domain: str, df: Counter[str], total_docs: int) -> d
     if not words:
         return {k: 0.0 for k in ("domain_relevance", "knowledge_density", "specificity", "information_content", "structure", "semantic_density")}
     unique = set(words)
-    domain_terms = set(tokens(DOMAIN_TERMS[domain]))
+    domain_terms = set(tokens(DOMAIN_TERMS[DOMAIN_ALIASES.get(domain, domain)]))
     relevant = len(unique & domain_terms)
     relevance = min(1.0, relevant / 8.0)
     pattern_hits = sum(bool(pattern.search(text)) for pattern in KNOWLEDGE_PATTERNS.values())
