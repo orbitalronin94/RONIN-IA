@@ -156,9 +156,15 @@ def _download_source_files(
         data = local_path.read_bytes()
         if len(data) != item["size"]:
             raise ValueError(f"Archivo de caché incompleto: {source['id']}:{relative}")
+        git_blob_sha1 = hashlib.sha1(
+            f"blob {len(data)}\\0".encode("ascii") + data
+        ).hexdigest()
+        if git_blob_sha1 != item["sha"]:
+            raise ValueError(f"SHA Git no coincide: {source['id']}:{relative}")
         downloaded.append({
             "path": relative,
             "size": len(data),
+            "git_blob_sha1": git_blob_sha1,
             "sha256": sha256(data),
             "local_path": str(local_path),
             "skipped": "",
