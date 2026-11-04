@@ -44,7 +44,7 @@ def main() -> int:
 
     readme = fetch(README_URL, 2 * 1024 * 1024)
     import hashlib as _hashlib
-    blob = b"blob " + str(len(readme)).encode() + b"\\0" + readme
+    blob = b"blob " + str(len(readme)).encode() + b"\0" + readme
     actual_blob = _hashlib.sha1(blob).hexdigest()
     if actual_blob != README_BLOB_SHA1:
         raise ValueError(f"pinned README Git blob mismatch: {actual_blob}")
@@ -70,7 +70,7 @@ def main() -> int:
                 if extracted is None:
                     raise ValueError(f"{filename}: TSV cannot be read")
                 text = io.TextIOWrapper(extracted, encoding="utf-8", newline="")
-                reader = csv.DictReader(text, delimiter="\\t")
+                reader = csv.DictReader(text, delimiter="\t")
                 if not reader.fieldnames or "translation" not in reader.fieldnames:
                     raise ValueError(f"{filename}: missing translation column")
                 pair_rows = 0
@@ -88,7 +88,7 @@ def main() -> int:
                         "source_dataset": "CoVoST 2",
                         "source_file": filename,
                         "source_row": pair_rows,
-                    }, ensure_ascii=False, sort_keys=True) + "\\n")
+                    }, ensure_ascii=False, sort_keys=True) + "\n")
                     pair_rows += 1
                     rows_written += 1
                     if rows_written >= args.max_rows:
