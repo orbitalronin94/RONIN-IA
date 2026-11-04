@@ -10,9 +10,9 @@ import hashlib
 import json
 import random
 from pathlib import Path
+from typing import Any
 
 from ronin.epistemic.obfuscation import validate_obfuscation_case
-from typing import Any
 
 POE_CIPHER = (
     "53‡‡†305))6*;4826)4‡.)4‡);806*;48†8¶60))85;1‡(;:‡*8†83(88)"
