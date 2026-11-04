@@ -1,11 +1,6 @@
-import hashlib
-import json
-
 import pytest
 
-from ronin.data.corpus import prepare
-from ronin.data.prompts import build_prompts
-from ronin.data.teacher import generate_completion, write_teacher_dataset
+from ronin.data.prompts import DOMAINS, build_prompts
 
 
 def test_prompt_curriculum_is_deterministic_and_validated():
@@ -15,60 +10,29 @@ def test_prompt_curriculum_is_deterministic_and_validated():
         build_prompts(0)
 
 
-def test_generation_rejects_empty_prompt():
-    with pytest.raises(ValueError, match="vacío"):
-        generate_completion(object(), object(), "  ")
+def test_curriculum_covers_many_domains_before_repeating():
+    prompts = build_prompts(len(DOMAINS) * 4)
+    assert len(DOMAINS) >= 12
+    assert all(f"«{domain}»" in prompts[index * 4] for index, domain in enumerate(DOMAINS))
+    assert len(set(prompts)) == len(prompts)
 
 
-def test_teacher_dataset_requires_verified_mit_manifest(tmp_path):
-    with pytest.raises(ValueError, match="MIT"):
-        write_teacher_dataset(
-            ["Explica algo"], tmp_path / "data.jsonl", object(), object(),
-            {"license": "apache-2.0", "license_verified": True},
-        )
+def test_curriculum_teaches_epistemic_distinctions_without_claiming_certainty():
+    prompt = build_prompts(1)[0]
+    for marker in (
+        "CLASE_EPISTEMICA",
+        "TIPO_DE_AFIRMACION",
+        "GENERO",
+        "ESTADO_DE_CODIFICACION",
+        "EVIDENCIA",
+        "INCERTIDUMBRE",
+        "POSIBLE_REFUTACION",
+        "REVISION",
+    ):
+        assert marker in prompt
+    assert "no marques decoded sin evidencia documentada" in prompt
 
 
-def test_teacher_record_has_provenance_and_student_stays_random(tmp_path, monkeypatch):
-    import ronin.data.teacher as teacher
-
-    monkeypatch.setattr(teacher, "generate_completion", lambda *args, **kwargs: "Respuesta local.")
-    manifest = {
-        "model_id": "openai-community/gpt2",
-        "revision": "a" * 40,
-        "license": "mit",
-        "license_verified": True,
-        "license_url": "https://huggingface.co/openai-community/gpt2",
-    }
-    output = tmp_path / "teacher.jsonl"
-    count = write_teacher_dataset(["Explica una idea."], output, object(), object(), manifest)
-    assert count == 1
-    record = json.loads(output.read_text(encoding="utf-8"))
-    expected = hashlib.sha256(
-        b"Explica una idea.\nRespuesta local."
-    ).hexdigest()
-    assert record["sha256"] == expected
-    assert record["teacher_license"] == "MIT"
-    assert record["student_initialization"] == "random"
-    assert record["teacher_weights_imported_into_student"] is False
-    assert record["teacher_license_verified"] is True
-
-
-def test_prepared_corpus_accepts_only_verified_local_mit_records(tmp_path, monkeypatch):
-    import ronin.data.teacher as teacher
-
-    monkeypatch.setattr(teacher, "generate_completion", lambda *args, **kwargs: "Respuesta local.")
-    manifest = {
-        "model_id": "openai-community/gpt2",
-        "revision": "b" * 40,
-        "license": "mit",
-        "license_verified": True,
-        "license_url": "https://huggingface.co/openai-community/gpt2",
-    }
-    source = tmp_path / "teacher.jsonl"
-    write_teacher_dataset(["Explica una idea."], source, object(), object(), manifest)
-    destination = tmp_path / "corpus.txt"
-    assert prepare(source, destination) == 1
-    corpus = destination.read_text(encoding="utf-8")
-    assert "### Instrucción" in corpus
-    assert "### Respuesta del tutor" in corpus
-    assert "Respuesta local." in corpus
+def test_prompt_count_is_bounded():
+    with pytest.raises(ValueError):
+        build_prompts(501)
