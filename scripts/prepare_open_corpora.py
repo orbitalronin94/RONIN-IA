@@ -304,7 +304,7 @@ def prepare(output_dir: Path, cache_dir: Path) -> dict[str, Any]:
             "license_text": item["license_text"],
             "license_metadata": item["license_metadata"],
             "selected_paths": list(item["paths"]),
-            "archive_sha256": archive_hashes[item["id"]],
+            **source_downloads[item["id"]],
         }
         for item in SOURCES
     ]
