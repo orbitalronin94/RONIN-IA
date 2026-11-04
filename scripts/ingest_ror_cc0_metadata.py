@@ -90,7 +90,7 @@ def main() -> int:
                 clean = {k: row[k] for k in ALLOW if k in row}
                 if not clean.get("id"):
                     continue
-                dst.write(json.dumps(clean, ensure_ascii=False, sort_keys=True) + "\\n")
+                dst.write(json.dumps(clean, ensure_ascii=False, sort_keys=True) + "\n")
                 count += 1
                 if count >= a.max_rows:
                     break
