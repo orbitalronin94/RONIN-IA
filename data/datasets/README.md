@@ -74,7 +74,7 @@ Sources: [arXiv bulk data access](https://info.arxiv.org/help/bulk_data.html), [
 
 ## GitHub dataset source audit (2026-11-05)
 
-The manually reviewed GitHub discovery register is `candidates/github-source-audit.json`. It records immutable catalog revisions, source-evidence links, candidate datasets, declared upstream licenses, and explicit quarantine reasons. It is a source-discovery ledger, **not** an admission manifest.
+The manually reviewed discovery register is `candidates/github-source-audit.json` (31 candidate sources registered; 5 sources/classes excluded or quarantined). It records immutable catalog revisions, source-evidence links, candidate datasets, declared upstream licenses, and explicit quarantine reasons. It is a source-discovery ledger, **not** an admission manifest.
 
 Initial audit results:
 
@@ -127,7 +127,7 @@ The ScienceVerse and Hlido candidates are registered in `candidates/github-sourc
 
 ## Additional multilingual and specialist source candidates (2026-11-05)
 
-The GitHub source audit now tracks 17 candidate sources. Four additional sources have been added after inspecting their public dataset documentation and recording the scope limitations:
+The source audit now tracks 31 candidate sources. Four additional sources have been added after inspecting their public dataset documentation and recording the scope limitations:
 
 - **VoxPopuli** — text-only ASR transcript candidate across European languages, including Spanish. Its README explicitly separates the VoxPopuli data (CC0) from Europarl-derived LM data (separate terms), and the repository's own LICENSE is CC-BY-NC 4.0. Therefore only exact VoxPopuli ASR transcript manifests may be considered; no audio, speaker identifiers, code, model weights or Europarl text.
 - **DReaM-es-open** — Spanish corpus declared CC-BY-4.0, reported as 9,115,151 tokens and 717,854 sentences. The currently listed 9.23 MB downloadable file is word statistics, not proof of a full-text corpus export. The actual corpus endpoint and payload manifest must be identified before ingestion.
@@ -162,3 +162,20 @@ The source audit is maintained in `candidates/github-source-audit.json`. It is a
 ROR adapter: `scripts/ingest_ror_cc0_metadata.py`; workflow: `.github/workflows/ingest-ror-cc0-metadata.yml`. It pins Zenodo record `23187250`, verifies the record's declared CC0 identifier, downloads a bounded archive, supports JSON-array/JSONL source layouts, exports an explicit field allowlist, removes the `locations` field (GeoNames-derived CC BY 4.0), and emits a proposed rights record with SHA-256 values. It does not append the rights ledger or make the dataset training-eligible.
 
 Important: source catalogs such as OpenCorpus, Open Trusted Data Initiative, and general dataset indexes are discovery aids only. Their license metadata does not replace the original provider's rights statement, item-level provenance, privacy checks, or exact payload hashes. Dataset volume is never a reason to relax those gates.
+
+
+### Further source expansion: translation, public institutions, Spanish and low-resource languages
+
+The register now includes these additional source families:
+
+- **VoxPopuli ASR**: transcript-only candidate across 16 transcribed languages; the upstream README reports Spanish among the ASR languages. The dataset declaration says VoxPopuli data is CC0, but the repository's own LICENSE is CC-BY-NC 4.0 and its LM data includes Europarl material with separate terms. Only the VoxPopuli transcript manifests are in scope; speaker IDs, audio, code, models and Europarl text are out.
+- **United Nations Parallel Corpus v1.0**: six official languages (including Spanish), manual sentence alignments, official records from 1990–2014, and an explicit UN public-domain statement. This is a strong translation candidate, but archive chunks, document-series rights and Spain/EU/US public-domain scope must be pinned before Level A.
+- **Biblioteca Digital Hispánica / BNE**: official catalogue exports include CSV/JSON/XML and OCR-text links, with CC-BY-4.0 distribution terms for the catalogue. That license does not automatically clear linked OCR text: each underlying work and edition must independently pass public-domain checks. This source can also help enrich provenance for the existing Spanish literature pool.
+- **DReaM-es-open**: Spanish corpus declared CC-BY-4.0, with 9.1M tokens / 717,854 sentences reported by Språkbanken. The visible downloadable ZIP is word statistics only; full corpus access still needs a reproducible export endpoint.
+- **HTRogène Occitan**: a small but valuable 65-page manuscript ground-truth set under a CC-BY-4.0 dataset declaration. It can support Occitan vocabulary/transcription, but only normalized transcription XML is relevant to text training; manuscript images are excluded and transcription/editorial provenance must be retained.
+- **DFKI SmartData**: German NER/relation corpus (about 2,600 documents) declared CC-BY-4.0. It remains blocked pending a pinned license file and privacy/source review because the corpus includes web, RSS and social material.
+- **COCOTEROS**: Spanish contextual-generation/NLG corpus, version 1.1, listed as CC-BY-4.0 by the University of Alicante research portal. It remains pending the exact Zenodo file manifest, payload hash and field-level provenance.
+- **ScienceVerse Collabra**: its pinned subcorpus README declares CC-BY-4.0 for 749 open-access psychology papers. It is isolated from sibling subcorpora with mixed or NC/ND licenses; individual DOI/version checks and PDF hashes are still required.
+- **OpenAlex, ROR and Eulogikon metadata**: metadata-only lanes with their own narrow CC0 scope. They support retrieval, attribution, cataloguing and domain routing; they are not counted as substantive text-training bytes.
+
+**Explicit exclusions matter:** HPLT's large Spanish/Catalan web-crawl packages are quarantined because a CC0 package statement does not establish the rights of every crawled source text. C4/ImPaKT-derived snippets remain blocked for the same underlying-source reason. The ELG Spanish Wikipedia-derived corpus is not promoted because its underlying Wikipedia text carries ShareAlike terms despite the catalogue's CC-BY label. No source is admitted by association with a code repository or catalogue license.
