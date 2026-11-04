@@ -76,7 +76,7 @@ def score_record(text: str, domain: str, df: Counter[str], total_docs: int) -> d
     units = pattern_hits + min(4, equations) + min(4, numeric / 2) + min(4, relations)
     density = min(1.0, units / max(2.0, len(words) / 45.0))
     specificity = min(1.0, (numeric + 2 * equations + 2 * relations) / max(4.0, len(words) / 20.0))
-    idfs = [math.log((1 + total_docs) / (1 + df[t])) for t in unique if t not in STOP and len(t) > 2]
+    idfs = [math.log((1 + total_docs) / (1 + df.get(t, 0))) for t in unique if t not in STOP and len(t) > 2]
     information = min(1.0, (sum(idfs) / max(1, len(idfs))) / 7.0) if idfs else 0.0
     sentence_count = max(1, len(SENTENCE_RE.split(text.strip())))
     avg_sentence = len(words) / sentence_count
