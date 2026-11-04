@@ -29,7 +29,7 @@ DATASET_ID = "PleIAs/common_corpus"
 DATASET_REVISION = "307910e4c5d040d6f318e6edf2a2b97849155771"
 MIN_DOCUMENT_BYTES = 300
 MAX_DOCUMENT_BYTES = 2 * 1024 * 1024
-HKD_FRACTION = 0.20
+HKD_FRACTION = 0.40
 ALLOWED_LICENSES = {
     "CC0", "CC0 1.0", "CC0-1.0",
     "CC BY 2.0", "CC BY 3.0", "CC BY 4.0",
@@ -271,7 +271,7 @@ def domain_kind_name(domain: str, kind: str) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=Path("/tmp/ronin-run5-candidates"))
-    parser.add_argument("--max-rows", type=int, default=500_000)
+    parser.add_argument("--max-rows", type=int, default=5_000_000)
     parser.add_argument("--domain", choices=DOMAIN_PRIORITY, help="Process one domain per runner to scale storage horizontally")
     parser.add_argument("--max-input-bytes", type=int, default=6 * 1024**3)
     parser.add_argument("--min-train-bytes", type=int, default=2_560 * 1024**2)
@@ -361,8 +361,6 @@ def main() -> int:
             rejected["invalid_row"] += 1
             continue
         raw_text = row_value(row, "text")
-        if isinstance(raw_text, str):
-            scanned_text_bytes += len(raw_text.encode("utf-8"))
         license_name = normalize_license(row_value(row, "license"))
         if license_name not in ALLOWED_LICENSES:
             rejected["license_not_allowlisted"] += 1
@@ -402,6 +400,10 @@ def main() -> int:
         if not source_filter_match:
             rejected["source_manifest_filter"] += 1
             continue
+        # The per-domain byte budget counts only documents that pass the
+        # source's configured domain/language filters and explicit license gate.
+        if isinstance(raw_text, str):
+            scanned_text_bytes += len(raw_text.encode())
         if args.domain and domain != args.domain:
             rejected["other_domain"] += 1
             continue
