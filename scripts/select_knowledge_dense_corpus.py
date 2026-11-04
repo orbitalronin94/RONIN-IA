@@ -34,8 +34,6 @@ DOMAIN_TERMS = {
     "logic_epistemology": "logic inference proposition predicate quantifier entailment validity soundness proof epistemology falsifiability induction deduction bayesian modal epistemic deontic modus ponens falacia inferencia cuantificador validez",
     "philosophy": "philosophy ontology metaphysics ethics epistemology causality knowledge truth argumentation realism empiricism rationalism filosofía ontología metafísica ética epistemología causalidad conocimiento verdad",
     "physics": "physics quantum mechanics particle field energy momentum thermodynamics relativity electromagnetism spectroscopy force mass wave física cuántica mecánica energía momento termodinámica relatividad campo",
-    "chemistry": "chemistry molecule compound reaction catalyst synthesis spectroscopy polymer material stoichiometry bond atom química molécula compuesto reacción catalizador síntesis polímero enlace átomo",
-    "biology_medicine": "biology cell gene protein genome organism pathway enzyme disease clinical trial cohort organism biology biología célula gen proteína genoma organismo enzima enfermedad ensayo clínico",
     "computer_science": "algorithm data structure complexity compiler operating system database protocol network type system program software code function memory concurrency algoritmo estructura de datos compilador sistema operativo base de datos",
     "chemistry_materials": "chemistry molecule compound reaction catalyst synthesis spectroscopy polymer material stoichiometry bond atom chemistry química molécula compuesto reacción catalizador síntesis polímero enlace átomo materials material",
     "biology": "biology cell gene protein genome organism pathway enzyme ecology evolution species genetics microbiology biología célula gen proteína genoma organismo enzima ecología evolución especie",
@@ -48,7 +46,6 @@ DOMAIN_TERMS = {
     "astronomy_earth_science": "astronomy astrophysics cosmology planet star galaxy geology climate meteorology oceanography earth science astronomía astrofísica cosmología planeta estrella galaxia geología clima meteorología oceanografía",
     "engineering_robotics": "engineering robotics control systems circuit mechanical electrical materials design manufacturing robot automation ingeniería robótica control circuitos mecánica eléctrica diseño fabricación automatización",
     "humanities": "history linguistics literature language philology culture art historical text humanities historia lingüística literatura lengua filología cultura arte humanidades",
-    "law_economics_social_sciences": "statute regulation court judgment contract liability jurisdiction theorem market elasticity inflation econometrics regression institution policy derecho ley tribunal sentencia contrato responsabilidad jurisdicción economía mercado inflación regresión política pública",
 }
 STOP = set("the and for with that this from into over under about have has had are was were which whose where when what como para desde entre sobre una uno unos unas los las del por con sin que este esta estos estas".split())
 
