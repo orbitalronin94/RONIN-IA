@@ -100,3 +100,56 @@ jobs:
             /tmp/ronin-open-corpus/processed/test.txt
           if-no-files-found: error
           retention-days: 7
+
+  acquire-cryptography-library:
+    name: Descargar fuentes primarias de criptografía
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Descargar cuatro fuentes HTTPS sin credenciales
+        run: |
+          python scripts/acquire_cryptography_library.py \
+            --output-dir /tmp/ronin-cryptography-library
+      - name: Verificar originales, hashes y exclusión del entrenamiento
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path("/tmp/ronin-cryptography-library")
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          assert manifest["credential_free"] is True
+          assert manifest["source_count"] == 4
+          for source in manifest["sources"]:
+              path = root / source["local_filename"]
+              data = path.read_bytes()
+              assert len(data) == source["size_bytes"]
+              assert hashlib.sha256(data).hexdigest() == source["sha256"]
+              assert source["training_status"] == "excluded_pending_manual_review"
+          print(json.dumps({
+              "library_id": manifest["library_id"],
+              "source_count": manifest["source_count"],
+              "sources": [
+                  {
+                      "id": source["id"],
+                      "size_bytes": source["size_bytes"],
+                      "sha256": source["sha256"],
+                      "format": source["format"],
+                      "training_status": source["training_status"],
+                  }
+                  for source in manifest["sources"]
+              ],
+          }, ensure_ascii=False, indent=2))
+          PY
+      - name: Publicar fuentes y manifiesto como biblioteca auxiliar temporal
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-cryptography-library-v1
+          path: /tmp/ronin-cryptography-library
+          if-no-files-found: error
+          retention-days: 7
