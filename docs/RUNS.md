@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:28 | [Integración continua #939 (run 41933988211)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933988211) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add scheduled/manual CoVoST bilingual text candidate workflow. Trigger: push; rama: main; intento: 1. | 54d4bdbc |
 | 2026-11-04 23:28 | [Integración continua #935 (run 41933910185)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933910185) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Certify exact OpenCitations CC0 citation graph export in rights ledger. Trigger: push; rama: main; intento: 1. | 8318d402 |
 | 2026-11-04 23:27 | [Integración continua #933 (run 41933797158)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933797158) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Trigger and version OpenCitations metadata candidate workflow. Trigger: push; rama: main; intento: 1. | f33546c0 |
 | 2026-11-04 23:27 | [Integración continua #934 (run 41933824990)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933824990) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Record Crossref and DataCite successful metadata exports and OpenCitations adapter. Trigger: push; rama: main; intento: 1. | 15431b46 |
