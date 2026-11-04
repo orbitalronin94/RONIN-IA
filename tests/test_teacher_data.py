@@ -48,11 +48,13 @@ def test_teacher_record_has_provenance_and_student_stays_random(tmp_path, monkey
         b"Explica una idea.\nRespuesta local."
     ).hexdigest()
     assert record["sha256"] == expected
-    assert record["teacher_license"] == "MIT"
+    assert record["teacher_model_license"] == "MIT"
     assert record["student_initialization"] == "random"
     assert record["teacher_weights_imported_into_student"] is False
-    assert record["teacher_license_verified"] is True
+    assert record["teacher_model_license_verified"] is True
     assert record["teacher_trust_remote_code"] is True
+    assert record["generated_output_license"] == "not_asserted"
+    assert record["generated_output_redistribution"] == "not_published"
 
 
 def test_prepared_corpus_accepts_only_verified_local_mit_records(tmp_path, monkeypatch):
