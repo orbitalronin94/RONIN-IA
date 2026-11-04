@@ -89,7 +89,7 @@ def main() -> int:
                 page_texts = []
                 for page in pages:
                     if isinstance(page, dict):
-                        value = get_field(page, "text", "content", "Texto", "texto")
+                        value = get_field(page, "text", "Text", "content", "Content", "Texto", "texto", "Contenido", "Contingut")
                         if value:
                             page_texts.append(str(value))
                 text = "\n".join(page_texts).strip()
