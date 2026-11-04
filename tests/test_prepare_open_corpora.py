@@ -1,4 +1,4 @@
-from scripts.prepare_open_corpora import _extract_tei, _is_source_path, _safe_member
+from scripts.prepare_open_corpora import (\n    _document_manifest_rows,\n    _extract_tei,\n    _is_source_path,\n    _safe_member,\n)
 
 
 def test_extrae_solo_el_contenido_tei_y_omite_cabecera():
@@ -44,3 +44,29 @@ def test_particiones_holdout_son_deterministas_y_no_se_solapan():
     assert hashes["train"].isdisjoint(hashes["test"])
     assert hashes["validation"].isdisjoint(hashes["test"])
     assert set.union(*hashes.values()) == {item["sha256"] for item in documents}
+
+
+
+def test_manifiesto_por_documento_conserva_procedencia_licencia_y_particion():
+    digest = "a" * 64
+    partitions = {
+        "train": [{
+            "source": "cligs-textbox",
+            "path": "spanish/cuentos-espanoles/tei/cuento.xml",
+            "sha256": digest,
+            "text": "Texto de prueba",
+        }],
+        "validation": [],
+        "test": [],
+    }
+
+    rows = _document_manifest_rows(partitions)
+
+    assert len(rows) == 1
+    assert rows[0]["record_id"] == digest
+    assert rows[0]["source_id"] == "cligs-textbox"
+    assert rows[0]["source_path"].endswith("cuento.xml")
+    assert rows[0]["license_text"] == "dominio público"
+    assert rows[0]["license_metadata"] == "CC-BY-4.0"
+    assert rows[0]["partition"] == "train"
+    assert rows[0]["character_count"] == len("Texto de prueba")
