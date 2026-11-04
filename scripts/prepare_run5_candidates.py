@@ -101,6 +101,45 @@ def row_value(row: dict[str, Any], *keys: str) -> Any:
     return None
 
 
+RIGHTS_REVIEW_LICENSES = {
+    "Public Domain",
+    "CC-By",
+    "CC-By-SA",
+    "Open Parliament Licence v3.0",
+    "Various open science",
+    "Various open data",
+    "Licence ouverte",
+}
+
+
+def rights_review_metadata(
+    row: dict[str, Any], collection: str, raw_license: str, raw_language: str
+) -> dict[str, str]:
+    """Return source locators and bibliographic labels only; never document text."""
+    result = {
+        "collection": collection,
+        "license_label": raw_license,
+        "language_label": raw_language,
+    }
+    fields = {
+        "identifier": ("identifier", "url", "source_url", "doi"),
+        "title": ("title", "document_title", "name"),
+        "authors": ("authors", "author", "creator"),
+        "publisher": ("publisher", "journal", "repository"),
+        "publication_date": ("publication_date", "date", "year"),
+    }
+    for output_key, input_keys in fields.items():
+        value = row_value(row, *input_keys)
+        if value is None:
+            continue
+        if isinstance(value, (list, tuple)):
+            value = "; ".join(str(item) for item in value[:10])
+        elif isinstance(value, dict):
+            value = json.dumps(value, ensure_ascii=False, sort_keys=True)
+        result[output_key] = str(value).strip()[:1000]
+    return result
+
+
 def is_code_language(value: Any) -> bool:
     return str(value or "").strip().casefold() in CODE_LANGUAGE_LABELS
 
@@ -414,6 +453,7 @@ def main() -> int:
     collection_license_values: Counter[str] = Counter()
     collection_language_values: Counter[str] = Counter()
     collection_license_language_values: Counter[str] = Counter()
+    rights_review_samples: dict[str, list[dict[str, str]]] = {}
     collection_domain_values: Counter[str] = Counter()
     accepted_code_documents = 0
     scanned_rows = 0
@@ -451,9 +491,12 @@ def main() -> int:
         # combinations are rejected before semantic routing.
         collection_license_values[f"{collection} | {raw_license}"] += 1
         collection_language_values[f"{collection} | {raw_language}"] += 1
-        collection_license_language_values[
-            f"{collection} | {raw_license} | {raw_language}"
-        ] += 1
+        review_key = f"{collection} | {raw_license} | {raw_language}"
+        collection_license_language_values[review_key] += 1
+        if raw_license in RIGHTS_REVIEW_LICENSES:
+            samples = rights_review_samples.setdefault(review_key, [])
+            if len(samples) < 8:
+                samples.append(rights_review_metadata(row, collection, raw_license, raw_language))
 
         license_name = normalize_license(row_value(row, "license"))
         if license_name not in ALLOWED_LICENSES:
@@ -638,6 +681,7 @@ def main() -> int:
                 "collection_license_language_values": histogram_report(
                     collection_license_language_values, limit=150
                 ),
+                "rights_review_samples": rights_review_samples,
                 "collection_domain_routing": histogram_report(collection_domain_values),
                 "note": "Counts contain metadata labels only; document text and excerpts are never emitted.",
             },

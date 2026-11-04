@@ -193,3 +193,26 @@ def test_collection_license_language_cross_tab_is_bounded_metadata_only():
         "count": 120,
     }
     assert all("text" not in item for item in report["top_values"])
+
+
+def test_rights_review_sample_contains_only_source_metadata():
+    from scripts.prepare_run5_candidates import rights_review_metadata
+
+    sample = rights_review_metadata(
+        {
+            "identifier": "https://example.org/article/123",
+            "title": "A source title",
+            "authors": ["Author One", "Author Two"],
+            "publication_date": "2024-02-03",
+            "text": "THIS DOCUMENT BODY MUST NEVER BE COPIED INTO THE REVIEW SAMPLE",
+        },
+        "Open Science",
+        "CC-By",
+        "English",
+    )
+    assert sample["identifier"] == "https://example.org/article/123"
+    assert sample["title"] == "A source title"
+    assert sample["authors"] == "Author One; Author Two"
+    assert sample["license_label"] == "CC-By"
+    assert "text" not in sample
+    assert "MUST NEVER BE COPIED" not in str(sample)
