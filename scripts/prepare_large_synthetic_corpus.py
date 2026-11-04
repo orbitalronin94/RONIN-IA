@@ -31,10 +31,10 @@ def build(output: Path, target_bytes: int, seed: int) -> dict[str, object]:
             language = rng.choice(("es", "en"))
             question, answer, explanation = GENERATORS[domain](rng, language)
             record = (
-                f"[RONIN synthetic record {index:09d} | domain={domain} | language={language}]\\n"
-                f"Question: {question}\\n"
-                f"Answer: {answer}\\n"
-                f"Explanation: {explanation}\\n\\n"
+                f"[RONIN synthetic record {index:09d} | domain={domain} | language={language}]\n"
+                f"Question: {question}\n"
+                f"Answer: {answer}\n"
+                f"Explanation: {explanation}\n\n"
             )
             payload = record.encode("utf-8")
             handle.write(payload)
@@ -61,7 +61,7 @@ def build(output: Path, target_bytes: int, seed: int) -> dict[str, object]:
     }
     manifest_path = output.with_suffix(output.suffix + ".manifest.json")
     manifest_path.write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2) + "\\n",
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     return manifest
