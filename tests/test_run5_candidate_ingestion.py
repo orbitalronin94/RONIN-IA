@@ -43,12 +43,12 @@ def test_open_science_domain_classifier_distinguishes_math_and_physics():
     math, math_scores = choose_domain(
         "Theorem: every finite-dimensional vector space has a basis. "
         "Proof follows by induction on the dimension.",
-        "OpenScience",
+        "Open Science",
     )
     physics, physics_scores = choose_domain(
         "Quantum mechanics describes the energy and momentum of a particle "
         "in a quantum field using the Schrödinger equation.",
-        "OpenScience",
+        "Open Science",
     )
     assert math == "mathematics"
     assert physics == "physics"
@@ -57,7 +57,7 @@ def test_open_science_domain_classifier_distinguishes_math_and_physics():
 
 
 def test_collection_filter_prevents_wrong_domain_fallback():
-    domain, _ = choose_domain("A theorem proves a mathematical identity.", "OpenCulture")
+    domain, _ = choose_domain("A theorem proves a mathematical identity.", "Open Culture")
     assert domain is None
 
 
@@ -113,3 +113,26 @@ def test_global_cross_library_dedup_fails_closed_on_empty_inventory(tmp_path):
     assert report["libraries_scanned"] == 0
     assert report["documents_scanned"] == 0
     assert report["incomplete_inventory"] is True
+
+
+def test_collection_names_match_common_corpus_manifest_values():
+    assert set(COLLECTIONS) == {
+        "Open Science", "Semantic data", "Open Culture",
+        "Open Source", "Open Government",
+    }
+    assert choose_domain(
+        "Quantum mechanics describes particle energy and momentum in a quantum field.",
+        "Open Science",
+    )[0] == "physics"
+    assert choose_domain(
+        "Philosophy studies ontology, metaphysics, ethics and the nature of knowledge.",
+        "Open Culture",
+    )[0] == "philosophy"
+    assert choose_domain(
+        "A software algorithm and database compiler implement a data structure.",
+        "Open Source",
+    )[0] == "computer_science"
+    assert choose_domain(
+        "A court judgment interprets a statute, regulation and contractual liability.",
+        "Open Government",
+    )[0] == "law_economics_social_sciences"
