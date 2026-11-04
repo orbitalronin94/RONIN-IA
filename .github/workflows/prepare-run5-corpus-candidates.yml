@@ -9,6 +9,8 @@ on:
     paths:
       - .github/workflows/prepare-run5-corpus-candidates.yml
       - scripts/prepare_run5_candidates.py
+      - scripts/pmc_oa_source.py
+      - scripts/prepare_pmc_oa_candidates.py
       - scripts/validate_license_audit.py
       - data/manifests/common_corpus_sources.json
       - data/manifests/knowledge_dense_sources.json
@@ -111,12 +113,21 @@ jobs:
 
       - name: Crear las dos bibliotecas del dominio con RONIN-HKD-0.1
         run: |
-          python scripts/prepare_run5_candidates.py \
-            --domain "$DOMAIN" \
-            --max-rows "$MAX_ROWS" \
-            --max-input-bytes "$((MAX_INPUT_GIB * 1024 * 1024 * 1024))" \
-            --min-train-bytes "$((MIN_TRAIN_MIB * 1024 * 1024))" \
-            --output-root "/tmp/ronin-run5-candidates/$DOMAIN"
+          if [ "$DOMAIN" = "biology_medicine" ] || [ "$DOMAIN" = "chemistry" ]; then
+            python scripts/prepare_pmc_oa_candidates.py \
+              --domain "$DOMAIN" \
+              --max-documents "$MAX_ROWS" \
+              --max-text-bytes "$((MAX_INPUT_GIB * 1024 * 1024 * 1024))" \
+              --min-train-bytes "$((MIN_TRAIN_MIB * 1024 * 1024))" \
+              --output-root "/tmp/ronin-run5-candidates/$DOMAIN"
+          else
+            python scripts/prepare_run5_candidates.py \
+              --domain "$DOMAIN" \
+              --max-rows "$MAX_ROWS" \
+              --max-input-bytes "$((MAX_INPUT_GIB * 1024 * 1024 * 1024))" \
+              --min-train-bytes "$((MIN_TRAIN_MIB * 1024 * 1024))" \
+              --output-root "/tmp/ronin-run5-candidates/$DOMAIN"
+          fi
 
       - name: Validar tamaño x10 de ambas bibliotecas
         id: validate_size
