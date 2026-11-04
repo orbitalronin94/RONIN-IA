@@ -33,3 +33,34 @@ def test_common_corpus_license_allowlist_is_narrow():
     assert not is_approved_common_corpus_license("CC BY-NC 4.0")
     assert not is_approved_common_corpus_license("CC BY-ND 4.0")
     assert not is_approved_common_corpus_license("unknown")
+
+
+
+def test_pmc_oa_preflight_excludes_sharealike_nd_nc_and_tdm():
+    from scripts.preflight_pmc_oa import (
+        DOMAIN_QUERIES,
+        LICENSE_ALLOWLIST,
+        approved_license,
+        normalize_license,
+    )
+
+    assert approved_license("CC BY 4.0")
+    assert approved_license("CC0")
+    assert not approved_license("CC BY-SA 4.0")
+    assert not approved_license("CC BY-ND 4.0")
+    assert not approved_license("CC BY-NC 4.0")
+    assert not approved_license("TDM")
+    assert normalize_license("cc-by-4.0") == "CC BY 4.0"
+    assert set(DOMAIN_QUERIES) == {"biology_medicine", "chemistry"}
+    assert "CC BY" in " ".join(LICENSE_ALLOWLIST)
+
+
+def test_pmc_oa_preflight_is_metadata_only():
+    import inspect
+
+    from scripts import preflight_pmc_oa
+
+    source = inspect.getsource(preflight_pmc_oa.preflight_domain)
+    assert '"abstract"' not in source
+    assert '"full_text"' not in source
+    assert '"candidate_text_downloads_authorized": False' in source
