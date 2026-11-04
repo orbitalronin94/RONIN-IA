@@ -5,9 +5,10 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/ronin-official-training-holdout.yml"
-      - "scripts/prepare_portfolio_corpus.py"
       - "scripts/prepare_open_corpora.py"
       - "scripts/prepare_training_mixture.py"
+      - "scripts/validate_eight_libraries.py"
+      - "data/manifests/eight_libraries.json"
       - "scripts/generate_teacher_data.py"
       - "scripts/audit_ref_dataset.py"
       - "scripts/prepare_teacher_corpus.py"
@@ -43,14 +44,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  portfolio-training:
+  ronin-training:
     name: Entrenar con corpus autorizado y medir antes/después
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
       PYTHONUNBUFFERED: "1"
-      GITHUB_TOKEN: ${{ github.token }}
-      PORTFOLIO_REVISION: "fffc234fdf3f82b6a90d56ae9b190d1c0de79690"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
       # PR: smoke corto. Push a main y ejecución manual por defecto: test externo completo con una semilla.
       STEPS: ${{ github.event_name == 'workflow_dispatch' && inputs.steps || (github.event_name == 'push' && '1000' || '100') }}
@@ -59,13 +58,6 @@ jobs:
     steps:
       - name: Obtener RONIN IA
         uses: actions/checkout@v5
-
-      - name: Obtener Portfolio en revisión inmutable
-        uses: actions/checkout@v5
-        with:
-          repository: orbitalronin94/Portfolio
-          ref: fffc234fdf3f82b6a90d56ae9b190d1c0de79690
-          path: data/source/portfolio
 
       - name: Preparar Python
         uses: actions/setup-python@v6
@@ -86,12 +78,8 @@ jobs:
           print("Evaluador externo listo:", datasets.__version__, huggingface_hub.__version__)
           PY
 
-      - name: Preparar corpus de Portfolio
-        run: |
-          python scripts/prepare_portfolio_corpus.py \
-            --source-dir data/source/portfolio/Papers \
-            --output-dir /tmp/ronin-portfolio/processed \
-            --source-revision "$PORTFOLIO_REVISION"
+      - name: Gate obligatorio: ocho bibliotecas admitidas antes de RUN #5
+        run: python scripts/validate_eight_libraries.py --require-ready
 
       - name: Preparar corpus literario de dominio público ya integrado
         run: |
@@ -146,40 +134,9 @@ jobs:
               "skipped_count": manifest["skipped_count"],
           }, ensure_ascii=False, indent=2))
           PY
-      - name: Verificar autorización, finalidad y hash del corpus
-        run: |
-          python - <<'PY'
-          import hashlib
-          import json
-          import os
-          from pathlib import Path
-
-          root = Path("/tmp/ronin-portfolio/processed")
-          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
-          corpus = root / "train.txt"
-          authorization = manifest.get("authorization", {})
-          assert authorization.get("status", "").startswith("autorización expresa")
-          assert "Portfolio/Papers" in authorization.get("scope", "")
-          assert manifest.get("purpose") == "entrenamiento únicamente; no usar como conjunto de validación ni prueba"
-          assert manifest.get("source_revision") == os.environ["PORTFOLIO_REVISION"]
-          assert manifest.get("document_count", 0) > 0
-          digest = hashlib.sha256(corpus.read_bytes()).hexdigest()
-          assert digest == manifest.get("corpus_sha256")
-          print(json.dumps({
-              "source_revision": manifest["source_revision"],
-              "authorization": authorization,
-              "purpose": manifest["purpose"],
-              "document_count": manifest["document_count"],
-              "skipped_count": manifest["skipped_count"],
-              "corpus_bytes": manifest["corpus_bytes"],
-              "corpus_sha256": digest,
-          }, ensure_ascii=False, indent=2))
-          PY
-
-      - name: Construir mezcla de todos los corpus aprobados para entrenamiento
+      - name: Construir corpus provisional (solo para validar el pipeline)
         run: |
           python scripts/prepare_training_mixture.py \
-            --input portfolio=/tmp/ronin-portfolio/processed/train.txt \
             --input literatura_pd=/tmp/ronin-open-corpus/processed/train.txt \
             --output /tmp/ronin-training/combined-train.txt \
             --manifest reports/training-mixture.json
@@ -222,8 +179,8 @@ jobs:
           for seed in "${seed_values[@]}"; do
             echo "::group::Semilla $seed"
             report_dir="reports/seed-$seed"
-            checkpoint_dir="/tmp/ronin-portfolio/checkpoints/seed-$seed"
-            initial_checkpoint="/tmp/ronin-portfolio/inicial-seed-$seed.pt"
+            checkpoint_dir="/tmp/ronin-training/checkpoints/seed-$seed"
+            initial_checkpoint="/tmp/ronin-training/inicial-seed-$seed.pt"
             mkdir -p "$report_dir" "$checkpoint_dir"
 
             SEED="$seed" INITIAL_CHECKPOINT="$initial_checkpoint" python - <<'PY'
@@ -277,9 +234,6 @@ jobs:
           import os
           from pathlib import Path
 
-          manifest = json.loads(
-              Path("/tmp/ronin-portfolio/processed/manifest.json").read_text(encoding="utf-8")
-          )
           open_manifest = json.loads(
               Path("/tmp/ronin-open-corpus/processed/manifest.json").read_text(encoding="utf-8")
           )
@@ -328,16 +282,7 @@ jobs:
               "steps_per_seed": int(os.environ["STEPS"]),
               "seeds": os.environ["SEEDS"].split(","),
               "training_corpora": {
-                  "portfolio": {
-                      "source_repository": manifest["source_repository"],
-                      "source_revision": manifest["source_revision"],
-                      "authorization": manifest["authorization"],
-                      "purpose": manifest["purpose"],
-                      "document_count": manifest["document_count"],
-                      "skipped_count": manifest["skipped_count"],
-                      "corpus_sha256": manifest["corpus_sha256"],
-                  },
-                  "public_domain_literature": {
+                  "existing_public_domain_literature": {
                       "dataset_id": open_manifest["dataset_id"],
                       "sources": [
                           {
@@ -369,9 +314,10 @@ jobs:
               },
               "cycles": rows,
               "interpretation": [
-                  "Portfolio/Papers se utiliza únicamente como corpus de entrenamiento; no se crea una partición de validación o prueba a partir de él.",
+                  "Portfolio/Papers está excluido de pretraining y SFT; queda reservado para recuperación RAG con citas.",
+                  "RUN #5 está bloqueada hasta que las ocho bibliotecas independientes superen el gate de licencia, procedencia, tamaño y calidad.",
                   "MMLU-Pro test se utiliza solo para evaluación antes/después y nunca para gradientes.",
-                  "Se entrena únicamente con Portfolio autorizado y las particiones train de CLiGS/CoNSSA/ELTeC; no se importan pesos de tutores.",
+                  "El corpus literario existente es solo una fuente ya verificada y no sustituye las ocho bibliotecas requeridas.",
                   "Los splits validation/test de literatura, MMLU-Pro test, el piloto interno y los casos criptográficos pendientes de revisión no se mezclan con train.",
                   "La biblioteca criptográfica sigue en cuarentena manual; los datos sintéticos y las generaciones de tutores no se consideran corpus de conocimiento para esta primera prueba.",
                   "Cada semilla parte de inicialización aleatoria y usa la misma semilla para su entrenamiento independiente.",
@@ -380,7 +326,7 @@ jobs:
                   "Una mejora o empeoramiento en esta muestra no demuestra por sí sola capacidad general ni causalidad.",
               ],
           }
-          Path("reports/resumen-portfolio-mmlu.json").write_text(
+          Path("reports/resumen-ronin-mmlu.json").write_text(
               json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
               encoding="utf-8",
           )
