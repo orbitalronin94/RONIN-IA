@@ -235,7 +235,6 @@ jobs:
           python scripts/prepare_teacher_corpus.py \
             --input /tmp/ronin-teacher/phi-4-ref-valid.jsonl \
             --output /tmp/ronin-teacher/phi-4-train.txt
-          cp /tmp/ronin-teacher/phi-4-mini-instruct.jsonl reports/
 
       - name: Construir mezcla de todos los corpus de entrenamiento admitidos
         run: |
@@ -423,11 +422,13 @@ jobs:
                   "phi4_teacher": {
                       "model_id": teacher_manifest["model_id"],
                       "revision": teacher_manifest["revision"],
-                      "license": teacher_manifest["license"],
+                      "model_license": teacher_manifest["license"],
+                      "generated_output_license": "not_asserted",
+                      "generated_output_published": False,
                       "generated_records": teacher_audit["records"],
                       "structurally_valid_records": teacher_audit["valid_records"],
                       "structural_validity_rate": teacher_audit["structural_validity_rate"],
-                      "generated_jsonl_sha256": hashlib.sha256(Path("reports/phi-4-mini-instruct.jsonl").read_bytes()).hexdigest(),
+                      "generated_jsonl_sha256": hashlib.sha256(Path("/tmp/ronin-teacher/phi-4-mini-instruct.jsonl").read_bytes()).hexdigest(),
                       "note": "La auditoría REF comprueba formato, no veracidad ni calidad factual.",
                   },
                   "mixture": mixture_manifest,
@@ -448,6 +449,7 @@ jobs:
                   "Solo se entrena con Portfolio autorizado, train de CLiGS/CoNSSA/ELTeC y propuestas estructuralmente válidas del tutor Phi-4.",
                   "Los splits validation/test de literatura, los benchmarks internos y los casos criptográficos pendientes de revisión no se mezclan con train.",
                   "Las salidas de Phi-4 son datos sintéticos de tutor no verificados factualmente; la auditoría REF no certifica su verdad.",
+                  "La licencia MIT corresponde al modelo, no se atribuye automáticamente a sus salidas; los textos generados se usan internamente y no se publican como artefactos.",
                   "Cada semilla parte de inicialización aleatoria y usa la misma semilla para su entrenamiento independiente.",
                   "Se comparan exactamente los mismos ítems MMLU-Pro en el estado inicial y final.",
                   "El protocolo de siguiente byte no es la evaluación oficial de MMLU-Pro ni permite comparar con su leaderboard.",
