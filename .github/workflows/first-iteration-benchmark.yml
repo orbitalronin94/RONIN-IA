@@ -141,6 +141,19 @@ jobs:
             --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu \
             --output /tmp/ronin-first/reports/entrenado-test.json
 
+      - name: Comparar arquitectura histórica y actual (A/B)
+        env:
+          STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
+        run: |
+          python scripts/benchmark_architecture_ab.py \
+            --train-text /tmp/ronin-open-corpus/processed/train.txt \
+            --validation-text /tmp/ronin-open-corpus/processed/validation.txt \
+            --steps "$STEPS" \
+            --seeds "1337,2027,42" \
+            --eval-batches 128 \
+            --batch-size 2 \
+            --output /tmp/ronin-first/reports/architecture-ab.json
+
       - name: Construir informe reproducible
         env:
           STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}

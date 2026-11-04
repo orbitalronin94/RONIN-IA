@@ -35,12 +35,14 @@ def load_checkpoint(
         optimizer.load_state_dict(checkpoint["optimizer"])
     if scaler is not None and checkpoint.get("scaler") is not None:
         scaler.load_state_dict(checkpoint["scaler"])
-    saved_batch_state = checkpoint.get("batch_generator_state")
-    if saved_batch_state is not None and batch_generator is None:
-        raise ValueError("checkpoint contains sampler state but no compatible batch generator was supplied")
-    if batch_generator is not None and saved_batch_state is not None:
-        batch_generator.set_state(saved_batch_state)
     if restore_rng:
+        saved_batch_state = checkpoint.get("batch_generator_state")
+        if saved_batch_state is not None and batch_generator is None:
+            raise ValueError(
+                "checkpoint contains sampler state but no compatible batch generator was supplied"
+            )
+        if batch_generator is not None and saved_batch_state is not None:
+            batch_generator.set_state(saved_batch_state)
         if checkpoint.get("torch_rng_state") is not None:
             torch.set_rng_state(checkpoint["torch_rng_state"].cpu())
         if checkpoint.get("cuda_rng_state_all") is not None and torch.cuda.is_available():
