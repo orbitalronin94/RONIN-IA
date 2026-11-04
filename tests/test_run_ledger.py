@@ -23,6 +23,7 @@ def test_run_ledger_is_idempotent_and_records_failure(tmp_path, monkeypatch):
             "conclusion": "failure",
             "head_branch": "main",
             "head_sha": "abcdef0123456789",
+            "head_commit": {"message": "Add corpus manifest"},
             "event": "push",
             "updated_at": "2026-11-04T12:00:00Z",
         }
@@ -36,6 +37,7 @@ def test_run_ledger_is_idempotent_and_records_failure(tmp_path, monkeypatch):
     assert "123456789" in first
     assert "failure" in first
     assert "abcdef01" in first
+    assert "Add corpus manifest" in first
 
     assert append_run_ledger.main() == 0
     second = runbook.read_text(encoding="utf-8")
