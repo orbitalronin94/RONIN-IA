@@ -215,7 +215,7 @@ def test_last_position_only_and_full_logits_evaluation_have_identical_prediction
     assert [row["predicted_index"] for row in full["details"]] == [
         row["predicted_index"] for row in optimized["details"]
     ]
-    for full_row, optimized_row in zip(full["details"], optimized["details"]):
+    for full_row, optimized_row in zip(full["details"], optimized["details"], strict=True):
         assert optimized_row["candidate_log_probabilities"] == pytest.approx(
             full_row["candidate_log_probabilities"], abs=1e-5
         )
