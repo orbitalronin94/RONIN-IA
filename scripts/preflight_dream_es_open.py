@@ -61,6 +61,22 @@ def main() -> int:
     })
     doc_meta = json.loads(doc_meta_raw)
     kwic = query.get("kwic", [])
+    doc_tree = doc_meta.get("corpora", {}).get(CORPUS.upper(), {}).get("doc_author>doc_title>doc_lgcode>doc_year", {})
+    document_rows = []
+    for author, titles in doc_tree.items():
+        for title, languages in titles.items():
+            for described_language, years in languages.items():
+                for year, token_count in years.items():
+                    document_rows.append({
+                        "author": author,
+                        "title": title,
+                        "described_language": described_language,
+                        "year": year,
+                        "token_count": token_count,
+                        "source_corpus": CORPUS,
+                    })
+    document_index = b"".join((json.dumps(row, ensure_ascii=False, sort_keys=True) + "\\n").encode("utf-8") for row in document_rows)
+    (a.out / "documents-index.jsonl").write_bytes(document_index)
     sample_languages = {}
     sample_documents = {}
     for hit in kwic:
@@ -88,6 +104,11 @@ def main() -> int:
         "sample_document_language_counts": sample_languages,
         "sample_document_sources": sample_documents,
         "document_attributes_response_keys": list(doc_meta.keys()),
+        "document_index_rows": len(document_rows),
+        "document_index_sha256": sha(document_index),
+        "total_query_hits": query.get("hits"),
+        "reported_tokens": match.get("tokens"),
+        "reported_sentences": match.get("sentences"),
         "retrieved_at": datetime.now(timezone.utc).isoformat(),
         "status": "access_preflight_only",
         "training_eligible": False,
