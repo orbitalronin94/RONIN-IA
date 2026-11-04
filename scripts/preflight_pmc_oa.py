@@ -22,7 +22,7 @@ from typing import Any
 
 ENDPOINT = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
 S3_BASE = "https://pmc-oa-opendata.s3.amazonaws.com"
-USER_AGENT = "RONIN-IA-PMC-OA-preflight/1.1 (metadata-only)"
+USER_AGENT = "RONIN-IA-PMC-OA-client/1.2 (+https://github.com/orbitalronin94/RONIN-IA)"
 LICENSE_ALLOWLIST = {
     "CC0", "CC0 1.0", "CC BY", "CC BY 2.0", "CC BY 3.0", "CC BY 4.0",
 }
