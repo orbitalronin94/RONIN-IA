@@ -18,11 +18,10 @@ concurrency:
 
 jobs:
   entrenar-y-evaluar:
-    name: Entrenar tiny desde cero y medir sobre CC0 reservado
+    name: Entrenar tiny desde cero y medir sobre literatura de dominio público
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      MDC_API_KEY: ${{ secrets.MDC_API_KEY }}
       PYTHONUNBUFFERED: "1"
     steps:
       - name: Obtener RONIN IA
@@ -39,20 +38,13 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
           python -m pip install -e . --no-deps
-          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datacollective>=0.2"
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66"
 
-      - name: Comprobar credencial de Mozilla
+      - name: Descargar y preparar corpus público sin credenciales
         run: |
-          if [ -z "${MDC_API_KEY:-}" ]; then
-            echo "::error::Falta el secreto MDC_API_KEY. Acepta primero las condiciones del conjunto en Mozilla y configura el secreto en GitHub."
-            exit 1
-          fi
-
-      - name: Descargar y preparar corpus CC0
-        run: |
-          python scripts/download_mozilla_corpus.py \
-            --download-dir /tmp/ronin-mozilla/raw \
-            --output /tmp/ronin-mozilla/processed
+          python scripts/prepare_open_corpora.py \
+            --output /tmp/ronin-open-corpus/processed \
+            --cache-dir /tmp/ronin-open-corpus/cache
 
       - name: Validar presupuesto de entrenamiento
         env:
@@ -86,7 +78,7 @@ jobs:
           for split in validation test; do
             python scripts/evaluate_text.py \
               --checkpoint /tmp/ronin-first/inicial.pt \
-              --validation-text "/tmp/ronin-mozilla/processed/$split.txt" \
+              --validation-text "/tmp/ronin-open-corpus/processed/$split.txt" \
               --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu \
               --output "/tmp/ronin-first/reports/inicial-$split.json"
           done
@@ -97,7 +89,7 @@ jobs:
         run: |
           inicio=$(date +%s)
           python scripts/train_text.py \
-            --text /tmp/ronin-mozilla/processed/train.txt \
+            --text /tmp/ronin-open-corpus/processed/train.txt \
             --profile tiny \
             --steps "$STEPS" \
             --device cpu \
@@ -114,7 +106,7 @@ jobs:
           for split in validation test; do
             python scripts/evaluate_text.py \
               --checkpoint "$checkpoint" \
-              --validation-text "/tmp/ronin-mozilla/processed/$split.txt" \
+              --validation-text "/tmp/ronin-open-corpus/processed/$split.txt" \
               --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu \
               --output "/tmp/ronin-first/reports/entrenado-$split.json"
           done
@@ -132,7 +124,7 @@ jobs:
           import torch
           from ronin.config import get_profile
           
-          root = Path("/tmp/ronin-mozilla/processed")
+          root = Path("/tmp/ronin-open-corpus/processed")
           reports = Path("/tmp/ronin-first/reports")
           manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
           model_config, training_config = get_profile("tiny")
@@ -160,10 +152,12 @@ jobs:
               "dataset": {
                   "id": manifest["dataset_id"],
                   "licencia": manifest["license"],
-                  "sha256_archivo_original": manifest["archive_sha256"],
-                  "frases_aceptadas": manifest["accepted_sentences"],
-                  "recuentos": manifest["sentence_counts"],
-                  "documentos_por_particion": manifest["source_document_counts"],
+                  "acceso": manifest["access"],
+                  "fuentes": manifest["sources"],
+                  "documentos_aceptados": manifest["document_count"],
+                  "documentos_por_particion": manifest["document_counts"],
+                  "documentos_por_fuente": manifest["source_document_counts"],
+                  "elementos_excluidos": manifest["skipped_count"],
                   "sha256_particiones": manifest["output_sha256"],
               },
               "modelo": {
@@ -193,9 +187,9 @@ jobs:
                   "metricas": metrics,
               },
               "limitaciones": [
-                  "El conjunto es español norteamericano del ámbito financiero; no representa el español general.",
+                  "El conjunto inicial está formado por literatura histórica; no representa por sí solo el español contemporáneo ni todas sus variedades.",
                   "Las métricas son comparables solo manteniendo idénticos corpus, tokenizador, perfil y protocolo.",
-                  "El conjunto test se reserva para esta medición inicial; las iteraciones de ajuste deben usar validation.",
+                  "La partición test se reserva para comparaciones finales; las iteraciones de ajuste deben usar validation.",
                   "La perplejidad byte-level no equivale a calidad conversacional ni a razonamiento.",
               ],
           }
