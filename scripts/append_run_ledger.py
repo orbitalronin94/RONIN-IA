@@ -35,6 +35,30 @@ SUMMARIES = {
         "y resúmenes de artículos con licencia CC BY/CC0; publicación "
         "versionada y nunca admisión automática al entrenamiento."
     ),
+    "Preparar corpus propio de Portfolio": (
+        "Preparación, validación de autorización, hashes y manifiesto del corpus Portfolio."
+    ),
+    "Calibración REF — lógica y falacias": (
+        "Validación de fixtures de lógica y falacias frente al esquema REF; no equivale a entrenamiento general."
+    ),
+    "Primera iteración y benchmark interno": (
+        "Ciclo inicial y benchmark interno; consultar el artefacto para métricas y alcance."
+    ),
+    "Ciclos sintéticos de entrenamiento RONIN": (
+        "Smoke tests con datos sintéticos aislados; no se consideran corpus de conocimiento ni entrenamiento oficial."
+    ),
+    "Auditoría de descargas reales del corpus": (
+        "Auditoría de adquisición de corpus literario y biblioteca de codificación; revisar estados de derechos antes de uso."
+    ),
+    "Generar candidatos REF con Phi-4 (sin entrenar al estudiante)": (
+        "Generación y auditoría de candidatos REF por tutor; las generaciones no se incorporan al estudiante ni al corpus automáticamente."
+    ),
+    "Preparar caché de tutores locales": (
+        "Descarga y verificación de revisiones y hashes de modelos tutores; no transfiere pesos al estudiante."
+    ),
+    "Comparativa A-B de arquitecturas": (
+        "Comparación experimental de arquitecturas con controles G-0; no asumir superioridad sin revisar métricas y ablations."
+    ),
 }
 
 
