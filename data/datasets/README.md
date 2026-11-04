@@ -70,3 +70,17 @@ The repository now has a scheduled OAI-PMH metadata harvest for the full arXiv c
 Only exact CC BY 4.0 and CC0 article-version licenses are eligible for a later full-text candidate lane. The default arXiv non-exclusive distribution license is not a reuse license for third parties; arXiv explicitly says it cannot grant reuse rights for those full texts. The submitter's per-version license must be checked in the OAI `arXiv` metadata format. The all-record descriptive metadata lane can therefore provide a large, independently rights-cleared scientific abstract corpus under CC0, subject to quality, privacy, duplicate and split gates. Only papers whose full-text license is explicitly CC BY 4.0 or CC0 may enter the separate full-text lane. A `journal-ref` or DOI is a discovery signal, not proof that the arXiv version was peer-reviewed; confirm publication status against Crossref and publisher metadata. Exclude third-party figures, tables, supplements and quoted content unless separately cleared.
 
 Sources: [arXiv bulk data access](https://info.arxiv.org/help/bulk_data.html), [arXiv license information](https://info.arxiv.org/help/license/index.html), [OAI-PMH and license metadata procedure](https://info.arxiv.org/help/ir.html).
+
+
+## GitHub dataset source audit (2026-11-05)
+
+The manually reviewed GitHub discovery register is `candidates/github-source-audit.json`. It records immutable catalog revisions, source-evidence links, candidate datasets, declared upstream licenses, and explicit quarantine reasons. It is a source-discovery ledger, **not** an admission manifest.
+
+Initial audit results:
+
+- `atlanai/decision-bench`: its code repository is MIT, but its own source catalog explicitly preserves the distinct license of every underlying dataset and says the benchmark corpus is not relicensed by the code license. We use its source catalog as a discovery index only; its 1,071 benchmark rows and answer labels are evaluation-only and must never enter training.
+- `GovDataHub/open-data-index`: useful CSV/JSON discovery catalog with license and attribution fields. It is not automatically trusted for admission: repository metadata has no declared repository license, some US public-domain classifications are inferred from federal authorship, and its README and export manifest disagree on the number of quarantined unlicensed datasets (2,239 vs 2,994). Inspect each underlying dataset and publisher record independently.
+- Nine candidate source records are registered for later exact-version review, including SEC EDGAR, Civil Comments, ContractNLI, CUAD, CORD-v2, MT-Bench human judgments, deepset prompt-injections, Amazon ESCI and Amazon Berkeley Objects.
+- Four entries are explicitly excluded or quarantined: HAGRID and FiNER-139 (ShareAlike), NVD (underlying CVE-TOU terms unresolved), and CFPB complaint narratives (privacy review required).
+
+At this stage, **zero payloads were downloaded, zero new level-A rights records were created, and zero GitHub candidates became training-eligible**. Every candidate still needs immutable source revision, exact license scope, payload SHA-256, third-party rights review, privacy/quality checks, cross-library deduplication, split-integrity checks and global G-0. This deliberately conservative result prevents a catalog's blanket license claim from being mistaken for rights clearance of every underlying record.
