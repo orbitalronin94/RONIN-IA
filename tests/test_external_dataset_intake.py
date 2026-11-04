@@ -2,6 +2,7 @@ import hashlib
 import json
 
 from scripts.ingest_external_samples import (
+    is_approved_common_corpus_license,
     is_approved_europe_pmc_license,
     write_jsonl,
 )
