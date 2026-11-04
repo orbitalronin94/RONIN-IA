@@ -5,10 +5,10 @@ from scripts.prepare_run5_candidates import (
     ALLOWED_LICENSES,
     COLLECTIONS,
     DATASET_REVISION,
+    DOMAIN_SOURCE_PARENT,
     LANGUAGE_ALIASES,
     choose_domain,
     domain_kind_name,
-    DOMAIN_SOURCE_PARENT,
     histogram_report,
     normalize_license,
 )
