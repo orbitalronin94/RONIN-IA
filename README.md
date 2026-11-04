@@ -56,7 +56,7 @@ El cierre es la única línea que no es arcaica, y está puesta a propósito: el
 
 ## Modelos auxiliares MIT
 
-El punto de partida incluye dos modelos de tamaño reducido, disponibles en Hugging Face bajo licencia MIT:
+El catálogo incluye dos modelos base pequeños y un tutor instruct de mayor capacidad, disponibles en Hugging Face con licencia MIT declarada:
 
 | Alias | Modelo | Parámetros aproximados | Licencia declarada |
 |---|---|---:|---|
