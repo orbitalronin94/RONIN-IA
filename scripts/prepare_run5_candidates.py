@@ -107,10 +107,17 @@ DOMAIN_HINTS = {
     "logic_epistemology": "logic inference proposition predicate proof epistemology falsifiability",
     "philosophy": "philosophy ontology metaphysics ethics epistemology causality knowledge truth",
     "physics": "physics quantum mechanics particle field energy momentum thermodynamics relativity",
-    "chemistry": "chemistry molecule compound reaction catalyst synthesis spectroscopy polymer atom",
-    "biology_medicine": "biology cell gene protein genome organism enzyme disease clinical trial",
+    "chemistry_materials": "chemistry molecule compound reaction catalyst synthesis spectroscopy polymer atom",
+    "biology": "biology cell gene protein genome organism enzyme ecology evolution",
+    "medicine_health": "medicine health clinical diagnosis treatment patient disease epidemiology",
     "computer_science": "algorithm data structure complexity compiler operating system database software",
-    "law_economics_social_sciences": "law statute regulation court judgment contract liability economics market inflation",
+    "law": "law statute regulation court judgment contract liability jurisprudence",
+    "economics": "economics market inflation econometrics regression monetary fiscal trade",
+    "social_sciences": "sociology anthropology psychology political science institution society policy",
+    "statistics_probability": "statistics probability stochastic distribution estimator hypothesis variance",
+    "astronomy_earth_science": "astronomy astrophysics cosmology planet star galaxy geology climate",
+    "engineering_robotics": "engineering robotics control systems circuit mechanical electrical materials",
+    "humanities": "history linguistics literature language philology culture art historical text",
 }
 DOMAIN_PRIORITY = tuple(DOMAIN_TERMS)
 
@@ -355,7 +362,7 @@ def write_split(
         "sha256": {name: digest.hexdigest() for name, digest in split_hashes.items()},
     }
     dedup_report = {
-        "exact_deduplication": "SHA-256 sobre texto normalizado; deduplicación dentro del dominio y entre sus dos bibliotecas base/HKD",
+        "exact_deduplication": "SHA-256 sobre texto normalizado; deduplicación dentro del dominio y entre sus dos bibliotecas General/HKD",
         "near_duplicates_removed": near_dupes,
         "unique_text_hashes_written": len(exact_hashes),
         "method": "SimHash-64 con distancia de Hamming <=3 dentro del dominio; la auditoría global de las 32 bibliotecas se ejecuta después de agregar artefactos",
