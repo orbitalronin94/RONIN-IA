@@ -352,5 +352,9 @@ def test_common_corpus_expansion_workflow_publishes_32_library_index():
         if step.get("name") == "Assemble 32 libraries, audit duplicates and publish master index"
     )
     assert "datasets/run5/INDEX.json" in assemble["run"]
-    assert "expected_libraries": 32
-    assert "audit_run5_cross_library_dedup.py" in workflow["jobs"]["aggregate-and-index"]["steps"][2]["run"]
+    assert '"expected_libraries": 32' in assemble["run"]
+    audit_step = next(
+        step for step in aggregate["steps"]
+        if step.get("name") == "Audit exact and near duplicates across all 32 libraries"
+    )
+    assert "audit_run5_cross_library_dedup.py" in audit_step["run"]
