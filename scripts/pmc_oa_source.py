@@ -133,7 +133,7 @@ def search_page(domain: str, cursor_mark: str, page_size: int) -> dict[str, Any]
 def verify_xml_digest(xml_payload: bytes, xml_url: str) -> str | None:
     expected_values = urllib.parse.parse_qs(urllib.parse.urlparse(xml_url).query).get("md5", [])
     if not expected_values:
-        return None
+        raise ValueError("PMC XML URL is missing its MD5 digest")
     expected = expected_values[0].strip()
     digest = hashlib.md5(xml_payload).digest()
     actual_hex = digest.hex()
@@ -188,6 +188,13 @@ def fetch_article_versions(item: dict[str, Any], domain: str) -> tuple[list[dict
         xml_url = str(metadata.get("xml_url") or "").strip()
         if not xml_url:
             stats["missing_xml_url"] += 1
+            continue
+        xml_host = urllib.parse.urlparse(xml_url).hostname
+        if xml_host not in {
+            "pmc-oa-opendata.s3.amazonaws.com",
+            "pmc-oa-opendata.s3.us-east-1.amazonaws.com",
+        }:
+            stats["unsafe_xml_url"] += 1
             continue
         try:
             xml_payload, _ = request_bytes(xml_url)
