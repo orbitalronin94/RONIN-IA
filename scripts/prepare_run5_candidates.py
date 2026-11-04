@@ -30,7 +30,7 @@ DATASET_ID = "PleIAs/common_corpus"
 DATASET_REVISION = "307910e4c5d040d6f318e6edf2a2b97849155771"
 MIN_DOCUMENT_BYTES = 300
 MAX_DOCUMENT_BYTES = 2 * 1024 * 1024
-HKD_FRACTION = 0.40
+HKD_FRACTION = 0.20
 # Avoid prefix bias in a streamed dataset: early shards must not monopolize RUN 5.
 SHUFFLE_SEED = 20261104
 SHUFFLE_BUFFER_SIZE = 10_000
@@ -396,8 +396,8 @@ def main() -> int:
     parser.add_argument("--license-audit", type=Path, default=Path("reports/license_audit.json"))
     parser.add_argument("--source-manifest", type=Path, default=Path("data/manifests/knowledge_dense_sources.json"))
     args = parser.parse_args()
-    if not 0.05 <= args.hkd_fraction <= 0.40:
-        parser.error("--hkd-fraction must be between 0.05 and 0.40")
+    if not 0.05 <= args.hkd_fraction <= 0.20:
+        parser.error("--hkd-fraction must be between 0.05 and 0.20")
 
     try:
         from datasets import load_dataset
