@@ -28,6 +28,17 @@ Workflow: [Ciclos sintéticos de entrenamiento RONIN](https://github.com/orbital
 
 
 
+## Estado de datos y experimentos (4 de noviembre de 2026)
+
+La integración de corpus y tutoría está en revisión en la [PR #39](https://github.com/orbitalronin94/RONIN-IA/pull/39). No debe confundirse una PR con una integración ya fusionada en `main`.
+
+- La auditoría de adquisición de la PR #39 terminó correctamente: 644 documentos literarios verificados (608 train, 18 validation y 18 test).
+- La CI de esa rama terminó correctamente: 100 pruebas pasadas, Ruff limpio y smoke de entrenamiento.
+- La biblioteca de codificación se descargó y validó estructuralmente, pero sus fuentes y casos siguen excluidos del preentrenamiento general hasta revisión manual.
+- El ciclo largo Portfolio + literatura + Phi-4 estaba en curso en la última consulta; no se publican métricas finales hasta que termine y se inspeccione su informe.
+
+El inventario operativo, con procedencia, revisiones, licencias, particiones, exclusiones y enlaces a artefactos, está en [Inventario de corpus y materiales](docs/INVENTARIO_CORPUS_Y_MATERIALES.md). Es la guía de qué puede entrenar, qué solo puede evaluar y qué permanece en cuarentena.
+
 ## La advertencia del README
 
 > Sepan cuantos este repositorio vieren que aquí se hace escarnio de cuanto los doctos predicaron sobre acrecentar modelos. Non hay hueste de tarjetas gráficas, nin caudal de dineros, nin ley del escalado que valga. Hay un ingenio de cuarenta y cuatro millones que apenas distingue el saludo del mandado, y un artificio de trazas que non se rompe.
