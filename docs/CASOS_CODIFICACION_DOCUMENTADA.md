@@ -253,3 +253,8 @@ independientes del mundo real. El conjunto no se considera listo para un
 entrenamiento general ni para medir capacidad de descifrado. Los positivos
 históricos son escasos y deben ampliarse con más pares validados, y el test
 debe reservar casos completos por obra y mecanismo.
+
+
+## Artefacto de revisión separado
+
+El workflow de adquisición prepara también `candidate-train.txt` y `candidate-manifest.json` a partir de los 404 registros del split train. Es un **candidato de corpus especialista**, no una autorización automática de entrenamiento: el estado del material sigue siendo `excluded_pending_manual_review` hasta completar revisión humana de OCR, edición, derechos, correspondencia entre fuente y caso y calidad de las anotaciones. Los 50 registros de validation y los 52 de test no se exportan al candidato train.

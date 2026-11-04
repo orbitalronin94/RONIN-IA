@@ -7,6 +7,8 @@ on:
       - "scripts/prepare_open_corpora.py"
       - "scripts/acquire_cryptography_library.py"
       - "scripts/build_obfuscation_cases.py"
+      - "scripts/prepare_obfuscation_training_corpus.py"
+      - "tests/test_prepare_obfuscation_training_corpus.py"
       - "ronin/epistemic/obfuscation.py"
       - "tests/test_epistemic_obfuscation.py"
       - "tests/test_build_obfuscation_cases.py"
@@ -27,6 +29,8 @@ jobs:
     name: Descargar y verificar bibliotecas abiertas
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - name: Verificar lista cerrada de corpus literarios ya admitidos
@@ -52,7 +56,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Descargar archivos originales sin credenciales y preparar corpus
+      - name: Descargar archivos originales con token de solo lectura y preparar corpus
         run: |
           python scripts/prepare_open_corpora.py \
             --output /tmp/ronin-open-corpus/processed \
@@ -194,6 +198,13 @@ jobs:
               "dataset": summary,
           }, ensure_ascii=False, indent=2))
           PY
+      - name: Preparar split train de casos criptográficos con holdouts intactos
+        run: |
+          PYTHONPATH="$GITHUB_WORKSPACE" python scripts/prepare_obfuscation_training_corpus.py \
+            --input /tmp/ronin-obfuscation-library/cases.jsonl \
+            --case-manifest /tmp/ronin-obfuscation-library/manifest.json \
+            --output /tmp/ronin-obfuscation-library/candidate-train.txt \
+            --manifest /tmp/ronin-obfuscation-library/candidate-manifest.json
       - name: Publicar fuentes primarias y pares de opacidad
         uses: actions/upload-artifact@v4
         with:

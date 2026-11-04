@@ -21,14 +21,14 @@ ALLOWED_MODELS = {
     "phi-4-mini-instruct": {
         "repo_id": "microsoft/Phi-4-mini-instruct",
         "license_url": "https://huggingface.co/microsoft/Phi-4-mini-instruct",
-        "trust_remote_code": True,
+        "trust_remote_code": False,
     },
 }
 ALLOW_PATTERNS = [
     "config.json", "generation_config.json", "model*.safetensors",
     "model.safetensors.index.json", "tokenizer.json", "tokenizer_config.json",
     "special_tokens_map.json", "vocab.json", "merges.txt", "added_tokens.json",
-    "chat_template.jinja", "*.py", "README.md", "LICENSE*", "NOTICE.md",
+    "chat_template.jinja", "README.md", "LICENSE*", "NOTICE.md",
 ]
 
 
@@ -71,6 +71,8 @@ def download_model(name: str, destination: Path) -> Path:
     missing_weights = [name for name in weight_files if not (model_dir / name).is_file()]
     if missing_weights:
         raise RuntimeError(f"{repo_id}: faltan pesos safetensors tras la descarga: {missing_weights}")
+    for stale_code in model_dir.rglob("*.py"):
+        stale_code.unlink()
     files = {}
     for path in sorted(model_dir.rglob("*")):
         if path.is_file() and path.name != "ronin-teacher-manifest.json":

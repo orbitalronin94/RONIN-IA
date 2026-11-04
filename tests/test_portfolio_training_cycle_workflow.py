@@ -31,6 +31,7 @@ def test_official_training_workflow_uses_approved_corpora_and_external_holdout()
         "(github.event_name == 'push' && '0' || '140') }}"
     )
     assert job["timeout-minutes"] == "360"
+    assert job["env"]["GITHUB_TOKEN"] == "${{ github.token }}"
 
     steps = job["steps"]
     by_name = {step.get("name"): step for step in steps}

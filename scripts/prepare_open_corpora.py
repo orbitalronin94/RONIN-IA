@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import urllib.request
 from pathlib import Path, PurePosixPath
@@ -123,6 +124,18 @@ def _safe_member(name: str) -> bool:
     return not path.is_absolute() and ".." not in path.parts
 
 
+def _github_api_headers() -> dict[str, str]:
+    """Devuelve cabeceras para GitHub API con token de Actions si está disponible."""
+    headers = {
+        "User-Agent": "RONIN-IA-corpus-preparer/1.0",
+        "Accept": "application/vnd.github+json",
+    }
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
+
+
 def _download_source_files(
     source: dict[str, Any],
     cache_dir: Path,
@@ -134,10 +147,7 @@ def _download_source_files(
     )
     request = urllib.request.Request(
         tree_url,
-        headers={
-            "User-Agent": "RONIN-IA-corpus-preparer/1.0",
-            "Accept": "application/vnd.github+json",
-        },
+        headers=_github_api_headers(),
     )
     with urllib.request.urlopen(request, timeout=60) as response:
         tree_data = json.loads(response.read().decode("utf-8"))
