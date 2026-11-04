@@ -310,3 +310,15 @@ Crossref, DataCite and OpenCitations are bibliographic/citation metadata. They e
 - **DReaM-es-open (Språkbanken)**: public Korp API preflight succeeds without credentials. It reports 9,115,151 tokens and 717,854 sentences. This is not yet a bulk-ingest approval: the first deterministic sample contains English Google Books boilerplate and a Zapotec grammar text, and Korp exposes per-document language/title/author/year/source-URL attributes. A random sample and item-level source-rights audit are required before any export. [Preflight run](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934527622).
 - **COCOTEROS**: the dataset declares CC BY 4.0, but its paper says its Spanish reference sentences were collected from Tatoeba. Tatoeba has per-sentence licenses (including CC BY 2.0-FR), so the derived corpus label does not automatically relicense those source sentences. This source is quarantined until field-level rights and attribution are resolved; its test split is excluded from training.
 - **GovEasy**: the publisher page advertises a useful Spanish administrative CC BY 4.0 dataset, but the static host returned HTTP 404 from GitHub Actions for the tested metadata endpoints. No payload was downloaded and automatic retries have been disabled; the candidate remains in the register pending host recovery.
+
+
+## GPLSI ClearText CAS/VAL candidate artifacts
+
+The BOE (BOE-A-2025-12053) lists both GPLSI collections as CC BY 4.0, but their individual documents contain separate source material and notices. The pinned acquisition workflow verifies every Git blob SHA and preserves title, version, source URL, language and file hashes.
+
+- **ClearText CAS v1.0**: 11 candidate documents, 1 explicit NC-ND original document quarantined; 907,806-byte JSONL payload, SHA-256 `e7cc5b66aa50dc2ba296ffeb348ea0f4e9a3c10fe22de93860bfe6fd0c1945cd`.
+- **ClearText VAL v1.0**: 6 candidate documents, 0 automatic license-marker quarantines; 221,948-byte JSONL payload, SHA-256 `15ea1a2495f312ee95e213cc4d851f9e3dca7c7d1e5c13259f3c859479a8219d`.
+- **17 documents remain pending item-level rights review**; the original Valencia Statute edition explicitly says CC BY-NC-ND 4.0 and is excluded. Copyright notices and underlying source URLs are retained in the review queue.
+- [Workflow and artifact](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935114828).
+
+The source register now has 64 entries. It includes acquisition-ready candidates, metadata-only resources, sources awaiting item-level checks, and explicit exclusions. It is not a count of 64 admitted datasets or 64 training-eligible libraries. The rights ledger remains at eight exact-scope Level A records; GPLSI ClearText has not been added to that ledger because third-party source rights still need review.
