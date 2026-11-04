@@ -10,6 +10,7 @@ import argparse, hashlib, json, urllib.parse, urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+ADAPTER_VERSION = "1.0.1"
 CROSSREF_BASE = "https://api.crossref.org/works"
 DATACITE_BASE = "https://api.datacite.org/dois"
 CROSSREF_RIGHTS = "https://www.crossref.org/documentation/retrieve-metadata/"
