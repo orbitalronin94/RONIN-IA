@@ -12,15 +12,6 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
-| 2026-11-04 17:02 | [Integración continua #577 (run 41873245568)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41873245568) | success | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: style: separate project import groups in evaluator benchmark. Trigger: pull_request; rama: integration/consolidate-open-prs-20261104; intento: 1. | cf3b64aa |
-| 2026-11-04 17:01 | [Integración continua #576 (run 41873227882)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41873227882) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: style: separate project import groups in evaluator benchmark. Trigger: pull_request; rama: integration/consolidate-open-prs-20261104; intento: 1. | cf3b64aa |
-| 2026-11-04 17:00 | [Comparativa A-B de arquitecturas #123 (run 41873227855)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41873227855) | cancelled | Comparación experimental de arquitecturas con controles G-0; no asumir superioridad sin revisar métricas y ablations. Commit: style: separate project import groups in evaluator benchmark. Trigger: pull_request; rama: integration/consolidate-open-prs-20261104; intento: 1. | cf3b64aa |
-| 2026-11-04 17:00 | [Comparativa A-B de arquitecturas #122 (run 41872900466)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41872900466) | cancelled | Comparación experimental de arquitecturas con controles G-0; no asumir superioridad sin revisar métricas y ablations. Commit: bench: sweep evaluator token budgets to minimize CPU padding overhead. Trigger: pull_request; rama: integration/consolidate-open-prs-20261104; intento: 1. | 9aa2fe0d |
-| 2026-11-04 17:00 | [Integración continua #575 (run 41872900988)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41872900988) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: bench: sweep evaluator token budgets to minimize CPU padding overhead. Trigger: pull_request; rama: integration/consolidate-open-prs-20261104; intento: 1. | 9aa2fe0d |
-| 2026-11-04 16:59 | [Integración continua #573 (run 41872862997)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41872862997) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: integrate: sync consolidated PR with latest main and preserve run ledger. Trigger: pull_request; rama: integration/consolidate-open-prs-20261104; intento: 1. | 1e2ab0ad |
-| 2026-11-04 16:58 | [Integración continua #572 (run 41872762496)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41872762496) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Consolidate corpus gates, evaluator and verified teacher cache. Trigger: pull_request; rama: integration/consolidate-last-three-prs; intento: 1. | 5d6bb2df |
-| 2026-11-04 16:58 | [Comparativa A-B de arquitecturas #120 (run 41872862795)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41872862795) | success | Comparación experimental de arquitecturas con controles G-0; no asumir superioridad sin revisar métricas y ablations. Commit: integrate: sync consolidated PR with latest main and preserve run ledger. Trigger: pull_request; rama: integration/consolidate-open-prs-20261104; intento: 1. | 1e2ab0ad |
-| 2026-11-04 16:57 | [Comparativa A-B de arquitecturas #119 (run 41872762106)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41872762106) | success | Comparación experimental de arquitecturas con controles G-0; no asumir superioridad sin revisar métricas y ablations. Commit: Consolidate corpus gates, evaluator and verified teacher cache. Trigger: pull_request; rama: integration/consolidate-last-three-prs; intento: 1. | 5d6bb2df |
 | 2026-11-04 16:55 | [Integración continua #571 (run 41872201452)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41872201452) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: integrate: rebase consolidated corpus and evaluator work on current main. Trigger: pull_request; rama: integration/consolidate-open-prs-20261104; intento: 1. | f844e9b6 |
 | 2026-11-04 16:54 | [Integración continua #569 (run 41871841996)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41871841996) | success | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: style: keep benchmark imports in one sorted block. Trigger: pull_request; rama: data/audit-eight-massive-corpora-and-cpu-speed; intento: 1. | 7d4d7934 |
 | 2026-11-04 16:54 | [Comparativa A-B de arquitecturas #118 (run 41872201437)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41872201437) | success | Comparación experimental de arquitecturas con controles G-0; no asumir superioridad sin revisar métricas y ablations. Commit: integrate: rebase consolidated corpus and evaluator work on current main. Trigger: pull_request; rama: integration/consolidate-open-prs-20261104; intento: 1. | f844e9b6 |
@@ -274,3 +265,29 @@ Si una ejecución cambia datos, código o documentación, la descripción debe i
 - [Manifiesto de datasets externos](../data/manifests/external_datasets.json)
 - [Política de ingesta y derechos G-0](INGESTA_AMPLIA_DATASETS_EXTERNOS.md)
 - [README del proyecto](../README.md)
+
+## Estado del gate 16 bibliotecas — 4 de noviembre de 2026
+
+La exigencia de RUN #5 se amplió a **16 bibliotecas masivas**: 8 base + 8 HKD (una por dominio). Portfolio/Papers es RAG experto, no training y no cuenta como biblioteca.
+
+Se añadieron:
+- scripts/select_knowledge_dense_corpus.py: selección reproducible con RONIN-HKD-0.1, licencia allowlist, IDF y SQLite temporal en disco.
+- scripts/harvest_knowledge_dense_libraries.py: orquestación de las ocho bibliotecas derivadas.
+- data/manifests/knowledge_dense_sources.json: fuentes/adaptadores y allowlists; todos desactivados por defecto.
+- data/manifests/sixteen_libraries.json y scripts/validate_sixteen_libraries.py: gate de 16 con hashes exactos, revisión humana y 256 MiB mínimo por biblioteca.
+- docs/METRICA_DENSIDAD_SEMANTICA.md: papers base, fórmula, pesos y protocolo de validación.
+
+Estado: 0/16 admitidas; las ocho bases y ocho HKD siguen candidatas. No se ha descargado ni admitido ningún texto nuevo por esta implementación. No se lanza entrenamiento ni se mergea la PR hasta que el gate completo pase.
+
+
+
+## Iteración de evaluador MMLU-Pro — 4 de noviembre de 2026
+
+En la PR #53 se incorpora evaluación por lotes con padding derecho causal y presupuesto configurable de tokens. Se añade un workflow de rendimiento activado por cambios del evaluador en PR; compara secuencial frente a batched en los mismos 140 ítems, mismo checkpoint y misma revisión inmutable del test. El artefacto registra tiempos, speedup y paridad de predicciones. La entrada de resultado se completará con el run real de Actions; no se anticipa ningún speedup.
+
+El workflow oficial de entrenamiento recibe `MMLU_BATCH_TOKEN_BUDGET=8192` por defecto y lo registra en el resumen experimental. El gate de 16 bibliotecas permanece obligatorio; este benchmark de rendimiento no lo omite ni lanza entrenamiento.
+
+
+## Iteración de optimización del evaluador — PR #53
+
+Se añade una ruta de inferencia que calcula logits solo en la última posición válida por secuencia y una extracción de scores A-J por lote. El workflow oficial recibe un presupuesto de tokens padded configurable y lo aplica a la evaluación inicial y final. Se añaden pruebas de equivalencia frente al forward completo y de configuración del workflow. Speedup pendiente de CI/benchmark real. No se ha lanzado RUN #5 ni se ha relajado el gate de 16 bibliotecas.
