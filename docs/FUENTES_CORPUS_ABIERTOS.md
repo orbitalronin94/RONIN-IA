@@ -2,6 +2,10 @@
 
 Actualizado: 2026-11-04.
 
+## Alcance de la auditoría G-0
+
+El informe `reports/license_audit.json` y su gate G-0 se refieren a cuatro colecciones candidatas concretas: Project Gutenberg, Internet Archive, Common Corpus y BookCorpusOpen. Su estado FAIL bloquea esas colecciones, no constituye una autorización general ni un bloqueo automático de las tres fuentes literarias ya integradas (CLiGS Textbox, CoNSSA y ELTeC-spa). Estas últimas tienen revisiones, licencias declaradas, manifiestos y validación específica por documento; el workflow de entrenamiento las admite mediante una lista cerrada de repositorios y commits. Cualquier fuente nueva necesita su propia revisión antes de entrar.
+
 ## Regla de admisión
 
 Una fuente solo puede pasar a entrenamiento si cumple simultáneamente:
