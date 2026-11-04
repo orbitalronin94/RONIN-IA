@@ -43,29 +43,48 @@ Los tutores GPT-2, GPT-Neo y Phi-4 pueden descargarse y ejecutarse localmente co
 
 ### Workflow oficial: entrenamiento desde cero + holdout externo
 
-<badge color="success">Workflow creado y lanzado</badge>
+<badge color="success">Primera ejecución completada</badge>
 
 [Experimento oficial RONIN desde cero + MMLU-Pro completo](https://github.com/orbitalronin94/RONIN-IA/actions/workflows/ronin-official-training-holdout.yml)
 
-La ejecución inicial es la [run #1](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377), actualmente en curso al actualizar este README.
+La [ejecución oficial #1](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377) terminó correctamente: 1.000 pasos, semilla 1337 y modelo tiny de 9.922.880 parámetros en CPU. El artefacto contiene informes y manifiestos, no pesos ni corpus.
 
-- Entrena el estudiante RONIN desde inicialización aleatoria, perfil `tiny`, 1.000 pasos y semilla 1337.
-- Usa únicamente los corpus autorizados indicados arriba.
-- Evalúa antes y después en el split **test completo de MMLU-Pro** (12.032 preguntas esperadas), un benchmark externo multidominio.
-- Mantiene el test fuera de los gradientes y de la mezcla de entrenamiento.
-- Registra exactitud por dominio, cobertura, ítems omitidos por exceder el contexto, hashes del checkpoint, dataset y mezcla.
-- No publica corpus ni checkpoints; el artefacto de Actions contiene informes y manifiestos.
+**Resultado MMLU-Pro (protocolo propio RONIN):**
 
-**Límite de interpretación:** RONIN puntúa la letra de respuesta por probabilidad del siguiente byte (A–J). Es un protocolo propio, no el protocolo oficial de MMLU-Pro ni una puntuación comparable con su leaderboard. El evaluador no trunca preguntas largas: informa cobertura y omisiones. La primera prueba es una sola semilla y un modelo de 9,9 M de parámetros en CPU; es una línea base experimental, no una afirmación de competencia general.
+| Medición | Inicial | Final |
+|---|---:|---:|
+| Aciertos | 1.299/11.687 | 1.283/11.687 |
+| Accuracy | 11,115 % | 10,978 % |
+
+- Diferencia global: **−0,137 puntos porcentuales**.
+- Seleccionados: 12.032; evaluados: 11.687; omitidos por exceder 2.048 bytes: 345.
+- Cobertura: 97,13 %. `complete_test_set=false`; por tanto, no se debe describir como cobertura completa.
+- Biology: −0,707 pp; Computer Science: −6,618 pp; Philosophy: −4,810 pp. Law: +4,762 pp; History: +4,221 pp.
+- La mezcla de entrenamiento fue 94,53 % literatura abierta y 5,47 % Portfolio por bytes.
+
+El resultado no demuestra que el entrenamiento causara por sí solo cada variación por dominio: fue una sola semilla y el informe agregado no permite pruebas pareadas por pregunta. Tampoco es una puntuación oficial comparable con el leaderboard de MMLU-Pro: RONIN evalúa la probabilidad del siguiente byte de A–J, sin CoT. Consulta el [artefacto de la ejecución](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377/artifacts/13325455883) y el [protocolo de benchmarks](docs/BENCHMARKS_MULTIDOMINIO.md).
+
+### Siguiente ciclo: benchmark reducido e instrumentación CPU
+
+El workflow [RONIN + MMLU-Pro reducido](.github/workflows/ronin-small-mmlu-pro.yml) está preparado en la rama de trabajo de la [PR #44](https://github.com/orbitalronin94/RONIN-IA/pull/44), todavía abierta como borrador. Sus valores manuales por defecto son 1.000 pasos, semilla 1337 y muestra estratificada de 1.400 preguntas. **Todavía no se ha lanzado.**
+
+La preparación técnica incorpora:
+
+- Muestreo de ventanas de tokens vectorizado, conservando el generador y el orden determinista de muestras.
+- Control explícito de hilos PyTorch CPU: 4 intra-op y 1 inter-op en el runner estándar.
+- Métricas por entrenamiento: duración total, latencia media/mediana/p95 por paso, mediana de estado estable, ejemplos/s, tokens/s y tiempo acumulado de checkpoints.
+- Registro del hardware y de la configuración de PyTorch en el log de Actions.
+- Prueba de regresión para comprobar que el sampler vectorizado conserva las mismas muestras.
+
+Estas modificaciones aún deben superar CI y medirse en el runner. No se afirma un factor de aceleración antes de disponer de una comparación reproducible con el mismo hardware, corpus, semilla y presupuesto. El cambio acelera el muestreo de batches y hace visible el coste del entrenamiento; no implica por sí solo que el forward/backward del Transformer sea más rápido.
+
+El workflow reducido se ejecutará después de integrar los cambios y lanzarlo manualmente desde Actions. El test MMLU-Pro sigue siendo solo evaluación, nunca datos de entrenamiento. El artefacto publicará métricas e informes, no checkpoints.
 
 ### Últimas ejecuciones observadas
 
-- [CI #387](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41828782413): correcta; 101 pruebas pasadas, análisis estático y smoke de entrenamiento en verde.
-- [Preparación Portfolio #25](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976274): correcta.
-- [Experimento oficial #1](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377): en curso.
-- [Caché de tutores #2](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41826972273): correcta.
-
-El ciclo anterior con Phi-4/MMLU-Pro falló en la ejecución histórica [#59](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919709). El workflow nuevo evita entrenar con salidas de tutor no revisadas y fija explícitamente las dependencias del evaluador. No se anunciarán métricas del experimento nuevo hasta que termine y se compruebe el artefacto.
+- [Experimento oficial #1](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377): completado; 1.000 pasos, loss final 1,98638 y resultado MMLU-Pro documentado arriba.
+- [CI #402](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41834027866): las pruebas unitarias y el smoke de entrenamiento pasaron; Ruff falló por el formato de imports en `scripts/compare_supra_baseline.py`. El formato se ha corregido en la rama de trabajo; falta confirmar el nuevo CI.
+- La [PR #44](https://github.com/orbitalronin94/RONIN-IA/pull/44) continúa sin fusionar. No se ha iniciado el workflow reducido.
 
 El inventario completo, con procedencia, revisiones, licencias, particiones, exclusiones y hashes, está en [Inventario de corpus y materiales](docs/INVENTARIO_CORPUS_Y_MATERIALES.md) y en el [manifiesto JSON](data/manifests/corpus_inventory.json).
 
