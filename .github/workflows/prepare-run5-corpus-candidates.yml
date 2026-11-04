@@ -16,7 +16,7 @@ on:
       min_train_mib:
         description: Mínimo de train por biblioteca (MiB)
         required: true
-        default: "256"
+        default: "2560"
         type: string
 
 permissions:
@@ -54,7 +54,7 @@ jobs:
           done
           [ "$MAX_ROWS" -ge 1000 ] && [ "$MAX_ROWS" -le 500000 ]
           [ "$MAX_INPUT_GIB" -ge 1 ] && [ "$MAX_INPUT_GIB" -le 8 ]
-          [ "$MIN_TRAIN_MIB" -ge 64 ] && [ "$MIN_TRAIN_MIB" -le 1024 ]
+          [ "$MIN_TRAIN_MIB" -ge 2560 ] && [ "$MIN_TRAIN_MIB" -le 10240 ]
 
       - name: Preparar Python y dependencias de streaming
         uses: actions/setup-python@v6
@@ -125,7 +125,7 @@ jobs:
           print(json.dumps({
               "rows_scanned": report["ingestion"]["rows_scanned"],
               "libraries_built": len(rows),
-              "libraries_meeting_256MiB": sum(x["train_bytes"] >= 256 * 1024**2 for x in rows),
+              "libraries_meeting_2_5GiB": sum(x["train_bytes"] >= 2560 * 1024**2 for x in rows),
               "train_bytes_by_library": {x["id"]: x["train_bytes"] for x in rows},
               "ready_for_human_review": report["ready_for_human_review"],
               "training_eligible": report["training_eligible"],
@@ -134,8 +134,8 @@ jobs:
           }, ensure_ascii=False, indent=2))
           if len(rows) != 16:
               raise SystemExit("No se han producido las 16 bibliotecas candidatas.")
-          if not all(x["train_bytes"] >= 256 * 1024**2 for x in rows):
-              raise SystemExit("Al menos una biblioteca no alcanza 256 MiB de train.")
+          if not all(x["train_bytes"] >= 2560 * 1024**2 for x in rows):
+              raise SystemExit("Al menos una biblioteca no alcanza 2.5 GiB de train.")
           PY
 
       - name: Enlazar libro de runs
