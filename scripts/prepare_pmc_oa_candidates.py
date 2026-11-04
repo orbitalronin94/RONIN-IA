@@ -81,14 +81,14 @@ def rows_from_db(
     query = (
         "SELECT id, text_blob, license, provenance, score, components, source_revision, "
         "pmcid, doi, title, publication_date, language, metadata_etag, metadata_sha256, "
-        "xml_url, xml_md5, xml_sha256, text_sha256 "
+        "xml_url, xml_https_url, xml_md5, xml_sha256, text_sha256, pmid, citation "
         "FROM docs WHERE domain=? ORDER BY score " + order + ", id ASC LIMIT ?"
     )
     for row in db.execute(query, (domain, limit)):
         (
             doc_id, text_blob, license_name, provenance, score, components, source_revision,
             pmcid, doi, title, publication_date, language, metadata_etag, metadata_sha256,
-            xml_url, xml_md5, xml_sha256, text_sha256,
+            xml_url, xml_https_url, xml_md5, xml_sha256, text_sha256, pmid, citation,
         ) = row
         extra = {
             "source_version_prefix": doc_id,
@@ -101,9 +101,16 @@ def rows_from_db(
             "source_metadata_etag": metadata_etag,
             "source_metadata_sha256": metadata_sha256,
             "source_xml_url": xml_url,
+            "source_xml_https_url": xml_https_url,
             "source_xml_md5": xml_md5,
             "source_xml_sha256": xml_sha256,
             "text_sha256": text_sha256,
+            "pmid": pmid,
+            "citation": citation,
+            "source_is_pmc_openaccess": True,
+            "source_is_manuscript": False,
+            "source_is_historical_ocr": False,
+            "source_is_retracted": False,
         }
         yield (
             doc_id,
@@ -160,8 +167,11 @@ def prepare(
             metadata_etag TEXT,
             metadata_sha256 TEXT,
             xml_url TEXT,
+            xml_https_url TEXT,
             xml_md5 TEXT,
-            xml_sha256 TEXT
+            xml_sha256 TEXT,
+            pmid TEXT,
+            citation TEXT
         )
         """
     )
@@ -189,8 +199,8 @@ def prepare(
                         id, domain, text_blob, license, provenance, source_revision,
                         bytes, score, components, text_sha, pmcid, doi, title,
                         publication_date, language, metadata_etag, metadata_sha256,
-                        xml_url, xml_md5, xml_sha256
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        xml_url, xml_https_url, xml_md5, xml_sha256, pmid, citation
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         record["document_id"],
@@ -211,8 +221,11 @@ def prepare(
                         record.get("source_metadata_etag"),
                         record.get("source_metadata_sha256"),
                         record.get("source_xml_url"),
+                        record.get("source_xml_https_url"),
                         record.get("source_xml_md5"),
                         record.get("source_xml_sha256"),
+                        record.get("pmid"),
+                        record.get("citation"),
                     ),
                 )
             except sqlite3.IntegrityError as exc:
