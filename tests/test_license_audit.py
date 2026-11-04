@@ -46,3 +46,26 @@ def test_duplicate_source_ids_are_rejected() -> None:
     audit["sources"][1] = copy.deepcopy(audit["sources"][0])
     with pytest.raises(ValueError, match="duplicados"):
         validate_license_audit(audit)
+
+
+def test_limited_candidate_download_authorization_never_admits_training() -> None:
+    audit = load_report()
+    authorization = audit["candidate_intake_authorizations"][0]
+    assert authorization["candidate_text_downloads_authorized"] is True
+    assert authorization["training_eligible"] is False
+    assert authorization["admitted"] is False
+    validate_license_audit(audit)
+
+
+def test_limited_authorization_rejects_training_eligibility() -> None:
+    audit = load_report()
+    audit["candidate_intake_authorizations"][0]["training_eligible"] = True
+    with pytest.raises(ValueError, match="nunca admite entrenamiento"):
+        validate_license_audit(audit)
+
+
+def test_limited_authorization_requires_pinned_revision() -> None:
+    audit = load_report()
+    audit["candidate_intake_authorizations"][0]["dataset_revision"] = ""
+    with pytest.raises(ValueError, match="fuente y revisión inmutable"):
+        validate_license_audit(audit)
