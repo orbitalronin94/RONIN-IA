@@ -47,8 +47,8 @@ def validate(record: dict, line: int, policy: dict) -> list[str]:
             errors.append(f"line {line}: {key} must be lowercase SHA-256")
     if record["license_id"] not in set(policy["accepted_license_ids"]):
         errors.append(f"line {line}: license {record['license_id']!r} is not allowlisted")
-    if record["rights_assertion_scope"] != "exact_text_and_version":
-        errors.append(f"line {line}: rights assertion must cover the exact text and version")
+    if record["rights_assertion_scope"] not in {"exact_text_and_version", "exact_metadata_file_and_version"}:
+        errors.append(f"line {line}: rights assertion must cover an exact text or metadata file and version")
     if record["third_party_content_review"] not in {"clear", "excluded_or_separately_cleared"}:
         errors.append(f"line {line}: third-party content is not cleared")
     jurisdictions = record["jurisdictions_cleared"]
