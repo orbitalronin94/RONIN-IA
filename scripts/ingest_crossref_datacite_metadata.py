@@ -126,7 +126,7 @@ def main() -> int:
     for record in rights_records:
         source = record["source_id"].split("-")[0]
         (a.out / f"rights-record-{source}.candidate.json").write_text(
-            json.dumps(record, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8"
+            json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
     summary = {
         "retrieved_at": retrieved,
