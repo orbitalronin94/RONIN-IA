@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:25 | [Integración continua #924 (run 41933511233)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933511233) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add scheduled/manual Crossref and DataCite CC0 metadata workflow. Trigger: push; rama: main; intento: 1. | cb656473 |
 | 2026-11-04 23:24 | [Integración continua #923 (run 41933496308)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933496308) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Use valid newline terminators in separate metadata rights records. Trigger: push; rama: main; intento: 1. | 816dbfb9 |
 | 2026-11-04 23:24 | [Integración continua #922 (run 41933477965)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933477965) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Emit individual Crossref and DataCite rights candidate files for validation. Trigger: push; rama: main; intento: 1. | 84941428 |
 | 2026-11-04 23:24 | [Integración continua #921 (run 41933441207)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933441207) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add bounded Crossref and DataCite CC0 metadata harvesters. Trigger: push; rama: main; intento: 1. | 8a379b8f |
