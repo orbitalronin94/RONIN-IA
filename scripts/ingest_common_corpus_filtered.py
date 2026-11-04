@@ -13,6 +13,7 @@ from pathlib import Path
 from huggingface_hub import HfApi
 from datasets import load_dataset
 
+ADAPTER_VERSION = "1.0.1"
 REPO = "PleIAs/common_corpus"
 CARD_URL = "https://huggingface.co/datasets/PleIAs/common_corpus"
 RIGHTS_URL = CARD_URL
