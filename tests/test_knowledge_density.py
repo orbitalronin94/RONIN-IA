@@ -59,3 +59,49 @@ def test_selector_rejects_sources_without_explicit_legal_approval(tmp_path):
     assert result.returncode != 0
     assert not output.exists()
     assert json.loads(report.read_text(encoding="utf-8"))["status"] == "blocked_no_admitted_sources"
+
+def test_selector_keeps_document_level_license_provenance_and_scores(tmp_path):
+    source = tmp_path / "source.jsonl"
+    text = (
+        "In physics, energy is defined as the capacity to do work. "
+        "If a force acts over a displacement, then work equals force times displacement. "
+        "The equation W = F times d describes this relation. "
+    ) * 5
+    source.write_text(json.dumps({
+        "text": text,
+        "license": "CC-BY-4.0",
+        "document_id": "paper-002"
+    }) + "\\n", encoding="utf-8")
+    spec = tmp_path / "sources.json"
+    spec.write_text(json.dumps({
+        "sources": [{
+            "id": "fixture",
+            "domain": "physics",
+            "adapter": "jsonl",
+            "path": str(source),
+            "immutable_revision": "fixture-rev",
+            "license_audit": "fixture-audit",
+            "allowed_licenses": ["CC-BY-4.0"],
+            "license_field": "license",
+            "text_field": "text",
+            "provenance_field": "document_id",
+            "enabled": True
+        }]
+    }), encoding="utf-8")
+    output = tmp_path / "physics" / "train.txt"
+    report = tmp_path / "physics" / "report.json"
+    result = subprocess.run([
+        sys.executable, "scripts/select_knowledge_dense_corpus.py",
+        "--source-spec", str(spec), "--domain", "physics",
+        "--output", str(output), "--report", str(report),
+        "--min-score", "0", "--top-percent", "100"
+    ], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr
+    selected = json.loads(report.read_text(encoding="utf-8"))
+    assert selected["selected_documents"] == 1
+    assert selected["selected_bytes_utf8"] == output.stat().st_size
+    sidecar = output.with_suffix(".manifest.jsonl")
+    entry = json.loads(sidecar.read_text(encoding="utf-8").splitlines()[0])
+    assert entry["license"] == "CC-BY-4.0"
+    assert entry["provenance"] == "paper-002"
+    assert entry["component_scores"]["semantic_density"] >= 0
