@@ -436,8 +436,6 @@ def main() -> int:
         if not is_allowed_language(raw_language, collection):
             rejected["language_not_allowlisted"] += 1
             continue
-        if collection == "Open Source" and is_code_language(raw_language):
-            accepted_code_documents += 1
         text = raw_text
         if not isinstance(text, str):
             rejected["missing_text"] += 1
@@ -499,6 +497,8 @@ def main() -> int:
             rejected["duplicate_document"] += 1
             continue
         accepted_bytes += byte_count
+        if collection == "Open Source" and is_code_language(raw_language):
+            accepted_code_documents += 1
         if scanned_rows % 1000 == 0:
             db.commit()
             print(
