@@ -296,3 +296,10 @@ CoVoST, OpenAlex and ROR exact payload versions have corresponding rights-ledger
 - **Common Corpus follow-up**: 2,159 candidate rows after excluding MIT-labelled source-code rows: 2,149 CC0, 4 CC-BY-3.0 and 6 CC-BY-4.0; 5,971,320 bytes total. It rejected 17,472 non-allowlisted license rows, 311 rows matching basic email/phone patterns and 8 invalid/oversized rows. The review queue and JSONL files were independently parsed after the newline fix. [Corrected run and artifact](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933372089).
 
 The source register now contains 52 candidate entries. The rights ledger contains seven exact-scope Level A records, but these certify only the recorded metadata/text payload rights. They do not change the global G-0 status or make any of the newly harvested sources training-eligible.
+
+
+## OpenCitations citation-graph candidate
+
+The public OpenCitations Index API adapter is `scripts/ingest_opencitations_index.py`; its workflow is `.github/workflows/ingest-opencitations-index.yml`. It seeds at most 30 DOI queries from Crossref, uses no access token or credentials, paces requests below the documented public rate limit, and exports citation entities only. The first verified run queried 20 DOIs and produced 24 citation rows (9,431 bytes; SHA-256 `75269b5f18a464e5b872c611ab4bfb50687dc679c36d61f37f8a3cdf0f442ff6`), with zero request failures. Its exact-scope CC0 metadata record is in the rights ledger. [Run and artifact](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933797143).
+
+Crossref, DataCite and OpenCitations are bibliographic/citation metadata. They enrich source discovery, provenance, citation routing and domain indexing; they are not counted as substantive natural-language training corpora. The rights ledger now contains eight exact-scope Level A records. Global G-0 and all admission gates remain separate.
