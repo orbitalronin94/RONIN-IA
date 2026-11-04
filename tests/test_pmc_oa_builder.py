@@ -5,6 +5,8 @@ import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 
+import yaml
+
 
 def test_write_split_preserves_per_article_pmc_revision_and_metadata(tmp_path: Path, monkeypatch):
     from scripts.prepare_run5_candidates import write_split
@@ -69,3 +71,20 @@ def test_write_split_preserves_per_article_pmc_revision_and_metadata(tmp_path: P
     assert metadata["source_dataset"] == "pmc-oa-opendata"
     assert metadata["source_revision"] == "per-article-version-etag-v1"
     assert metadata["license_policy"] == ["CC BY 4.0", "CC0"]
+
+
+def test_pmc_consolidation_workflow_uses_unescaped_source_run_id():
+    workflow_path = (
+        Path(__file__).parents[1]
+        / ".github"
+        / "workflows"
+        / "consolidate-pmc-candidates.yml"
+    )
+    raw = workflow_path.read_text(encoding="utf-8")
+    workflow = yaml.load(raw, Loader=yaml.BaseLoader)
+    assert "workflow_run" in workflow["on"]
+    assert "workflow_dispatch" in workflow["on"]
+    assert "source_run_id" in workflow["on"]["workflow_dispatch"]["inputs"]
+    assert "\\\\${{" not in raw
+    expected_run_id = "run-id: " + "$" + "{{ github.event.workflow_run.id || inputs.source_run_id }}"
+    assert expected_run_id in raw
