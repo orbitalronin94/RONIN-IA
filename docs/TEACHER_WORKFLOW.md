@@ -10,7 +10,7 @@ RONIN aprende siempre desde una inicialización aleatoria. Los tutores solo apor
 | gpt-neo-125m | https://huggingface.co/EleutherAI/gpt-neo-125m | MIT |
 | phi-4-mini-instruct | https://huggingface.co/microsoft/Phi-4-mini-instruct | MIT |
 
-El descargador vuelve a consultar los metadatos y cancela si la licencia del modelo no es exactamente MIT. Fija una revisión inmutable y calcula SHA-256 de los archivos. Al cargar el tutor, RONIN vuelve a verificar el inventario completo y cada hash; rechaza archivos ausentes, inesperados, alterados o rutas inseguras. **La licencia MIT del modelo no se atribuye automáticamente al texto que genere.**
+El descargador vuelve a consultar los metadatos y cancela si la licencia no es exactamente mit. Fija una revisión inmutable y calcula SHA-256 de los archivos. Al cargar el tutor, RONIN vuelve a verificar el inventario completo y cada hash; rechaza archivos ausentes, inesperados, alterados o rutas inseguras.
 
 Phi-4-mini-instruct es el tutor principal para las nuevas pruebas: 3,8B parámetros, ajuste instruct, soporte declarado para español y otros 23 idiomas. Su licencia publicada es MIT. Requiere Transformers 4.49 o posterior y código de modelo remoto; el descargador fija el commit y calcula hashes, y el cargador verifica cada archivo antes de ejecutar ese código. Sigue siendo principalmente entrenado en inglés y puede equivocarse; no se debe tratar como experto ni como fuente de verdad. GPT-2 y GPT-Neo 125M se conservan como líneas base pequeñas. Sus salidas son propuestas de tutor, no etiquetas certificadas ni hechos verificados. Requieren revisión, filtrado, deduplicación y comprobación de derechos antes de incorporarse a un entrenamiento.
 
@@ -52,7 +52,7 @@ Preparación de cada lote:
     python scripts/prepare_teacher_corpus.py --input artifacts/teacher/gpt2.jsonl --output artifacts/teacher/gpt2.txt
     python scripts/prepare_teacher_corpus.py --input artifacts/teacher/gpt-neo-125m.jsonl --output artifacts/teacher/gpt-neo-125m.txt
 
-El corpus generado por Phi-4 puede incorporarse como augmentación experimental después de la auditoría estructural REF. Esa auditoría solo valida formato y etiquetas; no comprueba verdad, citas ni calibración. Los registros identifican la licencia del modelo por separado y dejan la licencia de la salida como no atribuida; los textos generados no se publican como artefactos. Antes de redistribuirlos hay que revisar por separado sus derechos y condiciones. Las salidas conservan siempre la identidad y revisión del tutor, y no sustituyen la adjudicación humana. Para una destilación seria, añadir tutores especializados por dominio con licencias verificadas, evaluación cruzada y un conjunto REF anotado por personas.
+El corpus generado por Phi-4 puede incorporarse como augmentación experimental después de la auditoría estructural REF. Esa auditoría solo valida formato y etiquetas; no comprueba verdad, citas ni calibración. Las salidas conservan siempre la identidad y revisión del tutor, y no sustituyen la adjudicación humana. Para una destilación seria, añadir tutores especializados por dominio con licencias verificadas, evaluación cruzada y un conjunto REF anotado por personas.
 
 ## Separación tutor-estudiante
 
