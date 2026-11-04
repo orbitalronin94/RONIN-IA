@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--baseline", required=True, type=Path)
