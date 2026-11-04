@@ -251,10 +251,17 @@ jobs:
               "computer_science_hkd", "law_economics_social_sciences_hkd",
           ]
           libraries = []
+          all_manifests = list(root.glob("**/candidate-manifest.json"))
+          manifest_by_id = {}
+          for candidate_path in all_manifests:
+              try:
+                  candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+                  manifest_by_id.setdefault(candidate.get("id"), candidate_path)
+              except (OSError, json.JSONDecodeError):
+                  continue
           for library_id in expected:
-              manifests = list(root.glob(f"**/{library_id}/candidate-manifest.json"))
-              if manifests:
-                  manifest_path = manifests[0]
+              manifest_path = manifest_by_id.get(library_id)
+              if manifest_path:
                   item = json.loads(manifest_path.read_text(encoding="utf-8"))
                   libraries.append({
                       "id": library_id,
