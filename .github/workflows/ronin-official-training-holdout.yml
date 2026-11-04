@@ -48,6 +48,21 @@ jobs:
       - name: Obtener RONIN IA
         uses: actions/checkout@v5
 
+      - name: Preflight fail-fast de RUN 5 antes de descargar o instalar dependencias
+        run: |
+          python scripts/check_run5_preflight.py \
+            --corpus-root /tmp/ronin-sixteen-libraries \
+            --report reports/run5-preflight.json
+
+      - name: Publicar diagnóstico del preflight aunque el gate bloquee
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-run5-readiness-preflight
+          path: reports/run5-preflight.json
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Obtener Portfolio en revisión inmutable para recuperación
         uses: actions/checkout@v5
         with:
