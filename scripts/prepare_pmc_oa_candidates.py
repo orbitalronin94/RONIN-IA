@@ -21,6 +21,7 @@ from scripts.prepare_run5_candidates import (
     domain_kind_name,
     score_record,
     tokens,
+    minimum_scanned_bytes_for_library_floor,
     write_split,
 )
 
@@ -137,6 +138,14 @@ def prepare(
 ) -> dict[str, Any]:
     if domain not in PMC_DOMAINS:
         raise ValueError(f"PMC source does not cover domain {domain}")
+    required_input_bytes = minimum_scanned_bytes_for_library_floor(
+        min_train_bytes, HKD_FRACTION
+    )
+    if max_text_bytes < required_input_bytes:
+        raise ValueError(
+            f"max_text_bytes must be at least {required_input_bytes} bytes "
+            "for both disjoint PMC libraries to possibly meet the train floor"
+        )
     authorization = load_authorization(audit_path)
     source_spec = validate_source_spec(source_manifest_path, domain, authorization)
     output_root.mkdir(parents=True, exist_ok=True)
@@ -307,6 +316,7 @@ def prepare(
                 "max_documents": max_documents,
                 "max_text_bytes": max_text_bytes,
                 "minimum_train_bytes_per_library": min_train_bytes,
+                "minimum_scanned_bytes_for_both_libraries": required_input_bytes,
                 "hkd_fraction": HKD_FRACTION,
             },
             "ingestion": {
