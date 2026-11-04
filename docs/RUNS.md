@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:31 | [Integración continua #948 (run 41934289389)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934289389) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Pin GovEasy adapter to published dataset JSON endpoints and hash AI policy. Trigger: push; rama: main; intento: 1. | 0c3c1489 |
 | 2026-11-04 23:30 | [Integración continua #945 (run 41934110370)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934110370) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Withdraw CoVoST bilingual preflight pending independent Common Voice v4 rights/access. Trigger: push; rama: main; intento: 1. | 72cfe0c2 |
 | 2026-11-04 23:30 | [Integración continua #946 (run 41934211924)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934211924) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add GovEasy Spanish administrative dataset candidate adapter. Trigger: push; rama: main; intento: 1. | 4cf290e2 |
 | 2026-11-04 23:29 | [Integración continua #941 (run 41934010244)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934010244) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Register CoVoST bilingual text-pair candidate lane. Trigger: push; rama: main; intento: 1. | 0e75f110 |
