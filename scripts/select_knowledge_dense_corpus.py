@@ -175,7 +175,8 @@ def main() -> None:
         if spec.get("enabled") is not True:
             rejected["source_disabled_pending_audit"] += 1
             continue
-        if not spec.get("immutable_revision") or not spec.get("license_audit"):
+        audit_path = Path(spec.get("license_audit", ""))
+        if not spec.get("revision") or not audit_path.is_file():
             rejected["missing_revision_or_license_audit"] += 1
             continue
         allowed = set(spec.get("allowed_licenses", []))
