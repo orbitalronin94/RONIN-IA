@@ -83,7 +83,7 @@ Initial audit results:
 - Nine candidate source records are registered for later exact-version review, including SEC EDGAR, Civil Comments, ContractNLI, CUAD, CORD-v2, MT-Bench human judgments, deepset prompt-injections, Amazon ESCI and Amazon Berkeley Objects.
 - Four entries are explicitly excluded or quarantined: HAGRID and FiNER-139 (ShareAlike), NVD (underlying CVE-TOU terms unresolved), and CFPB complaint narratives (privacy review required).
 
-At this stage, **zero payloads were downloaded, zero new level-A rights records were created, and zero GitHub candidates became training-eligible**. Every candidate still needs immutable source revision, exact license scope, payload SHA-256, third-party rights review, privacy/quality checks, cross-library deduplication, split-integrity checks and global G-0. This deliberately conservative result prevents a catalog's blanket license claim from being mistaken for rights clearance of every underlying record.
+The original discovery stage began with zero downloads. The two later candidate-only acquisitions are tracked separately from admission: 2 candidate payloads and 2 rights records have been verified, but **0 payloads are admitted and 0 records are training-eligible**. The audit's `payloads_downloaded`, `level_a_records_created` and `training_eligible_records` counters intentionally remain zero until the separate admission process succeeds. Every candidate still needs immutable source revision, exact license scope, payload SHA-256, third-party rights review, privacy/quality checks, cross-library deduplication, split-integrity checks and global G-0. This deliberately conservative result prevents a catalog's blanket license claim from being mistaken for rights clearance of every underlying record.
 
 
 ## Eulogikon CC0 metadata candidate (2026-11-05)
@@ -114,3 +114,12 @@ Both acquisition workflows completed successfully, generated SHA-256 manifests, 
 - **OpenAlex works metadata:** 100,000 records, 259,309,375 bytes; payload SHA-256 `f2342d4d3ddf5f4acd251821a0ba6c85bc2b7440ca29be889796075ce515425f`. Snapshot date 2026-10-14; manifest SHA-256 `00ea35c5696d31ca88d814c4ba3ded371cac48681f843966191024f4609fc794`; exact S3 shard and hash are in the artifact manifest. Explicit metadata allowlist only; no abstracts or full text. Workflow run [41931767076](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41931767076), artifact [13372481305](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41931767076).
 
 The Actions artifacts are retained for 90 days. The source adapters and pinned manifests allow deterministic re-acquisition and re-hashing; the candidate payloads are not committed as large Git blobs.
+
+
+## Further reviewed candidates (not yet downloaded/admitted)
+
+- **ScienceVerse — Collabra: Psychology:** a pinned, domain-specific corpus of 749 open-access papers, with the corpus README declaring CC-BY 4.0 and approximately 915 MB of PDFs. The source repository contains other corpora with mixed or NC/ND terms, so the candidate is restricted to Collabra only. Per-DOI publisher rights, PDF hashes, third-party figures/tables and attribution must be checked before admission.
+- **Hlido open AI-agent review corpus:** pinned mirror manifest reports 1,041 agent reviews and a 1,700,537-byte CC-BY-4.0 dump (manifest SHA-256 for the JSONL: `8df3aef0822f5340668c94b885cce37cba1bfce917315d738244b4e614fae99f`). The licence applies only to the open-data dump. Its separate Hugging Face dataset is CC-BY-NC-4.0 and is excluded. The live dump still needs download and checksum verification; quote snippets require a third-party rights review. This is a narrow AI-agent evaluation source, not a general pretraining corpus.
+- **MathemAct:** reviewed its pinned 2026-11-03 export manifest. It declares CC-BY 4.0 for public contributions, but the current snapshot contains only 1 report and 1 claim (plus tags, profile and comment metadata). It is too small to prioritize now; user-submitted content and quoted third-party transcript excerpts need filtering before any future use.
+
+The ScienceVerse and Hlido candidates are registered in `candidates/github-source-audit.json`; neither has been downloaded or rights-certified by RONIN yet.
