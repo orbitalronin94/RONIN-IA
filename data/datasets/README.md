@@ -272,3 +272,17 @@ El registro incluye ahora 49 entradas entre candidatas, metadatos y exclusiones.
 
 
 Common Corpus filter refinement: MIT-labelled OpenSource/code rows are now rejected in the next run until we can preserve the exact upstream repository license notice and copyright bundle per source file. The first smoke run emitted 1,243 CC0 rows, 3 CC-BY-3.0 rows, 2 CC-BY-4.0 rows and 1,752 MIT rows, but **none are admitted**; the MIT partition is specifically quarantined and will not be reused as a training source. The next run retains only CC0 and CC-BY partitions and keeps human privacy/source review mandatory.
+
+
+## Verifiable candidate ingestion results (2026-11-05)
+
+The discovery register currently contains 49 candidate source entries. This is not 49 admitted datasets: entries are a mix of acquisition-ready candidates, metadata-only sources, pending per-item audits and explicit quarantines. The rights registry currently contains five exact-scope Level A records; none of these records bypasses global G-0, privacy, quality, deduplication or split-integrity gates.
+
+| Lane | Verified candidate output | Evidence |
+|---|---:|---|
+| CoVoST 2 translation-only | 432,475 rows; 86,874,752 bytes; SHA-256 `fc7f70d7ca75c2eef50a710b579186332d3082f5aa4369ee01039aab6d8ff58e` | [Workflow + artifact](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932647180) |
+| OpenAlex bibliographic metadata | 100,000 rows; 185,943,561 bytes; SHA-256 `a167fac571d5c172f531bd5c2ddb35c9ca06506919522ac187e602c3b9599cf8` | [Workflow + artifact](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932684850) |
+| ROR v2.14 metadata | 144,717 valid JSONL records; 87,836,990 bytes; SHA-256 `f4ec624eeb6ff4fe3015525dd8b0327c1610af3edd029d25862672ec75d7158c` | [Workflow + artifact](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933051951) |
+| Common Corpus filtered sample | First run: 3,000 candidates; 1,243 CC0, 3 CC-BY-3.0, 2 CC-BY-4.0, 1,752 MIT; 470 privacy-pattern rejections | [Workflow + artifact](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932708586) |
+
+CoVoST, OpenAlex and ROR exact payload versions have corresponding rights-ledger records. The Common Corpus sample remains review-only; MIT code rows are excluded in the follow-up acquisition until source-specific copyright/license notice bundles can be preserved. The OpenAlex and ROR outputs are bibliographic/registry metadata, not counted as substantive text-training corpora. No candidate output is admitted or training-eligible.
