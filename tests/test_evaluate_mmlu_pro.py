@@ -184,3 +184,38 @@ def test_forward_last_logits_rejects_invalid_positions():
         model.forward_last_logits(input_ids, torch.tensor([7], dtype=torch.long))
     with pytest.raises(ValueError, match="fuera de secuencia"):
         model.forward_last_logits(input_ids, torch.tensor([7, 8], dtype=torch.long))
+
+
+def test_last_position_only_and_full_logits_evaluation_have_identical_predictions(tmp_path: Path):
+    config, _ = get_profile("tiny")
+    model = RoninLM(config)
+    checkpoint = tmp_path / "model.pt"
+    torch.save({"model": model.state_dict(), "step": 0}, checkpoint)
+    rows = normalize_rows(sample_rows())
+    full = evaluate_rows(
+        checkpoint=checkpoint,
+        rows=rows,
+        all_rows_sha256=rows_sha256(rows),
+        context_length=128,
+        batch_token_budget=8192,
+        last_token_only=False,
+    )
+    optimized = evaluate_rows(
+        checkpoint=checkpoint,
+        rows=rows,
+        all_rows_sha256=rows_sha256(rows),
+        context_length=128,
+        batch_token_budget=8192,
+        last_token_only=True,
+    )
+    assert full["inference_path"] == "full_sequence_logits"
+    assert optimized["inference_path"] == "last_position_only"
+    assert full["overall"] == optimized["overall"]
+    assert full["by_domain"] == optimized["by_domain"]
+    assert [row["predicted_index"] for row in full["details"]] == [
+        row["predicted_index"] for row in optimized["details"]
+    ]
+    for full_row, optimized_row in zip(full["details"], optimized["details"]):
+        assert optimized_row["candidate_log_probabilities"] == pytest.approx(
+            full_row["candidate_log_probabilities"], abs=1e-5
+        )
