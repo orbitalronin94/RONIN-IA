@@ -235,3 +235,17 @@ Estas fuentes se registran como candidatas y todavía no son bibliotecas admitid
 - **Mozilla Common Voice** — términos de contribución de Mozilla establecen CC0 para contribuciones originales y la colección etiqueta sus releases como CC0-1.0. Se registra como corpus de voz/transcripción, separado del corpus de prosa. Cada versión requiere datasheet, acceso público confirmado, hash, auditoría de privacidad y decisión explícita sobre identificadores de hablante. No se asume que la existencia de una página de descarga implica acceso anónimo.
 
 Las referencias primarias y los límites de alcance están en `candidates/github-source-audit.json`. Las declaraciones de licencia de DBLP y Wikidata cubren sus metadatos/datos estructurados, no el contenido de webs enlazadas ni namespaces/media excluidos. Common Voice requiere validar la versión exacta descargada antes de crear un registro de derechos con hash.
+
+
+## Más repositorios y catálogos con derechos delimitados
+
+Se han incorporado al registro de descubrimiento (sin admisión automática):
+
+- **Dryad**: declara CC0 para los datasets depositados. Selección por DOI y archivo; excluir datos personales, humanos/sensibles o material de terceros sin autorización y evaluar si el contenido sirve realmente como texto de entrenamiento.
+- **Europeana**: sus metadatos agregados son CC0; los objetos digitales enlazados mantienen el derecho propio de cada proveedor en `edm:rights`. Se admite solo la capa de metadatos hasta tener una política por objeto.
+- **Smithsonian Open Access**: solo los objetos que muestran explícitamente el distintivo CC0; el resto no se presume abierto. Revisar privacidad, derechos de imagen/publicidad, patrimonio cultural y terceros.
+- **Open Library**: catálogo bibliográfico CC0; los dumps mensuales son voluminosos. La licencia del catálogo no autoriza textos de libros, cubiertas ni ficheros de Internet Archive.
+- **NASA Science Data**: los datos de misiones dirigidas por NASA pueden ser CC0 si el archivo no lleva aviso restrictivo; otras fuentes y contribuciones de terceros no se presumen libres. Es material científico estructurado, no prosa general.
+- **NIST Public Data Repository**: fuente de descubrimiento con DOI y ficheros descargables; no hay licencia global. Cada registro y archivo requiere licencia explícita y hashes.
+
+Los seis registros incluyen alcance, evidencia del proveedor y riesgos. No se han descargado ni contado bytes de estas fuentes, ni se consideran bibliotecas listas para entrenamiento. La fuente de verdad es el registro de auditoría; cada futuro adaptador debe producir manifiesto, SHA-256, provenance y propuesta de rights record antes de cualquier revisión de admisión.
