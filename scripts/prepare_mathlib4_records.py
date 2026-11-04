@@ -28,7 +28,7 @@ def build_record(path: Path, repo_root: Path, revision: str) -> dict[str, Any]:
             if declared != "Apache-2.0":
                 raise ValueError(f"conflicting SPDX license in {relative}: {declared}")
     source_sha = hashlib.sha256(raw).hexdigest()
-    document_id = hashlib.sha256(f"{revision}\0{relative}".encode("utf-8")).hexdigest()
+    document_id = hashlib.sha256(f"{revision}\0{relative}".encode()).hexdigest()
     return {
         "document_id": document_id,
         "domain": classify_path(relative),
@@ -64,7 +64,6 @@ def prepare(repo_root: Path, revision: str, output: Path) -> dict[str, Any]:
             raw = path.read_bytes()
             if not raw or len(raw) > 2 * 1024 * 1024:
                 continue
-            text = raw.decode("utf-8")
             record = build_record(path, repo_root, revision)
             encoded = (json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
             stream.write(encoded)
