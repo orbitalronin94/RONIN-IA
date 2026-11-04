@@ -14,6 +14,8 @@ def test_manifest_has_sixteen_distinct_libraries_and_portfolio_is_retrieval_only
     assert data["policy"]["target_train_bytes_per_library"] == 10 * 1024**3
     assert data["policy"]["minimum_total_train_bytes"] == 16 * 2_560 * 1024**2
     assert data["policy"]["target_total_train_bytes"] == 16 * 10 * 1024**3
+    assert data["policy"]["hkd_fraction"] == 0.5
+    assert "2.5 GiB" in data["policy"]["hkd_scale_rationale"]
     assert len({item["id"] for item in data["libraries"]}) == 16
     assert data["portfolio"]["role"] == "retrieval_only_fallback"
     assert data["portfolio"]["training_eligible"] is False
