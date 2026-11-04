@@ -228,10 +228,51 @@ jobs:
                   entry = libraries[library_id]
                   entry["source_revision"] = metadata.get("source_revision")
                   entry["source_dataset"] = metadata.get("source_dataset")
+                  domain_name = str(metadata.get("domain", ""))
+                  review_source = shard / "human-review-samples"
+                  if domain_name and review_source.is_dir():
+                      shutil.copytree(
+                          review_source,
+                          review_root / domain_name,
+                          dirs_exist_ok=True,
+                      )
                   if manifest_path.is_file():
                       manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                      original_manifest_hash = manifest.get("manifest_sha256")
+                      if metadata.get("manifest_sha256") != original_manifest_hash:
+                          entry["status"] = "manifest_hash_mismatch"
+                      review_name = Path(str(manifest.get("human_review_file", ""))).name
+                      if review_name:
+                          manifest["human_review_file"] = (
+                              f"../_human_review/{domain_name}/{review_name}"
+                          )
+                      manifest["documents_manifest"] = "documents.jsonl"
+                      manifest.pop("manifest_sha256", None)
+                      manifest["manifest_sha256"] = hashlib.sha256(
+                          json.dumps(
+                              manifest, ensure_ascii=False, sort_keys=True
+                          ).encode("utf-8")
+                      ).hexdigest()
+                      manifest_path.write_text(
+                          json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+                          encoding="utf-8",
+                      )
                       entry["manifest_sha256"] = manifest.get("manifest_sha256")
+                      entry["candidate_manifest_file_sha256"] = hashlib.sha256(
+                          manifest_path.read_bytes()
+                      ).hexdigest()
                       entry["documents_manifest_sha256"] = manifest.get("documents_manifest_sha256")
+                      entry["documents_jsonl_sha256"] = (
+                          hashlib.sha256(sidecar_path.read_bytes()).hexdigest()
+                          if sidecar_path.is_file() else None
+                      )
+                      entry["document_count"] = manifest.get("document_count", {})
+                      entry["license_policy"] = manifest.get("license_policy", [])
+                      entry["split_sha256"] = manifest.get("split_sha256", {})
+                      entry["sensitive_scan_sha256"] = manifest.get("sensitive_scan_sha256")
+                      entry["dedup_report_sha256"] = manifest.get("dedup_report_sha256")
+                      entry["selection_report_sha256"] = manifest.get("selection_report_sha256")
+                      entry["human_review_file"] = manifest.get("human_review_file")
                   if train_path.is_file():
                       content = train_path.read_bytes()
                       actual_hash = hashlib.sha256(content).hexdigest()
