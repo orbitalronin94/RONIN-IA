@@ -532,3 +532,10 @@ Se prepara una iteración separada del entrenamiento oficial RUN 5, porque G-0 y
 Limitaciones: las explicaciones son racionales explícitas generadas, no cadenas privadas de pensamiento. La etiqueta gold verifica la respuesta, pero no certifica independientemente cada frase de la explicación. La salida generada no recibe una licencia automática; se conserva como artefacto experimental interno. Usar repetidamente el test para decidir promociones puede producir contaminación adaptativa del holdout.
 
 Estado: workflow y pruebas añadidos en la rama `feat/phi4-mmlu-pro-rationale-distillation`; ejecución de entrenamiento pendiente de CI/merge. No afirmar mejora hasta disponer del informe MMLU-Pro completo antes/después.
+
+
+### Intento 1 de destilación Phi-4 — fallo de importación (4 de noviembre de 2026)
+
+- [Run #41919601882](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41919601882): instalación y tests de contrato correctos; Phi-4 mini instruct descargado desde la revisión fijada y manifiesto/hash verificados.
+- La generación no llegó a ejecutarse: al invocar `python scripts/distill_mmlu_pro_tutor.py`, Python no encontraba `scripts.evaluate_mmlu_pro` porque `scripts/` era `sys.path[0]`. No se generaron ejemplos, no hubo entrenamiento y no se evaluó MMLU-Pro test.
+- Corrección añadida en la rama: fallback de importación compatible con ejecución directa y con importación desde pytest. Se repite el workflow al actualizar la PR; no se relajan filtros ni se promocionan pesos.
