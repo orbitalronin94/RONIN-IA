@@ -43,7 +43,7 @@ Si cualquiera de las dos condiciones falla, no se guarda el checkpoint nuevo y l
 
 ## Ciclos rápidos con corpus abierto y promoción por validación
 
-El workflow `rapid-open-training-cycles.yml` ejecuta hasta tres ciclos cortos consecutivos y, cuando una ejecución termina correctamente, GitHub Actions dispara automáticamente la siguiente mediante `workflow_run`. No requiere activación manual entre ciclos. Un `cron` cada seis horas sirve solo como arranque/recuperación si la cadena se detiene. Usa el corpus público fijado por `prepare_open_corpora.py`, con partición por obra; conserva el último checkpoint aceptado y hace warm-start del siguiente ciclo.
+El workflow `rapid-open-training-cycles.yml` ejecuta hasta tres ciclos cortos consecutivos y, cuando una ejecución termina correctamente, el workflow separado `rapid-open-training-dispatcher.yml` recibe el evento `workflow_run` y solicita automáticamente la siguiente tanda mediante `workflow_dispatch`. Separar el dispatcher evita que el workflow de entrenamiento se dispare a sí mismo en una cadena recursiva. No requiere activación manual entre ciclos. Un `cron` cada seis horas sirve solo como arranque/recuperación si la cadena se detiene. Usa el corpus público fijado por `prepare_open_corpora.py`, con partición por obra; conserva el último checkpoint aceptado y hace warm-start del siguiente ciclo.
 
 **Gate obligatorio:** el workflow llama a `assert_g0_passed.py` antes de descargar textos o entrenar. Si G-0 no está en PASS, la ejecución falla de forma cerrada, no descarga textos ni modifica pesos y corta la cadena; el arranque periódico vuelve a intentarlo más tarde. Una etiqueta de licencia o la disponibilidad pública no sustituyen la revisión humana.
 
