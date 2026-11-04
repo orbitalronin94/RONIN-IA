@@ -131,9 +131,13 @@ def main() -> int:
         "Ejecución de GitHub Actions; consultar logs y artefactos "
         "enlazados para el resultado detallado.",
     )
+    head_commit = run.get("head_commit") or {}
+    commit_message = safe(head_commit.get("message") or "")
     description = (
         summary
-        + " Trigger: "
+        + " Commit: "
+        + commit_message
+        + ". Trigger: "
         + event_name
         + "; rama: "
         + branch
