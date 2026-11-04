@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
   "project": "RONIN-IA",
-  "audited_at": "2026-11-04T12:24:00Z",
+  "audited_at": "2026-11-04T12:40:00Z",
   "integration_branch": "main",
-  "pull_request": "https://github.com/orbitalronin94/RONIN-IA/pull/39",
+  "pull_request": "https://github.com/orbitalronin94/RONIN-IA/pull/42",
   "policy": "Never mix training data, validation/test holdouts, benchmarks, tutor models, or quarantined specialist material.",
   "artifacts": {
     "literature_acquisition_run": "https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919840",
@@ -26,14 +26,21 @@
       },
       {
         "name": "ronin-biblioteca-opacidad-v1",
-        "size_bytes": 203231066
+        "size_bytes": 203270819
       }
     ],
     "combined_training_artifact": "pending_official_workflow_run_1",
     "official_workflow": ".github/workflows/ronin-official-training-holdout.yml",
     "official_workflow_run": "https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377",
     "official_workflow_status": "in_progress",
-    "ci_status": "success_101_tests"
+    "ci_status": "success_pr_42",
+    "teacher_cache_run": "https://github.com/orbitalronin94/RONIN-IA/actions/runs/41830015010",
+    "teacher_cache_status": "success",
+    "teacher_candidate_run": "https://github.com/orbitalronin94/RONIN-IA/actions/runs/41830435286",
+    "teacher_candidate_status": "in_progress",
+    "official_workflow_followup_run": "https://github.com/orbitalronin94/RONIN-IA/actions/runs/41830014564",
+    "official_workflow_followup_status": "pending_behind_first_full_evaluation",
+    "pull_request_42_status": "merged"
   },
   "training_candidates": [
     {
@@ -117,8 +124,8 @@
       "id": "microsoft/Phi-4-mini-instruct",
       "license": "MIT",
       "revision": "cfbefacb99257ffa30c83adab238a50856ac3083",
-      "trust_remote_code": true,
-      "role": "optional local teacher; generated output license not asserted; REF structural audit does not prove factual truth"
+      "trust_remote_code": false,
+      "role": "local teacher only; generates REF candidates for human review; output license not asserted; structural audit does not prove factual truth; never used for student training before rights and quality review"
     }
   ],
   "specialist_material": [
@@ -132,7 +139,23 @@
         "test": 52
       },
       "status": "excluded_pending_manual_review",
-      "reason": "OCR, edition/source alignment, rights and epistemic review required before training admission"
+      "reason": "OCR, edition/source alignment, rights and epistemic review required before training admission",
+      "candidate_train_artifact": {
+        "run": "https://github.com/orbitalronin94/RONIN-IA/actions/runs/41829469089",
+        "artifact_id": 13323190940,
+        "artifact_name": "ronin-biblioteca-opacidad-v1",
+        "artifact_size_bytes": 203270819,
+        "filename": "ronin-obfuscation-library/candidate-train.txt",
+        "bytes": 281223,
+        "sha256": "95b46f12d5ae4fa0906ec3d9f70a6cf66ed97dd5a6cefeb41985231246bb04f7",
+        "train_records": 404,
+        "validation_reserved": 50,
+        "test_reserved": 52,
+        "synthetic_train_records": 400,
+        "non_synthetic_train_records": 4,
+        "used_for_training": false,
+        "status": "candidate_only_manual_review_required"
+      }
     },
     {
       "id": "synthetic-pseudowords",
@@ -193,7 +216,7 @@
     },
     {
       "id": "pleias-spanish-public-domain-books",
-      "status": "candidate_PR_13_open_not_integrated"
+      "status": "candidate_PR_13_closed_failed_download_and_static_checks"
     },
     {
       "id": "mozilla-finance-sentences",
@@ -209,7 +232,7 @@
     "Never mix validation, test, eval or benchmark paths into train.",
     "Do not concatenate corpus-v2 twice when source and partition SHA-256 values match.",
     "Keep Portfolio, literature and tutor output provenance independently identifiable.",
-    "Tutor output is optional and must be audited; if generation fails, record no augmentation.",
+    "Tutor outputs remain candidates only; never enter general training before human quality and rights review.",
     "Keep cryptography library and synthetic pseudowords outside general pretraining.",
     "Official training workflow excludes tutor-generated text until human quality and rights review.",
     "Official external holdout is the full MMLU-Pro test split; it must never enter training or prompt tuning."
