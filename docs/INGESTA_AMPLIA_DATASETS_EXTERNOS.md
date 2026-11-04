@@ -94,6 +94,7 @@ Se incorpora un primer flujo real y reproducible de descarga acotada:
 
 - **Wikidata CC0**: declaraciones estructuradas de entidades, tipos, propiedades y valores, con identificadores y etiquetas en español/inglés. No se convierte artificialmente en prosa ni se confunde con un corpus narrativo.
 - **Europe PMC**: resúmenes de artículos que declaran expresamente CC0 o CC BY. Se excluyen licencias no comerciales, sin obras derivadas y etiquetas desconocidas. Se conserva DOI/PMID/PMCID, autores, fecha, licencia y URL de origen.
+- **Common Corpus (PleIAs)**: consulta del filtro indexado de Hugging Face, sin clonar ni transmitir el corpus de varios terabytes. Se buscan textos cortos en español/inglés (hasta 5.000 palabras y 200 KB), con una allowlist exacta de dominio público, CC0, CC BY 2/3/4 y MIT. El manifiesto declara si el índice del visor es parcial; no se presupone cobertura completa.
 
 El workflow [Ingesta de muestras CC0/CC-BY — Wikidata + Europe PMC](../.github/workflows/external-sample-ingestion.yml) se ejecuta al integrar cambios en su pipeline, mensualmente y manualmente. Por defecto obtiene hasta 500 registros por fuente, calcula SHA-256, versiona los ficheros bajo `data/external_samples/` y publica un artefacto. Los registros continúan con `training_eligible=false`: esta ingesta es una muestra de adquisición, no una autorización para incorporarla automáticamente a train.
 
