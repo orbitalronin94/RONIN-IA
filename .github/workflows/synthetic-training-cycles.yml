@@ -49,9 +49,10 @@ jobs:
     env:
       PYTHONUNBUFFERED: "1"
       STEPS: ${{ github.event_name == 'workflow_dispatch' && inputs.steps || '100' }}
-      SEEDS: ${{ github.event_name == 'workflow_dispatch' && inputs.seeds || '1337' }}
+      SEEDS: ${{ github.event_name == 'workflow_dispatch' && inputs.seeds || '1337,2027,42' }}
       MMLU_LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.mmlu_limit || '0' }}
       MMLU_CONTEXT_LENGTH: ${{ github.event_name == 'workflow_dispatch' && inputs.mmlu_context_length || '2048' }}
+      CORPUS_SEED: ${{ github.run_id }}
     steps:
       - name: Obtener código
         uses: actions/checkout@v5
@@ -66,7 +67,7 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: /tmp/ronin-warmstart
-          key: ronin-synthetic-warmstart-${{ github.run_id }}
+          key: ronin-structured-warmstart-${{ github.run_id }}
           restore-keys: |
             ronin-synthetic-warmstart-
 
@@ -120,7 +121,8 @@ jobs:
           python scripts/prepare_synthetic_corpus.py \
             --output /tmp/ronin-synthetic \
             --train-sentences 12000 \
-            --validation-sentences 2000
+            --validation-sentences 2000 \
+            --seed "$CORPUS_SEED"
 
       - name: Entrenar, medir antes y después
         run: |
@@ -289,16 +291,17 @@ jobs:
           val_path = Path("/tmp/ronin-synthetic/validation.txt")
           dataset = Path("benchmarks/domains_v1.jsonl")
           summary = {
-              "experiment": "ronin-synthetic-warmstart-cycle-v2",
+              "experiment": "ronin-structured-synthetic-curriculum-warmstart-v1",
+              "corpus_seed": int(os.environ["CORPUS_SEED"]),
               "warmstart_promoted": Path("reports/warmstart-accepted.flag").is_file(),
-              "data_kind": "synthetic_artificial_text_not_a_knowledge_corpus",
+              "data_kind": "synthetic_structured_algorithmic_curriculum_not_external_knowledge_corpus",
               "steps_per_seed": int(os.environ["STEPS"]),
               "seeds": [x["seed"] for x in cycles],
               "sha256": {"train": sha(train_path), "validation": sha(val_path), "domain_benchmark": sha(dataset)},
               "cycles": cycles,
               "external_benchmark": "TIGER-Lab/MMLU-Pro; split test; MIT declarado; solo evaluación y nunca entrenamiento.",
               "limitations": [
-                  "El corpus artificial solo valida que entrenamiento y evaluación funcionan; no mide aprendizaje de conocimiento real.",
+                  "El currículo contiene tareas sintéticas estructuradas y respuestas calculadas; no sustituye a corpus externos ni acredita conocimiento factual amplio.",
                   "El benchmark multidominio tiene 23 preguntas y evalúa selección por siguiente byte, no razonamiento abierto.",
                   "MMLU-Pro se evalúa en modo zero-shot por siguiente byte; no es puntuación oficial ni comparable con su leaderboard.",
                   "La cobertura MMLU-Pro excluye explícitamente preguntas que superan el contexto; no se truncan.",
