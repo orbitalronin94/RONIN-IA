@@ -270,7 +270,8 @@ def domain_kind_name(domain: str, kind: str) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=Path("/tmp/ronin-run5-candidates"))
-    parser.add_argument("--max-rows", type=int, default=250_000)
+    parser.add_argument("--max-rows", type=int, default=500_000)
+    parser.add_argument("--domain", choices=DOMAIN_PRIORITY, help="Process one domain per runner to scale storage horizontally")
     parser.add_argument("--max-input-bytes", type=int, default=6 * 1024**3)
     parser.add_argument("--min-train-bytes", type=int, default=2_560 * 1024**2)
     parser.add_argument("--hkd-fraction", type=float, default=HKD_FRACTION)
@@ -364,6 +365,9 @@ def main() -> int:
         if domain is None:
             rejected["domain_unclassified"] += 1
             continue
+        if args.domain and domain != args.domain:
+            rejected["other_domain"] += 1
+            continue
         doc_id = hashlib.sha256(
             f"{DATASET_REVISION}\0{provenance}\0{license_name}".encode("utf-8")
         ).hexdigest()
@@ -394,13 +398,14 @@ def main() -> int:
             )
     db.commit()
 
+    active_domains = (args.domain,) if args.domain else DOMAIN_PRIORITY
     domain_counts = {
         domain: db.execute("SELECT COUNT(*) FROM docs WHERE domain=?", (domain,)).fetchone()[0]
-        for domain in DOMAIN_PRIORITY
+        for domain in active_domains
     }
 
     # Recompute RONIN-HKD with corpus-level document frequency, per domain.
-    for domain in DOMAIN_PRIORITY:
+    for domain in active_domains:
         total_docs = domain_counts[domain]
         if not total_docs:
             continue
@@ -424,7 +429,7 @@ def main() -> int:
     libraries: list[dict[str, Any]] = []
     sample_root = args.output_root / "human_review"
     global_seen_simhash: dict[int, dict[int, list[int]]] = {i: {} for i in range(4)}
-    for domain in DOMAIN_PRIORITY:
+    for domain in active_domains:
         count = domain_counts[domain]
         if count < 2:
             rejected[f"{domain}_insufficient_documents"] += 1
