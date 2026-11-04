@@ -50,6 +50,20 @@ COLLECTIONS = {
 }
 LANGUAGES = {"en", "es"}
 LANGUAGE_ALIASES = {"en": "en", "english": "en", "es": "es", "spanish": "es"}
+# Common Corpus uses the "language" field as a programming-language label for
+# Open Source records, not as a natural-language label. Keep this allowlist
+# explicit so human languages outside en/es remain excluded.
+CODE_LANGUAGE_LABELS = {
+    "assembly", "astro", "bash", "c", "c#", "c++", "cmake", "clojure",
+    "coffeescript", "crystal", "css", "dart", "dockerfile", "elixir",
+    "elm", "erlang", "f#", "fortran", "go", "groovy", "haskell", "html",
+    "java", "javascript", "julia", "kotlin", "lean", "less", "lua",
+    "makefile", "markdown", "matlab", "nix", "nim", "objective-c",
+    "ocaml", "pascal", "perl", "php", "powershell", "prolog", "python",
+    "r", "racket", "ruby", "rust", "sass", "scala", "scheme", "scss",
+    "shell", "solidity", "sql", "swift", "svelte", "tsx", "typescript",
+    "v", "vb", "vim script", "vue", "xml", "yaml", "zig",
+}
 DOMAIN_HINTS = {
     "mathematics": "theorem equation algebra calculus geometry probability statistics",
     "logic_epistemology": "logic inference proposition predicate proof epistemology falsifiability",
@@ -86,7 +100,23 @@ def row_value(row: dict[str, Any], *keys: str) -> Any:
     return None
 
 
-def choose_domain(text: str, collection: str) -> tuple[str | None, dict[str, float]]:
+def is_code_language(value: Any) -> bool:
+    return str(value or "").strip().casefold() in CODE_LANGUAGE_LABELS
+
+
+def is_allowed_language(value: Any, collection: str, domain: str | None = None) -> bool:
+    raw = str(value or "").strip()
+    normalized = raw.lower().split("-")[0]
+    if LANGUAGE_ALIASES.get(normalized, normalized) in LANGUAGES:
+        return True
+    return collection == "Open Source" and domain in (None, "computer_science") and is_code_language(raw)
+
+
+def choose_domain(
+    text: str, collection: str, language: Any = None
+) -> tuple[str | None, dict[str, float]]:
+    if collection == "Open Source" and is_code_language(language):
+        return "computer_science", score_record(text, "computer_science", Counter(), 1)
     allowed = COLLECTIONS.get(collection, set())
     if not allowed:
         return None, {}
@@ -367,6 +397,7 @@ def main() -> int:
     raw_language_values: Counter[str] = Counter()
     collection_values: Counter[str] = Counter()
     collection_domain_values: Counter[str] = Counter()
+    accepted_code_documents = 0
     scanned_rows = 0
     accepted_bytes = 0
     scanned_text_bytes = 0
@@ -403,9 +434,7 @@ def main() -> int:
         if license_name not in ALLOWED_LICENSES:
             rejected["license_not_allowlisted"] += 1
             continue
-        language_raw = raw_language.lower().split("-")[0] if raw_language != "<missing>" else ""
-        language = LANGUAGE_ALIASES.get(language_raw, language_raw)
-        if language not in LANGUAGES:
+        if not is_allowed_language(raw_language, collection):
             rejected["language_not_allowlisted"] += 1
             continue
         text = raw_text
@@ -424,7 +453,7 @@ def main() -> int:
         if not isinstance(provenance, str) or not provenance.strip():
             rejected["missing_provenance"] += 1
             continue
-        domain, components = choose_domain(text, collection)
+        domain, components = choose_domain(text, collection, raw_language)
         collection_domain_values[f"{collection} -> {domain or '<unclassified>'}"] += 1
         if domain is None:
             rejected["domain_unclassified"] += 1
@@ -432,7 +461,14 @@ def main() -> int:
         domain_specs = source_specs_by_domain.get(domain, [])
         source_filter_match = any(
             collection in spec.get("filters", {}).get("in", {}).get("open_type", [])
-            and str(row_value(row, "language") or "") in spec.get("filters", {}).get("in", {}).get("language", [])
+            and (
+                str(row_value(row, "language") or "") in spec.get("filters", {}).get("in", {}).get("language", [])
+                or (
+                    collection == "Open Source"
+                    and domain == "computer_science"
+                    and is_code_language(row_value(row, "language"))
+                )
+            )
             for spec in domain_specs
         )
         if not source_filter_match:
@@ -462,6 +498,8 @@ def main() -> int:
             rejected["duplicate_document"] += 1
             continue
         accepted_bytes += byte_count
+        if collection == "Open Source" and is_code_language(raw_language):
+            accepted_code_documents += 1
         if scanned_rows % 1000 == 0:
             db.commit()
             print(
@@ -564,6 +602,7 @@ def main() -> int:
             "accepted_document_bytes": accepted_bytes,
             "scanned_text_bytes": scanned_text_bytes,
             "accepted_documents_by_domain": domain_counts,
+            "accepted_code_documents": accepted_code_documents,
             "rejected": dict(rejected),
             "source_profile": {
                 "license_values": histogram_report(raw_license_values),
@@ -592,6 +631,7 @@ def main() -> int:
     print(json.dumps({
         "rows_scanned": scanned_rows,
         "accepted_documents_by_domain": domain_counts,
+        "accepted_code_documents": accepted_code_documents,
         "rejected": dict(rejected),
         "source_profile": report["ingestion"]["source_profile"],
         "libraries_built": len(libraries),
