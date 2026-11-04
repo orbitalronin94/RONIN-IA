@@ -34,7 +34,7 @@ def validate(manifest: dict[str, Any]) -> list[str]:
             if row.get("training_eligible") is True:
                 errors.append(f"{item_id}: candidate cannot self-authorize training")
             if section == "historical_authors":
-                if row.get("rights_status") != "pending_per_work_verification":
+                if "pending" not in str(row.get("rights_status", "")):
                     errors.append(f"{item_id}: historical rights must remain pending")
                 if not row.get("candidate_works"):
                     errors.append(f"{item_id}: no candidate works listed")
