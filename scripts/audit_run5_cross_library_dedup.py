@@ -22,7 +22,7 @@ def audit(corpus_root: Path, report_path: Path) -> dict:
     )
     db.execute("CREATE INDEX signatures_band_key ON signatures(band, band_key)")
     db.execute("CREATE TABLE exact_hashes (digest TEXT PRIMARY KEY, library TEXT, document_id TEXT)")
-    libraries = sorted(path for path in corpus_root.iterdir() if path.is_dir())
+    libraries = sorted(path for path in corpus_root.iterdir() if path.is_dir() and (path / "documents.jsonl").is_file())
     exact_cross = []
     near_cross = []
     docs_seen = 0
