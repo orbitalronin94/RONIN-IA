@@ -41,16 +41,19 @@ jobs:
       - name: Obtener RONIN IA
         uses: actions/checkout@v4
 
-      - name: "Gate G-0: bloquear si no hay derechos acreditados"
-        run: python scripts/assert_g0_passed.py
+      - name: "Gate G-0: comprobar autorización sin iniciar descargas"
+        id: g0
+        run: python scripts/assert_g0_passed.py --github-output "$GITHUB_OUTPUT"
 
       - name: Preparar Python
+        if: steps.g0.outputs.authorized == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
 
       - name: Instalar PyTorch CPU y dependencias
+        if: steps.g0.outputs.authorized == 'true'
         run: |
           python -m pip install --upgrade pip
           python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
@@ -58,12 +61,14 @@ jobs:
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66"
 
       - name: Preparar corpus público determinista
+        if: steps.g0.outputs.authorized == 'true'
         run: |
           python scripts/prepare_open_corpora.py \
             --output /tmp/ronin-ab/processed \
             --cache-dir /tmp/ronin-ab/cache
 
       - name: Validar parámetros del experimento
+        if: steps.g0.outputs.authorized == 'true'
         env:
           STEPS_INPUT: ${{ inputs.steps }}
           SEEDS_INPUT: ${{ inputs.seeds }}
@@ -86,6 +91,7 @@ jobs:
           fi
 
       - name: Entrenar ambas arquitecturas con el mismo protocolo
+        if: steps.g0.outputs.authorized == 'true'
         run: |
           python scripts/benchmark_architecture_ab.py \
             --train-text /tmp/ronin-ab/processed/train.txt \
@@ -97,6 +103,7 @@ jobs:
             --output /tmp/ronin-ab/reports/architecture-ab.json
 
       - name: Publicar informe de métricas
+        if: steps.g0.outputs.authorized == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ronin-arquitectura-ab
