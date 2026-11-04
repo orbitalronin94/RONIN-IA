@@ -34,7 +34,7 @@ jobs:
     env:
       PYTHONUNBUFFERED: "1"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
-      # PR: smoke corto. Push a main y ejecución manual por defecto: test externo completo con una semilla.
+      # Ejecución manual: test externo completo con una semilla tras superar el gate de 16 bibliotecas.
       STEPS: ${{ inputs.steps || '1000' }}
       SEEDS: ${{ inputs.seeds || '1337' }}
       MMLU_LIMIT: ${{ inputs.mmlu_limit || '0' }}
@@ -64,7 +64,7 @@ jobs:
       - name: "Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial"
         run: python scripts/validate_sixteen_libraries.py --require-ready --corpus-root /tmp/ronin-sixteen-libraries
 
-      - name: Construir mezcla balanceada de las ocho bibliotecas admitidas
+      - name: Construir mezcla balanceada de las dieciséis bibliotecas admitidas
         run: |
           python scripts/prepare_training_mixture.py \
             --input mathematics=/tmp/ronin-sixteen-libraries/mathematics/train.txt \
