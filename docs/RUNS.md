@@ -194,3 +194,8 @@ Estado: 0/16 admitidas; las ocho bases y ocho HKD siguen candidatas. No se ha de
 En la PR #53 se incorpora evaluación por lotes con padding derecho causal y presupuesto configurable de tokens. Se añade un workflow de rendimiento activado por cambios del evaluador en PR; compara secuencial frente a batched en los mismos 140 ítems, mismo checkpoint y misma revisión inmutable del test. El artefacto registra tiempos, speedup y paridad de predicciones. La entrada de resultado se completará con el run real de Actions; no se anticipa ningún speedup.
 
 El workflow oficial de entrenamiento recibe `MMLU_BATCH_TOKEN_BUDGET=8192` por defecto y lo registra en el resumen experimental. El gate de 16 bibliotecas permanece obligatorio; este benchmark de rendimiento no lo omite ni lanza entrenamiento.
+
+
+## Iteración de optimización del evaluador — PR #53
+
+Se añade una ruta de inferencia que calcula logits solo en la última posición válida por secuencia y una extracción de scores A-J por lote. El workflow oficial recibe un presupuesto de tokens padded configurable y lo aplica a la evaluación inicial y final. Se añaden pruebas de equivalencia frente al forward completo y de configuración del workflow. Speedup pendiente de CI/benchmark real. No se ha lanzado RUN #5 ni se ha relajado el gate de 16 bibliotecas.
