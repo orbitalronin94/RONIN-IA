@@ -86,6 +86,12 @@ def prepare_training_corpus(
                 curated_count += 1
 
     expected_splits = case_manifest.get("counts_by_split", {})
+    if expected_splits.get("holdout", 0) != 0:
+        raise ValueError("El manifiesto contiene registros holdout que no se deben exportar")
+    expected_splits = {
+        name: count for name, count in expected_splits.items()
+        if name in {"train", "validation", "test"} and count > 0
+    }
     if dict(split_counts) != expected_splits:
         raise ValueError(
             f"Los splits reales {dict(split_counts)} no coinciden con el manifiesto {expected_splits}"
@@ -107,6 +113,7 @@ def prepare_training_corpus(
         "train_records": len(train_rows),
         "validation_reserved": split_counts["validation"],
         "test_reserved": split_counts["test"],
+        "holdout_reserved": 0,
         "train_counts_by_label": dict(sorted(label_counts.items())),
         "synthetic_train_records": synthetic_count,
         "non_synthetic_train_records": curated_count,

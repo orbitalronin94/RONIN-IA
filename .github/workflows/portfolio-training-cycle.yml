@@ -107,9 +107,16 @@ jobs:
           python - <<'PY'
           import datasets
           import huggingface_hub
+          import torch
           import transformers
           from transformers.utils import LossKwargs
           print("Stack:", torch.__version__, datasets.__version__, huggingface_hub.__version__, transformers.__version__, LossKwargs.__name__)
+          PY
+          python -m pip check
+          python - <<'PY'
+          import datasets, huggingface_hub, torch, transformers
+          from transformers.utils import LossKwargs
+          print("Dependencias compatibles:", datasets.__version__, huggingface_hub.__version__, torch.__version__, transformers.__version__, LossKwargs.__name__)
           PY
 
       - name: Preparar corpus de Portfolio
@@ -250,7 +257,7 @@ jobs:
               "verified_primary_sources": source_manifest["source_count"],
               "case_records": case_manifest["record_count"],
               "case_splits": case_manifest["counts_by_split"],
-              "training_policy": "auxiliary only; not mixed into general pretraining",
+              "training_policy": "raw source texts excluded; only the curated train split is used as auxiliary task text",
           }, ensure_ascii=False, indent=2))
           PY
 

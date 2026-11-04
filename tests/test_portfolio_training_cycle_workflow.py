@@ -38,6 +38,9 @@ def test_portfolio_training_cycle_is_reproducible_and_separates_evaluation():
     assert "--input literatura_pd=" in mixture
     assert "--input cryptography_ref=" in mixture
     assert "--input phi4_tutor=" in mixture
+    crypto = by_name["Preparar split train de casos criptográficos; reservar validation y test"]["run"]
+    assert "--case-manifest" in crypto
+    assert "train.txt" in crypto
     assert "train.txt" in mixture
 
     teacher = by_name["Generar propuestas Phi-4 y auditar REF sin publicar salidas"]["run"]

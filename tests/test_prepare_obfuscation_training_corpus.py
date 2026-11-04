@@ -39,7 +39,7 @@ def test_exports_only_train_and_keeps_holdouts_out(tmp_path, monkeypatch):
         "dataset_id": "ronin-obfuscation-patterns-test",
         "record_count": 3,
         "dataset_sha256": hashlib.sha256(raw).hexdigest(),
-        "counts_by_split": {"train": 1, "validation": 1, "test": 1},
+        "counts_by_split": {"train": 1, "validation": 1, "test": 1, "holdout": 0},
     }
     manifest_path = tmp_path / "cases-manifest.json"
     manifest_path.write_text(json.dumps(case_manifest), encoding="utf-8")
