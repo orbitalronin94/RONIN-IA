@@ -1,0 +1,102 @@
+name: Comparativa A-B de arquitecturas
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/architecture-ab.yml"
+      - "ronin/models/**"
+      - "ronin/config.py"
+      - "scripts/benchmark_architecture_ab.py"
+      - "scripts/prepare_open_corpora.py"
+      - "pyproject.toml"
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: Pasos por arquitectura y semilla (1–1000)
+        required: true
+        default: "100"
+        type: string
+      seeds:
+        description: Semillas separadas por comas
+        required: true
+        default: "1337,2027,42"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-architecture-ab-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  architecture-ab:
+    name: GPT histórico frente a RONIN actual
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - name: Obtener RONIN IA
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar PyTorch CPU y dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66"
+
+      - name: Preparar corpus público determinista
+        run: |
+          python scripts/prepare_open_corpora.py \
+            --output /tmp/ronin-ab/processed \
+            --cache-dir /tmp/ronin-ab/cache
+
+      - name: Validar parámetros del experimento
+        env:
+          STEPS_INPUT: ${{ inputs.steps }}
+          SEEDS_INPUT: ${{ inputs.seeds }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            echo "STEPS=100" >> "$GITHUB_ENV"
+            echo "SEEDS=1337,2027,42" >> "$GITHUB_ENV"
+          else
+            if ! [[ "$STEPS_INPUT" =~ ^[0-9]+$ ]] || [ "$STEPS_INPUT" -lt 1 ] || [ "$STEPS_INPUT" -gt 1000 ]; then
+              echo "::error::Los pasos deben estar entre 1 y 1000."
+              exit 1
+            fi
+            if ! [[ "$SEEDS_INPUT" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
+              echo "::error::Formato de semillas no válido."
+              exit 1
+            fi
+            echo "STEPS=$STEPS_INPUT" >> "$GITHUB_ENV"
+            echo "SEEDS=$SEEDS_INPUT" >> "$GITHUB_ENV"
+          fi
+
+      - name: Entrenar ambas arquitecturas con el mismo protocolo
+        run: |
+          python scripts/benchmark_architecture_ab.py \
+            --train-text /tmp/ronin-ab/processed/train.txt \
+            --validation-text /tmp/ronin-ab/processed/validation.txt \
+            --steps "$STEPS" \
+            --seeds "$SEEDS" \
+            --eval-batches 128 \
+            --batch-size 2 \
+            --output /tmp/ronin-ab/reports/architecture-ab.json
+
+      - name: Publicar informe de métricas
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-arquitectura-ab
+          path: /tmp/ronin-ab/reports/architecture-ab.json
+          if-no-files-found: error
+          retention-days: 30
