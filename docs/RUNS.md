@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:24 | [Integración continua #921 (run 41933441207)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933441207) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add bounded Crossref and DataCite CC0 metadata harvesters. Trigger: push; rama: main; intento: 1. | 8a379b8f |
 | 2026-11-04 23:23 | [Integración continua #919 (run 41933316200)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933316200) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Publish verified candidate ingestion metrics and artifact references. Trigger: push; rama: main; intento: 1. | 5e1ba90e |
 | 2026-11-04 23:23 | [Integración continua #918 (run 41933299529)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933299529) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Record verified CoVoST, OpenAlex and ROR artifact hashes and rights ledger counts. Trigger: push; rama: main; intento: 1. | d64f47da |
 | 2026-11-04 23:23 | [Integración continua #914 (run 41933152718)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41933152718) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Certify exact CoVoST and OpenAlex candidate payload versions in rights ledger. Trigger: push; rama: main; intento: 1. | 926261d5 |
