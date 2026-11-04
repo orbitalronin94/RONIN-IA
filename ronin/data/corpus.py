@@ -33,8 +33,13 @@ def prepare(source: str | Path, destination: str | Path) -> int:
             raise ValueError(f"Falta la respuesta en la línea {line_number}")
         if record.get("source_type") != "local_mit_teacher_generated_text":
             raise ValueError(f"Tipo de origen inesperado en la línea {line_number}")
-        if record.get("teacher_license") != "MIT" or record.get("teacher_license_verified") is not True:
-            raise ValueError(f"El tutor no acredita licencia MIT en la línea {line_number}")
+        if (
+            record.get("teacher_model_license") != "MIT"
+            or record.get("teacher_model_license_verified") is not True
+        ):
+            raise ValueError(f"El modelo tutor no acredita licencia MIT en la línea {line_number}")
+        if record.get("generated_output_license") != "not_asserted":
+            raise ValueError(f"No se debe atribuir licencia automática a la salida en la línea {line_number}")
         if record.get("teacher_weights_loaded_locally") is not True:
             raise ValueError(f"No consta que el tutor se ejecutara localmente en la línea {line_number}")
         if record.get("teacher_weights_imported_into_student") is not False:
