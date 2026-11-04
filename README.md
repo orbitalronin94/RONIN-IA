@@ -60,6 +60,10 @@ El entorno operativo de referencia es GitHub Actions estándar para repositorios
 
 Los perfiles son objetivos de arquitectura, no garantías de memoria, duración ni rendimiento. Los recuentos deben verificarse con `ronin count-params --profile PERFIL`. El concepto MoE de 2,8 billones de parámetros queda fuera de la primera escalera.
 
+## Filtro epistémico REF
+
+RONIN incorpora el diseño inicial del **Filtro Epistémico de RONIN (REF)** para distinguir afirmaciones contrastables, contenido simbólico, formulaciones no falsables y casos indeterminados. REF mantiene separados el género textual y el estado de codificación: un texto extraño o arcaico puede contener nomenclatura técnica, cifrado o convenciones históricas aún no interpretadas. No se clasifica una obra entera por su género y no se trata ningún contenido como «negativo» por ser religioso o metafórico. Consulta [la política y el esquema REF](docs/FILTRO_EPISTEMICO_REF.md).
+
 ## Implementación inicial
 
 - Transformer causal decoder-only en PyTorch con RoPE, RMSNorm, SwiGLU y GQA configurable.
