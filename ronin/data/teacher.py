@@ -122,18 +122,25 @@ def generate_completion(
     else:
         encoded = tokenizer(prompt, return_tensors="pt", truncation=True)
         encoded = {key: value.to(device) for key, value in encoded.items()}
-    generator = torch.Generator(device=device).manual_seed(seed)
-    with torch.inference_mode():
-        output = model.generate(
-            **encoded,
-            max_new_tokens=max_new_tokens,
-            do_sample=True,
-            temperature=temperature,
-            top_p=top_p,
-            pad_token_id=tokenizer.eos_token_id,
-            eos_token_id=tokenizer.eos_token_id,
-            generator=generator,
-        )
+    rng_devices = (
+        [device.index if device.index is not None else torch.cuda.current_device()]
+        if device.type == "cuda"
+        else []
+    )
+    # Algunos modelos remotos (incluido Phi-4) no aceptan generator en generate().
+    # Aislamos el estado RNG para mantener reproducibilidad sin alterar el proceso.
+    with torch.random.fork_rng(devices=rng_devices):
+        torch.manual_seed(seed)
+        with torch.inference_mode():
+            output = model.generate(
+                **encoded,
+                max_new_tokens=max_new_tokens,
+                do_sample=True,
+                temperature=temperature,
+                top_p=top_p,
+                pad_token_id=tokenizer.eos_token_id,
+                eos_token_id=tokenizer.eos_token_id,
+            )
     continuation = output[0, encoded["input_ids"].shape[1]:]
     return tokenizer.decode(continuation, skip_special_tokens=True).strip()
 
