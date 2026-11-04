@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:18 | [Integración continua #891 (run 41932643411)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932643411) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document GovEasy and ParlaIbero candidate acquisition adapters. Trigger: push; rama: main; intento: 1. | dfd1d33b |
 | 2026-11-04 23:17 | [Integración continua #882 (run 41932589428)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932589428) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Use documented GovEasy API JSON endpoints and include provinces. Trigger: push; rama: main; intento: 1. | d7858cd2 |
 | 2026-11-04 23:17 | [Integración continua #879 (run 41932565283)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932565283) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Permit empty jurisdiction clearance on non-A candidate records. Trigger: push; rama: main; intento: 1. | 09b0cc51 |
 | 2026-11-04 23:17 | [Integración continua #870 (run 41932460022)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932460022) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add Spanish parliamentary, Galician journalism and public administration corpora. Trigger: push; rama: main; intento: 1. | e69b66c1 |
