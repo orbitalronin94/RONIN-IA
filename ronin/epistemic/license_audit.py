@@ -61,3 +61,31 @@ def validate_license_audit(audit: Mapping[str, Any]) -> None:
         raise ValueError("Un gate no aprobado debe tener status FAIL")
     if not isinstance(gate.get("reason"), str) or not gate["reason"].strip():
         raise ValueError("El gate debe explicar su decisión")
+
+    scoped = audit.get("candidate_intake_authorizations", [])
+    if not isinstance(scoped, list):
+        raise ValueError("candidate_intake_authorizations debe ser una lista")
+    scoped_ids: set[tuple[str, str]] = set()
+    for item in scoped:
+        if not isinstance(item, Mapping):
+            raise ValueError("Cada autorización limitada debe ser un objeto")
+        source_id = item.get("source_id")
+        revision = item.get("dataset_revision")
+        key = (str(source_id), str(revision))
+        if key in scoped_ids:
+            raise ValueError("Hay autorizaciones limitadas duplicadas")
+        scoped_ids.add(key)
+        if item.get("status") != "LIMITED_PASS":
+            raise ValueError("La autorización limitada debe declarar LIMITED_PASS")
+        if item.get("candidate_text_downloads_authorized") is not True:
+            raise ValueError("La autorización limitada debe declarar descargas de candidatos")
+        if item.get("training_eligible") is not False or item.get("admitted") is not False:
+            raise ValueError("Una autorización limitada nunca admite entrenamiento")
+        if not isinstance(source_id, str) or not source_id.strip() or not isinstance(revision, str) or not revision.strip():
+            raise ValueError("La autorización limitada requiere fuente y revisión inmutable")
+        if not isinstance(item.get("allowed_licenses"), list) or not item["allowed_licenses"]:
+            raise ValueError("La autorización limitada requiere allowlist documental")
+        if not isinstance(item.get("evidence"), list) or not item["evidence"]:
+            raise ValueError("La autorización limitada requiere evidencias")
+        if not isinstance(item.get("mandatory_conditions"), list) or not item["mandatory_conditions"]:
+            raise ValueError("La autorización limitada requiere condiciones obligatorias")
