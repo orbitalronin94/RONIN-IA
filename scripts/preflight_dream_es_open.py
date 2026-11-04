@@ -54,6 +54,12 @@ def main() -> int:
         "show_struct": "doc_author,doc_title,doc_lgcode,doc_year,page_page_url",
     })
     query = json.loads(query_raw)
+    doc_meta_raw = get("/attr_values", {
+        "corpus": CORPUS,
+        "attr": "doc_author>doc_title>doc_lgcode>doc_year",
+        "count": "true",
+    })
+    doc_meta = json.loads(doc_meta_raw)
     kwic = query.get("kwic", [])
     sample_languages = {}
     sample_documents = {}
@@ -65,6 +71,7 @@ def main() -> int:
         sample_documents[title] = structs.get("page_page_url", "")
     (a.out / "corpus-info.json").write_bytes(info_raw)
     (a.out / "sample-query.json").write_bytes(query_raw)
+    (a.out / "document-attributes.json").write_bytes(doc_meta_raw)
     manifest = {
         "source_id": "dream-es-open",
         "source_url": "https://spraakbanken.gu.se/en/resources/dream-es-open",
@@ -74,11 +81,13 @@ def main() -> int:
         "corpus_id": CORPUS,
         "corpus_info_sha256": sha(info_raw),
         "sample_query_sha256": sha(query_raw),
+        "document_attributes_sha256": sha(doc_meta_raw),
         "reported_corpus_info": match,
         "sample_hits_requested": a.sample_hits,
         "sample_hits_returned": len(kwic),
         "sample_document_language_counts": sample_languages,
         "sample_document_sources": sample_documents,
+        "document_attributes_response_keys": list(doc_meta.keys()),
         "retrieved_at": datetime.now(timezone.utc).isoformat(),
         "status": "access_preflight_only",
         "training_eligible": False,
