@@ -19,7 +19,6 @@ from pathlib import Path
 from typing import Any
 
 from scripts.select_knowledge_dense_corpus import (
-    DOMAIN_TERMS,
     score_record,
     simhash64,
     tokens,
