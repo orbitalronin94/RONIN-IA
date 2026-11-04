@@ -337,3 +337,6 @@ The source register also records SINAI-UJA resources from BOE-A-2025-12053 and t
 ## Immutable run ledger
 
 The exact workflow IDs, artifact IDs, row counts, payload byte counts, SHA-256 values, source revisions and admission decisions are stored in `candidates/ingestion-runs/2026-11-05.json`. The source register has 64 entries; the rights ledger has eight exact-scope Level A records. The global G-0 gate remains FAIL, and no new payload in this report is admitted or training-eligible.
+
+
+The expanded 32-domain / 64-library catalogue now maps 21 audited candidate source IDs to their relevant domain libraries through `candidate_source_links`. The mapping is traceability only: it includes metadata-only, preflight-only and quarantined sources with explicit roles; no source link promotes a library to admitted or training-eligible. CI validates that every mapped ID exists in the source audit register.
