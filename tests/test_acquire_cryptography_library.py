@@ -52,6 +52,7 @@ def test_adquisicion_guarda_archivos_hashes_y_exclusion_de_entrenamiento(
 
     saved = json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))
     assert saved["library_id"] == manifest["library_id"]
+    assert saved["retrieved_at"]
 
 
 def test_firma_sha256_es_estable():
