@@ -3,7 +3,7 @@ from pathlib import Path
 import yaml
 
 
-def test_official_training_workflow_uses_approved_corpora_and_external_holdout():
+def test_official_training_workflow_excludes_portfolio_and_requires_eight_libraries():
     workflow_path = (
         Path(__file__).parents[1]
         / ".github"
@@ -15,8 +15,7 @@ def test_official_training_workflow_uses_approved_corpora_and_external_holdout()
     assert "workflow_dispatch" in workflow["on"]
     assert "push" in workflow["on"]
     assert "pull_request" not in workflow["on"]
-    job = workflow["jobs"]["portfolio-training"]
-    assert job["env"]["PORTFOLIO_REVISION"] == "fffc234fdf3f82b6a90d56ae9b190d1c0de79690"
+    job = workflow["jobs"]["ronin-training"]
     assert job["env"]["MMLU_REVISION"] == "b189ec765aa7ed75c8acfea42df31fdae71f97be"
     assert job["env"]["STEPS"] == (
         "${{ github.event_name == 'workflow_dispatch' && inputs.steps || "
@@ -31,17 +30,15 @@ def test_official_training_workflow_uses_approved_corpora_and_external_holdout()
         "(github.event_name == 'push' && '0' || '140') }}"
     )
     assert job["timeout-minutes"] == "360"
-    assert job["env"]["GITHUB_TOKEN"] == "${{ github.token }}"
 
     steps = job["steps"]
     by_name = {step.get("name"): step for step in steps}
-    portfolio = by_name["Obtener Portfolio en revisión inmutable"]
-    assert portfolio["with"]["ref"] == job["env"]["PORTFOLIO_REVISION"]
-
-    validation = by_name["Verificar autorización, finalidad y hash del corpus"]["run"]
-    assert "autorización expresa" in validation
-    assert "entrenamiento únicamente" in validation
-    assert "corpus_sha256" in validation
+    assert "Obtener Portfolio en revisión inmutable" not in by_name
+    assert "Preparar corpus de Portfolio" not in by_name
+    assert "Verificar autorización, finalidad y hash del corpus" not in by_name
+    assert "Gate obligatorio: ocho bibliotecas admitidas antes de RUN #5" in by_name
+    gate = by_name["Gate obligatorio: ocho bibliotecas admitidas antes de RUN #5"]["run"]
+    assert "validate_eight_libraries.py --require-ready" in gate
 
     cycle = by_name["Entrenar desde cero y evaluar el test externo completo antes/después"]["run"]
     assert "--text /tmp/ronin-training/combined-train.txt" in cycle
@@ -51,7 +48,7 @@ def test_official_training_workflow_uses_approved_corpora_and_external_holdout()
     assert "mmlu-final.json" in cycle
 
     mixture = by_name["Construir mezcla de todos los corpus aprobados para entrenamiento"]["run"]
-    assert "--input portfolio=" in mixture
+    assert "--input portfolio=" not in mixture
     assert "--input literatura_pd=" in mixture
     assert "train.txt" in mixture
     assert "--input phi4_tutor=" not in mixture
@@ -68,6 +65,7 @@ def test_official_training_workflow_uses_approved_corpora_and_external_holdout()
     summary = by_name["Consolidar métricas, cobertura y procedencia"]["run"]
     assert '"used_for_training": False' in summary
     assert '"training_corpora"' in summary
+    assert "portfolio" not in summary
     assert '"expected_full_test_items": 12032' in summary
     assert 'initial["selected_items"] == final["selected_items"]' in summary
 
