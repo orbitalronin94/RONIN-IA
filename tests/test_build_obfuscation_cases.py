@@ -16,7 +16,7 @@ SOURCE_IDS = (
 def source_manifest(tmp_path):
     manifest = {
         "sources": [
-            {"id": source_id, "sha256": str(index) * 64}
+            {"id": source_id, "sha256": str(index) * 64, "license": "CC0 de prueba"}
             for index, source_id in enumerate(SOURCE_IDS, start=1)
         ]
     }
