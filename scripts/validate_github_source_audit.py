@@ -60,8 +60,10 @@ def main() -> int:
         "catalogs": len(data.get("audited_catalogs", [])),
         "candidate_sources": len(candidates),
         "excluded_or_quarantined": len(quarantined),
-        "payloads_downloaded": decision.get("payloads_downloaded"),
-        "level_a_records_created": decision.get("level_a_records_created"),
+        "candidate_payloads_downloaded": decision.get("candidate_payloads_downloaded", 0),
+        "candidate_level_a_records_created": decision.get("candidate_level_a_records_created", 0),
+        "admitted_payloads": decision.get("payloads_downloaded"),
+        "admitted_level_a_records": decision.get("level_a_records_created"),
         "training_eligible_records": decision.get("training_eligible_records"),
         "errors": errors,
     }, indent=2))
