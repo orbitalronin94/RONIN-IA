@@ -267,6 +267,10 @@ def fetch_article_versions(item: dict[str, Any], domain: str) -> tuple[list[dict
             "publication_date": item.get("firstPublicationDate"),
             "language": language,
             "text_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+            "source_is_pmc_openaccess": True,
+            "source_is_manuscript": False,
+            "source_is_historical_ocr": False,
+            "source_is_retracted": False,
         })
         stats["accepted_versions"] += 1
         stats["accepted_text_bytes"] += text_bytes
