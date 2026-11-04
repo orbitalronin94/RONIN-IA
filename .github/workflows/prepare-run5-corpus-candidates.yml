@@ -111,7 +111,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install "datasets==3.6.0" "huggingface_hub==0.36.0" "pyarrow>=18,<20"
 
-      - name: Crear las dos bibliotecas del dominio con RONIN-HKD-0.1
+      - name: Crear dos bibliotecas disjuntas 50/50: general + HKD RONIN-HKD-0.1
         run: |
           if [ "$DOMAIN" = "biology_medicine" ] || [ "$DOMAIN" = "chemistry" ]; then
             python scripts/prepare_pmc_oa_candidates.py \
@@ -119,6 +119,7 @@ jobs:
               --max-documents "$MAX_ROWS" \
               --max-text-bytes "$((MAX_INPUT_GIB * 1024 * 1024 * 1024))" \
               --min-train-bytes "$((MIN_TRAIN_MIB * 1024 * 1024))" \
+              --hkd-fraction 0.50 \
               --output-root "/tmp/ronin-run5-candidates/$DOMAIN"
           else
             python scripts/prepare_run5_candidates.py \
