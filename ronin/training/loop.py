@@ -195,6 +195,6 @@ def train(
         destination = Path(metrics_path)
         destination.parent.mkdir(parents=True, exist_ok=True)
         temporary = destination.with_suffix(destination.suffix + ".tmp")
-        temporary.write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+        temporary.write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         temporary.replace(destination)
     return losses
