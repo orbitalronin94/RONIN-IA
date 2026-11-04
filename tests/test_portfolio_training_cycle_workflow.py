@@ -13,22 +13,13 @@ def test_official_training_workflow_excludes_portfolio_and_requires_eight_librar
     workflow = yaml.load(workflow_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
 
     assert "workflow_dispatch" in workflow["on"]
-    assert "push" in workflow["on"]
+    assert "push" not in workflow["on"]
     assert "pull_request" not in workflow["on"]
     job = workflow["jobs"]["ronin-training"]
     assert job["env"]["MMLU_REVISION"] == "b189ec765aa7ed75c8acfea42df31fdae71f97be"
-    assert job["env"]["STEPS"] == (
-        "${{ github.event_name == 'workflow_dispatch' && inputs.steps || "
-        "(github.event_name == 'push' && '1000' || '100') }}"
-    )
-    assert job["env"]["SEEDS"] == (
-        "${{ github.event_name == 'workflow_dispatch' && inputs.seeds || "
-        "(github.event_name == 'push' && '1337' || '1337') }}"
-    )
-    assert job["env"]["MMLU_LIMIT"] == (
-        "${{ github.event_name == 'workflow_dispatch' && inputs.mmlu_limit || "
-        "(github.event_name == 'push' && '0' || '140') }}"
-    )
+    assert job["env"]["STEPS"] == "${{ inputs.steps || '1000' }}"
+    assert job["env"]["SEEDS"] == "${{ inputs.seeds || '1337' }}"
+    assert job["env"]["MMLU_LIMIT"] == "${{ inputs.mmlu_limit || '0' }}"
     assert job["timeout-minutes"] == "360"
 
     steps = job["steps"]
