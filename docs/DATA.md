@@ -8,7 +8,13 @@ Se ha seleccionado **Finance Sentences - North American Spanish**, conjunto cmm3
 
 La ficha advierte que no se hizo análisis sintáctico y que puede contener títulos o fragmentos. La procedencia se registra mediante file_hash, que el publicador define como MD5 del nombre de archivo; no es un hash del contenido. El script calcula SHA-256 del archivo comprimido y de cada partición.
 
-Antes de descargar, el operador debe entrar en la ficha de Mozilla y aceptar las condiciones aplicables. La API de descarga requiere credenciales y aceptación previa de términos en la web; no se debe eludir ese paso. Una vez descargado el archivo:
+Antes de descargar, el operador debe entrar en la ficha de Mozilla y aceptar las condiciones aplicables, y crear una clave de API. La API exige credenciales y aceptación previa de términos en la web; no se debe eludir ese paso. Después, define MDC_API_KEY en el entorno e instala el extra opcional:
+
+    python -m pip install -e '.[corpus]'
+    export MDC_API_KEY='clave-de-api'
+    python scripts/download_mozilla_corpus.py
+
+Si ya tienes el archivo comprimido, puedes omitir la descarga y preparar directamente las particiones:
 
     python scripts/prepare_mozilla_corpus.py --archive /ruta/finance-sentences-north-american-spanish.tar.gz --output data/processed/mozilla-spanish-finance
 
