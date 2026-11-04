@@ -42,6 +42,13 @@ jobs:
       - name: Obtener RONIN IA
         uses: actions/checkout@v5
 
+      - name: Obtener Portfolio en revisión inmutable para recuperación
+        uses: actions/checkout@v5
+        with:
+          repository: orbitalronin94/Portfolio
+          ref: fffc234fdf3f82b6a90d56ae9b190d1c0de79690
+          path: data/source/portfolio
+
       - name: Preparar Python
         uses: actions/setup-python@v6
         with:
@@ -61,8 +68,18 @@ jobs:
           print("Evaluador externo listo:", datasets.__version__, huggingface_hub.__version__)
           PY
 
+      - name: Preparar Portfolio como índice RAG (nunca como entrenamiento)
+        run: |
+          python scripts/prepare_portfolio_corpus.py \
+            --source-dir data/source/portfolio/Papers \
+            --output-dir /tmp/ronin-portfolio-rag/source \
+            --source-revision fffc234fdf3f82b6a90d56ae9b190d1c0de79690
+          python scripts/build_portfolio_rag_index.py \
+            --source-dir /tmp/ronin-portfolio-rag/source \
+            --output-dir /tmp/ronin-portfolio-rag
+
       - name: "Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial"
-        run: python scripts/validate_sixteen_libraries.py --require-ready --corpus-root /tmp/ronin-sixteen-libraries
+        run: python scripts/validate_sixteen_libraries.py --require-ready --corpus-root /tmp/ronin-sixteen-libraries --portfolio-root /tmp/ronin-portfolio-rag
 
       - name: Construir mezcla balanceada de las dieciséis bibliotecas admitidas
         run: |
