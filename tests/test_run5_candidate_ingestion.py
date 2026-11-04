@@ -88,7 +88,7 @@ def test_global_cross_library_dedup_passes_distinct_documents(tmp_path):
         json.dumps({"document_id": "b", "text_sha256": "b" * 64, "simhash64": 18446744073709551615}) + "\n",
         encoding="utf-8",
     )
-    report = audit(tmp_path, tmp_path / "dedup-report.json")
+    report = audit(tmp_path, tmp_path / "dedup-report.json", expected_libraries=2)
     assert report["status"] == "pass"
 
 
