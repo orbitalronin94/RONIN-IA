@@ -17,6 +17,7 @@ from typing import Any
 SOURCES: tuple[dict[str, Any], ...] = (
     {
         "id": "poe-gold-bug",
+        "expected_sha256": "c8d5fec040f1dc29be8d4e9cb7d3279b65bf894adea50544d99d400b2d587386",
         "title": "The Gold-Bug (incluido en The Works of Edgar Allan Poe, vol. 1)",
         "author": "Edgar Allan Poe",
         "year": 1843,
@@ -31,6 +32,7 @@ SOURCES: tuple[dict[str, Any], ...] = (
     },
     {
         "id": "verne-giant-raft",
+        "expected_sha256": "ab64b5594b50ef099be7d5a4e0a51206ce94c41cdaca6191e55bbab4893afce4",
         "title": "The Giant Raft / La Jangada",
         "author": "Jules Verne",
         "year": 1881,
@@ -45,6 +47,7 @@ SOURCES: tuple[dict[str, Any], ...] = (
     },
     {
         "id": "doyle-dancing-men",
+        "expected_sha256": "8c4de14b3a1952417eca4673fcb1b8aa8f946f8a4164f10ec761368af34d5e5a",
         "title": "The Adventure of the Dancing Men (en The Return of Sherlock Holmes)",
         "author": "Arthur Conan Doyle",
         "year": 1903,
@@ -59,6 +62,7 @@ SOURCES: tuple[dict[str, Any], ...] = (
     },
     {
         "id": "hypnerotomachia-poliphili-1499",
+        "expected_sha256": "60b9cfcc5155004237a7e9fe0a3d8b24f7a23da61e8f0392f2b0ca75adaeb54a",
         "title": "Hypnerotomachia Poliphili",
         "author": "Francesco Colonna (autoría atribuida)",
         "year": 1499,
@@ -73,6 +77,7 @@ SOURCES: tuple[dict[str, Any], ...] = (
     },
     {
         "id": "selenus-cryptomenytices-1624",
+        "expected_sha256": "902fc370124c3c2867c4f562c399cf9fd4dba4c712df0bf37a7184c29bcb2bfb",
         "title": "Cryptomenytices et cryptographiae libri IX",
         "author": "Augustus the Younger, Duke of Brunswick-Lüneburg (Gustavus Selenus)",
         "year": 1624,
@@ -113,6 +118,10 @@ def acquire(output_dir: Path) -> dict[str, Any]:
             raise ValueError(f"Fuente superior a 250 MiB: {source['id']}")
         if not data:
             raise ValueError(f"Descarga vacía: {source['id']}")
+        actual_sha256 = sha256(data)
+        expected_sha256 = source.get("expected_sha256")
+        if expected_sha256 and actual_sha256 != expected_sha256:
+            raise ValueError(f"SHA-256 inesperado para {source['id']}: {actual_sha256}")
         if source["format"] == "application/pdf" and not data.startswith(b"%PDF-"):
             raise ValueError(f"Respuesta no PDF: {source['id']}")
         if source["format"] != "application/pdf":
@@ -128,7 +137,7 @@ def acquire(output_dir: Path) -> dict[str, Any]:
             "download_url_final": final_url,
             "content_type_received": content_type,
             "size_bytes": len(data),
-            "sha256": sha256(data),
+            "sha256": actual_sha256,
             "local_filename": target.name,
             "acquisition": "descarga HTTPS anónima verificada",
             "training_status": "excluded_pending_manual_review",
