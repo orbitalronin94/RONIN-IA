@@ -1,0 +1,41 @@
+name: Harvest Crossref and DataCite CC0 metadata candidates
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/ingest_crossref_datacite_metadata.py"
+      - ".github/workflows/ingest-crossref-datacite-metadata.yml"
+  workflow_dispatch:
+    inputs:
+      rows:
+        description: Maximum rows per public API
+        required: false
+        default: "1000"
+  schedule:
+    - cron: "17 6 13 * *"
+
+permissions:
+  contents: read
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Harvest bounded CC0 metadata without credentials
+        run: python scripts/ingest_crossref_datacite_metadata.py --rows "${{ inputs.rows || '1000' }}"
+      - name: Validate Crossref exact-scope rights candidate
+        run: python scripts/validate_rights_registry.py --record artifacts/doi-metadata/rights-record-crossref.candidate.json
+      - name: Validate DataCite exact-scope rights candidate
+        run: python scripts/validate_rights_registry.py --record artifacts/doi-metadata/rights-record-datacite.candidate.json
+      - uses: actions/upload-artifact@v6
+        with:
+          name: ronin-crossref-datacite-cc0-metadata
+          path: artifacts/doi-metadata/
+          if-no-files-found: error
+          retention-days: 90
