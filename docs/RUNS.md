@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:36 | [Integración continua #963 (run 41935011670)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41935011670) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add pinned GPLSI ClearText CAS and VAL candidate ingester with per-document rights quarantine. Trigger: push; rama: main; intento: 1. | 38e14c95 |
 | 2026-11-04 23:35 | [Integración continua #961 (run 41934789284)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934789284) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Use sentence-span CQP query for DReaM preflight. Trigger: push; rama: main; intento: 1. | 089a65d1 |
 | 2026-11-04 23:34 | [Integración continua #958 (run 41934648259)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934648259) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Sample DReaM corpus randomly and record per-document language/source metadata. Trigger: push; rama: main; intento: 1. | 5cf6c5a1 |
 | 2026-11-04 23:34 | [Integración continua #960 (run 41934693804)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934693804) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document DReaM, COCOTEROS and GovEasy source access and rights decisions. Trigger: push; rama: main; intento: 1. | d61be4af |
