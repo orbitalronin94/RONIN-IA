@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the eight independent RONIN corpus libraries before official training."""
+"""Validate the sixteen independent RONIN corpus libraries before official training."""
 
 from __future__ import annotations
 
@@ -72,7 +72,7 @@ def validate(
     if portfolio.get("training_eligible") is not False:
         errors.append("Portfolio must remain excluded from training")
     if portfolio.get("counted_as_library") is not False:
-        errors.append("Portfolio must not count as one of the eight libraries")
+        errors.append("Portfolio must not count as one of the sixteen libraries")
     if portfolio.get("role") != "retrieval_only_fallback":
         errors.append("Portfolio role must be retrieval_only_fallback")
 
@@ -100,7 +100,7 @@ def main() -> None:
         for error in errors:
             print(f"FAIL: {error}")
         raise SystemExit(1)
-    print("PASS: eight-library manifest structure and Portfolio exclusion are valid")
+    print("PASS: sixteen-library manifest structure and Portfolio exclusion are valid")
 
 
 if __name__ == "__main__":
