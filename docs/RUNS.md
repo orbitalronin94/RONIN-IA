@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:32 | [Integración continua #953 (run 41934430782)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934430782) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Register credential-free DReaM-es-open public API preflight. Trigger: push; rama: main; intento: 1. | 9524454b |
 | 2026-11-04 23:31 | [Integración continua #952 (run 41934416443)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934416443) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Trigger and version DReaM-es-open credential-free preflight. Trigger: push; rama: main; intento: 1. | 4f5f376f |
 | 2026-11-04 23:31 | [Integración continua #950 (run 41934397166)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934397166) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add credential-free DReaM-es-open Korp API access preflight. Trigger: push; rama: main; intento: 1. | 5084f3ff |
 | 2026-11-04 23:31 | [Integración continua #947 (run 41934267539)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41934267539) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Remove duplicate GovEasy adapter in favor of existing reviewed candidate pipeline. Trigger: push; rama: main; intento: 1. | d2e5dd35 |
