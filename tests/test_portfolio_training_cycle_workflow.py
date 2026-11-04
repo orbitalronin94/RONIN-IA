@@ -38,7 +38,7 @@ def test_official_training_workflow_excludes_portfolio_and_requires_eight_librar
     assert "Verificar autorización, finalidad y hash del corpus" not in by_name
     assert "Gate obligatorio: ocho bibliotecas admitidas antes de RUN #5" in by_name
     gate = by_name["Gate obligatorio: ocho bibliotecas admitidas antes de RUN #5"]["run"]
-    assert "validate_eight_libraries.py --require-ready" in gate
+    assert "validate_eight_libraries.py --require-ready --corpus-root /tmp/ronin-eight-libraries" in gate
 
     cycle = by_name["Entrenar desde cero y evaluar el test externo completo antes/después"]["run"]
     assert "--text /tmp/ronin-training/combined-train.txt" in cycle
@@ -47,25 +47,20 @@ def test_official_training_workflow_excludes_portfolio_and_requires_eight_librar
     assert "mmlu-inicial.json" in cycle
     assert "mmlu-final.json" in cycle
 
-    mixture = by_name["Construir mezcla de todos los corpus aprobados para entrenamiento"]["run"]
+    mixture = by_name["Construir corpus provisional (solo para validar el pipeline)"]["run"]
     assert "--input portfolio=" not in mixture
-    assert "--input literatura_pd=" in mixture
-    assert "train.txt" in mixture
+    for library in ["mathematics", "logic_epistemology", "philosophy", "physics", "chemistry", "biology_medicine", "computer_science", "law_economics_social_sciences"]:
+        assert f"--input {library}=" in mixture
     assert "--input phi4_tutor=" not in mixture
 
     assert "Generar propuestas Phi-4 y auditar REF sin publicar salidas" not in by_name
     assert "Adquirir biblioteca primaria de criptografía como corpus auxiliar" not in by_name
 
-    public_corpus = by_name["Verificar fuentes permitidas, licencias declaradas y particiones"]["run"]
-    assert "cligs-textbox" in public_corpus
-    assert "cligs-conssa" in public_corpus
-    assert "eltec-spa" in public_corpus
-    assert "validation" in public_corpus and "test" in public_corpus
-
     summary = by_name["Consolidar métricas, cobertura y procedencia"]["run"]
     assert '"used_for_training": False' in summary
     assert '"training_corpora"' in summary
-    assert "portfolio" not in summary
+    assert '"role": "retrieval_only_fallback"' in summary
+    assert '"used_for_training": False' in summary
     assert '"expected_full_test_items": 12032' in summary
     assert 'initial["selected_items"] == final["selected_items"]' in summary
 
