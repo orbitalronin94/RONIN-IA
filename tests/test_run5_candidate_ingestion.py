@@ -44,4 +44,4 @@ def test_open_science_domain_classifier_distinguishes_math_and_physics():
 
 def test_collection_filter_prevents_wrong_domain_fallback():
     domain, _ = choose_domain("A theorem proves a mathematical identity.", "OpenCulture")
-    assert domain == "philosophy"
+    assert domain is None
