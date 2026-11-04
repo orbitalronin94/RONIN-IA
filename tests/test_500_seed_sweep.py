@@ -66,3 +66,5 @@ def test_seed_sweep_workflow_is_500_seed_validation_only():
     assert "MMLU_REVISION" in workflow
     parsed = yaml.load(workflow, Loader=yaml.BaseLoader)
     assert parsed["jobs"]["seed-sweep"]["timeout-minutes"] == "360"
+    assert parsed["jobs"]["seed-sweep"]["env"]["PYTHONPATH"] == "."
+    assert workflow.count("PYTHONPATH=. python scripts/prepare_large_synthetic_corpus.py") == 2
