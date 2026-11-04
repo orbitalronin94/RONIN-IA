@@ -9,7 +9,7 @@ RONIN aprende siempre desde una inicialización aleatoria. Los tutores solo apor
 | gpt2 | https://huggingface.co/openai-community/gpt2 | MIT |
 | gpt-neo-125m | https://huggingface.co/EleutherAI/gpt-neo-125m | MIT |
 
-El descargador vuelve a consultar los metadatos y cancela si la licencia no es exactamente mit. Fija una revisión inmutable y calcula SHA-256 de los archivos.
+El descargador vuelve a consultar los metadatos y cancela si la licencia no es exactamente mit. Fija una revisión inmutable y calcula SHA-256 de los archivos. Al cargar el tutor, RONIN vuelve a verificar el inventario completo y cada hash; rechaza archivos ausentes, inesperados, alterados o rutas inseguras.
 
 Ambos modelos son pequeños y principalmente anglófonos. No se debe presuponer que generarán buen castellano, conocimiento experto ni juicios epistemológicos correctos. Sus salidas son propuestas de tutor, no etiquetas certificadas ni hechos verificados. Requieren revisión, filtrado, deduplicación y comprobación de derechos antes de incorporarse a un entrenamiento.
 
@@ -31,7 +31,7 @@ Esto no convierte la salida en una anotación REF válida automáticamente. La g
 
 ## Caché de GitHub Actions
 
-El workflow manual «Preparar caché de tutores locales» descarga y verifica ambos modelos en un runner público y guarda models/teachers/ en la caché de Actions. Se ejecuta desde la pestaña Actions. Las siguientes ejecuciones pueden restaurarla; GitHub puede desalojar cachés antiguas por sus políticas de retención, así que el descargador siempre debe poder reconstruirlas.
+El workflow manual «Preparar caché de tutores locales» descarga y verifica ambos modelos en un runner público y guarda models/teachers/ en la caché de Actions. Se ejecuta desde la pestaña Actions o automáticamente al integrar cambios en el descargador, el cargador, sus dependencias o el propio workflow. Las siguientes ejecuciones pueden restaurarla; GitHub puede desalojar cachés antiguas por sus políticas de retención, así que el descargador siempre debe poder reconstruirlas.
 
 La caché acelera trabajos de Actions; no copia los modelos al ordenador local del operador. Los pesos no se versionan ni se publican como artefactos.
 
