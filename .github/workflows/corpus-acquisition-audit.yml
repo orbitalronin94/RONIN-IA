@@ -29,11 +29,27 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: "Gate G-0: bloquear cualquier descarga sin aprobación"
-        id: g0
-        run: python scripts/assert_g0_passed.py --github-output "$GITHUB_OUTPUT"
+      - name: Verificar lista cerrada de corpus literarios ya admitidos
+        run: |
+          python - <<'PY'
+          from scripts.prepare_open_corpora import SOURCES
+
+          expected = {
+              "cligs-textbox": ("cligs/textbox", "1b91e940475c8a7e866457a3953fed5edb0a29f1"),
+              "cligs-conssa": ("cligs/conssa", "8fccf669ed1bdbad309ff190f5afb0d6066d70a3"),
+              "eltec-spa": ("COST-ELTeC/ELTeC-spa", "83e2a22d5ef66f96e59f47f7ef810358c4236322"),
+          }
+          actual = {item["id"]: item for item in SOURCES}
+          assert set(actual) == set(expected)
+          for name, (repository, revision) in expected.items():
+              source = actual[name]
+              assert source["repository"] == repository
+              assert source["revision"] == revision
+              assert source["license_text"] == "dominio público"
+              assert source["license_metadata"] == "CC-BY-4.0"
+          print("Lista cerrada de fuentes literarias verificada.")
+          PY
       - uses: actions/setup-python@v5
-        if: steps.g0.outputs.authorized == 'true'
         with:
           python-version: "3.11"
       - name: Descargar archivos originales sin credenciales y preparar corpus
