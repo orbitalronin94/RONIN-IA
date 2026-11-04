@@ -160,6 +160,8 @@ los originales junto con un manifiesto de procedencia como artefacto temporal:
 - Selenus, ejemplar de 1624 de Wellcome Collection, 550 imágenes, descarga PDF
   con Public Domain Mark:
   https://iiif.wellcomecollection.org/pdf/b12946308
+- Johannes Trithemius, *Steganographia* (1608), ejemplar de Zentralbibliothek Zürich, descarga PDF con Public Domain Mark:
+  https://www.e-rara.ch/zuz/download/pdf/27179737
 - Colonna, *Hypnerotomachia Poliphili* (1499), ejemplar de la Biblioteca de la
   Universidad de Sevilla, descarga PDF con Public Domain Mark:
   https://archive.org/download/A336080/A336080.pdf
