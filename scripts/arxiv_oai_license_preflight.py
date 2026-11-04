@@ -152,6 +152,13 @@ def main() -> int:
         "records_data": rows,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.records_output.parent.mkdir(parents=True, exist_ok=True)
+    with gzip.open(args.records_output, "wt", encoding="utf-8") as stream:
+        for row in rows:
+            stream.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
+    report.pop("records_data")
+    report["records_jsonl_gzip"] = str(args.records_output)
+    report["metadata_rights"] = "CC0-1.0 applies to arXiv descriptive metadata including title, authors and abstracts; full-text paper rights remain per-version and separate."
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: report[k] for k in (
         "dataset_id", "pages", "records", "license_counts",
