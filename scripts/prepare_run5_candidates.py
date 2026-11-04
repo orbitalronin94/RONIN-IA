@@ -148,6 +148,7 @@ def write_split(
             sidecar = {
                 "document_id": doc_id,
                 "text_sha256": text_sha256,
+                "simhash64": simhash64(text),
                 "source_dataset": DATASET_ID,
                 "source_revision": source_revision,
                 "source_identifier": provenance,
@@ -211,10 +212,10 @@ def write_split(
         "sha256": {name: digest.hexdigest() for name, digest in split_hashes.items()},
     }
     dedup_report = {
-        "exact_deduplication": "SHA-256 sobre texto normalizado durante la ingesta, global entre dominios",
+        "exact_deduplication": "SHA-256 sobre texto normalizado; deduplicación dentro del dominio y entre sus dos bibliotecas base/HKD",
         "near_duplicates_removed": near_dupes,
         "unique_text_hashes_written": len(exact_hashes),
-        "method": "SimHash-64 con distancia de Hamming <=3, aplicado globalmente entre bibliotecas",
+        "method": "SimHash-64 con distancia de Hamming <=3 dentro del dominio; la auditoría global de las 16 bibliotecas se ejecuta después de agregar artefactos",
     }
     selection_report = {
         "metric": "RONIN-HKD-0.1",
