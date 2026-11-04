@@ -9,6 +9,7 @@ import argparse, hashlib, json, urllib.error, urllib.parse, urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+ADAPTER_VERSION = "1.0.1"
 BASE = "https://ws.spraakbanken.gu.se/ws/korp/v8"
 CORPUS = "dream-es-open"
 UA = "RONIN-IA-DReaM-preflight/1.0"
