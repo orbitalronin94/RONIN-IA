@@ -787,6 +787,68 @@
         "use for structured statistical facts and descriptions, not bulk publication text",
         "pin API retrieval time and full query/filters; Eurostat API has no historical versioning"
       ]
+    },
+    {
+      "id": "dblp-bibliographic-metadata-cc0",
+      "domain": "computer_science_bibliography",
+      "dataset_name": "DBLP Computer Science Bibliography metadata",
+      "upstream_url": "https://dblp.org/xml/",
+      "upstream_revision": null,
+      "license_id": "CC0-1.0",
+      "rights_evidence_url": "https://dblp.org/db/about/copyright.html",
+      "evidence_source": "Official DBLP copyright and license statement, checked 2026-11-05",
+      "evidence_note": "DBLP explicitly releases its metadata and XML/JSON/RDF exports under CC0 1.0; ODC-BY 1.0 is a secondary compatibility license.",
+      "status": "candidate_registered_metadata_only_pending_snapshot_hash_and_field_policy",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "metadata only: do not follow or ingest linked publisher full text",
+        "XML snapshot may be large; use official monthly artifact or bounded incremental export",
+        "record exact snapshot date, URL, ETag/Last-Modified and SHA-256 before proposing rights record",
+        "not substantive natural-language pretraining text"
+      ]
+    },
+    {
+      "id": "wikidata-structured-entities-cc0",
+      "domain": "multidomain_knowledge_graph",
+      "dataset_name": "Wikidata structured entity and lexeme data",
+      "upstream_url": "https://dumps.wikimedia.org/wikidatawiki/entities/",
+      "upstream_revision": null,
+      "license_id": "CC0-1.0",
+      "rights_evidence_url": "https://www.wikidata.org/wiki/Wikidata:Database_download",
+      "evidence_source": "Official Wikidata database download and license page, checked 2026-11-05",
+      "evidence_note": "Wikidata states structured data in main, Property, Lexeme and EntitySchema namespaces is CC0; other namespaces are CC BY-SA and media has separate licenses.",
+      "status": "candidate_registered_namespace_scoped_metadata_only_pending_snapshot_hash",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "only structured entities/properties/lexemes/EntitySchema; exclude other namespaces and media",
+        "exclude labels/descriptions if source namespace or provenance is uncertain",
+        "pin weekly dump date and exact filename; retain hash",
+        "full JSON dump is extremely large; prefer truthy RDF subsets or bounded entity filters",
+        "knowledge graph metadata is not equivalent to cleared prose corpus"
+      ]
+    },
+    {
+      "id": "mozilla-common-voice-v27-cc0",
+      "domain": "multilingual_speech_text",
+      "dataset_name": "Mozilla Common Voice Scripted Speech v27.0 and Spontaneous Speech v5.0",
+      "upstream_url": "https://commonvoice.mozilla.org/datasets",
+      "upstream_revision": null,
+      "license_id": "CC0-1.0",
+      "rights_evidence_url": "https://commonvoice.mozilla.org/dav/terms",
+      "evidence_source": "Mozilla Common Voice contribution terms and Mozilla Data Collective dataset catalogue, checked 2026-11-05",
+      "evidence_note": "Mozilla terms require contributors to warrant original contributions and make them available under CC0; catalogue labels dataset releases CC0-1.0. Dataset catalog indicates scripted v27 and spontaneous v5 releases.",
+      "status": "candidate_registered_pending_public_download_access_version_datasheet_and_hash",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "verify exact release dataset datasheet and archive-level license before download",
+        "download platform may require account; do not use gated/credentialed routes unless public anonymous access confirmed",
+        "preserve language, clip, sentence and validation metadata with provenance; remove speaker identifiers unless needed and justified",
+        "speech/text task data, not general prose; segregate from language-model text libraries",
+        "check consent/privacy and sensitive speech handling before any model use"
+      ]
     }
   ],
   "excluded_or_quarantined": [
@@ -833,12 +895,12 @@
   ],
   "integration_decision": {
     "catalogs_integrated": 2,
-    "candidate_sources_registered": 37,
+    "candidate_sources_registered": 40,
     "excluded_or_quarantined": 5,
     "payloads_downloaded": 0,
     "level_a_records_created": 0,
     "training_eligible_records": 0,
-    "reason": "Manual source audit is not a substitute for per-version rights proof, immutable payload hashes, privacy/quality checks, deduplication, split integrity, and global G-0. Eulogikon metadata is separate from underlying text; CC0 scope is limited to Eulogikon's preparation layer/manifests. Added CoVoST CC0 translation-only lane and OpenAlex CC0 bibliographic-metadata lane; neither is admitted pending immutable source versions, hashes and applicable quality/privacy gates. Added bounded CoVoST 2 translation-field-only and OpenAlex anonymous-S3 metadata-only acquisition adapters. Both export candidate artifacts and proposed rights records; neither appends the rights ledger or enables training. Successful candidate workflows generated 432,274 unique CoVoST translation rows (86,751,966 bytes) and 100,000 OpenAlex metadata rows (259,309,375 bytes). Both rights candidates passed the registry validator and were appended as two exact-scope level-A rights records; neither dataset is admitted or training-eligible. Candidate-only acquisition counters are tracked separately from admitted counters: two candidate payloads were downloaded and two exact-scope rights records were validated, while admitted payloads, admitted level-A records and training-eligible records remain zero. Added ScienceVerse Collabra and Hlido as further pinned candidates pending their own item-level/hash/privacy checks. Expanded discovery register with VoxPopuli ASR transcript-only, DReaM-es-open, HTRogène Occitan, and DFKI SmartData German NER/relation corpus. These remain candidate-only pending exact payload manifests, source-level rights, hashes and privacy/quality checks. Expanded discovery with ROR v2 (CC0 metadata, GeoNames location fields removed), MathemAct (CC-BY but quarantined for user-generated content/privacy), Common Corpus (per-document license filter required), HPLT (CC0 claim but crawl-origin rights unresolved), Gutenberg (per-work/per-edition public-domain checks), ScienceVerse, Hlido, Correlation Studio, and explicit quarantine/exclusion decisions for Perseus CC-BY-SA and two UD treebanks with mixed/conflicting source-text rights. Added United Nations Parallel Corpus v1.0 (six-language public-domain claim, exact archive/jurisdiction review pending), BNE digital-library catalogue/OCR metadata (CC-BY-4.0 metadata; per-work OCR rights required), and COCOTEROS Spanish contextual-generation corpus (CC-BY-4.0, exact Zenodo payload audit pending). HPLT was explicitly quarantined because a CC0 package label does not establish rights in all crawled source texts. Added ParlaIbero-ES v2.0 (562,514 Spanish parliamentary rows, CC-BY-4.0, Dataverse ZIP ~1.01 GB), CorpusNÓS/Nos_Corpus_Periodistico Galician journalism (159,986 documents / 55.9M tokens, but per-publisher rights required), and GovEasy Spanish administrative procedures (438 records, CC-BY-4.0, snapshot and source attribution pending). Corrected HPLT classification: CC0 covers packaging only, not underlying text, so text ingestion is excluded pending item-level rights. Common Corpus records per-document license variability and PII observed in legal-document examples; strict filtering required. Added direct Wikidata structured-data CC0, World Bank CC-BY default with dataset-level exception checks, and Eurostat statistical reuse as a policy-compatibility candidate. Added a bounded Common Corpus streaming filter adapter; it rejects non-allowlisted per-document license labels, excludes OpenGovernment and screens basic email/phone patterns, but keeps outputs in a human review queue only. Added anonymous Dataverse metadata preflight for ParlaIbero-ES v2.0; it resolves exact file IDs, declared sizes, provider checksums and restriction flags before any 1 GB payload is downloaded. ParlaIbero-ES v2.0 preflight succeeded: 17 unrestricted files / 1,059,811,627 declared bytes, with 1,058,266,687-byte ES_interventions.csv pinned by Dataverse file ID 14215089 and provider MD5. Only the metadata manifest artifact was acquired; the 1.06 GB speech payload remains undownloaded pending review.",
+    "reason": "Manual source audit is not a substitute for per-version rights proof, immutable payload hashes, privacy/quality checks, deduplication, split integrity, and global G-0. Eulogikon metadata is separate from underlying text; CC0 scope is limited to Eulogikon's preparation layer/manifests. Added CoVoST CC0 translation-only lane and OpenAlex CC0 bibliographic-metadata lane; neither is admitted pending immutable source versions, hashes and applicable quality/privacy gates. Added bounded CoVoST 2 translation-field-only and OpenAlex anonymous-S3 metadata-only acquisition adapters. Both export candidate artifacts and proposed rights records; neither appends the rights ledger or enables training. Successful candidate workflows generated 432,274 unique CoVoST translation rows (86,751,966 bytes) and 100,000 OpenAlex metadata rows (259,309,375 bytes). Both rights candidates passed the registry validator and were appended as two exact-scope level-A rights records; neither dataset is admitted or training-eligible. Candidate-only acquisition counters are tracked separately from admitted counters: two candidate payloads were downloaded and two exact-scope rights records were validated, while admitted payloads, admitted level-A records and training-eligible records remain zero. Added ScienceVerse Collabra and Hlido as further pinned candidates pending their own item-level/hash/privacy checks. Expanded discovery register with VoxPopuli ASR transcript-only, DReaM-es-open, HTRogène Occitan, and DFKI SmartData German NER/relation corpus. These remain candidate-only pending exact payload manifests, source-level rights, hashes and privacy/quality checks. Expanded discovery with ROR v2 (CC0 metadata, GeoNames location fields removed), MathemAct (CC-BY but quarantined for user-generated content/privacy), Common Corpus (per-document license filter required), HPLT (CC0 claim but crawl-origin rights unresolved), Gutenberg (per-work/per-edition public-domain checks), ScienceVerse, Hlido, Correlation Studio, and explicit quarantine/exclusion decisions for Perseus CC-BY-SA and two UD treebanks with mixed/conflicting source-text rights. Added United Nations Parallel Corpus v1.0 (six-language public-domain claim, exact archive/jurisdiction review pending), BNE digital-library catalogue/OCR metadata (CC-BY-4.0 metadata; per-work OCR rights required), and COCOTEROS Spanish contextual-generation corpus (CC-BY-4.0, exact Zenodo payload audit pending). HPLT was explicitly quarantined because a CC0 package label does not establish rights in all crawled source texts. Added ParlaIbero-ES v2.0 (562,514 Spanish parliamentary rows, CC-BY-4.0, Dataverse ZIP ~1.01 GB), CorpusNÓS/Nos_Corpus_Periodistico Galician journalism (159,986 documents / 55.9M tokens, but per-publisher rights required), and GovEasy Spanish administrative procedures (438 records, CC-BY-4.0, snapshot and source attribution pending). Corrected HPLT classification: CC0 covers packaging only, not underlying text, so text ingestion is excluded pending item-level rights. Common Corpus records per-document license variability and PII observed in legal-document examples; strict filtering required. Added direct Wikidata structured-data CC0, World Bank CC-BY default with dataset-level exception checks, and Eurostat statistical reuse as a policy-compatibility candidate. Added a bounded Common Corpus streaming filter adapter; it rejects non-allowlisted per-document license labels, excludes OpenGovernment and screens basic email/phone patterns, but keeps outputs in a human review queue only. Added anonymous Dataverse metadata preflight for ParlaIbero-ES v2.0; it resolves exact file IDs, declared sizes, provider checksums and restriction flags before any 1 GB payload is downloaded. ParlaIbero-ES v2.0 preflight succeeded: 17 unrestricted files / 1,059,811,627 declared bytes, with 1,058,266,687-byte ES_interventions.csv pinned by Dataverse file ID 14215089 and provider MD5. Only the metadata manifest artifact was acquired; the 1.06 GB speech payload remains undownloaded pending review. Added three independently documented CC0 discovery lanes: DBLP bibliographic metadata, Wikidata structured namespaces only, and Mozilla Common Voice release data (pending exact release datasheet, access and privacy review).",
     "metadata_sources_registered": 1,
     "candidate_payloads_downloaded": 2,
     "candidate_level_a_records_created": 2
