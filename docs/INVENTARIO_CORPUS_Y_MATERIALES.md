@@ -4,7 +4,7 @@
 **Rama con la integración más reciente:** `ronin/integrate-all-corpora-phi4-cycle`, [PR #39](https://github.com/orbitalronin94/RONIN-IA/pull/39).  
 **Estado:** la PR sigue abierta; los resultados de esta ficha no implican que todo esté fusionado en `main`.
 
-Este documento es el índice maestro para preparar mezclas reproducibles. No contiene textos de terceros ni pesos: apunta a manifiestos y artefactos temporales de Actions. La regla central es no mezclar corpus de entrenamiento, holdouts de evaluación, material auxiliar y benchmarks.
+Este documento es el índice maestro para preparar mezclas reproducibles. No contiene textos de terceros ni pesos: apunta a manifiestos y artefactos temporales de Actions. Su espejo estructurado para herramientas es [data/manifests/corpus_inventory.json](../data/manifests/corpus_inventory.json). La regla central es no mezclar corpus de entrenamiento, holdouts de evaluación, material auxiliar y benchmarks.
 
 ## Resumen ejecutivo
 
