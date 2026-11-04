@@ -13,6 +13,7 @@ from typing import Any
 import torch
 
 from ronin.config import get_profile
+from ronin.models.transformer import RoninLM
 
 
 def sha256_file(path: Path) -> str:
@@ -42,8 +43,16 @@ def export_weights(
         raise ValueError("checkpoint step does not match requested final step")
 
     model_config, _ = get_profile(profile)
+    reference_model = RoninLM(model_config)
+    expected_state = reference_model.state_dict()
     state_dict = checkpoint["model"]
-    parameter_count = sum(int(tensor.numel()) for tensor in state_dict.values())
+    if set(state_dict) != set(expected_state):
+        raise ValueError("checkpoint state_dict keys do not match the selected model profile")
+    for key, expected_tensor in expected_state.items():
+        if tuple(state_dict[key].shape) != tuple(expected_tensor.shape):
+            raise ValueError(f"checkpoint tensor shape mismatch for {key}")
+    parameter_count = reference_model.parameter_count
+    del reference_model, expected_state
     output_path.parent.mkdir(parents=True, exist_ok=True)
     torch.save(
         {
