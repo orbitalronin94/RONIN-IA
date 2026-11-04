@@ -117,7 +117,8 @@ def run_sweep(
             "delta_domain_accuracy": row["delta_domain_accuracy"],
             "final_domain_accuracy": row["final_domain_accuracy"],
             "final_bits_per_byte": row["final_bits_per_byte"],
-            "checkpoint_path": str(candidates_dir / f"seed-{seed}.pt"),
+            "checkpoint_path": str(candidates_dir / f"seed-{seed}-final.pt"),
+            "initial_checkpoint_path": str(candidates_dir / f"seed-{seed}-initial.pt"),
         }
         ranked = sorted(
             [*best, candidate],
@@ -131,14 +132,25 @@ def run_sweep(
         retained = {int(item["seed"]) for item in ranked}
         if seed in retained:
             payload = torch.load(final_path, map_location="cpu", weights_only=False)
-            candidate_path = candidates_dir / f"seed-{seed}.pt"
-            torch.save({"model": payload["model"], "step": steps}, candidate_path)
+            initial_payload = torch.load(initial_path, map_location="cpu", weights_only=False)
+            torch.save(
+                {"model": initial_payload["model"], "step": 0},
+                candidates_dir / f"seed-{seed}-initial.pt",
+            )
+            torch.save(
+                {"model": payload["model"], "step": steps},
+                candidates_dir / f"seed-{seed}-final.pt",
+            )
         for old in candidates_dir.glob("seed-*.pt"):
-            old_seed = int(old.stem.removeprefix("seed-"))
+            old_seed = int(old.name.split("-")[1])
             if old_seed not in retained:
                 old.unlink()
         best = [
-            {**item, "checkpoint_path": str(candidates_dir / f"seed-{item['seed']}.pt")}
+            {
+                **item,
+                "checkpoint_path": str(candidates_dir / f"seed-{item['seed']}-final.pt"),
+                "initial_checkpoint_path": str(candidates_dir / f"seed-{item['seed']}-initial.pt"),
+            }
             for item in ranked
         ]
 
