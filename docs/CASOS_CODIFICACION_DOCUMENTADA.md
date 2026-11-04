@@ -121,8 +121,9 @@ narrativa del criptograma; afirmación histórica sobre el método: refutada en
 la formulación inicial.
 
 La novela incluye un criptograma cuya solución se desarrolla dentro de la
-narración. Sin embargo, no debe atribuirse a Verne la invención ni la primera
-exposición del método de solución. Un estudio histórico de la NSA sobre los
+narración. La adquisición usa el texto francés original para no depender de
+los derechos de una traducción moderna. Sin embargo, no debe atribuirse a Verne
+la invención ni la primera exposición del método de solución. Un estudio histórico de la NSA sobre los
 criptogramas de Verne señala que el procedimiento de análisis era anterior y
 que Verne no lo inventó; también cuestiona su pretensión de haber resuelto el
 cifrado por un método nuevo. La obra sigue siendo útil como ejemplo de
@@ -141,8 +142,8 @@ los originales junto con un manifiesto de procedencia como artefacto temporal:
 
 - Poe, *The Works of Edgar Allan Poe*, vol. 1 (incluye “The Gold-Bug”):
   https://www.gutenberg.org/cache/epub/2147/pg2147.txt
-- Verne, *The Giant Raft* / *La Jangada*:
-  https://www.gutenberg.org/cache/epub/3091/pg3091.txt
+- Verne, *La Jangada: Huit cent lieues sur l'Amazone* (texto original francés):
+  https://www.gutenberg.org/cache/epub/14806/pg14806.txt
 - Doyle, *The Return of Sherlock Holmes* (incluye “The Adventure of the Dancing
   Men”):
   https://www.gutenberg.org/cache/epub/108/pg108.txt
