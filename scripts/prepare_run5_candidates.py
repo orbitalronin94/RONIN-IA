@@ -120,7 +120,6 @@ DOMAIN_HINTS = {
     "engineering_robotics": "engineering robotics control systems circuit mechanical electrical materials",
     "humanities": "history linguistics literature language philology culture art historical text",
 }
-DOMAIN_PRIORITY = tuple(dict.fromkeys(domain for group in COLLECTIONS.values() for domain in group))
 
 
 def minimum_scanned_bytes_for_library_floor(min_train_bytes: int, hkd_fraction: float) -> int:
