@@ -85,6 +85,6 @@ def test_pmc_consolidation_workflow_uses_unescaped_source_run_id():
     assert "workflow_run" in workflow["on"]
     assert "workflow_dispatch" in workflow["on"]
     assert "source_run_id" in workflow["on"]["workflow_dispatch"]["inputs"]
-    assert "\\\\${{" not in raw
-    expected_run_id = "run-id: " + "$" + "{{ github.event.workflow_run.id || inputs.source_run_id }}"
+    assert "\\${{" not in raw
+    expected_run_id = "run-id: " + "$" + "{{ github.event.workflow_run.id || github.event.inputs.source_run_id }}"
     assert expected_run_id in raw
