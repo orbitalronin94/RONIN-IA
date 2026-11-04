@@ -6,23 +6,20 @@ from pathlib import Path
 
 import pytest
 
-from scripts.prepare_mathlib4_records import (
-    SOURCE_DATASET,
-    build_record,
-    classify_path,
-    prepare,
-)
-
 
 REVISION = "a84939a26903163e1b98ee002bc94e9563e75c12"
 
 
 def test_mathlib_path_classification_is_domain_scoped():
+    from scripts.prepare_mathlib4_records import classify_path
+
     assert classify_path("Mathlib/Logic/Basic.lean") == "logic_epistemology"
     assert classify_path("Mathlib/Algebra/Group/Basic.lean") == "mathematics"
 
 
 def test_mathlib_record_keeps_pinned_provenance_and_hash(tmp_path: Path):
+    from scripts.prepare_mathlib4_records import SOURCE_DATASET, build_record
+
     root = tmp_path / "mathlib4"
     source = root / "Mathlib" / "Logic" / "Basic.lean"
     source.parent.mkdir(parents=True)
@@ -38,6 +35,8 @@ def test_mathlib_record_keeps_pinned_provenance_and_hash(tmp_path: Path):
 
 
 def test_mathlib_preparation_writes_valid_jsonl_and_report(tmp_path: Path):
+    from scripts.prepare_mathlib4_records import prepare
+
     root = tmp_path / "mathlib4"
     (root / "Mathlib" / "Logic").mkdir(parents=True)
     (root / "Mathlib" / "Algebra").mkdir(parents=True)
@@ -61,6 +60,8 @@ def test_mathlib_preparation_writes_valid_jsonl_and_report(tmp_path: Path):
 
 
 def test_mathlib_rejects_non_apache_root_license(tmp_path: Path):
+    from scripts.prepare_mathlib4_records import prepare
+
     root = tmp_path / "mathlib4"
     (root / "Mathlib").mkdir(parents=True)
     (root / "LICENSE").write_text("MIT License", encoding="utf-8")
