@@ -75,6 +75,7 @@ La preparación técnica incorpora:
 - Métricas por entrenamiento: duración total, latencia media/mediana/p95 por paso, mediana de estado estable, ejemplos/s, tokens/s y tiempo acumulado de checkpoints.
 - Registro del hardware y de la configuración de PyTorch en el log de Actions.
 - Prueba de regresión para comprobar que el sampler vectorizado conserva las mismas muestras.
+- [Diseño técnico, métricas y criterios A/B de aceleración CPU](docs/OPTIMIZACION_ENTRENAMIENTO_CPU.md).
 
 Estas modificaciones aún deben superar CI y medirse en el runner. No se afirma un factor de aceleración antes de disponer de una comparación reproducible con el mismo hardware, corpus, semilla y presupuesto. El cambio acelera el muestreo de batches y hace visible el coste del entrenamiento; no implica por sí solo que el forward/backward del Transformer sea más rápido.
 
@@ -83,7 +84,8 @@ El workflow reducido se ejecutará después de integrar los cambios y lanzarlo m
 ### Últimas ejecuciones observadas
 
 - [Experimento oficial #1](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377): completado; 1.000 pasos, loss final 1,98638 y resultado MMLU-Pro documentado arriba.
-- [CI #402](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41834027866): las pruebas unitarias y el smoke de entrenamiento pasaron; Ruff falló por el formato de imports en `scripts/compare_supra_baseline.py`. El formato se ha corregido en la rama de trabajo; falta confirmar el nuevo CI.
+- [Primera iteración y benchmark interno #?](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41840992712): completado correctamente en la revisión con el sampler vectorizado.
+- [CI de la revisión actual](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41840992719): en curso al actualizar este README. La revisión anterior corrigió el único fallo Ruff detectado en `scripts/compare_supra_baseline.py`; no se declara CI verde hasta que termine esta ejecución.
 - La [PR #44](https://github.com/orbitalronin94/RONIN-IA/pull/44) continúa sin fusionar. No se ha iniciado el workflow reducido.
 
 El inventario completo, con procedencia, revisiones, licencias, particiones, exclusiones y hashes, está en [Inventario de corpus y materiales](docs/INVENTARIO_CORPUS_Y_MATERIALES.md) y en el [manifiesto JSON](data/manifests/corpus_inventory.json).
