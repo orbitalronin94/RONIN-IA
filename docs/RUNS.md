@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 22:45 | [Integración continua #792 (run 41928038680)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41928038680) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): map each PMC library to its own document sidecar. Trigger: push; rama: main; intento: 1. | 7ae87a00 |
 | 2026-11-04 22:45 | [Integración continua #790 (run 41927953010)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927953010) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): resolve artifact-relative PMC document sidecars. Trigger: push; rama: main; intento: 1. | d0722526 |
 | 2026-11-04 22:45 | [Integración continua #787 (run 41927570621)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927570621) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(data\): assert 64 libraries across 32 domains. Trigger: push; rama: main; intento: 1. | 830ecc85 |
 | 2026-11-04 22:44 | [Integración continua #789 (run 41927932287)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927932287) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: add PMC candidate shard aggregation and global hash audit. Trigger: push; rama: main; intento: 1. | cbefa5fe |
