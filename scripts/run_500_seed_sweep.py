@@ -46,8 +46,11 @@ def run_sweep(
     checkpoint_dir.mkdir(exist_ok=True)
 
     model_config, default_training = get_profile("tiny")
-    torch.set_num_threads(4)
-    torch.set_num_interop_threads(1)
+    torch.set_num_threads(2)
+    try:
+        torch.set_num_interop_threads(1)
+    except RuntimeError:
+        pass
     tokens = encode_text_file(train_text)
     if tokens.numel() < model_config.context_length + 1:
         raise ValueError("training corpus is too short for the tiny profile")
