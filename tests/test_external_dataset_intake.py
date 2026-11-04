@@ -82,6 +82,8 @@ def test_pmc_s3_version_prefix_parser_and_license_families():
     assert license_family("cc by 4.0") == "CC BY"
     assert license_family("CC0-1.0") == "CC0"
     assert license_family("CC BY-SA 4.0") == "CC BY SA 4.0"
+    assert license_family("CC BY-ND 4.0") == "CC BY ND 4.0"
+    assert license_family("CC BY-NC 4.0") == "CC BY NC 4.0"
 
 
 def test_pmc_s3_metadata_verification_is_per_version(monkeypatch):
