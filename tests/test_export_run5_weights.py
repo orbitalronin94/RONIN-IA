@@ -5,6 +5,8 @@ from pathlib import Path
 
 import torch
 
+from ronin.config import get_profile
+from ronin.models.transformer import RoninLM
 from scripts.export_run5_weights import export_weights
 
 
@@ -16,7 +18,11 @@ def test_export_run5_weights_writes_model_only_artifact_and_provenance(tmp_path:
     initial_eval = tmp_path / "initial.json"
     final_eval = tmp_path / "final-eval.json"
 
-    torch.save({"model": {"weight": torch.ones(2, 3)}, "step": 12}, checkpoint)
+    model_config, _ = get_profile("tiny")
+    reference_model = RoninLM(model_config)
+    expected_parameter_count = reference_model.parameter_count
+    torch.save({"model": reference_model.state_dict(), "step": 12}, checkpoint)
+    del reference_model
     training_manifest.write_text(json.dumps({
         "source_count": 16,
         "total_input_bytes": 4096,
@@ -50,7 +56,7 @@ def test_export_run5_weights_writes_model_only_artifact_and_provenance(tmp_path:
     assert exported["format"] == "ronin-model-weights-v1"
     assert exported["seed"] == 7
     assert exported["step"] == 12
-    assert exported["parameter_count"] == 6
+    assert exported["parameter_count"] == expected_parameter_count
     assert "optimizer" not in exported
     assert result["weights_sha256"]
     assert result["evaluation"]["delta_accuracy"] == 0.1
