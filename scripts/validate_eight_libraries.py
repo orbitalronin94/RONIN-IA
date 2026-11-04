@@ -5,7 +5,7 @@ import argparse
 import json
 from pathlib import Path
 
-def validate(path: Path, require_ready: bool = False) -> list[str]:
+def validate(path: Path, require_ready: bool = False, corpus_root: Path | None = None) -> list[str]:
     data = json.loads(path.read_text(encoding="utf-8"))
     policy, libraries = data["policy"], data["libraries"]
     errors: list[str] = []
@@ -26,6 +26,19 @@ def validate(path: Path, require_ready: bool = False) -> list[str]:
             continue
         if not item.get("revision") or not item.get("manifest_sha256") or not item.get("license_audit"):
             errors.append(f"{name}: missing immutable revision, manifest hash or license audit")
+        if not item.get("train_sha256"):
+            errors.append(f"{name}: missing train corpus SHA-256")
+        if corpus_root is None:
+            errors.append(f"{name}: --corpus-root is required in ready mode")
+        else:
+            corpus_file = corpus_root / name / "train.txt"
+            if not corpus_file.is_file():
+                errors.append(f"{name}: missing prepared train.txt at {corpus_file}")
+            elif item.get("train_sha256"):
+                import hashlib
+                digest = hashlib.sha256(corpus_file.read_bytes()).hexdigest()
+                if digest != item["train_sha256"]:
+                    errors.append(f"{name}: train.txt SHA-256 mismatch")
         size = int(item.get("train_bytes", 0))
         if size < minimum:
             errors.append(f"{name}: train bytes {size} below minimum {minimum}")
@@ -47,8 +60,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--manifest", type=Path, default=Path("data/manifests/eight_libraries.json"))
     parser.add_argument("--require-ready", action="store_true")
+    parser.add_argument("--corpus-root", type=Path, default=None)
     args = parser.parse_args()
-    errors = validate(args.manifest, args.require_ready)
+    errors = validate(args.manifest, args.require_ready, args.corpus_root)
     if errors:
         for error in errors:
             print(f"FAIL: {error}")
