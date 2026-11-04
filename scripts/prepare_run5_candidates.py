@@ -326,6 +326,10 @@ def main() -> int:
                 raise SystemExit(f"El adaptador {spec.get('id')} no coincide con la autorización auditada.")
     if len({spec["domain"] for spec in enabled_specs}) != 8:
         raise SystemExit("Se requieren adaptadores Common Corpus autorizados para los ocho dominios.")
+    source_specs_by_domain = {
+        domain_name: [spec for spec in enabled_specs if spec.get("domain") == domain_name]
+        for domain_name in DOMAIN_PRIORITY
+    }
 
     args.output_root.mkdir(parents=True, exist_ok=True)
     database_path = args.output_root / "run5-candidates.sqlite3"
@@ -388,6 +392,15 @@ def main() -> int:
         domain, components = choose_domain(text, collection)
         if domain is None:
             rejected["domain_unclassified"] += 1
+            continue
+        domain_specs = source_specs_by_domain.get(domain, [])
+        source_filter_match = any(
+            collection in spec.get("filters", {}).get("in", {}).get("open_type", [])
+            and str(row_value(row, "language") or "") in spec.get("filters", {}).get("in", {}).get("language", [])
+            for spec in domain_specs
+        )
+        if not source_filter_match:
+            rejected["source_manifest_filter"] += 1
             continue
         if args.domain and domain != args.domain:
             rejected["other_domain"] += 1
