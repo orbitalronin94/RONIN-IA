@@ -95,8 +95,6 @@ def main() -> int:
                 if count >= a.max_rows:
                     break
             if count >= a.max_rows:
-                        break
-            if count >= a.max_rows:
                 break
     payload = out.read_bytes()
     manifest = {
