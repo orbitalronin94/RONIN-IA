@@ -546,3 +546,8 @@ Estado: workflow y pruebas añadidos en la rama `feat/phi4-mmlu-pro-rationale-di
 - [Run #41919967815](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41919967815): el primer arreglo de importación permitió pasar la suite de tests, pero Ruff del job principal rechazó el bloque condicional de imports (`I001`). La generación y el entrenamiento se omitieron; no hubo evaluación MMLU-Pro test.
 - Corrección añadida: resolución del módulo evaluador mediante `importlib`, compatible con ejecución directa e importación desde tests y sin bloque de imports condicional.
 - Se vuelve a ejecutar tras el commit de corrección. Phi-4 ya se descargó y verificó en el intento 1; la caché de Actions todavía no se había guardado porque el job acabó fallando.
+
+
+### Intento 3 — Ruff (4 de noviembre de 2026)
+
+Run 41920221125 falló antes de generar ejemplos: Ruff I001 detectó que faltaba una línea en blanco entre el último import y la función auxiliar. No hubo generación, entrenamiento ni evaluación. Se añadió la separación y se repite el workflow.
