@@ -3,7 +3,7 @@ from pathlib import Path
 import yaml
 
 
-def test_official_training_workflow_excludes_portfolio_and_requires_sixteen_libraries():
+def test_official_training_workflow_excludes_portfolio_and_requires_32_libraries():
     workflow_path = (
         Path(__file__).parents[1]
         / ".github"
@@ -28,7 +28,7 @@ def test_official_training_workflow_excludes_portfolio_and_requires_sixteen_libr
     assert "Obtener Portfolio en revisión inmutable para recuperación" in by_name
     assert "Preparar Portfolio como índice RAG (nunca como entrenamiento)" in by_name
     
-    assert "Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial" in by_name
+    assert "Gate obligatorio: 32 bibliotecas admitidas antes del entrenamiento oficial" in by_name
     gate = by_name["Gate obligatorio: dieciséis bibliotecas admitidas antes del entrenamiento oficial"]["run"]
     assert "validate_sixteen_libraries.py --require-ready --corpus-root /tmp/ronin-sixteen-libraries --portfolio-root /tmp/ronin-portfolio-rag" in gate
 
