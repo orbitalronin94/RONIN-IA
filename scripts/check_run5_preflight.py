@@ -20,7 +20,7 @@ HASH_FIELDS = (
     "split_manifest_sha256",
     "dedup_report_sha256",
 )
-MINIMUM_DEFAULT = 256 * 1024 * 1024
+MINIMUM_DEFAULT = 1 * 1024 * 1024
 
 
 def sha256_file(path: Path) -> str:
