@@ -15,12 +15,20 @@ from pathlib import Path
 from typing import Any
 
 from ronin.data.teacher import generate_completion, load_local_teacher
-from scripts.evaluate_mmlu_pro import (
-    DATASET_REVISION,
-    format_prompt,
-    load_external_dataset,
-    select_stratified,
-)
+try:
+    from scripts.evaluate_mmlu_pro import (
+        DATASET_REVISION,
+        format_prompt,
+        load_external_dataset,
+        select_stratified,
+    )
+except ModuleNotFoundError:  # ejecución directa: scripts/ es sys.path[0]
+    from evaluate_mmlu_pro import (
+        DATASET_REVISION,
+        format_prompt,
+        load_external_dataset,
+        select_stratified,
+    )
 
 ANSWER_RE = re.compile(r"(?im)^\s*ANSWER\s*:\s*([A-J])\b")
 RATIONALE_RE = re.compile(r"(?ims)^\s*(?:RATIONALE|JUSTIFICACION|JUSTIFICACIÓN)\s*:\s*(.+)$")
