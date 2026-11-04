@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "project": "RONIN-IA",
-  "audited_at": "2026-11-04T12:08:00Z",
-  "integration_branch": "ronin/integrate-all-corpora-phi4-cycle",
+  "audited_at": "2026-11-04T12:17:30Z",
+  "integration_branch": "main",
   "pull_request": "https://github.com/orbitalronin94/RONIN-IA/pull/39",
   "policy": "Never mix training data, validation/test holdouts, benchmarks, tutor models, or quarantined specialist material.",
   "artifacts": {
@@ -10,7 +10,7 @@
     "ci_run": "https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919819",
     "smoke_run": "https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919786",
     "integrated_training_run": "https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919709",
-    "integrated_training_status": "failure",
+    "integrated_training_status": "failed_legacy_run_superseded",
     "integrated_training_failure": [
       "Phi-4 generation failed because generate() rejected model_kwargs ['generator'].",
       "MMLU-Pro evaluation failed because datasets attempted to import BucketNotFoundError from huggingface_hub.errors."
@@ -29,7 +29,10 @@
         "size_bytes": 203231066
       }
     ],
-    "combined_training_artifact": "not produced"
+    "combined_training_artifact": "pending_official_workflow_run_1",
+    "official_workflow": ".github/workflows/ronin-official-training-holdout.yml",
+    "official_workflow_run": "https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377",
+    "official_workflow_status": "in_progress"
   },
   "training_candidates": [
     {
@@ -145,9 +148,12 @@
     {
       "id": "TIGER-Lab/MMLU-Pro",
       "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
-      "default_limit": 140,
+      "default_limit": 0,
       "split": "test",
-      "training_use": false
+      "training_use": false,
+      "expected_test_items": 12032,
+      "protocol": "RONIN zero-shot next-byte answer-letter likelihood A-J; not official leaderboard comparable",
+      "holdout": "full test split; never training"
     },
     {
       "id": "ronin-domains-v1",
@@ -203,6 +209,8 @@
     "Do not concatenate corpus-v2 twice when source and partition SHA-256 values match.",
     "Keep Portfolio, literature and tutor output provenance independently identifiable.",
     "Tutor output is optional and must be audited; if generation fails, record no augmentation.",
-    "Keep cryptography library and synthetic pseudowords outside general pretraining."
+    "Keep cryptography library and synthetic pseudowords outside general pretraining.",
+    "Official training workflow excludes tutor-generated text until human quality and rights review.",
+    "Official external holdout is the full MMLU-Pro test split; it must never enter training or prompt tuning."
   ]
 }
