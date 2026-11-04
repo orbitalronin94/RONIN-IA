@@ -145,7 +145,7 @@ los originales junto con un manifiesto de procedencia como artefacto temporal:
   https://www.gutenberg.org/cache/epub/3091/pg3091.txt
 - Doyle, *The Return of Sherlock Holmes* (incluye “The Adventure of the Dancing
   Men”):
-  https://gutenberg.net.au/ebooks/c00016.html
+  https://www.gutenberg.org/cache/epub/108/pg108.txt
 - Selenus, ejemplar de 1624 de Wellcome Collection, 550 imágenes, descarga PDF
   con Public Domain Mark:
   https://iiif.wellcomecollection.org/pdf/b12946308
