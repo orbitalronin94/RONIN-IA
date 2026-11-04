@@ -63,6 +63,14 @@ jobs:
             echo "::error::Máximo cinco semillas por ejecución."
             exit 1
           fi
+          declare -A seen
+          for seed in "${values[@]}"; do
+            if [ -n "${seen[$seed]+x}" ]; then
+              echo "::error::Semilla duplicada: $seed"
+              exit 1
+            fi
+            seen[$seed]=1
+          done
           mkdir -p reports checkpoints
 
       - name: Preparar corpus público con manifiesto
@@ -71,7 +79,7 @@ jobs:
             --output /tmp/ronin-multidomain/processed \
             --cache-dir /tmp/ronin-multidomain/cache
 
-      - name: Ejecutar ciclos independientes
+      - name: Ejecutar ciclos independientes con medición inicial y final
         env:
           STEPS: ${{ inputs.steps }}
           SEEDS: ${{ inputs.seeds }}
@@ -81,7 +89,37 @@ jobs:
             echo "::group::Semilla $seed"
             checkpoint_dir="checkpoints/seed-$seed"
             report_dir="reports/seed-$seed"
+            initial_checkpoint="/tmp/ronin-multidomain/inicial-seed-$seed.pt"
             mkdir -p "$checkpoint_dir" "$report_dir"
+
+            # La referencia usa exactamente la semilla y la inicialización
+            # que empleará train_text.py para este ciclo.
+            SEED="$seed" INITIAL_CHECKPOINT="$initial_checkpoint" python - <<'PY'
+          import os
+          import torch
+          from ronin.config import get_profile
+          from ronin.models.transformer import RoninLM
+          from ronin.utils.repro import seed_everything
+
+          config, _ = get_profile("tiny")
+          seed = int(os.environ["SEED"])
+          seed_everything(seed)
+          model = RoninLM(config)
+          torch.save({"model": model.state_dict(), "step": 0}, os.environ["INITIAL_CHECKPOINT"])
+          print(f"Referencia inicial: semilla={seed}, parámetros={model.parameter_count}")
+          PY
+
+            python scripts/evaluate_text.py \
+              --checkpoint "$initial_checkpoint" \
+              --validation-text /tmp/ronin-multidomain/processed/validation.txt \
+              --profile tiny --batches 128 --batch-size 2 --seed 2026 \
+              --device cpu --output "$report_dir/language-model-inicial.json"
+
+            python scripts/evaluate_domains.py \
+              --checkpoint "$initial_checkpoint" \
+              --dataset benchmarks/domains_v1.jsonl \
+              --profile tiny --device cpu \
+              --output "$report_dir/domains-inicial.json"
 
             python scripts/train_text.py \
               --text /tmp/ronin-multidomain/processed/train.txt \
@@ -113,8 +151,8 @@ jobs:
           python - <<'PY'
           import hashlib
           import json
-          from pathlib import Path
           import os
+          from pathlib import Path
 
           def sha(path):
               h = hashlib.sha256()
@@ -127,28 +165,48 @@ jobs:
           rows = []
           for domain_report in sorted(root.glob("seed-*/domains-v1.json")):
               seed_dir = domain_report.parent
-              lm_report = json.loads((seed_dir / "language-model.json").read_text())
-              domain = json.loads(domain_report.read_text())
+              language_initial = json.loads((seed_dir / "language-model-inicial.json").read_text())
+              language_final = json.loads((seed_dir / "language-model.json").read_text())
+              domains_initial = json.loads((seed_dir / "domains-inicial.json").read_text())
+              domains_final = json.loads(domain_report.read_text())
               rows.append({
                   "seed": seed_dir.name.removeprefix("seed-"),
-                  "language_model": lm_report,
-                  "domains": domain,
+                  "initial": {
+                      "language_model": language_initial,
+                      "domains": domains_initial,
+                  },
+                  "final": {
+                      "language_model": language_final,
+                      "domains": domains_final,
+                  },
+                  "delta": {
+                      "bits_per_byte": (
+                          language_final["bits_per_byte"] - language_initial["bits_per_byte"]
+                      ),
+                      "domain_accuracy": (
+                          domains_final["overall"]["accuracy"]
+                          - domains_initial["overall"]["accuracy"]
+                      ),
+                  },
               })
+
           dataset = Path("benchmarks/domains_v1.jsonl")
           manifest_path = Path("/tmp/ronin-multidomain/processed/manifest.json")
           manifest = json.loads(manifest_path.read_text())
           result = {
-              "experiment": "ronin-multidomain-independent-seeds-v1",
+              "experiment": "ronin-multidomain-independent-seeds-v2",
               "steps_per_cycle": int(os.environ.get("STEPS", "1000")),
               "seeds": [row["seed"] for row in rows],
               "dataset_sha256": sha(dataset),
               "corpus_manifest": manifest,
               "cycles": rows,
               "interpretation": [
-                  "Los ciclos son entrenamientos independientes desde inicialización aleatoria.",
+                  "Cada semilla constituye un entrenamiento independiente desde inicialización aleatoria.",
+                  "La referencia inicial y el entrenamiento comparten exactamente la misma semilla.",
                   "La exactitud multidominio usa un piloto pequeño de 23 preguntas y elección del siguiente byte; no mide razonamiento abierto.",
                   "BPB mide modelado del corpus de validación, no competencia por dominio.",
-                  "No se ha evaluado el holdout reservado.",
+                  "No se ha evaluado ni usado el holdout reservado.",
+                  "Un delta positivo de BPB indica empeoramiento; un delta positivo de exactitud indica mejora.",
               ],
           }
           Path("reports/resumen-multidominio.json").write_text(
@@ -158,13 +216,11 @@ jobs:
           print(json.dumps({
               "cycles": len(rows),
               "seeds": result["seeds"],
-              "accuracy": {
-                  row["seed"]: row["domains"]["overall"]["accuracy"]
-                  for row in rows
+              "delta_domain_accuracy": {
+                  row["seed"]: row["delta"]["domain_accuracy"] for row in rows
               },
-              "bpb": {
-                  row["seed"]: row["language_model"]["bits_per_byte"]
-                  for row in rows
+              "delta_bits_per_byte": {
+                  row["seed"]: row["delta"]["bits_per_byte"] for row in rows
               },
           }, ensure_ascii=False, indent=2))
           PY
