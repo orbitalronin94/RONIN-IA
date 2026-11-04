@@ -22,7 +22,7 @@ from typing import Any
 
 ENDPOINT = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
 S3_BASE = "https://pmc-oa-opendata.s3.amazonaws.com"
-USER_AGENT = "RONIN-IA-PMC-OA-preflight/1.1 (metadata-only)"
+USER_AGENT = "RONIN-IA-PMC-OA-client/1.2 (+https://github.com/orbitalronin94/RONIN-IA)"
 LICENSE_ALLOWLIST = {
     "CC0", "CC0 1.0", "CC BY", "CC BY 2.0", "CC BY 3.0", "CC BY 4.0",
 }
@@ -176,6 +176,11 @@ def preflight_domain(
     for item in accepted[:s3_verify_limit]:
         try:
             versions = verify_s3_metadata(item["pmcid"])
+            europe_family = license_family(item["license"])
+            for version in versions:
+                version["europe_pmc_license_family_match"] = (
+                    version["license_family"] == europe_family
+                )
             s3_verified.append({
                 "pmcid": item["pmcid"],
                 "europe_pmc_license": item["license"],
@@ -210,6 +215,13 @@ def preflight_domain(
         "s3_metadata_verified_records": s3_verified,
         "s3_metadata_verified_versions": sum(
             item.get("version_count", 0) for item in s3_verified
+        ),
+        "s3_metadata_allowlisted_versions": sum(
+            item.get("allowlisted_version_count", 0) for item in s3_verified
+        ),
+        "s3_metadata_family_mismatch_count": sum(
+            1 for item in s3_verified for version in item.get("versions", [])
+            if not version.get("europe_pmc_license_family_match", False)
         ),
         "s3_metadata_verification_errors": sum(
             "metadata_verification_error" in item for item in s3_verified
