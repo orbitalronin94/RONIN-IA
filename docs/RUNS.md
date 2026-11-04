@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 23:19 | [Integración continua #898 (run 41932729616)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932729616) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Use live GovEasy English dataset landing page as license evidence. Trigger: push; rama: main; intento: 1. | ccfc8beb |
 | 2026-11-04 23:19 | [Integración continua #897 (run 41932708608)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932708608) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Use supported Hugging Face download helper for pinned dataset card. Trigger: push; rama: main; intento: 1. | a9b7f5e0 |
 | 2026-11-04 23:18 | [Integración continua #896 (run 41932684880)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932684880) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Exclude nested OpenAlex publication locations and possible PDF URLs. Trigger: push; rama: main; intento: 1. | 470c6278 |
 | 2026-11-04 23:18 | [Integración continua #880 (run 41932571625)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41932571625) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Avoid claiming jurisdiction clearance for pending GovEasy candidate. Trigger: push; rama: main; intento: 1. | 4c146b01 |
