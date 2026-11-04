@@ -307,6 +307,87 @@
         "preserve per-review URLs, attribution and tested_at dates",
         "keep in AI-agent evaluation domain; do not treat scores as objective ground truth"
       ]
+    },
+    {
+      "id": "voxpopuli-asr-transcripts-cc0",
+      "domain": "multilingual_speech_transcripts",
+      "dataset_name": "VoxPopuli ASR transcripts (text-only; Spanish and other EU languages)",
+      "upstream_url": "https://github.com/facebookresearch/voxpopuli",
+      "upstream_revision": "f7a3bb98d664e1d031763ec4f7639c4a530c64e9",
+      "license_id": "CC0-1.0",
+      "rights_evidence_url": "https://github.com/facebookresearch/voxpopuli/blob/f7a3bb98d664e1d031763ec4f7639c4a530c64e9/README.md",
+      "evidence_source": "Pinned facebookresearch/voxpopuli README; README blob 3046b114349084639a9b53bc125e10ffbdda1444",
+      "evidence_note": "README separates VoxPopuli Data (CC0) from LM data (must check Europarl), pre-trained models and code (CC-BY-NC 4.0). Candidate scope is limited to transcript text from VoxPopuli ASR manifests; no raw audio, speaker IDs, code, model weights or Europarl LM data.",
+      "status": "candidate_pending_exact_transcript_manifest_hash_and_privacy_review",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "root repository LICENSE is CC-BY-NC 4.0; do not apply it to the separately declared VoxPopuli Data",
+        "download only VoxPopuli ASR transcripts and their exact split manifests; exclude Europarl LM corpus",
+        "remove speaker IDs and review personal data in parliamentary speech",
+        "check European Parliament legal notice and exact per-record source lineage",
+        "Spanish ASR transcript subset reported as 166 transcribed hours; verify current manifest counts"
+      ]
+    },
+    {
+      "id": "dream-es-open-spanish-ccby4",
+      "domain": "spanish_language_corpus",
+      "dataset_name": "DReaM-es-open Spanish corpus",
+      "upstream_url": "https://spraakbanken.gu.se/en/resources/dream-es-open",
+      "license_id": "CC-BY-4.0",
+      "rights_evidence_url": "https://spraakbanken.gu.se/en/resources/dream-es-open",
+      "evidence_source": "Språkbanken Text dataset record and DOI 10.23695/tgta-hp89",
+      "evidence_note": "Official resource page declares CC-BY-4.0 for the Spanish open corpus and reports 9,115,151 tokens / 717,854 sentences. Downloadable file currently listed is word statistics, not necessarily the complete text corpus; full corpus export and exact payload manifest still need to be located and hashed.",
+      "status": "candidate_pending_full_corpus_endpoint_and_item_level_manifest",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "do not mistake the 9.23 MB word-statistics ZIP for the full corpus",
+        "locate the actual corpus export endpoint and confirm it is the same CC-BY-4.0 release",
+        "preserve Språkbanken attribution and DOI",
+        "check source texts and contributor rights before Level A certification"
+      ]
+    },
+    {
+      "id": "htrogene-occitan-htr-ccby4",
+      "domain": "occitan_low_resource_language",
+      "dataset_name": "HTRogène Occitan manuscript transcription ground truth",
+      "upstream_url": "https://github.com/HTRogene/occitan",
+      "upstream_revision": "9983c1bb41e1d0e7f179b90352ebbaeec79b1ecb",
+      "license_id": "CC-BY-4.0",
+      "rights_evidence_url": "https://github.com/HTRogene/occitan/blob/9983c1bb41e1d0e7f179b90352ebbaeec79b1ecb/README.md",
+      "evidence_source": "Pinned HTRogene/occitan README blob 84251a1e3e9332f62eb8c04540ba5eb68270ec2b",
+      "evidence_note": "README declares the dataset CC-BY-4.0 and describes 65 pages of medieval/early-modern Occitan manuscripts with normalized XML ground truth, approximately 2,880 default text lines. Candidate is useful for Occitan language and transcription quality, but manuscript-image and transcription rights must be assessed separately.",
+      "status": "candidate_pending_payload_hash_transcription_rights_and_edition_review",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "only use normalized .chocomufin.xml transcription text if its CC-BY-4.0 scope is confirmed",
+        "do not assume medieval source text rights automatically clear modern editorial transcription",
+        "images are not needed for text model and should be excluded",
+        "retain shelfmark, manuscript institution, page and line provenance",
+        "small corpus; use as domain supplement, not a 1 MiB library by itself"
+      ]
+    },
+    {
+      "id": "dfki-smartdata-german-ccby4",
+      "domain": "german_ner_relations",
+      "dataset_name": "DFKI SmartData German NER and relation corpus",
+      "upstream_url": "https://github.com/DFKI-NLP/smartdata-corpus",
+      "upstream_revision": "796c8b8f5d76fcdeb7f2458c4f8df5711e2115af",
+      "license_id": "CC-BY-4.0",
+      "rights_evidence_url": "https://github.com/DFKI-NLP/smartdata-corpus",
+      "evidence_source": "DFKI-NLP SmartData corpus README; web audit states CC-BY-4.0; immutable commit 796c8b8f5d76fcdeb7f2458c4f8df5711e2115af located but README content fetch needs retry",
+      "evidence_note": "Approximately 2,600 German documents with original text and fine-grained traffic/industry entities and relations. CC-BY-4.0 declaration found in upstream README, but pinned README/license blob and source-content rights have not yet been independently recorded.",
+      "status": "candidate_pending_pinned_license_file_and_privacy_audit",
+      "training_eligible": false,
+      "admission_eligible": false,
+      "risk_flags": [
+        "tweets and scraped web/RSS material may have privacy or third-party rights issues",
+        "source text rights need per-source review despite corpus-level CC-BY-4.0 claim",
+        "exclude tweets unless privacy and platform provenance are cleared",
+        "retain only clearly licensed records with source-level manifest"
+      ]
     }
   ],
   "excluded_or_quarantined": [
@@ -345,12 +426,12 @@
   ],
   "integration_decision": {
     "catalogs_integrated": 2,
-    "candidate_sources_registered": 13,
+    "candidate_sources_registered": 17,
     "excluded_or_quarantined": 4,
     "payloads_downloaded": 0,
     "level_a_records_created": 0,
     "training_eligible_records": 0,
-    "reason": "Manual source audit is not a substitute for per-version rights proof, immutable payload hashes, privacy/quality checks, deduplication, split integrity, and global G-0. Eulogikon metadata is separate from underlying text; CC0 scope is limited to Eulogikon's preparation layer/manifests. Added CoVoST CC0 translation-only lane and OpenAlex CC0 bibliographic-metadata lane; neither is admitted pending immutable source versions, hashes and applicable quality/privacy gates. Added bounded CoVoST 2 translation-field-only and OpenAlex anonymous-S3 metadata-only acquisition adapters. Both export candidate artifacts and proposed rights records; neither appends the rights ledger or enables training. Successful candidate workflows generated 432,274 unique CoVoST translation rows (86,751,966 bytes) and 100,000 OpenAlex metadata rows (259,309,375 bytes). Both rights candidates passed the registry validator and were appended as two exact-scope level-A rights records; neither dataset is admitted or training-eligible. Candidate-only acquisition counters are tracked separately from admitted counters: two candidate payloads were downloaded and two exact-scope rights records were validated, while admitted payloads, admitted level-A records and training-eligible records remain zero. Added ScienceVerse Collabra and Hlido as further pinned candidates pending their own item-level/hash/privacy checks.",
+    "reason": "Manual source audit is not a substitute for per-version rights proof, immutable payload hashes, privacy/quality checks, deduplication, split integrity, and global G-0. Eulogikon metadata is separate from underlying text; CC0 scope is limited to Eulogikon's preparation layer/manifests. Added CoVoST CC0 translation-only lane and OpenAlex CC0 bibliographic-metadata lane; neither is admitted pending immutable source versions, hashes and applicable quality/privacy gates. Added bounded CoVoST 2 translation-field-only and OpenAlex anonymous-S3 metadata-only acquisition adapters. Both export candidate artifacts and proposed rights records; neither appends the rights ledger or enables training. Successful candidate workflows generated 432,274 unique CoVoST translation rows (86,751,966 bytes) and 100,000 OpenAlex metadata rows (259,309,375 bytes). Both rights candidates passed the registry validator and were appended as two exact-scope level-A rights records; neither dataset is admitted or training-eligible. Candidate-only acquisition counters are tracked separately from admitted counters: two candidate payloads were downloaded and two exact-scope rights records were validated, while admitted payloads, admitted level-A records and training-eligible records remain zero. Added ScienceVerse Collabra and Hlido as further pinned candidates pending their own item-level/hash/privacy checks. Expanded discovery register with VoxPopuli ASR transcript-only, DReaM-es-open, HTRogène Occitan, and DFKI SmartData German NER/relation corpus. These remain candidate-only pending exact payload manifests, source-level rights, hashes and privacy/quality checks.",
     "metadata_sources_registered": 1,
     "candidate_payloads_downloaded": 2,
     "candidate_level_a_records_created": 2
