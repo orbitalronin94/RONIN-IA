@@ -148,7 +148,7 @@ jobs:
           root = Path("datasets/run5")
           entries = []
           for library_id in (os.environ["DOMAIN"], os.environ["DOMAIN"] + "_hkd"):
-              folder = root / library_id
+              folder = root / os.environ["DOMAIN"] / library_id
               manifest = folder / "candidate-manifest.json"
               if manifest.is_file():
                   item = json.loads(manifest.read_text(encoding="utf-8"))
@@ -194,7 +194,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: ronin-datasets-run5-library-${{ matrix.domain }}-hkd
-          path: datasets/run5/${{ matrix.domain }}_hkd/
+          path: datasets/run5/${{ matrix.domain }}/${{ matrix.domain }}_hkd/
           if-no-files-found: warn
           compression-level: 1
           retention-days: 90
