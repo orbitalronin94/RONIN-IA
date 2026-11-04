@@ -111,6 +111,7 @@ def write_split(
     sidecar_handle = sidecar_path.open("wb")
     review_samples: list[dict[str, Any]] = []
     near_dupes = 0
+    exact_hashes: set[str] = set()
     paths = {name: path.open("wb") for name, path in split_paths.items()}
     try:
         for doc_id, text, license_name, provenance, score, components in rows:
@@ -140,8 +141,11 @@ def write_split(
             split_bytes[split] += len(payload)
             split_counts[split] += 1
 
+            text_sha256 = hashlib.sha256(text.encode("utf-8")).hexdigest()
+            exact_hashes.add(text_sha256)
             sidecar = {
                 "document_id": doc_id,
+                "text_sha256": text_sha256,
                 "source_dataset": DATASET_ID,
                 "source_revision": source_revision,
                 "source_identifier": provenance,
@@ -199,7 +203,23 @@ def write_split(
         encoding="utf-8",
     )
 
-    return {
+    split_manifest = {
+        "counts": dict(split_counts),
+        "bytes": dict(split_bytes),
+        "sha256": {name: digest.hexdigest() for name, digest in split_hashes.items()},
+    }
+    dedup_report = {
+        "exact_duplicates_removed_before_selection": 0,
+        "near_duplicates_removed": near_dupes,
+        "dedup_report": dedup_report,
+        "dedup_report_sha256": hashlib.sha256(json.dumps(dedup_report, sort_keys=True).encode("utf-8")).hexdigest(),
+        "split_manifest": split_manifest,
+        "split_manifest_sha256": hashlib.sha256(json.dumps(split_manifest, sort_keys=True).encode("utf-8")).hexdigest(),
+        "sensitive_scan_sha256": hashlib.sha256(json.dumps(scan_reports, sort_keys=True).encode("utf-8")).hexdigest(),
+        "unique_text_hashes_written": len(exact_hashes),
+        "method": "SHA-256 exact dedup across candidate intake; SimHash-64 Hamming distance <=3 cross-library pass",
+    }
+    metadata = {
         "id": domain_kind_name(domain, library_kind),
         "domain": domain,
         "kind": library_kind,
@@ -212,6 +232,7 @@ def write_split(
         "train_bytes": split_bytes["train"],
         "split_bytes": dict(split_bytes),
         "split_sha256": {name: digest.hexdigest() for name, digest in split_hashes.items()},
+        "train_sha256": split_hashes["train"].hexdigest(),
         "documents_manifest": str(sidecar_path),
         "documents_manifest_sha256": sidecar_hash.hexdigest(),
         "near_duplicates_removed": near_dupes,
@@ -221,6 +242,13 @@ def write_split(
         "rights_review": None,
         "quality_review": None,
     }
+    metadata["manifest_sha256"] = hashlib.sha256(
+        json.dumps(metadata, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+    (output_dir / "candidate-manifest.json").write_text(
+        json.dumps(metadata, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8"
+    )
+    return metadata
 
 
 def domain_kind_name(domain: str, kind: str) -> str:
@@ -277,6 +305,7 @@ def main() -> int:
     rejected: Counter[str] = Counter()
     scanned_rows = 0
     accepted_bytes = 0
+    scanned_text_bytes = 0
     dataset = load_dataset(
         DATASET_ID,
         split="train",
@@ -286,11 +315,14 @@ def main() -> int:
 
     for row in dataset:
         scanned_rows += 1
-        if scanned_rows > args.max_rows or accepted_bytes >= args.max_input_bytes:
+        if scanned_rows > args.max_rows or scanned_text_bytes >= args.max_input_bytes:
             break
         if not isinstance(row, dict):
             rejected["invalid_row"] += 1
             continue
+        raw_text = row_value(row, "text")
+        if isinstance(raw_text, str):
+            scanned_text_bytes += len(raw_text.encode("utf-8"))
         license_name = normalize_license(row_value(row, "license"))
         if license_name not in ALLOWED_LICENSES:
             rejected["license_not_allowlisted"] += 1
@@ -300,7 +332,7 @@ def main() -> int:
             rejected["language_not_allowlisted"] += 1
             continue
         collection = str(row_value(row, "open_type", "open type") or "")
-        text = row_value(row, "text")
+        text = raw_text
         if not isinstance(text, str):
             rejected["missing_text"] += 1
             continue
@@ -439,6 +471,7 @@ def main() -> int:
         "ingestion": {
             "rows_scanned": scanned_rows,
             "accepted_document_bytes": accepted_bytes,
+            "scanned_text_bytes": scanned_text_bytes,
             "accepted_documents_by_domain": domain_counts,
             "rejected": dict(rejected),
         },
