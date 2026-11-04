@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-04 22:53 | [Integración continua #804 (run 41929133602)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41929133602) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: register arXiv OAI as metadata-only cross-domain source. Trigger: push; rama: main; intento: 1. | 254a36c1 |
 | 2026-11-04 22:53 | [Integración continua #803 (run 41929117254)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41929117254) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: schedule arXiv OAI license preflight. Trigger: push; rama: main; intento: 1. | 1c2b6e64 |
 | 2026-11-04 22:50 | [Integración continua #800 (run 41928754867)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41928754867) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: report empty level-A registry without masking status. Trigger: push; rama: main; intento: 1. | 0494b7bc |
 | 2026-11-04 22:50 | [Integración continua #799 (run 41928697185)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41928697185) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: validate level-A rights evidence registry. Trigger: push; rama: main; intento: 1. | 1cf2d636 |
