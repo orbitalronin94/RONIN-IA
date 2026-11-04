@@ -71,7 +71,7 @@ def test_selector_keeps_document_level_license_provenance_and_scores(tmp_path):
         "text": text,
         "license": "CC-BY-4.0",
         "document_id": "paper-002"
-    }) + "\\n", encoding="utf-8")
+    }) + "\n", encoding="utf-8")
     spec = tmp_path / "sources.json"
     spec.write_text(json.dumps({
         "sources": [{
