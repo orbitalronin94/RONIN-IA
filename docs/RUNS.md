@@ -513,3 +513,14 @@ Límites que siguen vigentes:
 Estado al abrir esta iteración: código preparado en rama de trabajo; aún no hay ejecución real que demuestre 16 bibliotecas x10 ni admisión. RUN 5 oficial no debe lanzarse hasta que todos los gates pasen.
 
 Recuento de arquitectura de referencia: el perfil `tiny` actual tiene **9.922.880 parámetros entrenables** (embeddings compartidos contados una sola vez). Los pesos de mezcla de 16 bibliotecas no alteran ese número. Esta PR no añade módulos entrenables ni afirma crecimiento ficticio; una ampliación por expertos/adapters deberá tener ruta de entrenamiento condicionada por dominio y un recuento antes/después con prueba de equivalencia.
+
+
+## Auditoría posterior al merge de PR #90 — 4 de noviembre de 2026
+
+PR #90 quedó fusionada en `main` (merge `cecde97f745a7fcbeba216a81ed1a8aa9439565d`). La integración continua del merge pasó: pruebas unitarias/de integración, análisis estático y smoke test de entrenamiento desde cero. Esto valida el código cubierto por CI, pero no la ejecución real de adquisición.
+
+La ejecución automática del workflow de preparación tras el merge falló inmediatamente y GitHub no expuso jobs asociados (run [41917131944](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41917131944)); por tanto, no se atribuye el fallo a descarga de fuentes ni se afirma que haya comenzado la ingesta. La revisión estática posterior detectó dos incompatibilidades reales:
+- El workflow PMC pasaba `--hkd-fraction 0.50`, pero `scripts/prepare_pmc_oa_candidates.py` no define ese argumento; la política 50/50 ya está fijada en el adaptador.
+- Los artefactos de los workers se publicaban con prefijo `ronin-datasets-run5-library-`, mientras que el workflow oficial intentaba descargar `ronin-run5-library-*`; el entrenamiento no habría encontrado los artefactos.
+
+Se prepara una corrección separada para retirar el argumento no soportado, alinear el patrón de descarga del workflow oficial con los nombres publicados y añadir pruebas de contrato entre ambos workflows. La auditoría del catálogo mantiene 16 bibliotecas como candidatas, no admitidas; G-0 global continúa FAIL. No hay corpus elegible ni RUN 5 oficial iniciada.
