@@ -164,11 +164,7 @@ def test_run5_source_profile_is_bounded_and_metadata_only():
 
 
 def test_common_corpus_code_language_labels_are_not_mistaken_for_natural_languages():
-    from scripts.prepare_run5_candidates import (
-        is_allowed_language,
-        is_code_language,
-        choose_domain,
-    )
+    from scripts.prepare_run5_candidates import choose_domain, is_allowed_language, is_code_language
 
     assert is_code_language("Python")
     assert is_code_language("TypeScript")
