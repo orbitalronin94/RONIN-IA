@@ -97,6 +97,14 @@ DOMAIN_HINTS = {
 DOMAIN_PRIORITY = tuple(DOMAIN_TERMS)
 
 
+def minimum_scanned_bytes_for_library_floor(min_train_bytes: int, hkd_fraction: float) -> int:
+    """Conservative byte budget needed for both disjoint libraries' 90% train splits."""
+    if min_train_bytes < 1 or not 0.0 < hkd_fraction < 1.0:
+        raise ValueError("minimum bytes must be positive and HKD fraction must be between 0 and 1")
+    smallest_partition = min(hkd_fraction, 1.0 - hkd_fraction)
+    return int((min_train_bytes / (smallest_partition * 0.90)) + 0.999999)
+
+
 def normalize_license(value: Any) -> str:
     return " ".join(str(value or "").strip().split())
 
@@ -404,6 +412,14 @@ def main() -> int:
     args = parser.parse_args()
     if not 0.05 <= args.hkd_fraction <= 0.50:
         parser.error("--hkd-fraction must be between 0.05 and 0.50")
+    required_input_bytes = minimum_scanned_bytes_for_library_floor(
+        args.min_train_bytes, args.hkd_fraction
+    )
+    if args.max_input_bytes < required_input_bytes:
+        parser.error(
+            f"--max-input-bytes must be at least {required_input_bytes} bytes "
+            "for both disjoint libraries to possibly meet the train floor"
+        )
 
     try:
         from datasets import load_dataset
@@ -685,7 +701,9 @@ def main() -> int:
         "limits": {
             "max_rows": args.max_rows,
             "max_input_bytes": args.max_input_bytes,
+            "minimum_scanned_bytes_for_both_libraries": required_input_bytes,
             "minimum_train_bytes_per_library": args.min_train_bytes,
+            "minimum_scanned_bytes_for_both_libraries": required_input_bytes,
             "hkd_fraction": args.hkd_fraction,
             "stream_shuffle_seed": stream_seed,
             "stream_shuffle_buffer_rows": SHUFFLE_BUFFER_SIZE,
