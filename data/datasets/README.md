@@ -56,7 +56,7 @@ The PMC lane and Common Corpus lane remain candidate-only. The separate mathlib4
 
 ## Rights level A — evidence ledger
 
-The item-level rights evidence ledger is maintained in `rights_registry/`. Its policy, JSON schema, append-only records file and deterministic validator define the only route to rights level A. The registry currently starts empty: **0 documents have been certified as level A by this ledger**. The existing 608-document Spanish literature artifact remains separately admitted under its original manifest and checks; it has not been silently re-labelled under the new policy.
+The item-level rights evidence ledger is maintained in `rights_registry/`. Its policy, JSON schema, append-only records file and deterministic validator define the only route to rights level A. The registry currently contains **2 exact-scope level-A rights records** (CoVoST 2 translation-only and OpenAlex metadata-only). The existing 608-document Spanish literature artifact remains separately admitted under its original manifest and checks; it has not been silently re-labelled under the new policy. The existing 608-document Spanish literature artifact remains separately admitted under its original manifest and checks; it has not been silently re-labelled under the new policy.
 
 A source-level license field, public repository, AWS catalogue entry, SPDX identifier, Europeana rights statement, Crossref deposit, or PMC OA article label is evidence to inspect—not independent proof of ownership. Every candidate must carry item/version-level rights evidence and exact payload/metadata hashes. Public-domain claims need territorial and edition-specific evidence. Level A still does not bypass quality, privacy, deduplication, attribution, split-integrity, or global G-0 gates.
 
@@ -104,3 +104,13 @@ The workflow `.github/workflows/ingest-covost2-translation-candidate.yml` create
 `scripts/ingest_openalex_public_metadata.py` uses the public anonymous OpenAlex S3 JSONL snapshot, not the API. This avoids API keys, credentials and the API's current authentication/rate-limit constraints. It selects one bounded `works` shard from the published manifest, records the manifest date/hash and exact shard/hash, and exports only an explicit bibliographic/graph metadata allowlist. Abstract inverted indexes, full text, PDFs and content archive URLs are excluded.
 
 The workflow `.github/workflows/ingest-openalex-metadata-candidate.yml` publishes a bounded candidate artifact and proposed rights record. This is metadata for catalogue, retrieval and domain routing; it is not a substitute for scientific source text and is not counted as a text-training library. The public snapshot is much larger than a GitHub Actions job should mirror, so the adapter intentionally retrieves only one bounded shard. Candidate-only, no automatic rights-ledger append or training.
+
+
+### First two new rights-certified candidate exports (2026-11-04)
+
+Both acquisition workflows completed successfully, generated SHA-256 manifests, and passed `validate_rights_registry.py --record`. Their rights records are appended to `rights_registry/records.jsonl`. This certifies the exact rights scope recorded; it does **not** admit either dataset or make it training-eligible.
+
+- **CoVoST 2 translation-only:** 432,274 unique rows, 86,751,966 bytes; payload SHA-256 `854005109fc2ee26c9c39508dd1ae0a95319367ecc81c209defd40e36651cdca`. Three archive SHA-256 values and pinned upstream README blob are in the artifact manifest. Only Spanish→English, Catalan→English and English→Catalan translation-field values are exported. Workflow run [41931759338](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41931759338), artifact [13370774276](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41931759338).
+- **OpenAlex works metadata:** 100,000 records, 259,309,375 bytes; payload SHA-256 `f2342d4d3ddf5f4acd251821a0ba6c85bc2b7440ca29be889796075ce515425f`. Snapshot date 2026-10-14; manifest SHA-256 `00ea35c5696d31ca88d814c4ba3ded371cac48681f843966191024f4609fc794`; exact S3 shard and hash are in the artifact manifest. Explicit metadata allowlist only; no abstracts or full text. Workflow run [41931767076](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41931767076), artifact [13372481305](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41931767076).
+
+The Actions artifacts are retained for 90 days. The source adapters and pinned manifests allow deterministic re-acquisition and re-hashing; the candidate payloads are not committed as large Git blobs.
