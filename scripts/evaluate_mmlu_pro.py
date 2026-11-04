@@ -252,22 +252,19 @@ def evaluate_rows(
             input_ids[batch_index, :length] = torch.tensor(
                 prompt_ids, dtype=torch.long, device=target_device
             )
-        logits, _ = model(input_ids)
         last_positions = torch.tensor(
             [length - 1 for length in lengths],
             dtype=torch.long,
             device=target_device,
         )
-        row_indices = torch.arange(len(batch), device=target_device)
-        final_logits = logits[row_indices, last_positions].float()
+        final_logits = model.forward_last_logits(input_ids, last_positions).float()
         log_probs = F.log_softmax(final_logits, dim=-1)
+        # Una sola conversión a listas por lote, sin .item() por opción.
+        batch_scores = log_probs[:, [ord(label) for label in LABELS]].tolist()
 
         for batch_index, (original_index, row, prompt_ids) in enumerate(batch):
             labels = LABELS[: len(row["options"])]
-            scores = [
-                float(log_probs[batch_index, ord(label)].item())
-                for label in labels
-            ]
+            scores = batch_scores[batch_index][: len(labels)]
             predicted = max(range(len(scores)), key=lambda index: scores[index])
             details_by_index[original_index] = {
                 "id": row["id"],
