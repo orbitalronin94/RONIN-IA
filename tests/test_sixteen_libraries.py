@@ -7,19 +7,19 @@ from scripts.validate_sixteen_libraries import validate
 MANIFEST = Path(__file__).parents[1] / "data" / "manifests" / "sixteen_libraries.json"
 
 
-def test_manifest_has_64_libraries_across_32_domains_and_portfolio_is_retrieval_only():
+def test_manifest_has_32_libraries_across_16_domains_and_portfolio_is_retrieval_only():
     data = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    assert len(data["libraries"]) == 64
+    assert len(data["libraries"]) == 32
     assert data["policy"]["minimum_train_bytes_per_library"] == 1024**2
     assert data["policy"]["target_train_bytes_per_library"] == 10 * 1024**3
-    assert data["policy"]["minimum_total_train_bytes"] == 64 * 1024**2
-    assert data["policy"]["target_total_train_bytes"] == 64 * 10 * 1024**3
+    assert data["policy"]["minimum_total_train_bytes"] == 32 * 1024**2
+    assert data["policy"]["target_total_train_bytes"] == 32 * 10 * 1024**3
     assert data["policy"]["hkd_fraction"] == 0.5
     assert "1 MiB" in data["policy"]["hkd_scale_rationale"]
-    assert len({item["id"] for item in data["libraries"]}) == 64
-    assert len({item["domain"].split(" — ")[0] for item in data["libraries"]}) == 32
-    assert data["policy"]["required_library_count"] == 64
-    assert data["policy"]["domain_count"] == 32
+    assert len({item["id"] for item in data["libraries"]}) == 32
+    assert len({item["domain"].split(" — ")[0] for item in data["libraries"]}) == 16
+    assert data["policy"]["required_library_count"] == 32
+    assert data["policy"]["domain_count"] == 16
     assert data["portfolio"]["role"] == "retrieval_only_fallback"
     assert data["portfolio"]["training_eligible"] is False
     assert data["portfolio"]["counted_as_library"] is False
