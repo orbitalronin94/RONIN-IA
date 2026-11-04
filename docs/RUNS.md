@@ -4,6 +4,8 @@ Registro cronológico de GitHub Actions. Cada entrada enlaza al run original, re
 
 **Regla operativa:** los workflows registrados actualizan este libro automáticamente al terminar, tanto si acaban en éxito como en fallo o cancelación. Cada resumen de workflow enlaza directamente aquí. El historial es append-only: las correcciones se añaden como nuevas entradas y no se borran resultados anteriores.
 
+La cobertura automática incluye CI, entrenamiento oficial y reducido, preparación del corpus Portfolio, auditoría de corpus y biblioteca criptográfica, calibración REF, benchmark inicial, ciclos sintéticos, auditoría Supra, generación de candidatos Phi-4, caché de tutores, comparativa A/B, validación de manifiestos e ingesta de muestras externas.
+
 ## Historial importado
 
 Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al 4 de noviembre de 2026. A partir de la integración de este mecanismo, los nuevos runs se añaden automáticamente.
