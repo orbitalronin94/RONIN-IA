@@ -15,8 +15,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 BASE = "https://data.goveasy.eu"
-FILES = ("api/tramites.json", "api/organismos.json", "api/provincias.json")
-DATASET_META = "en"
+FILES = ("datasets/tramites.json", "datasets/organismos.json", "datasets/provincias.json")
+DATASET_META = "dataset.jsonld"
+AI_POLICY = "ai.txt"
 LICENSE = "https://creativecommons.org/licenses/by/4.0/"
 USER_AGENT = "RONIN-IA-goveasy-candidate/1.0"
 
@@ -40,6 +41,7 @@ def main() -> int:
     limit = args.max_file_mib * 1024 * 1024
 
     metadata = fetch(f"{BASE}/{DATASET_META}", 4 * 1024 * 1024)
+    ai_policy = fetch(f"{BASE}/{AI_POLICY}", 256 * 1024)
     metadata_text = metadata.decode("utf-8")
     if "CC BY 4.0" not in metadata_text and "CC-BY-4.0" not in metadata_text and "creativecommons.org/licenses/by/4.0" not in metadata_text:
         raise ValueError("dataset metadata does not expose the expected CC BY 4.0 declaration")
@@ -79,6 +81,8 @@ def main() -> int:
         "license_scope": "GovEasy's published dataset contribution; source government materials remain separately attributable",
         "metadata_url": f"{BASE}/{DATASET_META}",
         "metadata_sha256": meta_sha,
+        "ai_policy_url": f"{BASE}/{AI_POLICY}",
+        "ai_policy_sha256": sha(ai_policy),
         "source_files": files,
         "rows": len(rows),
         "payload_path": payload_path.name,
@@ -90,9 +94,9 @@ def main() -> int:
     record = {
         "record_id": "goveasy-candidate-" + payload_sha[:16],
         "source_id": "goveasy-open-dataset",
-        "source_item_id": "api/tramites.json + api/organismos.json + api/provincias.json",
+        "source_item_id": "datasets/tramites.json + datasets/organismos.json + datasets/provincias.json",
         "source_version": "2026-07-11; metadata-sha256:" + meta_sha,
-        "source_url": f"{BASE}/api/tramites.json",
+        "source_url": f"{BASE}/datasets/tramites.json",
         "rights_statement_uri": f"{BASE}/en",
         "license_id": "CC-BY-4.0",
         "license_uri": LICENSE,
@@ -106,7 +110,7 @@ def main() -> int:
         "third_party_content_review": "pending",
         "jurisdictions_cleared": [],
         "rights_level": "B",
-        "decision_reason": "Candidate export of GovEasy's own published dataset snapshot. The publisher declares CC BY 4.0, but the adapter preserves source links and does not assert that third-party government source documents are relicensed. Rights level B pending field/source review; not admitted and not training-eligible.",
+        "decision_reason": "Candidate export of GovEasy's own published dataset snapshot. The publisher declares CC BY 4.0 in its dataset metadata, but the adapter preserves source links and does not assert that third-party government source documents are relicensed. Rights level B pending field/source review; not admitted and not training-eligible.",
         "policy_version": "RONIN-RIGHTS-A-1",
     }
     (args.out / "rights-record.candidate.json").write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
