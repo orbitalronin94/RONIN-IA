@@ -1,0 +1,212 @@
+name: Primera iteración y benchmark interno
+
+on:
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: Pasos de entrenamiento (entre 1 y 1000)
+        required: true
+        default: "1000"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-first-iteration
+  cancel-in-progress: false
+
+jobs:
+  entrenar-y-evaluar:
+    name: Entrenar tiny desde cero y medir sobre CC0 reservado
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      MDC_API_KEY: ${{ secrets.MDC_API_KEY }}
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - name: Obtener RONIN IA
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar PyTorch CPU y dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datacollective>=0.2"
+
+      - name: Comprobar credencial de Mozilla
+        run: |
+          if [ -z "${MDC_API_KEY:-}" ]; then
+            echo "::error::Falta el secreto MDC_API_KEY. Acepta primero las condiciones del conjunto en Mozilla y configura el secreto en GitHub."
+            exit 1
+          fi
+
+      - name: Descargar y preparar corpus CC0
+        run: |
+          python scripts/download_mozilla_corpus.py \
+            --download-dir /tmp/ronin-mozilla/raw \
+            --output /tmp/ronin-mozilla/processed
+
+      - name: Validar presupuesto de entrenamiento
+        env:
+          STEPS: ${{ inputs.steps }}
+        run: |
+          if ! [[ "$STEPS" =~ ^[0-9]+$ ]] || [ "$STEPS" -lt 1 ] || [ "$STEPS" -gt 1000 ]; then
+            echo "::error::Los pasos deben estar entre 1 y 1000."
+            exit 1
+          fi
+
+      - name: Guardar referencia de inicialización aleatoria
+        run: |
+          mkdir -p /tmp/ronin-first/reports
+          python - <<'PY'
+          from pathlib import Path
+          import torch
+          from ronin.config import get_profile
+          from ronin.models.transformer import RoninLM
+          from ronin.utils.repro import seed_everything
+
+          model_config, training_config = get_profile("tiny")
+          seed_everything(training_config.seed)
+          model = RoninLM(model_config)
+          torch.save({"model": model.state_dict(), "step": 0}, "/tmp/ronin-first/inicial.pt")
+          print("Parámetros:", model.parameter_count)
+          print("Semilla de inicialización:", training_config.seed)
+          PY
+
+      - name: Medir modelo sin entrenar
+        run: |
+          for split in validation test; do
+            python scripts/evaluate_text.py \
+              --checkpoint /tmp/ronin-first/inicial.pt \
+              --validation-text "/tmp/ronin-mozilla/processed/$split.txt" \
+              --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu \
+              --output "/tmp/ronin-first/reports/inicial-$split.json"
+          done
+
+      - name: Entrenar RONIN desde cero
+        env:
+          STEPS: ${{ inputs.steps }}
+        run: |
+          inicio=$(date +%s)
+          python scripts/train_text.py \
+            --text /tmp/ronin-mozilla/processed/train.txt \
+            --profile tiny \
+            --steps "$STEPS" \
+            --device cpu \
+            --checkpoints /tmp/ronin-first/checkpoints
+          fin=$(date +%s)
+          echo "$((fin - inicio))" > /tmp/ronin-first/reports/tiempo_entrenamiento_segundos.txt
+
+      - name: Evaluar modelo entrenado
+        env:
+          STEPS: ${{ inputs.steps }}
+        run: |
+          checkpoint="/tmp/ronin-first/checkpoints/step-$(printf '%08d' "$STEPS").pt"
+          test -s "$checkpoint"
+          for split in validation test; do
+            python scripts/evaluate_text.py \
+              --checkpoint "$checkpoint" \
+              --validation-text "/tmp/ronin-mozilla/processed/$split.txt" \
+              --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu \
+              --output "/tmp/ronin-first/reports/entrenado-$split.json"
+          done
+
+      - name: Construir informe reproducible
+        env:
+          STEPS: ${{ inputs.steps }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import platform
+          from pathlib import Path
+          from dataclasses import replace
+          import torch
+          from ronin.config import get_profile
+          
+          root = Path("/tmp/ronin-mozilla/processed")
+          reports = Path("/tmp/ronin-first/reports")
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          model_config, training_config = get_profile("tiny")
+          steps = int(os.environ["STEPS"])
+          training_config = replace(
+              training_config,
+              max_steps=steps,
+              warmup_steps=min(training_config.warmup_steps, max(1, steps // 10)),
+          )
+          metrics = {}
+          for split in ("validation", "test"):
+              initial = json.loads((reports / f"inicial-{split}.json").read_text())
+              trained = json.loads((reports / f"entrenado-{split}.json").read_text())
+              before = initial["bits_per_byte"]
+              after = trained["bits_per_byte"]
+              metrics[split] = {
+                  "inicial": initial,
+                  "entrenado": trained,
+                  "delta_bits_per_byte": after - before,
+                  "reduccion_porcentual_bits_per_byte": (100.0 * (before - after) / before) if before else None,
+              }
+          summary = {
+              "proyecto": "RONIN IA",
+              "tipo": "primera iteración; benchmark interno, no benchmark general",
+              "dataset": {
+                  "id": manifest["dataset_id"],
+                  "licencia": manifest["license"],
+                  "sha256_archivo_original": manifest["archive_sha256"],
+                  "frases_aceptadas": manifest["accepted_sentences"],
+                  "recuentos": manifest["sentence_counts"],
+                  "documentos_por_particion": manifest["source_document_counts"],
+                  "sha256_particiones": manifest["output_sha256"],
+              },
+              "modelo": {
+                  "perfil": "tiny",
+                  "inicializacion": "aleatoria; no se importan pesos de tutores",
+                  "configuracion": model_config.__dict__,
+                  "parametros": metrics["validation"]["entrenado"]["parameter_count"],
+                  "configuracion_entrenamiento": training_config.__dict__,
+                  "pasos_ejecutados": steps,
+                  "tokens_presentados_aproximados": steps * training_config.batch_size * training_config.gradient_accumulation_steps * model_config.context_length,
+                  "tiempo_entrenamiento_segundos": int((reports / "tiempo_entrenamiento_segundos.txt").read_text()),
+              },
+              "entorno": {
+                  "python": platform.python_version(),
+                  "pytorch": torch.__version__,
+                  "sistema": platform.platform(),
+                  "cpu_logicos": os.cpu_count(),
+                  "dispositivo": "cpu",
+                  "cuda_disponible": torch.cuda.is_available(),
+              },
+              "evaluacion": {
+                  "tokenizador": "byte-v1",
+                  "semilla_muestreo": 2026,
+                  "lotes_por_particion": 128,
+                  "tamano_lote": 2,
+                  "tokens_evaluados_por_particion": 128 * 2 * model_config.context_length,
+                  "metricas": metrics,
+              },
+              "limitaciones": [
+                  "El conjunto es español norteamericano del ámbito financiero; no representa el español general.",
+                  "Las métricas son comparables solo manteniendo idénticos corpus, tokenizador, perfil y protocolo.",
+                  "El conjunto test se reserva para esta medición inicial; las iteraciones de ajuste deben usar validation.",
+                  "La perplejidad byte-level no equivale a calidad conversacional ni a razonamiento.",
+              ],
+          }
+          (reports / "resumen.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps({"resumen": str(reports / "resumen.json"), "metricas": {k: {"bpb_inicial": v["inicial"]["bits_per_byte"], "bpb_entrenado": v["entrenado"]["bits_per_byte"]} for k,v in metrics.items()}}, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Publicar solo métricas y manifiesto resumido
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-primera-iteracion-metricas
+          path: /tmp/ronin-first/reports/
+          if-no-files-found: error
+          retention-days: 30
