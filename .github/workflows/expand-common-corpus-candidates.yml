@@ -1,0 +1,142 @@
+name: Expand Common Corpus — 16 domains × General/HKD candidates
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/expand-common-corpus-candidates.yml"
+      - "scripts/prepare_run5_candidates.py"
+      - "scripts/select_knowledge_dense_corpus.py"
+      - "data/manifests/knowledge_dense_sources.json"
+      - "reports/license_audit.json"
+  schedule:
+    - cron: "47 1 * * 0"
+  workflow_dispatch:
+    inputs:
+      max_rows:
+        description: Maximum Common Corpus rows inspected per domain
+        required: true
+        default: "1000000"
+        type: string
+      max_input_gib:
+        description: Maximum text bytes inspected per domain in GiB
+        required: true
+        default: "1"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-common-corpus-expansion
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Prepare ${{ matrix.domain }} General/HKD
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        domain:
+          - mathematics
+          - logic_epistemology
+          - philosophy
+          - physics
+          - chemistry_materials
+          - biology
+          - medicine_health
+          - computer_science
+          - software_engineering
+          - law
+          - economics
+          - social_sciences
+          - statistics_probability
+          - astronomy_earth_science
+          - engineering_robotics
+          - humanities
+    env:
+      DOMAIN: ${{ matrix.domain }}
+      MAX_ROWS: ${{ inputs.max_rows || '1000000' }}
+      MAX_INPUT_GIB: ${{ inputs.max_input_gib || '1' }}
+      PYTHONPATH: .
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      HF_DATASETS_CACHE: /tmp/hf-datasets-cache
+      HF_HOME: /tmp/hf-home
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Validate bounded limits
+        run: |
+          [[ "$MAX_ROWS" =~ ^[0-9]+$ ]] && [ "$MAX_ROWS" -ge 1000 ] && [ "$MAX_ROWS" -le 1000000 ]
+          [[ "$MAX_INPUT_GIB" =~ ^[0-9]+$ ]] && [ "$MAX_INPUT_GIB" -ge 1 ] && [ "$MAX_INPUT_GIB" -le 1 ]
+      - name: Install anonymous streaming reader
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "datasets==3.6.0" "huggingface_hub==0.36.0" "pyarrow>=18,<20"
+      - name: Validate source-scoped LIMITED_PASS only
+        run: |
+          python scripts/validate_license_audit.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          audit = json.loads(Path("reports/license_audit.json").read_text())
+          assert audit["gate"]["status"] == "FAIL"
+          assert audit["gate"]["downloads_authorized"] is False
+          matches = [x for x in audit["candidate_intake_authorizations"]
+                     if x.get("source_id") == "PleIAs/common_corpus"
+                     and x.get("dataset_revision") == "307910e4c5d040d6f318e6edf2a2b97849155771"]
+          assert matches and any(x.get("status") == "LIMITED_PASS"
+                                 and x.get("candidate_text_downloads_authorized") is True
+                                 and x.get("training_eligible") is False
+                                 and x.get("admitted") is False for x in matches)
+          print("Scoped candidate extraction only; global G-0 remains FAIL.")
+          PY
+      - name: Stream, license-filter, classify and split into General/HKD
+        run: |
+          python scripts/prepare_run5_candidates.py \
+            --domain "$DOMAIN" \
+            --max-rows "$MAX_ROWS" \
+            --max-input-bytes "$((MAX_INPUT_GIB * 1024 * 1024 * 1024))" \
+            --min-train-bytes "$((1 * 1024 * 1024))" \
+            --output-root "/tmp/ronin-common-corpus/$DOMAIN"
+      - name: Assert candidate-only output and preserve partial diagnostics
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path("/tmp/ronin-common-corpus") / os.environ["DOMAIN"]
+          report = root / "run5-candidate-manifest.json"
+          if not report.is_file():
+              print("No candidate manifest; failed acquisition will be represented by missing artifact.")
+              raise SystemExit(0)
+          data = json.loads(report.read_text())
+          assert data.get("training_eligible") is False
+          assert data.get("admitted") is False
+          assert data.get("source", {}).get("scoped_authorization", {}).get("status") == "LIMITED_PASS"
+          print(json.dumps({
+              "domain": data.get("domain"),
+              "libraries": len(data.get("libraries", [])),
+              "accepted_documents": data.get("ingestion", {}).get("accepted_documents_by_domain"),
+              "training_eligible": False,
+              "admitted": False
+          }, indent=2))
+          PY
+      - name: Upload domain candidate shard and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-common-corpus-${{ matrix.domain }}-candidates
+          path: /tmp/ronin-common-corpus/${{ matrix.domain }}/
+          if-no-files-found: warn
+          compression-level: 1
+          retention-days: 90
+      - name: Link run ledger
+        if: always()
+        uses: ./.github/actions/run-ledger-link
