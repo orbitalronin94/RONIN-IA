@@ -42,15 +42,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "Gate G-0: bloquear si no hay derechos acreditados"
-        run: python scripts/assert_g0_passed.py
+        id: g0
+        run: python scripts/assert_g0_passed.py --github-output "$GITHUB_OUTPUT"
 
       - name: Preparar Python
+        if: steps.g0.outputs.authorized == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
 
       - name: Instalar PyTorch CPU y dependencias
+        if: steps.g0.outputs.authorized == 'true'
         run: |
           python -m pip install --upgrade pip
           python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
@@ -58,12 +61,14 @@ jobs:
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66"
 
       - name: Descargar y preparar corpus público sin credenciales
+        if: steps.g0.outputs.authorized == 'true'
         run: |
           python scripts/prepare_open_corpora.py \
             --output /tmp/ronin-open-corpus/processed \
             --cache-dir /tmp/ronin-open-corpus/cache
 
       - name: Validar presupuesto de entrenamiento
+        if: steps.g0.outputs.authorized == 'true'
         env:
           STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
         run: |
@@ -73,6 +78,7 @@ jobs:
           fi
 
       - name: Guardar referencia de inicialización aleatoria
+        if: steps.g0.outputs.authorized == 'true'
         run: |
           mkdir -p /tmp/ronin-first/reports
           python - <<'PY'
@@ -90,6 +96,7 @@ jobs:
           PY
 
       - name: Medir referencia inicial en validación
+        if: steps.g0.outputs.authorized == 'true'
         run: |
           python scripts/evaluate_text.py \
             --checkpoint /tmp/ronin-first/inicial.pt \
@@ -98,7 +105,7 @@ jobs:
             --output /tmp/ronin-first/reports/inicial-validation.json
 
       - name: Medir referencia inicial en holdout reservado
-        if: ${{ inputs.benchmark_holdout || false }}
+        if: steps.g0.outputs.authorized == 'true' && (${{ inputs.benchmark_holdout || false }})
         run: |
           python scripts/evaluate_text.py \
             --checkpoint /tmp/ronin-first/inicial.pt \
@@ -107,6 +114,7 @@ jobs:
             --output /tmp/ronin-first/reports/inicial-test.json
 
       - name: Entrenar RONIN desde cero
+        if: steps.g0.outputs.authorized == 'true'
         env:
           STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
         run: |
@@ -121,6 +129,7 @@ jobs:
           echo "$((fin - inicio))" > /tmp/ronin-first/reports/tiempo_entrenamiento_segundos.txt
 
       - name: Evaluar modelo entrenado en validación
+        if: steps.g0.outputs.authorized == 'true'
         env:
           STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
         run: |
@@ -133,7 +142,7 @@ jobs:
             --output /tmp/ronin-first/reports/entrenado-validation.json
 
       - name: Evaluar una sola vez el holdout reservado
-        if: ${{ inputs.benchmark_holdout || false }}
+        if: steps.g0.outputs.authorized == 'true' && (${{ inputs.benchmark_holdout || false }})
         env:
           STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
         run: |
@@ -145,6 +154,7 @@ jobs:
             --output /tmp/ronin-first/reports/entrenado-test.json
 
       - name: Evaluar batería multidominio antes y después del entrenamiento
+        if: steps.g0.outputs.authorized == 'true'
         env:
           STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
         run: |
@@ -161,6 +171,7 @@ jobs:
             --output /tmp/ronin-first/reports/domains-entrenado.json
 
       - name: Comparar arquitectura histórica y actual (A/B)
+        if: steps.g0.outputs.authorized == 'true'
         env:
           STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
         run: |
@@ -174,6 +185,7 @@ jobs:
             --output /tmp/ronin-first/reports/architecture-ab.json
 
       - name: Construir informe reproducible
+        if: steps.g0.outputs.authorized == 'true'
         env:
           STEPS: ${{ inputs.steps || (github.event_name == 'pull_request' && '100' || '1000') }}
           BENCHMARK_HOLDOUT: ${{ inputs.benchmark_holdout || false }}
@@ -296,6 +308,7 @@ jobs:
           PY
 
       - name: Publicar solo métricas y manifiesto resumido
+        if: steps.g0.outputs.authorized == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ronin-primera-iteracion-metricas
