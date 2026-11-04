@@ -409,7 +409,7 @@ def write_split(
 
 
 def domain_kind_name(domain: str, kind: str) -> str:
-    return domain if kind == "base" else f"{domain}_hkd"
+    return f"{domain}_general" if kind == "general" else f"{domain}_hkd"
 
 
 def expected_library_count(domain: str | None) -> int:
@@ -679,7 +679,7 @@ def main() -> int:
             "WHERE domain=? ORDER BY score ASC, id ASC LIMIT ?",
             (domain, base_count),
         )
-        for kind, selected in (("base", base_rows), ("hkd", hkd_rows)):
+        for kind, selected in (("general", base_rows), ("hkd", hkd_rows)):
             output = args.output_root / domain_kind_name(domain, kind)
             metadata = write_split(
                 selected,
