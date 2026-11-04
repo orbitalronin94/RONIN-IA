@@ -116,3 +116,14 @@ def test_teacher_manifest_rejects_untracked_and_unsafe_files(tmp_path):
     (tmp_path / "unexpected.bin").write_bytes(b"extra")
     with pytest.raises(ValueError, match="inventario"):
         verify_teacher_manifest(tmp_path, manifest)
+
+
+def test_phi4_mini_instruct_is_pinned_as_mit_remote_code_teacher():
+    from scripts.download_teacher_models import ALLOWED_MODELS, ALLOW_PATTERNS
+
+    model = ALLOWED_MODELS["phi-4-mini-instruct"]
+    assert model["repo_id"] == "microsoft/Phi-4-mini-instruct"
+    assert model["license_url"] == "https://huggingface.co/microsoft/Phi-4-mini-instruct"
+    assert model["trust_remote_code"] is True
+    assert "model*.safetensors" in ALLOW_PATTERNS
+    assert "*.py" in ALLOW_PATTERNS
