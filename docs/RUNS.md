@@ -516,3 +516,19 @@ Límites que siguen vigentes:
 Estado al abrir esta iteración: código preparado en rama de trabajo; aún no hay ejecución real que demuestre 16 bibliotecas x10 ni admisión. RUN 5 oficial no debe lanzarse hasta que todos los gates pasen.
 
 Recuento de arquitectura de referencia: el perfil `tiny` actual tiene **9.922.880 parámetros entrenables** (embeddings compartidos contados una sola vez). Los pesos de mezcla de 16 bibliotecas no alteran ese número. Esta PR no añade módulos entrenables ni afirma crecimiento ficticio; una ampliación por expertos/adapters deberá tener ruta de entrenamiento condicionada por dominio y un recuento antes/después con prueba de equivalencia.
+
+
+## Experimento de destilación tutorizada Phi-4 + MMLU-Pro — preparación
+
+Se prepara una iteración separada del entrenamiento oficial RUN 5, porque G-0 y las 16 bibliotecas siguen bloqueados. El tutor Phi-4 mini instruct se descarga/verifica desde su revisión MIT fijada; sus pesos no se copian al estudiante.
+
+- El tutor recibe preguntas muestreadas de `TIGER-Lab/MMLU-Pro` **validation**, sin recibir la respuesta correcta.
+- Solo pasan al corpus las respuestas cuya letra coincide exactamente con la etiqueta gold de validation y cuya explicación explícita supera el filtro mínimo de formato.
+- El texto de entrenamiento conserva el prefijo `Answer:` idéntico al protocolo del evaluador, seguido de una justificación breve.
+- El split `test` no se carga durante la generación ni el entrenamiento; se evalúa completo antes y después con la misma revisión, los mismos ítems y la misma cobertura.
+- El entrenamiento tiny permite contexto de 2048 bytes para alinearlo con la evaluación, en lugar de los 128 bytes por defecto.
+- La promoción del candidato exige mejora estricta de accuracy sin pérdida de cobertura. El artefacto no se convierte automáticamente en checkpoint de producción.
+
+Limitaciones: las explicaciones son racionales explícitas generadas, no cadenas privadas de pensamiento. La etiqueta gold verifica la respuesta, pero no certifica independientemente cada frase de la explicación. La salida generada no recibe una licencia automática; se conserva como artefacto experimental interno. Usar repetidamente el test para decidir promociones puede producir contaminación adaptativa del holdout.
+
+Estado: workflow y pruebas añadidos en la rama `feat/phi4-mmlu-pro-rationale-distillation`; ejecución de entrenamiento pendiente de CI/merge. No afirmar mejora hasta disponer del informe MMLU-Pro completo antes/después.
