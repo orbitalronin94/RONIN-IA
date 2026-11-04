@@ -371,7 +371,7 @@ def write_split(
     metadata = {
         "id": domain_kind_name(domain, library_kind),
         "domain": domain,
-        "source_domain_family": DOMAIN_SOURCE_PARENT[domain],
+        "source_domain_family": DOMAIN_SOURCE_PARENT.get(domain, domain),
         "kind": library_kind,
         "source_type": "high_knowledge_density_extraction" if library_kind == "hkd" else "general_domain_corpus",
         "status": "candidate_pending_human_review",
