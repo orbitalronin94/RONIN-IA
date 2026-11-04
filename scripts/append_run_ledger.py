@@ -109,7 +109,8 @@ def main() -> int:
     except (ValueError, AttributeError):
         date_text = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
 
-    name = safe(run.get("name") or "Workflow")
+    raw_name = str(run.get("name") or "Workflow")
+    name = safe(raw_name)
     url = safe(
         run.get("html_url")
         or (
@@ -127,7 +128,7 @@ def main() -> int:
     attempt = safe(run.get("run_attempt") or "1")
 
     summary = SUMMARIES.get(
-        name,
+        raw_name,
         "Ejecución de GitHub Actions; consultar logs y artefactos "
         "enlazados para el resultado detallado.",
     )
