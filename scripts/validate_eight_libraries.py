@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+"""Validate the eight independent RONIN corpus libraries before RUN #5."""
+from __future__ import annotations
+import argparse
+import json
+from pathlib import Path
+
+def validate(path: Path, require_ready: bool = False) -> list[str]:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    policy, libraries = data["policy"], data["libraries"]
+    errors: list[str] = []
+    required = int(policy["required_library_count"])
+    if len(libraries) != required:
+        errors.append(f"expected exactly {required} libraries, found {len(libraries)}")
+    ids = [item["id"] for item in libraries]
+    if len(ids) != len(set(ids)):
+        errors.append("library IDs must be unique")
+    minimum = int(policy["minimum_train_bytes_per_library"])
+    sizes = []
+    for item in libraries:
+        if not require_ready:
+            continue
+        name = item["id"]
+        if item.get("status") != "admitted" or item.get("training_eligible") is not True:
+            errors.append(f"{name}: not admitted for training")
+            continue
+        if not item.get("revision") or not item.get("manifest_sha256") or not item.get("license_audit"):
+            errors.append(f"{name}: missing immutable revision, manifest hash or license audit")
+        size = int(item.get("train_bytes", 0))
+        if size < minimum:
+            errors.append(f"{name}: train bytes {size} below minimum {minimum}")
+        sizes.append(size)
+    portfolio = data.get("portfolio", {})
+    if portfolio.get("training_eligible") is not False:
+        errors.append("Portfolio must remain excluded from training")
+    if portfolio.get("counted_as_library") is not False:
+        errors.append("Portfolio must not count as one of the eight libraries")
+    if portfolio.get("role") != "retrieval_only_fallback":
+        errors.append("Portfolio role must be retrieval_only_fallback")
+    if require_ready and len(sizes) == required:
+        ratio = min(sizes) / max(sizes)
+        if ratio < float(policy["balance_ratio_min"]):
+            errors.append(f"library byte balance ratio {ratio:.3f} below minimum")
+    return errors
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--manifest", type=Path, default=Path("data/manifests/eight_libraries.json"))
+    parser.add_argument("--require-ready", action="store_true")
+    args = parser.parse_args()
+    errors = validate(args.manifest, args.require_ready)
+    if errors:
+        for error in errors:
+            print(f"FAIL: {error}")
+        raise SystemExit(1)
+    print("PASS: eight-library manifest structure and Portfolio exclusion are valid")
+
+if __name__ == "__main__":
+    main()
