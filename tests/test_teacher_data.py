@@ -5,7 +5,7 @@ import pytest
 
 from ronin.data.corpus import prepare
 from ronin.data.prompts import build_prompts
-from ronin.data.teacher import generate_completion, write_teacher_dataset
+from ronin.data.teacher import generate_completion, verify_teacher_manifest, write_teacher_dataset
 
 
 def test_prompt_curriculum_is_deterministic_and_validated():
@@ -72,3 +72,47 @@ def test_prepared_corpus_accepts_only_verified_local_mit_records(tmp_path, monke
     assert "### Instrucción" in corpus
     assert "### Respuesta del tutor" in corpus
     assert "Respuesta local." in corpus
+
+
+
+def test_teacher_manifest_verifies_every_local_file(tmp_path):
+    weights = tmp_path / "model.safetensors"
+    weights.write_bytes(b"verified model bytes")
+    manifest = {
+        "model_id": "openai-community/gpt2",
+        "revision": "a" * 40,
+        "license": "mit",
+        "license_verified": True,
+        "license_url": "https://huggingface.co/openai-community/gpt2",
+        "weights_format": "safetensors",
+        "files_sha256": {
+            "model.safetensors": hashlib.sha256(weights.read_bytes()).hexdigest(),
+        },
+    }
+    verify_teacher_manifest(tmp_path, manifest)
+
+    weights.write_bytes(b"tampered model bytes")
+    with pytest.raises(ValueError, match="SHA-256"):
+        verify_teacher_manifest(tmp_path, manifest)
+
+
+def test_teacher_manifest_rejects_untracked_and_unsafe_files(tmp_path):
+    weights = tmp_path / "model.safetensors"
+    weights.write_bytes(b"model")
+    digest = hashlib.sha256(weights.read_bytes()).hexdigest()
+    manifest = {
+        "model_id": "openai-community/gpt2",
+        "revision": "a" * 40,
+        "license": "mit",
+        "license_verified": True,
+        "license_url": "https://huggingface.co/openai-community/gpt2",
+        "weights_format": "safetensors",
+        "files_sha256": {"../model.safetensors": digest},
+    }
+    with pytest.raises(ValueError, match="inventario|Ruta insegura"):
+        verify_teacher_manifest(tmp_path, manifest)
+
+    manifest["files_sha256"] = {"model.safetensors": digest}
+    (tmp_path / "unexpected.bin").write_bytes(b"extra")
+    with pytest.raises(ValueError, match="inventario"):
+        verify_teacher_manifest(tmp_path, manifest)
