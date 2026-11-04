@@ -104,6 +104,8 @@ def list_s3_version_prefixes(pmcid: str) -> list[str]:
 
 def license_family(value: Any) -> str:
     normalized = normalize_license(value)
+    if normalized.startswith(("CC BY SA", "CC BY ND", "CC BY NC")):
+        return normalized
     if normalized.startswith("CC BY"):
         return "CC BY"
     if normalized.startswith("CC0"):
