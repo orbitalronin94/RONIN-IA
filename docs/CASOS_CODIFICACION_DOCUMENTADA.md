@@ -258,3 +258,8 @@ debe reservar casos completos por obra y mecanismo.
 ## Artefacto de revisión separado
 
 El workflow de adquisición prepara también `candidate-train.txt` y `candidate-manifest.json` a partir de los 404 registros del split train. Es un **candidato de corpus especialista**, no una autorización automática de entrenamiento: el estado del material sigue siendo `excluded_pending_manual_review` hasta completar revisión humana de OCR, edición, derechos, correspondencia entre fuente y caso y calidad de las anotaciones. Los 50 registros de validation y los 52 de test no se exportan al candidato train.
+
+
+## Artefacto de revisión separado
+
+El workflow de adquisición prepara `candidate-train.txt` y `candidate-manifest.json` a partir de los 404 registros del split train. El artefacto generado en el run 41829469089 contiene 281.223 bytes, con SHA-256 `95b46f12d5ae4fa0906ec3d9f70a6cf66ed97dd5a6cefeb41985231246bb04f7`. Es un **candidato de corpus especialista**, no una autorización automática de entrenamiento: el estado sigue siendo `excluded_pending_manual_review` hasta completar revisión humana de OCR, edición, derechos, correspondencia entre fuente y caso y calidad de anotaciones. Los 50 registros de validation y los 52 de test no se exportan al candidato train.
