@@ -16,6 +16,8 @@ from pathlib import Path
 from typing import Any
 
 from ronin.data.teacher import generate_completion, load_local_teacher
+
+
 def _load_evaluator_api():
     try:
         module = importlib.import_module("scripts.evaluate_mmlu_pro")

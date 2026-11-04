@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the sixteen independent RONIN corpus libraries before official training."""
+"""Validate the 32 independent RONIN corpus libraries before official training."""
 
 from __future__ import annotations
 
@@ -25,6 +25,13 @@ def validate(
     if len(libraries) != required:
         errors.append(f"expected exactly {required} libraries, found {len(libraries)}")
     ids = [item["id"] for item in libraries]
+    domains = {item.get("domain", "").split(" — ")[0] for item in libraries}
+    if len(domains) != int(policy.get("domain_count", 16)):
+        errors.append(f"expected {policy.get('domain_count', 16)} distinct domains, found {len(domains)}")
+    for domain in domains:
+        partitions = [item for item in libraries if item.get("domain", "").split(" — ")[0] == domain]
+        if len(partitions) != 2 or {item.get("source_type", "general") for item in partitions} != {"general", "high_knowledge_density_extraction"}:
+            errors.append(f"{domain}: expected exactly one General and one HKD library")
     if len(ids) != len(set(ids)):
         errors.append("library IDs must be unique")
 

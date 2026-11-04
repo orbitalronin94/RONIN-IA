@@ -1,23 +1,47 @@
-# Almacén de datasets RONIN
+# Bibliotecas RONIN — 16 dominios × General/HKD
 
-Este directorio es el catálogo versionado y el punto lógico de entrada para los corpus de entrenamiento. Los corpus grandes de RUN 5 se conservan como artefactos independientes de GitHub Actions; no se versionan como blobs Git ni dependen de que un gate de entrenamiento pase.
+RONIN mantiene **16 dominios distintos**, cada uno dividido en dos particiones disjuntas:
 
-## RUN 5
+- **General:** mitad inferior del ranking RONIN-HKD-0.1.
+- **HKD:** mitad superior del ranking RONIN-HKD-0.1.
 
-Cada ejecución del workflow **Preparar las 16 bibliotecas RUN 5** publica:
+Total: **32 bibliotecas independientes**. El mínimo inicial para admitir cada biblioteca es **1 MiB de texto de entrenamiento**, con objetivo de crecimiento a **10 GiB por biblioteca** (320 GiB en total).
 
-- Un artefacto por biblioteca, con nombre `ronin-datasets-run5-library-<id>`.
-- Un índice/diagnóstico por dominio, incluso si el job falla parcialmente.
-- Un artefacto `ronin-datasets-run5-master-index` con `datasets/run5/INDEX.json`.
+## Regla de tamaño
 
-El índice maestro enumera siempre las 16 bibliotecas previstas. Para cada una registra estado, tamaño train, SHA-256, revisión de origen, manifiesto y nombre del artefacto. Si una biblioteca no llegó a generarse, aparece con estado `missing_or_generation_failed`; no se omite.
+El mínimo de 1 MiB es un umbral de arranque, no una garantía de calidad ni una excepción legal. Si un dominio no reúne 1 MiB de documentos admisibles, la biblioteca permanece como candidata/incompleta y se informa de su tamaño real. No se rellena con duplicados, texto de otro dominio, documentos sin licencia compatible ni material de evaluación.
 
-Los artefactos de datos se suben con condición `always()`: una validación fallida, una deduplicación que detecte colisiones o el bloqueo de admisión no elimina el material candidato generado. El workflow oficial de entrenamiento es independiente y solo puede consumir bibliotecas después de superar sus gates.
+## Admisión y G-0
 
-## Retención y reproducibilidad
+La apertura de G-0 permite trabajar con fuentes que tengan autorización limitada de adquisición de candidatos. No convierte esos candidatos en corpus admitido ni autoriza entrenamiento. Cada documento debe conservar licencia explícita, procedencia, revisión inmutable, hash, deduplicación, análisis de datos sensibles y revisión de calidad. Las licencias desconocidas, NC, ND, ShareAlike no autorizadas y los materiales con derechos inciertos permanecen excluidos.
 
-Los artefactos de Actions tienen retención limitada (configurada actualmente a 90 días). Para conservación a largo plazo, descarga los artefactos y archívalos en almacenamiento persistente externo con verificación SHA-256. El índice registra el run ID y commit para reconstruir la procedencia. No se debe interpretar un artefacto candidato como material legalmente admitido o elegible para entrenamiento.
+General y HKD comparten el mismo pool documental elegible, pero sus particiones deben ser disjuntas. Se exige deduplicación entre bibliotecas para impedir que el mismo documento infle ambos tamaños.
 
-## Pesos y parámetros
+## Los 16 dominios
 
-Los pesos de mezcla por biblioteca son metadatos de muestreo y controlan la proporción de ejemplos vistos durante el entrenamiento; no aumentan por sí mismos el número de parámetros entrenables. Cualquier crecimiento de parámetros debe reflejarse en el manifiesto de arquitectura y en un recuento explícito antes/después.
+1. Matemáticas
+2. Lógica y epistemología
+3. Filosofía
+4. Física
+5. Química y materiales
+6. Biología
+7. Medicina y ciencias de la salud
+8. Informática
+9. Ingeniería del software
+10. Derecho y jurisprudencia
+11. Economía
+12. Ciencias sociales
+13. Estadística y probabilidad
+14. Astronomía y ciencias de la Tierra
+15. Ingeniería y robótica
+16. Historia, lingüística y literatura
+
+El manifiesto data/manifests/sixteen_libraries.json contiene las 32 entradas y registra el estado real de cada una. Las entradas nuevas son candidatas; su presencia no significa que ya existan 1 MiB descargados ni que hayan superado G-0.
+
+## Escalado
+
+- Fase de arranque: hasta 1 MiB por biblioteca, si existe material admisible.
+- Crecimiento: aumentar el tamaño por dominio conforme a la disponibilidad y calidad.
+- Objetivo final: 10 GiB por biblioteca, sin relajar las garantías de derechos, calidad o separación de evaluación.
+
+El Portfolio sigue siendo exclusivamente retrieval/RAG y no cuenta como biblioteca de entrenamiento.
