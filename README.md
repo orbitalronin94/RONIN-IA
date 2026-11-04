@@ -84,7 +84,7 @@ El workflow reducido se ejecutará después de integrar los cambios y lanzarlo m
 ### Últimas ejecuciones observadas
 
 - [Experimento oficial #1](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41827976377): completado; 1.000 pasos, loss final 1,98638 y resultado MMLU-Pro documentado arriba.
-- [Primera iteración y benchmark interno #?](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41840992712): completado correctamente en la revisión con el sampler vectorizado.
+- [Primera iteración y benchmark interno (completado)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41840992712): completado correctamente en la revisión con el sampler vectorizado.
 - [CI de la revisión actual](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41840992719): en curso al actualizar este README. La revisión anterior corrigió el único fallo Ruff detectado en `scripts/compare_supra_baseline.py`; no se declara CI verde hasta que termine esta ejecución.
 - La [PR #44](https://github.com/orbitalronin94/RONIN-IA/pull/44) continúa sin fusionar. No se ha iniciado el workflow reducido.
 
