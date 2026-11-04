@@ -16,7 +16,9 @@ from pathlib import Path
 
 try:
     from scripts.prepare_synthetic_corpus import DOMAINS, GENERATORS
-except ModuleNotFoundError:
+except ModuleNotFoundError as exc:
+    if exc.name != "scripts":
+        raise
     from prepare_synthetic_corpus import DOMAINS, GENERATORS
 
 
