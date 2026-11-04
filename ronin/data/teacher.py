@@ -72,9 +72,17 @@ def load_local_teacher(model_dir: str | Path, device: str = "auto") -> tuple[Any
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     verify_teacher_manifest(root, manifest)
 
-    tokenizer = AutoTokenizer.from_pretrained(root, local_files_only=True)
+    trust_remote_code = bool(manifest.get("trust_remote_code", False))
+    tokenizer = AutoTokenizer.from_pretrained(
+        root, local_files_only=True, trust_remote_code=trust_remote_code
+    )
     model = AutoModelForCausalLM.from_pretrained(
-        root, local_files_only=True, use_safetensors=True, torch_dtype="auto"
+        root,
+        local_files_only=True,
+        use_safetensors=True,
+        torch_dtype="auto",
+        trust_remote_code=trust_remote_code,
+        attn_implementation="eager",
     )
     if device == "auto":
         device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -101,8 +109,18 @@ def generate_completion(
     if max_new_tokens < 1 or not 0.0 < temperature <= 2.0 or not 0.0 < top_p <= 1.0:
         raise ValueError("Parámetros de generación no válidos")
     device = next(model.parameters()).device
-    encoded = tokenizer(prompt, return_tensors="pt", truncation=True)
-    encoded = {key: value.to(device) for key, value in encoded.items()}
+    if getattr(tokenizer, "chat_template", None):
+        encoded = tokenizer.apply_chat_template(
+            [{"role": "user", "content": prompt}],
+            tokenize=True,
+            add_generation_prompt=True,
+            return_dict=True,
+            return_tensors="pt",
+        )
+        encoded = {key: value.to(device) for key, value in encoded.items()}
+    else:
+        encoded = tokenizer(prompt, return_tensors="pt", truncation=True)
+        encoded = {key: value.to(device) for key, value in encoded.items()}
     generator = torch.Generator(device=device).manual_seed(seed)
     with torch.inference_mode():
         output = model.generate(
@@ -112,6 +130,7 @@ def generate_completion(
             temperature=temperature,
             top_p=top_p,
             pad_token_id=tokenizer.eos_token_id,
+            eos_token_id=tokenizer.eos_token_id,
             generator=generator,
         )
     continuation = output[0, encoded["input_ids"].shape[1]:]
