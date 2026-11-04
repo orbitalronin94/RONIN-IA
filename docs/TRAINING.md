@@ -43,9 +43,9 @@ Si cualquiera de las dos condiciones falla, no se guarda el checkpoint nuevo y l
 
 ## Ciclos rápidos con corpus abierto y promoción por validación
 
-El workflow `rapid-open-training-cycles.yml` ejecuta hasta tres ciclos cortos consecutivos y vuelve a programarse cada seis horas. Usa el corpus público fijado por `prepare_open_corpora.py`, con partición por obra; conserva el último checkpoint aceptado y hace warm-start del siguiente ciclo.
+El workflow `rapid-open-training-cycles.yml` ejecuta hasta tres ciclos cortos consecutivos y, cuando una ejecución termina correctamente, GitHub Actions dispara automáticamente la siguiente mediante `workflow_run`. No requiere activación manual entre ciclos. Un `cron` cada seis horas sirve solo como arranque/recuperación si la cadena se detiene. Usa el corpus público fijado por `prepare_open_corpora.py`, con partición por obra; conserva el último checkpoint aceptado y hace warm-start del siguiente ciclo.
 
-**Gate obligatorio:** el workflow llama a `assert_g0_passed.py` antes de descargar textos o entrenar. Si G-0 no está en PASS, la ejecución registra el bloqueo y no modifica pesos. Una etiqueta de licencia o la disponibilidad pública no sustituyen la revisión humana.
+**Gate obligatorio:** el workflow llama a `assert_g0_passed.py` antes de descargar textos o entrenar. Si G-0 no está en PASS, la ejecución falla de forma cerrada, no descarga textos ni modifica pesos y corta la cadena; el arranque periódico vuelve a intentarlo más tarde. Una etiqueta de licencia o la disponibilidad pública no sustituyen la revisión humana.
 
 **Regla de promoción:** solo acepta el checkpoint si mejora estrictamente la accuracy de MMLU-Pro `validation` y no empeora bits-per-byte en el split de validación textual. Si no cumple ambas condiciones, restaura el checkpoint anterior y continúa desde él. El test de MMLU-Pro permanece fuera de este bucle y se reserva para evaluación final no usada en selección.
 
