@@ -28,6 +28,7 @@ def test_ready_gate_checks_exact_bytes_and_sha256(tmp_path):
     data = json.loads(MANIFEST.read_text(encoding="utf-8"))
     corpus_root = tmp_path
     content = b"verified library corpus"
+    data["policy"]["minimum_train_bytes_per_library"] = len(content)
     digest = hashlib.sha256(content).hexdigest()
 
     for library in data["libraries"]:
