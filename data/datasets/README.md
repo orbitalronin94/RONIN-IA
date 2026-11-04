@@ -249,3 +249,16 @@ Se han incorporado al registro de descubrimiento (sin admisión automática):
 - **NIST Public Data Repository**: fuente de descubrimiento con DOI y ficheros descargables; no hay licencia global. Cada registro y archivo requiere licencia explícita y hashes.
 
 Los seis registros incluyen alcance, evidencia del proveedor y riesgos. No se han descargado ni contado bytes de estas fuentes, ni se consideran bibliotecas listas para entrenamiento. La fuente de verdad es el registro de auditoría; cada futuro adaptador debe producir manifiesto, SHA-256, provenance y propuesta de rights record antes de cualquier revisión de admisión.
+
+
+## Primeras adquisiciones reproducibles: resultados verificados
+
+En los workflows de GitHub Actions se han producido estos artefactos candidatos (hashes también registrados en `candidates/github-source-audit.json`):
+
+| Fuente | Registros/filas | Payload sin comprimir | SHA-256 del payload | Estado |
+|---|---:|---:|---|---|
+| CoVoST 2, solo campo `translation` (es→en, ca→en, en→ca) | 432.475 | 86.874.752 bytes | `fc7f70d7ca75c2eef50a710b579186332d3082f5aa4369ee01039aab6d8ff58e` | Artefacto candidato; validador de propuesta de derechos pasó |
+| OpenAlex, metadatos bibliográficos allowlisted | 100.000 | 185.943.561 bytes | `a167fac571d5c172f531bd5c2ddb35c9ca06506919522ac187e602c3b9599cf8` | Artefacto candidato; validador de propuesta de derechos pasó |
+| ROR, metadatos CC0 sin campo `locations` | 144.717 | 87.981.707 bytes | `a717800a198694c7fdd6aff6759c4dbb4984d53f0f3ef92046eb7523aa3c7f3f` | Artefacto candidato; validador de propuesta de derechos pasó |
+
+Los tres artefactos están en GitHub Actions con retención de 90 días (CoVoST run `41932647180`, OpenAlex `41932684850`, ROR `41932866226`). No he copiado cientos de MB al historial Git. Los bytes de OpenAlex y ROR son metadatos estructurados y no cuentan como texto de preentrenamiento; CoVoST son traducciones cortas, no prosa general. Ninguno está todavía admitido en las bibliotecas ni en el split de entrenamiento: la validación de la propuesta de derechos solo comprueba el esquema y la política, y no sustituye G-0, privacidad, calidad, deduplicación, atribución ni revisión humana.
