@@ -36,7 +36,7 @@ La puntuación no mide verdad. Una frase falsa puede parecer densa; por eso se e
 - `data/manifests/sixteen_libraries.json`: gate oficial de las 16 bibliotecas.
 - `scripts/validate_sixteen_libraries.py --require-ready --corpus-root <ruta>`: exige las 16 admitidas, tamaño mínimo, hashes, auditoría, y para las ocho HKD también hash del informe de selección y revisión humana.
 
-Todos los adaptadores están desactivados por defecto. Para habilitar una fuente se exige: revisión inmutable, esquema real inspeccionado, campo de licencia o prueba jurídica de licencia a nivel de repositorio/archivo, allowlist compatible, procedencia estable y auditoría registrada. Un dataset que carece de metadatos de licencia por documento no se habilita por comodidad.
+Los adaptadores permanecen desactivados por defecto. En la iteración RUN 5-HKD se habilitan únicamente los ocho adaptadores de PleIAs Common Corpus (uno por dominio) para extracción de candidatos, bajo la autorización limitada y exacta de `reports/license_audit.json`: revisión inmutable, allowlist documental compatible y procedencia por `identifier`. Esta habilitación no cambia G-0 global, no aprueba la obra/edición subyacente y no concede admisión ni entrenamiento. Los demás adaptadores (OpenWebMath, MathPile, ProofPile-2, Lean/mathlib, arXiv, PMC, Europe PMC, PatentsView, The Stack y Harvard CAP) siguen desactivados hasta contar con revisión propia, revisión inmutable, esquema inspeccionado, licencia/allowlist compatible y autorización verificable. Un dataset sin metadatos de licencia documental no se habilita por comodidad.
 
 El selector no publica corpus ni los incluye en Git. Los cuerpos se almacenan como artefactos/datasets externos con manifiestos y hashes. No se aceptan tokens, secretos, credenciales, datos personales sensibles ni contenido con malware.
 
@@ -70,6 +70,6 @@ La inclusión en la tabla no significa que una fuente esté aprobada. En esta re
 ## Estado actual
 
 - 8 bibliotecas base: candidatas; aún no admitidas.
-- 8 bibliotecas HKD: manifiesto creado; cero bytes admitidos.
+- 8 bibliotecas HKD: extracción paralela activada para candidatos de Common Corpus mediante RONIN-HKD-0.1; tamaño objetivo mínimo 2.5 GiB por biblioteca, pendiente de ejecución y auditoría.
 - Portfolio: RAG de experto; no training.
-- RUN #5 / entrenamiento oficial: bloqueado. No ejecutar ni mergear la PR hasta que el gate de 16 bibliotecas esté completo y CI valide el protocolo.
+- RUN #5 / entrenamiento oficial: sigue bloqueado. La extracción HKD de candidatos no equivale a admisión. No ejecutar entrenamiento hasta completar 16 bibliotecas con mínimo 2.5 GiB cada una, G-0, derechos por documento, calidad humana, deduplicación cruzada, PII/secret scans, splits, hashes y preflight.
