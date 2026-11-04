@@ -5,6 +5,7 @@ import argparse, hashlib, io, json, urllib.request, zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+ADAPTER_VERSION = "1.0.1"
 RECORD_ID = "23187250"
 API = f"https://zenodo.org/api/records/{RECORD_ID}"
 LICENSE = "https://creativecommons.org/publicdomain/zero/1.0/"
