@@ -27,7 +27,7 @@ def test_prepare_includes_markdown_html_and_zip_text(tmp_path: Path) -> None:
         for line in (output / "documents.jsonl").read_text(encoding="utf-8").splitlines()
     ]
     saved_manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
-    corpus = "\\n".join(document["text"] for document in documents)
+    corpus = "\n".join(document["text"] for document in documents)
 
     assert manifest["document_count"] == 3
     assert "Texto propio de investigación." in corpus
