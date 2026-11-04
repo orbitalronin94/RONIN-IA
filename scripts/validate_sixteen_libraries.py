@@ -141,7 +141,7 @@ def main() -> None:
         for error in errors:
             print(f"FAIL: {error}")
         raise SystemExit(1)
-    print("PASS: sixteen-library manifest structure and Portfolio exclusion are valid")
+    print("PASS: 32-library manifest structure and Portfolio exclusion are valid")
 
 
 if __name__ == "__main__":
