@@ -11,7 +11,7 @@ Este documento es el índice maestro para preparar mezclas reproducibles. No con
 | Material | Inventario observado | Uso permitido en el flujo actual | Estado |
 |---|---:|---|---|
 | Portfolio/Papers | 48 documentos utilizables | Entrenamiento únicamente | Autorización expresa del titular registrada; revisión de terceros pendiente por documento |
-| CLiGS Textbox | 364 documentos preparados | 344 train aprox. incluidos en el total de literatura | Integrado y auditado |
+| CLiGS Textbox | 364 documentos preparados | Parte de los 608 train totales; reparto por fuente no publicado en el resumen | Integrado y auditado |
 | CoNSSA | 184 documentos preparados | Train dentro del total de literatura | Integrado y auditado |
 | ELTeC-spa | 96 documentos preparados | Train dentro del total de literatura | Integrado y auditado |
 | Literatura abierta conjunta | 644 documentos: 608 train, 18 validation, 18 test | Preentrenamiento + validación/test literarios separados | Descarga verificada en Actions |
@@ -166,7 +166,7 @@ El script `scripts/prepare_training_mixture.py` construye una mezcla a partir de
 - [Auditoría de adquisición, run #145](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919840) — corpus literario y biblioteca especializada.
 - [CI, run #351](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919819) — 100 tests, smoke CPU y Ruff en verde.
 - [Primera iteración/benchmark, run #126](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919786) — smoke tiny completado.
-- [Ciclo de entrenamiento y MMLU-Pro, run #59](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919709) — en curso al corte de esta ficha; sin resultados finales publicados.
+- [Ciclo de entrenamiento y MMLU-Pro, run #59](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41825919709) — terminó con fallo: Phi-4 no pudo generar texto porque `generator` no es un argumento aceptado por el modelo; después MMLU-Pro no pudo importar `BucketNotFoundError` desde `huggingface_hub.errors`. No se generó el informe final ni el artefacto `ronin-portfolio-mmlu-training-cycle`.
 - [PR #39: integración de corpus + Phi-4](https://github.com/orbitalronin94/RONIN-IA/pull/39).
 
 ## 8. Decisión de uso resumida
@@ -177,4 +177,4 @@ El script `scripts/prepare_training_mixture.py` construye una mezcla a partir de
 - **No descargar/no entrenar:** cuatro colecciones G-0 bloqueadas.
 - **No considerar integrado:** PleIAs PD Books, Mozilla Finance Sentences y las demás candidatas hasta completar su propio gate.
 
-La PR #39 debe terminar su ciclo largo y fusionarse antes de describir la mezcla Portfolio + literatura + Phi-4 como pipeline estable de `main`.
+La PR #39 debe corregir la compatibilidad de generación Phi-4 y fijar una combinación compatible de `datasets`/`huggingface_hub`, repetir el ciclo y generar el manifiesto final antes de describir la mezcla Portfolio + literatura + Phi-4 como pipeline estable de `main`. Los artefactos de adquisición separados sí existen; el artefacto consolidado del ciclo no se produjo.
