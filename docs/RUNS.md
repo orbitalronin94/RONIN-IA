@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:09 | [Integración continua #1156 (run 42000068519)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000068519) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Use automatic student device selection in docs. Trigger: push; rama: main; intento: 1. | 5ad0ff81 |
 | 2026-11-05 09:09 | [Integración continua #1146 (run 41999945550)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999945550) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Fix local llama runtime lint. Trigger: push; rama: main; intento: 1. | 93d0a2e1 |
 | 2026-11-05 09:09 | [Integración continua #1151 (run 42000033961)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000033961) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): stage candidate corpus path without absent admitted tree. Trigger: push; rama: main; intento: 1. | b3081806 |
 | 2026-11-05 09:09 | [Integración continua #1147 (run 41999978332)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999978332) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Test Socratic cross-examination prompt. Trigger: push; rama: main; intento: 1. | 6c0fe9b9 |
