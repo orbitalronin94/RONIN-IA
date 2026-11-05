@@ -21,10 +21,12 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-      - name: Install R, JSON and SHA-256 packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y r-base r-cran-jsonlite r-cran-digest
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.4"
+      - name: Install JSON and SHA-256 packages
+        run: Rscript -e 'install.packages(c("jsonlite", "digest"), repos="https://cloud.r-project.org")'
       - name: Export only eligible DOI records to per-document JSONL
         run: Rscript scripts/export_scienceverse_rds_text.R
       - name: Validate export counts and hashes
