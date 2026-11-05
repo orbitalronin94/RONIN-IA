@@ -86,7 +86,7 @@ def main() -> None:
         path = a.documents / f"{doc_id}.txt"
         raw = path.read_bytes()
         actual = digest(raw)
-        git_blob = hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\\0" + raw).hexdigest()
+        git_blob = hashlib.sha1(b"blob " + str(len(raw)).encode() + bytes([0]) + raw).hexdigest()
         if git_blob != verdict.get("git_blob_sha1"):
             raise SystemExit(f"{doc_id}: Git blob SHA mismatch against file-level review")
         if verdict.get("text_sha256") and actual != verdict["text_sha256"]:
