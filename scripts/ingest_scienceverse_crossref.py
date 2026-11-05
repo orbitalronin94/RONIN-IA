@@ -17,6 +17,7 @@ BASE=f"https://raw.githubusercontent.com/scienceverse/papers/{REV}"
 CORPORA={
  "elife":{"tag":"elife-2026-06-21","expected_catalog":1000,"target":"biology_general","release":"https://github.com/scienceverse/papers/releases/download/elife-2026-06-21/elife.rds"},
  "frontiers":{"tag":"frontiers-2026-06-21","expected_catalog":1000,"target":"social_sciences_general","release":"https://github.com/scienceverse/papers/releases/download/frontiers-2026-06-21/frontiers.rds"},
+ "collabra":{"tag":"collabra-2026-06-19","expected_catalog":748,"target":"social_sciences_general","release":"https://github.com/scienceverse/papers/releases/download/collabra-2026-06-19/collabra.rds"},
  "plosbio":{"tag":"plosbio-2026-06-19","expected_catalog":1000,"target":"biology_general","release":"https://github.com/scienceverse/papers/releases/download/plosbio-2026-06-19/plosbio.rds"},
  "plosmed":{"tag":"plosmed-2026-06-19","expected_catalog":1000,"target":"medicine_health_general","release":"https://github.com/scienceverse/papers/releases/download/plosmed-2026-06-19/plosmed.rds"},
  "plosone":{"tag":"plosone-2026-06-20","expected_catalog":1000,"target":"biology_general","release":"https://github.com/scienceverse/papers/releases/download/plosone-2026-06-20/plosone.rds"},
