@@ -138,6 +138,7 @@ def write_library(out: Path, domain: str, kind: str, records: list[dict[str, Any
     sizes = Counter()
     sources = Counter()
     rights_states = Counter()
+    admission_states = Counter()
     try:
         for row in sorted(records, key=lambda item: item["document_id"]):
             split = stable_partition(row["document_id"])
@@ -148,6 +149,7 @@ def write_library(out: Path, domain: str, kind: str, records: list[dict[str, Any
             sizes[split] += len(payload)
             sources[row["source_id"]] += 1
             rights_states[row.get("rights_status", "unspecified")] += 1
+            admission_states[row.get("admission_status", "candidate")] += 1
     finally:
         for handle in handles.values():
             handle.close()
@@ -157,7 +159,9 @@ def write_library(out: Path, domain: str, kind: str, records: list[dict[str, Any
         "kind": kind,
         "status": "implementado_parcialmente",
         "training_eligible": False,
-        "candidate_documents": sum(counts.values()),
+        "candidate_documents": sum(value for state, value in admission_states.items() if state != "admitted"),
+        "admitted_documents": admission_states["admitted"],
+        "admission_status_counts": dict(sorted(admission_states.items())),
         "documents_by_split": dict(counts),
         "bytes_by_split": dict(sizes),
         "sha256_by_split": {name: digest.hexdigest() for name, digest in hashes.items()},
@@ -207,6 +211,8 @@ def main() -> int:
             "source_revision": row.get("upstream_revision"),
             "license": "CC0-1.0",
             "rights_status": "level_a_exact_scope_candidate_not_admitted",
+            "rights_level": "A",
+            "admission_status": "candidate",
             "semantic_density": score,
             "domain_scores": components,
         }
@@ -247,6 +253,8 @@ def main() -> int:
             "source_identifier": row.get("source_identifier"),
             "license": row.get("license_id"),
             "rights_status": "item_source_rights_privacy_quality_review_pending",
+            "rights_level": "C",
+            "admission_status": "candidate",
             "semantic_density": score,
             "domain_scores": components,
         }
@@ -301,6 +309,8 @@ def main() -> int:
                 "source_identifier": row.get("doi"),
                 "license": "CC-BY-4.0",
                 "rights_status": "per_doi_license_verified_candidate_privacy_quality_review_pending",
+                "rights_level": "B",
+                "admission_status": "candidate",
                 "semantic_density": density_for_domain(text, "social_sciences"),
             }
             buckets["social_sciences"].append(record)
