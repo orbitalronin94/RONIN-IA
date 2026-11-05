@@ -14,7 +14,7 @@ concurrency:
 jobs:
   tournament:
     if: github.actor != 'github-actions[bot]'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 360
     env:
       PYTHONUNBUFFERED: "1"
@@ -26,7 +26,7 @@ jobs:
       NASA_FILE_REVIEWED_RUN_ID: "42028138060"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           persist-credentials: true
           sparse-checkout: |
@@ -36,7 +36,7 @@ jobs:
             weights
             ronin
             scripts
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
@@ -48,21 +48,21 @@ jobs:
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "dill==0.3.8" "multiprocess==0.70.16" "huggingface_hub==0.36.0"
           python -m compileall -q scripts/train_text.py scripts/evaluate_mmlu_pro.py scripts/run_seed_tournament.py ronin
       - name: Download admitted training partitions
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: ronin-admitted-literature-es-v1-train
           path: incoming/literature
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ env.LITERATURE_RUN_ID }}
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: ronin-admitted-mathlib4-v1
           path: incoming/mathlib4
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ env.MATHLIB_RUN_ID }}
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: ronin-nasa-ntrs-file-reviewed-train
           path: incoming/nasa-file-reviewed
@@ -86,7 +86,10 @@ jobs:
           ck=torch.load(base,map_location="cpu",weights_only=False)
           from ronin.config import get_profile
           from ronin.models.transformer import RoninLM
-          mc,_=get_profile("tiny"); model=RoninLM(mc); model.load_state_dict(ck,strict=True)
+          mc,_=get_profile("tiny"); model=RoninLM(mc)
+          state_dict=ck.get("model",ck)
+          model.load_state_dict(state_dict,strict=True)
+          assert ck.get("step",manifest["checkpoint_step"])==manifest["checkpoint_step"]
           assert sum(p.numel() for p in model.parameters())==9922880
           print("MAIN y corpus verificados; SHA de MAIN:",manifest["weights_sha256"])
           PY
@@ -124,9 +127,10 @@ jobs:
               raise SystemExit(0)
           source=Path(report["winner_checkpoint"])
           ck=torch.load(source,map_location="cpu",weights_only=False)
-          state=ck["model"]
+          state=ck.get("model",ck)
           dest=Path("weights/ronin-main.pt")
-          tmp=dest.with_suffix(".pt.tmp"); torch.save(state,tmp); tmp.replace(dest)
+          promoted={"model":state,"step":500,"profile":"tiny","training_config":ck.get("training_config"),"weights_only":True}
+          tmp=dest.with_suffix(".pt.tmp"); torch.save(promoted,tmp); tmp.replace(dest)
           def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
           manifest_path=Path("weights/main-model.json"); m=json.loads(manifest_path.read_text())
           m.update({"model_name":"RONIN-tiny-main-tournament","status":"main","source_workflow_run_id":int(os.environ["GITHUB_RUN_ID"]),"source_workflow_url":f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}","source_commit":os.environ["GITHUB_SHA"],"checkpoint_sha256":sha(source),"checkpoint_step":500,"weights_sha256":sha(dest),"weights_bytes":dest.stat().st_size,"checkpoint_path":"weights/ronin-main.pt","weights_path":"weights/ronin-main.pt","source_checkpoint_path":str(source),"checkpoint_storage":"promoted model state_dict; optimizer state excluded"})
@@ -146,7 +150,7 @@ jobs:
           fi
       - name: Upload complete tournament evidence
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ronin-adaptive-50-seed-${{ github.run_id }}
           path: |
