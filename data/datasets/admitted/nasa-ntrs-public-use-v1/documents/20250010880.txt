@@ -1,5 +1,5 @@
-Validation of Computational Fluid Dynamics Model of Pressure
-Control in a Flight-scale Liquid Hydrogen Tank using a Spray
+Valida ion of Compu a ional Fluid Dynamics Model of Pressure
+Con rol in a Fligh -scale Liquid Hydrogen Tank using a Spray
 
 
 
@@ -7,63 +7,63 @@ Bar
 
 
 
-Chintan S. Patel ∗
+Chin an S. Pa el ∗
 
 
 
-Qualis LLC (Amentum Space Exploration Division), NASA Marshall Space Flight Center, Huntsville, AL
+Qualis LLC (Amen um Space Explora ion Division), NASA Marshall Space Fligh Cen er, Hun sville, AL
 
 
 
-A state-of-the-art computational fluid dynamics (CFD) modeling methodology is developed to
-simulate depressurization tests of a flight-scale cryogenic propellant tank using a spray bar. The
-two-phase flow solver Loci-Stream-VOF models liquid and gaseous hydrogen as Eulerian fluid,
-while sub-grid scale liquid hydrogen spray droplets are represented by Lagrangian particles.
-The Lagrangian and Eulerian solvers are two-way coupled. Phase change for both Lagrangian
-droplets and Eulerian gas-liquid interface is modeled with thermal equilibrium model or gas
-kinetic theory based Hertz-Knudsen-Schrage model. Turbulence is captured with an improved
-delayed detached eddy simulation, and an asymmetric interface turbulence transport model is
-also employed to ensure accurate phase change and thermal gradient predictions at the Eulerian
-two-phase interface. Droplet breakup, coalescence and scattering are modeled based on Weber
-number. Without any model parameter calibration, the methodology predicts depressurization
-time with errors of +0.28% for the 50% fill height test and -11.27% for the 90% fill height test,
-demonstrating a robust Lagrangian-Eulerian model for predicting pressure control with spray
-bar to support NASA’s human spaceflight missions.
+A s a e-of- he-ar compu a ional fluid dynamics (CFD) modeling me hodology is developed o
+simula e depressuriza ion es s of a fligh -scale cryogenic propellan ank using a spray bar. The
+ wo-phase flow solver Loci-S ream-VOF models liquid and gaseous hydrogen as Eulerian fluid,
+while sub-grid scale liquid hydrogen spray drople s are represen ed by Lagrangian par icles.
+The Lagrangian and Eulerian solvers are wo-way coupled. Phase change for bo h Lagrangian
+drople s and Eulerian gas-liquid in erface is modeled wi h hermal equilibrium model or gas
+kine ic heory based Her z-Knudsen-Schrage model. Turbulence is cap ured wi h an improved
+delayed de ached eddy simula ion, and an asymme ric in erface urbulence ranspor model is
+also employed o ensure accura e phase change and hermal gradien predic ions a he Eulerian
+ wo-phase in erface. Drople breakup, coalescence and sca ering are modeled based on Weber
+number. Wi hou any model parame er calibra ion, he me hodology predic s depressuriza ion
+ ime wi h errors of +0.28% for he 50% fill heigh es and -11.27% for he 90% fill heigh es ,
+demons ra ing a robus Lagrangian-Eulerian model for predic ing pressure con rol wi h spray
+bar o suppor NASA’s human spacefligh missions.
 
 
 
-I. Nomenclature
+I. Nomencla ure
 
 
 
-𝑑𝑝 = Particle diameter
+𝑑𝑝 = Par icle diame er
 𝐸𝑐𝑜𝑎𝑙 = Coalescence efficiency
-𝑓1 = Drag correlation function
-𝑓2 = Heat transfer correction function for evaporating droplets
-𝑓𝑑 = Blending parameter in improved delayed detached eddy simulation model
-𝐺 = Body force in the momentum equation
-𝑔 = Gravitational acceleration vector
-ℎ𝑝 = Particle enthalpy
-ℎ𝑣𝑎𝑝 = Enthalpy of vaporization
-𝑘 = Thermal conductivity of fluid
-𝑚𝑝 = Particle mass
-¤𝑚𝑝 = Particle phase change rate
-𝑁𝑢 = Nusselt number
+𝑓1 = Drag correla ion func ion
+𝑓2 = Hea ransfer correc ion func ion for evapora ing drople s
+𝑓𝑑 = Blending parame er in improved delayed de ached eddy simula ion model
+𝐺 = Body force in he momen um equa ion
+𝑔 = Gravi a ional accelera ion vec or
+ℎ𝑝 = Par icle en halpy
+ℎ𝑣𝑎𝑝 = En halpy of vaporiza ion
+𝑘 = Thermal conduc ivi y of fluid
+𝑚𝑝 = Par icle mass
+¤𝑚𝑝 = Par icle phase change ra e
+𝑁𝑢 = Nussel number
 𝑂ℎ = Ohnesorge number
-𝑅𝑒𝑝 = Particle Reynolds number
-𝑃𝑟 = Prandtl number
-𝑝 = Static pressure of fluid
-𝑝𝑖, 𝑗 = Particle-particle collision probability
+𝑅𝑒𝑝 = Par icle Reynolds number
+𝑃𝑟 = Prand l number
+𝑝 = S a ic pressure of fluid
+𝑝𝑖, 𝑗 = Par icle-par icle collision probabili y
 𝑅𝑒 = Reynolds number
-𝑇 = Temperature of fluid
-𝑇𝑝 = Lagrangian particle temperature
+𝑇 = Tempera ure of fluid
+𝑇𝑝 = Lagrangian par icle empera ure
 𝑡 = Time
-𝑢𝑖, 𝑗 = Relative velocity between potentially colliding droplets
-𝑢𝑝 = Particle velocity
+𝑢𝑖, 𝑗 = Rela ive veloci y be ween po en ially colliding drople s
+𝑢𝑝 = Par icle veloci y
 
 
 
-∗Computational Fluid Dynamicist, Propulsion Engineering Fluid Dynamics Branch (ER42), NASA MSFC
+∗Compu a ional Fluid Dynamicis , Propulsion Engineering Fluid Dynamics Branch (ER42), NASA MSFC
 
 
 
@@ -81,77 +81,77 @@ I. Nomenclature
 
 𝑉 = Cell volume
 𝑊𝑒 = Weber number
-𝑊𝑒𝑐 = Critical Weber number for droplet breakup
-𝑥𝑝 = Particle location
+𝑊𝑒𝑐 = Cri ical Weber number for drople breakup
+𝑥𝑝 = Par icle loca ion
 
 
 
-Greek letters
-𝛼𝑙 = Thermal expansion coefficient of the liquid
-𝛽 = Constant in Menter’s SST model
-𝛽𝑙 = Isothermal compressibility of the liquid
-𝛾 = Diameter ratio of larger to smaller colliding particles
-𝜇 = Dynamic viscosity
-Φ = Heat dissipation through shear stress in total energy equation
-𝜌 = Density
-𝜌𝑝 = Particle density
-𝜎 = Surface tension
-𝜎𝑖, 𝑗 = Collision cross-section of droplet pair
-𝜏 = Shear stress
-𝜏𝑏𝑘 = Droplet breakup timescale
+Greek le ers
+𝛼𝑙 = Thermal expansion coefficien of he liquid
+𝛽 = Cons an in Men er’s SST model
+𝛽𝑙 = Iso hermal compressibili y of he liquid
+𝛾 = Diame er ra io of larger o smaller colliding par icles
+𝜇 = Dynamic viscosi y
+Φ = Hea dissipa ion hrough shear s ress in o al energy equa ion
+𝜌 = Densi y
+𝜌𝑝 = Par icle densi y
+𝜎 = Surface ension
+𝜎𝑖, 𝑗 = Collision cross-sec ion of drople pair
+𝜏 = Shear s ress
+𝜏𝑏𝑘 = Drople breakup imescale
 
 
 
-Subscripts
+Subscrip s
 𝑏𝑘 = Breakup
 𝑐𝑜𝑙𝑙 = Collision
 𝑔 = Gas/vapor
 𝑙 = Liquid
-𝑖, 𝑗 = Eulerian: Einstein index notation for conservation equations; Lagrangian: Particle indices
-𝑖𝑛 = Interface
-𝑝 = Particle
+𝑖, 𝑗 = Eulerian: Eins ein index no a ion for conserva ion equa ions; Lagrangian: Par icle indices
+𝑖𝑛 = In erface
+𝑝 = Par icle
 
 
 
-Superscripts
-𝑡 = Vector component tangential to the gas-liquid interface
-𝑛 = Vector component normal to the gas-liquid interface
+Superscrip s
+𝑡 = Vec or componen angen ial o he gas-liquid in erface
+𝑛 = Vec or componen normal o he gas-liquid in erface
 
 
 
-II. Introduction
+II. In roduc ion
 
 
 
-Cryogenic fluid management (CFM) is a critical enabling technology for the National Aeronautics and Space
-Administration’s (NASA) Moon and Mars human-landing missions. CFM addresses the challenges of safe, low-cost,
+Cryogenic fluid managemen (CFM) is a cri ical enabling echnology for he Na ional Aeronau ics and Space
+Adminis ra ion’s (NASA) Moon and Mars human-landing missions. CFM addresses he challenges of safe, low-cos ,
 
 
 
-and reliable in-space and on-surface long-term propellant storage; pressure control and propellant positioning within
-tanks for safe engine operations; and in-space and on-surface propellant transfer.
+and reliable in-space and on-surface long- erm propellan s orage; pressure con rol and propellan posi ioning wi hin
+ anks for safe engine opera ions; and in-space and on-surface propellan ransfer.
 
 
 
-NASA’s Space Technology Mission Directorate (STMD) has established the CFM Portfolio Project (CFMPP) to
-advance CFM technologies to enable future spaceflight missions. In addition to advanced hardware development and
-demonstration, there is a need for reliable predictive modeling of CFM systems and their operations to support rapid,
-reliable, and low-cost spacecraft design and operation. The CFM Modeling Portfolio within the CFMPP improves the
-modeling capabilities.
+NASA’s Space Technology Mission Direc ora e (STMD) has es ablished he CFM Por folio Projec (CFMPP) o
+advance CFM echnologies o enable fu ure spacefligh missions. In addi ion o advanced hardware developmen and
+demons ra ion, here is a need for reliable predic ive modeling of CFM sys ems and heir opera ions o suppor rapid,
+reliable, and low-cos spacecraf design and opera ion. The CFM Modeling Por folio wi hin he CFMPP improves he
+modeling capabili ies.
 
 
 
-CFD modeling is indispensable for high-fidelity predictions and for providing insight into flow phenomena that are
-difficult or impossible to measure or test. Under the CFM Modeling Portfolio, the Propulsion Fluid Dynamics Branch
-(ER42) within the Engineering Directorate at NASA Marshall Space Flight Center (MSFC) is assessing, improving,
-developing and validating the Loci-Stream-VOF CFD solver to predict CFM operations in support of current and future
-flight projects such as the Human Landing System and Commercial Lunar Payload Services.
+CFD modeling is indispensable for high-fideli y predic ions and for providing insigh in o flow phenomena ha are
+difficul or impossible o measure or es . Under he CFM Modeling Por folio, he Propulsion Fluid Dynamics Branch
+(ER42) wi hin he Engineering Direc ora e a NASA Marshall Space Fligh Cen er (MSFC) is assessing, improving,
+developing and valida ing he Loci-S ream-VOF CFD solver o predic CFM opera ions in suppor of curren and fu ure
+fligh projec s such as he Human Landing Sys em and Commercial Lunar Payload Services.
 
 
 
-One of the CFM operations of importance is depressurizing the propellant tank to maintain its structural integrity.
-Venting of the ullage gas, and injection of liquid propellant in spray or jet form are among the common techniques used
-for this purpose. This study’s focus is to formulate and validate a simulation methodology to predict propellant tank
+One of he CFM opera ions of impor ance is depressurizing he propellan ank o main ain i s s ruc ural in egri y.
+Ven ing of he ullage gas, and injec ion of liquid propellan in spray or je form are among he common echniques used
+for his purpose. This s udy’s focus is o formula e and valida e a simula ion me hodology o predic propellan ank
 
 
 
@@ -167,66 +167,66 @@ for this purpose. This study’s focus is to formulate and validate a simulation
 
 
 
-depressurization with injected liquid sprays. It is a multi-physics problem requiring modeling of two-phase turbulent
-flow; heat transfer; phase transition at the gas-liquid interfaces including the droplets; and droplet breakup, collision,
+depressuriza ion wi h injec ed liquid sprays. I is a mul i-physics problem requiring modeling of wo-phase urbulen 
+flow; hea ransfer; phase ransi ion a he gas-liquid in erfaces including he drople s; and drople breakup, collision,
 and coalescence modeling.
 
 
 
-For Eulerian fluid modeling, the present work applies a CFD modeling methodology that has been validated for
-prediction of self-pressurization [? ? ], autogenous pressurization [? ], pressure control using an axial jet, and
-non-condensable pressurization (planned publication).
+For Eulerian fluid modeling, he presen work applies a CFD modeling me hodology ha has been valida ed for
+predic ion of self-pressuriza ion [? ? ], au ogenous pressuriza ion [? ], pressure con rol using an axial je , and
+non-condensable pressuriza ion (planned publica ion).
 
 
 
-Modeling of droplet vaporization has been studied for several decades in the context of combustion applications [? ?
-], but few analytical studies predict spray injection in stored cryogenic propellants. Early nodal studies [? ? ] pioneered
-numerical predictions, but because they could not include detailed flow dynamics, they had relatively higher error
-than modern CFD predictions [? ? ], which have improved prediction accuracy. The study presented here provides a
-comprehensive CFD methodology that requires no calibration of the physics models while delivering high accuracy.
+Modeling of drople vaporiza ion has been s udied for several decades in he con ex of combus ion applica ions [? ?
+], bu few analy ical s udies predic spray injec ion in s ored cryogenic propellan s. Early nodal s udies [? ? ] pioneered
+numerical predic ions, bu because hey could no include de ailed flow dynamics, hey had rela ively higher error
+ han modern CFD predic ions [? ? ], which have improved predic ion accuracy. The s udy presen ed here provides a
+comprehensive CFD me hodology ha requires no calibra ion of he physics models while delivering high accuracy.
 
 
 
-III. Test Descriptions
+III. Tes Descrip ions
 
 
 
-A. Testing Facilities
-Flight-scale ground tests of self-pressurization were conducted at NASA MSFC’s test stand 300 during 1996-1998
+A. Tes ing Facili ies
+Fligh -scale ground es s of self-pressuriza ion were conduc ed a NASA MSFC’s es s and 300 during 1996-1998
 
 
 
-with the multipurpose hydrogen test bed (MHTB) tank (Figure 1a). The 5083 aluminum tank was a double domed
-cylindrical tank of diameter 3.05𝑚 with 3.05𝑚 total height including two 2:1 oblate hemispheres. The test tank with
-cryogenic insulation and supporting equipment was enclosed in a cylindrical environmental shroud (Figure 1b). The
-tank was equipped with a thermal venting system (TVS) and a recirculation pump near the bottom of the tank and a
-spray bar/heat exchanger along the major axis of the tank. Two vertical rakes in the tank housed 24 temperature probes
-for characterizing the fluid temperatures. Entire assembly was housed in a vacuum chamber with liquid nitrogen cold
+wi h he mul ipurpose hydrogen es bed (MHTB) ank (Figure 1a). The 5083 aluminum ank was a double domed
+cylindrical ank of diame er 3.05𝑚 wi h 3.05𝑚 o al heigh including wo 2:1 obla e hemispheres. The es ank wi h
+cryogenic insula ion and suppor ing equipmen was enclosed in a cylindrical environmen al shroud (Figure 1b). The
+ ank was equipped wi h a hermal ven ing sys em (TVS) and a recircula ion pump near he bo om of he ank and a
+spray bar/hea exchanger along he major axis of he ank. Two ver ical rakes in he ank housed 24 empera ure probes
+for charac erizing he fluid empera ures. En ire assembly was housed in a vacuum chamber wi h liquid ni rogen cold
 walls. [? ]
 
 
 
-The spray bar (Figure 2) has four spray tubes each with 21 injector holes of 1.7𝑚𝑚 diameter and was ≈ 0.5𝑚 offset
-from the tank’s major axis (Figure 3).
+The spray bar (Figure 2) has four spray ubes each wi h 21 injec or holes of 1.7𝑚𝑚 diame er and was ≈ 0.5𝑚 offse 
+from he ank’s major axis (Figure 3).
 
 
 
-(a) Tank with support structure [? ] (b) Cross-section illustrating tank configuration [? ]
+(a) Tank wi h suppor s ruc ure [? ] (b) Cross-sec ion illus ra ing ank configura ion [? ]
 
 
 
-Fig. 1 MHTB tank test set-up
+Fig. 1 MHTB ank es se -up
 
 
 
-B. Experimental Procedure
-The tank was filled with liquid hydrogen to a desired fill level and then vented to within a set pressure range for
+B. Experimen al Procedure
+The ank was filled wi h liquid hydrogen o a desired fill level and hen ven ed o wi hin a se pressure range for
 
 
 
-several hours to cool the tank structure. The ambient heat leaks to the tank were calculated with boil-off testing. Boil-off
-testing also set-up consistent initial condition for tank self-pressurization and TVS tests. Two heat leak conditions were
-tested. For low heat leak set-up, the walls of the vacuum chamber containing the tank were cooled with liquid nitrogen
+several hours o cool he ank s ruc ure. The ambien hea leaks o he ank were calcula ed wi h boil-off es ing. Boil-off
+ es ing also se -up consis en ini ial condi ion for ank self-pressuriza ion and TVS es s. Two hea leak condi ions were
+ es ed. For low hea leak se -up, he walls of he vacuum chamber con aining he ank were cooled wi h liquid ni rogen
 
 
 
@@ -242,51 +242,51 @@ tested. For low heat leak set-up, the walls of the vacuum chamber containing the
 
 
 
-to minimize the heat leakage. The high heat leak set-up consisted of additional venting and recirculation hardware at the
-bottom of the tank which introduced more conductive heat leakage. Additionally, the liquid nitrogen was not circulated
-through the vacuum chamber walls. [? ]
+ o minimize he hea leakage. The high hea leak se -up consis ed of addi ional ven ing and recircula ion hardware a he
+bo om of he ank which in roduced more conduc ive hea leakage. Addi ionally, he liquid ni rogen was no circula ed
+ hrough he vacuum chamber walls. [? ]
 
 
 
-After a desired conditioning of the hardware was achieved, the tank was sealed, and the self-pressurization test
-began. When the set upper pressure limit of 137.9𝑘𝑃𝑎 was reached, the self-pressurization test concluded. Then the
-pressure control test began with spray bar activation.
+Af er a desired condi ioning of he hardware was achieved, he ank was sealed, and he self-pressuriza ion es 
+began. When he se upper pressure limi of 137.9𝑘𝑃𝑎 was reached, he self-pressuriza ion es concluded. Then he
+pressure con rol es began wi h spray bar ac iva ion.
 
 
 
-The circulation pump was turned on to feed subcooled liquid hydrogen from the bottom of the tank (Figure 2a) to
-the spray bar/heat exchanger (Figure 2b) at a constant mass flow rate of 0.136𝑘𝑔/𝑠. The liquid hydrogen then passed
-through the spray tubes (Figure 2b and 2c) then injector holes to exist as sprayed droplets. The droplets cooled the ullage
-gas by two means: (1) sensible heat transfer, and (2) latent heat transfer due to droplet evaporation and depressurizes the
-tank. The pump is operated until the lower pressure limit of 131𝑘𝑃𝑎 was reached and the spray bar pressure control test
+The circula ion pump was urned on o feed subcooled liquid hydrogen from he bo om of he ank (Figure 2a) o
+ he spray bar/hea exchanger (Figure 2b) a a cons an mass flow ra e of 0.136𝑘𝑔/𝑠. The liquid hydrogen hen passed
+ hrough he spray ubes (Figure 2b and 2c) hen injec or holes o exis as sprayed drople s. The drople s cooled he ullage
+gas by wo means: (1) sensible hea ransfer, and (2) la en hea ransfer due o drople evapora ion and depressurizes he
+ ank. The pump is opera ed un il he lower pressure limi of 131𝑘𝑃𝑎 was reached and he spray bar pressure con rol es 
 ended.
 
 
 
-Two tests were selected for CFD model validation: (1) 51 W heat leak test with 50% fill height, and (2) 54.1 W heat
-leak test with 90% fill height.
+Two es s were selec ed for CFD model valida ion: (1) 51 W hea leak es wi h 50% fill heigh , and (2) 54.1 W hea 
+leak es wi h 90% fill heigh .
 
 
 
-(a) Spray bar lower penetration (b) Spray bar upper penetration (c) Spray bar cross-section at the top
+(a) Spray bar lower pene ra ion (b) Spray bar upper pene ra ion (c) Spray bar cross-sec ion a he op
 
 
 
-Fig. 2 MHTB tank spray bar configuration
+Fig. 2 MHTB ank spray bar configura ion
 
 
 
-Fig. 3 Top View of the tank internals (not to the scale)
+Fig. 3 Top View of he ank in ernals (no o he scale)
 
 
 
-IV. Computational Model
-The governing equations and models described below are implemented in Loci-Stream CFD solver — a pressure-
+IV. Compu a ional Model
+The governing equa ions and models described below are implemen ed in Loci-S ream CFD solver — a pressure-
 
 
 
-based, all-speed CFD solver for generalized meshes in the rule-based programming framework Loci [? ? ]. Loci [? ] is
-a rule-based declarative framework that automatically assembles the numerical solution components of an arbitrary set
+based, all-speed CFD solver for generalized meshes in he rule-based programming framework Loci [? ? ]. Loci [? ] is
+a rule-based declara ive framework ha au oma ically assembles he numerical solu ion componen s of an arbi rary se 
 
 
 
@@ -302,24 +302,24 @@ a rule-based declarative framework that automatically assembles the numerical so
 
 
 
-of partial differential equations and enables solution on large parallel computing systems for efficient parallelization
-across thousands of CPU processes. This technique enhances the flexibility of simulation tools, reducing the complexity
-of CFD software that includes various boundary conditions, complex geometries, and different physical models. The
-Lagrangian particle transport capabilities described in this section are adapted from Loci-Chem CFD solver. [? ]
+of par ial differen ial equa ions and enables solu ion on large parallel compu ing sys ems for efficien paralleliza ion
+across housands of CPU processes. This echnique enhances he flexibili y of simula ion ools, reducing he complexi y
+of CFD sof ware ha includes various boundary condi ions, complex geome ries, and differen physical models. The
+Lagrangian par icle ranspor capabili ies described in his sec ion are adap ed from Loci-Chem CFD solver. [? ]
 
 
 
-A. Governing Equations for Eulerian Flow
-The conservation equations, gas-liquid phase change model, stationary two-phase interface model, and interface
+A. Governing Equa ions for Eulerian Flow
+The conserva ion equa ions, gas-liquid phase change model, s a ionary wo-phase in erface model, and in erface
 
 
 
-turbulence transport models are described in this section.
-The conservation equations for mass, momentum, and energy are given in the Equation 1, 2 and 3. These equations
+ urbulence ranspor models are described in his sec ion.
+The conserva ion equa ions for mass, momen um, and energy are given in he Equa ion 1, 2 and 3. These equa ions
 
 
 
-are for single-phase fluids. The two-phase model is described in the subsections below.
+are for single-phase fluids. The wo-phase model is described in he subsec ions below.
 
 
 
@@ -402,10 +402,10 @@ are for single-phase fluids. The two-phase model is described in the subsections
 
 
 
-The liquid is modeled as an incompressible fluid, but the buoyancy effect is modeled using Boussinesq approximation,
-i.e., the liquid density is assumed to be constant except for calculating the buoyancy force, where the liquid density
-is considered a linear function of temperature. Equation 4 defines the contribution to the body force in momentum
-equation, where 𝜌𝑟𝑒 𝑓 is liquid density at the reference temperature 𝑇𝑟𝑒 𝑓 .
+The liquid is modeled as an incompressible fluid, bu he buoyancy effec is modeled using Boussinesq approxima ion,
+i.e., he liquid densi y is assumed o be cons an excep for calcula ing he buoyancy force, where he liquid densi y
+is considered a linear func ion of empera ure. Equa ion 4 defines he con ribu ion o he body force in momen um
+equa ion, where 𝜌𝑟𝑒 𝑓 is liquid densi y a he reference empera ure 𝑇𝑟𝑒 𝑓 .
 
 
 
@@ -413,24 +413,24 @@ equation, where 𝜌𝑟𝑒 𝑓 is liquid density at the reference temperature
 
 
 
-1. Frozen Two-phase Interface Model
-The frozen or stationary gas-liquid interface model, also referred to as sharp interface, takes advantage of a
+1. Frozen Two-phase In erface Model
+The frozen or s a ionary gas-liquid in erface model, also referred o as sharp in erface, akes advan age of a
 
 
 
-stationary/quasi-stationary interface. The frozen-interface method enforces a sharp, mesh-defined phase boundary,
-eliminating volume of fluid (VOF) advection and geometric reconstruction. An order of magnitude larger timestep is
-afforded by time-implicit frozen-interface method compared to typical time-explicit VOF methods with strict Courant
-number based stability criteria. The spurious/parasitic interfacial velocities commonly observed in VOF advection are
-also avoided, allowing careful resolution of thermal gradients in interfacial region without the stability and affordability
-problems faces by VOF transport.
+s a ionary/quasi-s a ionary in erface. The frozen-in erface me hod enforces a sharp, mesh-defined phase boundary,
+elimina ing volume of fluid (VOF) advec ion and geome ric recons ruc ion. An order of magni ude larger imes ep is
+afforded by ime-implici frozen-in erface me hod compared o ypical ime-explici VOF me hods wi h s ric Couran 
+number based s abili y cri eria. The spurious/parasi ic in erfacial veloci ies commonly observed in VOF advec ion are
+also avoided, allowing careful resolu ion of hermal gradien s in in erfacial region wi hou he s abili y and affordabili y
+problems faces by VOF ranspor .
 
 
 
-Velocity is continuous at the interface/phase boundary. Tangential velocities on the gas and liquid sides of the
-interface are equal(Equation 5)and so is tangential shear stress (Equation 6). Interface normal velocity is assumed to
-be zero (Equation 7) — even when phase change occurs because the phase change mass transfer and corresponding
-velocities are very small.
+Veloci y is con inuous a he in erface/phase boundary. Tangen ial veloci ies on he gas and liquid sides of he
+in erface are equal(Equa ion 5)and so is angen ial shear s ress (Equa ion 6). In erface normal veloci y is assumed o
+be zero (Equa ion 7) — even when phase change occurs because he phase change mass ransfer and corresponding
+veloci ies are very small.
 
 
 
@@ -447,15 +447,15 @@ velocities are very small.
 
 
 2. Phase Change Mass Transfer
-The mass transfer rate due to phase change between the gas and liquid phases ( ¤𝑚) is based on the model described
+The mass ransfer ra e due o phase change be ween he gas and liquid phases ( ¤𝑚) is based on he model described
 
 
 
-by Hertz-Knudsen-Schrage (HKS) (Equation 8) [? ] based on kinetic gas theory, where all quantities are represented in
-SI units. At equilibrium, evaporation and condensation rates are the same, so 𝐶𝑒𝑣𝑎𝑝 must be equal to 𝐶𝑐𝑜𝑛𝑑 . Therefore,
-near-equilibrium flows, like the ones encountered here, are simplified to Equation 9 and referred to as HKS equation for
-brevity. Saturation pressure is obtained using the Antoine equation (Equation 10), where the constants for a given fluid
-are sourced from NIST thermodynamic data [? ].
+by Her z-Knudsen-Schrage (HKS) (Equa ion 8) [? ] based on kine ic gas heory, where all quan i ies are represen ed in
+SI uni s. A equilibrium, evapora ion and condensa ion ra es are he same, so 𝐶𝑒𝑣𝑎𝑝 mus be equal o 𝐶𝑐𝑜𝑛𝑑 . Therefore,
+near-equilibrium flows, like he ones encoun ered here, are simplified o Equa ion 9 and referred o as HKS equa ion for
+brevi y. Sa ura ion pressure is ob ained using he An oine equa ion (Equa ion 10), where he cons an s for a given fluid
+are sourced from NIST hermodynamic da a [? ].
 
 
 
@@ -531,11 +531,11 @@ are sourced from NIST thermodynamic data [? ].
 
 
 
-Phase change is modeled using a mass source term and corresponding heat source term, with two modeling options,
-as described by Kassemi, et al. [? ] In the thermal balance method, the difference in heat transfer on gas and liquid side
-of the interface is assumed to supply latent heat of evaporation or condensation (Equation 11) to calculate phase change
-mass transfer rate, ¤𝑚. In the iterative method, the HKS equation (Equation 9) and thermal balance equations (Equation
-11) are iteratively solved to calculate interface temperature, 𝑇𝑖 .
+Phase change is modeled using a mass source erm and corresponding hea source erm, wi h wo modeling op ions,
+as described by Kassemi, e al. [? ] In he hermal balance me hod, he difference in hea ransfer on gas and liquid side
+of he in erface is assumed o supply la en hea of evapora ion or condensa ion (Equa ion 11) o calcula e phase change
+mass ransfer ra e, ¤𝑚. In he i era ive me hod, he HKS equa ion (Equa ion 9) and hermal balance equa ions (Equa ion
+11) are i era ively solved o calcula e in erface empera ure, 𝑇𝑖 .
 
 
 
@@ -566,57 +566,57 @@ mass transfer rate, ¤𝑚. In the iterative method, the HKS equation (Equation 
 
 
 3. Turbulence Modeling
-Menter’s 2003 shear stress transport (SST) [? ] is used for Reynolds-averaged Navier-Stokes (RANS) turbulence
+Men er’s 2003 shear s ress ranspor (SST) [? ] is used for Reynolds-averaged Navier-S okes (RANS) urbulence
 
 
 
-closure. An improved delayed detached eddy simulation (IDDES) approach [? ] is also utilized for turbulence
-modeling. IDDES is a hybrid RANS/LES (Large Eddy Simulation) approach: near-wall regions and unresolved scales —
-high-shear or high-vorticity regions where mesh refinement for LES is impractical — are modeled with RANS equations
-and resolved scales are modeled with sub-grid scale (SGS) modeling. An implicit LES approach is employed where
-grid-induced dissipation provides the sub-grid scales. A blending/shielding function 𝑓𝑑 distinguishes the resolved (LES)
-and unresolved (RANS) regions: RANS mode is indicated by 𝑓𝑑 = 1 and SGS mode is indicated by 𝑓𝑑 = 0.
+closure. An improved delayed de ached eddy simula ion (IDDES) approach [? ] is also u ilized for urbulence
+modeling. IDDES is a hybrid RANS/LES (Large Eddy Simula ion) approach: near-wall regions and unresolved scales —
+high-shear or high-vor ici y regions where mesh refinemen for LES is imprac ical — are modeled wi h RANS equa ions
+and resolved scales are modeled wi h sub-grid scale (SGS) modeling. An implici LES approach is employed where
+grid-induced dissipa ion provides he sub-grid scales. A blending/shielding func ion 𝑓𝑑 dis inguishes he resolved (LES)
+and unresolved (RANS) regions: RANS mode is indica ed by 𝑓𝑑 = 1 and SGS mode is indica ed by 𝑓𝑑 = 0.
 
 
 
-4. Interface Turbulence Transport
-Menter (1994), Wilcox (1998) and others have shown that eddy-viscosity based turbulence models predict non-
+4. In erface Turbulence Transpor 
+Men er (1994), Wilcox (1998) and o hers have shown ha eddy-viscosi y based urbulence models predic non-
 
 
 
-physically high turbulence near the interface compared to the experimental observations [? ]. A review of the two-phase
-literature [? ] shows that, near the gas-liquid interface, turbulence on the gas side resembles a wall viscous boundary
-layer, whereas the liquid side has either slightly enhanced or unchanged turbulence kinetic energy. [? ? ? ? ? ]
-RANS and hybrid RANS models must therefore be modified near the interface to capture these altered turbulence
-characteristics.
+physically high urbulence near he in erface compared o he experimen al observa ions [? ]. A review of he wo-phase
+li era ure [? ] shows ha , near he gas-liquid in erface, urbulence on he gas side resembles a wall viscous boundary
+layer, whereas he liquid side has ei her sligh ly enhanced or unchanged urbulence kine ic energy. [? ? ? ? ? ]
+RANS and hybrid RANS models mus herefore be modified near he in erface o cap ure hese al ered urbulence
+charac eris ics.
 
 
 
-A common approach proposed by Egorov [? ] modifies the 𝜔-equation with a source term that adds a wall-like
-treatment to reduce turbulence kinetic energy at the interface. This approach has shown to be effective in wide-ranging
-applications [? ]. The physical rationale is that, for two-phase flows with high density ratios, the lower-density fluid
-effectively "sees" the higher-density fluid as a wall. However, Egorov’s method is typically applied symmetrically to
-both phases. An asymmetric treatment in which the near wall turbulence characteristics on the heavier fluid side are free
-of boundary layer effect (i.e., slip-wall-like turbulence) is more appropriate [? ].
+A common approach proposed by Egorov [? ] modifies he 𝜔-equa ion wi h a source erm ha adds a wall-like
+ rea men o reduce urbulence kine ic energy a he in erface. This approach has shown o be effec ive in wide-ranging
+applica ions [? ]. The physical ra ionale is ha , for wo-phase flows wi h high densi y ra ios, he lower-densi y fluid
+effec ively "sees" he higher-densi y fluid as a wall. However, Egorov’s me hod is ypically applied symme rically o
+bo h phases. An asymme ric rea men in which he near wall urbulence charac eris ics on he heavier fluid side are free
+of boundary layer effec (i.e., slip-wall-like urbulence) is more appropria e [? ].
 
 
 
-These observations are encapsulated in our simple but highly effective interface turbulence model for frozen interface
-method [? ? ], in which the gas side of the interface is treated as wall-like while the liquid side is unaffected and has
-no boundary influence on the turbulence characteristics. This asymmetric turbulence damping technique has been
-instrumental in validation with multiple tests [? ? ], including the present work; an additional validation work is planned
-for future publication.
+These observa ions are encapsula ed in our simple bu highly effec ive in erface urbulence model for frozen in erface
+me hod [? ? ], in which he gas side of he in erface is rea ed as wall-like while he liquid side is unaffec ed and has
+no boundary influence on he urbulence charac eris ics. This asymme ric urbulence damping echnique has been
+ins rumen al in valida ion wi h mul iple es s [? ? ], including he presen work; an addi ional valida ion work is planned
+for fu ure publica ion.
 
 
 
-B. Governing Equations for Lagrangian Transport
-The governing equations for Lagrangian particle transport (Equations 13, 14, 15, and 16) follow the Basset-
+B. Governing Equa ions for Lagrangian Transpor 
+The governing equa ions for Lagrangian par icle ranspor (Equa ions 13, 14, 15, and 16) follow he Basse -
 
 
 
-Boussinesq-Oseen (BBO) and point-particle framework: particles are assumed to be small in comparison with the
-turbulent length scales so finite size and Faxén (shear) effects are negligible. Additionally, a heavy particle approximation
-is adopted, i.e., the particle density is assumed to be much larger than the fluid density, allowing omission of added-mass
+Boussinesq-Oseen (BBO) and poin -par icle framework: par icles are assumed o be small in comparison wi h he
+ urbulen leng h scales so fini e size and Faxén (shear) effec s are negligible. Addi ionally, a heavy par icle approxima ion
+is adop ed, i.e., he par icle densi y is assumed o be much larger han he fluid densi y, allowing omission of added-mass
 
 
 
@@ -632,16 +632,16 @@ is adopted, i.e., the particle density is assumed to be much larger than the flu
 
 
 
-and Basset-history terms. The governing equations and models for Lagrangian transport are adapted from Loci-CHEM’s
-Lagrangian Particle Transport (LPT) module [? ].
+and Basse -his ory erms. The governing equa ions and models for Lagrangian ranspor are adap ed from Loci-CHEM’s
+Lagrangian Par icle Transpor (LPT) module [? ].
 
 
 
-Tracking each particle becomes computationally untenable for large particle counts. Therefore, the Lagrangian
-particle transport in Loci-CHEM and Loci-Stream uses a parcel-based (stochastic/Monte-Carlo) approach: particles
-are grouped into a parcel, and each parcel is tracked as a Lagrangian entity whose constituent particles are assumed
-collocated. The initial number of particles per parcel is user-defined. The number of particles per parcel may change
-owing to droplet breakup or coalescence. Fractional numbers of particles are permitted in a parcel.
+Tracking each par icle becomes compu a ionally un enable for large par icle coun s. Therefore, he Lagrangian
+par icle ranspor in Loci-CHEM and Loci-S ream uses a parcel-based (s ochas ic/Mon e-Carlo) approach: par icles
+are grouped in o a parcel, and each parcel is racked as a Lagrangian en i y whose cons i uen par icles are assumed
+colloca ed. The ini ial number of par icles per parcel is user-defined. The number of par icles per parcel may change
+owing o drople breakup or coalescence. Frac ional numbers of par icles are permi ed in a parcel.
 
 
 
@@ -730,8 +730,8 @@ owing to droplet breakup or coalescence. Fractional numbers of particles are per
 
 
 
-The correlation function 𝑓1 is the drag correction for departure from Stokes flow. It provides two-way momentum
-coupling between the Lagrangian particles and the Eulerian fluid and is given by Clift and Gauvin (Equation 17).
+The correla ion func ion 𝑓1 is he drag correc ion for depar ure from S okes flow. I provides wo-way momen um
+coupling be ween he Lagrangian par icles and he Eulerian fluid and is given by Clif and Gauvin (Equa ion 17).
 
 
 
@@ -750,8 +750,8 @@ coupling between the Lagrangian particles and the Eulerian fluid and is given by
 
 
 
-For sensible heat exchange (i.e., two-way energy coupling) between the Lagrangian particles and the Eulerian fluid,
-the Nusselt number (Equation 18) correlation of Ranz-Marshall [? ] is used.
+For sensible hea exchange (i.e., wo-way energy coupling) be ween he Lagrangian par icles and he Eulerian fluid,
+ he Nussel number (Equa ion 18) correla ion of Ranz-Marshall [? ] is used.
 
 
 
@@ -776,14 +776,14 @@ the Nusselt number (Equation 18) correlation of Ranz-Marshall [? ] is used.
 
 
 
-1. Lagrangian Particle Breakup Model
-A Weber number based particle break-up is implemented based on Chryssakis and Assanis [? ]. A critical weber
+1. Lagrangian Par icle Breakup Model
+A Weber number based par icle break-up is implemen ed based on Chryssakis and Assanis [? ]. A cri ical weber
 
 
 
-number is first defined based on the droplet Reynolds number, 𝑅𝑒𝑝 and Ohnesorge number, 𝑂ℎ (Equation 19). If
-𝑊𝑒 > 𝑊𝑒𝑐 and 𝑂ℎ < 4, then probability of breakup during the given timestep is determined by particle breakup time
-𝜏𝑏𝑘 and dimensionless characteristic time of droplet breakup, 𝑡∗ (Equations 20 and 21).
+number is firs defined based on he drople Reynolds number, 𝑅𝑒𝑝 and Ohnesorge number, 𝑂ℎ (Equa ion 19). If
+𝑊𝑒 > 𝑊𝑒𝑐 and 𝑂ℎ < 4, hen probabili y of breakup during he given imes ep is de ermined by par icle breakup ime
+𝜏𝑏𝑘 and dimensionless charac eris ic ime of drople breakup, 𝑡∗ (Equa ions 20 and 21).
 
 
 
@@ -907,10 +907,10 @@ number is first defined based on the droplet Reynolds number, 𝑅𝑒𝑝 and O
 
 
 
-The breakup diameter is provided by Sauter Mean Diameter (SMD) in Equation 22. The diameter of the droplet
-resulting from the breakup (𝑑𝑏𝑘) is selected from a log normal distribution with mean of 1.2 ∗ 𝑆𝑀𝐷 and standard
-deviation of 0.1. The breakup modeling is stochastic. The probability of breakup during the current time-step is given
-by Equation 23.
+The breakup diame er is provided by Sau er Mean Diame er (SMD) in Equa ion 22. The diame er of he drople 
+resul ing from he breakup (𝑑𝑏𝑘) is selec ed from a log normal dis ribu ion wi h mean of 1.2 ∗ 𝑆𝑀𝐷 and s andard
+devia ion of 0.1. The breakup modeling is s ochas ic. The probabili y of breakup during he curren ime-s ep is given
+by Equa ion 23.
 
 
 
@@ -955,20 +955,20 @@ by Equation 23.
 
 
 2. Lagrangian Collision Model
-The particle-particle interaction model determines one of the three outcomes for droplet-droplet collisions: (1) they
+The par icle-par icle in erac ion model de ermines one of he hree ou comes for drople -drople collisions: (1) hey
 
 
 
-combine and form a larger stable droplet, (2) they combine and form an unstable droplet which subsequently separates,
-and (3) droplets bounce off of one another cushioned by the Eulerian fluid. The probability of liquid particles bouncing
-off after collision are much smaller than the former two possibilities — due to kinetic energy dissipation during inelastic
-collision, and surface tension favoring minimization of surface area upon contact — and is therefore ignored.
+combine and form a larger s able drople , (2) hey combine and form an uns able drople which subsequen ly separa es,
+and (3) drople s bounce off of one ano her cushioned by he Eulerian fluid. The probabili y of liquid par icles bouncing
+off af er collision are much smaller han he former wo possibili ies — due o kine ic energy dissipa ion during inelas ic
+collision, and surface ension favoring minimiza ion of surface area upon con ac — and is herefore ignored.
 
 
 
-The collision model is based on O’Rourke’s model [? ] which has been modified by Schmidt and Rutland [? ] to
-utilize the no-counter-time method of Bird [? ]. The algorithm uses a statistical sampling technique to obtain a particle
-subsample within a collision cell to estimate their collision probabilities (Equation 24 and 25).
+The collision model is based on O’Rourke’s model [? ] which has been modified by Schmid and Ru land [? ] o
+u ilize he no-coun er- ime me hod of Bird [? ]. The algori hm uses a s a is ical sampling echnique o ob ain a par icle
+subsample wi hin a collision cell o es ima e heir collision probabili ies (Equa ion 24 and 25).
 
 
 
@@ -986,10 +986,10 @@ subsample within a collision cell to estimate their collision probabilities (Equ
 
 
 
-Once a collision is identified, collision Weber number (Equation 26) is defined along with geometric parameters to
-determine whether coalescence or separation is occurring. The subscript 𝑖 denotes the smaller of the particles in the
-following equations. 𝜃 is the angle between the relative velocity vector (®𝑢 𝑗 − ®𝑢𝑖) of the colliding particles and position
-vector from the center of one particle to another (®𝑥 𝑗 − ®𝑥𝑖). Collision efficiency, 𝐸𝑐𝑜𝑎𝑙 is defined by Equation 27, where
+Once a collision is iden ified, collision Weber number (Equa ion 26) is defined along wi h geome ric parame ers o
+de ermine whe her coalescence or separa ion is occurring. The subscrip 𝑖 deno es he smaller of he par icles in he
+following equa ions. 𝜃 is he angle be ween he rela ive veloci y vec or (®𝑢 𝑗 − ®𝑢𝑖) of he colliding par icles and posi ion
+vec or from he cen er of one par icle o ano her (®𝑥 𝑗 − ®𝑥𝑖). Collision efficiency, 𝐸𝑐𝑜𝑎𝑙 is defined by Equa ion 27, where
 𝛾 =
 
 
@@ -999,7 +999,7 @@ vector from the center of one particle to another (®𝑥 𝑗 − ®𝑥𝑖). 
 
 
 𝑑𝑖
-. Coalescence is more likely if the collision is head-on, i.e., the angle 𝜃 is small. Mathematically, collision occurs
+. Coalescence is more likely if he collision is head-on, i.e., he angle 𝜃 is small. Ma hema ically, collision occurs
 
 
 
@@ -1033,7 +1033,7 @@ if 𝐸𝑐𝑜𝑎𝑙 ≤ 𝑠𝑖𝑛(𝜃).
 
 
 
-When coalescence is not predicted, the velocities of the particles is modified as per the Equations 28, 28 and 30.
+When coalescence is no predic ed, he veloci ies of he par icles is modified as per he Equa ions 28, 28 and 30.
 
 
 
@@ -1125,18 +1125,18 @@ When coalescence is not predicted, the velocities of the particles is modified a
 
 
 
-A thermal-equilibrium particle phase change model is used: the rate of evaporation is controlled by the heat transfer
-rate at which conduction can increase the temperature of the particle above saturation condition. Consequently, particle
-temperature does not exceed the saturation temperature.
+A hermal-equilibrium par icle phase change model is used: he ra e of evapora ion is con rolled by he hea ransfer
+ra e a which conduc ion can increase he empera ure of he par icle above sa ura ion condi ion. Consequen ly, par icle
+ empera ure does no exceed he sa ura ion empera ure.
 
 
 
 3. Lagrangian Turbulence Modeling
-The behavior of the Lagrangian particles in turbulent flows due to fluctuations in the mean velocity is described by
+The behavior of he Lagrangian par icles in urbulen flows due o fluc ua ions in he mean veloci y is described by
 
 
 
-stochastic differential equation of change in particle velocity of particle acceleration. Sawford’s acceleration scattering
+s ochas ic differen ial equa ion of change in par icle veloci y of par icle accelera ion. Sawford’s accelera ion sca ering
 model is used. [? ]
 
 
@@ -1153,27 +1153,27 @@ model is used. [? ]
 
 
 
-C. Geometry
-MHTB tank’s top view schematic is shown in Figure 3. The spray bar is offset from the tank’s vertical axis, but it is
+C. Geome ry
+MHTB ank’s op view schema ic is shown in Figure 3. The spray bar is offse from he ank’s ver ical axis, bu i is
 
 
 
-assumed to coincide with the axis so a simpler 90-degree sector computational model can be created. This simplification
-is expected to have negligible impact on the pressure prediction but might cause slight deviations in temperature probe
-comparison because the relative position and distance of temperature probes from the temperature rake deviate from the
-test.
+assumed o coincide wi h he axis so a simpler 90-degree sec or compu a ional model can be crea ed. This simplifica ion
+is expec ed o have negligible impac on he pressure predic ion bu migh cause sligh devia ions in empera ure probe
+comparison because he rela ive posi ion and dis ance of empera ure probes from he empera ure rake devia e from he
+ es .
 
 
 
 D. Mesh
-Several hexahedral unstructured meshes are created to ensure mesh insensitive predictions. Nominal cell edge
+Several hexahedral uns ruc ured meshes are crea ed o ensure mesh insensi ive predic ions. Nominal cell edge
 
 
 
-length, outside the wall boundary layer and interface refinement regions, varied from 5𝑐𝑚 for coarse mesh to 1𝑐𝑚
-for the most refined mesh. All meshes have refinement near the gas-liquid interface to resolve velocity and thermal
-gradients arising due to altered turbulent transport and phase change. A representative set of meshes are shown in
-Figure 4. A mesh independent solution is obtained and discussed in the Results section.
+leng h, ou side he wall boundary layer and in erface refinemen regions, varied from 5𝑐𝑚 for coarse mesh o 1𝑐𝑚
+for he mos refined mesh. All meshes have refinemen near he gas-liquid in erface o resolve veloci y and hermal
+gradien s arising due o al ered urbulen ranspor and phase change. A represen a ive se of meshes are shown in
+Figure 4. A mesh independen solu ion is ob ained and discussed in he Resul s sec ion.
 
 
 
@@ -1181,30 +1181,30 @@ Figure 4. A mesh independent solution is obtained and discussed in the Results s
 
 
 
-(c) Baseline mesh (d) Baseline Mesh - 90-deg sector
+(c) Baseline mesh (d) Baseline Mesh - 90-deg sec or
 
 
 
-Fig. 4 Meshes for 50% fill height test
+Fig. 4 Meshes for 50% fill heigh es 
 
 
 
-E. Initial Conditions
-Tank initial pressure is 137.9𝑘𝑃𝑎 and the interface temperature corresponds to saturation temperature at this pressure.
+E. Ini ial Condi ions
+Tank ini ial pressure is 137.9𝑘𝑃𝑎 and he in erface empera ure corresponds o sa ura ion empera ure a his pressure.
 
 
 
-Temperature rake data from the test is used to initialize the CFD simulation. The initial temperature field is shown in
+Tempera ure rake da a from he es is used o ini ialize he CFD simula ion. The ini ial empera ure field is shown in
 Figure 5.
 
 
 
-F. Boundary Conditions
-The spray bar test runs for 32𝑠, and based on the tank self-pressurization test with 50% fill height, the heat leakage
+F. Boundary Condi ions
+The spray bar es runs for 32𝑠, and based on he ank self-pressuriza ion es wi h 50% fill heigh , he hea leakage
 
 
 
-is predicted to increase pressure only by 0.017𝑘𝑃𝑎 which introduces a negligible 0.246% pressure drop error, so the
+is predic ed o increase pressure only by 0.017𝑘𝑃𝑎 which in roduces a negligible 0.246% pressure drop error, so he
 
 
 
@@ -1220,66 +1220,66 @@ is predicted to increase pressure only by 0.017𝑘𝑃𝑎 which introduces a n
 
 
 
-(a) 50% fill height test (b) 90% fill height test
+(a) 50% fill heigh es (b) 90% fill heigh es 
 
 
 
-Fig. 5 Initial temperature fields extracted from the test data
+Fig. 5 Ini ial empera ure fields ex rac ed from he es da a
 
 
 
-walls are considered to be adiabatic. A symmetry boundary condition is applied on the sector planes.
-The spray inlet is modeled using a Lagrangian boundary condition that equally distributes the recirculated flow
+walls are considered o be adiaba ic. A symme ry boundary condi ion is applied on he sec or planes.
+The spray inle is modeled using a Lagrangian boundary condi ion ha equally dis ribu es he recircula ed flow
 
 
 
-over the spray injections holes. The Lagrangian particles/droplets are absorbed by the gas-liquid interface upon impact.
-The droplets always bounce back from the symmetry walls with a coefficient of restitution of 1. As a modeling choice,
-droplets either are absorbed by the tank walls or rebound with a coefficient of restitution of 0.1. Depressurization trends
-are found to be independent of the choice of droplet-wall interaction model.
+over he spray injec ions holes. The Lagrangian par icles/drople s are absorbed by he gas-liquid in erface upon impac .
+The drople s always bounce back from he symme ry walls wi h a coefficien of res i u ion of 1. As a modeling choice,
+drople s ei her are absorbed by he ank walls or rebound wi h a coefficien of res i u ion of 0.1. Depressuriza ion rends
+are found o be independen of he choice of drople -wall in erac ion model.
 
 
 
-G. Fluid Properties
-Fluid properties are evaluated from the current National Institute of Standards and Technology (NIST) databases [?
+G. Fluid Proper ies
+Fluid proper ies are evalua ed from he curren Na ional Ins i u e of S andards and Technology (NIST) da abases [?
 
 
 
-]. Liquid hydrogen predominantly converts to the para-hydrogen isomeric state after sufficiently long storage; therefore,
-liquid hydrogen is assumed to be in the para-hydrogen state. The liquid is assumed to be a Boussinesq fluid to model the
-buoyancy effect. Constant thermal and transport properties are assumed because the liquid temperature does not vary
-considerably during the test.
+]. Liquid hydrogen predominan ly conver s o he para-hydrogen isomeric s a e af er sufficien ly long s orage; herefore,
+liquid hydrogen is assumed o be in he para-hydrogen s a e. The liquid is assumed o be a Boussinesq fluid o model he
+buoyancy effec . Cons an hermal and ranspor proper ies are assumed because he liquid empera ure does no vary
+considerably during he es .
 
 
 
-Sutherland’s law models temperature-dependent vapor viscosity and conductivity. Gaseous hydrogen deviates
-modestly from the ideal gas behavior [? ], so in a previous validation effort [? ] real gas was modeled using tabular
-equation of state. However, it had negligible influence on the pressurization prediction compared to the ideal gas
-equation of state. Consequently, the vapor is modeled as an ideal gas in the present study. The properties of liquid
-(Table 1), and hydrogen vapor (Table 2) are listed in the tables below.
+Su herland’s law models empera ure-dependen vapor viscosi y and conduc ivi y. Gaseous hydrogen devia es
+modes ly from he ideal gas behavior [? ], so in a previous valida ion effor [? ] real gas was modeled using abular
+equa ion of s a e. However, i had negligible influence on he pressuriza ion predic ion compared o he ideal gas
+equa ion of s a e. Consequen ly, he vapor is modeled as an ideal gas in he presen s udy. The proper ies of liquid
+(Table 1), and hydrogen vapor (Table 2) are lis ed in he ables below.
 
 
 
-Coefficient of restitution of 0.1 was assumed for liquid droplets. The saturation curve, obtained from NIST, was
-used to model phase change of both the droplets and the Eulerian hydrogen.
+Coefficien of res i u ion of 0.1 was assumed for liquid drople s. The sa ura ion curve, ob ained from NIST, was
+used o model phase change of bo h he drople s and he Eulerian hydrogen.
 
 
 
-Table 1 Thermodynamic properties of liquid hydrogen
+Table 1 Thermodynamic proper ies of liquid hydrogen
 
 
 
-Parameters Description Value
-𝜌𝑙 Liquid density 69.40 kg/m3
+Parame ers Descrip ion Value
+𝜌𝑙 Liquid densi y 69.40 kg/m3
 
 
 
-𝑐𝑝𝑙 Liquid specific heat at constant pressure 10 502.46 J/Kg/K
-𝑘𝑙 Liquid thermal conductivity 0.101 281 3 W/m/K
-𝜇𝑙 Liquid dynamic viscosity 1.223 693 5 × 10−5 kg/m/s
-𝛼𝑙 Liquid volume expansion coefficient 0.018 608 41 K
-𝐿 Latent heat 436 480.0 J/kg
-𝜎 Surface tension 0.001 665 055 N/m
+𝑐𝑝𝑙 Liquid specific hea a cons an pressure 10 502.46 J/Kg/K
+𝑘𝑙 Liquid hermal conduc ivi y 0.101 281 3 W/m/K
+𝜇𝑙 Liquid dynamic viscosi y 1.223 693 5 × 10−5 kg/m/s
+𝛼𝑙 Liquid volume expansion coefficien 0.018 608 41 K
+𝐿 La en hea 436 480.0 J/kg
+𝜎 Surface ension 0.001 665 055 N/m
 
 
 
@@ -1295,54 +1295,54 @@ Parameters Description Value
 
 
 
-Table 2 Thermodynamic properties of hydrogen vapor
+Table 2 Thermodynamic proper ies of hydrogen vapor
 
 
 
-Parameters Description Value
-𝜌 Density Ideal gas EOS or Tabulated real gas
-𝑐𝑝𝑔 Specific heat at constant pressure Function of temperature
-𝑘𝑔 Thermal conductivity Function of temperature
-𝜇𝑔 Liquid dynamic viscosity Function of temperature
+Parame ers Descrip ion Value
+𝜌 Densi y Ideal gas EOS or Tabula ed real gas
+𝑐𝑝𝑔 Specific hea a cons an pressure Func ion of empera ure
+𝑘𝑔 Thermal conduc ivi y Func ion of empera ure
+𝜇𝑔 Liquid dynamic viscosi y Func ion of empera ure
 
 
 
-H. Discretization and Solver Set-up
-SIMPLEC pressure-velocity coupling is used for solving the Navier-Stokes equations. Second order upwind (SOU)
+H. Discre iza ion and Solver Se -up
+SIMPLEC pressure-veloci y coupling is used for solving he Navier-S okes equa ions. Second order upwind (SOU)
 
 
 
-flux scheme is used for all but turbulence transport equations which use first order upwind scheme for increased stability.
-Second order backward difference formula is used for time integration. All simulations are well-converged with at least
-three orders of magnitude residual drop during each timestep.
+flux scheme is used for all bu urbulence ranspor equa ions which use firs order upwind scheme for increased s abili y.
+Second order backward difference formula is used for ime in egra ion. All simula ions are well-converged wi h a leas 
+ hree orders of magni ude residual drop during each imes ep.
 
 
 
-Spatial and temporal resolution insensitivities are discussed in the Results section. Timestep size of 0.1𝑠 is sufficient
-for temporal-resolution-invariant predictions. To model phase change, the thermal balance scheme is used for the
-Eulerian flow and thermal evaporation model is used for the Lagrangian flow.
+Spa ial and emporal resolu ion insensi ivi ies are discussed in he Resul s sec ion. Times ep size of 0.1𝑠 is sufficien 
+for emporal-resolu ion-invarian predic ions. To model phase change, he hermal balance scheme is used for he
+Eulerian flow and hermal evapora ion model is used for he Lagrangian flow.
 
 
 
-For Lagrangian particles, initial particle diameter is assumed to be the same as the injector diameter and allowed to
-break up and coalesce as per the breakup and coalescence models described above. In a typical set-up, a parcel initially
-contains 0.001 particles to allow for increase in the number of particles per parcel due to breakup. Spray is assumed to
-have 20-deg cone spread angle. Insensitivity to initial particles per parcel, spray spread angle, and variation in the inlet
-spray velocity are demonstrated in the Results section.
+For Lagrangian par icles, ini ial par icle diame er is assumed o be he same as he injec or diame er and allowed o
+break up and coalesce as per he breakup and coalescence models described above. In a ypical se -up, a parcel ini ially
+con ains 0.001 par icles o allow for increase in he number of par icles per parcel due o breakup. Spray is assumed o
+have 20-deg cone spread angle. Insensi ivi y o ini ial par icles per parcel, spray spread angle, and varia ion in he inle 
+spray veloci y are demons ra ed in he Resul s sec ion.
 
 
 
-V. Results
+V. Resul s
 
 
 
-A. Tank Pressurization
-Time-accurate tank pressure prediction is the primary validation goal. The relative error in CFD prediction is defined
+A. Tank Pressuriza ion
+Time-accura e ank pressure predic ion is he primary valida ion goal. The rela ive error in CFD predic ion is defined
 
 
 
-based on the elapsed time to depressurize from 137.9 kPa to 131.0 kPa. (Equation 31) Relative error in depressurization
-time was +0.28% for the 50% fill height test, and -11.27& for the 90% fill height test. (Figure 6)
+based on he elapsed ime o depressurize from 137.9 kPa o 131.0 kPa. (Equa ion 31) Rela ive error in depressuriza ion
+ ime was +0.28% for he 50% fill heigh es , and -11.27& for he 90% fill heigh es . (Figure 6)
 
 
 
@@ -1356,37 +1356,37 @@ time was +0.28% for the 50% fill height test, and -11.27& for the 90% fill heigh
 
 
 
-B. Flow Dynamics — Insights from CFD
-Multiple interacting physical phenomena must be modeled with sufficient fidelity to achieve parameter-free validation
+B. Flow Dynamics — Insigh s from CFD
+Mul iple in erac ing physical phenomena mus be modeled wi h sufficien fideli y o achieve parame er-free valida ion
 
 
 
-across both tests.
-The spray droplets rapidly breakup upon their introduction to the tank because their Weber number is higher than
+across bo h es s.
+The spray drople s rapidly breakup upon heir in roduc ion o he ank because heir Weber number is higher han
 
 
 
-the critical Weber number. Figure 7 shows a close-up view of the topmost injectors with parcels of different size —
-generated by the breakup and coalescence model, along with the Eulerian vapor temperature field. Figure 8a shows the
-distribution of parcels at 20 s for the 50% fill height test. There is a continuous cascade of larger parcels to smaller
-length-scales. The CFD predictions show that the existing droplets continue to breakup from millimeter scale to
-micrometer scale to even lower length scales — very strongly suggesting liquid hydrogen misting and atomization in the
-tank. Large surface area provided by the microscale droplets enhances heat and mass transfer between the droplets and
-the ullage.
+ he cri ical Weber number. Figure 7 shows a close-up view of he opmos injec ors wi h parcels of differen size —
+genera ed by he breakup and coalescence model, along wi h he Eulerian vapor empera ure field. Figure 8a shows he
+dis ribu ion of parcels a 20 s for he 50% fill heigh es . There is a con inuous cascade of larger parcels o smaller
+leng h-scales. The CFD predic ions show ha he exis ing drople s con inue o breakup from millime er scale o
+microme er scale o even lower leng h scales — very s rongly sugges ing liquid hydrogen mis ing and a omiza ion in he
+ ank. Large surface area provided by he microscale drople s enhances hea and mass ransfer be ween he drople s and
+ he ullage.
 
 
 
-The smaller droplets enhance drag and slow down the spray velocity. Figure 8b shows significantly reduced particle
-speeds compared to their inlet speeds of 6.4 m/s. The droplet deceleration increases the resident time of the droplets in
-the ullage, helping enhance the heat and mass transfer to cool and depressurize the ullage. Additionally, the cascade of
-droplet breakup produces droplets small enough that some remain suspended and are carried by the Eulerian flow in the
-ullage, providing strong evidence for misting/atomization, and further enhancing droplet resident time in the ullage for
-enhanced heat and mass transfer.
+The smaller drople s enhance drag and slow down he spray veloci y. Figure 8b shows significan ly reduced par icle
+speeds compared o heir inle speeds of 6.4 m/s. The drople decelera ion increases he residen ime of he drople s in
+ he ullage, helping enhance he hea and mass ransfer o cool and depressurize he ullage. Addi ionally, he cascade of
+drople breakup produces drople s small enough ha some remain suspended and are carried by he Eulerian flow in he
+ullage, providing s rong evidence for mis ing/a omiza ion, and fur her enhancing drople residen ime in he ullage for
+enhanced hea and mass ransfer.
 
 
 
-Figure 9 and 10 shows change in the temperature field over time as the spray cools the ullage gas. At 90% fill height,
-the droplets have shorter resident time in the ullage before they impact the gas-liquid interface, resulting in smaller
+Figure 9 and 10 shows change in he empera ure field over ime as he spray cools he ullage gas. A 90% fill heigh ,
+ he drople s have shor er residen ime in he ullage before hey impac he gas-liquid in erface, resul ing in smaller
 
 
 
@@ -1402,24 +1402,24 @@ the droplets have shorter resident time in the ullage before they impact the gas
 
 
 
-(a) 50% fill height test (b) 90% fill height test
+(a) 50% fill heigh es (b) 90% fill heigh es 
 
 
 
-Fig. 6 Pressure predictions compared to the tests
+Fig. 6 Pressure predic ions compared o he es s
 
 
 
-(a) t = 1 s
+(a) = 1 s
 
 
 
-(b) t = 20 s
+(b) = 20 s
 
 
 
-Fig. 7 Droplet and ullage temperature distribution near the topmost injectors (Parcels are scaled ×10; 10% of
-the parcels shown)
+Fig. 7 Drople and ullage empera ure dis ribu ion near he opmos injec ors (Parcels are scaled ×10; 10% of
+ he parcels shown)
 
 
 
@@ -1435,64 +1435,64 @@ the parcels shown)
 
 
 
-(a) Droplet size distribution at 20 s (b) Droplet speed distribution at 20 s
+(a) Drople size dis ribu ion a 20 s (b) Drople speed dis ribu ion a 20 s
 
 
 
-Fig. 8 50% fill height test — Droplet size and speed distributions
+Fig. 8 50% fill heigh es — Drople size and speed dis ribu ions
 
 
 
-concentration of microscale droplets. Lower spray mass flow rate through the ullage, lower initial vapor temperatures,
-and shorter droplet resident time compared to the 50% fill height test result in four times lower pressurization rate in the
-90% fill height test.
+concen ra ion of microscale drople s. Lower spray mass flow ra e hrough he ullage, lower ini ial vapor empera ures,
+and shor er drople residen ime compared o he 50% fill heigh es resul in four imes lower pressuriza ion ra e in he
+90% fill heigh es .
 
 
 
-C. Tank Temperatures
-CFD predictions agree well with the test data from the rake temperature probes for both experiments, but the
+C. Tank Tempera ures
+CFD predic ions agree well wi h he es da a from he rake empera ure probes for bo h experimen s, bu he
 
 
 
-agreement is notable for the 90% fill height test. (Figures 11a, and 12)
-Gas-liquid interface phase change results in latent heat exchange across the phases resulting in high temperature
+agreemen is no able for he 90% fill heigh es . (Figures 11a, and 12)
+Gas-liquid in erface phase change resul s in la en hea exchange across he phases resul ing in high empera ure
 
 
 
-gradient near the interface. The wall-like turbulence treatment on the gas side of the interface also requires sufficient
-resolution to accurately capture turbulence. Accordingly, the first cell height of at least 1 × 10−4 m normal to the
-interface is found to be necessary to accurately calculate the temperature gradient on the gas side of the interface —
-show in Figure 13 — and consequently to correctly predict the depressurization trend. This finding is consistent across
-two-phase CFD modeling of CFM operations. [? ? ? ]
+gradien near he in erface. The wall-like urbulence rea men on he gas side of he in erface also requires sufficien 
+resolu ion o accura ely cap ure urbulence. Accordingly, he firs cell heigh of a leas 1 × 10−4 m normal o he
+in erface is found o be necessary o accura ely calcula e he empera ure gradien on he gas side of he in erface —
+show in Figure 13 — and consequen ly o correc ly predic he depressuriza ion rend. This finding is consis en across
+ wo-phase CFD modeling of CFM opera ions. [? ? ? ]
 
 
 
-D. Mesh Sensitivity
-A subset of 50% fill height test simulations, shown in Figure 14, demonstrate mesh independent solution. Mesh
+D. Mesh Sensi ivi y
+A subse of 50% fill heigh es simula ions, shown in Figure 14, demons ra e mesh independen solu ion. Mesh
 
 
 
-independence was also confirmed for the 90% fill height cases. Several computational meshes are tested to achieve a
-mesh independent solution.
+independence was also confirmed for he 90% fill heigh cases. Several compu a ional meshes are es ed o achieve a
+mesh independen solu ion.
 
 
 
-E. Timestep Sensitivity
-Predictions were found to be independent of timestep up to the timestep value of 0.05 s (Figure 15).
+E. Times ep Sensi ivi y
+Predic ions were found o be independen of imes ep up o he imes ep value of 0.05 s (Figure 15).
 
 
 
-F. Accommodation Factor Sensitivity
-Accommodation factor in the Hertz-Knudsen-Schrage equation (Equation 9) is a coefficient that linearly modulates
+F. Accommoda ion Fac or Sensi ivi y
+Accommoda ion fac or in he Her z-Knudsen-Schrage equa ion (Equa ion 9) is a coefficien ha linearly modula es
 
 
 
-the rate of evaporation/condensation. Its value is expected to be a function of fluid properties, and thermodynamic state.
-Some experimentally calculated values of the accommodation factor are available in literature for certain fluids but
-tend to vary in a wide range. This uncertainty is greater concern for thermodynamically open systems where mass
-is added/removed from the domain. But for the accommodation factor value greater than 1𝑒 − 4, the closed systems
-predictions have historically shown to be independent of accommodation factor [? ? ] when sufficient interfacial mesh
-resolution is provided. The sensitivity analyses presented here (Figure 16) conform to these historical observations.
+ he ra e of evapora ion/condensa ion. I s value is expec ed o be a func ion of fluid proper ies, and hermodynamic s a e.
+Some experimen ally calcula ed values of he accommoda ion fac or are available in li era ure for cer ain fluids bu 
+ end o vary in a wide range. This uncer ain y is grea er concern for hermodynamically open sys ems where mass
+is added/removed from he domain. Bu for he accommoda ion fac or value grea er han 1𝑒 − 4, he closed sys ems
+predic ions have his orically shown o be independen of accommoda ion fac or [? ? ] when sufficien in erfacial mesh
+resolu ion is provided. The sensi ivi y analyses presen ed here (Figure 16) conform o hese his orical observa ions.
 
 
 
@@ -1508,44 +1508,44 @@ resolution is provided. The sensitivity analyses presented here (Figure 16) conf
 
 
 
-(a) t = 0 s (b) t = 10 s
+(a) = 0 s (b) = 10 s
 
 
 
-(c) t = 20 s (d) t = 30 s
+(c) = 20 s (d) = 30 s
 
 
 
-Fig. 9 50% Fill height test — temporal evolution of vapor temperature and droplet distribution (droplets
-colored by diameter)
+Fig. 9 50% Fill heigh es — emporal evolu ion of vapor empera ure and drople dis ribu ion (drople s
+colored by diame er)
 
 
 
-G. Parcel Injection Rate
-Lagrangian particle transport is a Monte-Carlo simulation. For a given particle mass flow rate and particle size(s),
+G. Parcel Injec ion Ra e
+Lagrangian par icle ranspor is a Mon e-Carlo simula ion. For a given par icle mass flow ra e and par icle size(s),
 
 
 
-the parcel injection rate determines how many particles are initially held in a parcel. For a fixed particle mass flow rate,
-increasing parcel injection rate reduces each the number of Lagrangian particles per injected parcel. When one particle
-per parcel is injected the Monte-Carlo simulation becomes a direct simulation of every particle.
+ he parcel injec ion ra e de ermines how many par icles are ini ially held in a parcel. For a fixed par icle mass flow ra e,
+increasing parcel injec ion ra e reduces each he number of Lagrangian par icles per injec ed parcel. When one par icle
+per parcel is injec ed he Mon e-Carlo simula ion becomes a direc simula ion of every par icle.
 
 
 
-With the particle breakup model, a breakup of an injected droplet would increase the number of particles in a parcel,
-so fractional particles per injected parcel to ensure there are not too many particles in a parcel after the breakup. Since
-the breakup depends on the flow parameters, necessary parcel injection rate is not known a priori. A wide range of
-parcel injection rates are therefore tested for their impact on depressurization prediction.
+Wi h he par icle breakup model, a breakup of an injec ed drople would increase he number of par icles in a parcel,
+so frac ional par icles per injec ed parcel o ensure here are no oo many par icles in a parcel af er he breakup. Since
+ he breakup depends on he flow parame ers, necessary parcel injec ion ra e is no known a priori. A wide range of
+parcel injec ion ra es are herefore es ed for heir impac on depressuriza ion predic ion.
 
 
 
-Initially, 1 particle per parcel is injected at injector hole diameter as a baseline. Up to 1000 times the baseline
-injection rate is simulated, i.e., 1𝑒 − 3 particles per parcel are injected. The resulting breakup for each simulation results
-in a distribution of number of particles per parcel. A distribution mode of 1, i.e., at when the Monte-Carlo simulation
-becomes a direct simulation, the depressurization prediction becomes independent of parcel injection rate as shown in
-Figure 17. The particle per parcel distribution is shown in Figure 18 for parcel injection rate 100 times higher than
-the baseline. Most parcels have 1 or fewer particles in it, which correlates to virtual insensitivity to increasing parcel
-injection rate on depressurization rate prediction (Figure 17).
+Ini ially, 1 par icle per parcel is injec ed a injec or hole diame er as a baseline. Up o 1000 imes he baseline
+injec ion ra e is simula ed, i.e., 1𝑒 − 3 par icles per parcel are injec ed. The resul ing breakup for each simula ion resul s
+in a dis ribu ion of number of par icles per parcel. A dis ribu ion mode of 1, i.e., a when he Mon e-Carlo simula ion
+becomes a direc simula ion, he depressuriza ion predic ion becomes independen of parcel injec ion ra e as shown in
+Figure 17. The par icle per parcel dis ribu ion is shown in Figure 18 for parcel injec ion ra e 100 imes higher han
+ he baseline. Mos parcels have 1 or fewer par icles in i , which correla es o vir ual insensi ivi y o increasing parcel
+injec ion ra e on depressuriza ion ra e predic ion (Figure 17).
 
 
 
@@ -1561,26 +1561,26 @@ injection rate on depressurization rate prediction (Figure 17).
 
 
 
-(a) t = 0 s (b) t = 40 s
+(a) = 0 s (b) = 40 s
 
 
 
-(c) t = 80 s (d) t = 120 s
+(c) = 80 s (d) = 120 s
 
 
 
-Fig. 10 90% Fill height test — temporal evolution of vapor temperature and droplet distribution (droplets
-colored by diameter)
+Fig. 10 90% Fill heigh es — emporal evolu ion of vapor empera ure and drople dis ribu ion (drople s
+colored by diame er)
 
 
 
-(a) 50% fill height test: Temperature over time
-(b) Temperature probe lo-
-cations
+(a) 50% fill heigh es : Tempera ure over ime
+(b) Tempera ure probe lo-
+ca ions
 
 
 
-Fig. 11 Temperature over time comparison between test and CFD at probes on the first rake
+Fig. 11 Tempera ure over ime comparison be ween es and CFD a probes on he firs rake
 
 
 
@@ -1596,36 +1596,36 @@ Fig. 11 Temperature over time comparison between test and CFD at probes on the f
 
 
 
-Fig. 12 90% fill height test — temporal evolution of
-temperature
+Fig. 12 90% fill heigh es — emporal evolu ion of
+ empera ure
 
 
 
-Fig. 13 Sharp thermal gradients across the gas-liquid
-interface
+Fig. 13 Sharp hermal gradien s across he gas-liquid
+in erface
 
 
 
-Fig. 14 Mesh sensitivity Fig. 15 Timestep sensitivity
+Fig. 14 Mesh sensi ivi y Fig. 15 Times ep sensi ivi y
 
 
 
-H. Turbulence Modeling Sensitivity
-A widely used unsteady RANS turbulence model, Menter’s SST turbulence model and a hybrid RANS/LES model,
+H. Turbulence Modeling Sensi ivi y
+A widely used uns eady RANS urbulence model, Men er’s SST urbulence model and a hybrid RANS/LES model,
 
 
 
-improved delayed detached eddy simulation (IDDES) model, are simulated and found to have little difference in their
-predictive capabilities for 50% fill height test as shown in Figure 19, but RANS modeling overpredicted turbulent
-mixing compared to IDDES model for 90% fill height. IDDES continues to demonstrate either similar or improved
-predictive capabilities compared to RANS modeling for CFM applications, because it is effective in containing regions
-of excessive turbulence viscosity predicted by RANS. [? ? ]
+improved delayed de ached eddy simula ion (IDDES) model, are simula ed and found o have li le difference in heir
+predic ive capabili ies for 50% fill heigh es as shown in Figure 19, bu RANS modeling overpredic ed urbulen 
+mixing compared o IDDES model for 90% fill heigh . IDDES con inues o demons ra e ei her similar or improved
+predic ive capabili ies compared o RANS modeling for CFM applica ions, because i is effec ive in con aining regions
+of excessive urbulence viscosi y predic ed by RANS. [? ? ]
 
 
 
-The modeling of interface turbulence transport plays a more significant role. An asymmetric turbulence damping
-approach most accurately predicts the depressurization rate (Figure 20), while a lack of any turbulence modeling or
-symmetrically damping turbulence on both gas and liquid side of the interface fail to capture the correct depressurization
+The modeling of in erface urbulence ranspor plays a more significan role. An asymme ric urbulence damping
+approach mos accura ely predic s he depressuriza ion ra e (Figure 20), while a lack of any urbulence modeling or
+symme rically damping urbulence on bo h gas and liquid side of he in erface fail o cap ure he correc depressuriza ion
 
 
 
@@ -1641,33 +1641,33 @@ symmetrically damping turbulence on both gas and liquid side of the interface fa
 
 
 
-Fig. 16 Accommodation factor sensitivity Fig. 17 Parcel injection rate sensitivity
+Fig. 16 Accommoda ion fac or sensi ivi y Fig. 17 Parcel injec ion ra e sensi ivi y
 
 
 
-Fig. 18 Distribution of Particles per Parcel
+Fig. 18 Dis ribu ion of Par icles per Parcel
 
 
 
-trend. The asymmetric turbulence damping approach consistently predicts CFM operations with high reliability [? ? ?
+ rend. The asymme ric urbulence damping approach consis en ly predic s CFM opera ions wi h high reliabili y [? ? ?
 ].
 
 
 
 VI. Conclusion
-CFD methodology for simulating Lagrangian-Eulerian multiphase flow modeling is developed for validation using
+CFD me hodology for simula ing Lagrangian-Eulerian mul iphase flow modeling is developed for valida ion using
 
 
 
-MHTB tank spray bar depressurization tests. The predictions compare well with the tests with relative depressurization
-time errors of +0.28% for the 50% fill height test and -11.27% for the 90% fill height test. A parameter-free validation
-against flight-scale MHTB tank pressure control strengthens confidence in applying CFD methodology to support
-NASA’s future spaceflight projects.
+MHTB ank spray bar depressuriza ion es s. The predic ions compare well wi h he es s wi h rela ive depressuriza ion
+ ime errors of +0.28% for he 50% fill heigh es and -11.27% for he 90% fill heigh es . A parame er-free valida ion
+agains fligh -scale MHTB ank pressure con rol s reng hens confidence in applying CFD me hodology o suppor 
+NASA’s fu ure spacefligh projec s.
 
 
 
-Weber number based Lagrangian droplet break-up and droplet coalescence models adapted from non-cryogenic
-literature performed well in conjunction with the Eulerian fluid model as evidenced by accurate prediction of
+Weber number based Lagrangian drople break-up and drople coalescence models adap ed from non-cryogenic
+li era ure performed well in conjunc ion wi h he Eulerian fluid model as evidenced by accura e predic ion of
 
 
 
@@ -1683,68 +1683,68 @@ literature performed well in conjunction with the Eulerian fluid model as eviden
 
 
 
-Fig. 19 Turbulence Model Sensitivity Fig. 20 Interface turbulence model sensitivity
+Fig. 19 Turbulence Model Sensi ivi y Fig. 20 In erface urbulence model sensi ivi y
 
 
 
-depressurization rate. These models dictate total droplet surface area available for heat and mass transfer and are
-therefore essential for accurate modeling of cooling for the ullage and depressurization of the tank.
+depressuriza ion ra e. These models dic a e o al drople surface area available for hea and mass ransfer and are
+ herefore essen ial for accura e modeling of cooling for he ullage and depressuriza ion of he ank.
 
 
 
-Careful turbulence transport is crucial for reliable modeling of spaceflight CFM operations. Consistent with the
-previous CFM validation efforts, asymmetric turbulence transport at the interface is again demonstrated to be essential
-for accurate phase change and consequently depressurization prediction.
+Careful urbulence ranspor is crucial for reliable modeling of spacefligh CFM opera ions. Consis en wi h he
+previous CFM valida ion effor s, asymme ric urbulence ranspor a he in erface is again demons ra ed o be essen ial
+for accura e phase change and consequen ly depressuriza ion predic ion.
 
 
 
-The frozen interface model avoids volume of fluid method’s limitations of spurious interface velocities and strict
-timestep requirement, enabling resolution of refined length/time scales at faster simulation times. Effort to apply the
-CFD methodology from this study to VOF simulation is ongoing.
+The frozen in erface model avoids volume of fluid me hod’s limi a ions of spurious in erface veloci ies and s ric 
+ imes ep requiremen , enabling resolu ion of refined leng h/ ime scales a fas er simula ion imes. Effor o apply he
+CFD me hodology from his s udy o VOF simula ion is ongoing.
 
 
 
-The CFD predictions provide indirect insights into the spray depressurization process, which may be difficult
-to measure and visualize through experiments: the droplet breakup, droplet-droplet interactions, and consequently
-misting/atomization with their size distributions and their impact on cryogenic fluid management operations.
+The CFD predic ions provide indirec insigh s in o he spray depressuriza ion process, which may be difficul 
+ o measure and visualize hrough experimen s: he drople breakup, drople -drople in erac ions, and consequen ly
+mis ing/a omiza ion wi h heir size dis ribu ions and heir impac on cryogenic fluid managemen opera ions.
 
 
 
-For future work, two-way conversion capability between Lagrangian particle and volume of fluid method has been
-developed. At a critical mass/volume fraction of Lagrangian particle, the particles can convert to Eulerian liquid and
-vice versa. Future work should test this new model for simulation of moving and morphing gas-liquid interfaces with
-Lagrangian particle transport.
+For fu ure work, wo-way conversion capabili y be ween Lagrangian par icle and volume of fluid me hod has been
+developed. A a cri ical mass/volume frac ion of Lagrangian par icle, he par icles can conver o Eulerian liquid and
+vice versa. Fu ure work should es his new model for simula ion of moving and morphing gas-liquid in erfaces wi h
+Lagrangian par icle ranspor .
 
 
 
-Acknowledgments
-The NASA High-End Computing (HEC) Program, through the NASA Advanced Supercomputing (NAS) Division
+Acknowledgmen s
+The NASA High-End Compu ing (HEC) Program, hrough he NASA Advanced Supercompu ing (NAS) Division
 
 
 
-at Ames Research Center provided the computational resources for these simulations. I am thankful to Jacob Brodnick
-(NASA MSFC) and H. Q. Yang (CFDRC / NASA MSFC) for support through questions and discussions. Robin
-Flachbart (Amentum/NASA MSFC) and Ali Hedayat (NASA MSFC, retired) provided access to the MHTB test data.
-Dan Hauser (NASA Glenn Research Center) provided additional test information.
+a Ames Research Cen er provided he compu a ional resources for hese simula ions. I am hankful o Jacob Brodnick
+(NASA MSFC) and H. Q. Yang (CFDRC / NASA MSFC) for suppor hrough ques ions and discussions. Robin
+Flachbar (Amen um/NASA MSFC) and Ali Hedaya (NASA MSFC, re ired) provided access o he MHTB es da a.
+Dan Hauser (NASA Glenn Research Cen er) provided addi ional es informa ion.
 
 
 
 References
-[] Yang, H. Q., Patel, C. S., and Williams, B. R., “Validation of Cryogenic Propellant Tank Self-Pressurization,” AIAA SCITECH
+[] Yang, H. Q., Pa el, C. S., and Williams, B. R., “Valida ion of Cryogenic Propellan Tank Self-Pressuriza ion,” AIAA SCITECH
 
 
 
-2023 Forum, 2023. https://doi.org/10.2514/6.2023-1411, URL https://arc.aiaa.org/doi/abs/10.2514/6.2023-1411.
+2023 Forum, 2023. h ps://doi.org/10.2514/6.2023-1411, URL h ps://arc.aiaa.org/doi/abs/10.2514/6.2023-1411.
 
 
 
-[] Patel, C., Yang, H. Q., and Williams, B., “Validation of Gas-Liquid Sharp Interface Model in Loci-Stream for Propellant Tank
-Self-pressurization under Normal Gravity,” AIAA SCITECH 2024 Forum, 2024. https://doi.org/10.2514/6.2024-0543, URL
-https://arc.aiaa.org/doi/abs/10.2514/6.2024-0543.
+[] Pa el, C., Yang, H. Q., and Williams, B., “Valida ion of Gas-Liquid Sharp In erface Model in Loci-S ream for Propellan Tank
+Self-pressuriza ion under Normal Gravi y,” AIAA SCITECH 2024 Forum, 2024. h ps://doi.org/10.2514/6.2024-0543, URL
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2024-0543.
 
 
 
-[] Patel, C., “Validation of Two Phase Flow Modeling Techniques in Loci-Stream Using Axial Jet Pressure Control and
+[] Pa el, C., “Valida ion of Two Phase Flow Modeling Techniques in Loci-S ream Using Axial Je Pressure Con rol and
 
 
 
@@ -1754,124 +1754,124 @@ https://arc.aiaa.org/doi/abs/10.2514/6.2024-0543.
 
 
 
-https://doi.org/10.2514/6.2023-1411
+h ps://doi.org/10.2514/6.2023-1411
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2023-1411
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2023-1411
 
 
-https://doi.org/10.2514/6.2024-0543
+h ps://doi.org/10.2514/6.2024-0543
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2024-0543
-
-
-
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2024-0543
 
 
 
 
 
-Autogenous Pressurization Experiments,” AIAA SCITECH 2025 Forum, 2025. https://doi.org/10.2514/6.2025-1358, URL
-https://arc.aiaa.org/doi/abs/10.2514/6.2025-1358.
 
 
 
-[] Shearer, A. J., and Faeth, G. M., “Evaluation of a locally homogeneous model of spray evaporation,” NTRS - NASA Technical
-Reports Server, 1979. URL https://ntrs.nasa.gov/citations/19790025164.
+Au ogenous Pressuriza ion Experimen s,” AIAA SCITECH 2025 Forum, 2025. h ps://doi.org/10.2514/6.2025-1358, URL
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2025-1358.
 
 
 
-[] Abramzon, B., and Sirignano, W., “Droplet vaporization model for spray combustion calculations,” International Journal of
-Heat and Mass Transfer, Vol. 32, No. 9, 1989, pp. 1605–1618. https://doi.org/https://doi.org/10.1016/0017-9310(89)90043-4,
-URL https://www.sciencedirect.com/science/article/pii/0017931089900434.
+[] Shearer, A. J., and Fae h, G. M., “Evalua ion of a locally homogeneous model of spray evapora ion,” NTRS - NASA Technical
+Repor s Server, 1979. URL h ps://n rs.nasa.gov/ci a ions/19790025164.
 
 
 
-[] Nguyen, H., “Zero-G Thermodynamic Venting System (TVS) Performance Prediction Program,” NTRS - NASA Technical
-Reports Server, 1994. URL https://ntrs.nasa.gov/citations/19950004458.
+[] Abramzon, B., and Sirignano, W., “Drople vaporiza ion model for spray combus ion calcula ions,” In erna ional Journal of
+Hea and Mass Transfer, Vol. 32, No. 9, 1989, pp. 1605–1618. h ps://doi.org/h ps://doi.org/10.1016/0017-9310(89)90043-4,
+URL h ps://www.sciencedirec .com/science/ar icle/pii/0017931089900434.
 
 
 
-[] Hastings, L. J., Flachbart, R. H., Martin, J. J., Hedayat, A., M., F., Lak, T., H., N., and W., B. J., “Spray Bar Zero-
-Gravity Vent System for On-Orbit Liquid Hydrogen Storage,” NTRS - NASA Technical Reports Server, 2003. URL
-https://ntrs.nasa.gov/citations/20040000092.
+[] Nguyen, H., “Zero-G Thermodynamic Ven ing Sys em (TVS) Performance Predic ion Program,” NTRS - NASA Technical
+Repor s Server, 1994. URL h ps://n rs.nasa.gov/ci a ions/19950004458.
 
 
 
-[] Kartuzova, O., and Kassemi, M., “Modeling ullage dynamics of tank pressure control experiment during jet mixing in
-microgravity,” AIAA 52nd joint propulsion conference. Salt Lake City, UT, 2016.
+[] Has ings, L. J., Flachbar , R. H., Mar in, J. J., Hedaya , A., M., F., Lak, T., H., N., and W., B. J., “Spray Bar Zero-
+Gravi y Ven Sys em for On-Orbi Liquid Hydrogen S orage,” NTRS - NASA Technical Repor s Server, 2003. URL
+h ps://n rs.nasa.gov/ci a ions/20040000092.
 
 
 
-[] Soriano, S. A., Kartuzova, O. V., Kassemi, M., and Hauser, D. M., “Modeling Self-Pressurization and Spray Bar Pressure Control
-of a Cryogenic Storage Tank in Normal Gravity,” AIAA SCITECH 2025 Forum, 2025. https://doi.org/10.2514/6.2025-0356,
-URL https://arc.aiaa.org/doi/abs/10.2514/6.2025-0356.
+[] Kar uzova, O., and Kassemi, M., “Modeling ullage dynamics of ank pressure con rol experimen during je mixing in
+microgravi y,” AIAA 52nd join propulsion conference. Sal Lake Ci y, UT, 2016.
 
 
 
-[] Thakur, S., Wright, J., and Shyy, J. W., “An Algorithm for Chemically Reacting Flows on Generalized Grids Using a Rule-Based
+[] Soriano, S. A., Kar uzova, O. V., Kassemi, M., and Hauser, D. M., “Modeling Self-Pressuriza ion and Spray Bar Pressure Con rol
+of a Cryogenic S orage Tank in Normal Gravi y,” AIAA SCITECH 2025 Forum, 2025. h ps://doi.org/10.2514/6.2025-0356,
+URL h ps://arc.aiaa.org/doi/abs/10.2514/6.2025-0356.
+
+
+
+[] Thakur, S., Wrigh , J., and Shyy, J. W., “An Algori hm for Chemically Reac ing Flows on Generalized Grids Using a Rule-Based
 Framework,” 43rd AIAA Conference, 2005, p. 0875.
 
 
 
-[] Kamakoti, R., Thakur, S., Wright, J., and Shyy, W., “Validation of a new parallel all-speed CFD code in a rule-based framework
-for multidisciplinary applications,” 36th AIAA Fluid Dynamics Conference and Exhibit, AIAA 2006–3063, San Francisco, CA,
+[] Kamako i, R., Thakur, S., Wrigh , J., and Shyy, W., “Valida ion of a new parallel all-speed CFD code in a rule-based framework
+for mul idisciplinary applica ions,” 36 h AIAA Fluid Dynamics Conference and Exhibi , AIAA 2006–3063, San Francisco, CA,
 2006.
 
 
 
-[] LUKE, E. A., and GEORGE, T., “Loci: a rule-based framework for parallel multi-disciplinary simulation synthesis,” Journal of
-Functional Programming, Special Issue on Functional Approaches to High-Performance Parallel Programming, Vol. 15, No. 3,
-2005, p. 477–502. https://doi.org/10.1017/S0956796805005514, URL https://doi.org/10.1017/S0956796805005514.
+[] LUKE, E. A., and GEORGE, T., “Loci: a rule-based framework for parallel mul i-disciplinary simula ion syn hesis,” Journal of
+Func ional Programming, Special Issue on Func ional Approaches o High-Performance Parallel Programming, Vol. 15, No. 3,
+2005, p. 477–502. h ps://doi.org/10.1017/S0956796805005514, URL h ps://doi.org/10.1017/S0956796805005514.
 
 
 
-[] Luke, E. A., Tong, X.-L., Wu, J., Cinnella, P., and Chamberlain, R., “Chem 2: A finite-rate viscous chemistry solver–the user
-guide,” Mississippi State University, Mississippi State, MS, Tech. Rep, 2004.
+[] Luke, E. A., Tong, X.-L., Wu, J., Cinnella, P., and Chamberlain, R., “Chem 2: A fini e-ra e viscous chemis ry solver– he user
+guide,” Mississippi S a e Universi y, Mississippi S a e, MS, Tech. Rep, 2004.
 
 
 
-[] Schrage, R. W., A Theoretical Study of Interphase Mass Transfer, Columbia University Press, 1953, p. 27.
+[] Schrage, R. W., A Theore ical S udy of In erphase Mass Transfer, Columbia Universi y Press, 1953, p. 27.
 
 
 
-[] Linstrom, P., and Mallard, W., “Editors,” NIST Chemistry WebBook, NIST Std. Ref. Database Number 69, NIST, 2005. URL
-http://webbook.nist.gov.
+[] Lins rom, P., and Mallard, W., “Edi ors,” NIST Chemis ry WebBook, NIST S d. Ref. Da abase Number 69, NIST, 2005. URL
+h p://webbook.nis .gov.
 
 
 
-[] Kassemi, M., Kartuzova, O., and Hylton, S., “Validation of two-phase CFD models for propellant tank self-pressurization:
-Crossing fluid types, scales, and gravity levels,” Cryogenics, Vol. 89, 2018, pp. 1–15. https://doi.org/https://doi.org/10.1016/j.
-cryogenics.2017.10.019, URL https://www.sciencedirect.com/science/article/pii/S0011227517302576.
+[] Kassemi, M., Kar uzova, O., and Hyl on, S., “Valida ion of wo-phase CFD models for propellan ank self-pressuriza ion:
+Crossing fluid ypes, scales, and gravi y levels,” Cryogenics, Vol. 89, 2018, pp. 1–15. h ps://doi.org/h ps://doi.org/10.1016/j.
+cryogenics.2017.10.019, URL h ps://www.sciencedirec .com/science/ar icle/pii/S0011227517302576.
 
 
 
-[] Menter, F., Kuntz, M., and Langtry, R., “Ten years of industrial experience with the SST turbulence model,” Heat and Mass
+[] Men er, F., Kun z, M., and Lang ry, R., “Ten years of indus rial experience wi h he SST urbulence model,” Hea and Mass
 Transfer, Vol. 4, 2003.
 
 
 
-[] Gritskevich, M. S., Garbaruk, A. V., Schütze, J., and Menter, F. R., “Development of DDES and IDDES Formulations
-for the k-w Shear Stress Transport Model,” Flow, Turbulence and Combustion, Vol. 88, No. 3, 2012, pp. 431–449.
-https://doi.org/10.1007/s10494-011-9378-4, URL https://doi.org/10.1007/s10494-011-9378-4.
+[] Gri skevich, M. S., Garbaruk, A. V., Schü ze, J., and Men er, F. R., “Developmen of DDES and IDDES Formula ions
+for he k-w Shear S ress Transpor Model,” Flow, Turbulence and Combus ion, Vol. 88, No. 3, 2012, pp. 431–449.
+h ps://doi.org/10.1007/s10494-011-9378-4, URL h ps://doi.org/10.1007/s10494-011-9378-4.
 
 
 
-[] Frederix, E., Mathur, A., Dovizio, D., Geurts, B., and Komen, E., “Reynolds-averaged modeling of turbulence damping near a
-large-scale interface in two-phase flow,” Nuclear Engineering and Design, Vol. 333, 2018, pp. 122–130. https://doi.org/https:
-//doi.org/10.1016/j.nucengdes.2018.04.010, URL https://www.sciencedirect.com/science/article/pii/S0029549318304266.
+[] Frederix, E., Ma hur, A., Dovizio, D., Geur s, B., and Komen, E., “Reynolds-averaged modeling of urbulence damping near a
+large-scale in erface in wo-phase flow,” Nuclear Engineering and Design, Vol. 333, 2018, pp. 122–130. h ps://doi.org/h ps:
+//doi.org/10.1016/j.nucengdes.2018.04.010, URL h ps://www.sciencedirec .com/science/ar icle/pii/S0029549318304266.
 
 
 
-[] Fabre, J., Suzanne, C., and Masbernat, L., “EXPERIMENTAL DATA SET NO. 7: STRATIFIED FLOW, PART I: LOCAL
-STRUCTURE,” Multiphase Science and Technology, Vol. 3, No. 1-4, 1987, pp. 285–301.
+[] Fabre, J., Suzanne, C., and Masberna , L., “EXPERIMENTAL DATA SET NO. 7: STRATIFIED FLOW, PART I: LOCAL
+STRUCTURE,” Mul iphase Science and Technology, Vol. 3, No. 1-4, 1987, pp. 285–301.
 
 
 
-[] Rashidi, M., and Banerjee, S., “The effect of boundary conditions and shear rate on streak formation and breakdown in turbulent
-channel flows,” Physics of Fluids A: Fluid Dynamics, Vol. 2, No. 10, 1990, pp. 1827–1838. https://doi.org/10.1063/1.857656,
-URL https://doi.org/10.1063/1.857656.
+[] Rashidi, M., and Banerjee, S., “The effec of boundary condi ions and shear ra e on s reak forma ion and breakdown in urbulen 
+channel flows,” Physics of Fluids A: Fluid Dynamics, Vol. 2, No. 10, 1990, pp. 1827–1838. h ps://doi.org/10.1063/1.857656,
+URL h ps://doi.org/10.1063/1.857656.
 
 
 
@@ -1881,153 +1881,153 @@ URL https://doi.org/10.1063/1.857656.
 
 
 
-https://doi.org/10.2514/6.2025-1358
+h ps://doi.org/10.2514/6.2025-1358
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2025-1358
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2025-1358
 
 
-https://ntrs.nasa.gov/citations/19790025164
+h ps://n rs.nasa.gov/ci a ions/19790025164
 
 
-https://doi.org/https://doi.org/10.1016/0017-9310(89)90043-4
+h ps://doi.org/h ps://doi.org/10.1016/0017-9310(89)90043-4
 
 
-https://www.sciencedirect.com/science/article/pii/0017931089900434
+h ps://www.sciencedirec .com/science/ar icle/pii/0017931089900434
 
 
-https://ntrs.nasa.gov/citations/19950004458
+h ps://n rs.nasa.gov/ci a ions/19950004458
 
 
-https://ntrs.nasa.gov/citations/20040000092
+h ps://n rs.nasa.gov/ci a ions/20040000092
 
 
-https://doi.org/10.2514/6.2025-0356
+h ps://doi.org/10.2514/6.2025-0356
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2025-0356
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2025-0356
 
 
-https://doi.org/10.1017/S0956796805005514
+h ps://doi.org/10.1017/S0956796805005514
 
 
-https://doi.org/10.1017/S0956796805005514
+h ps://doi.org/10.1017/S0956796805005514
 
 
-http://webbook.nist.gov
+h p://webbook.nis .gov
 
 
-https://doi.org/https://doi.org/10.1016/j.cryogenics.2017.10.019
+h ps://doi.org/h ps://doi.org/10.1016/j.cryogenics.2017.10.019
 
 
-https://doi.org/https://doi.org/10.1016/j.cryogenics.2017.10.019
+h ps://doi.org/h ps://doi.org/10.1016/j.cryogenics.2017.10.019
 
 
-https://www.sciencedirect.com/science/article/pii/S0011227517302576
+h ps://www.sciencedirec .com/science/ar icle/pii/S0011227517302576
 
 
-https://doi.org/10.1007/s10494-011-9378-4
+h ps://doi.org/10.1007/s10494-011-9378-4
 
 
-https://doi.org/10.1007/s10494-011-9378-4
+h ps://doi.org/10.1007/s10494-011-9378-4
 
 
-https://doi.org/https://doi.org/10.1016/j.nucengdes.2018.04.010
+h ps://doi.org/h ps://doi.org/10.1016/j.nucengdes.2018.04.010
 
 
-https://doi.org/https://doi.org/10.1016/j.nucengdes.2018.04.010
+h ps://doi.org/h ps://doi.org/10.1016/j.nucengdes.2018.04.010
 
 
-https://www.sciencedirect.com/science/article/pii/S0029549318304266
+h ps://www.sciencedirec .com/science/ar icle/pii/S0029549318304266
 
 
-https://doi.org/10.1063/1.857656
+h ps://doi.org/10.1063/1.857656
 
 
-https://doi.org/10.1063/1.857656
-
-
-
+h ps://doi.org/10.1063/1.857656
 
 
 
 
 
-[] Lombardi, P., De Angelis, V., and Banerjee, S., “Direct numerical simulation of near-interface turbulence in coupled
-gas-liquid flow,” Physics of Fluids, Vol. 8, No. 6, 1996, pp. 1643–1665. https://doi.org/10.1063/1.868937, URL https:
+
+
+
+[] Lombardi, P., De Angelis, V., and Banerjee, S., “Direc numerical simula ion of near-in erface urbulence in coupled
+gas-liquid flow,” Physics of Fluids, Vol. 8, No. 6, 1996, pp. 1643–1665. h ps://doi.org/10.1063/1.868937, URL h ps:
 //doi.org/10.1063/1.868937.
 
 
 
-[] Fulgosi, M., Lakehal, D., Banerjee, S., and Angelis, V. D., “Direct numerical simulation of turbulence in a sheared
-air–water flow with a deformable interface,” Journal of Fluid Mechanics, Vol. 482, 2003, pp. 319 – 345. URL https:
-//api.semanticscholar.org/CorpusID:120893786.
+[] Fulgosi, M., Lakehal, D., Banerjee, S., and Angelis, V. D., “Direc numerical simula ion of urbulence in a sheared
+air–wa er flow wi h a deformable in erface,” Journal of Fluid Mechanics, Vol. 482, 2003, pp. 319 – 345. URL h ps:
+//api.seman icscholar.org/CorpusID:120893786.
 
 
 
-[] Jofre, L., Dodd, M. S., Grau, J., and Torres, R., “Near-interface flow modeling in large-eddy simulation of two-phase turbulence,”
-International Journal of Multiphase Flow, Vol. 132, 2020, p. 103406. https://doi.org/https://doi.org/10.1016/j.ijmultiphaseflow.
-2020.103406, URL https://www.sciencedirect.com/science/article/pii/S0301932220305152.
+[] Jofre, L., Dodd, M. S., Grau, J., and Torres, R., “Near-in erface flow modeling in large-eddy simula ion of wo-phase urbulence,”
+In erna ional Journal of Mul iphase Flow, Vol. 132, 2020, p. 103406. h ps://doi.org/h ps://doi.org/10.1016/j.ijmul iphaseflow.
+2020.103406, URL h ps://www.sciencedirec .com/science/ar icle/pii/S0301932220305152.
 
 
 
-[] Egorov, Y., Boucker, M., Martin, A., Pigny, S., Scheuerer, M., and Willemsen, S., “Validation of CFD codes with PTS-relevant
-test cases,” 5th Euratom Framework Programme ECORA project, Vol. 2004, 2004, pp. 91–116.
+[] Egorov, Y., Boucker, M., Mar in, A., Pigny, S., Scheuerer, M., and Willemsen, S., “Valida ion of CFD codes wi h PTS-relevan 
+ es cases,” 5 h Eura om Framework Programme ECORA projec , Vol. 2004, 2004, pp. 91–116.
 
 
 
-[] Fan, W., and Anglart, H., “Progress in Phenomenological Modeling of Turbulence Damping around a Two-Phase Interface,”
-Fluids, Vol. 4, No. 3, 2019. https://doi.org/10.3390/fluids4030136, URL https://www.mdpi.com/2311-5521/4/3/136.
+[] Fan, W., and Anglar , H., “Progress in Phenomenological Modeling of Turbulence Damping around a Two-Phase In erface,”
+Fluids, Vol. 4, No. 3, 2019. h ps://doi.org/10.3390/fluids4030136, URL h ps://www.mdpi.com/2311-5521/4/3/136.
 
 
 
-[] Patel, C., and Williams, B., “Validation of Loci-Stream for Autogenous Pressurization of Cryogenic Propellant Tank,” AIAA
-SCITECH 2024 Forum, 2024. https://doi.org/10.2514/6.2024-0544, URL https://arc.aiaa.org/doi/abs/10.2514/6.2024-0544.
+[] Pa el, C., and Williams, B., “Valida ion of Loci-S ream for Au ogenous Pressuriza ion of Cryogenic Propellan Tank,” AIAA
+SCITECH 2024 Forum, 2024. h ps://doi.org/10.2514/6.2024-0544, URL h ps://arc.aiaa.org/doi/abs/10.2514/6.2024-0544.
 
 
 
-[] Patel, C., “Validation of Computational Fluid Dynamics Model of Self-pressurization in a Flight-scale Liquid Hydrogen Tank,”
+[] Pa el, C., “Valida ion of Compu a ional Fluid Dynamics Model of Self-pressuriza ion in a Fligh -scale Liquid Hydrogen Tank,”
 AIAA SCITECH 2026 Forum, 2026.
 
 
 
-[] Luke, E. A., Tong, X.-L., Wu, J., Tang, L., and Cinnella, P., “A chemically reacting flow solver for generalized grids,” AIAA
+[] Luke, E. A., Tong, X.-L., Wu, J., Tang, L., and Cinnella, P., “A chemically reac ing flow solver for generalized grids,” AIAA
 Journal, 2003.
 
 
 
-[] Ranz, W. E., and Marshall, J., W. R., “Evaporation from drops,” Chemical Engineering Progress, Vol. 48, 1952, pp. 141–146.
+[] Ranz, W. E., and Marshall, J., W. R., “Evapora ion from drops,” Chemical Engineering Progress, Vol. 48, 1952, pp. 141–146.
 
 
 
-[] Chryssakis, C., and Assanis, D., “A unified fuel spray breakup model for internal combustion engine applications,” Atomization
-and Sprays - ATOMIZATION SPRAYS, Vol. 18, 2008, pp. 375–426. https://doi.org/10.1615/AtomizSpr.v18.i5.10.
+[] Chryssakis, C., and Assanis, D., “A unified fuel spray breakup model for in ernal combus ion engine applica ions,” A omiza ion
+and Sprays - ATOMIZATION SPRAYS, Vol. 18, 2008, pp. 375–426. h ps://doi.org/10.1615/A omizSpr.v18.i5.10.
 
 
 
-[] O’Rourke, P. J., “Collective drop effects on vaporizing liquid sprays,” Tech. rep., Los Alamos National Lab., NM (USA), 11
-1981. URL https://www.osti.gov/biblio/5201366.
+[] O’Rourke, P. J., “Collec ive drop effec s on vaporizing liquid sprays,” Tech. rep., Los Alamos Na ional Lab., NM (USA), 11
+1981. URL h ps://www.os i.gov/biblio/5201366.
 
 
 
-[] Schmidt, D. P., and Rutland, C., “A New Droplet Collision Algorithm,” Journal of Computational Physics, Vol. 164, No. 1,
-2000, pp. 62–80. https://doi.org/https://doi.org/10.1006/jcph.2000.6568, URL https://www.sciencedirect.com/science/article/
+[] Schmid , D. P., and Ru land, C., “A New Drople Collision Algori hm,” Journal of Compu a ional Physics, Vol. 164, No. 1,
+2000, pp. 62–80. h ps://doi.org/h ps://doi.org/10.1006/jcph.2000.6568, URL h ps://www.sciencedirec .com/science/ar icle/
 pii/S0021999100965689.
 
 
 
-[] Bird, G. A., Molecular Gas Dynamics And The Direct Simulation Of Gas Flows, Oxford University Press, 1994. https:
-//doi.org/10.1093/oso/9780198561958.001.0001, URL https://doi.org/10.1093/oso/9780198561958.001.0001.
+[] Bird, G. A., Molecular Gas Dynamics And The Direc Simula ion Of Gas Flows, Oxford Universi y Press, 1994. h ps:
+//doi.org/10.1093/oso/9780198561958.001.0001, URL h ps://doi.org/10.1093/oso/9780198561958.001.0001.
 
 
 
-[] Sawford, B. L., “Reynolds number effects in Lagrangian stochastic models of turbulent dispersion,” Physics of Fluids A: Fluid
-Dynamics, Vol. 3, No. 6, 1991, pp. 1577–1586. https://doi.org/10.1063/1.857937, URL https://doi.org/10.1063/1.857937.
+[] Sawford, B. L., “Reynolds number effec s in Lagrangian s ochas ic models of urbulen dispersion,” Physics of Fluids A: Fluid
+Dynamics, Vol. 3, No. 6, 1991, pp. 1577–1586. h ps://doi.org/10.1063/1.857937, URL h ps://doi.org/10.1063/1.857937.
 
 
 
-[] Stewart, M., “Pressurization of a Flightweight, Liquid Hydrogen Tank: Evaporation Condensation at the Liquid/Vapor
-Interface,” 53rd AIAA/SAE/ASEE Joint Propulsion Conference, 2017. https://doi.org/10.2514/6.2017-4916, URL https:
+[] S ewar , M., “Pressuriza ion of a Fligh weigh , Liquid Hydrogen Tank: Evapora ion Condensa ion a he Liquid/Vapor
+In erface,” 53rd AIAA/SAE/ASEE Join Propulsion Conference, 2017. h ps://doi.org/10.2514/6.2017-4916, URL h ps:
 //arc.aiaa.org/doi/abs/10.2514/6.2017-4916.
 
 
@@ -2038,176 +2038,176 @@ Interface,” 53rd AIAA/SAE/ASEE Joint Propulsion Conference, 2017. https://doi.
 
 
 
-https://doi.org/10.1063/1.868937
+h ps://doi.org/10.1063/1.868937
 
 
-https://doi.org/10.1063/1.868937
+h ps://doi.org/10.1063/1.868937
 
 
-https://doi.org/10.1063/1.868937
+h ps://doi.org/10.1063/1.868937
 
 
-https://api.semanticscholar.org/CorpusID:120893786
+h ps://api.seman icscholar.org/CorpusID:120893786
 
 
-https://api.semanticscholar.org/CorpusID:120893786
+h ps://api.seman icscholar.org/CorpusID:120893786
 
 
-https://doi.org/https://doi.org/10.1016/j.ijmultiphaseflow.2020.103406
+h ps://doi.org/h ps://doi.org/10.1016/j.ijmul iphaseflow.2020.103406
 
 
-https://doi.org/https://doi.org/10.1016/j.ijmultiphaseflow.2020.103406
+h ps://doi.org/h ps://doi.org/10.1016/j.ijmul iphaseflow.2020.103406
 
 
-https://www.sciencedirect.com/science/article/pii/S0301932220305152
+h ps://www.sciencedirec .com/science/ar icle/pii/S0301932220305152
 
 
-https://doi.org/10.3390/fluids4030136
+h ps://doi.org/10.3390/fluids4030136
 
 
-https://www.mdpi.com/2311-5521/4/3/136
+h ps://www.mdpi.com/2311-5521/4/3/136
 
 
-https://doi.org/10.2514/6.2024-0544
+h ps://doi.org/10.2514/6.2024-0544
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2024-0544
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2024-0544
 
 
-https://doi.org/10.1615/AtomizSpr.v18.i5.10
+h ps://doi.org/10.1615/A omizSpr.v18.i5.10
 
 
-https://www.osti.gov/biblio/5201366
+h ps://www.os i.gov/biblio/5201366
 
 
-https://doi.org/https://doi.org/10.1006/jcph.2000.6568
+h ps://doi.org/h ps://doi.org/10.1006/jcph.2000.6568
 
 
-https://www.sciencedirect.com/science/article/pii/S0021999100965689
+h ps://www.sciencedirec .com/science/ar icle/pii/S0021999100965689
 
 
-https://www.sciencedirect.com/science/article/pii/S0021999100965689
+h ps://www.sciencedirec .com/science/ar icle/pii/S0021999100965689
 
 
-https://doi.org/10.1093/oso/9780198561958.001.0001
+h ps://doi.org/10.1093/oso/9780198561958.001.0001
 
 
-https://doi.org/10.1093/oso/9780198561958.001.0001
+h ps://doi.org/10.1093/oso/9780198561958.001.0001
 
 
-https://doi.org/10.1093/oso/9780198561958.001.0001
+h ps://doi.org/10.1093/oso/9780198561958.001.0001
 
 
-https://doi.org/10.1063/1.857937
+h ps://doi.org/10.1063/1.857937
 
 
-https://doi.org/10.1063/1.857937
+h ps://doi.org/10.1063/1.857937
 
 
-https://doi.org/10.2514/6.2017-4916
+h ps://doi.org/10.2514/6.2017-4916
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2017-4916
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2017-4916
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2017-4916
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2017-4916
 
 
 
- 
-Nomenclature
+	
+Nomencla ure
 
- 
-Introduction
+	
+In roduc ion
 
- 
-Test Descriptions
+	
+Tes Descrip ions
 
- 
-Testing Facilities
+	
+Tes ing Facili ies
 
- 
-Experimental Procedure
+	
+Experimen al Procedure
 
 
- 
-Computational Model
+	
+Compu a ional Model
 
- 
-Governing Equations for Eulerian Flow
+	
+Governing Equa ions for Eulerian Flow
 
- 
-Frozen Two-phase Interface Model
+	
+Frozen Two-phase In erface Model
 
- 
+	
 Phase Change Mass Transfer
 
- 
+	
 Turbulence Modeling
 
- 
-Interface Turbulence Transport
+	
+In erface Turbulence Transpor 
 
 
- 
-Governing Equations for Lagrangian Transport
+	
+Governing Equa ions for Lagrangian Transpor 
 
- 
-Lagrangian Particle Breakup Model
+	
+Lagrangian Par icle Breakup Model
 
- 
+	
 Lagrangian Collision Model
 
- 
+	
 Lagrangian Turbulence Modeling
 
 
- 
-Geometry
+	
+Geome ry
 
- 
+	
 Mesh
 
- 
-Initial Conditions
+	
+Ini ial Condi ions
 
- 
-Boundary Conditions
+	
+Boundary Condi ions
 
- 
-Fluid Properties
+	
+Fluid Proper ies
 
- 
-Discretization and Solver Set-up
-
-
- 
-Results
-
- 
-Tank Pressurization
-
- 
-Flow Dynamics — Insights from CFD
-
- 
-Tank Temperatures
-
- 
-Mesh Sensitivity
-
- 
-Timestep Sensitivity
-
- 
-Accommodation Factor Sensitivity
-
- 
-Parcel Injection Rate
-
- 
-Turbulence Modeling Sensitivity
+	
+Discre iza ion and Solver Se -up
 
 
- 
+	
+Resul s
+
+	
+Tank Pressuriza ion
+
+	
+Flow Dynamics — Insigh s from CFD
+
+	
+Tank Tempera ures
+
+	
+Mesh Sensi ivi y
+
+	
+Times ep Sensi ivi y
+
+	
+Accommoda ion Fac or Sensi ivi y
+
+	
+Parcel Injec ion Ra e
+
+	
+Turbulence Modeling Sensi ivi y
+
+
+	
 Conclusion

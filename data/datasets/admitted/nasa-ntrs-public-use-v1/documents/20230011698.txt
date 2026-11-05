@@ -6,11 +6,11 @@
 
 
 
-Applying Machine Learning Algorithms to Label and Track 
+Applying Machine Learning Algori hms o Label and Track 
 
 
 
-Vibrational Mode-Shapes of a Generic Lunar Ascent Vehicle 
+Vibra ional Mode-Shapes of a Generic Lunar Ascen Vehicle 
 
 
 
@@ -18,79 +18,79 @@ Jamshid Samareh*, Alexander Chin†, Hilmi Alkamhawi‡, and Sasan Armand§
 
 
 
-NASA Langley Research Center, Hampton, VA 23681 
+NASA Langley Research Cen er, Hamp on, VA 23681 
 
 
 
-Finite-element analysis of dynamic structures results in a finite number of mode shapes 
+Fini e-elemen analysis of dynamic s ruc ures resul s in a fini e number of mode shapes 
 
 
 
-with corresponding frequencies and mode-shape scale factors. Most structural designs for 
+wi h corresponding frequencies and mode-shape scale fac ors. Mos s ruc ural designs for 
 
 
 
-spacecraft require the lowest frequencies to stay above the launch vehicle design constraints. 
+spacecraf require he lowes frequencies o s ay above he launch vehicle design cons rain s. 
 
 
 
-As the design changes, the output sequence for mode shapes can switch, e.g., a second mode of 
+As he design changes, he ou pu sequence for mode shapes can swi ch, e.g., a second mode of 
 
 
 
-vibration which is torsional may switch its place with that which is a bending mode. The task 
+vibra ion which is orsional may swi ch i s place wi h ha which is a bending mode. The ask 
 
 
 
-of labeling and tracking the mode sequence entails careful visual inspection of mode shapes, 
+of labeling and racking he mode sequence en ails careful visual inspec ion of mode shapes, 
 
 
 
-typically through a human-in-the-loop process. Some design applications involve labeling and 
+ ypically hrough a human-in- he-loop process. Some design applica ions involve labeling and 
 
 
 
-tracking thousands of mode shapes, requiring significant wall-clock time and human 
+ racking housands of mode shapes, requiring significan wall-clock ime and human 
 
 
 
-resources, which increases opportunities to introduce errors. The machine learning field is an 
+resources, which increases oppor uni ies o in roduce errors. The machine learning field is an 
 
 
 
-emerging area of interest, especially for engineering applications. This paper presents the use 
+emerging area of in eres , especially for engineering applica ions. This paper presen s he use 
 
 
 
-of machine learning algorithms to automate the mode shape labeling and tracking tasks. The 
+of machine learning algori hms o au oma e he mode shape labeling and racking asks. The 
 
 
 
-algorithms were tested on a tube and a generic lunar ascent vehicle. The mode shape tracking 
+algori hms were es ed on a ube and a generic lunar ascen vehicle. The mode shape racking 
 
 
 
-tests had a minimum of 96% accuracy for identifying the first mode shapes. The accuracy for 
+ es s had a minimum of 96% accuracy for iden ifying he firs mode shapes. The accuracy for 
 
 
 
-tracking four subsequent mode shapes decreased but stayed above 90%. For labeling mode 
+ racking four subsequen mode shapes decreased bu s ayed above 90%. For labeling mode 
 
 
 
-shapes, the algorithms captured mode diversity with 50 clusters. The mode shape labeling and 
+shapes, he algori hms cap ured mode diversi y wi h 50 clus ers. The mode shape labeling and 
 
 
 
-tracking automation reduced the processing time from days and weeks to minutes. 
+ racking au oma ion reduced he processing ime from days and weeks o minu es. 
 
 
 
-I. Nomenclature 
+I. Nomencla ure 
 
 
 
-k = iteration number 
+k = i era ion number 
 
 
 
@@ -98,23 +98,23 @@ M = number of rows (number of available mode shapes)
 
 
 
-𝑀𝑠 = number of rows (number of synthesized mode shapes) 
+𝑀𝑠 = number of rows (number of syn hesized mode shapes) 
 
 
 
-𝑚𝑘 = number of rows (number of labeled mode shapes for iteration k) 
+𝑚𝑘 = number of rows (number of labeled mode shapes for i era ion k) 
 
 
 
-N = number of columns (number of nodes multiplied by 3) 
+N = number of columns (number of nodes mul iplied by 3) 
 
 
 
-n = number of columns (number of selected nodes multiplied by 3) 
+n = number of columns (number of selec ed nodes mul iplied by 3) 
 
 
 
-s = number of synthesized mode shapes 
+s = number of syn hesized mode shapes 
 
 
 
@@ -122,27 +122,27 @@ s = number of synthesized mode shapes
 
 
 
-II. Introduction 
+II. In roduc ion 
 
 
 
- NASA has made a significant investment in developing advanced materials and structural concepts. The advanced 
+ NASA has made a significan inves men in developing advanced ma erials and s ruc ural concep s. The advanced 
 
 
 
-materials include advanced carbon nanotubes (CNT), intermediate modulus fibers (IM7), polymers, and matrix 
+ma erials include advanced carbon nano ubes (CNT), in ermedia e modulus fibers (IM7), polymers, and ma rix 
 
 
 
-composites. The traditional advanced materials assessment relies on the subject matter experts to provide qualitative 
+composi es. The radi ional advanced ma erials assessmen relies on he subjec ma er exper s o provide quali a ive 
 
 
 
-assessments used to prioritize technology investments. However, quantitative assessments of advanced materials 
+assessmen s used o priori ize echnology inves men s. However, quan i a ive assessmen s of advanced ma erials 
 
 
 
-require a careful examination of materials and their applications using high-fidelity tools such as finite-element 
+require a careful examina ion of ma erials and heir applica ions using high-fideli y ools such as fini e-elemen 
 
 
 
@@ -150,27 +150,27 @@ analysis (FEA).
 
 
 
-A typical structural modal analysis provides buckling and vibrational responses, including the natural frequencies, 
+A ypical s ruc ural modal analysis provides buckling and vibra ional responses, including he na ural frequencies, 
 
 
 
-mode shapes, and mode factors. The structural responses are equivalent to a mathematical model for the dynamical 
+mode shapes, and mode fac ors. The s ruc ural responses are equivalen o a ma hema ical model for he dynamical 
 
 
 
-behavior of the structure. A structural natural frequency has an associated mode shape, which provides a visual 
+behavior of he s ruc ure. A s ruc ural na ural frequency has an associa ed mode shape, which provides a visual 
 
 
 
-representation of the structural deformation in response to the given frequency. A mode shape is a coalescent of 
+represen a ion of he s ruc ural deforma ion in response o he given frequency. A mode shape is a coalescen of 
 
 
 
  
-* Aerospace Research Engineer, Vehicle Analysis Branch, AIAA Associate Fellow. 
-† Aerospace Research Engineer, Structural & Thermal Systems Branch, AIAA Senior Member. 
+* Aerospace Research Engineer, Vehicle Analysis Branch, AIAA Associa e Fellow. 
+† Aerospace Research Engineer, S ruc ural & Thermal Sys ems Branch, AIAA Senior Member. 
 ‡ Aerospace Research Engineer, Vehicle Analysis Branch. 
-§ Aerospace Research Engineer, Structural & Thermal Systems Branch. 
+§ Aerospace Research Engineer, S ruc ural & Thermal Sys ems Branch. 
 
 
 
@@ -190,143 +190,143 @@ representation of the structural deformation in response to the given frequency.
 
 
 
-possible deformed shapes at which a structure exchanges kinetic and strain energies. Each mode shape has a 
+possible deformed shapes a which a s ruc ure exchanges kine ic and s rain energies. Each mode shape has a 
 
 
 
-corresponding frequency at which the energy exchange occurs. The combined mode shapes and the corresponding 
+corresponding frequency a which he energy exchange occurs. The combined mode shapes and he corresponding 
 
 
 
-frequencies capture an important portion of dynamic characteristics of a structure. 
+frequencies cap ure an impor an por ion of dynamic charac eris ics of a s ruc ure. 
 
 
 
-A continuous structural analysis results in an infinite number of mode shapes and frequencies. However, a FEA 
+A con inuous s ruc ural analysis resul s in an infini e number of mode shapes and frequencies. However, a FEA 
 
 
 
-results in a finite number of mode shapes with corresponding frequencies and mode-shape scale factors. Most 
+resul s in a fini e number of mode shapes wi h corresponding frequencies and mode-shape scale fac ors. Mos 
 
 
 
-structural designs require the lowest frequencies to stay above a design constraint to avoid interference with the control 
+s ruc ural designs require he lowes frequencies o s ay above a design cons rain o avoid in erference wi h he con rol 
 
 
 
-system of a vehicle. In the case of launch vehicles and their payloads, the minimum flexible mode should be higher 
+sys em of a vehicle. In he case of launch vehicles and heir payloads, he minimum flexible mode should be higher 
 
 
 
-than the controls frequency of the launch vehicle to eliminate the coupling among these frequencies. In addition, the 
+ han he con rols frequency of he launch vehicle o elimina e he coupling among hese frequencies. In addi ion, he 
 
 
 
-flexible frequencies and their mode shapes should be accurate because they are used to decouple the equations of 
+flexible frequencies and heir mode shapes should be accura e because hey are used o decouple he equa ions of 
 
 
 
-motion for integrated loads analysis of launch vehicles and spacecraft. 
+mo ion for in egra ed loads analysis of launch vehicles and spacecraf . 
 
 
 
-The material properties such as stiffness (Young’s modulus) and strength (yield, tensile, compressive, and 
+The ma erial proper ies such as s iffness (Young’s modulus) and s reng h (yield, ensile, compressive, and 
 
 
 
-bending) play a key role in the design of structural concepts. Improving these properties may have benefits for 
+bending) play a key role in he design of s ruc ural concep s. Improving hese proper ies may have benefi s for 
 
 
 
-structural designs used for NASA missions. To assess and quantify the impact of these parameters, we selected a 
+s ruc ural designs used for NASA missions. To assess and quan ify he impac of hese parame ers, we selec ed a 
 
 
 
-generic lunar ascent vehicle and created a parametric FEA model (Fig. 1) with the goal of minimizing the structural 
+generic lunar ascen vehicle and crea ed a parame ric FEA model (Fig. 1) wi h he goal of minimizing he s ruc ural 
 
 
 
-mass subject to realistic constraints and loads from an earlier set of analyses performed by NASA. The load cases 
+mass subjec o realis ic cons rain s and loads from an earlier se of analyses performed by NASA. The load cases 
 
 
 
-included Earth launch, lunar landing, and the ascent from the lunar surface. Two test cases were created for this paper. 
+included Ear h launch, lunar landing, and he ascen from he lunar surface. Two es cases were crea ed for his paper. 
 
 
 
-The first test case was an isolated load-bearing tube extracted from the generic lunar ascent vehicle. A parametric FEA 
+The firs es case was an isola ed load-bearing ube ex rac ed from he generic lunar ascen vehicle. A parame ric FEA 
 
 
 
-model of the tube was created with constraints and loads. The input variables for the parametric model were scaled 
+model of he ube was crea ed wi h cons rain s and loads. The inpu variables for he parame ric model were scaled 
 
 
 
-stiffness, scaled strength, number of fiber layers, and tube diameter. The second test case was the lunar ascent vehicle 
+s iffness, scaled s reng h, number of fiber layers, and ube diame er. The second es case was he lunar ascen vehicle 
 
 
 
-shown in Fig. 1. A parametric FEA model of the ascent vehicle was created with constraints and loads. The input 
+shown in Fig. 1. A parame ric FEA model of he ascen vehicle was crea ed wi h cons rain s and loads. The inpu 
 
 
 
-variables for the parametric model were scaled modules and tube diameters for the supporting structures. 
+variables for he parame ric model were scaled modules and ube diame ers for he suppor ing s ruc ures. 
 
 
 
-For these two test cases, the task of labeling and tracking the mode shapes within the output sequence entails 
+For hese wo es cases, he ask of labeling and racking he mode shapes wi hin he ou pu sequence en ails 
 
 
 
-careful visual inspection of all modes, requiring human-in-the-loop inspection. The focus of this paper is the 
+careful visual inspec ion of all modes, requiring human-in- he-loop inspec ion. The focus of his paper is he 
 
 
 
-applications of machine learning algorithms to automate the mode shape labeling and tracking. 
+applica ions of machine learning algori hms o au oma e he mode shape labeling and racking. 
 
 
 
-III. Mode Shape Labeling and Tracking Algorithms 
+III. Mode Shape Labeling and Tracking Algori hms 
 
 
 
-Machine Learning (ML) is a set of statistical learning algorithms with a wide range of applications. Readers are 
+Machine Learning (ML) is a se of s a is ical learning algori hms wi h a wide range of applica ions. Readers are 
 
 
 
-referred to standard textbooks on machine learning (e.g., Ref. [1, 2]). Most machine learning algorithms are designed 
+referred o s andard ex books on machine learning (e.g., Ref. [1, 2]). Mos machine learning algori hms are designed 
 
 
 
-to handle large data sets, which are either labeled or unlabeled. In some applications, the set may include both labeled 
+ o handle large da a se s, which are ei her labeled or unlabeled. In some applica ions, he se may include bo h labeled 
 
 
 
-and unlabeled data. The data types play a key role in selecting suitable ML algorithms. The data types for ML 
+and unlabeled da a. The da a ypes play a key role in selec ing sui able ML algori hms. The da a ypes for ML 
 
 
 
-algorithms are divided into the following categories: 
+algori hms are divided in o he following ca egories: 
 
 
 
-• Numerical Data: the data are quantitative and made of numbers. 
+• Numerical Da a: he da a are quan i a ive and made of numbers. 
 
 
 
-o Continuous: the data have infinite options (e.g., mass). 
+o Con inuous: he da a have infini e op ions (e.g., mass). 
 
 
 
-o Discrete: the data have finite options (e.g., number of composite fiber layers). 
+o Discre e: he da a have fini e op ions (e.g., number of composi e fiber layers). 
 
 
 
-• Categorical Data: the data are qualitative and made of characters and words. 
+• Ca egorical Da a: he da a are quali a ive and made of charac ers and words. 
 
 
 
-o Ordinal: the data are structured and have a hierarchical order (e.g., low risk, medium risk, and 
+o Ordinal: he da a are s ruc ured and have a hierarchical order (e.g., low risk, medium risk, and 
 
 
 
@@ -334,74 +334,74 @@ high risk).
 
 
 
-o Nominal: the data are unstructured and unordered with no hierarchy (e.g., material type). 
+o Nominal: he da a are uns ruc ured and unordered wi h no hierarchy (e.g., ma erial ype). 
 
 
 
-The data sets used for this paper were either continuous (e.g., eigenvectors) or nominal (e.g., mode shape 
+The da a se s used for his paper were ei her con inuous (e.g., eigenvec ors) or nominal (e.g., mode shape 
 
 
 
-designations). 
+designa ions). 
 
 
 
-The ML algorithms are divided into the following categories: 
+The ML algori hms are divided in o he following ca egories: 
 
 
 
-• Supervised Learning: it is used to train a model on labeled datasets. 
+• Supervised Learning: i is used o rain a model on labeled da ase s. 
 
 
 
-o Classification: it is used to predict which cluster (grouping) the data belong to. 
+o Classifica ion: i is used o predic which clus er (grouping) he da a belong o. 
 
 
 
-o Regression: it is used to predict continuous values. 
+o Regression: i is used o predic con inuous values. 
 
 
 
-• Unsupervised Learning: it is used to find clusters or reduce an unlabeled dataset. 
+• Unsupervised Learning: i is used o find clus ers or reduce an unlabeled da ase . 
 
 
 
-o Dimensionality Reduction: it is used to compress the dataset into a smaller dataset. 
+o Dimensionali y Reduc ion: i is used o compress he da ase in o a smaller da ase . 
 
 
 
-o Clustering: it is used to identify clusters within a dataset. 
+o Clus ering: i is used o iden ify clus ers wi hin a da ase . 
 
 
 
-• Reinforced Learning: it uses trial and error to train a predictive model. 
+• Reinforced Learning: i uses rial and error o rain a predic ive model. 
 
 
 
-For this paper we used classification and clustering algorithms from the ML module scikit-learn in python** to 
+For his paper we used classifica ion and clus ering algori hms from he ML module sciki -learn in py hon** o 
 
 
 
-label and track mode shapes. The labeling process used the K-Means (KM) and Gaussian Mixture (GM) algorithms, 
+label and rack mode shapes. The labeling process used he K-Means (KM) and Gaussian Mix ure (GM) algori hms, 
 
 
 
-and the tracking process used the K-Nearest (KN) neighbor algorithm. The labeling process was a relatively simple 
+and he racking process used he K-Neares (KN) neighbor algori hm. The labeling process was a rela ively simple 
 
 
 
-implementation of the KM algorithm. The mode shape tracking is more involved. Figure 2 shows the flowchart 
+implemen a ion of he KM algori hm. The mode shape racking is more involved. Figure 2 shows he flowchar 
 
 
 
  
-**https://scikit-learn.org (accessed July 24, 2023). 
+**h ps://sciki -learn.org (accessed July 24, 2023). 
 
 
 
 
 
-https://scikit-learn.org/
+h ps://sciki -learn.org/
 
 
 
@@ -418,31 +418,31 @@ https://scikit-learn.org/
 
 
 
-implementation for mode shape tracking. The algorithm started from the upper left of Fig. 2 with the entire dataset in 
+implemen a ion for mode shape racking. The algori hm s ar ed from he upper lef of Fig. 2 wi h he en ire da ase in 
 
 
 
-a matrix form as an input. Matrix rows represented individual mode shapes, and columns represented mode shape 
+a ma rix form as an inpu . Ma rix rows represen ed individual mode shapes, and columns represen ed mode shape 
 
 
 
-vectors at FEA nodes. Below is a list of steps (even numbers) and data descriptions (odd numbers) for the mode shape 
+vec ors a FEA nodes. Below is a lis of s eps (even numbers) and da a descrip ions (odd numbers) for he mode shape 
 
 
 
-tracking algorithm shown in Fig. 2: 
+ racking algori hm shown in Fig. 2: 
 
 
 
-1. The full dataset in a matrix form with M rows (total number of modes) and N columns (number of nodes 
+1. The full da ase in a ma rix form wi h M rows ( o al number of modes) and N columns (number of nodes 
 
 
 
-multiplied by three). 
+mul iplied by hree). 
 
 
 
-2. Use KM and GM algorithms to select m mode shapes and n nodes that captured the diversity of available 
+2. Use KM and GM algori hms o selec m mode shapes and n nodes ha cap ured he diversi y of available 
 
 
 
@@ -450,40 +450,40 @@ mode shapes.
 
 
 
-3. The reduced matrix (mk x n) is updated for each iteration. The index k is the iteration number. 
+3. The reduced ma rix (mk x n) is upda ed for each i era ion. The index k is he i era ion number. 
 
 
 
-4. Label the reduced set of mode shapes (mk x n). An engineer labeled mk mode shapes. This step is similar 
+4. Label he reduced se of mode shapes (mk x n). An engineer labeled mk mode shapes. This s ep is similar 
 
 
 
-to labeling commercial images using crowdsourcing web services. 
+ o labeling commercial images using crowdsourcing web services. 
 
 
 
-5. The reduced labeled matrix includes labels as an additional column with nominal data type. 
+5. The reduced labeled ma rix includes labels as an addi ional column wi h nominal da a ype. 
 
 
 
-6. Synthesize a large dataset using mk labels from step five. Each synthesized mode shape was a random 
+6. Syn hesize a large da ase using mk labels from s ep five. Each syn hesized mode shape was a random 
 
 
 
-perturbation of a labeled mode shape. 
+per urba ion of a labeled mode shape. 
 
 
 
-7. The synthesized matrix has 𝑀𝑘
-𝑠 rows and n columns. The index s is equal to the number of synthesized 
+7. The syn hesized ma rix has 𝑀𝑘
+𝑠 rows and n columns. The index s is equal o he number of syn hesized 
 
 
 
-mode shapes plus the number of labeled modes from step four. 
+mode shapes plus he number of labeled modes from s ep four. 
 
 
 
-8. Use the synthesized matrix and train a KN model. This model was used to label the dataset matrix in step 
+8. Use he syn hesized ma rix and rain a KN model. This model was used o label he da ase ma rix in s ep 
 
 
 
@@ -491,87 +491,87 @@ one.
 
 
 
-9. The new labeled matrix includes the label uncertainty for each mode shape. 
+9. The new labeled ma rix includes he label uncer ain y for each mode shape. 
 
 
 
-10. Select a small number of mode shapes with the largest uncertainty to label. We selected a maximum of 
+10. Selec a small number of mode shapes wi h he larges uncer ain y o label. We selec ed a maximum of 
 
 
 
-10 modes shapes for the isolated tube and a maximum of 14 for the generic lunar ascent test cases. This 
+10 modes shapes for he isola ed ube and a maximum of 14 for he generic lunar ascen es cases. This 
 
 
 
-step completed one iteration. The next iteration started at step three with the combined labeled mode 
+s ep comple ed one i era ion. The nex i era ion s ar ed a s ep hree wi h he combined labeled mode 
 
 
 
-shapes from this step and step 3. The iterative process will stop when the least uncertain label is below a 
+shapes from his s ep and s ep 3. The i era ive process will s op when he leas uncer ain label is below a 
 
 
 
-user-defined threshold. 
+user-defined hreshold. 
 
 
 
-At the conclusion of the algorithm, the entire data set was labeled using the model developed in step eight. Each 
+A he conclusion of he algori hm, he en ire da a se was labeled using he model developed in s ep eigh . Each 
 
 
 
-label included a label uncertainty. 
+label included a label uncer ain y. 
 
 
 
-IV. Results 
+IV. Resul s 
 
 
 
-For this paper we used an isolated tube and a lunar ascent vehicle to demonstrate the applications of ML algorithms 
+For his paper we used an isola ed ube and a lunar ascen vehicle o demons ra e he applica ions of ML algori hms 
 
 
 
-to label and track mode shapes. The results for both cases are discussed in the next sections. 
+ o label and rack mode shapes. The resul s for bo h cases are discussed in he nex sec ions. 
 
 
 
-A. An Isolated Tube 
+A. An Isola ed Tube 
 
 
 
-Figure 3 shows a tube extracted from the generic lunar ascent model shown in Fig. 1. The FEA model for the tube 
+Figure 3 shows a ube ex rac ed from he generic lunar ascen model shown in Fig. 1. The FEA model for he ube 
 
 
 
-included loads and constraints from the lunar ascent model. Because the tube was isolated, it was modeled with a set 
+included loads and cons rain s from he lunar ascen model. Because he ube was isola ed, i was modeled wi h a se 
 
 
 
-of cantilevered boundary conditions. The top of Fig. 3 shows the tube fiber layout. The bottom of Fig. 3 shows a 
+of can ilevered boundary condi ions. The op of Fig. 3 shows he ube fiber layou . The bo om of Fig. 3 shows a 
 
 
 
-sample deflected contour for a given mode shape at a deformed position for a specific natural frequency. 
+sample deflec ed con our for a given mode shape a a deformed posi ion for a specific na ural frequency. 
 
 
 
-A parametric model for the normal mode FEA was created with 14,136 nodes. The large number of nodes may 
+A parame ric model for he normal mode FEA was crea ed wi h 14,136 nodes. The large number of nodes may 
 
 
 
-appear to be excessive, but it is required to capture the large variation in diameter (0.5, 1, 2, 3, 4, 5, and 6 inches) and 
+appear o be excessive, bu i is required o cap ure he large varia ion in diame er (0.5, 1, 2, 3, 4, 5, and 6 inches) and 
 
 
 
-number of fiber layers (3, 6, 9, 12, 15, and 18 layers). The model was executed with seven different diameters, six 
+number of fiber layers (3, 6, 9, 12, 15, and 18 layers). The model was execu ed wi h seven differen diame ers, six 
 
 
 
-different fiber layers, and two material types (IM7 and CNT), for a total of 84 runs. The first 10 mode shapes were 
+differen fiber layers, and wo ma erial ypes (IM7 and CNT), for a o al of 84 runs. The firs 10 mode shapes were 
 
 
 
-extracted from each FEA solution, resulting in 840 mode shapes. The full dataset matrix was 840 rows and 34,359 
+ex rac ed from each FEA solu ion, resul ing in 840 mode shapes. The full da ase ma rix was 840 rows and 34,359 
 
 
 
@@ -579,31 +579,31 @@ extracted from each FEA solution, resulting in 840 mode shapes. The full dataset
 
 
 
-To reduce the size of the dataset matrix and the required computational cost, step 2 of the algorithm in Fig. 2 was 
+To reduce he size of he da ase ma rix and he required compu a ional cos , s ep 2 of he algori hm in Fig. 2 was 
 
 
 
-used to select a representative set of FEA nodes (n=75) and their surrounding regions (clusters). Figure 4 shows the 
+used o selec a represen a ive se of FEA nodes (n=75) and heir surrounding regions (clus ers). Figure 4 shows he 
 
 
 
-selected nodes and their associated clusters, forming a quilt like pattern. The inputs to the clustering algorithm were 
+selec ed nodes and heir associa ed clus ers, forming a quil like pa ern. The inpu s o he clus ering algori hm were 
 
 
 
-the full matrix and number of desired clusters. The algorithm selected nodes for each cluster with no additional user 
+ he full ma rix and number of desired clus ers. The algori hm selec ed nodes for each clus er wi h no addi ional user 
 
 
 
-input. The resulting reduced matrix had 840 rows and 225 (75x3) columns. Figure 5 shows the first output mode shape 
+inpu . The resul ing reduced ma rix had 840 rows and 225 (75x3) columns. Figure 5 shows he firs ou pu mode shape 
 
 
 
-from the 84 FEA solutions. The baseline mode shape is shown in row 1, column 1. The first output mode shapes varied 
+from he 84 FEA solu ions. The baseline mode shape is shown in row 1, column 1. The firs ou pu mode shapes varied 
 
 
 
-across different runs (e.g., see row 2, column 6). 
+across differen runs (e.g., see row 2, column 6). 
 
 
 
@@ -611,19 +611,19 @@ Mode Shape Labeling
 
 
 
-The mode shapes depend on the input parameters such as diameter and number of fiber layers. There are clusters 
+The mode shapes depend on he inpu parame ers such as diame er and number of fiber layers. There are clus ers 
 
 
 
-of mode shapes that may look similar, but there are slight differences in their shapes. The K-Means algorithm was 
+of mode shapes ha may look similar, bu here are sligh differences in heir shapes. The K-Means algori hm was 
 
 
 
-used to identify the major mode shape clusters. The inputs to the algorithm were the reduced matrix and the desired 
+used o iden ify he major mode shape clus ers. The inpu s o he algori hm were he reduced ma rix and he desired 
 
 
 
-number of clusters, which has significant impact on the clustering results. Figure 6 shows the impact of the number 
+number of clus ers, which has significan impac on he clus ering resul s. Figure 6 shows he impac of he number 
 
 
 
@@ -643,31 +643,31 @@ number of clusters, which has significant impact on the clustering results. Figu
 
 
 
-of clusters on the maximum number of modes among clusters. The curve for the maximum number bent around 45 to 
+of clus ers on he maximum number of modes among clus ers. The curve for he maximum number ben around 45 o 
 
 
 
-50 clusters, which was an optimal balance between the number of clusters and the maximum number of modes among 
+50 clus ers, which was an op imal balance be ween he number of clus ers and he maximum number of modes among 
 
 
 
-clusters. Figure 7 shows the number of mode shapes in each cluster for a 50-cluster case. Figure 8 shows the labeled 
+clus ers. Figure 7 shows he number of mode shapes in each clus er for a 50-clus er case. Figure 8 shows he labeled 
 
 
 
-mode shapes for cluster 14 of Fig. 7. The figure legends show the FEA run number (R) and mode sequence number 
+mode shapes for clus er 14 of Fig. 7. The figure legends show he FEA run number (R) and mode sequence number 
 
 
 
-(M). Figures A1-A3 in the appendix show additional labeling results for the 50-cluster case. Two out 50 clusters 
+(M). Figures A1-A3 in he appendix show addi ional labeling resul s for he 50-clus er case. Two ou 50 clus ers 
 
 
 
-contained dissimilar mode shapes that need to be labeled by the user, resulting in 96% accuracy. Increasing the number 
+con ained dissimilar mode shapes ha need o be labeled by he user, resul ing in 96% accuracy. Increasing he number 
 
 
 
-of clusters to 70 resulted in one dissimilar cluster (98.6% accuracy). 
+of clus ers o 70 resul ed in one dissimilar clus er (98.6% accuracy). 
 
 
 
@@ -675,103 +675,103 @@ Mode Shape Tracking
 
 
 
-The tracking algorithm described in section III was used to track mode shapes. Figure 9 shows the intermediate 
+The racking algori hm described in sec ion III was used o rack mode shapes. Figure 9 shows he in ermedia e 
 
 
 
-results for 12 iterations. The iteration sequence starts at the top row of Fig. 9, and each row represents a single FEA 
+resul s for 12 i era ions. The i era ion sequence s ar s a he op row of Fig. 9, and each row represen s a single FEA 
 
 
 
-run. For this implementation, 10 modes shapes were extracted from the FEA output for each iteration. To simplify the 
+run. For his implemen a ion, 10 modes shapes were ex rac ed from he FEA ou pu for each i era ion. To simplify he 
 
 
 
-labeling process, the potential mode clusters are identified with a single character (e.g., A). In Fig. 9, the red labels 
+labeling process, he po en ial mode clus ers are iden ified wi h a single charac er (e.g., A). In Fig. 9, he red labels 
 
 
 
-are mode labels identified by the user, and the black labels are identified by the algorithm. The black labels in 
+are mode labels iden ified by he user, and he black labels are iden ified by he algori hm. The black labels in 
 
 
 
-parenthesis are mode shapes that were incorrectly identified by the algorithm and corrected by the user. After each 
+paren hesis are mode shapes ha were incorrec ly iden ified by he algori hm and correc ed by he user. Af er each 
 
 
 
-iteration, the user examined the prediction for the next FEA run and corrected the misidentified mode shapes. After 
+i era ion, he user examined he predic ion for he nex FEA run and correc ed he misiden ified mode shapes. Af er 
 
 
 
-12 iterations, the KN model was applied to the entire 840 mode shapes. Figure 10 shows 348 mode shapes identified 
+12 i era ions, he KN model was applied o he en ire 840 mode shapes. Figure 10 shows 348 mode shapes iden ified 
 
 
 
-as mode A, with 14 misidentified modes (e.g., row 1, column 16). The tracking accuracy for mode shape A was 96%. 
+as mode A, wi h 14 misiden ified modes (e.g., row 1, column 16). The racking accuracy for mode shape A was 96%. 
 
 
 
-The tracking accuracy for modes further into the sequence decreased. For example, the accuracy for modes B and C 
+The racking accuracy for modes fur her in o he sequence decreased. For example, he accuracy for modes B and C 
 
 
 
-were 94% and 92%, respectively. For structural dynamic analysis and design, the first mode is the critical mode shape. 
+were 94% and 92%, respec ively. For s ruc ural dynamic analysis and design, he firs mode is he cri ical mode shape. 
 
 
 
-Figures A4-A5 in the appendix show additional tracking results. 
+Figures A4-A5 in he appendix show addi ional racking resul s. 
 
 
 
-B. Generic Lunar Ascent 
+B. Generic Lunar Ascen 
 
 
 
-A parametric FEA model for normal mode was created for an aluminum lunar ascent vehicle with 11,474 nodes. 
+A parame ric FEA model for normal mode was crea ed for an aluminum lunar ascen vehicle wi h 11,474 nodes. 
 
 
 
-The model was executed with five different scaled modules and five different tube diameters for the crew-cabin 
+The model was execu ed wi h five differen scaled modules and five differen ube diame ers for he crew-cabin 
 
 
 
-support structure, for a total of 25 runs. The first six rigid body modes were ignored, and the next fourteen mode 
+suppor s ruc ure, for a o al of 25 runs. The firs six rigid body modes were ignored, and he nex four een mode 
 
 
 
-shapes were extracted from each FEA solution, resulting in 350 mode shapes. Figure 11 shows the seventh mode of 
+shapes were ex rac ed from each FEA solu ion, resul ing in 350 mode shapes. Figure 11 shows he seven h mode of 
 
 
 
-the output sequence extracted from the 25 FEA solutions. The baseline mode shape is shown in row 1, column 1. 
+ he ou pu sequence ex rac ed from he 25 FEA solu ions. The baseline mode shape is shown in row 1, column 1. 
 
 
 
-There were three distinct mode shapes: seven mode shapes similar to R1/M7, nine similar to R5/M7, and 10 similar 
+There were hree dis inc mode shapes: seven mode shapes similar o R1/M7, nine similar o R5/M7, and 10 similar 
 
 
 
-to R16/M7. Similar to the isolated tube, the mode shape sequence changed as design parameters changed. 
+ o R16/M7. Similar o he isola ed ube, he mode shape sequence changed as design parame ers changed. 
 
 
 
- The full matrix for the dataset was 350 rows and 34,422 (11,474x3) columns. To reduce the size of the matrix and 
+ The full ma rix for he da ase was 350 rows and 34,422 (11,474x3) columns. To reduce he size of he ma rix and 
 
 
 
-the required computational cost, the K-Means algorithm was used to select a representative set of FEA nodes (n=150) 
+ he required compu a ional cos , he K-Means algori hm was used o selec a represen a ive se of FEA nodes (n=150) 
 
 
 
-and their surrounding regions (clusters). Figure 12 shows the selected nodes and their associated clusters. The inputs 
+and heir surrounding regions (clus ers). Figure 12 shows he selec ed nodes and heir associa ed clus ers. The inpu s 
 
 
 
-to the clustering algorithm were the full matrix and number of desired clusters. The algorithm selected nodes for each 
+ o he clus ering algori hm were he full ma rix and number of desired clus ers. The algori hm selec ed nodes for each 
 
 
 
-cluster with no additional user input. The resulting reduced matrix has 350 rows and 450 (150x3) columns. 
+clus er wi h no addi ional user inpu . The resul ing reduced ma rix has 350 rows and 450 (150x3) columns. 
 
 
 
@@ -783,31 +783,31 @@ Mode Shape Labeling
 
 
 
-The K-Means algorithm was used to identify mode shape clusters. The inputs to the algorithm were the reduced 
+The K-Means algori hm was used o iden ify mode shape clus ers. The inpu s o he algori hm were he reduced 
 
 
 
-matrix and the desired number of clusters, which had significant impact on clustering results. Figure 13 shows the 
+ma rix and he desired number of clus ers, which had significan impac on clus ering resul s. Figure 13 shows he 
 
 
 
-impact of the number of clusters on the maximum number of mode shapes among cluster. The curve for the maximum 
+impac of he number of clus ers on he maximum number of mode shapes among clus er. The curve for he maximum 
 
 
 
-number bent around 45 to 50 clusters. Figures 14 and 15 show sample results for a 50-cluster case. The K-Means 
+number ben around 45 o 50 clus ers. Figures 14 and 15 show sample resul s for a 50-clus er case. The K-Means 
 
 
 
-algorithm was effective at clustering unique mode shapes. One out 50 clusters contained dissimilar mode shapes that 
+algori hm was effec ive a clus ering unique mode shapes. One ou 50 clus ers con ained dissimilar mode shapes ha 
 
 
 
-need to be labeled by the user, resulting in 98% accuracy. Reducing the number of clusters to 30 resulted in three 
+need o be labeled by he user, resul ing in 98% accuracy. Reducing he number of clus ers o 30 resul ed in hree 
 
 
 
-clusters with dissimilar mode shapes (90% accuracy). 
+clus ers wi h dissimilar mode shapes (90% accuracy). 
 
 
 
@@ -815,39 +815,39 @@ Mode Shape Tracking
 
 
 
- The tracking algorithm described in section III was used to track mode shapes for a generic lunar ascent vehicle. 
+ The racking algori hm described in sec ion III was used o rack mode shapes for a generic lunar ascen vehicle. 
 
 
 
-Figure 16 shows the intermediate results for eight iterations. Each column represents one iteration, and the iteration 
+Figure 16 shows he in ermedia e resul s for eigh i era ions. Each column represen s one i era ion, and he i era ion 
 
 
 
-sequence starts at the left column with the mode sequence going from bottom to top. During each iteration, 14 mode 
+sequence s ar s a he lef column wi h he mode sequence going from bo om o op. During each i era ion, 14 mode 
 
 
 
-shapes were either identified by ML algorithms or corrected by the user. To simplify the labeling process, the modes 
+shapes were ei her iden ified by ML algori hms or correc ed by he user. To simplify he labeling process, he modes 
 
 
 
-are identified with a single character (e.g., A). In Fig. 16, the red text are mode shapes identified by the user, and the 
+are iden ified wi h a single charac er (e.g., A). In Fig. 16, he red ex are mode shapes iden ified by he user, and he 
 
 
 
-black text are mode shapes identified by the algorithm. The black text in parenthesis are mode shapes that were 
+black ex are mode shapes iden ified by he algori hm. The black ex in paren hesis are mode shapes ha were 
 
 
 
-incorrectly identified by the algorithm and corrected by the user. After each iteration, the user examined the prediction 
+incorrec ly iden ified by he algori hm and correc ed by he user. Af er each i era ion, he user examined he predic ion 
 
 
 
-for the next FEA run and corrected the misidentified mode shapes. Some modes shapes were symmetric about each 
+for he nex FEA run and correc ed he misiden ified mode shapes. Some modes shapes were symme ric abou each 
 
 
 
-other, and the tracking algorithm could not resolve the differences. For example, rotating the first mode shape of the 
+o her, and he racking algori hm could no resolve he differences. For example, ro a ing he firs mode shape of he 
 
 
 
@@ -867,35 +867,35 @@ other, and the tracking algorithm could not resolve the differences. For example
 
 
 
-fifth run (bottom row of Fig. 16) by 90° around the primary axis produced a similar mode shape to the first mode of 
+fif h run (bo om row of Fig. 16) by 90° around he primary axis produced a similar mode shape o he firs mode of 
 
 
 
-the first run. The user used the same labels for these symmetric mode shapes. 
+ he firs run. The user used he same labels for hese symme ric mode shapes. 
 
 
 
- After the eighth iteration, the KN model was applied to the entire 350 mode shapes. Figure 17 shows 25 mode 
+ Af er he eigh h i era ion, he KN model was applied o he en ire 350 mode shapes. Figure 17 shows 25 mode 
 
 
 
-shapes identified as mode shape A. In Fig. 17, thirteen mode shapes are similar to R1/M7 and 12 similar to R11/M7. 
+shapes iden ified as mode shape A. In Fig. 17, hir een mode shapes are similar o R1/M7 and 12 similar o R11/M7. 
 
 
 
-Figures 18, A6, and A7 show similar results for mode shapes B, C, and D, respectively. The tracking accuracy for 
+Figures 18, A6, and A7 show similar resul s for mode shapes B, C, and D, respec ively. The racking accuracy for 
 
 
 
-mode shapes A-E, G, and K were 100%. The tracking accuracy for modes further into the sequence decreased. For 
+mode shapes A-E, G, and K were 100%. The racking accuracy for modes fur her in o he sequence decreased. For 
 
 
 
-example, the accuracy for modes F and H were 55% and 79%, respectively. For structural dynamic analysis and 
+example, he accuracy for modes F and H were 55% and 79%, respec ively. For s ruc ural dynamic analysis and 
 
 
 
-design, the first mode is the critical mode shape. 
+design, he firs mode is he cri ical mode shape. 
 
 
 
@@ -903,35 +903,35 @@ V. Summary
 
 
 
-We used machine learning algorithms to automate the labeling and tracking of structural mode shapes for two sets 
+We used machine learning algori hms o au oma e he labeling and racking of s ruc ural mode shapes for wo se s 
 
 
 
-of finite-element analysis models. The algorithms had a minimum of 96% accuracy for labeling and tracking the first 
+of fini e-elemen analysis models. The algori hms had a minimum of 96% accuracy for labeling and racking he firs 
 
 
 
-mode shapes. The accuracy for second through fifth mode shapes decreased but stayed above 90%. The automation 
+mode shapes. The accuracy for second hrough fif h mode shapes decreased bu s ayed above 90%. The au oma ion 
 
 
 
-reduced the time for labeling and tracking mode shapes from days and weeks to minutes. Three areas of improvements 
+reduced he ime for labeling and racking mode shapes from days and weeks o minu es. Three areas of improvemen s 
 
 
 
-are recommended. First, the algorithm implementations should be validated with additional finite-element analysis 
+are recommended. Firs , he algori hm implemen a ions should be valida ed wi h addi ional fini e-elemen analysis 
 
 
 
-models. Second, combining K-Means and the K-Nearest algorithms to track mode shapes could reduce the burden for 
+models. Second, combining K-Means and he K-Neares algori hms o rack mode shapes could reduce he burden for 
 
 
 
-the user to label mode shapes. Third, other machine learning classification and clustering algorithms should be 
+ he user o label mode shapes. Third, o her machine learning classifica ion and clus ering algori hms should be 
 
 
 
-evaluated (e.g., spectral clustering for labeling and gradient boosting for tracking). 
+evalua ed (e.g., spec ral clus ering for labeling and gradien boos ing for racking). 
 
 
 
@@ -960,7 +960,7 @@ evaluated (e.g., spectral clustering for labeling and gradient boosting for trac
 
 
 
-Fig. 1 Generic lunar ascent vehicle (left) and corresponding FEA model (right). 
+Fig. 1 Generic lunar ascen vehicle (lef ) and corresponding FEA model (righ ). 
 
 
 
@@ -977,7 +977,7 @@ Fig. 1 Generic lunar ascent vehicle (left) and corresponding FEA model (right).
 
 
 
-Fig. 2 Algorithm for mode shape tracking (rectangles represent processes and parallelograms represent datasets). 
+Fig. 2 Algori hm for mode shape racking (rec angles represen processes and parallelograms represen da ase s). 
 
 
 
@@ -1002,7 +1002,7 @@ Use GM & Kmeans and
 
 
 
-Select n Nodes and m0
+Selec n Nodes and m0
 
 
 
@@ -1034,7 +1034,7 @@ Label mk Modes
 
 
 
-Synthesize Modes
+Syn hesize Modes
 
 
 
@@ -1058,7 +1058,7 @@ Modes
 
 
 
-Select Most Uncertain 
+Selec Mos Uncer ain 
 
 
 
@@ -1082,7 +1082,7 @@ Unlabeled
 
 
 
-Matrix
+Ma rix
 
 
 
@@ -1094,7 +1094,7 @@ Reduced
 
 
 
-Matrix
+Ma rix
 
 
 
@@ -1106,7 +1106,7 @@ Label
 
 
 
-Matrix
+Ma rix
 
 
 
@@ -1118,7 +1118,7 @@ Labeled
 
 
 
-Matrix
+Ma rix
 
 
 
@@ -1126,11 +1126,11 @@ Matrix
 
 
 
-Synthesize 
+Syn hesize 
 
 
 
-Matrix
+Ma rix
 
 
 
@@ -1184,7 +1184,7 @@ k=k+1
 
 
 
-Fig. 3 A composite fiber layout for a tube (top) and sample FEA solution (bottom). 
+Fig. 3 A composi e fiber layou for a ube ( op) and sample FEA solu ion (bo om). 
 
 
 
@@ -1197,7 +1197,7 @@ Fig. 3 A composite fiber layout for a tube (top) and sample FEA solution (bottom
 
 
  
-Fig. 4 FEA model of an isolated tube divided into 75 clusters with their centers (black dots). 
+Fig. 4 FEA model of an isola ed ube divided in o 75 clus ers wi h heir cen ers (black do s). 
 
 
 
@@ -1242,7 +1242,7 @@ Fig. 4 FEA model of an isolated tube divided into 75 clusters with their centers
 
 
 
-Fig. 5 First output mode shapes extracted from the 84 FEA solutions. 
+Fig. 5 Firs ou pu mode shapes ex rac ed from he 84 FEA solu ions. 
 
 
 
@@ -1275,7 +1275,7 @@ Fig. 5 First output mode shapes extracted from the 84 FEA solutions.
 
 
 
-Fig. 6 Maximum number of modes among clusters. 
+Fig. 6 Maximum number of modes among clus ers. 
 
 
 
@@ -1284,7 +1284,7 @@ Fig. 6 Maximum number of modes among clusters.
 
 
  
-Fig. 7 Number of mode shapes for 50-cluster case. 
+Fig. 7 Number of mode shapes for 50-clus er case. 
 
 
 
@@ -1372,12 +1372,12 @@ lu
 
 
 
-st
+s 
 er
 
 
 
-Number of Clusters
+Number of Clus ers
 
 
 
@@ -1464,12 +1464,12 @@ lu
 
 
 
-st
+s 
 er
 
 
 
-Cluster Number
+Clus er Number
 
 
 
@@ -1498,7 +1498,7 @@ Cluster Number
 
 
 
-Fig. 8 Labeled mode shapes for cluster 14 (R: run number, M: mode output sequence number). 
+Fig. 8 Labeled mode shapes for clus er 14 (R: run number, M: mode ou pu sequence number). 
 
 
 
@@ -1552,11 +1552,11 @@ Fig. 10 Tracked bending mode order 1 shapes.
 
 
 
-Fig. 9 Mode shape tracking results for 12 iterations (Red labels indicate user identified; Black indicate algorithm 
+Fig. 9 Mode shape racking resul s for 12 i era ions (Red labels indica e user iden ified; Black indica e algori hm 
 
 
 
-identified). 
+iden ified). 
 
 
 
@@ -1580,27 +1580,27 @@ B B A A C C (B) C C B B
 
 
 
-Iteration 1
+I era ion 1
 
 
 
-Iteration 2
+I era ion 2
 
 
 
-Iteration 3
+I era ion 3
 
 
 
-Iteration 4
+I era ion 4
 
 
 
-Iteration 5
+I era ion 5
 
 
 
-Iteration 6
+I era ion 6
 
 
 
@@ -1628,27 +1628,27 @@ B B C C A A C C E E
 
 
 
-Iteration 7
+I era ion 7
 
 
 
-Iteration 8
+I era ion 8
 
 
 
-Iteration 9
+I era ion 9
 
 
 
-Iteration 10
+I era ion 10
 
 
 
-Iteration 11
+I era ion 11
 
 
 
-Iteration 12
+I era ion 12
 
 
 
@@ -1681,7 +1681,7 @@ B B A A C C C C B B
 
 
 
-Fig. 10 Tracked mode shapes for cluster A (R: run number, M: mode output sequence number). 
+Fig. 10 Tracked mode shapes for clus er A (R: run number, M: mode ou pu sequence number). 
 
 
 
@@ -1714,7 +1714,7 @@ Fig. 10 Tracked mode shapes for cluster A (R: run number, M: mode output sequenc
 
 
 
-Fig. 11 The seventh mode shapes for all 25 FEA solutions (R: run number, M: mode output sequence number). 
+Fig. 11 The seven h mode shapes for all 25 FEA solu ions (R: run number, M: mode ou pu sequence number). 
 
 
 
@@ -1755,7 +1755,7 @@ Fig. 11 The seventh mode shapes for all 25 FEA solutions (R: run number, M: mode
 
 
  
-Fig. 12 FEA model divided into 150 clusters with their centers (black dots). 
+Fig. 12 FEA model divided in o 150 clus ers wi h heir cen ers (black do s). 
 
 
 
@@ -1768,7 +1768,7 @@ Fig. 12 FEA model divided into 150 clusters with their centers (black dots).
 
 
  
-Fig. 13 Maximum number of mode shapes in a cluster. 
+Fig. 13 Maximum number of mode shapes in a clus er. 
 
 
 
@@ -1868,12 +1868,12 @@ lu
 
 
 
-st
+s 
 er
 
 
 
-Number of Clusters
+Number of Clus ers
 
 
 
@@ -1906,7 +1906,7 @@ Number of Clusters
 
 
  
-Fig. 14 Labeled mode shapes for cluster 42 (R: run number, M: mode output sequence number). 
+Fig. 14 Labeled mode shapes for clus er 42 (R: run number, M: mode ou pu sequence number). 
 
 
 
@@ -1947,7 +1947,7 @@ Fig. 14 Labeled mode shapes for cluster 42 (R: run number, M: mode output sequen
 
 
  
-Fig. 15 Labeled mode shapes for cluster 18 (R: run number, M: mode output sequence number). 
+Fig. 15 Labeled mode shapes for clus er 18 (R: run number, M: mode ou pu sequence number). 
 
 
 
@@ -1977,11 +1977,11 @@ i
 
 
 
-Fig. 16 Mode shape tracking results for eight iterations (Red labels indicate user identified; Black indicate 
+Fig. 16 Mode shape racking resul s for eigh i era ions (Red labels indica e user iden ified; Black indica e 
 
 
 
-algorithm identified). 
+algori hm iden ified). 
 
 
 
@@ -2470,7 +2470,7 @@ Run #1 Run #2 Run #3 Run #6 Run #7 Run #8Run #4 Run #5
 
 
 
-Fig. 17 Tracked mode shapes for cluster A (R: run number, M: mode output sequence number). 
+Fig. 17 Tracked mode shapes for clus er A (R: run number, M: mode ou pu sequence number). 
 
 
 
@@ -2507,7 +2507,7 @@ Fig. 17 Tracked mode shapes for cluster A (R: run number, M: mode output sequenc
 
 
 
-Fig. 18 Tracked mode shapes for cluster B (R: run number, M: mode output sequence number). 
+Fig. 18 Tracked mode shapes for clus er B (R: run number, M: mode ou pu sequence number). 
 
 
 
@@ -2540,7 +2540,7 @@ Appendix
 
 
 
-Fig. A1 Labeled mode shapes for cluster 22 (R: run number, M: mode output sequence number). 
+Fig. A1 Labeled mode shapes for clus er 22 (R: run number, M: mode ou pu sequence number). 
 
 
 
@@ -2573,7 +2573,7 @@ Fig. A1 Labeled mode shapes for cluster 22 (R: run number, M: mode output sequen
 
 
 
-Fig. A2 Labeled mode shapes for cluster 28 (R: run number, M: mode output sequence number). 
+Fig. A2 Labeled mode shapes for clus er 28 (R: run number, M: mode ou pu sequence number). 
 
 
 
@@ -2606,7 +2606,7 @@ Fig. A2 Labeled mode shapes for cluster 28 (R: run number, M: mode output sequen
 
 
 
-Fig. A3 Labeled mode shapes for cluster 43 (R: run number, M: mode output sequence number). 
+Fig. A3 Labeled mode shapes for clus er 43 (R: run number, M: mode ou pu sequence number). 
 
 
 
@@ -2639,7 +2639,7 @@ Fig. A3 Labeled mode shapes for cluster 43 (R: run number, M: mode output sequen
 
 
 
-Fig. A4 Tracked mode shapes for cluster B (R: run number, M: mode output sequence number). 
+Fig. A4 Tracked mode shapes for clus er B (R: run number, M: mode ou pu sequence number). 
 
 
 
@@ -2676,7 +2676,7 @@ Fig. A4 Tracked mode shapes for cluster B (R: run number, M: mode output sequenc
 
 
 
-Fig. A5 Tracked mode shapes for cluster C (R: run number, M: mode output sequence number). 
+Fig. A5 Tracked mode shapes for clus er C (R: run number, M: mode ou pu sequence number). 
 
 
 
@@ -2709,7 +2709,7 @@ Fig. A5 Tracked mode shapes for cluster C (R: run number, M: mode output sequenc
 
 
  
-Fig. A6 Tracked mode shapes for cluster C (R: run number, M: mode output sequence number). 
+Fig. A6 Tracked mode shapes for clus er C (R: run number, M: mode ou pu sequence number). 
 
 
 
@@ -2742,7 +2742,7 @@ Fig. A6 Tracked mode shapes for cluster C (R: run number, M: mode output sequenc
 
 
 
-Fig. A7 Tracked mode shapes for cluster D (R: run number, M: mode output sequence number). 
+Fig. A7 Tracked mode shapes for clus er D (R: run number, M: mode ou pu sequence number). 
 
 
 
@@ -2766,23 +2766,23 @@ Fig. A7 Tracked mode shapes for cluster D (R: run number, M: mode output sequenc
 
 
 
-Acknowledgments 
+Acknowledgmen s 
 
 
 
-The authors would like to thank Dr. Emilie Siochi for her continued support and guidance for this project. She 
+The au hors would like o hank Dr. Emilie Siochi for her con inued suppor and guidance for his projec . She 
 
 
 
-has been instrumental in continuing the use of systems analysis to assess advanced materials. We would also like to 
+has been ins rumen al in con inuing he use of sys ems analysis o assess advanced ma erials. We would also like o 
 
 
 
-thank Miguel Cabello, a NASA Engineering and Safety Center (NESC) Loads and Dynamics summer intern, for 
+ hank Miguel Cabello, a NASA Engineering and Safe y Cen er (NESC) Loads and Dynamics summer in ern, for 
 
 
 
-assisting in the writing of scripts used to generate the composite tube models. 
+assis ing in he wri ing of scrip s used o genera e he composi e ube models. 
 
 
 
@@ -2790,25 +2790,25 @@ References
 
 
 
-[1] Flach, P., Machine Learning: The Art and Science of Algorithms That Make Sense of Data, Cambridge 
+[1] Flach, P., Machine Learning: The Ar and Science of Algori hms Tha Make Sense of Da a, Cambridge 
 
 
 
-University Press, Boca Raton, FL, 2012. https://doi.org/10.1017/CBO9780511973000 
+Universi y Press, Boca Ra on, FL, 2012. h ps://doi.org/10.1017/CBO9780511973000 
 
 
 
-[2] Marsland, S., Machine Learning: An Algorithmic Perspective, CRC Press, New York, 2009. 
+[2] Marsland, S., Machine Learning: An Algori hmic Perspec ive, CRC Press, New York, 2009. 
 
 
 
-https://doi.org/10.1201/9781420067194 
+h ps://doi.org/10.1201/9781420067194 
 
 
 
 
 
-https://doi.org/10.1017/CBO9780511973000
+h ps://doi.org/10.1017/CBO9780511973000
 
 
-https://doi.org/10.1201/9781420067194
+h ps://doi.org/10.1201/9781420067194

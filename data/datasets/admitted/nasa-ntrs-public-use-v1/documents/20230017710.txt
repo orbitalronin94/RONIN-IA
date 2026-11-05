@@ -1,8 +1,8 @@
-Design of Safe Separation Bounds for Temporally Deconflicted
+Design of Safe Separa ion Bounds for Temporally Deconflic ed
 
 
 
-Trajectories under Bounded Uncertainties
+Trajec ories under Bounded Uncer ain ies
 
 
 
@@ -10,153 +10,153 @@ Javier Puig-Navarro∗
 
 
 
-Analytical Mechanics Associates, Hampton, Virginia, 23666, USA
+Analy ical Mechanics Associa es, Hamp on, Virginia, 23666, USA
 
 
 
-Benjamin N. Kelley†, Matthew P. Vaughan‡, and B. Danette Allen§
+Benjamin N. Kelley†, Ma hew P. Vaughan‡, and B. Dane e Allen§
 
 
 
-NASA Langley Research Center, Hampton, Virginia, 23666, USA
+NASA Langley Research Cen er, Hamp on, Virginia, 23666, USA
 
 
 
-This paper explores the derivation of safe separation bounds for a heterogeneous group of =
+This paper explores he deriva ion of safe separa ion bounds for a he erogeneous group of =
 
 
 
-Uncrewed Aerial Systems (UAS) that are assigned temporally deconflicted trajectories. Com-
+Uncrewed Aerial Sys ems (UAS) ha are assigned emporally deconflic ed rajec ories. Com-
 
 
 
-pared to spatially deconflicted trajectories, temporal deconfliction can lead to higher traffic
+pared o spa ially deconflic ed rajec ories, emporal deconflic ion can lead o higher raffic
 
 
 
-capacities and a more efficient use of the available airspace. One challenge with this type of
+capaci ies and a more efficien use of he available airspace. One challenge wi h his ype of
 
 
 
-deconfliction is that collisions can occur if some cooperating UAS are behind or ahead of sched-
+deconflic ion is ha collisions can occur if some coopera ing UAS are behind or ahead of sched-
 
 
 
-ule. To overcome this risk, this paper derives a lower bound on the safety distance between
+ule. To overcome his risk, his paper derives a lower bound on he safe y dis ance be ween
 
 
 
-two heterogeneous UAS in the presence of bounded uncertainties. This safety distance can
+ wo he erogeneous UAS in he presence of bounded uncer ain ies. This safe y dis ance can
 
 
 
-be leveraged to inform trajectory generation algorithms. The proposed bound establishes a
+be leveraged o inform rajec ory genera ion algori hms. The proposed bound es ablishes a
 
 
 
-rigorous safety margin when the fleet deviates from the planned trajectories, both temporally
+rigorous safe y margin when he flee devia es from he planned rajec ories, bo h emporally
 
 
 
-and spatially. For its derivation the paper assumes the UAS implement a distributed coordina-
+and spa ially. For i s deriva ion he paper assumes he UAS implemen a dis ribu ed coordina-
 
 
 
-tion algorithm that allows the fleet to maintain their schedules synchronized within a bounded
+ ion algori hm ha allows he flee o main ain heir schedules synchronized wi hin a bounded
 
 
 
-temporal error, and a path-following algorithm that lets the vehicles track a target that moves
+ emporal error, and a pa h-following algori hm ha le s he vehicles rack a arge ha moves
 
 
 
-along the planned trajectory with a bounded spatial error.
+along he planned rajec ory wi h a bounded spa ial error.
 
 
 
-I. Nomenclature
+I. Nomencla ure
 
 
 
-UAS = uncrewed aerial systems
+UAS = uncrewed aerial sys ems
 
 
 
-CoM = center of mass
+CoM = cen er of mass
 
 
 
-C = real time
+C = real ime
 
 
 
-C38 = desired time for the 8th UAS as planned in the trajectory generation phase
+C38 = desired ime for he 8 h UAS as planned in he rajec ory genera ion phase
 
 
 
-b8 = virtual time for the 8th UAS
+b8 = vir ual ime for he 8 h UAS
 
 
 
-pi = position of the CoM of the 8th UAS
+pi = posi ion of he CoM of he 8 h UAS
 
 
 
-pdi = desired position for the CoM of the 8th UAS
+pdi = desired posi ion for he CoM of he 8 h UAS
 
 
 
 pTi
-= position of the virtual target of the 8th UAS
+= posi ion of he vir ual arge of he 8 h UAS
 
 
 
 eTi
-= target-tracking error for the 8th UAS
+= arge - racking error for he 8 h UAS
 
 
 
-3B8, 9 = safety distance between the 8th and 9th UAS
+3B8, 9 = safe y dis ance be ween he 8 h and 9 h UAS
 
 
 
-2B8, 9 = safety coefficient for the separation problem between the 8th and 9th UAS
+2B8, 9 = safe y coefficien for he separa ion problem be ween he 8 h and 9 h UAS
 
 
 
-A8 = radius of a bounding sphere for the frame of the 8th UAS with center at pi
+A8 = radius of a bounding sphere for he frame of he 8 h UAS wi h cen er a pi
 
 
 
-II. Introduction
-As the diversity and number of vehicles in the airspace increase, it is important to aid traffic controllers, automate
+II. In roduc ion
+As he diversi y and number of vehicles in he airspace increase, i is impor an o aid raffic con rollers, au oma e
 
 
 
-certain tasks, and certify that travel plans are safe within specified margins, even in the presence of uncertainties. In
+cer ain asks, and cer ify ha ravel plans are safe wi hin specified margins, even in he presence of uncer ain ies. In
 
 
 
-addition, as the air traffic demand grows [1], increasing the traffic capacity of the existing infrastructure may require
+addi ion, as he air raffic demand grows [1], increasing he raffic capaci y of he exis ing infras ruc ure may require
 
 
 
-less conservative solutions that maintain or improve the levels of safety that the aviation industry has historically
+less conserva ive solu ions ha main ain or improve he levels of safe y ha he avia ion indus ry has his orically
 
 
 
-operated under. In this context of soaring traffic demand, the inclusion of unmanned systems in the airspace poses
+opera ed under. In his con ex of soaring raffic demand, he inclusion of unmanned sys ems in he airspace poses
 
 
 
-an added challenge. In some scenarios, UAS operators resort to ad hoc safe separation bounds that are sometimes
+an added challenge. In some scenarios, UAS opera ors resor o ad hoc safe separa ion bounds ha are some imes
 
 
 
-∗Aerospace Engineer Senior, Analytical Mechanics Associates, AIAA Member.
-†Research Computer Scientist, Autonomous Integrated Systems Research Branch.
-‡Research Computer Scientist, Autonomous Integrated Systems Research Branch.
-§NASA Senior Leader for Autonomous Systems, AIAA Associate Fellow.
+∗Aerospace Engineer Senior, Analy ical Mechanics Associa es, AIAA Member.
+†Research Compu er Scien is , Au onomous In egra ed Sys ems Research Branch.
+‡Research Compu er Scien is , Au onomous In egra ed Sys ems Research Branch.
+§NASA Senior Leader for Au onomous Sys ems, AIAA Associa e Fellow.
 
 
 
@@ -172,79 +172,79 @@ an added challenge. In some scenarios, UAS operators resort to ad hoc safe separ
 
 
 
-informed with Monte Carlo simulation results. This paper attempts to characterize the trajectory-tracking performance
+informed wi h Mon e Carlo simula ion resul s. This paper a emp s o charac erize he rajec ory- racking performance
 
 
 
-of any UAS with the goal of moving closer to standardization. To this end, this paper proposes that UAS implement
+of any UAS wi h he goal of moving closer o s andardiza ion. To his end, his paper proposes ha UAS implemen 
 
 
 
-two algorithms: a path-following algorithm that attempts to track a point in space with a bounded spatial error, and
+ wo algori hms: a pa h-following algori hm ha a emp s o rack a poin in space wi h a bounded spa ial error, and
 
 
 
-a time-critical coordination algorithm that is tasked with synchronizing the schedules of the cooperating UAS that
+a ime-cri ical coordina ion algori hm ha is asked wi h synchronizing he schedules of he coopera ing UAS ha 
 
 
 
-operate in mid and close proximity. The performance of these algorithms is characterized by generic bounds, based
+opera e in mid and close proximi y. The performance of hese algori hms is charac erized by generic bounds, based
 
 
 
-on existing algorithms [2, 3]. These are then leveraged to derive a lower bound for the safe separation distance. The
+on exis ing algori hms [2, 3]. These are hen leveraged o derive a lower bound for he safe separa ion dis ance. The
 
 
 
-contribution of this paper is the definition of a safety coefficient that provides a normalized notion of the safety margins
+con ribu ion of his paper is he defini ion of a safe y coefficien ha provides a normalized no ion of he safe y margins
 
 
 
-embedded in the solutions of the trajectory generation problem. This use of a safety coefficient resembles standard
+embedded in he solu ions of he rajec ory genera ion problem. This use of a safe y coefficien resembles s andard
 
 
 
-practices in structures and materials problems.
+prac ices in s ruc ures and ma erials problems.
 
 
 
-This paper is organized in three main sections. Section III captures the properties of the trajectories considered,
+This paper is organized in hree main sec ions. Sec ion III cap ures he proper ies of he rajec ories considered,
 
 
 
-and the characteristics of the relevant underlying algorithms that control the UAS. These are formalized through a
+and he charac eris ics of he relevan underlying algori hms ha con rol he UAS. These are formalized hrough a
 
 
 
-series of assumptions. These assumptions are then used to define the problem of the design of safe separation bounds
+series of assump ions. These assump ions are hen used o define he problem of he design of safe separa ion bounds
 
 
 
-for temporally deconflicted trajectories in the presence of uncertainties. Section IV provides a solution through the
+for emporally deconflic ed rajec ories in he presence of uncer ain ies. Sec ion IV provides a solu ion hrough he
 
 
 
-derivation of a safe separation bound for each pair of heterogeneous UAS. Last, Section V presents the conclusions of
+deriva ion of a safe separa ion bound for each pair of he erogeneous UAS. Las , Sec ion V presen s he conclusions of
 
 
 
-this paper, and suggests potential applications and extensions of the results presented.
+ his paper, and sugges s po en ial applica ions and ex ensions of he resul s presen ed.
 
 
 
-III. Problem Formulation
+III. Problem Formula ion
 
 
 
-Fig. 1 Time-deconflicted trajectories.
+Fig. 1 Time-deconflic ed rajec ories.
 
 
 
-Consider a fleet of = heterogeneous UAS
+Consider a flee of = he erogeneous UAS
 
 
 
-with a set of unique identification numbers
+wi h a se of unique iden ifica ion numbers
 
 
 
@@ -252,11 +252,11 @@ I := {1, . . . , =}. Assume each UAS has been as-
 
 
 
-signed a trajectory pdi (C38 ) that maps a desired
+signed a rajec ory pdi (C38 ) ha maps a desired
 
 
 
-time C38 to a position in space
+ ime C38 o a posi ion in space
 
 
 
@@ -277,60 +277,60 @@ C8=8 8 , C4=38
 
 
 
-where 8 ∈ I, C8=88 is the initial mission time, and
+where 8 ∈ I, C8=88 is he ini ial mission ime, and
 
 
 
 C4=38
-is the end mission time for the 8th UAS. Fig-
+is he end mission ime for he 8 h UAS. Fig-
 
 
 
-ure 1 depicts two trajectories for the 8th and 9th
+ure 1 depic s wo rajec ories for he 8 h and 9 h
 
 
 
-UAS in the fleet. These trajectories, if not timed
+UAS in he flee . These rajec ories, if no imed
 
 
 
-properly, could lead to a collision below the arch.
+properly, could lead o a collision below he arch.
 
 
 
-However, the planned locations of the vehicles do
+However, he planned loca ions of he vehicles do
 
 
 
-not coincide in space and time. As a result, not
+no coincide in space and ime. As a resul , no 
 
 
 
-only must these trajectories adhere to the dynamic
+only mus hese rajec ories adhere o he dynamic
 
 
 
-constraints of the vehicles, but also guarantee safe
+cons rain s of he vehicles, bu also guaran ee safe
 
 
 
-separation among the UAS through temporal de-
+separa ion among he UAS hrough emporal de-
 
 
 
-confliction. Temporally deconflicted trajectories
+conflic ion. Temporally deconflic ed rajec ories
 
 
 
-must guarantee that the distance between any two
+mus guaran ee ha he dis ance be ween any wo
 
 
 
-points on the curve with the same time is greater
+poin s on he curve wi h he same ime is grea er
 
 
 
-than a safety distance, that is
+ han a safe y dis ance, ha is
 
 
 
@@ -344,11 +344,11 @@ than a safety distance, that is
 
 
 
-where 3B8, 9 is a specific safety distance for the 8th and 9th UAS, whereas spatially deconflicted trajectories must
+where 3B8, 9 is a specific safe y dis ance for he 8 h and 9 h UAS, whereas spa ially deconflic ed rajec ories mus 
 
 
 
-guarantee a separation distance between any two points on the curve, that is
+guaran ee a separa ion dis ance be ween any wo poin s on he curve, ha is
 
 
 
@@ -367,19 +367,19 @@ guarantee a separation distance between any two points on the curve, that is
 
 
 
-In addition to temporal deconfliction, the following assumption describes the properties of the trajectories considered
+In addi ion o emporal deconflic ion, he following assump ion describes he proper ies of he rajec ories considered
 
 
 
-henceforth.
+hencefor h.
 
 
 
-Assumption 1 (Uniformly continuous trajectories) The trajectories used to prescribe the motion of the UAS are
+Assump ion 1 (Uniformly con inuous rajec ories) The rajec ories used o prescribe he mo ion of he UAS are
 
 
 
-uniformly continuous by construction, and thus for any X?8 > 0 there exists a ΔC8 > 0 satisfying
+uniformly con inuous by cons ruc ion, and hus for any X?8 > 0 here exis s a ΔC8 > 0 sa isfying
 
 
 
@@ -399,57 +399,57 @@ uniformly continuous by construction, and thus for any X?8 > 0 there exists a Δ
 
 
 
-A common constraint that all trajectories must observe is the maximum speed of their vehicles, ‖ ¤pdi (C38 )‖ ≤ Emax8
+A common cons rain ha all rajec ories mus observe is he maximum speed of heir vehicles, ‖ ¤pdi (C38 )‖ ≤ Emax8
 
 
 
 for all 8 ∈ I, and all C38 ∈ [C8=88 , C4=38
-]. This can serve as an easy, although generally conservative, bound for X?8,
+]. This can serve as an easy, al hough generally conserva ive, bound for X?8,
 
 
 
-since X?8 ≤ Emax8 ΔC8 . For the purposes of this paper, assume also that the UAS are equipped with two algorithms that
+since X?8 ≤ Emax8 ΔC8 . For he purposes of his paper, assume also ha he UAS are equipped wi h wo algori hms ha 
 
 
 
-work in unison to execute the mission in a coordinated fashion. The first is a path-following algorithm responsible
+work in unison o execu e he mission in a coordina ed fashion. The firs is a pa h-following algori hm responsible
 
 
 
-for making the UAS converge to and stay on their paths. The second is a time-critical coordination algorithm tasked
+for making he UAS converge o and s ay on heir pa hs. The second is a ime-cri ical coordina ion algori hm asked
 
 
 
-with synchronizing the UAS locations along their paths to avoid collisions, and maintain a specific formation if the
+wi h synchronizing he UAS loca ions along heir pa hs o avoid collisions, and main ain a specific forma ion if he
 
 
 
-mission requires, even in the presence of external disturbances like a wind gust. The following subsection addresses
+mission requires, even in he presence of ex ernal dis urbances like a wind gus . The following subsec ion addresses
 
 
 
-the properties of the path-following algorithms considered here.
+ he proper ies of he pa h-following algori hms considered here.
 
 
 
-A. Path-following Algorithm
+A. Pa h-following Algori hm
 
 
 
-The path-following algorithm ensures that the 8th UAS tracks its virtual target with a known precision. The virtual
+The pa h-following algori hm ensures ha he 8 h UAS racks i s vir ual arge wi h a known precision. The vir ual
 
 
 
-target is a point pTi
-(C) ∈ R3 that slides along the trajectory as the mission evolves. If all virtual targets were perfectly
+ arge is a poin pTi
+(C) ∈ R3 ha slides along he rajec ory as he mission evolves. If all vir ual arge s were perfec ly
 
 
 
-synchronized, and all vehicles tracked their targets precisely, then a set of temporally deconflicted trajectories would
+synchronized, and all vehicles racked heir arge s precisely, hen a se of emporally deconflic ed rajec ories would
 
 
 
-guarantee that no collisions occur with the following safety distance:
+guaran ee ha no collisions occur wi h he following safe y dis ance:
 
 
 
@@ -457,15 +457,15 @@ guarantee that no collisions occur with the following safety distance:
 
 
 
-where A8 and A 9 are the radii of the bounding spheres for the frames of the 8th and 9th UAS. However, in practice the
+where A8 and A 9 are he radii of he bounding spheres for he frames of he 8 h and 9 h UAS. However, in prac ice he
 
 
 
-virtual targets are not perfectly synchronized, and path-following algorithms cannot track a virtual target precisely. To
+vir ual arge s are no perfec ly synchronized, and pa h-following algori hms canno rack a vir ual arge precisely. To
 
 
 
-capture the latter, define the target-tracking error for the 8th UAS as
+cap ure he la er, define he arge - racking error for he 8 h UAS as
 
 
 
@@ -479,19 +479,19 @@ eTi
 
 
 where pi (C) ∈ R
-3 is the actual location of the 8th UAS. The following assumption defines the transient and steady-state
+3 is he ac ual loca ion of he 8 h UAS. The following assump ion defines he ransien and s eady-s a e
 
 
 
-performance of the path-following algorithm.
+performance of he pa h-following algori hm.
 
 
 
-Assumption 2 (Path Following Performance) The evolution of the path-following error for the 8th UAS can be
+Assump ion 2 (Pa h Following Performance) The evolu ion of he pa h-following error for he 8 h UAS can be
 
 
 
-characterized by the upper bound
+charac erized by he upper bound
 
 
 
@@ -504,44 +504,44 @@ characterized by the upper bound
 
 
 
-where :8 > 0 is a known constant, eT0i
-is the initial path-following error, _8 > 0 is a guaranteed rate of convergence,
+where :8 > 0 is a known cons an , eT0i
+is he ini ial pa h-following error, _8 > 0 is a guaran eed ra e of convergence,
 
 
 
-and 4̄8 is an upper bound for the steady-state error.
+and 4̄8 is an upper bound for he s eady-s a e error.
 
 
 
-The geometric interpretation of Assumption 2 can be visualized in Figure 2. Equation (2) defines a ball with center
+The geome ric in erpre a ion of Assump ion 2 can be visualized in Figure 2. Equa ion (2) defines a ball wi h cen er
 
 
 
-at the virtual target and a radius that decreases monotonically over time. This serves as a bounding region for the center
+a he vir ual arge and a radius ha decreases mono onically over ime. This serves as a bounding region for he cen er
 
 
 
-of mass of each agent. As the virtual target moves, this ball defines a shrinking tube, as illustrated in Figure 2. The
+of mass of each agen . As he vir ual arge moves, his ball defines a shrinking ube, as illus ra ed in Figure 2. The
 
 
 
-following section tackles the characteristics of the time-critical coordination algorithms considered in this paper, and
+following sec ion ackles he charac eris ics of he ime-cri ical coordina ion algori hms considered in his paper, and
 
 
 
-the interaction with the path-following control laws.
+ he in erac ion wi h he pa h-following con rol laws.
 
 
 
-B. Time-Critical Coordination Algorithm
+B. Time-Cri ical Coordina ion Algori hm
 
 
 
-The time-critical coordination algorithm controls the movement of the virtual target in real time. The position of
+The ime-cri ical coordina ion algori hm con rols he movemen of he vir ual arge in real ime. The posi ion of
 
 
 
-the virtual target
+ he vir ual arge 
 
 
 
@@ -550,7 +550,7 @@ pTi
 
 
 
-is given by a virtual time b8 (C) ∈ R, whose evolution is governed by two terms
+is given by a vir ual ime b8 (C) ∈ R, whose evolu ion is governed by wo erms
 
 
 
@@ -559,44 +559,44 @@ is given by a virtual time b8 (C) ∈ R, whose evolution is governed by two term
 
 
 
-The first term D2 (C) is the coordination feedback. It attempts to synchronize the virtual targets to ensure safe separation
+The firs erm D2 (C) is he coordina ion feedback. I a emp s o synchronize he vir ual arge s o ensure safe separa ion
 
 
 
-among the UAS. Its goal is to enforce temporal deconfliction in real time, as disturbances and delays affect the group.
+among he UAS. I s goal is o enforce emporal deconflic ion in real ime, as dis urbances and delays affec he group.
 
 
 
-The second term DT8
-(C) is the target-tracking feedback. It is responsible for slowing or expediting the progress of the
+The second erm DT8
+(C) is he arge - racking feedback. I is responsible for slowing or expedi ing he progress of he
 
 
 
-virtual target along its trajectory if the actual vehicle is behind or ahead of its target. This establishes a negotiation
+vir ual arge along i s rajec ory if he ac ual vehicle is behind or ahead of i s arge . This es ablishes a nego ia ion
 
 
 
-process between the agent and its virtual target that prevents the UAS from “cutting corners”, thus avoiding potential
+process be ween he agen and i s vir ual arge ha preven s he UAS from “cu ing corners”, hus avoiding po en ial
 
 
 
-collisions with nearby obstacles, particularly in cluttered environments. Further details about these feedback terms are
+collisions wi h nearby obs acles, par icularly in clu ered environmen s. Fur her de ails abou hese feedback erms are
 
 
 
-beyond the scope of this paper, and are available in [2]. If the virtual targets of every pair of UAS in the fleet were
+beyond he scope of his paper, and are available in [2]. If he vir ual arge s of every pair of UAS in he flee were
 
 
 
-perfectly coordinated, that is b8 (C) ≡ b 9 (C) with 8, 9 ∈ I and 8 ≠ 9 , then the analysis would be much simpler. However,
+perfec ly coordina ed, ha is b8 (C) ≡ b 9 (C) wi h 8, 9 ∈ I and 8 ≠ 9 , hen he analysis would be much simpler. However,
 
 
 
-the UAS can deviate from their planned schedule, and in practice they often do. The following assumption captures
+ he UAS can devia e from heir planned schedule, and in prac ice hey of en do. The following assump ion cap ures
 
 
 
-the performance of the time-critical coordination algorithm.
+ he performance of he ime-cri ical coordina ion algori hm.
 
 
 
@@ -612,15 +612,15 @@ the performance of the time-critical coordination algorithm.
 
 
 
-Fig. 2 Bounding tubes.
+Fig. 2 Bounding ubes.
 
 
 
-Assumption 3 (Time-Critical Coordination Performance) The time-critical coordination algorithm can only main-
+Assump ion 3 (Time-Cri ical Coordina ion Performance) The ime-cri ical coordina ion algori hm can only main-
 
 
 
-tain the coordination error between the 8th and 9th cooperating UAS within a neighborhood of the origin
+ ain he coordina ion error be ween he 8 h and 9 h coopera ing UAS wi hin a neighborhood of he origin
 
 
 
@@ -628,31 +628,31 @@ tain the coordination error between the 8th and 9th cooperating UAS within a nei
 
 
 
-The next section combines the path-followingand time-critical coordination assumptions to formally define the problem
+The nex sec ion combines he pa h-followingand ime-cri ical coordina ion assump ions o formally define he problem
 
 
 
-addressed in this paper.
+addressed in his paper.
 
 
 
-C. Problem Definition
+C. Problem Defini ion
 
 
 
-The objective of this paper is to design 3B8, 9 such that the spheres that bound the frames of the 8th and 9th UAS
+The objec ive of his paper is o design 3B8, 9 such ha he spheres ha bound he frames of he 8 h and 9 h UAS
 
 
 
-do not intersect throughout the mission, even if the vehicles do not accurately follow the planned trajectories, both
+do no in ersec hroughou he mission, even if he vehicles do no accura ely follow he planned rajec ories, bo h
 
 
 
-temporally and spatially. This goal is summarized in the following problem definition.
+ emporally and spa ially. This goal is summarized in he following problem defini ion.
 
 
 
-Definition 1 (Safety Bound Design Problem) Given Assumptions 1, 2, and 3, find a safety distance 3B8, 9 such that
+Defini ion 1 (Safe y Bound Design Problem) Given Assump ions 1, 2, and 3, find a safe y dis ance 3B8, 9 such ha 
 
 
 
@@ -660,7 +660,7 @@ Definition 1 (Safety Bound Design Problem) Given Assumptions 1, 2, and 3, find a
 
 
 
-and for the time that the missions overlap, that is all C ∈ R such that b8 (C), b 9 (C) ∈
+and for he ime ha he missions overlap, ha is all C ∈ R such ha b8 (C), b 9 (C) ∈
 [
 
 
@@ -687,20 +687,20 @@ C8=8 9 , C4=3 9
 
 
 
-The following section provides a solution to the problem defined above.
+The following sec ion provides a solu ion o he problem defined above.
 
 
 
-IV. Derivation of Safety Bounds
-Consider a pair of UAS with identification numbers 8 and 9 , equipped with the path-following and time critical
+IV. Deriva ion of Safe y Bounds
+Consider a pair of UAS wi h iden ifica ion numbers 8 and 9 , equipped wi h he pa h-following and ime cri ical
 
 
 
-coordination algorithms described in Sections III.A and III.B. These vehicles are assigned temporally deconflicted
+coordina ion algori hms described in Sec ions III.A and III.B. These vehicles are assigned emporally deconflic ed
 
 
 
-trajectories, as illustrated in Figure 1, that is
+ rajec ories, as illus ra ed in Figure 1, ha is
 
 
 
@@ -713,15 +713,15 @@ trajectories, as illustrated in Figure 1, that is
 
 
 
-Generally, the initial and final times of a pair of trajectories being compared may not coincide. As a result, trajectories
+Generally, he ini ial and final imes of a pair of rajec ories being compared may no coincide. As a resul , rajec ories
 
 
 
-can be clipped accordingly so that the initial and final times of the trajectory segments being compared coincide when
+can be clipped accordingly so ha he ini ial and final imes of he rajec ory segmen s being compared coincide when
 
 
 
-performing tolerance verification queries [4]. Then, choose the safety distance
+performing olerance verifica ion queries [4]. Then, choose he safe y dis ance
 
 
 
@@ -754,19 +754,19 @@ A8 + 4̄8 + A 9 + 4̄ 9
 
 
 
-which accounts for the dimensions of the vehicle frames A8 and A 9 , and the upper bounds for the steady-state target-
+which accoun s for he dimensions of he vehicle frames A8 and A 9 , and he upper bounds for he s eady-s a e arge -
 
 
 
-tracking errors 4̄8 and 4̄ 9 . The safety factor 2B8, 9 > 1 provides an additional safety buffer for unmodeled errors and
+ racking errors 4̄8 and 4̄ 9 . The safe y fac or 2B8, 9 > 1 provides an addi ional safe y buffer for unmodeled errors and
 
 
 
-unexpected events. The desired trajectories and the virtual times of each UAS at time C determine the position of the
+unexpec ed even s. The desired rajec ories and he vir ual imes of each UAS a ime C de ermine he posi ion of he
 
 
 
-virtual targets
+vir ual arge s
 
 
 
@@ -780,7 +780,7 @@ pTi
 
 
 
-Consequently, the distance between the centers of mass of vehicles 8 and 9 at time C can be bounded using Equation (1)
+Consequen ly, he dis ance be ween he cen ers of mass of vehicles 8 and 9 a ime C can be bounded using Equa ion (1)
 
 
 
@@ -812,12 +812,12 @@ as follows:
 
 
 
-Next, rewrite and bound the term ‖ pdi (b8 (C)) − pd j
-(b 9 (C))‖ in Equation (6) using Equation (4), and Assumptions 1
+Nex , rewri e and bound he erm ‖ pdi (b8 (C)) − pd j
+(b 9 (C))‖ in Equa ion (6) using Equa ion (4), and Assump ions 1
 
 
 
-and 3 with ΔC8 = Xb8, 9
+and 3 wi h ΔC8 = Xb8, 9
 
 
 
@@ -839,12 +839,12 @@ and 3 with ΔC8 = Xb8, 9
 
 
 
-Note that a similar bound can be derived by adding and subtracting pd j
-(b8 (C)) instead. Then, choose the least
+No e ha a similar bound can be derived by adding and sub rac ing pd j
+(b8 (C)) ins ead. Then, choose he leas 
 
 
 
-conservative option
+conserva ive op ion
 
 
 
@@ -869,7 +869,7 @@ X?8, X? 9
 
 
 
-and use it in Equation (6) to arrive at the following expression:
+and use i in Equa ion (6) o arrive a he following expression:
 
 
 
@@ -895,7 +895,7 @@ X?8, X? 9
 
 
 
-Then, using Equations (3) and (5) yields
+Then, using Equa ions (3) and (5) yields
 
 
 
@@ -934,11 +934,11 @@ X?8, X? 9
 
 
 
-Last, using Assumption 2 and solving for the safety coefficient yields a lower bound that ensures the pair of UAS
+Las , using Assump ion 2 and solving for he safe y coefficien yields a lower bound ha ensures he pair of UAS
 
 
 
-maintain safe separation throughout the mission, even when they deviate from the planned schedules or assigned paths
+main ain safe separa ion hroughou he mission, even when hey devia e from he planned schedules or assigned pa hs
 
 
 
@@ -976,23 +976,23 @@ A8 + 4̄8 + A 9 + 4̄ 9
 
 
 
-This completes the proof of the following theorem, which summarizes this result for the entire fleet of UAS.
+This comple es he proof of he following heorem, which summarizes his resul for he en ire flee of UAS.
 
 
 
-Theorem 1 Given a heterogeneous fleet of = UAS, equipped with a trajectory generation algorithm that produces
+Theorem 1 Given a he erogeneous flee of = UAS, equipped wi h a rajec ory genera ion algori hm ha produces
 
 
 
-temporally deconflicted trajectories that adhere to Assumption 1, with a safety distance given by Equation (5); a path-
+ emporally deconflic ed rajec ories ha adhere o Assump ion 1, wi h a safe y dis ance given by Equa ion (5); a pa h-
 
 
 
-following algorithm that satisfies Assumption 2; and a time-critical coordination algorithm that satisfies Assumption 3;
+following algori hm ha sa isfies Assump ion 2; and a ime-cri ical coordina ion algori hm ha sa isfies Assump ion 3;
 
 
 
-then
+ hen
 
 
 
@@ -1030,7 +1030,7 @@ A8 + 4̄8 + A 9 + 4̄ 9
 
 
 
-and all C ∈ R such that b8 (C), b 9 (C) ∈
+and all C ∈ R such ha b8 (C), b 9 (C) ∈
 [
 
 
@@ -1057,19 +1057,19 @@ C8=8 9 , C4=3 9
 
 
 
-The geometric interpretation of this theorem is depicted in Figure 3. Note that Figure 3a shows a snapshot of the
+The geome ric in erpre a ion of his heorem is depic ed in Figure 3. No e ha Figure 3a shows a snapsho of he
 
 
 
-bounding tubes for the UAS at time C1, whereas Figure 3b shows a snapshot of the bounding tubes at a later time C2. In
+bounding ubes for he UAS a ime C1, whereas Figure 3b shows a snapsho of he bounding ubes a a la er ime C2. In
 
 
 
-both scenarios, the bounding tubes for the 8th and 9th UAS do not intersect. As a result, the cooperating UAS avoid
+bo h scenarios, he bounding ubes for he 8 h and 9 h UAS do no in ersec . As a resul , he coopera ing UAS avoid
 
 
 
-collisions among each other, even when the vehicles do not accurately track their time-parameterized trajectories.
+collisions among each o her, even when he vehicles do no accura ely rack heir ime-parame erized rajec ories.
 
 
 
@@ -1085,73 +1085,73 @@ collisions among each other, even when the vehicles do not accurately track thei
 
 
 
-(a) Snapshot at time C1 (b) Snapshot at time C2 > C1
+(a) Snapsho a ime C1 (b) Snapsho a ime C2 > C1
 
 
 
-Fig. 3 Temporal deconfliction of the bounding tubes.
+Fig. 3 Temporal deconflic ion of he bounding ubes.
 
 
 
 V. Conclusion
-This paper defines and solves a safe separation problem for a fleet of = heterogeneous UAS that are assigned
+This paper defines and solves a safe separa ion problem for a flee of = he erogeneous UAS ha are assigned
 
 
 
-temporally deconflicted trajectories. This work assumes that the vehicles are equipped with a path-following algorithm
+ emporally deconflic ed rajec ories. This work assumes ha he vehicles are equipped wi h a pa h-following algori hm
 
 
 
-that can track a virtual target that slides along their trajectories within some bounded spatial error. To coordinate the
+ ha can rack a vir ual arge ha slides along heir rajec ories wi hin some bounded spa ial error. To coordina e he
 
 
 
-UAS as the mission evolves, even in the presence of external disturbances, the fleet is also equipped with a distributed
+UAS as he mission evolves, even in he presence of ex ernal dis urbances, he flee is also equipped wi h a dis ribu ed
 
 
 
-time-critical coordination algorithm. This protocol attempts to synchronize the vehicle schedules within a bounded
+ ime-cri ical coordina ion algori hm. This pro ocol a emp s o synchronize he vehicle schedules wi hin a bounded
 
 
 
-temporal error. The paper leverages these bounded spatial and temporal errors to propose a lower bound for the safety
+ emporal error. The paper leverages hese bounded spa ial and emporal errors o propose a lower bound for he safe y
 
 
 
-distance between the vehicle trajectories. Embedded in the computation of the safe separation distance is a safety
+dis ance be ween he vehicle rajec ories. Embedded in he compu a ion of he safe separa ion dis ance is a safe y
 
 
 
-coefficient that provides a normalized notion of the safety margins built into the trajectory generation problem. If
+coefficien ha provides a normalized no ion of he safe y margins buil in o he rajec ory genera ion problem. If
 
 
 
-chosen within the bounds provided in this paper, the safety coefficients guarantee safe separation among all cooperating
+chosen wi hin he bounds provided in his paper, he safe y coefficien s guaran ee safe separa ion among all coopera ing
 
 
 
-UAS. Future work could leverage the proposed bound to identify areas of improvement in path-following, time-critical
+UAS. Fu ure work could leverage he proposed bound o iden ify areas of improvemen in pa h-following, ime-cri ical
 
 
 
-coordination, and trajectory generation to safely improve the traffic capacity of the airspace. A clear extension of this
+coordina ion, and rajec ory genera ion o safely improve he raffic capaci y of he airspace. A clear ex ension of his
 
 
 
-work could involve the design of well-clear geometries that resemble current standards as in detailed in [5, 6], instead
+work could involve he design of well-clear geome ries ha resemble curren s andards as in de ailed in [5, 6], ins ead
 
 
 
-of the bounding sphere used here.
+of he bounding sphere used here.
 
 
 
 References
-[1] Smith, J. C., Viken, J. K., Kwa, T.-S., and Moore, M. D., “Projected Demand and Potential Impacts to the National Airspace
+[1] Smi h, J. C., Viken, J. K., Kwa, T.-S., and Moore, M. D., “Projec ed Demand and Po en ial Impac s o he Na ional Airspace
 
 
 
-System of Autonomous, Electric, On-Demand Small Aircraft,” AIAA Aviation Technology, Integration, and Operations, Indi-
+Sys em of Au onomous, Elec ric, On-Demand Small Aircraf ,” AIAA Avia ion Technology, In egra ion, and Opera ions, Indi-
 
 
 
@@ -1159,19 +1159,19 @@ anapolis, IN, USA, 2012.
 
 
 
-[2] Puig-Navarro, J., “Distributed Time-Critical Coordination Strategies for Unmanned Aerial Systems in Cluttered Environments,”
+[2] Puig-Navarro, J., “Dis ribu ed Time-Cri ical Coordina ion S ra egies for Unmanned Aerial Sys ems in Clu ered Environmen s,”
 
 
 
-Ph.D. thesis, University of Illinois Urbana-Champaign, Urbana, IL, USA, 2021.
+Ph.D. hesis, Universi y of Illinois Urbana-Champaign, Urbana, IL, USA, 2021.
 
 
 
-[3] Zhao, P., Lakshmanan, A., Ackerman, K., Gahlawat, A., Pavone, M., and Hovakimyan, N., “Tube-Certified Trajectory Tracking
+[3] Zhao, P., Lakshmanan, A., Ackerman, K., Gahlawa , A., Pavone, M., and Hovakimyan, N., “Tube-Cer ified Trajec ory Tracking
 
 
 
-for Nonlinear Systems With Robust Control Contraction Metrics,” IEEE Robotics and Automation Letters, Vol. 7, No. 2, 2022,
+for Nonlinear Sys ems Wi h Robus Con rol Con rac ion Me rics,” IEEE Robo ics and Au oma ion Le ers, Vol. 7, No. 2, 2022,
 
 
 
@@ -1179,11 +1179,11 @@ pp. 5528–5535.
 
 
 
-[4] Lakshmanan, A., Patterson, A., Cichella, V., and Hovakimyan, N., “Proximity Queries for Absolutely Continuous Parametric
+[4] Lakshmanan, A., Pa erson, A., Cichella, V., and Hovakimyan, N., “Proximi y Queries for Absolu ely Con inuous Parame ric
 
 
 
-Curves,” Proceedings of Robotics: Science and Systems, Freiburg im Breisgau, Germany, 2019. https://doi.org/10.15607/RSS.
+Curves,” Proceedings of Robo ics: Science and Sys ems, Freiburg im Breisgau, Germany, 2019. h ps://doi.org/10.15607/RSS.
 
 
 
@@ -1191,7 +1191,7 @@ Curves,” Proceedings of Robotics: Science and Systems, Freiburg im Breisgau, G
 
 
 
-[5] Cook, S. P., Brooks, D., Cole, R., Hackenberg, D., and Raska, V., “Defining Well Clear for Unmanned Aircraft Systems,” AIAA
+[5] Cook, S. P., Brooks, D., Cole, R., Hackenberg, D., and Raska, V., “Defining Well Clear for Unmanned Aircraf Sys ems,” AIAA
 
 
 
@@ -1205,23 +1205,23 @@ SciTech Forum, Kissimmee, FL, USA, 2015.
 
 
 
-https://doi.org/10.15607/RSS.2019.XV.042
+h ps://doi.org/10.15607/RSS.2019.XV.042
 
 
-https://doi.org/10.15607/RSS.2019.XV.042
-
-
-
+h ps://doi.org/10.15607/RSS.2019.XV.042
 
 
 
 
 
-[6] Weinert, A., Campbell, S., Vela, A., Schuldt, D., and Kurucar, J., “Well-Clear Recommendation for Small Unmanned Aircraft
 
 
 
-Systems Based on Unmitigated Collision Risk,” Journal of Air Transportation, Vol. 26, No. 3, 2018, pp. 113–122.
+[6] Weiner , A., Campbell, S., Vela, A., Schuld , D., and Kurucar, J., “Well-Clear Recommenda ion for Small Unmanned Aircraf 
+
+
+
+Sys ems Based on Unmi iga ed Collision Risk,” Journal of Air Transpor a ion, Vol. 26, No. 3, 2018, pp. 113–122.
 
 
 
@@ -1232,27 +1232,27 @@ Systems Based on Unmitigated Collision Risk,” Journal of Air Transportation, V
 
 
 
- 
-Nomenclature
+	
+Nomencla ure
 
- 
-Introduction
+	
+In roduc ion
 
- 
-Problem Formulation
+	
+Problem Formula ion
 
- 
-Path-following Algorithm
+	
+Pa h-following Algori hm
 
- 
-Time-Critical Coordination Algorithm
+	
+Time-Cri ical Coordina ion Algori hm
 
- 
-Problem Definition
+	
+Problem Defini ion
 
 
- 
-Derivation of Safety Bounds
+	
+Deriva ion of Safe y Bounds
 
- 
+	
 Conclusion

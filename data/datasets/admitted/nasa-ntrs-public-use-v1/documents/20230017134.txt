@@ -1,85 +1,85 @@
-Ground-Based Vision Tracker for Advanced Air Mobility and
-Urban Air Mobility
+Ground-Based Vision Tracker for Advanced Air Mobili y and
+Urban Air Mobili y
 
 
 
-Evan Kawamura ∗1, Keerthana Kannan †1, Thomas Lombaerts ‡1, Vahram Stepanyan§1, Chester Dolph ¶2, and Corey
-Ippolito �1
+Evan Kawamura ∗1, Keer hana Kannan †1, Thomas Lombaer s ‡1, Vahram S epanyan§1, Ches er Dolph ¶2, and Corey
+Ippoli o �1
 
 
 
-1NASA Ames Research Center, Moffett Field, Mountain View, CA 94035
-2NASA Langley Research Center, 1 Nasa Dr, Hampton, VA 23666
+1NASA Ames Research Cen er, Moffe Field, Moun ain View, CA 94035
+2NASA Langley Research Cen er, 1 Nasa Dr, Hamp on, VA 23666
 
 
 
-Advanced Air Mobility (AAM) and Urban Air Mobility (UAM) require aircraft surveillance
-and monitoring for safety and security. Persistent tracking of flying objects provides Air
-Traffic Control (ATC) and Air Traffic Management (ATM) continuous coverage and knowledge
-of the National Airspace System (NAS). Future AAM and UAM operations will have more
-aircraft than commercial aircraft in the NAS, coupled with the dense AAM/UAM operations
-in urban environments, so employing the existing ATC/ATM architectures poses considerable
-challenges. A first step in creating a similar ATC/ATM architecture for AAM/UAM will require
-ground-based and airborne sensors to provide monitoring. This paper proposes a vision-based
-tracking method with static cameras by utilizing image subtraction and blob detection, which
-avoids adding additional electromagnetic interferences in the environment with sensors such as
-radar. The Ground-Based Vision Tracker (GBVT) outputs the detected objects’ azimuth and
-elevation angles from Unmanned Aerial System (UAS) flight tests. Future and ongoing work
-includes sending the detected objects’ azimuth and elevation angles as inputs for an extended
-Kalman filter (EKF) to estimate the position and velocity of the detected object.
+Advanced Air Mobili y (AAM) and Urban Air Mobili y (UAM) require aircraf surveillance
+and moni oring for safe y and securi y. Persis en racking of flying objec s provides Air
+Traffic Con rol (ATC) and Air Traffic Managemen (ATM) con inuous coverage and knowledge
+of he Na ional Airspace Sys em (NAS). Fu ure AAM and UAM opera ions will have more
+aircraf han commercial aircraf in he NAS, coupled wi h he dense AAM/UAM opera ions
+in urban environmen s, so employing he exis ing ATC/ATM archi ec ures poses considerable
+challenges. A firs s ep in crea ing a similar ATC/ATM archi ec ure for AAM/UAM will require
+ground-based and airborne sensors o provide moni oring. This paper proposes a vision-based
+ racking me hod wi h s a ic cameras by u ilizing image sub rac ion and blob de ec ion, which
+avoids adding addi ional elec romagne ic in erferences in he environmen wi h sensors such as
+radar. The Ground-Based Vision Tracker (GBVT) ou pu s he de ec ed objec s’ azimu h and
+eleva ion angles from Unmanned Aerial Sys em (UAS) fligh es s. Fu ure and ongoing work
+includes sending he de ec ed objec s’ azimu h and eleva ion angles as inpu s for an ex ended
+Kalman fil er (EKF) o es ima e he posi ion and veloci y of he de ec ed objec .
 
 
 
-I. Introduction
+I. In roduc ion
 
 
 
-Advanced Air Mobility (AAM) and Urban Air Mobility (UAM) require aircraft surveillance and monitoring for
-safety and security purposes. Since there will be numerous more AAM/UAM aircraft than commercial airplanes
+Advanced Air Mobili y (AAM) and Urban Air Mobili y (UAM) require aircraf surveillance and moni oring for
+safe y and securi y purposes. Since here will be numerous more AAM/UAM aircraf han commercial airplanes
 
 
 
-flying in the airspace, it will be challenging to scale conventional Air Traffic Control (ATC) and Air Traffic Management
-(ATM) procedures and protocol for AAM/UAM concepts of operation. One way to reduce scaling complexities and
-increase efficiency is to implement distributed sensors in the environment for monitoring the airspace. Then, the
-distributed sensors can provide aircraft tracking information to the modified ATC/ATM architectures by leveraging
-automatic and passive tracking capabilities. Therefore, these modified ATC/ATM architectures will have an efficient and
-scalable solution for monitoring the airspace with increased awareness, path planning, and contingency management.
-The distributed sensing project uses radar and cameras in urban environments for several applications such as monitoring,
-surveillance, tracking, and estimation [1].
+flying in he airspace, i will be challenging o scale conven ional Air Traffic Con rol (ATC) and Air Traffic Managemen 
+(ATM) procedures and pro ocol for AAM/UAM concep s of opera ion. One way o reduce scaling complexi ies and
+increase efficiency is o implemen dis ribu ed sensors in he environmen for moni oring he airspace. Then, he
+dis ribu ed sensors can provide aircraf racking informa ion o he modified ATC/ATM archi ec ures by leveraging
+au oma ic and passive racking capabili ies. Therefore, hese modified ATC/ATM archi ec ures will have an efficien and
+scalable solu ion for moni oring he airspace wi h increased awareness, pa h planning, and con ingency managemen .
+The dis ribu ed sensing projec uses radar and cameras in urban environmen s for several applica ions such as moni oring,
+surveillance, racking, and es ima ion [1].
 
 
 
-There are radar-based tracking methods for UAS, which could extend to AAM tracking. Poitevin et al. describe
-several challenges for detecting UAS by radar due to their speed and size. Consequently, radar-based detection methods
-need to quickly scan large volumes and eliminate non-UAS targets (false alarms) [2]. One study shows radar-based
-techniques for detecting UAS: millimeter wave (mmWave), ultra-wideband, 2.4 GHz, MIMO, and non-line-of-sight
-(“seeing around or beyond the corner”) [3]. Accardo et al. conducted UAS flight tests with radar for obstacle detection
-and tracking for noncooperative UAS collision avoidance [4]. Another study shows how a radar tracking system in urban
-environments finds multiple non-UAS targets such as birds, people, and cars with filtered micro-Doppler signatures to
-distinguish UAS targets from non-UAS targets [5]. Samaras et al. utilize a deep neural network to distinguish UAS
-targets from non-UAS targets after obtaining radar measurements of various targets [6]. Mohajerin et al. demonstrate
+There are radar-based racking me hods for UAS, which could ex end o AAM racking. Poi evin e al. describe
+several challenges for de ec ing UAS by radar due o heir speed and size. Consequen ly, radar-based de ec ion me hods
+need o quickly scan large volumes and elimina e non-UAS arge s (false alarms) [2]. One s udy shows radar-based
+ echniques for de ec ing UAS: millime er wave (mmWave), ul ra-wideband, 2.4 GHz, MIMO, and non-line-of-sigh 
+(“seeing around or beyond he corner”) [3]. Accardo e al. conduc ed UAS fligh es s wi h radar for obs acle de ec ion
+and racking for noncoopera ive UAS collision avoidance [4]. Ano her s udy shows how a radar racking sys em in urban
+environmen s finds mul iple non-UAS arge s such as birds, people, and cars wi h fil ered micro-Doppler signa ures o
+dis inguish UAS arge s from non-UAS arge s [5]. Samaras e al. u ilize a deep neural ne work o dis inguish UAS
+ arge s from non-UAS arge s af er ob aining radar measuremen s of various arge s [6]. Mohajerin e al. demons ra e
 
 
 
-∗Computer/GNC Engineer, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View, CA 94035, USA.
-†Software Engineer, KBR Wyle Services, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View, CA 94035,
+∗Compu er/GNC Engineer, In elligen Sys ems Division, NASA Ames Research Cen er, Moffe Field, Moun ain View, CA 94035, USA.
+†Sof ware Engineer, KBR Wyle Services, In elligen Sys ems Division, NASA Ames Research Cen er, Moffe Field, Moun ain View, CA 94035,
 
 
 
 USA.
-‡Aerospace Research Engineer, KBR Wyle Services, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View,
+‡Aerospace Research Engineer, KBR Wyle Services, In elligen Sys ems Division, NASA Ames Research Cen er, Moffe Field, Moun ain View,
 
 
 
 CA 94035, USA.
-§Aerospace Research Engineer, KBR Wyle Services, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View,
+§Aerospace Research Engineer, KBR Wyle Services, In elligen Sys ems Division, NASA Ames Research Cen er, Moffe Field, Moun ain View,
 
 
 
 CA 94035, USA.
-¶Aerospace Engineer, Aeronautics Systems Engineering Branch, NASA Langley Research Center, 1 Nasa Dr, Hampton, VA 23666.
-�Aerospace Scientist, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View, CA 94035, USA
+¶Aerospace Engineer, Aeronau ics Sys ems Engineering Branch, NASA Langley Research Cen er, 1 Nasa Dr, Hamp on, VA 23666.
+�Aerospace Scien is , In elligen Sys ems Division, NASA Ames Research Cen er, Moffe Field, Moun ain View, CA 94035, USA
 
 
 
@@ -95,43 +95,43 @@ CA 94035, USA.
 
 
 
-how associating different radar tracks of objects is crucial in crowded airspace, especially identifying UAS tracks from
-other types of tracks such as airplanes and birds, and simulation results demonstrate 99% accuracy for correctly labeling
-the Unmanned Aerial Vehicle (UAV) tracks [7].
+how associa ing differen radar racks of objec s is crucial in crowded airspace, especially iden ifying UAS racks from
+o her ypes of racks such as airplanes and birds, and simula ion resul s demons ra e 99% accuracy for correc ly labeling
+ he Unmanned Aerial Vehicle (UAV) racks [7].
 
 
 
-There are several studies and projects about vision-based tracking. Fu et al. show how a real-time, adaptive
-visual algorithm with a Multiple-Instance (MI) learning approach, Multiple-Classifier (MC) voting mechanism, and
-Multiple-Resolution (MR) representation strategy solves online learning and tracking arbitrary aircraft and intruders
-in the air with experimental results [8]. Sattigeri et al. combined a vision-based target tracker with a neural network
-and a Kalman filter to create an adaptive target state estimator [9]. Sivaraman and Trivedi conducted a survey of
-on-road vision-based vehicle detectors to show various monocular and stereo vision-based trackers [10]. Toyama and
-Hager utilize an Incremental Focus of Attention (IFA) hierarchical architecture, which yields robust, adaptive, and
-real-time vision-based tracking [11]. Joo et al. combined onboard inertial navigation system (INS) telemetry data and a
-ground-based monocular camera running optical flow into an Extended Kalman Filter (EKF) to generate robust and
-accurate state estimation of the tracked UAV [12]. Bharati et al. utilize an adaptive object detection method, which
-yields fast and robust object tracking for airplanes [13]. Ganti and Kim created a tracking system to identify and detect
-UAS with image processing and mechanical tracking, which feeds into countermeasures such as keeping malicious or
-harmful UAS away from restricted and residential areas [14]. Iswanto and Li designed a visual tracking algorithm that
-combines mean-shift and a particle-Kalman filter such that the particle filter executes only when occlusions occur or the
-mean-shift tracking result is not accurate [15]. The Edge Company has a system for detecting birds and drones with
-optical artificial intelligence to identify, track, count, and classify the birds and drones in real-time, which provides
-insight for monitoring the airspace around airports, vertiports, and spaceports [16].
+There are several s udies and projec s abou vision-based racking. Fu e al. show how a real- ime, adap ive
+visual algori hm wi h a Mul iple-Ins ance (MI) learning approach, Mul iple-Classifier (MC) vo ing mechanism, and
+Mul iple-Resolu ion (MR) represen a ion s ra egy solves online learning and racking arbi rary aircraf and in ruders
+in he air wi h experimen al resul s [8]. Sa igeri e al. combined a vision-based arge racker wi h a neural ne work
+and a Kalman fil er o crea e an adap ive arge s a e es ima or [9]. Sivaraman and Trivedi conduc ed a survey of
+on-road vision-based vehicle de ec ors o show various monocular and s ereo vision-based rackers [10]. Toyama and
+Hager u ilize an Incremen al Focus of A en ion (IFA) hierarchical archi ec ure, which yields robus , adap ive, and
+real- ime vision-based racking [11]. Joo e al. combined onboard iner ial naviga ion sys em (INS) eleme ry da a and a
+ground-based monocular camera running op ical flow in o an Ex ended Kalman Fil er (EKF) o genera e robus and
+accura e s a e es ima ion of he racked UAV [12]. Bhara i e al. u ilize an adap ive objec de ec ion me hod, which
+yields fas and robus objec racking for airplanes [13]. Gan i and Kim crea ed a racking sys em o iden ify and de ec 
+UAS wi h image processing and mechanical racking, which feeds in o coun ermeasures such as keeping malicious or
+harmful UAS away from res ric ed and residen ial areas [14]. Iswan o and Li designed a visual racking algori hm ha 
+combines mean-shif and a par icle-Kalman fil er such ha he par icle fil er execu es only when occlusions occur or he
+mean-shif racking resul is no accura e [15]. The Edge Company has a sys em for de ec ing birds and drones wi h
+op ical ar ificial in elligence o iden ify, rack, coun , and classify he birds and drones in real- ime, which provides
+insigh for moni oring he airspace around airpor s, ver ipor s, and spacepor s [16].
 
 
 
-This paper focuses on vision-based tracking with ground-based distributed sensors in the environment. The proposed
-research in this paper demonstrates a Ground-Based Vision Tracker (GBVT) for distributed and calibrated cameras
-in an urban environment to simulate future AAM/UAM operations for monitoring the airspace. Post-processing a
-ground-based camera’s video of a UAV flight includes image subtraction to capture a moving UAV across the camera’s
-field of view. The processed GBVT results feed into a Ground-Based Object Tracker (GBOT) EKF (see Ref. [17, 18] for
-more details) for estimating the tracked object’s position and velocity. Figure 1 shows the high-level block diagram of
-how the GBVT takes the distributed camera images and videos, processes them, outputs the tracked object information,
-and feeds the data into the GBOT EKF (blue box). The block titled, “Tracks of Objects,” has the pixel coordinates,
-azimuth/elevation angles, and object radius for each tracked object. The origin for the pixel coordinates for each tracked
-object is at the top left corner of the image, and section III shows the computations for converting the target’s pixel
-coordinates into the azimuth and elevation angles in the sensor’s frame.
+This paper focuses on vision-based racking wi h ground-based dis ribu ed sensors in he environmen . The proposed
+research in his paper demons ra es a Ground-Based Vision Tracker (GBVT) for dis ribu ed and calibra ed cameras
+in an urban environmen o simula e fu ure AAM/UAM opera ions for moni oring he airspace. Pos -processing a
+ground-based camera’s video of a UAV fligh includes image sub rac ion o cap ure a moving UAV across he camera’s
+field of view. The processed GBVT resul s feed in o a Ground-Based Objec Tracker (GBOT) EKF (see Ref. [17, 18] for
+more de ails) for es ima ing he racked objec ’s posi ion and veloci y. Figure 1 shows he high-level block diagram of
+how he GBVT akes he dis ribu ed camera images and videos, processes hem, ou pu s he racked objec informa ion,
+and feeds he da a in o he GBOT EKF (blue box). The block i led, “Tracks of Objec s,” has he pixel coordina es,
+azimu h/eleva ion angles, and objec radius for each racked objec . The origin for he pixel coordina es for each racked
+objec is a he op lef corner of he image, and sec ion III shows he compu a ions for conver ing he arge ’s pixel
+coordina es in o he azimu h and eleva ion angles in he sensor’s frame.
 
 
 
@@ -139,22 +139,22 @@ Fig. 1 High-Level Block Diagram: GBVT and GBOT EKF
 
 
 
-This paper’s organization is as follows. Section II discusses the proposed solution for the GBVT, and section III
-shows the computations and drawings for the sensor azimuth and elevation angles. Section IV provides the details about
-the UAS flight tests to test the GBVT, and section V describes the results for those tests. Finally, section VI ends with
-concluding remarks, future work, and key takeaways.
+This paper’s organiza ion is as follows. Sec ion II discusses he proposed solu ion for he GBVT, and sec ion III
+shows he compu a ions and drawings for he sensor azimu h and eleva ion angles. Sec ion IV provides he de ails abou 
+ he UAS fligh es s o es he GBVT, and sec ion V describes he resul s for hose es s. Finally, sec ion VI ends wi h
+concluding remarks, fu ure work, and key akeaways.
 
 
 
 II. Ground-Based Vision Tracker
-There are two different implementations for the GBVT: one uses the MATLAB Computer Vision Toolbox, while
+There are wo differen implemen a ions for he GBVT: one uses he MATLAB Compu er Vision Toolbox, while
 
 
 
-the other uses OpenCV in C++. However, both implementations utilize image subtraction and blob detection. There
-are similar steps in the procedure but with differences due to programming language and data storage. Overall, the
-MATLAB implementation of the GBVT served as a prototype for preliminary testing, and then re-implemented in C++
-using OpenCV with minor adjustments. Therefore, most of the details provided in this paper will focus on the OpenCV
+ he o her uses OpenCV in C++. However, bo h implemen a ions u ilize image sub rac ion and blob de ec ion. There
+are similar s eps in he procedure bu wi h differences due o programming language and da a s orage. Overall, he
+MATLAB implemen a ion of he GBVT served as a pro o ype for preliminary es ing, and hen re-implemen ed in C++
+using OpenCV wi h minor adjus men s. Therefore, mos of he de ails provided in his paper will focus on he OpenCV
 
 
 
@@ -170,39 +170,39 @@ using OpenCV with minor adjustments. Therefore, most of the details provided in 
 
 
 
-implementation.
+implemen a ion.
 
 
 
 A. MATLAB
-Figure 2 shows the MATLAB image subtraction flowchart. The GBVT in MATLAB uses image subtraction to find
+Figure 2 shows he MATLAB image sub rac ion flowchar . The GBVT in MATLAB uses image sub rac ion o find
 
 
 
-the objects that have moved since the last frame. The main steps are in Figure2 and also summarized here:
-1) Obtain two frames (consecutive or skip)
-2) Apply grayscale to both frames, i.e., convert RGB to grayscale
-3) Apply image subtraction between the two frames
-4) Increase the intensity (brightness) of the subtracted image to see the objects more easily
-5) Apply threshold for the subtracted frames to remove objects with lower intensity
-6) Convert the subtracted image to binary because blob detection needs binary images
-7) Apply blob detection on the binary image to find the largest blobs (in this particular case, look for the five largest)
-8) For each of the five detected blobs
+ he objec s ha have moved since he las frame. The main s eps are in Figure2 and also summarized here:
+1) Ob ain wo frames (consecu ive or skip)
+2) Apply grayscale o bo h frames, i.e., conver RGB o grayscale
+3) Apply image sub rac ion be ween he wo frames
+4) Increase he in ensi y (brigh ness) of he sub rac ed image o see he objec s more easily
+5) Apply hreshold for he sub rac ed frames o remove objec s wi h lower in ensi y
+6) Conver he sub rac ed image o binary because blob de ec ion needs binary images
+7) Apply blob de ec ion on he binary image o find he larges blobs (in his par icular case, look for he five larges )
+8) For each of he five de ec ed blobs
 
 
 
-1) Determine the azimuth and elevation angles
-2) Determine the bounding box locations (pixel coordinates)
-3) Update the centroid log/table with the new information: frame number, time, pixel coordinates, azimuth
+1) De ermine he azimu h and eleva ion angles
+2) De ermine he bounding box loca ions (pixel coordina es)
+3) Upda e he cen roid log/ able wi h he new informa ion: frame number, ime, pixel coordina es, azimu h
 
 
 
-and elevation angles, bounding box parameters: width, height, and top left pixel coordinates
-The main two computer vision methods are: 1) image subtraction and 2) blob detection. The image subtraction is a
+and eleva ion angles, bounding box parame ers: wid h, heigh , and op lef pixel coordina es
+The main wo compu er vision me hods are: 1) image sub rac ion and 2) blob de ec ion. The image sub rac ion is a
 
 
 
-straightforward method that takes the absolute difference between the pixels in the two images:
+s raigh forward me hod ha akes he absolu e difference be ween he pixels in he wo images:
 
 
 
@@ -210,16 +210,16 @@ straightforward method that takes the absolute difference between the pixels in 
 
 
 
-such that 𝐼𝑚𝑔 denotes an image and 𝑖 is the index for the ith image. MATLAB’s regionprops function looks at connected
-regions and returns stats about those regions, which includes the area and centroid point. ∗
+such ha 𝐼𝑚𝑔 deno es an image and 𝑖 is he index for he i h image. MATLAB’s regionprops func ion looks a connec ed
+regions and re urns s a s abou hose regions, which includes he area and cen roid poin . ∗
 
 
 
-Fig. 2 MATLAB Image Subtraction Flowchart
+Fig. 2 MATLAB Image Sub rac ion Flowchar 
 
 
 
-∗https://www.mathworks.com/help/images/ref/regionprops.html
+∗h ps://www.ma hworks.com/help/images/ref/regionprops.h ml
 
 
 
@@ -236,40 +236,40 @@ Fig. 2 MATLAB Image Subtraction Flowchart
 
 
 B. OpenCV: C++
-Figure 3 shows how the C++ version of the GBVT (CGBVT) works and when it is in the calibration phase or tracking
+Figure 3 shows how he C++ version of he GBVT (CGBVT) works and when i is in he calibra ion phase or racking
 
 
 
-phase based on the current frame number. Future flight tests will need real-time implementation of the GBVT. The
-default and fixed frame rate options apply for post-processing. The variable frame rate involves real-time processing by
-skipping to the next available frame after processing the current frame, but it is currently a work-in-progress. Overall, it
-has three different timing modes:
+phase based on he curren frame number. Fu ure fligh es s will need real- ime implemen a ion of he GBVT. The
+defaul and fixed frame ra e op ions apply for pos -processing. The variable frame ra e involves real- ime processing by
+skipping o he nex available frame af er processing he curren frame, bu i is curren ly a work-in-progress. Overall, i 
+has hree differen iming modes:
 
 
 
-1) The default rate processes all available frames.
-2) The fixed frame rate has a constant frame difference between iterations.
-3) After processing the current frame, the variable frame rate jumps to the next available frame.
+1) The defaul ra e processes all available frames.
+2) The fixed frame ra e has a cons an frame difference be ween i era ions.
+3) Af er processing he curren frame, he variable frame ra e jumps o he nex available frame.
 
 
 
-Fig. 3 Image Tracker Flowchart: High-Level
+Fig. 3 Image Tracker Flowchar : High-Level
 
 
 
-Both implementations of the GBVT have calibration and tracking phases, and Figure 4 shows the image processing
-pipeline for the CGBVT. The calibration phase contains only image/background subtraction and does not include blob
-detection, i.e., stops at the fourth box in Figure 4. Conversely, the tracking phase includes both image/background
-subtraction and blob detection, so it follows all the steps in Figure 4.
+Bo h implemen a ions of he GBVT have calibra ion and racking phases, and Figure 4 shows he image processing
+pipeline for he CGBVT. The calibra ion phase con ains only image/background sub rac ion and does no include blob
+de ec ion, i.e., s ops a he four h box in Figure 4. Conversely, he racking phase includes bo h image/background
+sub rac ion and blob de ec ion, so i follows all he s eps in Figure 4.
 
 
 
-The CGBVT has a user interface for users to draw ROIs and masks to reduce the visual coverage for tracking. Users
-can also pause tracking to redraw ROIs and masks to crop out undesired features and move the ROI to follow the desired
-object, which yields better tracking results. Alternatively, users can draw a large ROI with masks to cover the coverage
-area for the entire flight without pausing and redrawing. Future work can include automating the ROI and masks to
-increase scalability to deploy the GBVT at several locations. Figure 5 shows a flowchart for the main steps in the image
-tracker after feature detection and contains the steps for determining the detected object’s ID number.
+The CGBVT has a user in erface for users o draw ROIs and masks o reduce he visual coverage for racking. Users
+can also pause racking o redraw ROIs and masks o crop ou undesired fea ures and move he ROI o follow he desired
+objec , which yields be er racking resul s. Al erna ively, users can draw a large ROI wi h masks o cover he coverage
+area for he en ire fligh wi hou pausing and redrawing. Fu ure work can include au oma ing he ROI and masks o
+increase scalabili y o deploy he GBVT a several loca ions. Figure 5 shows a flowchar for he main s eps in he image
+ racker af er fea ure de ec ion and con ains he s eps for de ermining he de ec ed objec ’s ID number.
 
 
 
@@ -277,9 +277,9 @@ Fig. 4 Image Processing Pipeline
 
 
 
-Overall, the main steps for the CGBVT are:
-1) Obtain two frames (consecutive or skip)
-2) Apply grayscale to both frames, i.e., convert RGB to grayscale
+Overall, he main s eps for he CGBVT are:
+1) Ob ain wo frames (consecu ive or skip)
+2) Apply grayscale o bo h frames, i.e., conver RGB o grayscale
 
 
 
@@ -295,9 +295,9 @@ Overall, the main steps for the CGBVT are:
 
 
 
-Fig. 5 CGBVT: Tracking Phase Flowchart - pClosestDet is a pointer to the closest detection, tempDetection
-and tempDetection2 are instances of the Detection class, ListOfDetection has a list of all the previous detections,
-frameThreshold is set to 540 (“forget” detections after 540 frames pass)
+Fig. 5 CGBVT: Tracking Phase Flowchar - pCloses De is a poin er o he closes de ec ion, empDe ec ion
+and empDe ec ion2 are ins ances of he De ec ion class, Lis OfDe ec ion has a lis of all he previous de ec ions,
+frameThreshold is se o 540 (“forge ” de ec ions af er 540 frames pass)
 
 
 
@@ -313,61 +313,61 @@ frameThreshold is set to 540 (“forget” detections after 540 frames pass)
 
 
 
-3) Apply OpenCV’s background subtraction (MOG2) † between the two frames to learn the background model,
-which helps remove static objects
+3) Apply OpenCV’s background sub rac ion (MOG2) † be ween he wo frames o learn he background model,
+which helps remove s a ic objec s
 
 
 
-4) Apply blob detection on the binary image ‡
+4) Apply blob de ec ion on he binary image ‡
 
 
 
-5) Run the tracking phase (see Figure 5)
-1) Compute the distance between the current and previous detections, i.e., pairwise comparison for all
+5) Run he racking phase (see Figure 5)
+1) Compu e he dis ance be ween he curren and previous de ec ions, i.e., pairwise comparison for all
 
 
 
-current to previous blobs
-2) Assign the same ID number for close detections that overlap
-3) Assign a new ID number for current detections that do not overlap with previous detections
+curren o previous blobs
+2) Assign he same ID number for close de ec ions ha overlap
+3) Assign a new ID number for curren de ec ions ha do no overlap wi h previous de ec ions
 
 
 
-III. Distributed Cameras and Radar: Azimuth and Elevation Angles
-This section follows Ref. [19] for computing the azimuth and elevation angles.
-Let East North Up (ENU) be the World Coordinate System (WCS) and defined as an inertial frame fixed on the
+III. Dis ribu ed Cameras and Radar: Azimu h and Eleva ion Angles
+This sec ion follows Ref. [19] for compu ing he azimu h and eleva ion angles.
+Le Eas Nor h Up (ENU) be he World Coordina e Sys em (WCS) and defined as an iner ial frame fixed on he
 
 
 
-ground with an origin, 𝑂𝑊𝐶𝑆 . Let the sensor frame, 𝑠, be defined as an x-fwd, y-right, z-down coordinate system with
-its origin 𝑂𝑠 at the center of projection for the sensor. The x-axis points in the direction of the sensor, y-axis points to
-the right, and the z-axis points down from the sensor’s point of view to complete a right-handed system.
+ground wi h an origin, 𝑂𝑊𝐶𝑆 . Le he sensor frame, 𝑠, be defined as an x-fwd, y-righ , z-down coordina e sys em wi h
+i s origin 𝑂𝑠 a he cen er of projec ion for he sensor. The x-axis poin s in he direc ion of he sensor, y-axis poin s o
+ he righ , and he z-axis poin s down from he sensor’s poin of view o comple e a righ -handed sys em.
 
 
 
-Figure 17a shows the unit vectors, 𝒊𝑠 , 𝒋𝑠 , �̂�𝑠 in the sensor frame in the x, y, z directions, respectively. Let 𝑃 denote a
-target such that 𝑽𝑠𝑝 be the vector from 𝑂𝑠 to the target point 𝑃. Let 𝒓𝑥𝑦 be the projection of 𝑽𝑠𝑝 to the X-Y sensor
-axis plane. Let 𝜓 denote the azimuth angle and defined as the angle between 𝒊𝑠 and 𝒓𝑥𝑦 , defined as positive right-hand
-rotation around �̂�𝑠 . Then, let \ denote the elevation angle defined as the angle between 𝒓𝑥𝑦 and 𝑽𝑠𝑝 , positive right from
-𝒓𝑥𝑦 to 𝑽𝑠𝑝 (i.e., positive rotation around the cross-product of 𝒓𝑥𝑦 × 𝑽𝑠𝑝).
+Figure 17a shows he uni vec ors, 𝒊𝑠 , 𝒋𝑠 , �̂�𝑠 in he sensor frame in he x, y, z direc ions, respec ively. Le 𝑃 deno e a
+ arge such ha 𝑽𝑠𝑝 be he vec or from 𝑂𝑠 o he arge poin 𝑃. Le 𝒓𝑥𝑦 be he projec ion of 𝑽𝑠𝑝 o he X-Y sensor
+axis plane. Le 𝜓 deno e he azimu h angle and defined as he angle be ween 𝒊𝑠 and 𝒓𝑥𝑦 , defined as posi ive righ -hand
+ro a ion around �̂�𝑠 . Then, le deno e he eleva ion angle defined as he angle be ween 𝒓𝑥𝑦 and 𝑽𝑠𝑝 , posi ive righ from
+𝒓𝑥𝑦 o 𝑽𝑠𝑝 (i.e., posi ive ro a ion around he cross-produc of 𝒓𝑥𝑦 × 𝑽𝑠𝑝).
 
 
 
-Finally, projecting the target point onto the X-Z plane provides an elevation angle 𝛼𝑥𝑧 in the XZ plane, as shown in
-Figure 17b, which shows the mapping from 𝑂𝑤𝑐𝑠 to 𝑂𝑠 . Figure 6 shows the target’s azimuth and elevation angles (𝜓, \)
-in 3D space and the X-Z plane.
+Finally, projec ing he arge poin on o he X-Z plane provides an eleva ion angle 𝛼𝑥𝑧 in he XZ plane, as shown in
+Figure 17b, which shows he mapping from 𝑂𝑤𝑐𝑠 o 𝑂𝑠 . Figure 6 shows he arge ’s azimu h and eleva ion angles (𝜓, )
+in 3D space and he X-Z plane.
 
 
 
-(a) Point in 3D Space: Azimuth and Elevation (b) Projected Point onto the X-Z Plane: Azimuth and Elevation
+(a) Poin in 3D Space: Azimu h and Eleva ion (b) Projec ed Poin on o he X-Z Plane: Azimu h and Eleva ion
 
 
 
-Fig. 6 Azimuth and Elevation Angles (resembles figure 5 of Ref. [19])
+Fig. 6 Azimu h and Eleva ion Angles (resembles figure 5 of Ref. [19])
 
 
 
-Using the total pixel width, 𝑊 , and horizontal field of view in radians, 𝐹𝑂𝑉ℎ, provides the focal length, 𝑓 , as shown
+Using he o al pixel wid h, 𝑊 , and horizon al field of view in radians, 𝐹𝑂𝑉ℎ, provides he focal leng h, 𝑓 , as shown
 in Eqn. (2).
 
 
@@ -377,7 +377,7 @@ in Eqn. (2).
 
 
 
-2 · tan
+2 · an
 (
 𝐹𝑂𝑉ℎ
 
@@ -387,12 +387,12 @@ in Eqn. (2).
 
 
 
-) (constant) (2)
+) (cons an ) (2)
 
 
 
-†https://docs.opencv.org/4.x/d7/d7b/classcv_1_1BackgroundSubtractorMOG2.html
-‡https://docs.opencv.org/4.x/d0/d13/classcv_1_1Feature2D.html#aa4e9a7082ec61ebc108806704fbd7887
+†h ps://docs.opencv.org/4.x/d7/d7b/classcv_1_1BackgroundSub rac orMOG2.h ml
+‡h ps://docs.opencv.org/4.x/d0/d13/classcv_1_1Fea ure2D.h ml#aa4e9a7082ec61ebc108806704fbd7887
 
 
 
@@ -408,15 +408,15 @@ in Eqn. (2).
 
 
 
-Fig. 7 Azimuth and Elevation Angles to Pixel Coordinates: 1) given the horizontal field of view and image width
-in pixels, compute the focal length (Eqn. (2)), 2) compute the horizontal pixel offset, 𝑑𝑥 (Eqn. (3)), 3) compute the
-azimuth and elevation angles (Eqn. (4))
+Fig. 7 Azimu h and Eleva ion Angles o Pixel Coordina es: 1) given he horizon al field of view and image wid h
+in pixels, compu e he focal leng h (Eqn. (2)), 2) compu e he horizon al pixel offse , 𝑑𝑥 (Eqn. (3)), 3) compu e he
+azimu h and eleva ion angles (Eqn. (4))
 
 
 
-The next equations describe the computations for converting the target pixels into azimuth and elevation angles (see
-Figures 7-8). Equation (3) shows the difference between the target’s pixels and the midpoint of the total pixel width and
-height, 𝑊&𝐻, respectively.
+The nex equa ions describe he compu a ions for conver ing he arge pixels in o azimu h and eleva ion angles (see
+Figures 7-8). Equa ion (3) shows he difference be ween he arge ’s pixels and he midpoin of he o al pixel wid h and
+heigh , 𝑊&𝐻, respec ively.
 
 
 
@@ -424,10 +424,10 @@ height, 𝑊&𝐻, respectively.
 
 
 
-Finally, compute the azimuth and elevation angles using the focal length from Eqn. (2) and the computed target pixel
-offsets from Eqn. (3). The minus sign in the equation for \ in Eqn. (4) exists since 𝑝𝑦 is positive in the downward
-direction, i.e., the pixel coordinates’ origin is at the image’s top left corner. Figures 7-8b show drawings for computing
-the azimuth and elevation angles from the focal length, pixel coordinates, camera resolution, and fields of view.
+Finally, compu e he azimu h and eleva ion angles using he focal leng h from Eqn. (2) and he compu ed arge pixel
+offse s from Eqn. (3). The minus sign in he equa ion for in Eqn. (4) exis s since 𝑝𝑦 is posi ive in he downward
+direc ion, i.e., he pixel coordina es’ origin is a he image’s op lef corner. Figures 7-8b show drawings for compu ing
+ he azimu h and eleva ion angles from he focal leng h, pixel coordina es, camera resolu ion, and fields of view.
 
 
 
@@ -445,7 +445,7 @@ the azimuth and elevation angles from the focal length, pixel coordinates, camer
 
 
 )
-, \ = −𝑎𝑟𝑐𝑡𝑎𝑛
+, = −𝑎𝑟𝑐𝑡𝑎𝑛
 
 
 
@@ -463,32 +463,32 @@ the azimuth and elevation angles from the focal length, pixel coordinates, camer
 
 
 
-IV. Flight Tests
-This section describes the UAS flight tests for testing the GBVT. The first subsection describes a preliminary test at
+IV. Fligh Tes s
+This sec ion describes he UAS fligh es s for es ing he GBVT. The firs subsec ion describes a preliminary es a 
 
 
 
-NASA Ames with one camera. The second subsection discusses the distributed sensing flight test with four ground
+NASA Ames wi h one camera. The second subsec ion discusses he dis ribu ed sensing fligh es wi h four ground
 cameras.
 
 
 
-A. Preliminary Test with One Camera
-For this preliminary test with one camera, the UAS flies from left to right in the camera’s field of view. Figure 9a
+A. Preliminary Tes wi h One Camera
+For his preliminary es wi h one camera, he UAS flies from lef o righ in he camera’s field of view. Figure 9a
 
 
 
-shows the first frame for the preliminary UAS flight test at Ames, and Figure 9b shows the 7100th frame as the UAS
-flew to the right and towards the end of the field of view. Table 1 summarizes the camera parameters.
+shows he firs frame for he preliminary UAS fligh es a Ames, and Figure 9b shows he 7100 h frame as he UAS
+flew o he righ and owards he end of he field of view. Table 1 summarizes he camera parame ers.
 
 
 
-B. Distributed Sensing Test with Four Cameras
-Figure 10 shows a generic architecture diagram for the four image trackers for the Ames Build 1 scenario. Each
+B. Dis ribu ed Sensing Tes wi h Four Cameras
+Figure 10 shows a generic archi ec ure diagram for he four image rackers for he Ames Build 1 scenario. Each
 
 
 
-image tracker will run at some preset (1-30 Hz) frequency and receive color images for real-time implementation. Then,
+image racker will run a some prese (1-30 Hz) frequency and receive color images for real- ime implemen a ion. Then,
 
 
 
@@ -504,14 +504,14 @@ image tracker will run at some preset (1-30 Hz) frequency and receive color imag
 
 
 
-(a) Pixel Coordinates to Elevation Angle with Camera: eleva-
-tion angle (\)
+(a) Pixel Coordina es o Eleva ion Angle wi h Camera: eleva-
+ ion angle ( )
 
 
 
-(b) Pixel Coordinates to Elevation Angles: 1) given 𝑑𝑥, 𝑑𝑦, and
-𝑓 (blue, red, and black lines, respectively) from Eqns. (2) and
-(3), compute
+(b) Pixel Coordina es o Eleva ion Angles: 1) given 𝑑𝑥, 𝑑𝑦, and
+𝑓 (blue, red, and black lines, respec ively) from Eqns. (2) and
+(3), compu e
 
 
 
@@ -525,35 +525,35 @@ tion angle (\)
 
 
 
-to solve for \ (elevation angle) from Eqn. (4)
+ o solve for (eleva ion angle) from Eqn. (4)
 
 
 
-Fig. 8 Pixel Coordinates to Azimuth and Elevation Angles
+Fig. 8 Pixel Coordina es o Azimu h and Eleva ion Angles
 
 
 
-(a) Ames Preliminary UAS Flight Test: Frame 1 (b) Ames Preliminary UAS Flight Test: Frame 7100
+(a) Ames Preliminary UAS Fligh Tes : Frame 1 (b) Ames Preliminary UAS Fligh Tes : Frame 7100
 
 
 
-Fig. 9 Preliminary UAS Flight Test
+Fig. 9 Preliminary UAS Fligh Tes 
 
 
 
-Table 1 Camera Specs for Preliminary Flight Test
+Table 1 Camera Specs for Preliminary Fligh Tes 
 
 
 
 Spec Value
-Horizontal Field of View (◦) 110
+Horizon al Field of View (◦) 110
 
 
 
-Vertical Field of View (◦) 73.6
-Aspect Ratio 1.91
-pixel width 1274
-pixel height 674
+Ver ical Field of View (◦) 73.6
+Aspec Ra io 1.91
+pixel wid h 1274
+pixel heigh 674
 
 
 
@@ -573,33 +573,33 @@ FPS 60
 
 
 
-each image tracker will compute the azimuth and elevation angles for detected and tracked objects within their fields of
-view, which feeds into the data association problem of keeping track of many objects [20]. Finally, the GBOT EKFs
-presented in Ref. [17, 18, 21] receive multiple cameras’ associated objects’ azimuth and elevation angles.
+each image racker will compu e he azimu h and eleva ion angles for de ec ed and racked objec s wi hin heir fields of
+view, which feeds in o he da a associa ion problem of keeping rack of many objec s [20]. Finally, he GBOT EKFs
+presen ed in Ref. [17, 18, 21] receive mul iple cameras’ associa ed objec s’ azimu h and eleva ion angles.
 
 
 
-Figure 11 shows the sensor locations (yellow circles), and their locations are given in Table 2 [22, 23]. Figures 12
-and 13 show the UAV path (blue line) during the flight tests at NASA Ames Research Center. See Ref. [18] for more
-details about flight test designs for ground-based distributed sensing.
+Figure 11 shows he sensor loca ions (yellow circles), and heir loca ions are given in Table 2 [22, 23]. Figures 12
+and 13 show he UAV pa h (blue line) during he fligh es s a NASA Ames Research Cen er. See Ref. [18] for more
+de ails abou fligh es designs for ground-based dis ribu ed sensing.
 
 
 
-Fig. 10 Generic Distributed Sensing Architecture: frame rates vary between 30 or 60, depending on the camera
-settings - see Tables 1 & 3
+Fig. 10 Generic Dis ribu ed Sensing Archi ec ure: frame ra es vary be ween 30 or 60, depending on he camera
+se ings - see Tables 1 & 3
 
 
 
-The OpenCV C++ image tracker also utilizes image subtraction § and blob detection ¶. Preliminary tests have a
-calibration phase that takes the first 150 frames to learn the background model and uses the OpenCV MOG2 Background
-Subtractor. For rendering and tracking, none of the detections, matching, or plotting occur until after the calibration
-phase. Two drawbacks for the current implementation of the OpenCV image tracker are: 1) the image tracker does
-not track the UAV for the frames during the calibration phase, and 2) it must find the UAV in the first frame after
-the calibration phase, i.e., frame 151 in the preliminary tests. The number of frames during the calibration phase is
-arbitrary, and future work may consider a more robust and flexible image tracker framework to avoid needing to detect
-the UAV in the first frame immediately after the calibration phase. Figure 14 shows a diagram of the distance between
-two detections and the overlap radius. For simplicity, the tracker currently detects the UAV and only considers future
-detections that are within an overlap distance of:
+The OpenCV C++ image racker also u ilizes image sub rac ion § and blob de ec ion ¶. Preliminary es s have a
+calibra ion phase ha akes he firs 150 frames o learn he background model and uses he OpenCV MOG2 Background
+Sub rac or. For rendering and racking, none of he de ec ions, ma ching, or plo ing occur un il af er he calibra ion
+phase. Two drawbacks for he curren implemen a ion of he OpenCV image racker are: 1) he image racker does
+no rack he UAV for he frames during he calibra ion phase, and 2) i mus find he UAV in he firs frame af er
+ he calibra ion phase, i.e., frame 151 in he preliminary es s. The number of frames during he calibra ion phase is
+arbi rary, and fu ure work may consider a more robus and flexible image racker framework o avoid needing o de ec 
+ he UAV in he firs frame immedia ely af er he calibra ion phase. Figure 14 shows a diagram of he dis ance be ween
+ wo de ec ions and he overlap radius. For simplici y, he racker curren ly de ec s he UAV and only considers fu ure
+de ec ions ha are wi hin an overlap dis ance of:
 
 
 
@@ -607,15 +607,15 @@ overlap = 𝑑 − 2 · overlap radius (5)
 
 
 
-with “2” as a scaling factor and “overlap radius” is a tuning parameter, which was set to seven pixels.
+wi h “2” as a scaling fac or and “overlap radius” is a uning parame er, which was se o seven pixels.
 
 
 
-Table 2 NASA Ames Build 1 Scenario Sensor Locations and Angles
+Table 2 NASA Ames Build 1 Scenario Sensor Loca ions and Angles
 
 
 
-Location Latitude (◦) Longitude (◦) Alt. (m) Heading (◦) Elev. (◦) Range (m)
+Loca ion La i ude (◦) Longi ude (◦) Al . (m) Heading (◦) Elev. (◦) Range (m)
 1 37.429540 -122.067712 1.54 66.53 9.68 600
 2 37.425155 -122.059832 1.54 246.54 29.29 600
 3 37.423476 -122.061238 1.57 303.14 34.0 600
@@ -624,16 +624,16 @@ O 37.426861 -122.066015 0 N/A N/A N/A
 
 
 
-Different GoPro HERO10 Black camera lenses and modes will be selected and optimized to have the UAV within at
-least two camera fields of view throughout most of the UAV’s flight path (see Figure 11), and the estimated horizontal
-field of view per camera is 40◦. �. The horizontal field of view for each GoPro HERO10 Black camera was set to 110◦.
-The camera at ground node 2 had different settings than those at ground nodes 1, 3, & 4 since it was recording in a
+Differen GoPro HERO10 Black camera lenses and modes will be selec ed and op imized o have he UAV wi hin a 
+leas wo camera fields of view hroughou mos of he UAV’s fligh pa h (see Figure 11), and he es ima ed horizon al
+field of view per camera is 40◦. �. The horizon al field of view for each GoPro HERO10 Black camera was se o 110◦.
+The camera a ground node 2 had differen se ings han hose a ground nodes 1, 3, & 4 since i was recording in a
 
 
 
-§https://docs.opencv.org/3.4/d1/dc5/tutorial_background_subtraction.html
-¶https://learnopencv.com/blob-detection-using-opencv-python-c/
-�https://community.gopro.com/s/article/HERO10-Black-Digital-Lenses-FOV-Informations?language=en_US
+§h ps://docs.opencv.org/3.4/d1/dc5/ u orial_background_sub rac ion.h ml
+¶h ps://learnopencv.com/blob-de ec ion-using-opencv-py hon-c/
+�h ps://communi y.gopro.com/s/ar icle/HERO10-Black-Digi al-Lenses-FOV-Informa ions?language=en_US
 
 
 
@@ -649,7 +649,7 @@ The camera at ground node 2 had different settings than those at ground nodes 1,
 
 
 
-Fig. 11 Ames Research Center Flight Test - Build 1: sensor stations (yellow) & origin, O (black dot)
+Fig. 11 Ames Research Cen er Fligh Tes - Build 1: sensor s a ions (yellow) & origin, O (black do )
 
 
 
@@ -674,8 +674,8 @@ a
 
 
 
-ti
-tu
+ i
+ u
 
 
 
@@ -688,16 +688,16 @@ e
 
 
 
-Longitude
+Longi ude
 
 
 
-UAV Path: Latitude & Longitude
+UAV Pa h: La i ude & Longi ude
 
 
 
-County of Santa Clara, Bureau of Land Management, Esri, HERE, Garmin, INCREMENT P, NGA, USGS
- 200 ft 
+Coun y of San a Clara, Bureau of Land Managemen , Esri, HERE, Garmin, INCREMENT P, NGA, USGS
+ 200 f 
 
 
 
@@ -705,11 +705,11 @@ County of Santa Clara, Bureau of Land Management, Esri, HERE, Garmin, INCREMENT 
 
 
 
-UAV Path
+UAV Pa h
 
 
 
-Fig. 12 UAV Path: Latitude & Longitude (thick blue line)
+Fig. 12 UAV Pa h: La i ude & Longi ude ( hick blue line)
 
 
 
@@ -725,12 +725,12 @@ Fig. 12 UAV Path: Latitude & Longitude (thick blue line)
 
 
 
-Fig. 13 UAV Path: Google Earth
+Fig. 13 UAV Pa h: Google Ear h
 
 
 
-Fig. 14 Overlap Radius Diagram: “1” and “2” are blob centroid points in consecutive frames, 𝑑 is the distance
-between the two centroid points, and overlap radius is a tuning parameter, which was set to seven pixels
+Fig. 14 Overlap Radius Diagram: “1” and “2” are blob cen roid poin s in consecu ive frames, 𝑑 is he dis ance
+be ween he wo cen roid poin s, and overlap radius is a uning parame er, which was se o seven pixels
 
 
 
@@ -746,19 +746,19 @@ between the two centroid points, and overlap radius is a tuning parameter, which
 
 
 
-different mode, which yields different resolution and frames per second values. Table 3 shows the difference in the
-camera specs between ground nodes 1, 3, & 4 vs. 2.
+differen mode, which yields differen resolu ion and frames per second values. Table 3 shows he difference in he
+camera specs be ween ground nodes 1, 3, & 4 vs. 2.
 
 
 
-Table 3 Distributed Sensing Camera Specs for UAS Flight Test
+Table 3 Dis ribu ed Sensing Camera Specs for UAS Fligh Tes 
 
 
 
 Spec GN1,3,4 GN2
-Aspect Ratio 4:3 16:9
-pixel width 4000 3840
-pixel height 3000 2160
+Aspec Ra io 4:3 16:9
+pixel wid h 4000 3840
+pixel heigh 3000 2160
 
 
 
@@ -766,51 +766,51 @@ FPS 60 30
 
 
 
-V. Results
-This section describes the outcomes from the post-processed GBVT experiments. The first subsection presents the
+V. Resul s
+This sec ion describes he ou comes from he pos -processed GBVT experimen s. The firs subsec ion presen s he
 
 
 
-findings of the preliminary test conducted with a singular camera, where the UAV traverses from the leftmost to the
-rightmost extent within the camera’s field of view. The second subsection shows the outcomes from the UAV flight test
-with a ground-based distributed sensing network of four distinct cameras.
+findings of he preliminary es conduc ed wi h a singular camera, where he UAV raverses from he lef mos o he
+righ mos ex en wi hin he camera’s field of view. The second subsec ion shows he ou comes from he UAV fligh es 
+wi h a ground-based dis ribu ed sensing ne work of four dis inc cameras.
 
 
 
-A. Preliminary Test with One Camera
-A preliminary distributed sensing test involved using a ground-based, fixed-angle camera to acquire flight test data to
+A. Preliminary Tes wi h One Camera
+A preliminary dis ribu ed sensing es involved using a ground-based, fixed-angle camera o acquire fligh es da a o
 
 
 
-evaluate the GBVT. Figure 15 illustrates the intermediate steps of image subtraction, depicting the original and masked
-images after applying the subtraction process. Figure 15a displays the current image, while Figure 15b exhibits the
-subtracted image following the steps outlined in Figure 2. Setting the intensity factor to 5 and the threshold pixel value
-to 240 ensures the elimination of all pixels below this threshold. Preliminary tests of the GBVT in MATLAB involve
+evalua e he GBVT. Figure 15 illus ra es he in ermedia e s eps of image sub rac ion, depic ing he original and masked
+images af er applying he sub rac ion process. Figure 15a displays he curren image, while Figure 15b exhibi s he
+sub rac ed image following he s eps ou lined in Figure 2. Se ing he in ensi y fac or o 5 and he hreshold pixel value
+ o 240 ensures he elimina ion of all pixels below his hreshold. Preliminary es s of he GBVT in MATLAB involve
 
 
 
-(a) Original Image (b) Mask after Image Subtraction
+(a) Original Image (b) Mask af er Image Sub rac ion
 
 
 
-Fig. 15 Results of Image Subtraction: Frame 2480
+Fig. 15 Resul s of Image Sub rac ion: Frame 2480
 
 
 
-tracking five objects using image subtraction and blob detection (bwareafilt) ∗∗. Objects (centroids) 2-4, exhibiting
-relatively low and flat elevation angles between approximately 40 and 55 seconds, are likely to be cars, corresponding to
-the observed vehicles in the video (see Figure 16). The fifth detection displays random outliers, so Figure 16 does not
-show it for brevity. The average runtime per iteration is 0.2675 seconds, showcasing near real-time capabilities. With
-the video recorded at 60 frames per second, the frame subtraction step involves 55 frames, allowing sufficient time
-and difference for detecting UAV motion. It is possible to reduce frame subtraction to 30 frames (0.5 seconds for a
-60 fps camera); however, this leads to multiple false positives. Figure 17 presents the azimuth and elevation angles
-of the tracked UAV for the OpenCV C++ implementation. The OpenCV-tracked UAV azimuth and elevation angles
-closely resemble the MATLAB implementation from Figure 16 but lack the initial false positives. The CGBVT exhibits
-smoother results and avoids missing detections, as observed in the gaps in the azimuth and elevation angles for Centroid 1
+ racking five objec s using image sub rac ion and blob de ec ion (bwareafil ) ∗∗. Objec s (cen roids) 2-4, exhibi ing
+rela ively low and fla eleva ion angles be ween approxima ely 40 and 55 seconds, are likely o be cars, corresponding o
+ he observed vehicles in he video (see Figure 16). The fif h de ec ion displays random ou liers, so Figure 16 does no 
+show i for brevi y. The average run ime per i era ion is 0.2675 seconds, showcasing near real- ime capabili ies. Wi h
+ he video recorded a 60 frames per second, he frame sub rac ion s ep involves 55 frames, allowing sufficien ime
+and difference for de ec ing UAV mo ion. I is possible o reduce frame sub rac ion o 30 frames (0.5 seconds for a
+60 fps camera); however, his leads o mul iple false posi ives. Figure 17 presen s he azimu h and eleva ion angles
+of he racked UAV for he OpenCV C++ implemen a ion. The OpenCV- racked UAV azimu h and eleva ion angles
+closely resemble he MATLAB implemen a ion from Figure 16 bu lack he ini ial false posi ives. The CGBVT exhibi s
+smoo her resul s and avoids missing de ec ions, as observed in he gaps in he azimu h and eleva ion angles for Cen roid 1
 
 
 
-∗∗https://www.mathworks.com/help/images/ref/bwareafilt.html
+∗∗h ps://www.ma hworks.com/help/images/ref/bwareafil .h ml
 
 
 
@@ -826,7 +826,7 @@ smoother results and avoids missing detections, as observed in the gaps in the a
 
 
 
-Centroid 1: Azimuth and Elevation Angles
+Cen roid 1: Azimu h and Eleva ion Angles
 
 
 
@@ -857,7 +857,7 @@ im
 
 
 u
-th
+ h
 
 
 
@@ -907,7 +907,7 @@ le
 
 v
 a
-ti
+ i
 o
 n
  A
@@ -928,11 +928,11 @@ g
 
 
 
-(a) Object 1 (UAV)
+(a) Objec 1 (UAV)
 
 
 
-Centroid 2: Azimuth and Elevation Angles
+Cen roid 2: Azimu h and Eleva ion Angles
 
 
 
@@ -963,7 +963,7 @@ im
 
 
 u
-th
+ h
 
 
 
@@ -1013,7 +1013,7 @@ le
 
 v
 a
-ti
+ i
 o
 n
  A
@@ -1034,11 +1034,11 @@ g
 
 
 
-(b) Object 2 (car)
+(b) Objec 2 (car)
 
 
 
-Centroid 3: Azimuth and Elevation Angles
+Cen roid 3: Azimu h and Eleva ion Angles
 
 
 
@@ -1069,7 +1069,7 @@ im
 
 
 u
-th
+ h
 
 
 
@@ -1123,7 +1123,7 @@ le
 
 v
 a
-ti
+ i
 o
 n
  A
@@ -1144,11 +1144,11 @@ g
 
 
 
-(c) Object 3 (car)
+(c) Objec 3 (car)
 
 
 
-Centroid 4: Azimuth and Elevation Angles
+Cen roid 4: Azimu h and Eleva ion Angles
 
 
 
@@ -1187,7 +1187,7 @@ im
 
 
 u
-th
+ h
 
 
 
@@ -1237,7 +1237,7 @@ le
 
 v
 a
-ti
+ i
 o
 n
  A
@@ -1258,12 +1258,12 @@ g
 
 
 
-(d) Object 4 (car)
+(d) Objec 4 (car)
 
 
 
-Fig. 16 Azimuth and Elevation Angles per Detection: MATLAB Image Tracker for Single-Camera Case -
-centroid 1 is the UAV, and the others are cars that appear/hide behind trees and buildings
+Fig. 16 Azimu h and Eleva ion Angles per De ec ion: MATLAB Image Tracker for Single-Camera Case -
+cen roid 1 is he UAV, and he o hers are cars ha appear/hide behind rees and buildings
 
 
 
@@ -1279,10 +1279,10 @@ centroid 1 is the UAV, and the others are cars that appear/hide behind trees and
 
 
 
-in Figure 16a. OpenCV’s background subtraction function notably facilitates learning the background model, enhancing
-tracking performance by removing static objects. In contrast, the MATLAB implementation lacks background learning,
-resulting in less consistent tracking, mainly when the UAV appears smaller towards the end. The subsequent step for
-GBVT involves its execution with multiple cameras (videos), leveraging the OpenCV implementation. Key takeaways
+in Figure 16a. OpenCV’s background sub rac ion func ion no ably facili a es learning he background model, enhancing
+ racking performance by removing s a ic objec s. In con ras , he MATLAB implemen a ion lacks background learning,
+resul ing in less consis en racking, mainly when he UAV appears smaller owards he end. The subsequen s ep for
+GBVT involves i s execu ion wi h mul iple cameras (videos), leveraging he OpenCV implemen a ion. Key akeaways
 
 
 
@@ -1290,7 +1290,7 @@ GBVT involves its execution with multiple cameras (videos), leveraging the OpenC
 
 
 
-time (seconds)
+ ime (seconds)
 
 
 
@@ -1329,7 +1329,7 @@ im
 
 
 u
-th
+ h
 
 
 
@@ -1352,11 +1352,11 @@ le
 
 
 
-Azimuth Angle vs. Time
+Azimu h Angle vs. Time
 
 
 
-(a) Azimuth Angle
+(a) Azimu h Angle
 
 
 
@@ -1364,7 +1364,7 @@ Azimuth Angle vs. Time
 
 
 
-time (seconds)
+ ime (seconds)
 
 
 
@@ -1394,7 +1394,7 @@ a
 
 
 
-ti
+ i
 o
 
 
@@ -1419,73 +1419,73 @@ le
 
 
 
-Elevation Angle vs. Time
+Eleva ion Angle vs. Time
 
 
 
-(b) Elevation Angle
+(b) Eleva ion Angle
 
 
 
-Fig. 17 Tracked UAV Azimuth and Elevation Angles: CGBVT
+Fig. 17 Tracked UAV Azimu h and Eleva ion Angles: CGBVT
 
 
 
-from this preliminary GBVT test include:
-1) Image subtraction effectively removes several static objects, and its combination with blob detection enables
+from his preliminary GBVT es include:
+1) Image sub rac ion effec ively removes several s a ic objec s, and i s combina ion wi h blob de ec ion enables
 
 
 
-multi-object tracking.
-2) Objects exhibiting slight movements appearing in the subtracted image emphasize the importance of applying a
+mul i-objec racking.
+2) Objec s exhibi ing sligh movemen s appearing in he sub rac ed image emphasize he impor ance of applying a
 
 
 
-threshold to eliminate less intense pixels (slight movements like jitter, shaking, etc.) or objects.
-3) The incorporation of a region of interest (ROI) allows the GBVT to focus on desired targets by narrowing the
+ hreshold o elimina e less in ense pixels (sligh movemen s like ji er, shaking, e c.) or objec s.
+3) The incorpora ion of a region of in eres (ROI) allows he GBVT o focus on desired arge s by narrowing he
 
 
 
 search area.
-4) The use of masks effectively removes undesired regions where targets are unlikely to be found, such as grass,
+4) The use of masks effec ively removes undesired regions where arge s are unlikely o be found, such as grass,
 
 
 
-buildings, and trees.
-5) Implementing a purely computer vision tracking method demonstrates promising results, suggesting that
+buildings, and rees.
+5) Implemen ing a purely compu er vision racking me hod demons ra es promising resul s, sugges ing ha 
 
 
 
-incorporating Kalman filters may be unnecessary. However, including estimated object kinematics may enhance
-tracking performance and object classification, particularly considering the varying flight patterns between birds
-and quadcopter UAVs, where birds typically exhibit faster and more sporadic movements.
+incorpora ing Kalman fil ers may be unnecessary. However, including es ima ed objec kinema ics may enhance
+ racking performance and objec classifica ion, par icularly considering he varying fligh pa erns be ween birds
+and quadcop er UAVs, where birds ypically exhibi fas er and more sporadic movemen s.
 
 
 
-B. Distributed Sensing Test with Four Cameras
-This subsection shows the distributed sensing results for the four cameras from Figure 11. The first subsubsection
+B. Dis ribu ed Sensing Tes wi h Four Cameras
+This subsec ion shows he dis ribu ed sensing resul s for he four cameras from Figure 11. The firs subsubsec ion
 
 
 
-shows the GBVT image processing pipeline, and the second subsubsection describes the tracking performance metrics
-and definitions.
+shows he GBVT image processing pipeline, and he second subsubsec ion describes he racking performance me rics
+and defini ions.
 
 
 
 1. GBVT Image Processing Pipeline
-Figure 18 shows a screenshot that details the image tracker’s image processing pipeline, following the sequential
+Figure 18 shows a screensho ha de ails he image racker’s image processing pipeline, following he sequen ial
 
 
 
-operations outlined in Fig. 4. The calibration phase lasts for 150 frames for ground nodes 1-3. The CGBVT for ground
-node 2 uses only 10 frames in its calibration phase because CGBVT tests the features for pausing the video and redrawing
-the ROI, which provides quick learning for the background model. This figure clarifies the procedural sequence of the
-GBVT pipeline. The upper-leftmost panel displays the unaltered frame, with black masks excluding undesirable regions
-and a rectangular delineation designating the region of interest (ROI). The adjacent right panel highlights tracking
-efficacy within the ROI, indicating active tracking with a conspicuous blue bounding box encapsulating the UAV. The
-subsequent upper-right panel exhibits the resulting image after background subtraction, eliminating pixels corresponding
-to static objects and leaving only the UAV (depicted in white). The lower-leftmost panel incorporates a red circle
-around the latest detection (keypoint) and an encompassing bounding box. The final panel displays multiple white dots,
+opera ions ou lined in Fig. 4. The calibra ion phase las s for 150 frames for ground nodes 1-3. The CGBVT for ground
+node 2 uses only 10 frames in i s calibra ion phase because CGBVT es s he fea ures for pausing he video and redrawing
+ he ROI, which provides quick learning for he background model. This figure clarifies he procedural sequence of he
+GBVT pipeline. The upper-lef mos panel displays he unal ered frame, wi h black masks excluding undesirable regions
+and a rec angular delinea ion designa ing he region of in eres (ROI). The adjacen righ panel highligh s racking
+efficacy wi hin he ROI, indica ing ac ive racking wi h a conspicuous blue bounding box encapsula ing he UAV. The
+subsequen upper-righ panel exhibi s he resul ing image af er background sub rac ion, elimina ing pixels corresponding
+ o s a ic objec s and leaving only he UAV (depic ed in whi e). The lower-lef mos panel incorpora es a red circle
+around he la es de ec ion (keypoin ) and an encompassing bounding box. The final panel displays mul iple whi e do s,
 
 
 
@@ -1501,56 +1501,56 @@ around the latest detection (keypoint) and an encompassing bounding box. The fin
 
 
 
-representing previous detections of the object, with the red dot designating the presently tracked object, including its
-bounding box. Finally, the command prompt in the lower-right corner provides information about the current frame,
-including the completion percentage computed based on the current frame number and the remaining frames.
+represen ing previous de ec ions of he objec , wi h he red do designa ing he presen ly racked objec , including i s
+bounding box. Finally, he command promp in he lower-righ corner provides informa ion abou he curren frame,
+including he comple ion percen age compu ed based on he curren frame number and he remaining frames.
 
 
 
-Fig. 18 Image Tracker Screenshot: Image Processing Pipeline for Ground Node 1 (6/26/23 flight test) - the black
-rectangle and lines remove the street light and powerlines to help remove false positives
+Fig. 18 Image Tracker Screensho : Image Processing Pipeline for Ground Node 1 (6/26/23 fligh es ) - he black
+rec angle and lines remove he s ree ligh and powerlines o help remove false posi ives
 
 
 
-Figure 19 shows a screenshot of the GBVT image processing pipeline and tests the GBVT’s tracking capabilities by
-pausing the video and redrawing the ROI to reduce the number of false positives and negatives. The detection precision
-and recall metrics shown later will provide more details about how this pause-and-redraw-ROI tracking strategy performs
-better than the standard method with one ROI that encompasses the entire UAV trajectory.
+Figure 19 shows a screensho of he GBVT image processing pipeline and es s he GBVT’s racking capabili ies by
+pausing he video and redrawing he ROI o reduce he number of false posi ives and nega ives. The de ec ion precision
+and recall me rics shown la er will provide more de ails abou how his pause-and-redraw-ROI racking s ra egy performs
+be er han he s andard me hod wi h one ROI ha encompasses he en ire UAV rajec ory.
 
 
 
-Figure 20 shows a screenshot of the GBVT image processing pipeline as the UAV approaches the end of its trajectory
-and heads towards the landing zone. The camera at GN3 captures the last portion of the flight with a few birds and
-some masks to remove undesired areas such as grass and trees. As the UAV approached the landing zone, it appeared
-larger and had several blobs instead of only one. Figure 21 illustrates the representation of the UAV as a claw, with two
-motors resembling outer fingers and an inner finger located near the UAV’s center of mass. Given the smaller size of the
-motors, their blob radii are diminished compared to the center blob (middle finger of the claw). Future investigations
-could explore methodologies such as selecting the largest blob or centroid while disregarding smaller neighboring blobs.
-Alternatively, dilating the detected blobs to merge them before determining the centroid of the blob represents another
-avenue for consideration.
+Figure 20 shows a screensho of he GBVT image processing pipeline as he UAV approaches he end of i s rajec ory
+and heads owards he landing zone. The camera a GN3 cap ures he las por ion of he fligh wi h a few birds and
+some masks o remove undesired areas such as grass and rees. As he UAV approached he landing zone, i appeared
+larger and had several blobs ins ead of only one. Figure 21 illus ra es he represen a ion of he UAV as a claw, wi h wo
+mo ors resembling ou er fingers and an inner finger loca ed near he UAV’s cen er of mass. Given he smaller size of he
+mo ors, heir blob radii are diminished compared o he cen er blob (middle finger of he claw). Fu ure inves iga ions
+could explore me hodologies such as selec ing he larges blob or cen roid while disregarding smaller neighboring blobs.
+Al erna ively, dila ing he de ec ed blobs o merge hem before de ermining he cen roid of he blob represen s ano her
+avenue for considera ion.
 
 
 
-Figure 22 shows a screenshot of the GBVT’s image processing pipeline at ground node 4, with many birds in the
-scenery occasionally overlapping with the UAV. The GBVT has certain limitations when it comes to overlapping objects.
-An occurrence of note is the potential for labeling issues when tracked objects traverse the same path, specifically when
-intersecting. For example, in Figure 23, the image tracker assigns label 106 to two distinct objects: a bird (left) and a
-UAV (right). This labeling discrepancy arises as both entities traverse or intersect at a point along the path identified as
+Figure 22 shows a screensho of he GBVT’s image processing pipeline a ground node 4, wi h many birds in he
+scenery occasionally overlapping wi h he UAV. The GBVT has cer ain limi a ions when i comes o overlapping objec s.
+An occurrence of no e is he po en ial for labeling issues when racked objec s raverse he same pa h, specifically when
+in ersec ing. For example, in Figure 23, he image racker assigns label 106 o wo dis inc objec s: a bird (lef ) and a
+UAV (righ ). This labeling discrepancy arises as bo h en i ies raverse or in ersec a a poin along he pa h iden ified as
 106.
 
 
 
-Potential avenues for future research encompass investigating and mitigating the overlap problem. Introducing
-artificial intelligence or machine learning methodologies may offer a solution by classifying objects based on size, speed,
-and direction/heading. Alternative approaches may assess the probability of object A retaining its identity compared to
-a newly detected object.
+Po en ial avenues for fu ure research encompass inves iga ing and mi iga ing he overlap problem. In roducing
+ar ificial in elligence or machine learning me hodologies may offer a solu ion by classifying objec s based on size, speed,
+and direc ion/heading. Al erna ive approaches may assess he probabili y of objec A re aining i s iden i y compared o
+a newly de ec ed objec .
 
 
 
-Another notable phenomenon pertains to the labeling of objects that overlap with one another. As depicted in Figure
-24, the image tracker adjusts the UAV’s identifier from 106 to 219 due to a path overlapping with a bird (identified by
-219). The current image tracker methodology adheres exclusively to computer vision and image processing techniques.
-However, future investigations may contemplate incorporating a Kalman filter to predict the tracked target’s next position
+Ano her no able phenomenon per ains o he labeling of objec s ha overlap wi h one ano her. As depic ed in Figure
+24, he image racker adjus s he UAV’s iden ifier from 106 o 219 due o a pa h overlapping wi h a bird (iden ified by
+219). The curren image racker me hodology adheres exclusively o compu er vision and image processing echniques.
+However, fu ure inves iga ions may con empla e incorpora ing a Kalman fil er o predic he racked arge ’s nex posi ion
 
 
 
@@ -1566,16 +1566,16 @@ However, future investigations may contemplate incorporating a Kalman filter to 
 
 
 
-Fig. 19 Image Tracker Screenshot: Image Processing Pipeline for Ground Node 2 (6/26/23 flight test) - testing
-the GBVT’s ROI and tracking capabilities by pausing and redrawing the ROI to follow the UAV throughout its
-trajectory, which eliminates false positives and negatives; future work can include a function to automatically
-redraw ROIs when the object is nearing the end of the ROI
+Fig. 19 Image Tracker Screensho : Image Processing Pipeline for Ground Node 2 (6/26/23 fligh es ) - es ing
+ he GBVT’s ROI and racking capabili ies by pausing and redrawing he ROI o follow he UAV hroughou i s
+ rajec ory, which elimina es false posi ives and nega ives; fu ure work can include a func ion o au oma ically
+redraw ROIs when he objec is nearing he end of he ROI
 
 
 
-Fig. 20 Image Tracker Screenshot: Image Processing Pipeline for Ground Node 3 (6/26/23 flight test) - the UAV
-(319) heads towards the landing zone at ground node 3 (orange mat in the bottom left); for clarity, the black box
-in the top row’s middle window is the same mask in the first window in the top left
+Fig. 20 Image Tracker Screensho : Image Processing Pipeline for Ground Node 3 (6/26/23 fligh es ) - he UAV
+(319) heads owards he landing zone a ground node 3 (orange ma in he bo om lef ); for clari y, he black box
+in he op row’s middle window is he same mask in he firs window in he op lef 
 
 
 
@@ -1591,14 +1591,14 @@ in the top row’s middle window is the same mask in the first window in the top
 
 
 
-Fig. 21 Image Tracker: “Claw Phenomenon” for Ground Node 3’s Camera - tracking subcomponents of the
-target as distinct objects
+Fig. 21 Image Tracker: “Claw Phenomenon” for Ground Node 3’s Camera - racking subcomponen s of he
+ arge as dis inc objec s
 
 
 
-Fig. 22 Image Tracker Screenshot: Image Processing Pipeline for Ground Node 4 (6/26/23 flight test) - several
-birds confuse the GBVT, making it difficult to detect the UAV (226) and process the pixel coordinates and azimuth
-& elevation angles, especially during overlaps or “collisions”
+Fig. 22 Image Tracker Screensho : Image Processing Pipeline for Ground Node 4 (6/26/23 fligh es ) - several
+birds confuse he GBVT, making i difficul o de ec he UAV (226) and process he pixel coordina es and azimu h
+& eleva ion angles, especially during overlaps or “collisions”
 
 
 
@@ -1614,34 +1614,34 @@ birds confuse the GBVT, making it difficult to detect the UAV (226) and process 
 
 
 
-Fig. 23 Image Tracker: Same Label (106) for Two Objects - Label 106 enhances clarity, depicting a bird (left)
-and UAV (right); IDs are not unique for overlapping objects
+Fig. 23 Image Tracker: Same Label (106) for Two Objec s - Label 106 enhances clari y, depic ing a bird (lef )
+and UAV (righ ); IDs are no unique for overlapping objec s
 
 
 
-based on the current state and kinematics. Implementing this type of Kalman filter could estimate the state of a detected
-object in subsequent iterations, thereby preventing the assignment of identical identifiers to overlapping objects.
+based on he curren s a e and kinema ics. Implemen ing his ype of Kalman fil er could es ima e he s a e of a de ec ed
+objec in subsequen i era ions, hereby preven ing he assignmen of iden ical iden ifiers o overlapping objec s.
 
 
 
-(a) UAV labeled with ID#: 106 (b) UAV labeled with ID#: 219
+(a) UAV labeled wi h ID#: 106 (b) UAV labeled wi h ID#: 219
 
 
 
-Fig. 24 Image Tracker Label Change During Overlapping Paths at Ground Node 4
+Fig. 24 Image Tracker Label Change During Overlapping Pa hs a Ground Node 4
 
 
 
-2. Detector Precision and Recall
-Reference [24] offers comprehensive performance metrics and values concerning the detector’s precision and recall.
+2. De ec or Precision and Recall
+Reference [24] offers comprehensive performance me rics and values concerning he de ec or’s precision and recall.
 
 
 
-The definitions and performance metrics employed by the GBVT align with those provided in the reference above. True
-positives (TP) denote the number of drone detections (centroids) located within 100 pixels of the ground truth, false
-positives (FP) signify the number of detections (centroids) corresponding to clouds, birds, aircraft, and other objects
-within a 100-pixel proximity to the ground truth, and false negatives (FN) represent the instances of missed drone
-detections. Notably, one pixel corresponds to an angular resolution of 0.05 degrees, resulting in a 100-pixel radius
+The defini ions and performance me rics employed by he GBVT align wi h hose provided in he reference above. True
+posi ives (TP) deno e he number of drone de ec ions (cen roids) loca ed wi hin 100 pixels of he ground ru h, false
+posi ives (FP) signify he number of de ec ions (cen roids) corresponding o clouds, birds, aircraf , and o her objec s
+wi hin a 100-pixel proximi y o he ground ru h, and false nega ives (FN) represen he ins ances of missed drone
+de ec ions. No ably, one pixel corresponds o an angular resolu ion of 0.05 degrees, resul ing in a 100-pixel radius
 
 
 
@@ -1657,7 +1657,7 @@ detections. Notably, one pixel corresponds to an angular resolution of 0.05 degr
 
 
 
-equivalent to 5 degrees. The detector precision (DP) and detector recall (DR) are defined as follows:
+equivalen o 5 degrees. The de ec or precision (DP) and de ec or recall (DR) are defined as follows:
 
 
 
@@ -1680,41 +1680,41 @@ equivalent to 5 degrees. The detector precision (DP) and detector recall (DR) ar
 
 
 
-Each video encapsulates up to 8 minutes and 54 seconds of footage. Ground nodes 1 and 4’s videos capture the UAV
-throughout one video, while ground nodes 2 and 3’s videos span two segments. Table 4 enumerates the detection
-precision and recall values for ground node 1, demonstrating notable accuracy. Ground node 1 exhibits high precision
-values, primarily due to false positives (birds) scarcity. However, the occurrence of false negatives, i.e., missed
-detections, is attributed to two primary factors: 1) the presence of masks over powerlines and a streetlight (refer to
-Figure 25) and 2) the UAV appears very small when it is far away from the camera. Ground node 2 exhibits a slight
+Each video encapsula es up o 8 minu es and 54 seconds of foo age. Ground nodes 1 and 4’s videos cap ure he UAV
+ hroughou one video, while ground nodes 2 and 3’s videos span wo segmen s. Table 4 enumera es he de ec ion
+precision and recall values for ground node 1, demons ra ing no able accuracy. Ground node 1 exhibi s high precision
+values, primarily due o false posi ives (birds) scarci y. However, he occurrence of false nega ives, i.e., missed
+de ec ions, is a ribu ed o wo primary fac ors: 1) he presence of masks over powerlines and a s ree ligh (refer o
+Figure 25) and 2) he UAV appears very small when i is far away from he camera. Ground node 2 exhibi s a sligh 
 
 
 
-Table 4 Detector Precision and Recall for Ground Node 1’s Camera
+Table 4 De ec or Precision and Recall for Ground Node 1’s Camera
 
 
 
 ID
-True Positives
+True Posi ives
 
 
 
 (TP)
-False Positives
+False Posi ives
 
 
 
 (FP)
-False Negatives
+False Nega ives
 
 
 
 (FN)
-Detection Precision
+De ec ion Precision
 
 
 
 (DP)
-Detetion Recall
+De e ion Recall
 
 
 
@@ -1734,24 +1734,24 @@ Detetion Recall
 
 
 
-Fig. 25 Ground Node 1: ROI and Masks - Mask placement increases the number of false negatives, i.e., missed
-detections
+Fig. 25 Ground Node 1: ROI and Masks - Mask placemen increases he number of false nega ives, i.e., missed
+de ec ions
 
 
 
-camera shift at the commencement of the initial video, resulting in false positives, false negatives, and various other
-detections within the scenery, such as powerlines, trees, and grass. Post-processing and cleaning of the raw data
-contribute to an increased tracking duration for the UAV. Several false negatives persist, as indicated in Table 5. After
-the camera stabilizes, most detection precision and recall values exceed 90%. ID 16, however, demonstrates a lower
-detection precision value at 71.13% due to birds flying within 100 pixels of the UAV. The GBVT’s methodology of
-pausing the video and redrawing the ROI for tracking a small search area yields accurate results. Future work may
-contemplate implementing a dynamic ROI or bounding box that dynamically follows the tracked target to enhance
-tracking performance regarding detection precision and recall. Table 6 provides the detection precision and recall values
-for ground node 3’s camera, capturing the UAV’s final trajectory and landing segment. The initial stages depict the UAV
-as diminutive, rendering detection challenging and inconsistent. Consequently, the UAV’s ID (319) in the first video
-assumes a substantial value. Furthermore, a multitude of false negatives leads to a diminished DR value. As the UAV
-approaches the landing zone, it appears larger, enabling the tracker to detect the UAV’s arms, motors, or propellers.
-However, the GBVT treats these components as separate detections, culminating in more false positives, even though
+camera shif a he commencemen of he ini ial video, resul ing in false posi ives, false nega ives, and various o her
+de ec ions wi hin he scenery, such as powerlines, rees, and grass. Pos -processing and cleaning of he raw da a
+con ribu e o an increased racking dura ion for he UAV. Several false nega ives persis , as indica ed in Table 5. Af er
+ he camera s abilizes, mos de ec ion precision and recall values exceed 90%. ID 16, however, demons ra es a lower
+de ec ion precision value a 71.13% due o birds flying wi hin 100 pixels of he UAV. The GBVT’s me hodology of
+pausing he video and redrawing he ROI for racking a small search area yields accura e resul s. Fu ure work may
+con empla e implemen ing a dynamic ROI or bounding box ha dynamically follows he racked arge o enhance
+ racking performance regarding de ec ion precision and recall. Table 6 provides he de ec ion precision and recall values
+for ground node 3’s camera, cap uring he UAV’s final rajec ory and landing segmen . The ini ial s ages depic he UAV
+as diminu ive, rendering de ec ion challenging and inconsis en . Consequen ly, he UAV’s ID (319) in he firs video
+assumes a subs an ial value. Fur hermore, a mul i ude of false nega ives leads o a diminished DR value. As he UAV
+approaches he landing zone, i appears larger, enabling he racker o de ec he UAV’s arms, mo ors, or propellers.
+However, he GBVT rea s hese componen s as separa e de ec ions, culmina ing in more false posi ives, even hough
 
 
 
@@ -1767,33 +1767,33 @@ However, the GBVT treats these components as separate detections, culminating in
 
 
 
-Table 5 Detector Precision and Recall for Ground Node 2’s Camera (V1 = 1st video & V2 = 2nd video, subscript
-is the ID number)
+Table 5 De ec or Precision and Recall for Ground Node 2’s Camera (V1 = 1s video & V2 = 2nd video, subscrip 
+is he ID number)
 
 
 
 ID
-True Positives
+True Posi ives
 
 
 
 (TP)
-False Positives
+False Posi ives
 
 
 
 (FP)
-False Negatives
+False Nega ives
 
 
 
 (FN)
-Detection Precision
+De ec ion Precision
 
 
 
 (DP)
-Detetion Recall
+De e ion Recall
 
 
 
@@ -1811,39 +1811,39 @@ Detetion Recall
 
 
 
-they do not correspond to birds, powerlines, or other aircraft. Fortunately, as the UAV nears the landing zone, the arms,
-motors, or propeller detections deviate farther from the UAV’s center, surpassing the 100-pixel radius specified in the
-false positives definition. Consequently, the count of false positives for detection precision lacks these detections. Table
+ hey do no correspond o birds, powerlines, or o her aircraf . For una ely, as he UAV nears he landing zone, he arms,
+mo ors, or propeller de ec ions devia e far her from he UAV’s cen er, surpassing he 100-pixel radius specified in he
+false posi ives defini ion. Consequen ly, he coun of false posi ives for de ec ion precision lacks hese de ec ions. Table
 
 
 
-Table 6 Detector Precision and Recall for Ground Node 3’s Camera (V1 = 1st video & V2 = 2nd video, subscript
-is the ID number)
+Table 6 De ec or Precision and Recall for Ground Node 3’s Camera (V1 = 1s video & V2 = 2nd video, subscrip 
+is he ID number)
 
 
 
 ID
-True Positives
+True Posi ives
 
 
 
 (TP)
-False Positives
+False Posi ives
 
 
 
 (FP)
-False Negatives
+False Nega ives
 
 
 
 (FN)
-Detection Precision
+De ec ion Precision
 
 
 
 (DP)
-Detetion Recall
+De e ion Recall
 
 
 
@@ -1856,43 +1856,43 @@ Detetion Recall
 
 
 
-7 outlines the detection precision and recall values for ground node 4’s camera. Regrettably, numerous false negatives
-ensue due to the UAV’s diminutive size, rendering it a smaller blob than the birds. Ground node 4’s camera, hosting the
-most birds and overlapping objects among all cameras, encounters heightened complexity. Consequently, it features
-an extensive array of ID numbers. Noteworthy segments where the GBVT achieves commendable precision for the
-UAV with percentages exceeding 80% occur at IDs 106, 305, and 393. Despite the prevalence of numerous birds flying
-near the UAV and overlapping its path, resulting in diminished detection precision and recall, there are accurate recall
-values with percentages higher than 80% at IDs: 219 and 226. A dynamic ROI or bounding box can enhance tracking
+7 ou lines he de ec ion precision and recall values for ground node 4’s camera. Regre ably, numerous false nega ives
+ensue due o he UAV’s diminu ive size, rendering i a smaller blob han he birds. Ground node 4’s camera, hos ing he
+mos birds and overlapping objec s among all cameras, encoun ers heigh ened complexi y. Consequen ly, i fea ures
+an ex ensive array of ID numbers. No ewor hy segmen s where he GBVT achieves commendable precision for he
+UAV wi h percen ages exceeding 80% occur a IDs 106, 305, and 393. Despi e he prevalence of numerous birds flying
+near he UAV and overlapping i s pa h, resul ing in diminished de ec ion precision and recall, here are accura e recall
+values wi h percen ages higher han 80% a IDs: 219 and 226. A dynamic ROI or bounding box can enhance racking
 performance, as shown in Table 5.
 
 
 
-Table 7 Detector Precision and Recall for Ground Node 4’s Camera
+Table 7 De ec or Precision and Recall for Ground Node 4’s Camera
 
 
 
 ID
-True Positives
+True Posi ives
 
 
 
 (TP)
-False Positives
+False Posi ives
 
 
 
 (FP)
-False Negatives
+False Nega ives
 
 
 
 (FN)
-Detection Precision
+De ec ion Precision
 
 
 
 (DP)
-Detetion Recall
+De e ion Recall
 
 
 
@@ -1923,101 +1923,101 @@ Detetion Recall
 
 
 VI. Conclusion
-The UAV flight test videos present auspicious outcomes in the context of ground-based distributed sensing within
+The UAV fligh es videos presen auspicious ou comes in he con ex of ground-based dis ribu ed sensing wi hin
 
 
 
-the airspace, particularly in the tracking and monitoring of AAM/UAM aircraft, especially in scenarios such as corridor
-surveillance. Prospective AAM/UAM operations necessitate the integration of ground-based and airborne sensors to
-effectively monitor the airspace.
+ he airspace, par icularly in he racking and moni oring of AAM/UAM aircraf , especially in scenarios such as corridor
+surveillance. Prospec ive AAM/UAM opera ions necessi a e he in egra ion of ground-based and airborne sensors o
+effec ively moni or he airspace.
 
 
 
-Under the assumption of precise camera calibration, future work may involve the incorporation of an undistortion
-step within the pre-processing pipeline. This augmentation serves to enhance the system’s robustness, thereby refining
-the accuracy of azimuth and elevation angles pertaining to the target before transmission to the EKF embedded within the
-distributed sensor system. Other future endeavors involve distinguishing different objects during overlapping segments,
-clustering nearby blobs together to remove claw effects in the UAV and its motors/propellers, and implementing a
-dynamic ROI that moves with the target. The ultimate objective of these enhancements is to bolster the precision of
-estimations regarding the target’s states.
+Under he assump ion of precise camera calibra ion, fu ure work may involve he incorpora ion of an undis or ion
+s ep wi hin he pre-processing pipeline. This augmen a ion serves o enhance he sys em’s robus ness, hereby refining
+ he accuracy of azimu h and eleva ion angles per aining o he arge before ransmission o he EKF embedded wi hin he
+dis ribu ed sensor sys em. O her fu ure endeavors involve dis inguishing differen objec s during overlapping segmen s,
+clus ering nearby blobs oge her o remove claw effec s in he UAV and i s mo ors/propellers, and implemen ing a
+dynamic ROI ha moves wi h he arge . The ul ima e objec ive of hese enhancemen s is o bols er he precision of
+es ima ions regarding he arge ’s s a es.
 
 
 
-Subsequent phases of experimentation involving UAS flight tests, coupled with the real-time implementation of the
-GBVT, constitute essential strides toward the preliminary development of an AAM/UAM distributed sensing architecture.
-This architecture aims to mirror characteristics akin to those observed in ATC/ATM systems.
+Subsequen phases of experimen a ion involving UAS fligh es s, coupled wi h he real- ime implemen a ion of he
+GBVT, cons i u e essen ial s rides oward he preliminary developmen of an AAM/UAM dis ribu ed sensing archi ec ure.
+This archi ec ure aims o mirror charac eris ics akin o hose observed in ATC/ATM sys ems.
 
 
 
-Acknowledgments
-The authors would like to thank the Transformative Tools and Technologies (TTT) Project under the NASA
+Acknowledgmen s
+The au hors would like o hank he Transforma ive Tools and Technologies (TTT) Projec under he NASA
 
 
 
-Aeronautics Research Mission Directorate (ARMD) for funding this research. The authors would also like to thank Loc
-Tran (NASA Langley Research Center) for his insight and expertise in image processing and computer vision.
+Aeronau ics Research Mission Direc ora e (ARMD) for funding his research. The au hors would also like o hank Loc
+Tran (NASA Langley Research Cen er) for his insigh and exper ise in image processing and compu er vision.
 
 
 
 References
-[1] Ippolito, C. A., Hashemi, K., Kawamura, E., Gorospe, G., Holforty, W., Kannan, K., Stepanyan, V., Lombaerts, T., Brown, N.,
+[1] Ippoli o, C. A., Hashemi, K., Kawamura, E., Gorospe, G., Holfor y, W., Kannan, K., S epanyan, V., Lombaer s, T., Brown, N.,
 
 
 
-Jaffe, A., et al., “Concepts for Distributed Sensing and Collaborative Airspace Autonomy in Advanced Urban Air Mobility,”
+Jaffe, A., e al., “Concep s for Dis ribu ed Sensing and Collabora ive Airspace Au onomy in Advanced Urban Air Mobili y,”
 AIAA SciTech 2023 Forum, 2023, p. 20.
 
 
 
-[2] Poitevin, P., Pelletier, M., and Lamontagne, P., “Challenges in detecting UAS with radar,” 2017 International Carnahan
-Conference on Security Technology (ICCST), IEEE, 2017, pp. 1–6.
+[2] Poi evin, P., Pelle ier, M., and Lamon agne, P., “Challenges in de ec ing UAS wi h radar,” 2017 In erna ional Carnahan
+Conference on Securi y Technology (ICCST), IEEE, 2017, pp. 1–6.
 
 
 
-[3] Güvenç, I., Ozdemir, O., Yapici, Y., Mehrpouyan, H., and Matolak, D., “Detection, localization, and tracking of unauthorized
-UAS and jammers,” 2017 IEEE/AIAA 36th Digital Avionics Systems Conference (DASC), IEEE, 2017, pp. 1–10.
+[3] Güvenç, I., Ozdemir, O., Yapici, Y., Mehrpouyan, H., and Ma olak, D., “De ec ion, localiza ion, and racking of unau horized
+UAS and jammers,” 2017 IEEE/AIAA 36 h Digi al Avionics Sys ems Conference (DASC), IEEE, 2017, pp. 1–10.
 
 
 
-[4] Accardo, D., Fasano, G., Forlenza, L., Moccia, A., and Rispoli, A., “Flight test of a radar-based tracking system for UAS sense
-and avoid,” IEEE Transactions on Aerospace and Electronic Systems, Vol. 49, No. 2, 2013, pp. 1139–1160.
+[4] Accardo, D., Fasano, G., Forlenza, L., Moccia, A., and Rispoli, A., “Fligh es of a radar-based racking sys em for UAS sense
+and avoid,” IEEE Transac ions on Aerospace and Elec ronic Sys ems, Vol. 49, No. 2, 2013, pp. 1139–1160.
 
 
 
-[5] Martinez, M., “UAS detection, classification, and tracking in urban terrain,” 2019 IEEE Radar Conference (RadarConf), IEEE,
+[5] Mar inez, M., “UAS de ec ion, classifica ion, and racking in urban errain,” 2019 IEEE Radar Conference (RadarConf), IEEE,
 2019, pp. 1–6.
 
 
 
-[6] Samaras, S., Magoulianitis, V., Dimou, A., Zarpalas, D., and Daras, P., “UAV classification with deep learning using surveillance
-radar data,” International Conference on Computer Vision Systems, Springer, 2019, pp. 744–753.
+[6] Samaras, S., Magouliani is, V., Dimou, A., Zarpalas, D., and Daras, P., “UAV classifica ion wi h deep learning using surveillance
+radar da a,” In erna ional Conference on Compu er Vision Sys ems, Springer, 2019, pp. 744–753.
 
 
 
-[7] Mohajerin, N., Histon, J., Dizaji, R., and Waslander, S. L., “Feature extraction and radar track classification for detecting UAVs
+[7] Mohajerin, N., His on, J., Dizaji, R., and Waslander, S. L., “Fea ure ex rac ion and radar rack classifica ion for de ec ing UAVs
 in civillian airspace,” 2014 IEEE Radar Conference, IEEE, 2014, pp. 0674–0679.
 
 
 
-[8] Fu, C., Carrio, A., Olivares-Mendez, M. A., Suarez-Fernandez, R., and Campoy, P., “Robust real-time vision-based aircraft
-tracking from unmanned aerial vehicles,” 2014 ieee international conference on robotics and automation (ICRA), IEEE, 2014,
-pp. 5441–5446. https://doi.org/10.1109/ICRA.2014.6907659.
+[8] Fu, C., Carrio, A., Olivares-Mendez, M. A., Suarez-Fernandez, R., and Campoy, P., “Robus real- ime vision-based aircraf 
+ racking from unmanned aerial vehicles,” 2014 ieee in erna ional conference on robo ics and au oma ion (ICRA), IEEE, 2014,
+pp. 5441–5446. h ps://doi.org/10.1109/ICRA.2014.6907659.
 
 
 
-[9] Sattigeri, R., Johnson, E., Calise, A., and Ha, J., “Vision-based target tracking with adaptive target state estimator,” AIAA
-Guidance, Navigation and Control Conference and Exhibit, 2007, p. 6828. https://doi.org/10.2514/6.2007-6828.
+[9] Sa igeri, R., Johnson, E., Calise, A., and Ha, J., “Vision-based arge racking wi h adap ive arge s a e es ima or,” AIAA
+Guidance, Naviga ion and Con rol Conference and Exhibi , 2007, p. 6828. h ps://doi.org/10.2514/6.2007-6828.
 
 
 
-[10] Sivaraman, S., and Trivedi, M. M., “Looking at vehicles on the road: A survey of vision-based vehicle detection, tracking,
-and behavior analysis,” IEEE transactions on intelligent transportation systems, Vol. 14, No. 4, 2013, pp. 1773–1795.
-https://doi.org/10.1109/TITS.2013.2266661.
+[10] Sivaraman, S., and Trivedi, M. M., “Looking a vehicles on he road: A survey of vision-based vehicle de ec ion, racking,
+and behavior analysis,” IEEE ransac ions on in elligen ranspor a ion sys ems, Vol. 14, No. 4, 2013, pp. 1773–1795.
+h ps://doi.org/10.1109/TITS.2013.2266661.
 
 
 
-[11] Toyama, K., and Hager, G. D., “Incremental focus of attention for robust vision-based tracking,” International Journal of
-Computer Vision, Vol. 35, 1999, pp. 45–63. https://doi.org/10.1023/A:1008159011682.
+[11] Toyama, K., and Hager, G. D., “Incremen al focus of a en ion for robus vision-based racking,” In erna ional Journal of
+Compu er Vision, Vol. 35, 1999, pp. 45–63. h ps://doi.org/10.1023/A:1008159011682.
 
 
 
@@ -2027,91 +2027,91 @@ Computer Vision, Vol. 35, 1999, pp. 45–63. https://doi.org/10.1023/A:100815901
 
 
 
-https://doi.org/10.1109/ICRA.2014.6907659
+h ps://doi.org/10.1109/ICRA.2014.6907659
 
 
-https://doi.org/10.2514/6.2007-6828
+h ps://doi.org/10.2514/6.2007-6828
 
 
-https://doi.org/10.1109/TITS.2013.2266661
+h ps://doi.org/10.1109/TITS.2013.2266661
 
 
-https://doi.org/10.1023/A:1008159011682
-
-
-
+h ps://doi.org/10.1023/A:1008159011682
 
 
 
 
 
-[12] Joo, S., Ippolito, C., Al-Ali, K., and Yeh, Y.-H., “Vision aided inertial navigation with measurement delay for fixed-wing
-unmanned aerial vehicle landing,” 2008 IEEE aerospace conference, IEEE, 2008, pp. 1–9. https://doi.org/10.1109/AERO.2008.
+
+
+
+[12] Joo, S., Ippoli o, C., Al-Ali, K., and Yeh, Y.-H., “Vision aided iner ial naviga ion wi h measuremen delay for fixed-wing
+unmanned aerial vehicle landing,” 2008 IEEE aerospace conference, IEEE, 2008, pp. 1–9. h ps://doi.org/10.1109/AERO.2008.
 4526557.
 
 
 
-[13] Bharati, S. P., Nandi, S., Wu, Y., Sui, Y., and Wang, G., “Fast and robust object tracking with adaptive detection,”
-2016 IEEE 28th international conference on tools with artificial intelligence (ICTAI), IEEE, 2016, pp. 706–713. https:
+[13] Bhara i, S. P., Nandi, S., Wu, Y., Sui, Y., and Wang, G., “Fas and robus objec racking wi h adap ive de ec ion,”
+2016 IEEE 28 h in erna ional conference on ools wi h ar ificial in elligence (ICTAI), IEEE, 2016, pp. 706–713. h ps:
 //doi.org/10.1109/ICTAI.2016.0112.
 
 
 
-[14] Ganti, S. R., and Kim, Y., “Implementation of detection and tracking mechanism for small UAS,” 2016 International Conference
-on Unmanned Aircraft Systems (ICUAS), IEEE, 2016, pp. 1254–1260.
+[14] Gan i, S. R., and Kim, Y., “Implemen a ion of de ec ion and racking mechanism for small UAS,” 2016 In erna ional Conference
+on Unmanned Aircraf Sys ems (ICUAS), IEEE, 2016, pp. 1254–1260.
 
 
 
-[15] Iswanto, I. A., and Li, B., “Visual object tracking based on mean-shift and particle-Kalman filter,” Procedia computer science,
-Vol. 116, 2017, pp. 587–595. https://doi.org/10.1016/j.procs.2017.10.010.
+[15] Iswan o, I. A., and Li, B., “Visual objec racking based on mean-shif and par icle-Kalman fil er,” Procedia compu er science,
+Vol. 116, 2017, pp. 587–595. h ps://doi.org/10.1016/j.procs.2017.10.010.
 
 
 
-[16] The Edge Company, “BCMS Ventur Bird Drone Detection System,” Mare Nostrum Communicazione, 2021. URL https:
-//www.theedgecompany.net/bcms-ventur-bird-drone-detection-system/.
+[16] The Edge Company, “BCMS Ven ur Bird Drone De ec ion Sys em,” Mare Nos rum Communicazione, 2021. URL h ps:
+//www. heedgecompany.ne /bcms-ven ur-bird-drone-de ec ion-sys em/.
 
 
 
-[17] Lombaerts, T., Kawamura, E., Kannan, C., Keerthanaand Dolph, Stepanyan, V., Gorospe, G., and Ippolito, C. A., “Development
-and Field Test Results of Distributed Ground Sensor Fusion Based Object Tracking,” AIAA SciTech 2024 Forum, 2024.
+[17] Lombaer s, T., Kawamura, E., Kannan, C., Keer hanaand Dolph, S epanyan, V., Gorospe, G., and Ippoli o, C. A., “Developmen 
+and Field Tes Resul s of Dis ribu ed Ground Sensor Fusion Based Objec Tracking,” AIAA SciTech 2024 Forum, 2024.
 
 
 
-[18] Stepanyan, V., Ippolito, C., Kannan, K., Kawamura, E., Lombaerts, T., Holforty, W., and Dolph, C., “Flight Test Design and
-Implementation for Airspace Independent Surveillance through a Distributed Ground Based Sensor Network,” AIAA SciTech
+[18] S epanyan, V., Ippoli o, C., Kannan, K., Kawamura, E., Lombaer s, T., Holfor y, W., and Dolph, C., “Fligh Tes Design and
+Implemen a ion for Airspace Independen Surveillance hrough a Dis ribu ed Ground Based Sensor Ne work,” AIAA SciTech
 2024 Forum, 2024.
 
 
 
-[19] Kawamura, E., Dolph, C., Kannan, K., Lombaerts, T., and Ippolito, C. A., “Simulated Vision-based Approach and Landing
-System Advanced Air Mobility,” AIAA SciTech 2023 Forum, AIAA-2023-2195, 2023. https://doi.org/10.2514/6.2023-2195.
+[19] Kawamura, E., Dolph, C., Kannan, K., Lombaer s, T., and Ippoli o, C. A., “Simula ed Vision-based Approach and Landing
+Sys em Advanced Air Mobili y,” AIAA SciTech 2023 Forum, AIAA-2023-2195, 2023. h ps://doi.org/10.2514/6.2023-2195.
 
 
 
-[20] Russell, S. J., and Norvig, P., Artificial Intelligence A Modern Approach, 3rd ed., Pearson Education, Inc., 2010.
+[20] Russell, S. J., and Norvig, P., Ar ificial In elligence A Modern Approach, 3rd ed., Pearson Educa ion, Inc., 2010.
 
 
 
-[21] Lombaerts, T., Kannan, K., Kawamura, E., Dolph, C., Stepanyan, V., George, G., and Ippolito, C., “Distributed Ground
-Sensor Fusion Based Object Tracking for Autonomous Advanced Air Mobility Operations,” AIAA SciTech 2023 Forum,
-AIAA-2023-0896, 2023. https://doi.org/10.2514/6.2023-0896.
+[21] Lombaer s, T., Kannan, K., Kawamura, E., Dolph, C., S epanyan, V., George, G., and Ippoli o, C., “Dis ribu ed Ground
+Sensor Fusion Based Objec Tracking for Au onomous Advanced Air Mobili y Opera ions,” AIAA SciTech 2023 Forum,
+AIAA-2023-0896, 2023. h ps://doi.org/10.2514/6.2023-0896.
 
 
 
-[22] Kannan, K., Baculi, J., Lombaerts, T., Kawamura, E., Gorospe, G., Holforty, W., Ippolito, C., Stepanyan, V., Dolph, C., and
-Brown, N., “A Simulation Architecture for Air Traffic Over Urban Environments Supporting Autonomy Research in Advanced
-Air Mobility,” AIAA SciTech 2023 Forum, AIAA-2023-0895, 2023. https://doi.org/10.2514/6.2023-0895.
+[22] Kannan, K., Baculi, J., Lombaer s, T., Kawamura, E., Gorospe, G., Holfor y, W., Ippoli o, C., S epanyan, V., Dolph, C., and
+Brown, N., “A Simula ion Archi ec ure for Air Traffic Over Urban Environmen s Suppor ing Au onomy Research in Advanced
+Air Mobili y,” AIAA SciTech 2023 Forum, AIAA-2023-0895, 2023. h ps://doi.org/10.2514/6.2023-0895.
 
 
 
-[23] Stepanyan, V., Kannan, K., Kawamura, E., Lombaerts, T., and Ippolito, C., “Target Tracking with Distributed Sensing and
-Optimal Data Migration,” AIAA SciTech 2023 Forum, AIAA-2023-2194, 2023. https://doi.org/10.2514/6.2023-2194.
+[23] S epanyan, V., Kannan, K., Kawamura, E., Lombaer s, T., and Ippoli o, C., “Targe Tracking wi h Dis ribu ed Sensing and
+Op imal Da a Migra ion,” AIAA SciTech 2023 Forum, AIAA-2023-2194, 2023. h ps://doi.org/10.2514/6.2023-2194.
 
 
 
-[24] Dolph, C. V., Minwalla, C., Glaab, L. J., Logan, M. J., Danette Allen, B., and Iftekharuddin, K. M., “Detection and Tracking
-of Aircraft from Small Unmanned Aerial Systems,” Journal of Aerospace Information Systems, Vol. 18, No. 11, 2021, pp.
-838–851. https://doi.org/10.2514/1.I010911.
+[24] Dolph, C. V., Minwalla, C., Glaab, L. J., Logan, M. J., Dane e Allen, B., and If ekharuddin, K. M., “De ec ion and Tracking
+of Aircraf from Small Unmanned Aerial Sys ems,” Journal of Aerospace Informa ion Sys ems, Vol. 18, No. 11, 2021, pp.
+838–851. h ps://doi.org/10.2514/1.I010911.
 
 
 
@@ -2121,85 +2121,85 @@ of Aircraft from Small Unmanned Aerial Systems,” Journal of Aerospace Informat
 
 
 
-https://doi.org/10.1109/AERO.2008.4526557
+h ps://doi.org/10.1109/AERO.2008.4526557
 
 
-https://doi.org/10.1109/AERO.2008.4526557
+h ps://doi.org/10.1109/AERO.2008.4526557
 
 
-https://doi.org/10.1109/ICTAI.2016.0112
+h ps://doi.org/10.1109/ICTAI.2016.0112
 
 
-https://doi.org/10.1109/ICTAI.2016.0112
+h ps://doi.org/10.1109/ICTAI.2016.0112
 
 
-https://doi.org/10.1016/j.procs.2017.10.010
+h ps://doi.org/10.1016/j.procs.2017.10.010
 
 
-https://www.theedgecompany.net/bcms-ventur-bird-drone-detection-system/
+h ps://www. heedgecompany.ne /bcms-ven ur-bird-drone-de ec ion-sys em/
 
 
-https://www.theedgecompany.net/bcms-ventur-bird-drone-detection-system/
+h ps://www. heedgecompany.ne /bcms-ven ur-bird-drone-de ec ion-sys em/
 
 
-https://doi.org/10.2514/6.2023-2195
+h ps://doi.org/10.2514/6.2023-2195
 
 
-https://doi.org/10.2514/6.2023-0896
+h ps://doi.org/10.2514/6.2023-0896
 
 
-https://doi.org/10.2514/6.2023-0895
+h ps://doi.org/10.2514/6.2023-0895
 
 
-https://doi.org/10.2514/6.2023-2194
+h ps://doi.org/10.2514/6.2023-2194
 
 
-https://doi.org/10.2514/1.I010911
+h ps://doi.org/10.2514/1.I010911
 
 
 
- 
-Introduction
+	
+In roduc ion
 
- 
+	
 Ground-Based Vision Tracker
 
- 
+	
 MATLAB
 
- 
+	
 OpenCV: C++
 
 
- 
-Distributed Cameras and Radar: Azimuth and Elevation Angles
+	
+Dis ribu ed Cameras and Radar: Azimu h and Eleva ion Angles
 
- 
-Flight Tests
+	
+Fligh Tes s
 
- 
-Preliminary Test with One Camera
+	
+Preliminary Tes wi h One Camera
 
- 
-Distributed Sensing Test with Four Cameras
+	
+Dis ribu ed Sensing Tes wi h Four Cameras
 
 
- 
-Results
+	
+Resul s
 
- 
-Preliminary Test with One Camera
+	
+Preliminary Tes wi h One Camera
 
- 
-Distributed Sensing Test with Four Cameras
+	
+Dis ribu ed Sensing Tes wi h Four Cameras
 
- 
+	
 GBVT Image Processing Pipeline
 
- 
-Detector Precision and Recall
+	
+De ec or Precision and Recall
 
 
 
- 
+	
 Conclusion

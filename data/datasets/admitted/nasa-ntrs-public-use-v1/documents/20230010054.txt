@@ -2,11 +2,11 @@ Paper for Space Cryogenics Workshop 2023
 
 
 
-Two-dimensional network flow modeling of no-vent tank filling of a cryogenic 
+Two-dimensional ne work flow modeling of no-ven ank filling of a cryogenic 
 
 
 
-tank with thermo-dynamic vent system assisted injector 
+ ank wi h hermo-dynamic ven sys em assis ed injec or 
 
 
 
@@ -14,23 +14,23 @@ Alok Majumdar, Andre LeClair
 
 
 
-NASA Marshall Space Center, Huntsville, AL 35812 
+NASA Marshall Space Cen er, Hun sville, AL 35812 
 
 
 
-Jason Hartwig 
+Jason Har wig 
 
 
 
-NASA/Glenn Research Center, Cleveland, OH 44135 
+NASA/Glenn Research Cen er, Cleveland, OH 44135 
 
 
 
- S. Mostafa Ghiaasiaan 
+ S. Mos afa Ghiaasiaan 
 
 
 
-Georgia Institute of Technology; Atlanta, GA 30332-0405 
+Georgia Ins i u e of Technology; A lan a, GA 30332-0405 
 
 
 
@@ -38,63 +38,63 @@ ABSTRACT
 
 
 
-A finite volume-based network flow modeling tool, Generalized Fluid System Simulation Program 
+A fini e volume-based ne work flow modeling ool, Generalized Fluid Sys em Simula ion Program 
 
 
 
-(GFSSP), was used to simulate the no-vent filling of a cryogenic tank with a thermodynamic vent 
+(GFSSP), was used o simula e he no-ven filling of a cryogenic ank wi h a hermodynamic ven 
 
 
 
-system assisted injector. The tank was discretized into nodes in the radial and axial directions to 
+sys em assis ed injec or. The ank was discre ized in o nodes in he radial and axial direc ions o 
 
 
 
-calculate two-dimensional axisymmetric flow with heat transfer between the solid wall and fluid. 
+calcula e wo-dimensional axisymme ric flow wi h hea ransfer be ween he solid wall and fluid. 
 
 
 
-The nodes are connected by branches where momentum equations are solved to calculate the 
+The nodes are connec ed by branches where momen um equa ions are solved o calcula e he 
 
 
 
-flowrates. The mass and energy conservation equations and the equation of state are solved to 
+flowra es. The mass and energy conserva ion equa ions and he equa ion of s a e are solved o 
 
 
 
-calculate pressure, temperature, and resident mass at the nodes. The energy conservation equations 
+calcula e pressure, empera ure, and residen mass a he nodes. The energy conserva ion equa ions 
 
 
 
-at the solid nodes were solved to calculate the temperature of the solid wall. The system of 
+a he solid nodes were solved o calcula e he empera ure of he solid wall. The sys em of 
 
 
 
-equations was solved by a combination of successive substitution and simultaneous Newton-
+equa ions was solved by a combina ion of successive subs i u ion and simul aneous New on-
 
 
 
-Raphson method. The numerical model accounts for a) different regimes of pool boiling heat 
+Raphson me hod. The numerical model accoun s for a) differen regimes of pool boiling hea 
 
 
 
-transfer, b) condensation of vapor around the spray droplets, c) condensation of vapor at the 
+ ransfer, b) condensa ion of vapor around he spray drople s, c) condensa ion of vapor a he 
 
 
 
-interface of the cooled injector and ullage, and d) condensation at the liquid-vapor interphase. The 
+in erface of he cooled injec or and ullage, and d) condensa ion a he liquid-vapor in erphase. The 
 
 
 
-numerical predictions of tank pressure, filling rate, and wall temperatures were compared with the 
+numerical predic ions of ank pressure, filling ra e, and wall empera ures were compared wi h he 
 
 
 
-test data. The paper also presents the effect of nodal discretization by comparing the results of the 
+ es da a. The paper also presen s he effec of nodal discre iza ion by comparing he resul s of he 
 
 
 
-1D and 2D models and examines the effect of the droplet diameter on tank filling. 
+1D and 2D models and examines he effec of he drople diame er on ank filling. 
 
 
 
@@ -102,51 +102,47 @@ test data. The paper also presents the effect of nodal discretization by compari
 
 
 
-1. Introduction 
+1. In roduc ion 
 
 
 
-On orbit transfer of cryogenic liquids is necessary for many future space missions. Filling a tank 
+On orbi ransfer of cryogenic liquids is necessary for many fu ure space missions. Filling a ank 
 
 
 
-with cryogenic fluid is more challenging than filling a tank with water or any other fluid that is in 
+wi h cryogenic fluid is more challenging han filling a ank wi h wa er or any o her fluid ha is in 
 
 
 
-liquid state at atmospheric conditions. Filling a tank with cryogenic fluid is a two-step process. 
+liquid s a e a a mospheric condi ions. Filling a ank wi h cryogenic fluid is a wo-s ep process. 
 
 
 
-First the tank and the transfer line must be chilled. Liquid cryogens start flowing into the tank at a 
+Firs he ank and he ransfer line mus be chilled. Liquid cryogens s ar flowing in o he ank a a 
 
 
 
-significant rate only after the tank and transfer lines are chilled to the fluid saturation temperature. 
+significan ra e only af er he ank and ransfer lines are chilled o he fluid sa ura ion empera ure. 
 
 
 
-In normal gravity, cryogenic tanks are usually filled from the bottom at nearly atmospheric 
+In normal gravi y, cryogenic anks are usually filled from he bo om a nearly a mospheric 
 
 
 
-pressure. The vapor generated due to heat transfer from the warm tank walls is allowed to vent 
+pressure. The vapor genera ed due o hea ransfer from he warm ank walls is allowed o ven 
 
 
 
-from the top of the tank while the tank is being filled. Filling a cryogenic tank in the absence of 
+from he op of he ank while he ank is being filled. Filling a cryogenic ank in he absence of 
 
 
 
-gravity is more challenging because in a non-stratified environment, liquid propellant may not 
+gravi y is more challenging because in a non-s ra ified environmen , liquid propellan may no 
 
 
 
-settle at the tank bottom as it does on earth. There is a strong possibility that liquid propellant may 
-
-
-
-
+se le a he ank bo om as i does on ear h. There is a s rong possibili y ha liquid propellan may 
 
 
 
@@ -154,7 +150,11 @@ settle at the tank bottom as it does on earth. There is a strong possibility tha
 
 
 
-exit through the vent valve, which is typically located at the top of the tank to vent propellant 
+
+
+
+
+exi hrough he ven valve, which is ypically loca ed a he op of he ank o ven propellan 
 
 
 
@@ -166,155 +166,155 @@ vapor.
 
 
 
-To reduce the loss of precious propellant during tank filling, a “charge-hold-vent” (CHV) method 
+To reduce he loss of precious propellan during ank filling, a “charge-hold-ven ” (CHV) me hod 
 
 
 
-[1] was developed. CHV is a cyclic process where the tank wall temperature is reduced to the 
+[1] was developed. CHV is a cyclic process where he ank wall empera ure is reduced o he 
 
 
 
-saturation temperature of cryogenic propellant by extracting energy from the wall by repeated 
+sa ura ion empera ure of cryogenic propellan by ex rac ing energy from he wall by repea ed 
 
 
 
-injections of the liquid propellant followed by a hold and vent process. Once the tank wall reaches 
+injec ions of he liquid propellan followed by a hold and ven process. Once he ank wall reaches 
 
 
 
-the saturation temperature, the tank is filled with a closed vent valve. A simpler method is that of 
+ he sa ura ion empera ure, he ank is filled wi h a closed ven valve. A simpler me hod is ha of 
 
 
 
-Vented-Chill / No-Vent-Fill (VCNVF) [2]. In this method, the tank’s vent valve is kept open for 
+Ven ed-Chill / No-Ven -Fill (VCNVF) [2]. In his me hod, he ank’s ven valve is kep open for 
 
 
 
-an initial period while the tank walls are chilled with a spray of cryogenic liquid that boils to vapor 
+an ini ial period while he ank walls are chilled wi h a spray of cryogenic liquid ha boils o vapor 
 
 
 
-and exits through the vent. When the tank walls have been sufficiently chilled, the vent valve is 
+and exi s hrough he ven . When he ank walls have been sufficien ly chilled, he ven valve is 
 
 
 
-closed, and the tank is filled with liquid. Care must be taken with the timing of the vent closure. 
+closed, and he ank is filled wi h liquid. Care mus be aken wi h he iming of he ven closure. 
 
 
 
-If the vent is closed too early, residual heat in the walls may drive sufficient boil-off to raise the 
+If he ven is closed oo early, residual hea in he walls may drive sufficien boil-off o raise he 
 
 
 
-tank pressure high enough to stall the inlet flow. If the vent is closed too late, some liquid 
+ ank pressure high enough o s all he inle flow. If he ven is closed oo la e, some liquid 
 
 
 
-propellant may be lost out the vent. Compared to the CHV method, VCNVF is less mass efficient; 
+propellan may be los ou he ven . Compared o he CHV me hod, VCNVF is less mass efficien ; 
 
 
 
-the gas being vented during the chill may not be extracting the maximum possible thermal energy 
+ he gas being ven ed during he chill may no be ex rac ing he maximum possible hermal energy 
 
 
 
-from the tank wall. There is always the risk that some of the precious liquid propellant will be 
+from he ank wall. There is always he risk ha some of he precious liquid propellan will be 
 
 
 
-vented. However, VCNVF is much simpler from an operational standpoint. The transfer lines 
+ven ed. However, VCNVF is much simpler from an opera ional s andpoin . The ransfer lines 
 
 
 
-need to be chilled down only once and there is less cycling of inlet and vent valves. Since there is 
+need o be chilled down only once and here is less cycling of inle and ven valves. Since here is 
 
 
 
-no hold period, overall loading time is likely to be shorter. 
+no hold period, overall loading ime is likely o be shor er. 
 
 
 
-The limitation of the VCNVF method to find an optimum target temperature was overcome by the 
+The limi a ion of he VCNVF me hod o find an op imum arge empera ure was overcome by he 
 
 
 
-No Vent Fill (NVF) method [2] where a TVS (Thermodynamic Vent System) augmented injector 
+No Ven Fill (NVF) me hod [2] where a TVS (Thermodynamic Ven Sys em) augmen ed injec or 
 
 
 
-was used with the vent valve closed during the entire filling process. In a TVS-augmented injector, 
+was used wi h he ven valve closed during he en ire filling process. In a TVS-augmen ed injec or, 
 
 
 
-the liquid flow splits into two streams: the minor stream is routed to a Joule-Thomson (J-T) orifice 
+ he liquid flow spli s in o wo s reams: he minor s ream is rou ed o a Joule-Thomson (J-T) orifice 
 
 
 
-where the flow immediately flashes from liquid to vapor or two phase mixture, because the 
+where he flow immedia ely flashes from liquid o vapor or wo phase mix ure, because he 
 
 
 
-downstream of the J-T leg is maintained at vacuum level; the primary stream is injected into the 
+downs ream of he J-T leg is main ained a vacuum level; he primary s ream is injec ed in o he 
 
 
 
-tank after being cooled by the cold vapor of the J-T leg in a heat exchanger. The flow through the 
+ ank af er being cooled by he cold vapor of he J-T leg in a hea exchanger. The flow hrough he 
 
 
 
-J-T leg is also used to cool the outer metal matrix of the injector which in turn cools the vapor in 
+J-T leg is also used o cool he ou er me al ma rix of he injec or which in urn cools he vapor in 
 
 
 
-the tank ullage. The cooling of vapor in the ullage by the cold injector surface reduces the ullage 
+ he ank ullage. The cooling of vapor in he ullage by he cold injec or surface reduces he ullage 
 
 
 
-pressure, allowing liquid to enter and fill the tank. 
+pressure, allowing liquid o en er and fill he ank. 
 
 
 
-An accurate simulation of no vent tank chill and fill is necessary to estimate the amount of 
+An accura e simula ion of no ven ank chill and fill is necessary o es ima e he amoun of 
 
 
 
-propellant that is needed to chill the tank, determine the maximum sustainable flowrate to fill the 
+propellan ha is needed o chill he ank, de ermine he maximum sus ainable flowra e o fill he 
 
 
 
-tank without stalling, and establish a timeline for the filling process. Numerical modeling of filling 
+ ank wi hou s alling, and es ablish a imeline for he filling process. Numerical modeling of filling 
 
 
 
-a cryogenic tank is complex because the flow is unsteady two phase and the process involves both 
+a cryogenic ank is complex because he flow is uns eady wo phase and he process involves bo h 
 
 
 
-boiling and condensation with heat transfer between solid and fluid. In recent years, progress has 
+boiling and condensa ion wi h hea ransfer be ween solid and fluid. In recen years, progress has 
 
 
 
-been made to develop a numerical modeling technique to simulate CHV [3], VCNVF [4] and NVF 
+been made o develop a numerical modeling echnique o simula e CHV [3], VCNVF [4] and NVF 
 
 
 
-[5,6] methods of tank filling and verifying the numerical predictions by comparing with the test 
+[5,6] me hods of ank filling and verifying he numerical predic ions by comparing wi h he es 
 
 
 
-data of Chato et al [1] and Hartwig et al [2]. The numerical technique was incorporated into 
+da a of Cha o e al [1] and Har wig e al [2]. The numerical echnique was incorpora ed in o 
 
 
 
-NASA’s Generalized Fluid System Simulation Program (GFSSP) [7]. 
+NASA’s Generalized Fluid Sys em Simula ion Program (GFSSP) [7]. 
 
 
 
-GFSSP was used [3] to model CHV process by discretizing the tank into multiple nodes with 
+GFSSP was used [3] o model CHV process by discre izing he ank in o mul iple nodes wi h 
 
 
 
-conjugate heat transfer between tank wall and fluid nodes. The predicted propellant consumption 
+conjuga e hea ransfer be ween ank wall and fluid nodes. The predic ed propellan consump ion 
 
 
 
@@ -326,75 +326,75 @@ conjugate heat transfer between tank wall and fluid nodes. The predicted propell
 
 
 
-and wall temperature compared well with the test data measured at K-Site at NASA/GRC [1]. The 
+and wall empera ure compared well wi h he es da a measured a K-Si e a NASA/GRC [1]. The 
 
 
 
-VCNVF test carried out at NASA/MSFC [2] using CRYOTE tank was also modeled [4] using 
+VCNVF es carried ou a NASA/MSFC [2] using CRYOTE ank was also modeled [4] using 
 
 
 
-GFSSP’s multi-node modeling approach. The pool boiling curve was introduced in the model 
+GFSSP’s mul i-node modeling approach. The pool boiling curve was in roduced in he model 
 
 
 
-along with a simplified condensation model at droplet-ullage interphase. The predicted tank 
+along wi h a simplified condensa ion model a drople -ullage in erphase. The predic ed ank 
 
 
 
-pressure, filling rate and wall temperatures compared well with the test data. The multi-node model 
+pressure, filling ra e and wall empera ures compared well wi h he es da a. The mul i-node model 
 
 
 
-of VCNVF test was extended to model NVF test with TVS assisted injector. In this modeling effort 
+of VCNVF es was ex ended o model NVF es wi h TVS assis ed injec or. In his modeling effor 
 
 
 
-[5], two additional condensation models were introduced: condensation at injector-wall interface 
+[5], wo addi ional condensa ion models were in roduced: condensa ion a injec or-wall in erface 
 
 
 
-and condensation at liquid-vapor interphase. The numerical predictions of pressure and tank filling 
+and condensa ion a liquid-vapor in erphase. The numerical predic ions of pressure and ank filling 
 
 
 
-time compare with the measured data within 11% and 5% respectively. 
+ ime compare wi h he measured da a wi hin 11% and 5% respec ively. 
 
 
 
-The purpose of this paper is to investigate the effect of discretization on the performance of No 
+The purpose of his paper is o inves iga e he effec of discre iza ion on he performance of No 
 
 
 
-Vent Tank Filling model. In reference 4 and 5, the tank was discretized into 10 axial nodes. The 
+Ven Tank Filling model. In reference 4 and 5, he ank was discre ized in o 10 axial nodes. The 
 
 
 
-variation in the radial direction was not considered. In the present model, the tank was also 
+varia ion in he radial direc ion was no considered. In he presen model, he ank was also 
 
 
 
-discretized in the radial direction to account for a recirculating flow that could develop in the tank 
+discre ized in he radial direc ion o accoun for a recircula ing flow ha could develop in he ank 
 
 
 
-due to natural convection. The intent was to compare the numerical predictions of 2D 
+due o na ural convec ion. The in en was o compare he numerical predic ions of 2D 
 
 
 
-axisymmetric model with 1D model results and test data. A working progress of 2D model 
+axisymme ric model wi h 1D model resul s and es da a. A working progress of 2D model 
 
 
 
-development was presented in reference 6. A plausible numerical solution was obtained without 
+developmen was presen ed in reference 6. A plausible numerical solu ion was ob ained wi hou 
 
 
 
-introducing pressure work and condensation at liquid vapor interface. Model predictions compared 
+in roducing pressure work and condensa ion a liquid vapor in erface. Model predic ions compared 
 
 
 
-favorably with test data and 1D solution. 
+favorably wi h es da a and 1D solu ion. 
 
 
 
@@ -402,111 +402,51 @@ favorably with test data and 1D solution.
 
 
 
-2.Test Data 
+2.Tes Da a 
 
 
 
-During 2016 to 2018, NASA/MSFC conducted a series of Tank Chill and Fill tests using a flight 
+During 2016 o 2018, NASA/MSFC conduc ed a series of Tank Chill and Fill es s using a fligh 
 
 
 
-tank in a vacuum chamber to collect data for VCNVF and NVF tests with TVS assisted injectors. 
+ ank in a vacuum chamber o collec da a for VCNVF and NVF es s wi h TVS assis ed injec ors. 
 
 
 
-For a detailed description of the hardware and instrumentation, the reader is referred to [2], only 
+For a de ailed descrip ion of he hardware and ins rumen a ion, he reader is referred o [2], only 
 
 
 
-a brief description is given here. The tank is a 6-4 Titanium sphere with outer diameter of 29.70 
+a brief descrip ion is given here. The ank is a 6-4 Ti anium sphere wi h ou er diame er of 29.70 
 
 
 
-inches (75.44 cm) and 0.05-inch (1.27 mm) wall thickness. To minimize heat conduction into the 
+inches (75.44 cm) and 0.05-inch (1.27 mm) wall hickness. To minimize hea conduc ion in o he 
 
 
 
-tank, it is mounted in a cone-shaped composite skirt. The mass of the titanium sphere is 22.7 lbm 
+ ank, i is moun ed in a cone-shaped composi e skir . The mass of he i anium sphere is 22.7 lbm 
 
 
 
-(10.28 kg), and the mass of the stainless-steel lid is 6.35 lbm (2.88kg). 
+(10.28 kg), and he mass of he s ainless-s eel lid is 6.35 lbm (2.88kg). 
 
 
 
-To eliminate convection heat transfer, tests were carried out in a vacuum chamber, as shown in 
+To elimina e convec ion hea ransfer, es s were carried ou in a vacuum chamber, as shown in 
 
 
 
-Figure 1. The larger VATA test tank was used as the supply tank for liquid nitrogen (LN2). To 
+Figure 1. The larger VATA es ank was used as he supply ank for liquid ni rogen (LN2). To 
 
 
 
-reduce radiation heat transfer, CRYOTE was covered with Multi-Layer Insulation (MLI). Based 
+reduce radia ion hea ransfer, CRYOTE was covered wi h Mul i-Layer Insula ion (MLI). Based 
 
 
 
-on earlier boil-off tests, steady-state heat leak into CRYOTE is estimated at 10 W. 
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
-
-Figure 1. CRYOTE and VATA tanks in vacuum chamber. 
-
-
-
- 
-
-
-
-The transfer line between VATA and CRYOTE is approximately 210 inches (5.33 m) of 0.5-inch 
-
-
-
-(1.27 cm) outer-diameter stainless steel tubing, with a mass of 4.2 lbm (1.9 kg). There is no 
-
-
-
-separate pre-chill of the transfer line: vapor created during line chilldown enters the CRYOTE 
-
-
-
-tank. As shown in Figure 2, a series of thermocouples measures the temperature of the outer 
-
-
-
-wall of the pipe. TC50, located just upstream of the CRYOTE injector, is a wetted thermocouple 
-
-
-
-on the inside wall of the transfer line. 
-
-
-
-Figure 3 presents the CRYOTE tank instrumentation. Most of the thermocouples are placed on 
-
-
-
-the outside wall of the tank. Green indicates that the thermocouple was tested as a possible 
-
-
-
-trigger for closure of the vent valve during VCNVF tests. Not shown are TC49 and TC79, 
-
-
-
-wetted thermocouples inside the tank at the 39.5% and 95% fill levels. 
+on earlier boil-off es s, s eady-s a e hea leak in o CRYOTE is es ima ed a 10 W. 
 
 
 
@@ -522,7 +462,7 @@ wetted thermocouples inside the tank at the 39.5% and 95% fill levels.
 
 
 
-Figure 2. Transfer and vent lines with thermocouples. 
+Figure 1. CRYOTE and VATA anks in vacuum chamber. 
 
 
 
@@ -530,15 +470,43 @@ Figure 2. Transfer and vent lines with thermocouples.
 
 
 
-Figure 3. CRYOTE tank instrumentation 
+The ransfer line be ween VATA and CRYOTE is approxima ely 210 inches (5.33 m) of 0.5-inch 
 
 
 
-In addition to temperature measurements, pressure transducers measure the pressures in the 
+(1.27 cm) ou er-diame er s ainless s eel ubing, wi h a mass of 4.2 lbm (1.9 kg). There is no 
 
 
 
-ullages of VATA and CRYOTE, as well as the pressure just upstream of the CRYOTE injector. 
+separa e pre-chill of he ransfer line: vapor crea ed during line chilldown en ers he CRYOTE 
+
+
+
+ ank. As shown in Figure 2, a series of hermocouples measures he empera ure of he ou er 
+
+
+
+wall of he pipe. TC50, loca ed jus ups ream of he CRYOTE injec or, is a we ed hermocouple 
+
+
+
+on he inside wall of he ransfer line. 
+
+
+
+Figure 3 presen s he CRYOTE ank ins rumen a ion. Mos of he hermocouples are placed on 
+
+
+
+ he ou side wall of he ank. Green indica es ha he hermocouple was es ed as a possible 
+
+
+
+ rigger for closure of he ven valve during VCNVF es s. No shown are TC49 and TC79, 
+
+
+
+we ed hermocouples inside he ank a he 39.5% and 95% fill levels. 
 
 
 
@@ -547,50 +515,6 @@ ullages of VATA and CRYOTE, as well as the pressure just upstream of the CRYOTE 
 
 
 
-
-
-
-Load cells provide the mass of VATA and CRYOTE. The change in tank mass over time can be 
-
-
-
-used to calculate the transfer line average flow rate; there was no liquid flow meter used in the 
-
-
-
-tests. All thermocouples had ± 2 K uncertainty and the accuracy of the pressure transducers was 
-
-
-
-± 0.5 %. The details of the experiments are described by Hartwig et al [2]. 
-
-
-
-With the TVS-Assisted NVF method, the tank vent can be kept closed at all times during the 
-
-
-
-filling process. Figure 4 is a photograph of the TVS-Augmented Injector. It is located about 10 
-
-
-
-cm below the top of tank. 
-
-
-
- 
-
-
-
- Figure 4. A photograph of the TVS-Augmented Injector 
-
-
-
-Table 1 outlines significant events in NVF Test 20180404, conducted on April 4, 2018. The 
-
-
-
-model results will be compared to this data in Section 4. 
 
 
 
@@ -598,7 +522,75 @@ model results will be compared to this data in Section 4.
 
 
 
+Figure 2. Transfer and ven lines wi h hermocouples. 
+
+
+
  
+
+
+
+Figure 3. CRYOTE ank ins rumen a ion 
+
+
+
+In addi ion o empera ure measuremen s, pressure ransducers measure he pressures in he 
+
+
+
+ullages of VATA and CRYOTE, as well as he pressure jus ups ream of he CRYOTE injec or. 
+
+
+
+
+
+
+
+
+
+
+
+Load cells provide he mass of VATA and CRYOTE. The change in ank mass over ime can be 
+
+
+
+used o calcula e he ransfer line average flow ra e; here was no liquid flow me er used in he 
+
+
+
+ es s. All hermocouples had ± 2 K uncer ain y and he accuracy of he pressure ransducers was 
+
+
+
+± 0.5 %. The de ails of he experimen s are described by Har wig e al [2]. 
+
+
+
+Wi h he TVS-Assis ed NVF me hod, he ank ven can be kep closed a all imes during he 
+
+
+
+filling process. Figure 4 is a pho ograph of he TVS-Augmen ed Injec or. I is loca ed abou 10 
+
+
+
+cm below he op of ank. 
+
+
+
+ 
+
+
+
+ Figure 4. A pho ograph of he TVS-Augmen ed Injec or 
+
+
+
+Table 1 ou lines significan even s in NVF Tes 20180404, conduc ed on April 4, 2018. The 
+
+
+
+model resul s will be compared o his da a in Sec ion 4. 
 
 
 
@@ -634,6 +626,11 @@ model results will be compared to this data in Section 4.
 
 
 
+ 
+
+
+
+ 
 
 
 
@@ -642,15 +639,18 @@ model results will be compared to this data in Section 4.
 
 
 
-Table 1: Events in TVS-Augmented NVF 
 
 
 
-Test 20180404 
+Table 1: Even s in TVS-Augmen ed NVF 
 
 
 
-Time (sec) Event Description 
+Tes 20180404 
+
+
+
+Time (sec) Even Descrip ion 
 
 
 
@@ -658,11 +658,11 @@ Time (sec) Event Description
 
 
 
-tank from 101 to 379 kPa 
+ ank from 101 o 379 kPa 
 
 
 
-(14.7 to 55 psia) 
+(14.7 o 55 psia) 
 
 
 
@@ -670,11 +670,11 @@ tank from 101 to 379 kPa
 
 
 
-1280 TC50 suggests saturated 
+1280 TC50 sugges s sa ura ed 
 
 
 
-two-phase flow entering 
+ wo-phase flow en ering 
 
 
 
@@ -686,23 +686,23 @@ CRYOTE
 
 
 
-pressure at 58 psia; transfer 
+pressure a 58 psia; ransfer 
 
 
 
-flow stalls 
+flow s alls 
 
 
 
-~1400-1800 Stop-Start inlet flow 
+~1400-1800 S op-S ar inle flow 
 
 
 
-~1760-1830 Load cells suggest liquid 
+~1760-1830 Load cells sugges liquid 
 
 
 
-accumulation begins in 
+accumula ion begins in 
 
 
 
@@ -710,7 +710,7 @@ CRYOTE
 
 
 
-1872 TVS Secondary Flow turned 
+1872 TVS Secondary Flow urned 
 
 
 
@@ -718,47 +718,15 @@ off
 
 
 
-2000 TC50 suggests pure liquid 
+2000 TC50 sugges s pure liquid 
 
 
 
-flow entering CRYOTE 
+flow en ering CRYOTE 
 
 
 
-3268 Stop fill at 89% full 
-
-
-
- 
-
-
-
-3. Mathematical Modeling 
-
-
-
-Numerical modeling of filling a tank at ambient temperature with liquid cryogen is highly 
-
-
-
-complex. The physical processes are complex because the flow is unsteady, two-phase, and the 
-
-
-
-process involves both boiling and condensation with heat transfer between solid and fluid. The 
-
-
-
-objectives of a numerical model of filling a cryogenic tank are to predict the chilldown and 
-
-
-
-filling time and to estimate the amount of propellant consumption to chill down a tank. This 
-
-
-
-paper uses a nodal approach for numerical simulation using GFSSP. 
+3268 S op fill a 89% full 
 
 
 
@@ -766,127 +734,159 @@ paper uses a nodal approach for numerical simulation using GFSSP.
 
 
 
-3.1 Introduction to GFSSP 
+3. Ma hema ical Modeling 
 
 
 
-GFSSP is a general-purpose computer program for analyzing fluid flow and heat transfer in a 
+Numerical modeling of filling a ank a ambien empera ure wi h liquid cryogen is highly 
 
 
 
-complex network of fluid and solid systems. It employs a pressure based, finite volume 
+complex. The physical processes are complex because he flow is uns eady, wo-phase, and he 
 
 
 
-algorithm [8] that solves the mass and energy conservation equations at the nodes and the 
+process involves bo h boiling and condensa ion wi h hea ransfer be ween solid and fluid. The 
 
 
 
-momentum conservation equation at branches connecting the nodes. The energy conservation 
+objec ives of a numerical model of filling a cryogenic ank are o predic he chilldown and 
 
 
 
-equations for solid are solved at solid nodes that are connected with fluid nodes to allow 
+filling ime and o es ima e he amoun of propellan consump ion o chill down a ank. This 
 
 
 
-conjugate heat transfer. The mass and momentum conservation equations along with the 
+paper uses a nodal approach for numerical simula ion using GFSSP. 
 
 
 
-equation of state are solved simultaneously to calculate pressure, flowrate and resident mass 
+ 
 
 
 
-using the Newton-Raphson method. The energy conservation equations are solved by a 
+3.1 In roduc ion o GFSSP 
 
 
 
-successive substitution method to calculate enthalpies at the nodes within the iteration loop of 
+GFSSP is a general-purpose compu er program for analyzing fluid flow and hea ransfer in a 
 
 
 
-Newton-Raphson scheme. This scheme known as “SAAS” (Simultaneous Adjustment with 
+complex ne work of fluid and solid sys ems. I employs a pressure based, fini e volume 
 
 
 
+algori hm [8] ha solves he mass and energy conserva ion equa ions a he nodes and he 
 
 
 
+momen um conserva ion equa ion a branches connec ing he nodes. The energy conserva ion 
 
 
 
+equa ions for solid are solved a solid nodes ha are connec ed wi h fluid nodes o allow 
 
 
-Successive Substitution) scheme [8] has been found to be robust and efficient for a non-linear 
 
+conjuga e hea ransfer. The mass and momen um conserva ion equa ions along wi h he 
 
 
-and coupled set of governing equations. 
 
+equa ion of s a e are solved simul aneously o calcula e pressure, flowra e and residen mass 
 
 
-Thermodynamic properties are calculated for propellants using the computer program GASP [9], 
 
+using he New on-Raphson me hod. The energy conserva ion equa ions are solved by a 
 
 
-which is integrated with GFSSP. The fluid resistance library includes pipes, orifices, and 
 
+successive subs i u ion me hod o calcula e en halpies a he nodes wi hin he i era ion loop of 
 
 
-common fittings and valves. GFSSP has three major parts. The first part is the graphical user 
 
+New on-Raphson scheme. This scheme known as “SAAS” (Simul aneous Adjus men wi h 
 
 
-interface MIG (Modeling Interface for GFSSP). MIG allows users to create a flow circuit by a 
 
 
 
-“point and click” paradigm. It creates the GFSSP input file after the completion of the model 
 
 
 
-building process. It can also create a customized GFSSP executable by compiling and linking 
 
 
 
-User Subroutines with the solver module of the code. The user can run GFSSP from MIG and 
+Successive Subs i u ion) scheme [8] has been found o be robus and efficien for a non-linear 
 
 
 
-post process the results in the same environment. The second major part of the program is the 
+and coupled se of governing equa ions. 
 
 
 
-Solver and Property Module. This is the heart of the program, which reads the input data file and 
+Thermodynamic proper ies are calcula ed for propellan s using he compu er program GASP [9], 
 
 
 
-generates the required conservation equations for fluid and solid nodes and branches with the 
+which is in egra ed wi h GFSSP. The fluid resis ance library includes pipes, orifices, and 
 
 
 
-help of thermodynamic property programs. It also interfaces with User Subroutines to receive 
+common fi ings and valves. GFSSP has hree major par s. The firs par is he graphical user 
 
 
 
-any specific inputs from users. Finally, it creates output files for MIG to read and display results. 
+in erface MIG (Modeling In erface for GFSSP). MIG allows users o crea e a flow circui by a 
 
 
 
-The User Subroutine is the third major part of the program. This consists of several blank 
+“poin and click” paradigm. I crea es he GFSSP inpu file af er he comple ion of he model 
 
 
 
-subroutines that are called by the Solver Module. These subroutines allow the users to 
+building process. I can also crea e a cus omized GFSSP execu able by compiling and linking 
 
 
 
-incorporate any new physical model, resistance option, fluid, etc. in the model. Further details of 
+User Subrou ines wi h he solver module of he code. The user can run GFSSP from MIG and 
 
 
 
-the finite volume procedure and the computer program are described in references 7 and 8. 
+pos process he resul s in he same environmen . The second major par of he program is he 
+
+
+
+Solver and Proper y Module. This is he hear of he program, which reads he inpu da a file and 
+
+
+
+genera es he required conserva ion equa ions for fluid and solid nodes and branches wi h he 
+
+
+
+help of hermodynamic proper y programs. I also in erfaces wi h User Subrou ines o receive 
+
+
+
+any specific inpu s from users. Finally, i crea es ou pu files for MIG o read and display resul s. 
+
+
+
+The User Subrou ine is he hird major par of he program. This consis s of several blank 
+
+
+
+subrou ines ha are called by he Solver Module. These subrou ines allow he users o 
+
+
+
+incorpora e any new physical model, resis ance op ion, fluid, e c. in he model. Fur her de ails of 
+
+
+
+ he fini e volume procedure and he compu er program are described in references 7 and 8. 
 
 
 
@@ -902,43 +902,143 @@ the finite volume procedure and the computer program are described in references
 
 
 
-The chilldown of a propellant tank is primarily governed by boiling of liquid propellant at the 
+The chilldown of a propellan ank is primarily governed by boiling of liquid propellan a he 
 
 
 
-tank wall. Figure 5 shows different pool boiling regimes. During chilldown, the heat flux 
+ ank wall. Figure 5 shows differen pool boiling regimes. During chilldown, he hea flux 
 
 
 
-temperature history of the solid surface moves from right to left (E - D - C – B – A). Initially, the 
+ empera ure his ory of he solid surface moves from righ o lef (E - D - C – B – A). Ini ially, he 
 
 
 
-difference between the solid wall surface temperature and saturation temperature (wall 
+difference be ween he solid wall surface empera ure and sa ura ion empera ure (wall 
 
 
 
-superheat) is typically several hundred degrees. Therefore, the boiling starts in the Film Boiling 
+superhea ) is ypically several hundred degrees. Therefore, he boiling s ar s in he Film Boiling 
 
 
 
-regime and continues until it reaches the Leidenfrost (Minimum Film Boiling, MFB) point. After 
+regime and con inues un il i reaches he Leidenfros (Minimum Film Boiling, MFB) poin . Af er 
 
 
 
-reaching the Leidenfrost point, it switches to Transition Boiling and continues to Critical Heat 
+reaching he Leidenfros poin , i swi ches o Transi ion Boiling and con inues o Cri ical Hea 
 
 
 
-Flux. Nucleate Boiling starts after reaching Critical Heat Flux and, finally, heat transfer is 
+Flux. Nuclea e Boiling s ar s af er reaching Cri ical Hea Flux and, finally, hea ransfer is 
 
 
 
-controlled by natural convection beyond the Onset of Nucleate Boiling (ONB) point. Pool 
+con rolled by na ural convec ion beyond he Onse of Nuclea e Boiling (ONB) poin . Pool 
 
 
 
-boiling correlations used in this paper are described in reference 7. 
+boiling correla ions used in his paper are described in reference 7. 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+ Figure 5. Hea Flux Dis ribu ion during Pool Boiling 
+
+
+
+ 
+
+
+
+ 
+
+
+
+3.3 Condensa ion Model 
+
+
+
+ 
+
+
+
+Condensa ion on a drople from liquid spray 
+
+
+
+ 
+
+
+
+Some of he vapor in he ank ullage condenses during he process of filling he ank by spraying 
+
+
+
+liquid propellan in he ank. Condensa ion of vapor occurs when vapor comes in con ac wi h 
+
+
+
+subcooled liquid spray. Condensa ion reduces he ank pressure and herefore mus be accoun ed 
+
+
+
+for in he numerical model o predic he pressure and he residen liquid mass in he ank. A 
+
+
+
+simple condensa ion model was developed [11] for such analysis. I is assumed ha he liquid 
+
+
+
+spray in he ank remains in he form of drople s of cons an effec ive diame er. The number of 
+
+
+
+drople s in he ank was es ima ed from he residen mass. The me hod of es ima ing he 
+
+
+
+condensa ion ra e was described in reference 10. 
+
+
+
+Condensa ion a Injec or Ullage In erface 
+
+
+
+Figure 6 shows he schema ic of he condensa ion model a Injec or-Ullage in erface. The 
+
+
+
+injec or is cooled by he in ernal flow of cold vapor produced by he J-T valve. Ullage vapor is 
+
+
+
+condensed a his cold surface. Condensa ion occurs on a hin condensa e liquid film where he 
+
+
+
+liquid film-ullage in erface remains a sa ura ion empera ure corresponding o he ullage 
+
+
+
+pressure near he solid surface. The me hod of es ima ing condensa ion ra e described in 
+
+
+
+reference 10 was also used in his paper. 
 
 
 
@@ -951,10 +1051,11 @@ boiling correlations used in this paper are described in reference 7.
 
 
  
+ 
 
 
 
- Figure 5. Heat Flux Distribution during Pool Boiling 
+Figure 6. Schema ic of Injec or – Ullage Condensa ion Model 
 
 
 
@@ -962,100 +1063,43 @@ boiling correlations used in this paper are described in reference 7.
 
 
 
- 
+Condensa ion a he liquid pool-vapor in erface 
 
 
 
-3.3 Condensation Model 
+ The in erphase of liquid and vapor remains sa ura ed wi h respec o he local vapor pressure. A 
 
 
 
- 
+ he liquid-vapor in erphase, here is a possibili y of ei her evapora ion or condensa ion depending 
 
 
 
-Condensation on a droplet from liquid spray 
+upon he condi ion of ullage vapor and liquid. The phase change occurs as a resul of imbalance 
 
 
 
- 
+be ween sensible hea ransfer ra es on he vapor and liquid sides of he sa ura ed in erphase. If 
 
 
 
-Some of the vapor in the tank ullage condenses during the process of filling the tank by spraying 
+ he hea ransfer from he ullage o he in erphase (QUI) is larger han he hea ransfer from he 
 
 
 
-liquid propellant in the tank. Condensation of vapor occurs when vapor comes in contact with 
+in erphase o liquid (QIL), evapora ion of liquid occurs as shown in Figure 7. On he o her hand, 
 
 
 
-subcooled liquid spray. Condensation reduces the tank pressure and therefore must be accounted 
+if he hea ransfer from he in erphase o liquid (QIL) is larger han he hea ransfer from he 
 
 
 
-for in the numerical model to predict the pressure and the resident liquid mass in the tank. A 
+ullage o he in erphase (QUI), condensa ion of vapor occurs a he in erphase. Fur her de ail of 
 
 
 
-simple condensation model was developed [11] for such analysis. It is assumed that the liquid 
-
-
-
-spray in the tank remains in the form of droplets of constant effective diameter. The number of 
-
-
-
-droplets in the tank was estimated from the resident mass. The method of estimating the 
-
-
-
-condensation rate was described in reference 10. 
-
-
-
-Condensation at Injector Ullage Interface 
-
-
-
-Figure 6 shows the schematic of the condensation model at Injector-Ullage interface. The 
-
-
-
-injector is cooled by the internal flow of cold vapor produced by the J-T valve. Ullage vapor is 
-
-
-
-condensed at this cold surface. Condensation occurs on a thin condensate liquid film where the 
-
-
-
-liquid film-ullage interface remains at saturation temperature corresponding to the ullage 
-
-
-
-pressure near the solid surface. The method of estimating condensation rate described in 
-
-
-
-reference 10 was also used in this paper. 
-
-
-
-
-
-
-
-
-
-
-
- 
- 
-
-
-
-Figure 6. Schematic of Injector – Ullage Condensation Model 
+ his analysis appears in Reference 10. 
 
 
 
@@ -1063,51 +1107,7 @@ Figure 6. Schematic of Injector – Ullage Condensation Model
 
 
 
-Condensation at the liquid pool-vapor interface 
-
-
-
- The interphase of liquid and vapor remains saturated with respect to the local vapor pressure. At 
-
-
-
-the liquid-vapor interphase, there is a possibility of either evaporation or condensation depending 
-
-
-
-upon the condition of ullage vapor and liquid. The phase change occurs as a result of imbalance 
-
-
-
-between sensible heat transfer rates on the vapor and liquid sides of the saturated interphase. If 
-
-
-
-the heat transfer from the ullage to the interphase (QUI) is larger than the heat transfer from the 
-
-
-
-interphase to liquid (QIL), evaporation of liquid occurs as shown in Figure 7. On the other hand, 
-
-
-
-if the heat transfer from the interphase to liquid (QIL) is larger than the heat transfer from the 
-
-
-
-ullage to the interphase (QUI), condensation of vapor occurs at the interphase. Further detail of 
-
-
-
-this analysis appears in Reference 10. 
-
-
-
- 
-
-
-
-Figure 7. Evaporative mass transfer at liquid-vapor interface 
+Figure 7. Evapora ive mass ransfer a liquid-vapor in erface 
 
 
 
@@ -1119,31 +1119,31 @@ Figure 7. Evaporative mass transfer at liquid-vapor interface
 
 
 
-4. 1D and 2D GFSSP Model of No Vent Tank Fill 
+4. 1D and 2D GFSSP Model of No Ven Tank Fill 
 
 
 
-Two GFSSP models of NVF Test with TVS augmented injector are described in this section. 
+Two GFSSP models of NVF Tes wi h TVS augmen ed injec or are described in his sec ion. 
 
 
 
-Although the main purpose of this paper is to describe the axisymmetric two-dimensional 
+Al hough he main purpose of his paper is o describe he axisymme ric wo-dimensional 
 
 
 
-model, the 1D model [10] is also described for reference purpose. Both models start from the 
+model, he 1D model [10] is also described for reference purpose. Bo h models s ar from he 
 
 
 
-inlet of the TVS augmented injector and include the J-T valve and the line leading to the 
+inle of he TVS augmen ed injec or and include he J-T valve and he line leading o he 
 
 
 
-vacuum pump. The vent line of the tank was also included because the vent line was open for 
+vacuum pump. The ven line of he ank was also included because he ven line was open for 
 
 
 
-a very short period during tank filling. 
+a very shor period during ank filling. 
 
 
 
@@ -1160,7 +1160,7 @@ a very short period during tank filling.
 
 
  
-Figure 8. 1D GFSSP Model of CRYOTE tank with TVS assisted injector 
+Figure 8. 1D GFSSP Model of CRYOTE ank wi h TVS assis ed injec or 
 
 
 
@@ -1168,43 +1168,43 @@ Figure 8. 1D GFSSP Model of CRYOTE tank with TVS assisted injector
 
 
 
-The 1D GFSSP model of NVF experiment is shown in Figure 8. The model starts from the inlet 
+The 1D GFSSP model of NVF experimen is shown in Figure 8. The model s ar s from he inle 
 
 
 
-to the injector (Node 2). The fluid is distributed to two parallel paths. A smaller portion of the 
+ o he injec or (Node 2). The fluid is dis ribu ed o wo parallel pa hs. A smaller por ion of he 
 
 
 
-flow goes through a J-T valve (Branch 5727) and exits through a vacuum pump represented by 
+flow goes hrough a J-T valve (Branch 5727) and exi s hrough a vacuum pump represen ed by 
 
 
 
-Node 29. In the J-T valve, the liquid is expanded to go through a change of phase and becomes a 
+Node 29. In he J-T valve, he liquid is expanded o go hrough a change of phase and becomes a 
 
 
 
-mixture of cold liquid and vapor. This cold mixture cools Solid Node 30 which represents the 
+mix ure of cold liquid and vapor. This cold mix ure cools Solid Node 30 which represen s he 
 
 
 
-injector surface (Figure 6) in contact with the ullage. The larger portion of the flow goes through 
+injec or surface (Figure 6) in con ac wi h he ullage. The larger por ion of he flow goes hrough 
 
 
 
-the injector represented by Node 32 and 9 restriction branches (321, 327, 328, 329, 3210, 3211, 
+ he injec or represen ed by Node 32 and 9 res ric ion branches (321, 327, 328, 329, 3210, 3211, 
 
 
 
-3212, 3213, 3214). These branches all have identical resistances and therefore the injector 
+3212, 3213, 3214). These branches all have iden ical resis ances and herefore he injec or 
 
 
 
-provides uniform flow to 9 Tank Nodes (1, 7, 8, 9, 10, 11, 12, 13, 14). Note that the top tank 
+provides uniform flow o 9 Tank Nodes (1, 7, 8, 9, 10, 11, 12, 13, 14). No e ha he op ank 
 
 
 
-node 15 does not receive any spray. However, it is cooled by the injector surface (Node 30). 
+node 15 does no receive any spray. However, i is cooled by he injec or surface (Node 30). 
 
 
 
@@ -1220,27 +1220,27 @@ node 15 does not receive any spray. However, it is cooled by the injector surfac
 
 
 
-In the 1D model, the spherical tank was modeled as 9 cylindrical segments with different 
+In he 1D model, he spherical ank was modeled as 9 cylindrical segmen s wi h differen 
 
 
 
-diameters. The combined volume of the 9 cylinders was equal to the tank volume. Those 9 
+diame ers. The combined volume of he 9 cylinders was equal o he ank volume. Those 9 
 
 
 
-cylinders were represented by 9 branches (17, 78, 89, 910, 1011, 1112, 1213, 1314 and 1415). 
+cylinders were represen ed by 9 branches (17, 78, 89, 910, 1011, 1112, 1213, 1314 and 1415). 
 
 
 
-The length of each branch is 3.188 inches. The diameter of each branch is provided in Table 2. 
+The leng h of each branch is 3.188 inches. The diame er of each branch is provided in Table 2. 
 
 
 
-Table 2: Branch Diameters in 1D Model 
+Table 2: Branch Diame ers in 1D Model 
 
 
 
-Branch Number Diameter (inches) 
+Branch Number Diame er (inches) 
 
 
 
@@ -1288,7 +1288,7 @@ Branch Number Diameter (inches)
 
 
 
-It may be noted that in the 1D model, tank volume was assigned through branches. Node 
+I may be no ed ha in he 1D model, ank volume was assigned hrough branches. Node 
 
 
 
@@ -1304,39 +1304,39 @@ volumes were derived from branch volumes.
 
 
 
-The 2D model is shown in Figure 9. The modeling of the TVS injector is identical to the 
+The 2D model is shown in Figure 9. The modeling of he TVS injec or is iden ical o he 
 
 
 
-aforementioned 1D model. In the 2D model, the tank is discreized into 50 nodes: 10 nodes in the 
+aforemen ioned 1D model. In he 2D model, he ank is discreized in o 50 nodes: 10 nodes in he 
 
 
 
-axial (vertical) direction (identical to the 1D model) and 5 nodes in the radial direction as can be 
+axial (ver ical) direc ion (iden ical o he 1D model) and 5 nodes in he radial direc ion as can be 
 
 
 
-seen in Figure 10. Unlike the 1D model, tank volume was is distributed among the nodes. The 
+seen in Figure 10. Unlike he 1D model, ank volume was is dis ribu ed among he nodes. The 
 
 
 
-node co-ordinates and node volumes are shown in Table 3. In the 2D model, similar to the 1D 
+node co-ordina es and node volumes are shown in Table 3. In he 2D model, similar o he 1D 
 
 
 
-model, there are nine branches representing the injector (5845, 5840, 5835, 5830, 5825, 5820, 
+model, here are nine branches represen ing he injec or (5845, 5840, 5835, 5830, 5825, 5820, 
 
 
 
-5815, 5810 and 585). The injector branches are connected to near-wall nodes 
+5815, 5810 and 585). The injec or branches are connec ed o near-wall nodes 
 
 
 
-(45,40,35,30,25,20,15,10 and 5). The 1D and 2D models models have identical models for pool 
+(45,40,35,30,25,20,15,10 and 5). The 1D and 2D models models have iden ical models for pool 
 
 
 
-boiling, ullage-spray condensation and ullage-injector wall condensation. 
+boiling, ullage-spray condensa ion and ullage-injec or wall condensa ion. 
 
 
 
@@ -1352,7 +1352,7 @@ boiling, ullage-spray condensation and ullage-injector wall condensation.
 
 
 
-Figure 9. 2D GFSSP Model of CRYOTE tank with TVS assisted injector 
+Figure 9. 2D GFSSP Model of CRYOTE ank wi h TVS assis ed injec or 
 
 
 
@@ -1364,15 +1364,11 @@ Figure 9. 2D GFSSP Model of CRYOTE tank with TVS assisted injector
 
 
 
-Figure 10. Axisymmetric Model of CRYOTE Tank with 5 grids in Radial Direction and 10 
+Figure 10. Axisymme ric Model of CRYOTE Tank wi h 5 grids in Radial Direc ion and 10 
 
 
 
-grids in Axial Direction 
-
-
-
-
+grids in Axial Direc ion 
 
 
 
@@ -1380,7 +1376,11 @@ grids in Axial Direction
 
 
 
-Table 3: Node co-ordinates and node volumes in 2D axisymmetric tank model 
+
+
+
+
+Table 3: Node co-ordina es and node volumes in 2D axisymme ric ank model 
 
 
 
@@ -1404,20 +1404,20 @@ Table 3: Node co-ordinates and node volumes in 2D axisymmetric tank model
 
 
 
-5. Results and Discussion 
-In this section, the 2D model results are compared with Test Data and the1D model 
+5. Resul s and Discussion 
+In his sec ion, he 2D model resul s are compared wi h Tes Da a and he1D model 
 
 
 
-results. The effect of droplet diameter on predicted simulation is also investigated. The 
+resul s. The effec of drople diame er on predic ed simula ion is also inves iga ed. The 
 
 
 
-computations were carried out using a 0.05 second timestep. The discrepancy between 
+compu a ions were carried ou using a 0.05 second imes ep. The discrepancy be ween 
 
 
 
-the measured and predicted data was quantified by mean average percentage error 
+ he measured and predic ed da a was quan ified by mean average percen age error 
 
 
 
@@ -1456,7 +1456,7 @@ the measured and predicted data was quantified by mean average percentage error
 
 
 
-where 𝑛 is the number of entries, 𝐴𝑡 is the actual value, and 𝐹𝑡 is the predicted value. 
+where 𝑛 is he number of en ries, 𝐴𝑡 is he ac ual value, and 𝐹𝑡 is he predic ed value. 
 
 
 
@@ -1465,7 +1465,7 @@ where 𝑛 is the number of entries, 𝐴𝑡 is the actual value, and 𝐹𝑡 
 
 
  
-Figure 11. Comparison of measured and predicted Tank Pressure for Test 20180404, 
+Figure 11. Comparison of measured and predic ed Tank Pressure for Tes 20180404, 
 
 
 
@@ -1477,55 +1477,43 @@ MAPE for 1.5 mm = 8.36% and MAPE for 0.375 mm = 10.12%
 
 
 
-Figure 11 shows a comparison of measured and predicted tank pressure during tank 
+Figure 11 shows a comparison of measured and predic ed ank pressure during ank 
 
 
 
-filling. The tank pressure rises rapidly in the beginning and then remains relatively 
+filling. The ank pressure rises rapidly in he beginning and hen remains rela ively 
 
 
 
-constant for some time before it starts dropping. The pressure continues to drop until the 
+cons an for some ime before i s ar s dropping. The pressure con inues o drop un il he 
 
 
 
-tank fills. During the last part of tank filling the pressure rises rapidly to the supply 
+ ank fills. During he las par of ank filling he pressure rises rapidly o he supply 
 
 
 
-pressure. Figure 12 shows a comparison of measured and predicted resident mass during 
+pressure. Figure 12 shows a comparison of measured and predic ed residen mass during 
 
 
 
-tank filling. For the first 600 seconds, the resident mass remains constant at a near zero 
+ ank filling. For he firs 600 seconds, he residen mass remains cons an a a near zero 
 
 
 
-value. During this time liquid nitrogen is arriving into the tank at a very low rate and 
+value. During his ime liquid ni rogen is arriving in o he ank a a very low ra e and 
 
 
 
-liquid turns immediately to vapor on entering the tank. This is the reason for rapid 
+liquid urns immedia ely o vapor on en ering he ank. This is he reason for rapid 
 
 
 
-pressurization observed in Figure 11. After 600 seconds, liquid starts accumulating and 
+pressuriza ion observed in Figure 11. Af er 600 seconds, liquid s ar s accumula ing and 
 
 
 
-leading to the rise of resident mass. The pressure also starts decreasing at the same time. 
-
-
-
- 
-
-
-
-
-
-
-
-
+leading o he rise of residen mass. The pressure also s ar s decreasing a he same ime. 
 
 
 
@@ -1533,7 +1521,19 @@ leading to the rise of resident mass. The pressure also starts decreasing at the
 
 
 
-Figure 12. Comparison of measured and predicted Resident Mass for Test 20180404, 
+
+
+
+
+
+
+
+
+ 
+
+
+
+Figure 12. Comparison of measured and predic ed Residen Mass for Tes 20180404, 
 
 
 
@@ -1545,7 +1545,7 @@ MAPE for 1.5 mm = 8.46% and MAPE for 0.375 mm = 4.71 %
 
 
 
-5.1 Effect of Droplet Diameter 
+5.1 Effec of Drople Diame er 
 
 
 
@@ -1553,71 +1553,71 @@ MAPE for 1.5 mm = 8.46% and MAPE for 0.375 mm = 4.71 %
 
 
 
-Calculations have been performed with two different droplet diameters: 1.5 mm and 
+Calcula ions have been performed wi h wo differen drople diame ers: 1.5 mm and 
 
 
 
-0.375 mm. It is observed that the predicted resident mass (Figure 12) with 0.375 mm 
+0.375 mm. I is observed ha he predic ed residen mass (Figure 12) wi h 0.375 mm 
 
 
 
-diameter (blue line) matches better with the test data. However, the pressures were under 
+diame er (blue line) ma ches be er wi h he es da a. However, he pressures were under 
 
 
 
-predicted (Figure 11) during the 1800 seconds to 2400 seconds period, and they were 
+predic ed (Figure 11) during he 1800 seconds o 2400 seconds period, and hey were 
 
 
 
-over predicted during the 2400 seconds to 3100 seconds period. It may be noted that three 
+over predic ed during he 2400 seconds o 3100 seconds period. I may be no ed ha hree 
 
 
 
-modes of condensation influence the tank pressure during tank filling. During the 1700 to 
+modes of condensa ion influence he ank pressure during ank filling. During he 1700 o 
 
 
 
-1900 seconds period, condensation at injector-ullage interface helps to lower the tank 
+1900 seconds period, condensa ion a injec or-ullage in erface helps o lower he ank 
 
 
 
-pressure and thereby avoids the stalling of the tank during no vent filling. The second 
+pressure and hereby avoids he s alling of he ank during no ven filling. The second 
 
 
 
-mode of condensation, i.e., condensation around droplets, becomes prevalent after 1900 
+mode of condensa ion, i.e., condensa ion around drople s, becomes prevalen af er 1900 
 
 
 
-seconds. This allows the tank pressure to drop at a faster rate. As the tank fills, 
+seconds. This allows he ank pressure o drop a a fas er ra e. As he ank fills, 
 
 
 
-condensation around droplet reduces since fewer droplets are available for condensation. 
+condensa ion around drople reduces since fewer drople s are available for condensa ion. 
 
 
 
-However, the third mode of condensation starts at the liquid-vapor interphase as the tank 
+However, he hird mode of condensa ion s ar s a he liquid-vapor in erphase as he ank 
 
 
 
-starts filling and thereby causing the tank pressure continue to fall. A detailed description 
+s ar s filling and hereby causing he ank pressure con inue o fall. A de ailed descrip ion 
 
 
 
-of all three condensation models incorporated in the 1D GFSSP model is provided in 
+of all hree condensa ion models incorpora ed in he 1D GFSSP model is provided in 
 
 
 
-Reference 10. Those condensation models with one additional modification was 
+Reference 10. Those condensa ion models wi h one addi ional modifica ion was 
 
 
 
-incorporated in the 2D model described in this paper. In the modified condensation model 
+incorpora ed in he 2D model described in his paper. In he modified condensa ion model 
 
 
 
-around spray droplets, the number of droplets is reduced as the tank fills. 
+around spray drople s, he number of drople s is reduced as he ank fills. 
 
 
 
@@ -1625,19 +1625,15 @@ around spray droplets, the number of droplets is reduced as the tank fills.
 
 
 
-The variation of droplet counts during tank filling is shown in Figure 13. The maximum 
+The varia ion of drople coun s during ank filling is shown in Figure 13. The maximum 
 
 
 
-number of droplets for 1.5 mm and 0.375 mm are approximately 88,000 and 14,000 
+number of drople s for 1.5 mm and 0.375 mm are approxima ely 88,000 and 14,000 
 
 
 
-respectively. The larger number of droplets provides a higher rate of condensation as 
-
-
-
-
+respec ively. The larger number of drople s provides a higher ra e of condensa ion as 
 
 
 
@@ -1645,19 +1641,15 @@ respectively. The larger number of droplets provides a higher rate of condensati
 
 
 
-shown in Figure 14. The droplet counts and condensation rate gradually decrease as the 
 
 
 
-tank fills. 
+
+shown in Figure 14. The drople coun s and condensa ion ra e gradually decrease as he 
 
 
 
- 
-
-
-
-5.2 Condensation at Injector-Ullage and Liquid-Vapor Interphase 
+ ank fills. 
 
 
 
@@ -1665,31 +1657,7 @@ tank fills.
 
 
 
-The condensation rate at injector-ullage and liquid-vapor interphase is shown in Figure 
-
-
-
-15. The condensation at injector-ullage interphase starts around 1600 seconds and 
-
-
-
-continues for another 300 seconds. Due to this condensation, the tank overcomes 
-
-
-
-“stalling”. Once the ullage temperature reaches saturation temperature, condensation at 
-
-
-
-ullage-injector interphase ceases and condensation around spray droplet starts as 
-
-
-
-discussed in the earlier section. The condensation at liquid-vapor interphase starts shortly 
-
-
-
-after 2000 seconds as the tank starts filling. 
+5.2 Condensa ion a Injec or-Ullage and Liquid-Vapor In erphase 
 
 
 
@@ -1697,57 +1665,31 @@ after 2000 seconds as the tank starts filling.
 
 
 
- 
+The condensa ion ra e a injec or-ullage and liquid-vapor in erphase is shown in Figure 
 
 
 
- 
-Figure 13. The variation of Droplet Count during Tank Filling 
+15. The condensa ion a injec or-ullage in erphase s ar s around 1600 seconds and 
 
 
 
- 
+con inues for ano her 300 seconds. Due o his condensa ion, he ank overcomes 
 
 
 
-5.3 Pressure Rise and Evaporative Mass Transfer 
+“s alling”. Once he ullage empera ure reaches sa ura ion empera ure, condensa ion a 
 
 
 
- 
+ullage-injec or in erphase ceases and condensa ion around spray drople s ar s as 
 
 
 
-During the last 300 seconds of tank filling, there is a significant rise of tank pressure as shown in 
+discussed in he earlier sec ion. The condensa ion a liquid-vapor in erphase s ar s shor ly 
 
 
 
-Figure 11 (the green line). There is about 25 psi pressure rise in about 200 seconds. It is 
-
-
-
-anticipated that the evaporative mass transfer at the liquid-vapor interphase is likely the cause of 
-
-
-
-the observed pressure rise. An attempt was made to approximately estimate an evaporation rate 
-
-
-
-
-
-
-
-
-
-
-
- 
-Figure 14. The condensation rate around spray droplets for two different droplet 
-
-
-
-diameters 
+af er 2000 seconds as he ank s ar s filling. 
 
 
 
@@ -1756,19 +1698,77 @@ diameters
 
 
  
-Figure 15. The condensation rate at injector-ullage interface (Red) and liquid-vapor 
 
 
 
-interface (Blue) 
+ 
+Figure 13. The varia ion of Drople Coun during Tank Filling 
 
 
 
-from the measured pressure history and incorporate in the numerical model. From the equation 
+ 
 
 
 
-of state of an ideal gas, one can derive: 
+5.3 Pressure Rise and Evapora ive Mass Transfer 
+
+
+
+ 
+
+
+
+During he las 300 seconds of ank filling, here is a significan rise of ank pressure as shown in 
+
+
+
+Figure 11 ( he green line). There is abou 25 psi pressure rise in abou 200 seconds. I is 
+
+
+
+an icipa ed ha he evapora ive mass ransfer a he liquid-vapor in erphase is likely he cause of 
+
+
+
+ he observed pressure rise. An a emp was made o approxima ely es ima e an evapora ion ra e 
+
+
+
+
+
+
+
+
+
+
+
+ 
+Figure 14. The condensa ion ra e around spray drople s for wo differen drople 
+
+
+
+diame ers 
+
+
+
+ 
+
+
+
+ 
+Figure 15. The condensa ion ra e a injec or-ullage in erface (Red) and liquid-vapor 
+
+
+
+in erface (Blue) 
+
+
+
+from he measured pressure his ory and incorpora e in he numerical model. From he equa ion 
+
+
+
+of s a e of an ideal gas, one can derive: 
 
 
 
@@ -1812,21 +1812,21 @@ Where
 
 
 𝜕𝜏
- is the evaporation rate, �̅� and �̅� are average ullage volume and temperature during 
+ is he evapora ion ra e, �̅� and �̅� are average ullage volume and empera ure during 
 
 
 
-pressurization and R is the gas constant and 
+pressuriza ion and R is he gas cons an and 
 𝜕𝑝
 
 
 
 𝜕𝜏
- is the measured rate of pressure rise during this 
+ is he measured ra e of pressure rise during his 
 
 
 
-period. It was estimated that the evaporation rate was 0.005 lbm/sec and was incorporated in the 
+period. I was es ima ed ha he evapora ion ra e was 0.005 lbm/sec and was incorpora ed in he 
 
 
 
@@ -1838,23 +1838,15 @@ GFSSP model as shown in Figure 15.
 
 
 
-Introduction of the evaporation rate has prevented the ullage collapse but did not predict the 
+In roduc ion of he evapora ion ra e has preven ed he ullage collapse bu did no predic he 
 
 
 
-pressure history accurately (Figure 11). There is evidently a need for a more accurate 
+pressure his ory accura ely (Figure 11). There is eviden ly a need for a more accura e 
 
 
 
-evaporation model to predict the observed pressurization process. 
-
-
-
- 
-
-
-
-5.4 Predicted Flow Pattern 
+evapora ion model o predic he observed pressuriza ion process. 
 
 
 
@@ -1862,31 +1854,7 @@ evaporation model to predict the observed pressurization process.
 
 
 
-One of the reasons of building a 2D model is to account for the effect of recirculating flow on the 
-
-
-
-thermodynamics and heat transfer processes that occur during tank filling. The 1D model shown 
-
-
-
-in Figure 8, does not have the capability to predict recirculating flow. On the other hand, a Navier-
-
-
-
-Stokes based CFD simulation of the entire tank filling process may also not be practicable for 
-
-
-
-scoping analysis. Therefore, a network based multi-dimensional flow calculation was attempted in 
-
-
-
-this paper. However, viscous effects were not modeled in any detail. In the momentum equation 
-
-
-
-only pressure and gravity terms were accounted for. 
+5.4 Predic ed Flow Pa ern 
 
 
 
@@ -1894,35 +1862,31 @@ only pressure and gravity terms were accounted for.
 
 
 
-Figure 16 shows the predicted stream traces and contours of vapor quality at 2000 seconds. The 
+One of he reasons of building a 2D model is o accoun for he effec of recircula ing flow on he 
 
 
 
-X and Y co-ordinates are in inches. Stream traces are computed from radial and axial velocity 
+ hermodynamics and hea ransfer processes ha occur during ank filling. The 1D model shown 
 
 
 
-components at each point. It represents the path of “zero mass” particles when released at 
+in Figure 8, does no have he capabili y o predic recircula ing flow. On he o her hand, a Navier-
 
 
 
-multiple points in the flow domain. The 2D model predicts recirculating flows that are similar to 
+S okes based CFD simula ion of he en ire ank filling process may also no be prac icable for 
 
 
 
-those observed in natural convection. An upward flow is observed near the wall which is warmer 
+scoping analysis. Therefore, a ne work based mul i-dimensional flow calcula ion was a emp ed in 
 
 
 
-than the fluid. This is due to gravitational effect in a flow with density variation. The vapor 
+ his paper. However, viscous effec s were no modeled in any de ail. In he momen um equa ion 
 
 
 
-contour plot shows that the fluid with lower vapor content (denser fluid) is settled at the bottom. 
-
-
-
-Overall, the predicted flow field and vapor quality contour plots appear plausible. 
+only pressure and gravi y erms were accoun ed for. 
 
 
 
@@ -1930,27 +1894,35 @@ Overall, the predicted flow field and vapor quality contour plots appear plausib
 
 
 
-5.5 Wall Temperatures 
+Figure 16 shows he predic ed s ream races and con ours of vapor quali y a 2000 seconds. The 
 
 
 
-The measured and predicted wall temperatures at the middle and top of the tank are shown in 
+X and Y co-ordina es are in inches. S ream races are compu ed from radial and axial veloci y 
 
 
 
-Figure 17 and 18, respectively. GFSSP predicts a larger rate of cooling than the rate of cooling 
+componen s a each poin . I represen s he pa h of “zero mass” par icles when released a 
 
 
 
-observed in the test. Near the top of the tank the test data show significant stratification 
+mul iple poin s in he flow domain. The 2D model predic s recircula ing flows ha are similar o 
 
 
 
-compared to the numerical predictions. This discrepancy is likely due to the homogeneous flow 
+ hose observed in na ural convec ion. An upward flow is observed near he wall which is warmer 
 
 
 
-assumption of the two phase flow model. 
+ han he fluid. This is due o gravi a ional effec in a flow wi h densi y varia ion. The vapor 
+
+
+
+con our plo shows ha he fluid wi h lower vapor con en (denser fluid) is se led a he bo om. 
+
+
+
+Overall, he predic ed flow field and vapor quali y con our plo s appear plausible. 
 
 
 
@@ -1958,7 +1930,27 @@ assumption of the two phase flow model.
 
 
 
- 
+5.5 Wall Tempera ures 
+
+
+
+The measured and predic ed wall empera ures a he middle and op of he ank are shown in 
+
+
+
+Figure 17 and 18, respec ively. GFSSP predic s a larger ra e of cooling han he ra e of cooling 
+
+
+
+observed in he es . Near he op of he ank he es da a show significan s ra ifica ion 
+
+
+
+compared o he numerical predic ions. This discrepancy is likely due o he homogeneous flow 
+
+
+
+assump ion of he wo phase flow model. 
 
 
 
@@ -1982,20 +1974,7 @@ assumption of the two phase flow model.
 
 
 
-
-
-
-
-
-
-
-
  
- 
-
-
-
-Figure 16. The predicted stream traces and contours of vapor quality at 2000 seconds 
 
 
 
@@ -2012,11 +1991,32 @@ Figure 16. The predicted stream traces and contours of vapor quality at 2000 sec
 
 
  
-Figure 17. Comparison of measured and predicted Wall Temperature at middle of 
+ 
 
 
 
-the tank (MAPE = 37.86 %) 
+Figure 16. The predic ed s ream races and con ours of vapor quali y a 2000 seconds 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+Figure 17. Comparison of measured and predic ed Wall Tempera ure a middle of 
+
+
+
+ he ank (MAPE = 37.86 %) 
 
 
 
@@ -2025,7 +2025,7 @@ the tank (MAPE = 37.86 %)
 
 
  
-Figure 18. Comparison of measured and predicted Wall Temperature near top of the tank 
+Figure 18. Comparison of measured and predic ed Wall Tempera ure near op of he ank 
 
 
 
@@ -2033,31 +2033,27 @@ Figure 18. Comparison of measured and predicted Wall Temperature near top of the
 
 
 
-5.6 Comparison with 1D Solution 
+5.6 Comparison wi h 1D Solu ion 
 
 
 
-A comparison between the measured pressure and the predicted tank pressure by 1D and 2D 
+A comparison be ween he measured pressure and he predic ed ank pressure by 1D and 2D 
 
 
 
-models is provided in Figure 19. Figure 20 compares the measured resident mass with the 
+models is provided in Figure 19. Figure 20 compares he measured residen mass wi h he 
 
 
 
-predictions by the 1D and 2D models. It may be noted that in the 1D model droplet diameter was 
+predic ions by he 1D and 2D models. I may be no ed ha in he 1D model drople diame er was 
 
 
 
-assumed to be 1.5 mm whereas in the 2D model droplet diameter was 0.375 mm. The 1D model 
+assumed o be 1.5 mm whereas in he 2D model drople diame er was 0.375 mm. The 1D model 
 
 
 
-was numerically unstable for smaller diameter. The 2D Model predictions compare with the test 
-
-
-
-
+was numerically uns able for smaller diame er. The 2D Model predic ions compare wi h he es 
 
 
 
@@ -2065,20 +2061,24 @@ was numerically unstable for smaller diameter. The 2D Model predictions compare 
 
 
 
-data better than the 1D model. However, evidently the accuracy of both models can be improved 
 
 
 
-by incorporating more accurate condensation and evaporation models. 
+
+da a be er han he 1D model. However, eviden ly he accuracy of bo h models can be improved 
 
 
 
- 
+by incorpora ing more accura e condensa ion and evapora ion models. 
 
 
 
  
-Figure 19. Comparison of measured and predicted Tank Pressure by 1D and 2D Model 
+
+
+
+ 
+Figure 19. Comparison of measured and predic ed Tank Pressure by 1D and 2D Model 
 
 
 
@@ -2091,7 +2091,7 @@ MAPE for 1D = 10.94% and MAPE for 2D = 10.12%
 
 
  
-Figure 20. Comparison of measured and predicted Resident Mass by 1D and 2D Model 
+Figure 20. Comparison of measured and predic ed Residen Mass by 1D and 2D Model 
 
 
 
@@ -2124,83 +2124,83 @@ MAPE for 1D = 4.77% and MAPE for 2D = 4.71%
 
 
 6. Conclusions 
-Numerical modeling of No Vent Fill of a Cryogenic Tank is complex for several reasons. 
+Numerical modeling of No Ven Fill of a Cryogenic Tank is complex for several reasons. 
 
 
 
-The flow is two-phase with both boiling and condensation taking place during the 
+The flow is wo-phase wi h bo h boiling and condensa ion aking place during he 
 
 
 
-operation. In recent years, a nodal modeling tool, GFSSP [7] has been used [10,111] to 
+opera ion. In recen years, a nodal modeling ool, GFSSP [7] has been used [10,111] o 
 
 
 
-model tank filling. Due to unavailability of accurate correlations to model condensation, 
+model ank filling. Due o unavailabili y of accura e correla ions o model condensa ion, 
 
 
 
-“ad-hoc” condensation models were developed. Numerical prediction of system 
+“ad-hoc” condensa ion models were developed. Numerical predic ion of sys em 
 
 
 
-parameters such as tank pressure and filling rate compared reasonably well with the test 
+parame ers such as ank pressure and filling ra e compared reasonably well wi h he es 
 
 
 
-data [2]. Typically, nodal modeling tools are used to model flow networks consisting of 
+da a [2]. Typically, nodal modeling ools are used o model flow ne works consis ing of 
 
 
 
-pipes and various flow components where flow is considered one-dimensional. In no vent 
+pipes and various flow componen s where flow is considered one-dimensional. In no ven 
 
 
 
-fill models of cryogenic tank, the spherical tank was discretized into cylindrical section 
+fill models of cryogenic ank, he spherical ank was discre ized in o cylindrical sec ion 
 
 
 
-and was thus represented by a series of pipes with variable diameters. There was no 
+and was hus represen ed by a series of pipes wi h variable diame ers. There was no 
 
 
 
-attempt to predict recirculating flow in the tank caused due to natural convection. In this 
+a emp o predic recircula ing flow in he ank caused due o na ural convec ion. In his 
 
 
 
-paper an attempt was made to discretize the tank assuming the tank is two-dimensional 
+paper an a emp was made o discre ize he ank assuming he ank is wo-dimensional 
 
 
 
-and axisymmetric. A two-dimensional nodal based model was able to predict 
+and axisymme ric. A wo-dimensional nodal based model was able o predic 
 
 
 
-recirculating flow in the tank and provided some improvement over the 1D model. In the 
+recircula ing flow in he ank and provided some improvemen over he 1D model. In he 
 
 
 
-2D model it was possible to use a more realistic effective droplet size in comparison to 
+2D model i was possible o use a more realis ic effec ive drople size in comparison o 
 
 
 
-the 1D model. However, more validation is necessary to justify the use of the 2D models 
+ he 1D model. However, more valida ion is necessary o jus ify he use of he 2D models 
 
 
 
-over the 1D model since the 2D model take more time to run. Both 1D and 2D modeling, 
+over he 1D model since he 2D model ake more ime o run. Bo h 1D and 2D modeling, 
 
 
 
-however, need more accurate correlations of condensation and evaporation heat transfer 
+however, need more accura e correla ions of condensa ion and evapora ion hea ransfer 
 
 
 
-to improve the accuracy of numerical predictions. Furthermore, the ability to model 
+ o improve he accuracy of numerical predic ions. Fur hermore, he abili y o model 
 
 
 
-separated two-phase flow will help to predict the ullage stratification more accurately. 
+separa ed wo-phase flow will help o predic he ullage s ra ifica ion more accura ely. 
 
 
 
@@ -2208,12 +2208,12 @@ separated two-phase flow will help to predict the ullage stratification more acc
 
 
 
-7. Acknowledgement 
-• This work was performed under NASA’s Reduced Gravity Cryogenic Transfer (RGCT) 
+7. Acknowledgemen 
+• This work was performed under NASA’s Reduced Gravi y Cryogenic Transfer (RGCT) 
 
 
 
-project under Cryogenic Flow Management (CFM) portfolio project. Authors wish to 
+projec under Cryogenic Flow Managemen (CFM) por folio projec . Au hors wish o 
 
 
 
@@ -2221,7 +2221,7 @@ acknowledge Mr. Derek Moody of MSFC for his help in improving GFSSP’s
 
 
 
-computational efficiency and error analysis. 
+compu a ional efficiency and error analysis. 
 
 
 
@@ -2238,7 +2238,7 @@ computational efficiency and error analysis.
 
 
  
-1. David Chato & Rafael Sanabria, “Review and Test of Chilldown Methods for Space-
+1. David Cha o & Rafael Sanabria, “Review and Tes of Chilldown Me hods for Space-
 
 
 
@@ -2246,15 +2246,15 @@ Based Cryogenic Tanks”, NASA Technical Memorandum 104458, AIAA-91-1843.
 
 
 
-2. Hartwig, J.W., Rhys, N., Stevens, J., Clark, J., LeClair, A., and Majumdar, A. “Test Data 
+2. Har wig, J.W., Rhys, N., S evens, J., Clark, J., LeClair, A., and Majumdar, A. “Tes Da a 
 
 
 
-Analysis of the CRYOTE-2 TVS Augmented Top Spray Injector Liquid Nitrogen 
+Analysis of he CRYOTE-2 TVS Augmen ed Top Spray Injec or Liquid Ni rogen 
 
 
 
-Transfer Experiments” International Journal of Heat and Mass Transfer 194, 122986. 
+Transfer Experimen s” In erna ional Journal of Hea and Mass Transfer 194, 122986. 
 
 
 
@@ -2262,31 +2262,27 @@ Transfer Experiments” International Journal of Heat and Mass Transfer 194, 122
 
 
 
-3. Alok Majumdar, “No Vent Tank Fill and Transfer Line Chilldown Analysis by GFSSP”, 
+3. Alok Majumdar, “No Ven Tank Fill and Transfer Line Chilldown Analysis by GFSSP”, 
 
 
 
-presented in Thermal & Fluids Analysis Workshop (TFAWS 2013), July 29 – August 2, 
+presen ed in Thermal & Fluids Analysis Workshop (TFAWS 2013), July 29 – Augus 2, 
 
 
 
-2013, Kennedy Space Center, Florida. 
+2013, Kennedy Space Cen er, Florida. 
 
 
 
-4. Alok Majumdar, Andre LeClair, Jason Hartwig, Adam Martin, Noah Rhys, “Numerical 
+4. Alok Majumdar, Andre LeClair, Jason Har wig, Adam Mar in, Noah Rhys, “Numerical 
 
 
 
-Modeling of No Vent Filling of a Cryogenic Tank” AIAA Joint Propulsion Conference, 
+Modeling of No Ven Filling of a Cryogenic Tank” AIAA Join Propulsion Conference, 
 
 
 
-August 20-24, 2020 (Virtual) 
-
-
-
-
+Augus 20-24, 2020 (Vir ual) 
 
 
 
@@ -2294,32 +2290,36 @@ August 20-24, 2020 (Virtual)
 
 
 
-5. Alok Majumdar, Andre LeClair, Jason Hartwig and S. Mostafa Ghiaasiaan, “Numerical 
 
 
 
-Modeling of No Vent Filling of a Cryogenic Tank with Thermodynamic Vent System 
+
+5. Alok Majumdar, Andre LeClair, Jason Har wig and S. Mos afa Ghiaasiaan, “Numerical 
 
 
 
-Augmented Injector”, Cryogenics, Volume 131, 2023 
+Modeling of No Ven Filling of a Cryogenic Tank wi h Thermodynamic Ven Sys em 
 
 
 
-6. Alok Majumdar, Andre LeClair, Jason Hartwig, “Axisymmetric Two-Dimensional 
+Augmen ed Injec or”, Cryogenics, Volume 131, 2023 
 
 
 
-Modeling of No Vent Filling of a Cryogenic Tank using Generalized Fluid System 
+6. Alok Majumdar, Andre LeClair, Jason Har wig, “Axisymme ric Two-Dimensional 
 
 
 
-Simulation Program”, AIAA Sci Tech Forum, National Harbor, MD, January 23 – 27, 
+Modeling of No Ven Filling of a Cryogenic Tank using Generalized Fluid Sys em 
+
+
+
+Simula ion Program”, AIAA Sci Tech Forum, Na ional Harbor, MD, January 23 – 27, 
 
 
 
 2023, AIAA-2023-0848. 
-7. Generalized Fluid System Simulation Program, Version 6.0, User Manual, March 2016, 
+7. Generalized Fluid Sys em Simula ion Program, Version 6.0, User Manual, March 2016, 
 
 
 
@@ -2327,11 +2327,11 @@ NASA/TP-2016-218218.
 
 
 
-8. Alok Majumdar, “A Finite Volume Procedure for Thermofluid System Analysis in a Flow 
+8. Alok Majumdar, “A Fini e Volume Procedure for Thermofluid Sys em Analysis in a Flow 
 
 
 
-Network” p 231-265, 50 Years of CFD in Engineering Sciences, A Commemorative 
+Ne work” p 231-265, 50 Years of CFD in Engineering Sciences, A Commemora ive 
 
 
 
@@ -2339,24 +2339,24 @@ Volume in Memory of D. Brian Spalding, Springer, 2020.
 
 
 
-9. Hendricks, R. C., Baron, A. K., and Peller, I. C., “GASP - A Computer Code for 
+9. Hendricks, R. C., Baron, A. K., and Peller, I. C., “GASP - A Compu er Code for 
 
 
 
-Calculating the Thermodynamic and Transport Properties for Ten Fluids: Parahydrogen, 
+Calcula ing he Thermodynamic and Transpor Proper ies for Ten Fluids: Parahydrogen, 
 
 
 
-Helium, Neon, Methane, Nitrogen, Carbon Monoxide, Oxygen, Fluorine, Argon, and 
+Helium, Neon, Me hane, Ni rogen, Carbon Monoxide, Oxygen, Fluorine, Argon, and 
 
 
 
 Carbon Dioxide”, NASA TN D-7808, February, 1975. 
-10. Alok Majumdar, Andre LeClair, Jason Hartwig and S. Mostafa Ghiaasiaan, “Numerical Modeling 
+10. Alok Majumdar, Andre LeClair, Jason Har wig and S. Mos afa Ghiaasiaan, “Numerical Modeling 
 
 
 
-of No Vent Filling of a Cryogenic Tank with Thermodynamic Vent System Augmented Injector”, 
+of No Ven Filling of a Cryogenic Tank wi h Thermodynamic Ven Sys em Augmen ed Injec or”, 
 
 
 
@@ -2364,12 +2364,12 @@ Cryogenics, Volume 131, 2023
 
 
 
-11. Alok Majumdar, Andre LeClair, Jason Hartwig, Adam Martin, Noah Rhys, “Numerical 
+11. Alok Majumdar, Andre LeClair, Jason Har wig, Adam Mar in, Noah Rhys, “Numerical 
 
 
 
-Modeling of No Vent Filling of a Cryogenic Tank” AIAA Joint Propulsion Conference, 
+Modeling of No Ven Filling of a Cryogenic Tank” AIAA Join Propulsion Conference, 
 
 
 
-August 20-24, 2020 (Virtual)
+Augus 20-24, 2020 (Vir ual)

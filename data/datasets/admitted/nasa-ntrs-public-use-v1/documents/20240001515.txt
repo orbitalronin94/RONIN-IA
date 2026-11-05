@@ -1,14 +1,14 @@
-Historical Retrospective on 
+His orical Re rospec ive on 
 Orion GNC Design
 
 
 
-Robert Gay
+Rober Gay
 February 6, 2024
 
 
 
-46th Rocky Mountain AAS GNC 
+46 h Rocky Moun ain AAS GNC 
 Conference
 
 
@@ -17,7 +17,7 @@ Conference
 
 
 
-It I 
+I I 
 
 
 
@@ -29,29 +29,29 @@ It I
 
 
 
-Outline
+Ou line
 
 
 
-• Introduction
-• Navigation – First things First
+• In roduc ion
+• Naviga ion – Firs hings Firs 
 
 
 
-– Navigation Architecture Upgrade – EFT-1 to Artemis I
-– “Navigation Base” – Compromises Hurt
+– Naviga ion Archi ec ure Upgrade – EFT-1 o Ar emis I
+– “Naviga ion Base” – Compromises Hur 
 
 
 
-• Return with Permanent Comm Loss – What?
-– Autonomous Optical Navigation – First Time Ever
-– Autonomous Onboard Targeting and Burn Execution – Most Sophisticated Ever
+• Re urn wi h Permanen Comm Loss – Wha ?
+– Au onomous Op ical Naviga ion – Firs Time Ever
+– Au onomous Onboard Targe ing and Burn Execu ion – Mos Sophis ica ed Ever
 
 
 
-• Time to Come Home – Returning to Earth
-– Skip Entry Guidance – First Ever “Real” Skip Flown
-– Touchdown Roll Control
+• Time o Come Home – Re urning o Ear h
+– Skip En ry Guidance – Firs Ever “Real” Skip Flown
+– Touchdown Roll Con rol
 
 
 
@@ -67,26 +67,26 @@ Outline
 
 
 
-Introduction
+In roduc ion
 
 
 
-Artemis I – First human-rated vehicle back to the moon in fifty years
+Ar emis I – Firs human-ra ed vehicle back o he moon in fif y years
 • Paper is a sampling of key Orion GNC design decisions over 17+ years 
 
 
 
-leading up to Artemis I.
-• Author started on Orion in November of 2005 just prior to contract award 
+leading up o Ar emis I.
+• Au hor s ar ed on Orion in November of 2005 jus prior o con rac award 
 
 
 
-to Lockheed Martin in 2006.
-– Early Orion simulation development (2005)
-– Entry Descent and Landing (EDL) Navigation Subsystem Manager (2006)
-– Navigation System Manger and MODE Team Lead (2011)
+ o Lockheed Mar in in 2006.
+– Early Orion simula ion developmen (2005)
+– En ry Descen and Landing (EDL) Naviga ion Subsys em Manager (2006)
+– Naviga ion Sys em Manger and MODE Team Lead (2011)
 – VIO Program Lead Engineer (2016), SMI Program Lead Engineer (2020)
-– Orion Spacecraft Chief Engineer / Deputy Program Chief Engineer – (2024)
+– Orion Spacecraf Chief Engineer / Depu y Program Chief Engineer – (2024)
 
 
 
@@ -106,12 +106,12 @@ to Lockheed Martin in 2006.
 
 
 
-Navigation – First things First
-I never understood why Guidance came before Navigation in 
-GNC? You must know where you are (Navigation) before you 
-can decide where to go (Guidance) and how to get there 
-(Control), - right? Ok, I’m biased. I’m a Nav guy. On to the 
-story…
+Naviga ion – Firs hings Firs 
+I never unders ood why Guidance came before Naviga ion in 
+GNC? You mus know where you are (Naviga ion) before you 
+can decide where o go (Guidance) and how o ge here 
+(Con rol), - righ ? Ok, I’m biased. I’m a Nav guy. On o he 
+s ory…
 
 
 
@@ -123,24 +123,24 @@ story…
 
 
 
-Navigation Architecture Upgrade – EFT-1 to Artemis I
+Naviga ion Archi ec ure Upgrade – EFT-1 o Ar emis I
 
 
 
-• EFT-1 was a great success, but due to changing political 
-priorities and resulting schedule pressures, the Nav code 
-needed an overall to handle additional hardware and be 
-more extensible for future missions.
+• EFT-1 was a grea success, bu due o changing poli ical 
+priori ies and resul ing schedule pressures, he Nav code 
+needed an overall o handle addi ional hardware and be 
+more ex ensible for fu ure missions.
 
 
 
-• Nav team held multiple TIMs to redesign the base 
-architecture to support future needs.
+• Nav eam held mul iple TIMs o redesign he base 
+archi ec ure o suppor fu ure needs.
 
 
 
-• Resulted in an historic achievement captured at the end 
-of the last TIM on Nov 21, 2014.
+• Resul ed in an his oric achievemen cap ured a he end 
+of he las TIM on Nov 21, 2014.
 
 
 
@@ -148,25 +148,25 @@ of the last TIM on Nov 21, 2014.
 
 
 
-• Image above: Whiteboard 
-sketch detailing the 
-fundamentals of the 
-4-Channel architecture.
+• Image above: Whi eboard 
+ske ch de ailing he 
+fundamen als of he 
+4-Channel archi ec ure.
 
 
 
-• Image right: Documentation of 
-Artemis I Nav implementation
+• Image righ : Documen a ion of 
+Ar emis I Nav implemen a ion
 
 
 
-• 3 – Aided channels + 1 – Inertial 
-propagation only channel
+• 3 – Aided channels + 1 – Iner ial 
+propaga ion only channel
 
 
 
-• 4 – Modular EKFs for all flight 
-phases (easy to add more as 
+• 4 – Modular EKFs for all fligh 
+phases (easy o add more as 
 needed)
 
 
@@ -176,17 +176,17 @@ FDIR
 
 
 
-• Source select and Altitude 
-select logic
+• Source selec and Al i ude 
+selec logic
 
 
 
-Simplified NVA A h. (EKF ~ re ,tecture 
+Simplified NVA A h. (EKF ~ re , ec ure 
 rocused) 
 
 
 
-ECRV States 
+ECRV S a es 
 
 
 
@@ -202,39 +202,39 @@ ECRV States
 
 
 
-“Navigation Base” – Compromises Hurt
-• Most spacecraft have a rigid “Nav Base” with co-located IMUs and Star Trackers (STR).
+“Naviga ion Base” – Compromises Hur 
+• Mos spacecraf have a rigid “Nav Base” wi h co-loca ed IMUs and S ar Trackers (STR).
 
 
 
-– Allows for stable alignment between sensors needed for attitude and gyro error estimation
-• IMUs are needed for the entire mission so they must be located on the Crew Module (CM).
-• STRs need a sun shield to protect optics and need to penetrate the outer mold line to see 
+– Allows for s able alignmen be ween sensors needed for a i ude and gyro error es ima ion
+• IMUs are needed for he en ire mission so hey mus be loca ed on he Crew Module (CM).
+• STRs need a sun shield o pro ec op ics and need o pene ra e he ou er mold line o see 
 
 
 
-stars.
-– Sun shield that could withstand the heat of entry would be very heavy
+s ars.
+– Sun shield ha could wi hs and he hea of en ry would be very heavy
 
 
 
-• Nav Team challenged to put the STR on the Crew Module Adaptor (CMA).
-• In addition, configurators required one of the IMUs had to be located on the opposite side of 
+• Nav Team challenged o pu he STR on he Crew Module Adap or (CMA).
+• In addi ion, configura ors required one of he IMUs had o be loca ed on he opposi e side of 
 
 
 
-the vehicle. 
-• A successful design was implemented to estimate the STR-IMU alignment by processing STR 
+ he vehicle. 
+• A successful design was implemen ed o es ima e he STR-IMU alignmen by processing STR 
 
 
 
-measurements while rotating the vehicle.
-– Assumes reasonably stable structure between alignment maneuvers
+measuremen s while ro a ing he vehicle.
+– Assumes reasonably s able s ruc ure be ween alignmen maneuvers
 
 
 
-• Later discovered that the pressure vessel deflected (ballooned) in vacuum and from 
-aerodynamic loading during entry
+• La er discovered ha he pressure vessel deflec ed (ballooned) in vacuum and from 
+aerodynamic loading during en ry
 
 
 
@@ -242,16 +242,16 @@ aerodynamic loading during entry
 
 
 
-• Mostly impacted IMU FDIR –
-had to increase thresholds 
-and persistence
+• Mos ly impac ed IMU FDIR –
+had o increase hresholds 
+and persis ence
 
 
 
-• On-orbit alignment process 
-still worked well, and the 
-vehicle structure was stable 
-between maneuvers
+• On-orbi alignmen process 
+s ill worked well, and he 
+vehicle s ruc ure was s able 
+be ween maneuvers
 
 
 
@@ -261,13 +261,13 @@ possible.
 
 
 Simplified 20 
-representation 
+represen a ion 
 
 
 
 of complex 
-30 motion, 
-not to scale 
+30 mo ion, 
+no o scale 
 
 
 
@@ -287,13 +287,13 @@ e
 
 
 
-Return with Permanent Comm Loss – What?
-Orion has a requirement to return the crew home safely to Earth 
-without communications with the ground. This core requirement 
-drives Orion to be one of the most autonomous and automated 
-vehicles to ever fly in space. Two primary capabilities evolved to 
-satisfy this requirement: Optical Navigation (OpNav) and 
-Onboard targeting and burn execution.
+Re urn wi h Permanen Comm Loss – Wha ?
+Orion has a requiremen o re urn he crew home safely o Ear h 
+wi hou communica ions wi h he ground. This core requiremen 
+drives Orion o be one of he mos au onomous and au oma ed 
+vehicles o ever fly in space. Two primary capabili ies evolved o 
+sa isfy his requiremen : Op ical Naviga ion (OpNav) and 
+Onboard arge ing and burn execu ion.
 
 
 
@@ -305,28 +305,28 @@ Onboard targeting and burn execution.
 
 
 
-Autonomous Optical Navigation – First Time Ever
+Au onomous Op ical Naviga ion – Firs Time Ever
 
 
 
-• In place of conventual Earth-based ground tracking navigation, OpNav is the process of computing a 
-bearing and range measurement to a known celestial object like a planet or moon.
+• In place of conven ual Ear h-based ground racking naviga ion, OpNav is he process of compu ing a 
+bearing and range measuremen o a known celes ial objec like a plane or moon.
 
 
 
-• General technique demonstrated on Apollo but with humans using a sextant (star-limb meas).
-• Executed in various forms for un-maned spacecraft with most of the processing done on the ground.
-• Orion OpNav uses a special camera and custom image processing and lens calibration to derive the 
+• General echnique demons ra ed on Apollo bu wi h humans using a sex an (s ar-limb meas).
+• Execu ed in various forms for un-maned spacecraf wi h mos of he processing done on he ground.
+• Orion OpNav uses a special camera and cus om image processing and lens calibra ion o derive he 
 
 
 
-bearing and rang to the Earth or Moon.
-– Also provides backup to star tracker for inertial attitude (ground process for Artemis I, onboard for Artemis II+)
-– Successfully certified during Artemis I and demonstrated the first-ever fully autonomous Optical Navigation 
+bearing and rang o he Ear h or Moon.
+– Also provides backup o s ar racker for iner ial a i ude (ground process for Ar emis I, onboard for Ar emis II+)
+– Successfully cer ified during Ar emis I and demons ra ed he firs -ever fully au onomous Op ical Naviga ion 
 
 
 
-capability.
+capabili y.
 
 
 
@@ -334,20 +334,16 @@ capability.
 
 
 
-Lens Calibration
+Lens Calibra ion
 
 
 
-Artemis I Detected Limb and OpNav solution projected over lunar imageHW-in-the-loop 
-Si l ti
+Ar emis I De ec ed Limb and OpNav solu ion projec ed over lunar imageHW-in- he-loop 
+Si l i
 
 
 
-Basic OpNav Measurement Geometry
-
-
-
-
+Basic OpNav Measuremen Geome ry
 
 
 
@@ -355,8 +351,12 @@ Basic OpNav Measurement Geometry
 
 
 
-Autonomous Onboard Targeting and 
-Burn Execution – Most Sophisticated Ever
+
+
+
+
+Au onomous Onboard Targe ing and 
+Burn Execu ion – Mos Sophis ica ed Ever
 
 
 
@@ -364,58 +364,58 @@ Burn Execution – Most Sophisticated Ever
 
 
 
-• Without ground support, Orion must plan, target, and 
-execute all burns needed to get home.
+• Wi hou ground suppor , Orion mus plan, arge , and 
+execu e all burns needed o ge home.
 
 
 
-• Burn Plan Manager (BPM) uses Burn Plan (BP) data to 
-drive onboard Two-Level-Targeter (TLT) to generate 
-targets for orbit guidance (Orbguid).
+• Burn Plan Manager (BPM) uses Burn Plan (BP) da a o 
+drive onboard Two-Level-Targe er (TLT) o genera e 
+ arge s for orbi guidance (Orbguid).
 
 
 
-• During burn execution Orbguid provides steering 
-commands to Service Module (SM) Control (CNS).
+• During burn execu ion Orbguid provides s eering 
+commands o Service Module (SM) Con rol (CNS).
 
 
 
-• Timeline Vehicle Manager (TVM) uses BP data to control 
-events, Solar Array Wing (SAW) positioning (CAR), and 
-FSW configuration.
+• Timeline Vehicle Manager (TVM) uses BP da a o con rol 
+even s, Solar Array Wing (SAW) posi ioning (CAR), and 
+FSW configura ion.
 
 
 
-• Artemis I had two BPs available: one for nominal and 
-one for the PCL scenario.
+• Ar emis I had wo BPs available: one for nominal and 
+one for he PCL scenario.
 
 
 
-Burn Plan Manager Functional Flow
+Burn Plan Manager Func ional Flow
 
 
 
-TLT: Loop 1 iterates on position, Loop 2 applies 
-additional constraints, repeat loops till converged 
+TLT: Loop 1 i era es on posi ion, Loop 2 applies 
+addi ional cons rain s, repea loops ill converged 
 
 
 
-Orbguid: Executive drives core Power Explicit 
-Guidance (PEG) with desired burn solution type.
+Orbguid: Execu ive drives core Power Explici 
+Guidance (PEG) wi h desired burn solu ion ype.
 
 
 
-Bt>'n Plan Data Mission Control 
+B >'n Plan Da a Mission Con rol 
 
 
 
 Bum Plan 
-Manager Two Level Targeter 
+Manager Two Level Targe er 
 
 
 
 ·-- ~ -+------, ~~-.. 
-~ _j ~-1t---l--➔I 
+~ _j ~-1 ---l--➔I 
 
 
 
@@ -425,64 +425,64 @@ Manager Two Level Targeter
 
 
 ~,,,..,. ... 
------► Sftt'tad b'Jffl pllln .... -. - """'-
+-----► Sf ' ad b'Jffl pllln .... -. - """'-
 
 
 
-[);t'('. 
+[); '('. 
 
 
 
-Input State, mode dependent burn tarf,E"t:. TIG, runPre-BurnCornp~Flap; 
-COl\lrOb l:'Xt'(Lt u:)I\ 1rn11alua1io,'li 't:'v.:'tS., tr.~1~~1t10m 
+Inpu S a e, mode dependen burn arf,E" :. TIG, runPre-BurnCornp~Flap; 
+COl lrOb l:'X '(L u:)I 1rn11alua1io,'li ' :'v.:' S., r.~1~~1 10m 
 
 
 
-OrbGuidruM in t\llf0 'i:X'i:CUtion 
+OrbGuidruM in llf0 'i:X'i:CU ion 
 modes, a own in brown 
 box:es: 
 
 
 
-Pr• •bum computa'!ions: 
-• Active bum ~uid.anc:e · 
+Pr• •bum compu a'!ions: 
+• Ac ive bum ~uid.anc:e · 
 
 
 
-[t > ITIG - IGuldPreTIG I && burn Enable == TRU E] 
+[ > ITIG - IGuldPreTIG I && burn Enable == TRU E] 
 
 
 
-• Two Level Targeter is NOT: 
-• A Burn Plan generator 
+• Two Level Targe er is NOT: 
+• A Burn Plan genera or 
 
 
 
-• A Non-Linear corrector 
+• A Non-Linear correc or 
 
 
 
-• A trajectory optimizer 
+• A rajec ory op imizer 
 
 
 
-• Two Level Targeter is: 
-• A linear predictor/corrector 
+• Two Level Targe er is: 
+• A linear predic or/correc or 
 
 
 
-Level 1 Iteration 
+Level 1 I era ion 
 
 
 
-Use d ifferential corrector 
-to compute tJ. V needed to 
-transfer from patch point 
-to patch point. 
+Use d ifferen ial correc or 
+ o compu e J. V needed o 
+ ransfer from pa ch poin 
+ o pa ch poin . 
 
 
 
-t 
+ 
 
 
 
@@ -490,58 +490,58 @@ Level 2
 
 
 
-Change patch point 
-+-- positions and times so 
+Change pa ch poin 
++-- posi ions and imes so 
 
 
 
-that constraints on tJ.Vs 
-and other trajectory 
-parameters are met. 
+ ha cons rain s on J.Vs 
+and o her rajec ory 
+parame ers are me . 
 
 
 
-t No 
+ No 
 
 
 
-Max iterations ? ---► Trajectory constraints met ? t Yes No 
+Max i era ions ? ---► Trajec ory cons rain s me ? Yes No 
 
 
 
 I TLT Failure I 
-t Yes 
+ Yes 
 
 
 
-Compute bum targets I 
+Compu e bum arge s I 
 for Orb Guid. 
 
 
 
-Level 1 - Compute t.iis to reduce arrival position 
-errors to zero . 
+Level 1 - Compu e .iis o reduce arrival posi ion 
+errors o zero . 
 
 
 
-0 <----_ Adjusted patch 
-,t. point, lower dV. 
+0 <----_ Adjus ed pa ch 
+, . poin , lower dV. 
 I 
 
 
 
 ~0--------.__, 0 
-~ constraints met ~ 
+~ cons rain s me ~ 
 
 
 
-Level 2 -Adjust patch points to reduce t.Vs and meet 
-constraints for a dispersed trajectory. 
+Level 2 -Adjus pa ch poin s o reduce .Vs and mee 
+cons rain s for a dispersed rajec ory. 
 
 
 
-Level 1 re-computes t.iis so that trajectory passes 
-through patch points . 
+Level 1 re-compu es .iis so ha rajec ory passes 
+ hrough pa ch poin s . 
 
 
 
@@ -557,12 +557,12 @@ through patch points .
 
 
 
-Time to Come Home – Returning to Earth
-After a long journey to the Moon and back, Orion returns to 
-Earth at incredible speed. All that energy must be dissipated 
-to slow the vehicle down so parachutes can be deployed, 
-and Orion can descend to a gentle splashdown in the Pacific 
-Ocean off the coast of California.
+Time o Come Home – Re urning o Ear h
+Af er a long journey o he Moon and back, Orion re urns o 
+Ear h a incredible speed. All ha energy mus be dissipa ed 
+ o slow he vehicle down so parachu es can be deployed, 
+and Orion can descend o a gen le splashdown in he Pacific 
+Ocean off he coas of California.
 
 
 
@@ -574,33 +574,33 @@ Ocean off the coast of California.
 
 
 
-Skip Entry Guidance – First Ever “Real” Skip Flown
+Skip En ry Guidance – Firs Ever “Real” Skip Flown
 
 
 
-• Skip entry enables Orion to return from the Moon with a 
-variety of Earth-Moon geometries and still land off the coast 
+• Skip en ry enables Orion o re urn from he Moon wi h a 
+varie y of Ear h-Moon geome ries and s ill land off he coas 
 of San Diego, California near Naval recovery forces.
 
 
 
-– Lift vector rolled up/down to control range (with a little cross 
-range capability too)
+– Lif vec or rolled up/down o con rol range (wi h a li le cross 
+range capabili y oo)
 
 
 
-– Special Entry Interface (EI) target line utilized to setup approach.
-• Early in the Orion Program there was a flyoff between NASA’s 
+– Special En ry In erface (EI) arge line u ilized o se up approach.
+• Early in he Orion Program here was a flyoff be ween NASA’s 
 
 
 
-Numerical Skip Entry Guidance (NSEG) algorithm and 
-Draper’s PredGuid algorithm.
+Numerical Skip En ry Guidance (NSEG) algori hm and 
+Draper’s PredGuid algori hm.
 
 
 
-– Flyoff turned into more a merger and in the end PredGuid was 
-chosen (though performance was similar).
+– Flyoff urned in o more a merger and in he end PredGuid was 
+chosen ( hough performance was similar).
 
 
 
@@ -608,14 +608,14 @@ chosen (though performance was similar).
 
 
 
-• CM raise burn executed between CM/SM sep
-and EI used to fine tune the flight path angle 
-(FPA) at EI.
+• CM raise burn execu ed be ween CM/SM sep
+and EI used o fine une he fligh pa h angle 
+(FPA) a EI.
 
 
 
-– FPA is very critical for Orion due to mass-
-optimized heat shield
+– FPA is very cri ical for Orion due o mass-
+op imized hea shield
 
 
 
@@ -623,7 +623,7 @@ NSEG vs PredGuid Flyoff
 
 
 
-Horizontal EI Target Line
+Horizon al EI Targe Line
 
 
 
@@ -632,15 +632,15 @@ f}~l: 11
 
 
 
-P\'anel ~del.lYe Vekic~ M~g:1C116e 4kl't/S) 
+P 'anel ~del.lYe Vekic~ M~g:1C116e 4kl' /S) 
 
 
 
-Drogue Oepk:ry. Actual Geodetic Latitude vs Longlude "' .... .. .. ., ............. i .. ...... ••·•·•• .... Nsiic; 
+Drogue Oepk:ry. Ac ual Geode ic La i ude vs Longlude "' .... .. .. ., ............. i .. ...... ••·•·•• .... Nsiic; 
 
 
 
-Map of Targel Li ne with Allowable El Zone 
+Map of Targel Li ne wi h Allowable El Zone 
 
 
 
@@ -653,7 +653,7 @@ Map of Targel Li ne with Allowable El Zone
 
 
 160'w 
-Longitude (d) 
+Longi ude (d) 
 
 
 
@@ -680,7 +680,7 @@ o 200 ,400 600 eoo 1000 1200 1400 1eoo 1aoo 2000
 
 
 
-Ti'mt(S) 
+Ti'm (S) 
 
 
 
@@ -694,22 +694,18 @@ sde (Clegl
 
 
 - u1 0.q«Jr.1Cf1 .!l!IM 
-- n!ca~to,- cnmrn 
+- n!ca~ o,- cnmrn 
 c::::::::l111ci11~,-cfl~­
-- 11totll!'l(l,..,111,oo-
-- EIS 1t,i(l,..CA1,,,,_ 
+- 11 o ll!'l(l,..,111,oo-
+- EIS 1 ,i(l,..CA1,,,,_ 
 
 
 
-I Advantage PredGu id I 
+I Advan age PredGu id I 
 
 
 
-Figure 35. A e rodynamic Delta Figure-of-Me r it. 
-
-
-
-
+Figure 35. A e rodynamic Del a Figure-of-Me r i . 
 
 
 
@@ -717,7 +713,11 @@ Figure 35. A e rodynamic Delta Figure-of-Me r it.
 
 
 
-Touchdown Roll Control
+
+
+
+
+Touchdown Roll Con rol
 
 
 
@@ -725,79 +725,79 @@ Touchdown Roll Control
 
 
 
-• Orion must perform “Roll Control” or (Heading Control) under main 
-parachutes to ensure CM impacts the water at a certain orientation.
+• Orion mus perform “Roll Con rol” or (Heading Con rol) under main 
+parachu es o ensure CM impac s he wa er a a cer ain orien a ion.
 
 
 
-– Localizes impact loads to reduce structural mass and allows for seat stroke in 
-a specific direction (only enough room in that direction and better for crew).
+– Localizes impac loads o reduce s ruc ural mass and allows for sea s roke in 
+a specific direc ion (only enough room in ha direc ion and be er for crew).
 
 
 
-• The main parachute attach point is offset to produce a hang angle so 
-Orion ”knifes” into the water.
+• The main parachu e a ach poin is offse o produce a hang angle so 
+Orion ”knifes” in o he wa er.
 
 
 
-– Additional load reduction to save mass
-• Roll Control points the vehicle in the direction of travel to slice into the 
+– Addi ional load reduc ion o save mass
+• Roll Con rol poin s he vehicle in he direc ion of ravel o slice in o he 
 
 
 
-water at the proper orientation (CM +Z Body axis).
-• Just prior to EFT-1, a pendulum mode was discovered if descending 
+wa er a he proper orien a ion (CM +Z Body axis).
+• Jus prior o EFT-1, a pendulum mode was discovered if descending 
 
 
 
-under two parachutes (nominally there are three – requires a failure).
-– Could produce velocity direction changes too rapid for Roll Control to 
+under wo parachu es (nominally here are hree – requires a failure).
+– Could produce veloci y direc ion changes oo rapid for Roll Con rol o 
 
 
 
-function.
-– Pendulum Observer developed to track the swing and remove the added 
+func ion.
+– Pendulum Observer developed o rack he swing and remove he added 
 
 
 
-velocity from the general direction of travel (controller can follow heading).
-– New control mode engaged if pendulum motion is present that orients Orion 
+veloci y from he general direc ion of ravel (con roller can follow heading).
+– New con rol mode engaged if pendulum mo ion is presen ha orien s Orion 
 
 
 
-CM +Z Body perpendicular to the swing plane (if horizontal velocity below a 
-threshold).
+CM +Z Body perpendicular o he swing plane (if horizon al veloci y below a 
+ hreshold).
 
 
 
-– +Z Perpendicular to the swing plane reduces impact loads.
+– +Z Perpendicular o he swing plane reduces impac loads.
 
 
 
-Pendulum Motion Under 2 Chutes
+Pendulum Mo ion Under 2 Chu es
 
 
 
-+Z Body perpendicular to Swing 
-Plane (Alternate) moves impact 
-point further to the edge of the 
-Heat Shield reducing loads.
++Z Body perpendicular o Swing 
+Plane (Al erna e) moves impac 
+poin fur her o he edge of he 
+Hea Shield reducing loads.
 
 
 
-Desired Impact Orientation Relative to Direction of Travel 
+Desired Impac Orien a ion Rela ive o Direc ion of Travel 
 
 
 
-Undesired Orientation Desired Orientation 
+Undesired Orien a ion Desired Orien a ion 
 
 
 
-F parachutes F parachutes 
+F parachu es F parachu es 
 
 
 
-lfTl)act Polar Comparison 
+lfTl)ac Polar Comparison 
 
 
 
@@ -832,13 +832,13 @@ Fa-Hurl!'
 
 
 
-, , , , , CM t-\JJgned with tbf 
-Pi'oJul.um Ph,nt 
+, , , , , CM - JJgned wi h bf 
+Pi'oJul.um Ph,n 
 
 
 
 CM Aligned 1"1;"rpendlc.ul;:1r 
-rn lbe Ptnd.olum Plant 
+rn lbe P nd.olum Plan 
 
 
 
@@ -850,7 +850,7 @@ rn lbe Ptnd.olum Plant
 
 
 
-Questions?
+Ques ions?
 
 
 
@@ -861,41 +861,41 @@ Questions?
 
 
 
- 
-Historical Retrospective on Orion GNC Design��
+	
+His orical Re rospec ive on Orion GNC Design��
 
- 
-Outline
+	
+Ou line
 
- 
-Introduction
+	
+In roduc ion
 
- 
+	
 Slide Number 4
 
- 
-Navigation Architecture Upgrade – EFT-1 to Artemis I
+	
+Naviga ion Archi ec ure Upgrade – EFT-1 o Ar emis I
 
- 
-“Navigation Base” – Compromises Hurt
+	
+“Naviga ion Base” – Compromises Hur 
 
- 
+	
 Slide Number 7
 
- 
-Autonomous Optical Navigation – First Time Ever
+	
+Au onomous Op ical Naviga ion – Firs Time Ever
 
- 
-Autonomous Onboard Targeting and �Burn Execution – Most Sophisticated Ever
+	
+Au onomous Onboard Targe ing and �Burn Execu ion – Mos Sophis ica ed Ever
 
- 
+	
 Slide Number 10
 
- 
-Skip Entry Guidance – First Ever “Real” Skip Flown 
+	
+Skip En ry Guidance – Firs Ever “Real” Skip Flown 
 
- 
-Touchdown Roll Control
+	
+Touchdown Roll Con rol
 
- 
-Questions?
+	
+Ques ions?

@@ -1,83 +1,83 @@
-Analysis of a Bank Control Guidance for Aerocapture at Uranus
+Analysis of a Bank Con rol Guidance for Aerocap ure a Uranus
 
 
 
-Daniel A. Matz ∗, Breanna J. Johnson †, Joshua K. Geiser ‡, and Sergio A. Sandoval §
-NASA Johnson Space Center, Houston, Texas 77058
+Daniel A. Ma z ∗, Breanna J. Johnson †, Joshua K. Geiser ‡, and Sergio A. Sandoval §
+NASA Johnson Space Cen er, Hous on, Texas 77058
 
 
 
-Rohan G. Deshmukh ¶, Rafael A. Lugo ‖, and Soumyo Dutta ∗∗
-NASA Langley Research Center, Hampton, Virginia 23681
+Rohan G. Deshmukh ¶, Rafael A. Lugo ‖, and Soumyo Du a ∗∗
+NASA Langley Research Cen er, Hamp on, Virginia 23681
 
 
 
 Pardha Sai Chadalavada ††
-Analytical Mechanics Associates, Hampton, Virginia 23666
+Analy ical Mechanics Associa es, Hamp on, Virginia 23666
 
 
 
-We apply the Fully Numerical Predictor-corrector Aerocapture Guidance to capture a vehicle
-into orbit for a mission at Uranus. Using the Genesis flight mechanics simulation, we analyze
-both undispersed and dispersed trajectories in order to tune the guidance parameters. We
-then assess the performance of the guidance using Monte Carlo analyses. Properly accounting
-for the oblateness of Uranus within the guidance proves to be critical. We identify high-to-low
-density gradients as the cause of large target orbit misses. Intentionally targeting a steeper
-flight-path angle at entry interface mitigates the risk of exiting the atmosphere on a hyperbolic
-orbit. Finally, We deliver the guidance code and tuned parameters for integration into the
-Program to Optimize Simulated Trajectories II.
+We apply he Fully Numerical Predic or-correc or Aerocap ure Guidance o cap ure a vehicle
+in o orbi for a mission a Uranus. Using he Genesis fligh mechanics simula ion, we analyze
+bo h undispersed and dispersed rajec ories in order o une he guidance parame ers. We
+ hen assess he performance of he guidance using Mon e Carlo analyses. Properly accoun ing
+for he obla eness of Uranus wi hin he guidance proves o be cri ical. We iden ify high- o-low
+densi y gradien s as he cause of large arge orbi misses. In en ionally arge ing a s eeper
+fligh -pa h angle a en ry in erface mi iga es he risk of exi ing he a mosphere on a hyperbolic
+orbi . Finally, We deliver he guidance code and uned parame ers for in egra ion in o he
+Program o Op imize Simula ed Trajec ories II.
 
 
 
-I. Nomenclature
+I. Nomencla ure
 
 
 
-W = Flight-path angle
-Δ+ = Change in velocity
+W = Fligh -pa h angle
+Δ+ = Change in veloci y
 q = Bank angle
-q3 = Lift down bank angle of the bang-bang bank angle profile used by the FNPAG predictor in phase 1
-d = Atmospheric density
-f = Standard deviation
-28 = Coefficients of the density curve fit
-ℎ = Altitude
-�! = Lift coefficient
-�� = Drag coefficient
-L/D = Lift-to-drag ratio
+q3 = Lif down bank angle of he bang-bang bank angle profile used by he FNPAG predic or in phase 1
+d = A mospheric densi y
+f = S andard devia ion
+28 = Coefficien s of he densi y curve fi 
+ℎ = Al i ude
+�! = Lif coefficien 
+�� = Drag coefficien 
+L/D = Lif - o-drag ra io
 
 
 
-II. Introduction
+II. In roduc ion
 
 
 
-Missions to other planetary bodies can utilize fully-propulsive braking or an aero-assist maneuver to insert into
-a desired orbit. While fully-propulsive and aero-assist maneuvers such as aerobraking and skip entry have been
+Missions o o her plane ary bodies can u ilize fully-propulsive braking or an aero-assis maneuver o inser in o
+a desired orbi . While fully-propulsive and aero-assis maneuvers such as aerobraking and skip en ry have been
 
 
 
-demonstrated [1, 2], aerocapture remains an untested technology with a great deal of potential to save future missions
-time, mass, and cost [3]. Aerocapture is an orbital maneuver whereby the vehicle takes advantage of a planet’s atmosphere
-to help reduce the amount of Δ+ , or fuel, required to insert into a target orbit. Figure 1 illustrates the maneuver.
+demons ra ed [1, 2], aerocap ure remains an un es ed echnology wi h a grea deal of po en ial o save fu ure missions
+ ime, mass, and cos [3]. Aerocap ure is an orbi al maneuver whereby he vehicle akes advan age of a plane ’s a mosphere
+ o help reduce he amoun of Δ+ , or fuel, required o inser in o a arge orbi . Figure 1 illus ra es he maneuver.
 
 
 
-First the vehicle skims the atmosphere, reducing the hyperbolic arrival energy using aerodynamic forces. Following
-this atmospheric pass, the vehicle performs a periapsis raise maneuver followed by an apoapsis correction maneuver to
+Firs he vehicle skims he a mosphere, reducing he hyperbolic arrival energy using aerodynamic forces. Following
+ his a mospheric pass, he vehicle performs a periapsis raise maneuver followed by an apoapsis correc ion maneuver o
 
 
 
-∗Flight Dynamics Modeling Technical Discipline Lead, Flight Mechanics and Trajectory Design Branch, AIAA Senior Member
-†Aerospace Engineer, Flight Mechanics and Trajectory Design Branch, AIAA Atmospheric Flight Mechanics Technical Committee Member
-‡Aerospace Engineer, Flight Mechanics and Trajectory Design Branch
-§Aerospace Engineer, Flight Mechanics and Trajectory Design Branch, AIAA Member
-¶Aerospace Engineer, Atmospheric Flight and Entry Systems Branch, AIAA Member
-‖Aerospace Engineer, Atmospheric Flight and Entry Systems Branch, AIAA Senior Member
+∗Fligh Dynamics Modeling Technical Discipline Lead, Fligh Mechanics and Trajec ory Design Branch, AIAA Senior Member
+†Aerospace Engineer, Fligh Mechanics and Trajec ory Design Branch, AIAA A mospheric Fligh Mechanics Technical Commi ee Member
+‡Aerospace Engineer, Fligh Mechanics and Trajec ory Design Branch
+§Aerospace Engineer, Fligh Mechanics and Trajec ory Design Branch, AIAA Member
+¶Aerospace Engineer, A mospheric Fligh and En ry Sys ems Branch, AIAA Member
+‖Aerospace Engineer, A mospheric Fligh and En ry Sys ems Branch, AIAA Senior Member
 
 
 
-∗∗Aerospace Engineer, Atmospheric Flight and Entry Systems Branch, AIAA Associate Fellow
-††Aerospace Engineer, Atmospheric Flight and Entry Systems Branch, AIAA Member
+∗∗Aerospace Engineer, A mospheric Fligh and En ry Sys ems Branch, AIAA Associa e Fellow
+††Aerospace Engineer, A mospheric Fligh and En ry Sys ems Branch, AIAA Member
 
 
 
@@ -93,54 +93,54 @@ this atmospheric pass, the vehicle performs a periapsis raise maneuver followed 
 
 
 
-Fig. 1 Aerocapture concept of operations.
+Fig. 1 Aerocap ure concep of opera ions.
 
 
 
-achieve the target orbit. While there have been many studies of aerocapture [4–8], there have been few with Uranus as
-the destination.
+achieve he arge orbi . While here have been many s udies of aerocap ure [4–8], here have been few wi h Uranus as
+ he des ina ion.
 
 
 
-Recently, the National Academies Planetary Science and Astrobiology Decadal Survey of 2023-2032 identified
-Uranus as a top priority science destination [9]. Visiting Uranus has become a priority due to its unique atmospheric
-dynamics, axial tilt, and similarities to the most common of exoplanets discovered by the Kepler telescope [10]. However,
-Uranus has not been visited in over three decades. One of the biggest challenges in visiting the Ice Giants is the long
-transit times and high fuel required to perform a traditional, fully-propulsive orbit insertion. The more a vehicle allocates
-mass to fuel, the less mass is devoted to the science payload. While aerocapture could benefit many deep space missions,
-for distant destinations like Uranus, the effect of using aerocapture becomes even more impactful, with the potential
-to reduce the transit time by years. For these reasons, NASA is assessing the feasibility of performing aerocapture at
-Uranus, with the Ice Giants Aerocapture Project [11–13].
+Recen ly, he Na ional Academies Plane ary Science and As robiology Decadal Survey of 2023-2032 iden ified
+Uranus as a op priori y science des ina ion [9]. Visi ing Uranus has become a priori y due o i s unique a mospheric
+dynamics, axial il , and similari ies o he mos common of exoplane s discovered by he Kepler elescope [10]. However,
+Uranus has no been visi ed in over hree decades. One of he bigges challenges in visi ing he Ice Gian s is he long
+ ransi imes and high fuel required o perform a radi ional, fully-propulsive orbi inser ion. The more a vehicle alloca es
+mass o fuel, he less mass is devo ed o he science payload. While aerocap ure could benefi many deep space missions,
+for dis an des ina ions like Uranus, he effec of using aerocap ure becomes even more impac ful, wi h he po en ial
+ o reduce he ransi ime by years. For hese reasons, NASA is assessing he feasibili y of performing aerocap ure a 
+Uranus, wi h he Ice Gian s Aerocap ure Projec [11–13].
 
 
 
-This paper details the application of aerocapture guidance to a Uranus orbiter mission, leveraging a method flown
-in previous guided reentry missions at Earth and Mars known as bank angle control [2, 14]. While other guidance
-methodologies and conceptual vehicle designs have been studied for missions to the Ice Giants, we chose to select the
-architecture and guidance approach most commonly flown to reduce potential risk and complexity should an aerocapture
-mission be selected over a fully propulsive orbit insertion [10]. In 2004, a team studied aerocapture at Neptune and
-found that an L/D of 0.8 was required for bank control to be feasible [8].
+This paper de ails he applica ion of aerocap ure guidance o a Uranus orbi er mission, leveraging a me hod flown
+in previous guided reen ry missions a Ear h and Mars known as bank angle con rol [2, 14]. While o her guidance
+me hodologies and concep ual vehicle designs have been s udied for missions o he Ice Gian s, we chose o selec he
+archi ec ure and guidance approach mos commonly flown o reduce po en ial risk and complexi y should an aerocap ure
+mission be selec ed over a fully propulsive orbi inser ion [10]. In 2004, a eam s udied aerocap ure a Nep une and
+found ha an L/D of 0.8 was required for bank con rol o be feasible [8].
 
 
 
-Our results here will show how guidance and navigation advances over the past two decades make aerocapture at the
-Ice Giants possible with much less L/D. Monte Carlo analysis will be discussed to quantify the mission’s sensitivities
-to uncertainty and guidance parameter selection. This paper will also expand upon unique Uranus considerations in
-guidance design such as its oblateness and atmospheric uncertainties. Finally, we will discuss how the Julia-based
-guidance from Genesis was integrated into the Program to Optimize Simulated Trajectories II (POST2) for the project’s
-runs for the record.
+Our resul s here will show how guidance and naviga ion advances over he pas wo decades make aerocap ure a he
+Ice Gian s possible wi h much less L/D. Mon e Carlo analysis will be discussed o quan ify he mission’s sensi ivi ies
+ o uncer ain y and guidance parame er selec ion. This paper will also expand upon unique Uranus considera ions in
+guidance design such as i s obla eness and a mospheric uncer ain ies. Finally, we will discuss how he Julia-based
+guidance from Genesis was in egra ed in o he Program o Op imize Simula ed Trajec ories II (POST2) for he projec ’s
+runs for he record.
 
 
 
 III. FNPAG Overview
-This analysis uses the Fully Numerical Predictor-corrector Aerocapture Guidance (FNPAG) algorithm [15]. FNPAG
+This analysis uses he Fully Numerical Predic or-correc or Aerocap ure Guidance (FNPAG) algori hm [15]. FNPAG
 
 
 
-is based on the optimal solution to the aerocapture problem using bank angle control, which dictates a bang-bang
-solution, where the vehicle first flies full lift up and then at some point switches to full lift down. The guidance consists
-of two phases. In the first phase, the predictor uses the profile shown in Figure 2, where q0 and q3 are specified by the
-user. The corrector iterates to solve for the value of the switching time, CB , such that the predicted radius of apoapsis is
+is based on he op imal solu ion o he aerocap ure problem using bank angle con rol, which dic a es a bang-bang
+solu ion, where he vehicle firs flies full lif up and hen a some poin swi ches o full lif down. The guidance consis s
+of wo phases. In he firs phase, he predic or uses he profile shown in Figure 2, where q0 and q3 are specified by he
+user. The correc or i era es o solve for he value of he swi ching ime, CB , such ha he predic ed radius of apoapsis is
 
 
 
@@ -176,75 +176,75 @@ q3
 
 
 
-Fig. 2 Phase 1 of FNPAG uses a bang-bang bank profile in the predictor.
+Fig. 2 Phase 1 of FNPAG uses a bang-bang bank profile in he predic or.
 
 
 
-Table 1 The vehicle has a sphere-cone aeroshell with a low L/D and uses bank angle for control.
+Table 1 The vehicle has a sphere-cone aeroshell wi h a low L/D and uses bank angle for con rol.
 
 
 
-Property Value
+Proper y Value
 
 
 
-Ballistic Coefficient 180 kg/m2
+Ballis ic Coefficien 180 kg/m2
 
 
 
 L/D 0.25
-Max Bank Rate 15◦/s
-Max Bank Acceleration 5◦/s2
+Max Bank Ra e 15◦/s
+Max Bank Accelera ion 5◦/s2
 
 
 
-equal to the desired target. Once CB is reached, the second phase begins, during which the predictor uses a constant bank
-angle command, and the corrector solves for the value of that command that achieves the radius of apoapsis target. For
-the lateral channel, FNPAG uses bank reversals to target a desired orbital plane.
+equal o he desired arge . Once CB is reached, he second phase begins, during which he predic or uses a cons an bank
+angle command, and he correc or solves for he value of ha command ha achieves he radius of apoapsis arge . For
+ he la eral channel, FNPAG uses bank reversals o arge a desired orbi al plane.
 
 
 
-FNPAG is a model-based guidance and does not require extensive tuning. It uses basic vehicle and environment
-parameters, such as the vehicle’s mass and the planet’s gravitational parameter, on-board models of the vehicle’s
-aerodynamics and the planet’s atmospheric density, and a small number of guidance-specific parameters.
+FNPAG is a model-based guidance and does no require ex ensive uning. I uses basic vehicle and environmen 
+parame ers, such as he vehicle’s mass and he plane ’s gravi a ional parame er, on-board models of he vehicle’s
+aerodynamics and he plane ’s a mospheric densi y, and a small number of guidance-specific parame ers.
 
 
 
-We selected FNPAG for this Uranus mission because of its previous performance in studies for both small and
-large mass orbiters [6, 15–17]. The algorithm has also been shown to be robust to large uncertainties, an important
-consideration for planetary bodies with limited atmospheric data [9].
+We selec ed FNPAG for his Uranus mission because of i s previous performance in s udies for bo h small and
+large mass orbi ers [6, 15–17]. The algori hm has also been shown o be robus o large uncer ain ies, an impor an 
+considera ion for plane ary bodies wi h limi ed a mospheric da a [9].
 
 
 
-IV. Simulation Overview
-Genesis was used to simulate open-loop and guided three-degree-of-freedom trajectories in order to tune FNPAG.
+IV. Simula ion Overview
+Genesis was used o simula e open-loop and guided hree-degree-of-freedom rajec ories in order o une FNPAG.
 
 
 
-Genesis is a generic, multi-vehicle, variable-degree-of-freedom flight mechanics simulation. It enables rapid mission
-design and is capable of modeling ascent, aerocapture, entry, descent, and landing trajectories around a single planetary
-body [18]. It is designed to be flexible and easily reconfigured for new vehicles. Genesis provides generic models for
-atmospheric properties, winds, aerodynamics, and propulsion. It can easily be extended with new environment, vehicle,
-or flight software models. Genesis can be used for a wide variety of analyses, ranging from optimizing a single trajectory
-to running a large Monte Carlo analysis in a High-Performance Computing (HPC) environment. It is a successor to the
-Flight Analysis and Simulation Tool (FAST) and consolidates and replaces a suite of legacy flight mechanics simulations
-used at JSC. It is implemented in the Julia programming language [19].
+Genesis is a generic, mul i-vehicle, variable-degree-of-freedom fligh mechanics simula ion. I enables rapid mission
+design and is capable of modeling ascen , aerocap ure, en ry, descen , and landing rajec ories around a single plane ary
+body [18]. I is designed o be flexible and easily reconfigured for new vehicles. Genesis provides generic models for
+a mospheric proper ies, winds, aerodynamics, and propulsion. I can easily be ex ended wi h new environmen , vehicle,
+or fligh sof ware models. Genesis can be used for a wide varie y of analyses, ranging from op imizing a single rajec ory
+ o running a large Mon e Carlo analysis in a High-Performance Compu ing (HPC) environmen . I is a successor o he
+Fligh Analysis and Simula ion Tool (FAST) and consolida es and replaces a sui e of legacy fligh mechanics simula ions
+used a JSC. I is implemen ed in he Julia programming language [19].
 
 
 
-V. Simulation Configuration
-The vehicle for this mission has a 70◦ sphere-cone aeroshell with a low lift-to-drag ratio (L/D). It continuously
+V. Simula ion Configura ion
+The vehicle for his mission has a 70◦ sphere-cone aeroshell wi h a low lif - o-drag ra io (L/D). I con inuously
 
 
 
-modulates the bank angle for control in the atmosphere. While the trajectory is only simulated in three degrees of
-freedom, the bank angle response is emulated by a phase-plane controller, with bank angle rate and acceleration limits
-selected to approximate the response in six degrees of freedom. The vehicle parameters are shown in Table 1. The target
-orbit is highly elliptical, and its parameters are given in Table 2. For this study, only the shape of the orbit is considered.
+modula es he bank angle for con rol in he a mosphere. While he rajec ory is only simula ed in hree degrees of
+freedom, he bank angle response is emula ed by a phase-plane con roller, wi h bank angle ra e and accelera ion limi s
+selec ed o approxima e he response in six degrees of freedom. The vehicle parame ers are shown in Table 1. The arge 
+orbi is highly ellip ical, and i s parame ers are given in Table 2. For his s udy, only he shape of he orbi is considered.
 
 
 
-The simulation is initialized 10 minutes prior to Entry Interface (EI), but for our purposes the states at EI are more
+The simula ion is ini ialized 10 minu es prior o En ry In erface (EI), bu for our purposes he s a es a EI are more
 
 
 
@@ -260,83 +260,83 @@ The simulation is initialized 10 minutes prior to Entry Interface (EI), but for 
 
 
 
-Table 2 The aerocapture maneuver targets a highly elliptical orbit.
+Table 2 The aerocap ure maneuver arge s a highly ellip ical orbi .
 
 
 
-Target Value
+Targe Value
 
 
 
-Altitude of Apoapsis 550 000 km
-Altitude of Periapsis 4000 km
+Al i ude of Apoapsis 550 000 km
+Al i ude of Periapsis 4000 km
 
 
 
-Table 3 The nominal conditions at entry interface.
+Table 3 The nominal condi ions a en ry in erface.
 
 
 
-State Value
+S a e Value
 
 
 
 Radius 26 559 km
-Longitude 100.7◦
+Longi ude 100.7◦
 
 
 
-Planetocentric Latitude −9.9◦
+Plane ocen ric La i ude −9.9◦
 
 
 
-Inertial Velocity 24.9 km/s
-Planetocentric Inertial Flight-Path Angle −11.1◦
+Iner ial Veloci y 24.9 km/s
+Plane ocen ric Iner ial Fligh -Pa h Angle −11.1◦
 
 
 
-Planetocentric Inertial Azimuth 138.9◦
+Plane ocen ric Iner ial Azimu h 138.9◦
 
 
 
-relevant. The nominal states at EI are shown in Table 3. For Monte Carlo analyses, we disperse the initial state, mass,
-atmosphere, and aerodynamics, as summarized in Table 4.
+relevan . The nominal s a es a EI are shown in Table 3. For Mon e Carlo analyses, we disperse he ini ial s a e, mass,
+a mosphere, and aerodynamics, as summarized in Table 4.
 
 
 
-The guidance team must synchronize the Genesis and POST2 simulations at the beginning of each design analysis
-cycle. The trajectory team delivers a comma-separated values (CSV) file of the relevant vehicle and environment model
-parameters. Genesis and POST2 have been configured to read this file to populate their respective inputs.
+The guidance eam mus synchronize he Genesis and POST2 simula ions a he beginning of each design analysis
+cycle. The rajec ory eam delivers a comma-separa ed values (CSV) file of he relevan vehicle and environmen model
+parame ers. Genesis and POST2 have been configured o read his file o popula e heir respec ive inpu s.
 
 
 
-VI. Post-Aerocapture Δ+
-After the atmospheric pass, some amount of Δ+ is required to clean up the resulting orbit. This Δ+ is one of the
+VI. Pos -Aerocap ure Δ+
+Af er he a mospheric pass, some amoun of Δ+ is required o clean up he resul ing orbi . This Δ+ is one of he
 
 
 
-metrics by which we evaluate the performance of a trajectory. The concept of operations used depends on whether the
-vehicle exits the atmosphere on an elliptical or hyperbolic trajectory.
+me rics by which we evalua e he performance of a rajec ory. The concep of opera ions used depends on whe her he
+vehicle exi s he a mosphere on an ellip ical or hyperbolic rajec ory.
 
 
 
-For this study, the Δ+ does not include any burns to correct the orbital plane. The vehicle will perform a series of
-flybys of the Uranus system to gradually adjust the orbit to the final science orbit.
+For his s udy, he Δ+ does no include any burns o correc he orbi al plane. The vehicle will perform a series of
+flybys of he Uranus sys em o gradually adjus he orbi o he final science orbi .
 
 
 
-A. Nominal Concept of Operations
-If the trajectory exits the atmosphere on an elliptical orbit, then a sequence of two impulsive maneuvers is used to
+A. Nominal Concep of Opera ions
+If he rajec ory exi s he a mosphere on an ellip ical orbi , hen a sequence of wo impulsive maneuvers is used o
 
 
 
-achieve the desired orbit. First, after exiting the atmosphere, the vehicle coasts to apoapsis, at which point it performs a
-burn to raise the periapsis out of the atmosphere to the desired value. The vehicle then coasts to this new periapsis, at
-which point it performs a second burn to clean up any error in the apoapsis.
+achieve he desired orbi . Firs , af er exi ing he a mosphere, he vehicle coas s o apoapsis, a which poin i performs a
+burn o raise he periapsis ou of he a mosphere o he desired value. The vehicle hen coas s o his new periapsis, a 
+which poin i performs a second burn o clean up any error in he apoapsis.
 
 
 
-Table 4 Monte Carlo dispersions.
+Table 4 Mon e Carlo dispersions.
 
 
 
@@ -344,12 +344,12 @@ Variable Dispersion
 
 
 
-Initial Position from entry state file
-Initial Inertial Velocity from entry state file
+Ini ial Posi ion from en ry s a e file
+Ini ial Iner ial Veloci y from en ry s a e file
 Mass normal, f = 3.333 %
 GRAM Random Seed uniform, 1–30000
-�! Multiplier uniform, f = 6.667 %
-�� Multiplier uniform, f = 6.667 %
+�! Mul iplier uniform, f = 6.667 %
+�� Mul iplier uniform, f = 6.667 %
 
 
 
@@ -365,11 +365,11 @@ GRAM Random Seed uniform, 1–30000
 
 
 
-Table 5 The coefficients of the density fit used by guidance were tuned for the given entry states.
+Table 5 The coefficien s of he densi y fi used by guidance were uned for he given en ry s a es.
 
 
 
-Coefficient Value
+Coefficien Value
 
 
 
@@ -406,48 +406,48 @@ Coefficient Value
 
 
 
-B. Hyperbolic Exit Concept of Operations
-If the trajectory exits the atmosphere on a hyperbolic orbit, the concept of operations is more complicated, and there is
+B. Hyperbolic Exi Concep of Opera ions
+If he rajec ory exi s he a mosphere on a hyperbolic orbi , he concep of opera ions is more complica ed, and here is
 
 
 
-no simple conic approximation. Instead, we used Copernicus [20] to calculate higher fidelity Δ+ estimates. Copernicus
-is a generalized trajectory optimization tool primarily used for exo-atmospheric trajectory design applications. With a
-suite of built-in nonlinear solvers and optimizers, Copernicus allows users to efficiently define and solve constrained
-nonlinear optimization problems.
+no simple conic approxima ion. Ins ead, we used Copernicus [20] o calcula e higher fideli y Δ+ es ima es. Copernicus
+is a generalized rajec ory op imiza ion ool primarily used for exo-a mospheric rajec ory design applica ions. Wi h a
+sui e of buil -in nonlinear solvers and op imizers, Copernicus allows users o efficien ly define and solve cons rained
+nonlinear op imiza ion problems.
 
 
 
-For hyperbolic cases, the final state at atmospheric exit was extracted from Genesis and used to seed the initial state
-in Copernicus simulations. A two-burn sequence was first proposed: the spacecraft would coast some short duration
-before initiating Δ+-1, it would then coast for a variable amount of time, then Δ+-2 would be executed. The objective
-function was to minimize the sum of the two Δ+ magnitudes, the optimization variables were the Δ+ vectors and the
-coast time between them, and the constraints were on the semi-major axis and eccentricity of the final orbit to match the
-size and shape of the target orbit. The rest of the orbital parameters were left unconstrained.
+For hyperbolic cases, he final s a e a a mospheric exi was ex rac ed from Genesis and used o seed he ini ial s a e
+in Copernicus simula ions. A wo-burn sequence was firs proposed: he spacecraf would coas some shor dura ion
+before ini ia ing Δ+-1, i would hen coas for a variable amoun of ime, hen Δ+-2 would be execu ed. The objec ive
+func ion was o minimize he sum of he wo Δ+ magni udes, he op imiza ion variables were he Δ+ vec ors and he
+coas ime be ween hem, and he cons rain s were on he semi-major axis and eccen rici y of he final orbi o ma ch he
+size and shape of he arge orbi . The res of he orbi al parame ers were lef uncons rained.
 
 
 
-It was found that the optimal solution to the two-burn sequence placed Δ+-1 instantaneously after atmospheric exit
-(i.e., zero coast time), and Δ+-2 at the apoapsis point. Though this concept of operations effectively tries to mimic a
-Hohmann-like transfer, it is unable to as the atmospheric exit point (and therefore Δ+-1), occurs after passing periapsis.
-A 3-burn sequence was proposed to address this shortcoming in the 2-burn sequence. When optimized, Δ+-1 of the
-3-burn sequence would subtract just enough energy to place the spacecraft in a highly eccentric orbit. Δ+-2 would
-again occur at apoapsis to raise periapsis altitude, and Δ+-3 would occur at the periapsis point to lower apoapsis to the
-target altitude. This concept of operations represents the theoretical lower bound on Δ+ required for hyperbolic cases to
-capture into a target orbit with desired apoapsis and periapsis altitudes. The hyperbolic Δ+ values shown in the results
-of this paper use this 3-burn sequence.
+I was found ha he op imal solu ion o he wo-burn sequence placed Δ+-1 ins an aneously af er a mospheric exi 
+(i.e., zero coas ime), and Δ+-2 a he apoapsis poin . Though his concep of opera ions effec ively ries o mimic a
+Hohmann-like ransfer, i is unable o as he a mospheric exi poin (and herefore Δ+-1), occurs af er passing periapsis.
+A 3-burn sequence was proposed o address his shor coming in he 2-burn sequence. When op imized, Δ+-1 of he
+3-burn sequence would sub rac jus enough energy o place he spacecraf in a highly eccen ric orbi . Δ+-2 would
+again occur a apoapsis o raise periapsis al i ude, and Δ+-3 would occur a he periapsis poin o lower apoapsis o he
+ arge al i ude. This concep of opera ions represen s he heore ical lower bound on Δ+ required for hyperbolic cases o
+cap ure in o a arge orbi wi h desired apoapsis and periapsis al i udes. The hyperbolic Δ+ values shown in he resul s
+of his paper use his 3-burn sequence.
 
 
 
 VII. FNPAG Tuning
-The atmospheric density model has a large impact on performance and is typically the only guidance model that
+The a mospheric densi y model has a large impac on performance and is ypically he only guidance model ha 
 
 
 
-needs to be tuned. When given a new set of entry conditions, we propagate an open-loop, lift-up trajectory along the
-steep edge of the flight-path angle corridor and record the density profile. We then generate a curve fit to the log of the
-density as a function of altitude, as shown in Equation 1. By using a propagated trajectory, we attempt to incorporate
-latitude effects without making the curve fit depend explicitly on latitude. The density coefficients are shown in Table 5.
+needs o be uned. When given a new se of en ry condi ions, we propaga e an open-loop, lif -up rajec ory along he
+s eep edge of he fligh -pa h angle corridor and record he densi y profile. We hen genera e a curve fi o he log of he
+densi y as a func ion of al i ude, as shown in Equa ion 1. By using a propaga ed rajec ory, we a emp o incorpora e
+la i ude effec s wi hou making he curve fi depend explici ly on la i ude. The densi y coefficien s are shown in Table 5.
 
 
 
@@ -501,7 +501,7 @@ ln d =
 
 
 
-Planet-Relative Velocity [km/s]
+Plane -Rela ive Veloci y [km/s]
 
 
 
@@ -510,22 +510,22 @@ an
 
 
 
-et
+e 
 od
 
 
 
-et
+e 
 ic
 
 
 
 A
-lti
+l i
 
 
 
-tu
+ u
 de
 
 
@@ -613,11 +613,11 @@ Time from EI [s]
 
 
 A
-lti
+l i
 
 
 
-tu
+ u
 de
 
 
@@ -643,7 +643,7 @@ m
 
 
 
-Truth
+Tru h
 FNPAG
 
 
@@ -679,26 +679,26 @@ Fa
 
 
 
-ct
+c 
 or
 
 
 
 Drag
-Lift
+Lif 
 
 
 
-Target
+Targe 
 
 
 
-Fig. 3 An undispersed, guided trajectory showing the two-phase bank angle profile targeting a desired altitude
+Fig. 3 An undispersed, guided rajec ory showing he wo-phase bank angle profile arge ing a desired al i ude
 of apoapsis.
 
 
 
-VIII. Results
+VIII. Resul s
 
 
 
@@ -707,32 +707,32 @@ A. Undispersed
 
 
 1. Open-Loop
-We run open-loop cases to assess the flight-path angle corridor, which defines the range of flight-path angles within
+We run open-loop cases o assess he fligh -pa h angle corridor, which defines he range of fligh -pa h angles wi hin
 
 
 
-which the vehicle has enough control authority to reach its target. For a particular constant bank angle, we can iterate
-to find the flight-path angle at EI that results in the desired altitude of apoapsis at atmosphere exit. Flying full lift
-up corresponds to the steepest possible flight path angle. Flying full lift down corresponds to the shallowest possible
-flight-path angle. For this mission and vehicle, the flight path angle corridor at entry interface is from −11.36◦ to
+which he vehicle has enough con rol au hori y o reach i s arge . For a par icular cons an bank angle, we can i era e
+ o find he fligh -pa h angle a EI ha resul s in he desired al i ude of apoapsis a a mosphere exi . Flying full lif 
+up corresponds o he s eepes possible fligh pa h angle. Flying full lif down corresponds o he shallowes possible
+fligh -pa h angle. For his mission and vehicle, he fligh pa h angle corridor a en ry in erface is from −11.36◦ o
 −10.81◦.
 
 
 
 2. Guided
-Before we run a Monte Carlo analysis, we look at undispersed, guided cases, to ensure the guidance is properly
+Before we run a Mon e Carlo analysis, we look a undispersed, guided cases, o ensure he guidance is properly
 
 
 
-configured and performing well. Figure 3 shows the results. The bank angle profile is typical for FNPAG: phase 1 of
-the guidance commands a bank angle of 15◦, and then FNPAG switches to phase 2 at approximately 200 s. The final
-altitude of apoapsis being predicted by FNPAG tracks the target well for the majority of the trajectory. FNPAG’s lift and
-drag estimators are adapting the on-board models as the vehicle flies through the atmosphere.
+configured and performing well. Figure 3 shows he resul s. The bank angle profile is ypical for FNPAG: phase 1 of
+ he guidance commands a bank angle of 15◦, and hen FNPAG swi ches o phase 2 a approxima ely 200 s. The final
+al i ude of apoapsis being predic ed by FNPAG racks he arge well for he majori y of he rajec ory. FNPAG’s lif and
+drag es ima ors are adap ing he on-board models as he vehicle flies hrough he a mosphere.
 
 
 
-The late decrease in drag at 400 s, coupled with the loss of control authority as the vehicle pulls up out of the
-atmosphere, results in the commanded bank angle saturating full lift down. This is expected behavior.
+The la e decrease in drag a 400 s, coupled wi h he loss of con rol au hori y as he vehicle pulls up ou of he
+a mosphere, resul s in he commanded bank angle sa ura ing full lif down. This is expec ed behavior.
 
 
 
@@ -748,101 +748,101 @@ atmosphere, results in the commanded bank angle saturating full lift down. This 
 
 
 
-3. Observation Regarding Planetary Oblateness
-FNPAG’s internal calculations use two versions of altitude. One version is simply the difference between the
+3. Observa ion Regarding Plane ary Obla eness
+FNPAG’s in ernal calcula ions use wo versions of al i ude. One version is simply he difference be ween he
 
 
 
-magnitude of the vehicle’s position vector and the equatorial radius of the planet. The equations of motion in FNPAG are
-non-dimensionalized, and because lengths are non-dimensionalized by the equatorial radius of the planet, this altitude
-can by computed very easily as A − 1, where A is the non-dimensional magnitude of the vehicle’s position.
+magni ude of he vehicle’s posi ion vec or and he equa orial radius of he plane . The equa ions of mo ion in FNPAG are
+non-dimensionalized, and because leng hs are non-dimensionalized by he equa orial radius of he plane , his al i ude
+can by compu ed very easily as A − 1, where A is he non-dimensional magni ude of he vehicle’s posi ion.
 
 
 
-The second version of altitude is the planetodetic altitude, which uses a bi-axial ellipsoid model of the planet’s shape.
-Originally, planetodetic altitude was only used for computing the local atmospheric density.
+The second version of al i ude is he plane ode ic al i ude, which uses a bi-axial ellipsoid model of he plane ’s shape.
+Originally, plane ode ic al i ude was only used for compu ing he local a mospheric densi y.
 
 
 
-Past FNPAG studies have focused on Earth, Venus, and Mars. Venus is nearly spherical, but Earth and Mars are
-somewhat oblate. However, the difference between their equatorial and polar radii are only about 20 km. Compared to
-the celestial bodies studied previously, Uranus is both more oblate and larger. The difference between the equatorial and
-polar radii is about 580 km, which is a significant portion of the EI altitude of 1000 km.
+Pas FNPAG s udies have focused on Ear h, Venus, and Mars. Venus is nearly spherical, bu Ear h and Mars are
+somewha obla e. However, he difference be ween heir equa orial and polar radii are only abou 20 km. Compared o
+ he celes ial bodies s udied previously, Uranus is bo h more obla e and larger. The difference be ween he equa orial and
+polar radii is abou 580 km, which is a significan por ion of he EI al i ude of 1000 km.
 
 
 
-While running our initial undispersed cases for this study, we quickly realized that we needed to modify FNPAG. In
-particular, we were more careful to use the planetodetic altitude when computing events (e.g., atmosphere exit) in the
-predictor.
+While running our ini ial undispersed cases for his s udy, we quickly realized ha we needed o modify FNPAG. In
+par icular, we were more careful o use he plane ode ic al i ude when compu ing even s (e.g., a mosphere exi ) in he
+predic or.
 
 
 
 B. Dispersed
-A 3,000-case Monte Carlo was performed to characterize the performance of FNPAG for this mission. Table 6
+A 3,000-case Mon e Carlo was performed o charac erize he performance of FNPAG for his mission. Table 6
 
 
 
-summarizes the statistics for the baseline Monte Carlo. There was a single case that exited on a hyperbolic trajectory. It
-is included in all of the statistics except the Δ+ . The Δ+ of the hyperbolic case was computed separately in Copernicus
-using the 3-burn sequence as described in Section VI.B and found to be 880 m/s. We will address these hyperbolic
-cases further in Section VIII.C.2.
+summarizes he s a is ics for he baseline Mon e Carlo. There was a single case ha exi ed on a hyperbolic rajec ory. I 
+is included in all of he s a is ics excep he Δ+ . The Δ+ of he hyperbolic case was compu ed separa ely in Copernicus
+using he 3-burn sequence as described in Sec ion VI.B and found o be 880 m/s. We will address hese hyperbolic
+cases fur her in Sec ion VIII.C.2.
 
 
 
-Figure 4 shows scatter plots and histograms of the baseline Monte Carlo results. The vertical dashed lines show the
-steep and shallow flight-path angle corridor bounds. Note how the dispersed flight-path angle fills the entire corridor.
+Figure 4 shows sca er plo s and his ograms of he baseline Mon e Carlo resul s. The ver ical dashed lines show he
+s eep and shallow fligh -pa h angle corridor bounds. No e how he dispersed fligh -pa h angle fills he en ire corridor.
 
 
 
-The first histogram plot shows the Δ+ of the first post-aerocapture burn. This burn has a non-zero mean because it
-is raising the periapsis of the post-aerocapture orbit out of the atmosphere. The second histogram shows the Δ+ of the
-second post-aerocapture burn. This burn corrects any apoapsis targeting error. Ideally, the guidance would hit the target
-perfectly, and this burn would not be necessary. But of course in practice the aerodynamic and atmospheric dispersions
-result in some apoapsis targeting error. The third histogram plot shows the total Δ+ of the two post-aerocapture burns.
+The firs his ogram plo shows he Δ+ of he firs pos -aerocap ure burn. This burn has a non-zero mean because i 
+is raising he periapsis of he pos -aerocap ure orbi ou of he a mosphere. The second his ogram shows he Δ+ of he
+second pos -aerocap ure burn. This burn correc s any apoapsis arge ing error. Ideally, he guidance would hi he arge 
+perfec ly, and his burn would no be necessary. Bu of course in prac ice he aerodynamic and a mospheric dispersions
+resul in some apoapsis arge ing error. The hird his ogram plo shows he o al Δ+ of he wo pos -aerocap ure burns.
 
 
 
-The first scatter plot shows the post-aerocapture altitude of apoapsis. The results cluster around the desired altitude
-of apoapsis across the dispersed range of flight-path angles, with a few outlier cases, especially on the shallow side.
+The firs sca er plo shows he pos -aerocap ure al i ude of apoapsis. The resul s clus er around he desired al i ude
+of apoapsis across he dispersed range of fligh -pa h angles, wi h a few ou lier cases, especially on he shallow side.
 
 
 
-The second scatter plot shows the duration of phase 1 of FNPAG, which is the phase when FNPAG commands lift
-up. As expected, near the shallow boundary, FNPAG immediately computes a switching time of 0 s because it must fly
-at a bank angle more lift down than q3 in order to hit the target. Towards the steeper end of the corridor, FNPAG is able
-to utilize phase 1 and the optimal bang-bang structure.
+The second sca er plo shows he dura ion of phase 1 of FNPAG, which is he phase when FNPAG commands lif 
+up. As expec ed, near he shallow boundary, FNPAG immedia ely compu es a swi ching ime of 0 s because i mus fly
+a a bank angle more lif down han q3 in order o hi he arge . Towards he s eeper end of he corridor, FNPAG is able
+ o u ilize phase 1 and he op imal bang-bang s ruc ure.
 
 
 
-The third scatter plot shows the total post-aerocapture Δ+ . Outliers occur at both the shallow and steep edges of the
-corridor. Figure 5 explores the guidance performance of a representative outlier in more detail. Guidance activates at
-approximately 180 s. The estimators see that drag is about 25% higher than expected early on. FNPAG adapts to this and
-remains in phase 1, flying lift up. At approximately 300 s, the sensed drag and lift both decrease significantly, indicating
-a sudden drop in atmospheric density. Now that it anticipates less drag for the remainder of the trajectory, FNPAG
-switches to phase 2 and actually saturates at the maximum lift down bank angle command of ±165◦. The trajectory
-exits in a very elliptical orbit, with an altitude of apopapsis far greater than the desired value. This kind of high-to-low
-density gradient is a known difficulty for other guidance algorithms, such as skip-entry guidance.
+The hird sca er plo shows he o al pos -aerocap ure Δ+ . Ou liers occur a bo h he shallow and s eep edges of he
+corridor. Figure 5 explores he guidance performance of a represen a ive ou lier in more de ail. Guidance ac iva es a 
+approxima ely 180 s. The es ima ors see ha drag is abou 25% higher han expec ed early on. FNPAG adap s o his and
+remains in phase 1, flying lif up. A approxima ely 300 s, he sensed drag and lif bo h decrease significan ly, indica ing
+a sudden drop in a mospheric densi y. Now ha i an icipa es less drag for he remainder of he rajec ory, FNPAG
+swi ches o phase 2 and ac ually sa ura es a he maximum lif down bank angle command of ±165◦. The rajec ory
+exi s in a very ellip ical orbi , wi h an al i ude of apopapsis far grea er han he desired value. This kind of high- o-low
+densi y gradien is a known difficul y for o her guidance algori hms, such as skip-en ry guidance.
 
 
 
-C. Guidance Parameter Studies
+C. Guidance Parame er S udies
 
 
 
 1. Phase 2 Bank Angle
-The q3 guidance parameter allows the guidance team to trade performance and robustness. A trajectory with a more
+The q3 guidance parame er allows he guidance eam o rade performance and robus ness. A rajec ory wi h a more
 
 
 
-lift down value of q3 will more closely mimic the optimal bang-bang bank angle profile, but it will retain less lift down
-margin to respond to atmospheric disturbances later in the trajectory.
+lif down value of q3 will more closely mimic he op imal bang-bang bank angle profile, bu i will re ain less lif down
+margin o respond o a mospheric dis urbances la er in he rajec ory.
 
 
 
-We typically start with q3 = 90◦ and then perform Monte Carlo scans to see if a slightly more lift down value would
-be beneficial. In this case, with the dispersed flight-path angle at EI stretching across the entire flight-path angle corridor,
-we expected that a value of q3 = 90◦ would indeed be the best choice, as it maintains an equal amount of lift up and lift
-down margin. However, the results show that a more lift up bank angle is favorable. This is likely caused by the outlier
+We ypically s ar wi h q3 = 90◦ and hen perform Mon e Carlo scans o see if a sligh ly more lif down value would
+be beneficial. In his case, wi h he dispersed fligh -pa h angle a EI s re ching across he en ire fligh -pa h angle corridor,
+we expec ed ha a value of q3 = 90◦ would indeed be he bes choice, as i main ains an equal amoun of lif up and lif 
+down margin. However, he resul s show ha a more lif up bank angle is favorable. This is likely caused by he ou lier
 
 
 
@@ -891,7 +891,7 @@ ou
 
 
 
-nt
+n 
 
 
 
@@ -916,16 +916,16 @@ nt
 
 
 
-Planetocentric Inertial Flight-Path Angle at EI [◦]
+Plane ocen ric Iner ial Fligh -Pa h Angle a EI [◦]
 
 
 
 A
-lti
+l i
 
 
 
-tu
+ u
 de
 
 
@@ -945,12 +945,12 @@ sa
 
 
 
-tE
+ E
 xi
 
 
 
-t[
+ [
 km
 
 
@@ -984,7 +984,7 @@ ou
 
 
 
-nt
+n 
 
 
 
@@ -1008,7 +1008,7 @@ nt
 
 
 
-Planetocentric Inertial Flight-Path Angle at EI [◦]
+Plane ocen ric Iner ial Fligh -Pa h Angle a EI [◦]
 
 
 
@@ -1027,7 +1027,7 @@ ur
 
 
 
-at
+a 
 io
 
 
@@ -1058,7 +1058,7 @@ n
 
 
 
-Total In-Plane Δ+ [m/s]
+To al In-Plane Δ+ [m/s]
 
 
 
@@ -1067,7 +1067,7 @@ ou
 
 
 
-nt
+n 
 
 
 
@@ -1083,12 +1083,12 @@ nt
 
 
 
-Planetocentric Inertial Flight-Path Angle at EI [◦]
+Plane ocen ric Iner ial Fligh -Pa h Angle a EI [◦]
 
 
 
 To
-ta
+ a
 
 
 
@@ -1114,11 +1114,11 @@ e
 
 
 
-Target
+Targe 
 
 
 
-Fig. 4 Results of the baseline Monte Carlo.
+Fig. 4 Resul s of he baseline Mon e Carlo.
 
 
 
@@ -1134,17 +1134,17 @@ Fig. 4 Results of the baseline Monte Carlo.
 
 
 
-Table 6 Statistical summary of the key performance parameters for the baseline Monte Carlo.
+Table 6 S a is ical summary of he key performance parame ers for he baseline Mon e Carlo.
 
 
 
-Apoapsis Altitude Total In-Plane Δ+ Peak Heat Rate Peak G-Load
+Apoapsis Al i ude To al In-Plane Δ+ Peak Hea Ra e Peak G-Load
 [km] [m/s]
 
 
 
 [
-W/cm2] [Earth g]
+W/cm2] [Ear h g]
 
 
 
@@ -1237,54 +1237,54 @@ Fa
 
 
 
-ct
+c 
 or
 
 
 
 Drag
-Lift
+Lif 
 
 
 
-Fig. 5 Outlier cases tend to be caused by large changes in density.
+Fig. 5 Ou lier cases end o be caused by large changes in densi y.
 
 
 
-cases discussed above. By using a more lift up value of q3 , the vehicle spends less time in the lift up configuration and
-preserves more lift down margin. The cases that experience high-to-low density gradients then have more capability to
-go lift down and reduce the final altitude of apoapsis.
+cases discussed above. By using a more lif up value of q3 , he vehicle spends less ime in he lif up configura ion and
+preserves more lif down margin. The cases ha experience high- o-low densi y gradien s hen have more capabili y o
+go lif down and reduce he final al i ude of apoapsis.
 
 
 
-2. Flight-Path Angle at Entry Interface
-Another parameter that has a strong influence on aerocapture performance is the flight-path angle at entry interface,
+2. Fligh -Pa h Angle a En ry In erface
+Ano her parame er ha has a s rong influence on aerocap ure performance is he fligh -pa h angle a en ry in erface,
 
 
 
-especially for this mission, where the dispersed flight-path angle provided by the interplanetary trajectory team spans the
-entire flight-path angle corridor. The baseline Monte Carlo results in Section VIII.B showed that one case out of 3,000
-exited the atmosphere on a hyperbolic trajectory. This case’s dispersed flight-path angle was very close to the shallow
-flight-path angle corridor boundary. As a reminder, the Δ+ required to complete the capture of this case propulsively
+especially for his mission, where he dispersed fligh -pa h angle provided by he in erplane ary rajec ory eam spans he
+en ire fligh -pa h angle corridor. The baseline Mon e Carlo resul s in Sec ion VIII.B showed ha one case ou of 3,000
+exi ed he a mosphere on a hyperbolic rajec ory. This case’s dispersed fligh -pa h angle was very close o he shallow
+fligh -pa h angle corridor boundary. As a reminder, he Δ+ required o comple e he cap ure of his case propulsively
 was 880 m/s.
 
 
 
-By applying an additive bias to the flight-path angle at entry interface, we can approximate the effect of re-targeting
+By applying an addi ive bias o he fligh -pa h angle a en ry in erface, we can approxima e he effec of re- arge ing
 
 
 
-Table 7 Results of a scan on q3 .
+Table 7 Resul s of a scan on q3 .
 
 
 
-q3 # Hyperbolic 99%-ile Total In-Plane Δ+ 99%-ile Peak Heat Rate 99%-ile Peak G-Load
+q3 # Hyperbolic 99%-ile To al In-Plane Δ+ 99%-ile Peak Hea Ra e 99%-ile Peak G-Load
 [◦] [m/s]
 
 
 
 [
-W/cm2] [Earth g]
+W/cm2] [Ear h g]
 
 
 
@@ -1311,17 +1311,17 @@ W/cm2] [Earth g]
 
 
 
-Table 8 Results of a scan on flight-path angle at entry interface.
+Table 8 Resul s of a scan on fligh -pa h angle a en ry in erface.
 
 
 
-ΔW # Hyperbolic 99%-ile Total In-Plane Δ+ 99%-ile Peak Heat Rate 99%-ile Peak G-Load
+ΔW # Hyperbolic 99%-ile To al In-Plane Δ+ 99%-ile Peak Hea Ra e 99%-ile Peak G-Load
 [◦] [m/s]
 
 
 
 [
-W/cm2] [Earth g]
+W/cm2] [Ear h g]
 
 
 
@@ -1336,73 +1336,73 @@ W/cm2] [Earth g]
 
 
 
-the arrival at Uranus. The results of this scan are shown in Table 8. The hyperbolic cases are excluded from the Δ+
-statistics but are included in the peak heat rate and peak sensed acceleration statistics.
+ he arrival a Uranus. The resul s of his scan are shown in Table 8. The hyperbolic cases are excluded from he Δ+
+s a is ics bu are included in he peak hea ra e and peak sensed accelera ion s a is ics.
 
 
 
-As expected, a shallowermean flight-path angle results in more cases exiting the atmosphere on hyperbolic trajectories.
-By biasing the flight-path angles by only 0.025◦, we see 6 cases that are hyperbolic. The Δ+ required to complete the
-capture of these cases propulsively ranges from 546 to 1490 m/s.
+As expec ed, a shallowermean fligh -pa h angle resul s in more cases exi ing he a mosphere on hyperbolic rajec ories.
+By biasing he fligh -pa h angles by only 0.025◦, we see 6 cases ha are hyperbolic. The Δ+ required o comple e he
+cap ure of hese cases propulsively ranges from 546 o 1490 m/s.
 
 
 
-A slightly steeper mean flight-path angle is able to completely eliminate the hyperbolic cases, with a small increase
-in Δ+ , peak heat rate, and peak sensed acceleration. Some of the dispersed flight-path angles are then steeper than the
-steep flight-path angle corridor boundary, which simply means they capture into an elliptical orbit with an apoapsis
-below the desired value and require additional Δ+ to boost back up to the desired orbit. None of the cases capture for
-entry.
+A sligh ly s eeper mean fligh -pa h angle is able o comple ely elimina e he hyperbolic cases, wi h a small increase
+in Δ+ , peak hea ra e, and peak sensed accelera ion. Some of he dispersed fligh -pa h angles are hen s eeper han he
+s eep fligh -pa h angle corridor boundary, which simply means hey cap ure in o an ellip ical orbi wi h an apoapsis
+below he desired value and require addi ional Δ+ o boos back up o he desired orbi . None of he cases cap ure for
+en ry.
 
 
 
-IX. FNPAG Integration in POST2
-The version of FNPAG used for this analysis was implemented in Julia. This was simple to use within Genesis,
+IX. FNPAG In egra ion in POST2
+The version of FNPAG used for his analysis was implemen ed in Julia. This was simple o use wi hin Genesis,
 
 
 
-which is also implemented in Julia. However, the runs for the record for this project are performed using POST2, which
-is written in C. Rather than re-implement FNPAG in C, the team desired to call the Julia version directly.
+which is also implemen ed in Julia. However, he runs for he record for his projec are performed using POST2, which
+is wri en in C. Ra her han re-implemen FNPAG in C, he eam desired o call he Julia version direc ly.
 
 
 
-It is straightforward to use the PackageCompiler.jl package to compile the FNPAG Julia code into a shared
-library with a C API. Internally, the guidance is still being run by Julia, but the C API makes it easy to incorporate into
-other tools like POST2.
+I is s raigh forward o use he PackageCompiler.jl package o compile he FNPAG Julia code in o a shared
+library wi h a C API. In ernally, he guidance is s ill being run by Julia, bu he C API makes i easy o incorpora e in o
+o her ools like POST2.
 
 
 
-In addition to the shared library, the guidance team delivers a CSV file containing the tuned guidance parameters and
-a time history file containing all of the guidance inputs and outputs for a unit test case. The POST2 team exercises their
-FNPAG interface with the unit test case and matches the outputs within a tight tolerance, giving the team confidence
-that the guidance has been integrated correctly in POST2.
+In addi ion o he shared library, he guidance eam delivers a CSV file con aining he uned guidance parame ers and
+a ime his ory file con aining all of he guidance inpu s and ou pu s for a uni es case. The POST2 eam exercises heir
+FNPAG in erface wi h he uni es case and ma ches he ou pu s wi hin a igh olerance, giving he eam confidence
+ ha he guidance has been in egra ed correc ly in POST2.
 
 
 
 X. Conclusion
-The application of a numeric predictor-corrector, bank control guidance for aerocapture at Uranus has been presented.
+The applica ion of a numeric predic or-correc or, bank con rol guidance for aerocap ure a Uranus has been presen ed.
 
 
 
-Nominal and Monte Carlo results indicate that bank angle control is capable of performing aerocapture at Uranus using
-a low-L/D aeroshell. Guidance parameter studies identify potential trade offs between performance and robustness.
-In particular, targeting the entry conditions steeper than the baseline can prevent cases from exiting the atmosphere
-on hyperbolic trajectories. The Julia implementation of the FNPAG algorithm is compiled into a shared library for
-integration into POST2.
+Nominal and Mon e Carlo resul s indica e ha bank angle con rol is capable of performing aerocap ure a Uranus using
+a low-L/D aeroshell. Guidance parame er s udies iden ify po en ial rade offs be ween performance and robus ness.
+In par icular, arge ing he en ry condi ions s eeper han he baseline can preven cases from exi ing he a mosphere
+on hyperbolic rajec ories. The Julia implemen a ion of he FNPAG algori hm is compiled in o a shared library for
+in egra ion in o POST2.
 
 
 
 References
-[1] Papadopoulos, P., Venkatapathy, E., Henline, W., Wercinski, P., Papadopoulos, P., Venkatapathy, E., Henline, W., and Wercinski,
+[1] Papadopoulos, P., Venka apa hy, E., Henline, W., Wercinski, P., Papadopoulos, P., Venka apa hy, E., Henline, W., and Wercinski,
 
 
 
-P., ‘‘Aerothermal heating simulations with surface catalysis for the Mars 2001 aerocapture mission,’’ 35th Aerospace Sciences
-Meeting and Exhibit, 1997. https://doi.org/10.2514/6.1997-473, URL http://dx.doi.org/10.2514/6.1997-473.
+P., ‘‘Aero hermal hea ing simula ions wi h surface ca alysis for he Mars 2001 aerocap ure mission,’’ 35 h Aerospace Sciences
+Mee ing and Exhibi , 1997. h ps://doi.org/10.2514/6.1997-473, URL h p://dx.doi.org/10.2514/6.1997-473.
 
 
 
-[2] Rea, J., and Putnam, Z., ‘‘A Comparison of Two Orion Skip Entry Guidance Algorithms,’’ AIAA Guidance, Navigation and
-Control Conference and Exhibit, 2007. https://doi.org/10.2514/6.2007-6424, URL http://dx.doi.org/10.2514/6.2007-6424.
+[2] Rea, J., and Pu nam, Z., ‘‘A Comparison of Two Orion Skip En ry Guidance Algori hms,’’ AIAA Guidance, Naviga ion and
+Con rol Conference and Exhibi , 2007. h ps://doi.org/10.2514/6.2007-6424, URL h p://dx.doi.org/10.2514/6.2007-6424.
 
 
 
@@ -1412,117 +1412,117 @@ Control Conference and Exhibit, 2007. https://doi.org/10.2514/6.2007-6424, URL h
 
 
 
-https://doi.org/10.2514/6.1997-473
+h ps://doi.org/10.2514/6.1997-473
 
 
-http://dx.doi.org/10.2514/6.1997-473
+h p://dx.doi.org/10.2514/6.1997-473
 
 
-https://doi.org/10.2514/6.2007-6424
+h ps://doi.org/10.2514/6.2007-6424
 
 
-http://dx.doi.org/10.2514/6.2007-6424
-
-
-
+h p://dx.doi.org/10.2514/6.2007-6424
 
 
 
 
 
-[3] Cerimele, C., and Gamble, J., ‘‘A simplified guidance algorithm for lifting aeroassist orbital transfer vehicles,’’ 23rd Aerospace
-Sciences Meeting, 1985. https://doi.org/10.2514/6.1985-348, URL http://dx.doi.org/10.2514/6.1985-348.
 
 
 
-[4] Hoffman, S., ‘‘A comparison of aerobraking and aerocapture vehicles for interplanetary missions,’’ Astrodynamics Conference,
-1984. https://doi.org/10.2514/6.1984-2057, URL http://dx.doi.org/10.2514/6.1984-2057.
+[3] Cerimele, C., and Gamble, J., ‘‘A simplified guidance algori hm for lif ing aeroassis orbi al ransfer vehicles,’’ 23rd Aerospace
+Sciences Mee ing, 1985. h ps://doi.org/10.2514/6.1985-348, URL h p://dx.doi.org/10.2514/6.1985-348.
 
 
 
-[5] Matz, D. A., and Cerimele, C., ‘‘Development of a Numeric Predictor-Corrector Aerocapture Guidance for Direct Force
-Control,’’ AIAA Scitech 2020 Forum, 2020. https://doi.org/10.2514/6.2020-0847, URL https://doi.org/10.2514/6.2020-0847.
+[4] Hoffman, S., ‘‘A comparison of aerobraking and aerocap ure vehicles for in erplane ary missions,’’ As rodynamics Conference,
+1984. h ps://doi.org/10.2514/6.1984-2057, URL h p://dx.doi.org/10.2514/6.1984-2057.
 
 
 
-[6] Matz, D. A., Cerimele, C., and Sostaric, R. R., ‘‘Comparison of Aerocapture Performance Using Bank Control and Direct Force
-Control With Two Human-Scale Vehicles At Mars,’’ AIAA Scitech 2020 Forum, 2020. https://doi.org/10.2514/6.2020-1738,
-URL https://doi.org/10.2514/6.2020-1738.
+[5] Ma z, D. A., and Cerimele, C., ‘‘Developmen of a Numeric Predic or-Correc or Aerocap ure Guidance for Direc Force
+Con rol,’’ AIAA Sci ech 2020 Forum, 2020. h ps://doi.org/10.2514/6.2020-0847, URL h ps://doi.org/10.2514/6.2020-0847.
 
 
 
-[7] Geiser, J. K., and Matz, D. A., ‘‘Optimal Angle of Attack Control for Aerocapture,’’ AIAA SCITECH 2022 Forum, 2022.
-https://doi.org/10.2514/6.2022-0608, URL http://dx.doi.org/10.2514/6.2022-0608.
+[6] Ma z, D. A., Cerimele, C., and Sos aric, R. R., ‘‘Comparison of Aerocap ure Performance Using Bank Con rol and Direc Force
+Con rol Wi h Two Human-Scale Vehicles A Mars,’’ AIAA Sci ech 2020 Forum, 2020. h ps://doi.org/10.2514/6.2020-1738,
+URL h ps://doi.org/10.2514/6.2020-1738.
 
 
 
-[8] Edquist, K., Prabhu, R., Hoffman, D., and Rea, J., ‘‘Configuration, Aerodynamics, and Stability Analysis for a Neptune
-Aerocapture Orbiter,’’ AIAA Atmospheric Flight Mechanics Conference and Exhibit, 2004. https://doi.org/10.2514/6.2004-4953,
-URL http://dx.doi.org/10.2514/6.2004-4953.
+[7] Geiser, J. K., and Ma z, D. A., ‘‘Op imal Angle of A ack Con rol for Aerocap ure,’’ AIAA SCITECH 2022 Forum, 2022.
+h ps://doi.org/10.2514/6.2022-0608, URL h p://dx.doi.org/10.2514/6.2022-0608.
 
 
 
-[9] ‘‘Origins, Worlds, and Life: A Decadal Strategy for Planetary Science and Astrobiology 2023-2032,’’ National Academies
-Press, 2022. https://doi.org/10.17226/26522, URL https://doi.org/10.17226%2F26522.
+[8] Edquis , K., Prabhu, R., Hoffman, D., and Rea, J., ‘‘Configura ion, Aerodynamics, and S abili y Analysis for a Nep une
+Aerocap ure Orbi er,’’ AIAA A mospheric Fligh Mechanics Conference and Exhibi , 2004. h ps://doi.org/10.2514/6.2004-4953,
+URL h p://dx.doi.org/10.2514/6.2004-4953.
 
 
 
-[10] Simon, A., Nimmo, F., and Anderson, R., ‘‘Journey to an Ice Giant System: Uranus Orbiter and Probe,’’ Planetary Mission
-Concept for the 2023-2032 Decadal Survey, 2021. URL https://forum.nasaspaceflight.com/index.php?action=dlattach;topic=
-8184.0;attach=2170027.
+[9] ‘‘Origins, Worlds, and Life: A Decadal S ra egy for Plane ary Science and As robiology 2023-2032,’’ Na ional Academies
+Press, 2022. h ps://doi.org/10.17226/26522, URL h ps://doi.org/10.17226%2F26522.
 
 
 
-[11] Dutta, S., Shellabarger, E., Scoggins, J., Gomez-Delrio, A., Lugo, R., Deshmukh, R., Chadalavada, P., Williams, J., Garland, J.,
-Johnson, B., Matz, D., Geiser, J., Morgan, J., Restrepo, R., and Mages, J., ‘‘Uranus Flagship-class Orbiter and Probe Using
-Aerocapture,’’ AIAA SciTech, Orlando, FL, 2024.
+[10] Simon, A., Nimmo, F., and Anderson, R., ‘‘Journey o an Ice Gian Sys em: Uranus Orbi er and Probe,’’ Plane ary Mission
+Concep for he 2023-2032 Decadal Survey, 2021. URL h ps://forum.nasaspacefligh .com/index.php?ac ion=dla ach; opic=
+8184.0;a ach=2170027.
 
 
 
-[12] Deshmukh, R., Dutta, S., Lugo, R., Restrepo, R., Mages, D., Johnson, B., Matz, D., Geiser, J., Scoggins, J., Shellabarger,
-E., Gomez-Delrio, A., and Williams, J., ‘‘Performance Analysis of Aerocapture Systems for Uranus Orbiter,’’ AIAA SciTech,
+[11] Du a, S., Shellabarger, E., Scoggins, J., Gomez-Delrio, A., Lugo, R., Deshmukh, R., Chadalavada, P., Williams, J., Garland, J.,
+Johnson, B., Ma z, D., Geiser, J., Morgan, J., Res repo, R., and Mages, J., ‘‘Uranus Flagship-class Orbi er and Probe Using
+Aerocap ure,’’ AIAA SciTech, Orlando, FL, 2024.
+
+
+
+[12] Deshmukh, R., Du a, S., Lugo, R., Res repo, R., Mages, D., Johnson, B., Ma z, D., Geiser, J., Scoggins, J., Shellabarger,
+E., Gomez-Delrio, A., and Williams, J., ‘‘Performance Analysis of Aerocap ure Sys ems for Uranus Orbi er,’’ AIAA SciTech,
 Orlando, FL, 2024.
 
 
 
-[13] Mages, D., Restrepo, R., Deshmukh, R., Dutta, S., and Benhacine, L., ‘‘Mission Design and Navigation Solutions for Uranus
-Aerocapture,’’ AIAA SciTech, Orlando, FL, 2024.
+[13] Mages, D., Res repo, R., Deshmukh, R., Du a, S., and Benhacine, L., ‘‘Mission Design and Naviga ion Solu ions for Uranus
+Aerocap ure,’’ AIAA SciTech, Orlando, FL, 2024.
 
 
 
-[14] Mendeck, G., and Craig McGrew, L., ‘‘Entry Guidance Design and Postflight Performance for 2011 Mars Science Laboratory
-Mission,’’ Journal of Spacecraft and Rockets, 2014. https://doi.org/51(4):1094-1105.
+[14] Mendeck, G., and Craig McGrew, L., ‘‘En ry Guidance Design and Pos fligh Performance for 2011 Mars Science Labora ory
+Mission,’’ Journal of Spacecraf and Rocke s, 2014. h ps://doi.org/51(4):1094-1105.
 
 
 
-[15] Lu, P., Cerimele, C. J., Tigges, M. A., and Matz, D. A., ‘‘Optimal Aerocapture Guidance,’’ Journal of Guidance, Control, and
-Dynamics, Vol. 38, No. 4, 2015, p. 553–565. https://doi.org/10.2514/1.g000713, URL http://dx.doi.org/10.2514/1.G000713.
+[15] Lu, P., Cerimele, C. J., Tigges, M. A., and Ma z, D. A., ‘‘Op imal Aerocap ure Guidance,’’ Journal of Guidance, Con rol, and
+Dynamics, Vol. 38, No. 4, 2015, p. 553–565. h ps://doi.org/10.2514/1.g000713, URL h p://dx.doi.org/10.2514/1.G000713.
 
 
 
-[16] Matz, D. A., Lu, P., Mendeck, G. F., and Sostaric, R. R., ‘‘Application of a Fully Numerical Guidance to Mars Aerocapture,’’
-AIAA Guidance, Navigation, and Control Conference, 2017. https://doi.org/10.2514/6.2017-1901.
+[16] Ma z, D. A., Lu, P., Mendeck, G. F., and Sos aric, R. R., ‘‘Applica ion of a Fully Numerical Guidance o Mars Aerocap ure,’’
+AIAA Guidance, Naviga ion, and Con rol Conference, 2017. h ps://doi.org/10.2514/6.2017-1901.
 
 
 
-[17] Lugo, R. A., Dutta, S., Matz, D., Johnson, B. J., Pensado, A. R., Roelke, E., Aguirre, J. T., and Powell, R., ‘‘Performance
-Analysis of SmallSat Aerocapture at Venus,’’ AIAA SCITECH 2023 Forum, 2023. https://doi.org/10.2514/6.2023-0878, URL
-http://dx.doi.org/10.2514/6.2023-0878.
+[17] Lugo, R. A., Du a, S., Ma z, D., Johnson, B. J., Pensado, A. R., Roelke, E., Aguirre, J. T., and Powell, R., ‘‘Performance
+Analysis of SmallSa Aerocap ure a Venus,’’ AIAA SCITECH 2023 Forum, 2023. h ps://doi.org/10.2514/6.2023-0878, URL
+h p://dx.doi.org/10.2514/6.2023-0878.
 
 
 
-[18] Murri, D., and Matz, D., ‘‘Genesis Flight Mechanics Simulation,’’ NASA Engineering and Safety Center Technical Bulletin No.
-21-02, 2021. URL https://www.nasa.gov/sites/default/files/atoms/files/tb_21-02_genesis_flight_mechanics_simulation.pdf.
+[18] Murri, D., and Ma z, D., ‘‘Genesis Fligh Mechanics Simula ion,’’ NASA Engineering and Safe y Cen er Technical Bulle in No.
+21-02, 2021. URL h ps://www.nasa.gov/si es/defaul /files/a oms/files/ b_21-02_genesis_fligh _mechanics_simula ion.pdf.
 
 
 
-[19] Bezanson, J., Edelman, A., Karpinski, S., and Shah, V. B., ‘‘Julia: A fresh approach to numerical computing,’’ SIAM Review,
-Vol. 59, No. 1, 2017, pp. 65–98. https://doi.org/10.1137/141000671, URL https://epubs.siam.org/doi/10.1137/141000671.
+[19] Bezanson, J., Edelman, A., Karpinski, S., and Shah, V. B., ‘‘Julia: A fresh approach o numerical compu ing,’’ SIAM Review,
+Vol. 59, No. 1, 2017, pp. 65–98. h ps://doi.org/10.1137/141000671, URL h ps://epubs.siam.org/doi/10.1137/141000671.
 
 
 
-[20] Williams, J., Kamath, A. H., Eckman, R. A., Condon, G. L., Mathur, R., and Davis, D. C., ‘‘Copernicus 5.0: Latest Advances
-in JSC’s Spacecraft Trajectory Optimization and Design System,’’ 2019.
+[20] Williams, J., Kama h, A. H., Eckman, R. A., Condon, G. L., Ma hur, R., and Davis, D. C., ‘‘Copernicus 5.0: La es Advances
+in JSC’s Spacecraf Trajec ory Op imiza ion and Design Sys em,’’ 2019.
 
 
 
@@ -1532,142 +1532,142 @@ in JSC’s Spacecraft Trajectory Optimization and Design System,’’ 2019.
 
 
 
-https://doi.org/10.2514/6.1985-348
+h ps://doi.org/10.2514/6.1985-348
 
 
-http://dx.doi.org/10.2514/6.1985-348
+h p://dx.doi.org/10.2514/6.1985-348
 
 
-https://doi.org/10.2514/6.1984-2057
+h ps://doi.org/10.2514/6.1984-2057
 
 
-http://dx.doi.org/10.2514/6.1984-2057
+h p://dx.doi.org/10.2514/6.1984-2057
 
 
-https://doi.org/10.2514/6.2020-0847
+h ps://doi.org/10.2514/6.2020-0847
 
 
-https://doi.org/10.2514/6.2020-0847
+h ps://doi.org/10.2514/6.2020-0847
 
 
-https://doi.org/10.2514/6.2020-1738
+h ps://doi.org/10.2514/6.2020-1738
 
 
-https://doi.org/10.2514/6.2020-1738
+h ps://doi.org/10.2514/6.2020-1738
 
 
-https://doi.org/10.2514/6.2022-0608
+h ps://doi.org/10.2514/6.2022-0608
 
 
-http://dx.doi.org/10.2514/6.2022-0608
+h p://dx.doi.org/10.2514/6.2022-0608
 
 
-https://doi.org/10.2514/6.2004-4953
+h ps://doi.org/10.2514/6.2004-4953
 
 
-http://dx.doi.org/10.2514/6.2004-4953
+h p://dx.doi.org/10.2514/6.2004-4953
 
 
-https://doi.org/10.17226/26522
+h ps://doi.org/10.17226/26522
 
 
-https://doi.org/10.17226%2F26522
+h ps://doi.org/10.17226%2F26522
 
 
-https://forum.nasaspaceflight.com/index.php?action=dlattach;topic=8184.0;attach=2170027
+h ps://forum.nasaspacefligh .com/index.php?ac ion=dla ach; opic=8184.0;a ach=2170027
 
 
-https://forum.nasaspaceflight.com/index.php?action=dlattach;topic=8184.0;attach=2170027
+h ps://forum.nasaspacefligh .com/index.php?ac ion=dla ach; opic=8184.0;a ach=2170027
 
 
-https://doi.org/51(4):1094-1105
+h ps://doi.org/51(4):1094-1105
 
 
-https://doi.org/10.2514/1.g000713
+h ps://doi.org/10.2514/1.g000713
 
 
-http://dx.doi.org/10.2514/1.G000713
+h p://dx.doi.org/10.2514/1.G000713
 
 
-https://doi.org/10.2514/6.2017-1901
+h ps://doi.org/10.2514/6.2017-1901
 
 
-https://doi.org/10.2514/6.2023-0878
+h ps://doi.org/10.2514/6.2023-0878
 
 
-http://dx.doi.org/10.2514/6.2023-0878
+h p://dx.doi.org/10.2514/6.2023-0878
 
 
-https://www.nasa.gov/sites/default/files/atoms/files/tb_21-02_genesis_flight_mechanics_simulation.pdf
+h ps://www.nasa.gov/si es/defaul /files/a oms/files/ b_21-02_genesis_fligh _mechanics_simula ion.pdf
 
 
-https://doi.org/10.1137/141000671
+h ps://doi.org/10.1137/141000671
 
 
-https://epubs.siam.org/doi/10.1137/141000671
+h ps://epubs.siam.org/doi/10.1137/141000671
 
 
 
- 
-Nomenclature
+	
+Nomencla ure
 
- 
-Introduction
+	
+In roduc ion
 
- 
+	
 FNPAG Overview
 
- 
-Simulation Overview
+	
+Simula ion Overview
 
- 
-Simulation Configuration
+	
+Simula ion Configura ion
 
- 
-Post-Aerocapture V
+	
+Pos -Aerocap ure V
 
- 
-Nominal Concept of Operations
+	
+Nominal Concep of Opera ions
 
- 
-Hyperbolic Exit Concept of Operations
+	
+Hyperbolic Exi Concep of Opera ions
 
 
- 
+	
 FNPAG Tuning
 
- 
-Results
+	
+Resul s
 
- 
+	
 Undispersed
 
- 
+	
 Open-Loop
 
- 
+	
 Guided
 
- 
-Observation Regarding Planetary Oblateness
+	
+Observa ion Regarding Plane ary Obla eness
 
 
- 
+	
 Dispersed
 
- 
-Guidance Parameter Studies
+	
+Guidance Parame er S udies
 
- 
+	
 Phase 2 Bank Angle
 
- 
-Flight-Path Angle at Entry Interface
+	
+Fligh -Pa h Angle a En ry In erface
 
 
 
- 
-FNPAG Integration in POST2
+	
+FNPAG In egra ion in POST2
 
- 
+	
 Conclusion

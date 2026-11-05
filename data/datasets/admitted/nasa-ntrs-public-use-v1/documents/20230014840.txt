@@ -1,4 +1,4 @@
-Linear Parameter-Varying Control Compatible with Excitation
+Linear Parame er-Varying Con rol Compa ible wi h Exci a ion
 for Real-Time Modeling
 
 
@@ -7,82 +7,82 @@ Luke J. Miller ∗
 
 
 
-NASA Langley Research Center Hampton, Virginia, 23681
+NASA Langley Research Cen er Hamp on, Virginia, 23681
 
 
 
-The Modeling and Control for Agile Aircraft Development project (MCAAD) seeks to
-reduce the time spent on wind tunnel testing and computational fluid dynamic modeling when
-developing control laws for new commercial and military aircraft. MCAAD uses advanced
-dynamic modeling procedures coupled with real-time control design which can reduce the time
-and cost spent on traditional aircraft development methods. This is done in-flight by using a
-real-time modeling procedure where programmed test inputs (PTI) deflect the aircraft control
-surfaces, and the responses are measured in order to create a dynamic model. This paper
-presents an 𝐻∞-based linear parameter-varying (LPV) control law designed on a nonlinear
-rigid-body dynamic model which commands control surface deflections at frequencies above
-the PTI frequency band. Thus the controller will not suppress the response due to the PTI. The
-LPV controller is compared with a previously designed Nonlinear Dynamic Inversion (NDI)
-controller and the coherence between the commanded control surface deflections and the PTI is
-plotted for both controllers. The LPV controller is shown to distort the PTI less than the NDI
-controller.
+The Modeling and Con rol for Agile Aircraf Developmen projec (MCAAD) seeks o
+reduce he ime spen on wind unnel es ing and compu a ional fluid dynamic modeling when
+developing con rol laws for new commercial and mili ary aircraf . MCAAD uses advanced
+dynamic modeling procedures coupled wi h real- ime con rol design which can reduce he ime
+and cos spen on radi ional aircraf developmen me hods. This is done in-fligh by using a
+real- ime modeling procedure where programmed es inpu s (PTI) deflec he aircraf con rol
+surfaces, and he responses are measured in order o crea e a dynamic model. This paper
+presen s an 𝐻∞-based linear parame er-varying (LPV) con rol law designed on a nonlinear
+rigid-body dynamic model which commands con rol surface deflec ions a frequencies above
+ he PTI frequency band. Thus he con roller will no suppress he response due o he PTI. The
+LPV con roller is compared wi h a previously designed Nonlinear Dynamic Inversion (NDI)
+con roller and he coherence be ween he commanded con rol surface deflec ions and he PTI is
+plo ed for bo h con rollers. The LPV con roller is shown o dis or he PTI less han he NDI
+con roller.
 
 
 
-I. Nomenclature
+I. Nomencla ure
 
 
 
-𝑏 = wing span, ft
-𝑐 = wing mean aerodynamic chord, ft
-𝐶𝑙 , 𝐶𝑚, 𝐶𝑛 = body-axis nondimensional aerodynamic moment coefficients
-𝑔 = acceleration due to gravity, ft s−2
+𝑏 = wing span, f 
+𝑐 = wing mean aerodynamic chord, f 
+𝐶𝑙 , 𝐶𝑚, 𝐶𝑛 = body-axis nondimensional aerodynamic momen coefficien s
+𝑔 = accelera ion due o gravi y, f s−2
 
 
 
-𝐼𝑥𝑥 , 𝐼𝑦𝑦 , 𝐼𝑧𝑧 , 𝐼𝑥𝑧 = inertia tensor elements, slug ft2
-𝐾 = control gain
+𝐼𝑥𝑥 , 𝐼𝑦𝑦 , 𝐼𝑧𝑧 , 𝐼𝑥𝑧 = iner ia ensor elemen s, slug f 2
+𝐾 = con rol gain
 𝑚 = mass, slug
-𝑀 = vector of aerodynamic moments, lb ft
-𝑀𝑢 = vector of aerodynamic moments due to control surface deflection, lb ft
-𝜔1, 𝜔2, 𝜔3 = body-axis roll, pitch, and yaw rates, rad s−1
+𝑀 = vec or of aerodynamic momen s, lb f 
+𝑀𝑢 = vec or of aerodynamic momen s due o con rol surface deflec ion, lb f 
+𝜔1, 𝜔2, 𝜔3 = body-axis roll, pi ch, and yaw ra es, rad s−1
 
 
 
-𝑞 = dynamic pressure, lb ft−2
+𝑞 = dynamic pressure, lb f −2
 
 
 
-𝑆 = wing reference area, ft2
-𝑉 = true airspeed, ft s−1
+𝑆 = wing reference area, f 2
+𝑉 = rue airspeed, f s−1
 
 
 
-𝑉𝑐𝑎𝑠 = calibrated airspeed, ft s−1
+𝑉𝑐𝑎𝑠 = calibra ed airspeed, f s−1
 
 
 
-𝑇ℎ = Throttle, lb
-𝛼 = angle of attack, rad
+𝑇ℎ = Thro le, lb
+𝛼 = angle of a ack, rad
 𝛽 = sideslip angle, rad
-𝑟 = control system tracking command
-𝑢 = control surface deflection, rad
-Z = damping ratio
-`, 𝛾, 𝜒 = bank, flight path, and track angles, rad
-𝜙, \, 𝜓 = Euler roll, pitch, and yaw angles, rad
-𝜔 = body-axis angular rate, rad s−1
+𝑟 = con rol sys em racking command
+𝑢 = con rol surface deflec ion, rad
+Z = damping ra io
+`, 𝛾, 𝜒 = bank, fligh pa h, and rack angles, rad
+𝜙, , 𝜓 = Euler roll, pi ch, and yaw angles, rad
+𝜔 = body-axis angular ra e, rad s−1
 
 
 
-𝜔𝑛 = natural frequency, rad s−1
+𝜔𝑛 = na ural frequency, rad s−1
 
 
 
-𝑦 = plant output
-𝑧 = output of weighting filter
+𝑦 = plan ou pu 
+𝑧 = ou pu of weigh ing fil er
 
 
 
-∗Research Aerospace Engineer, Flight Dynamics Branch, AIAA Member
+∗Research Aerospace Engineer, Fligh Dynamics Branch, AIAA Member
 
 
 
@@ -98,61 +98,61 @@ Z = damping ratio
 
 
 
-Subscripts
+Subscrip s
 
 
 
 𝑐𝑚𝑑 = command
 𝑒𝑟𝑟 = error
-𝐾 = controller
-𝑙 𝑓 , 𝑟 𝑓 = left and right flap
-𝑙𝑎, 𝑟𝑎 = left and right aileron
-𝑒 = elevator
+𝐾 = con roller
+𝑙 𝑓 , 𝑟 𝑓 = lef and righ flap
+𝑙𝑎, 𝑟𝑎 = lef and righ aileron
+𝑒 = eleva or
 𝑟𝑢 = rudder
-𝑖 = inner loop controller
-𝑜 = outer loop controller
-𝑝 = prefilter
+𝑖 = inner loop con roller
+𝑜 = ou er loop con roller
+𝑝 = prefil er
 
 
 
-Superscripts
+Superscrip s
 
 
 
-^ = estimate
+^ = es ima e
 
 
 
-II. Introduction
-Stability and reference tracking are paramount concerns to a control system designer. However, in order to ensure
+II. In roduc ion
+S abili y and reference racking are paramoun concerns o a con rol sys em designer. However, in order o ensure
 
 
 
-stability and tracking performance, an accurate model of the aircraft system must be available. One of the goals of the
-NASA Modeling and Control for Agile Aircraft Development (MCAAD) project is to develop an aircraft model and
-aircraft control system in real time when there is no prior knowledge of the aircraft dynamics. This real-time modeling
-and control design procedure has the potential to greatly reduce the development time and cost of commercial and
-military aircraft.
+s abili y and racking performance, an accura e model of he aircraf sys em mus be available. One of he goals of he
+NASA Modeling and Con rol for Agile Aircraf Developmen (MCAAD) projec is o develop an aircraf model and
+aircraf con rol sys em in real ime when here is no prior knowledge of he aircraf dynamics. This real- ime modeling
+and con rol design procedure has he po en ial o grea ly reduce he developmen ime and cos of commercial and
+mili ary aircraf .
 
 
 
-Real-time model identification and real-time control design has been considered before to study actuator failure
-cases, as flown on the VISTA/F-16 aircraft [1]. Additionally, identification schemes using prior information to enhance
-parameter estimates in a recursive least-squares formulation have been used [2]. Reconfigurable control allocation in
-the presence of actuator failure has also been well studied [3] [4]. The NASA Learn-to-Fly (L2F) project explored
-simultaneous real-time control design and real-time aerodynamic modeling aimed at reducing time spent on traditional
-aircraft development methods. The Learn-to-Fly project used baseline Nonlinear Dynamic Inversion (NDI) control laws,
-with adaptive L1 augmentation which was developed by Snyder et al. [5], [6], [7]. The control architecture used in L2F
-is depicted in fig. 1. The real-time aerodynamic modeling under L2F was developed by Morelli [8].
+Real- ime model iden ifica ion and real- ime con rol design has been considered before o s udy ac ua or failure
+cases, as flown on he VISTA/F-16 aircraf [1]. Addi ionally, iden ifica ion schemes using prior informa ion o enhance
+parame er es ima es in a recursive leas -squares formula ion have been used [2]. Reconfigurable con rol alloca ion in
+ he presence of ac ua or failure has also been well s udied [3] [4]. The NASA Learn- o-Fly (L2F) projec explored
+simul aneous real- ime con rol design and real- ime aerodynamic modeling aimed a reducing ime spen on radi ional
+aircraf developmen me hods. The Learn- o-Fly projec used baseline Nonlinear Dynamic Inversion (NDI) con rol laws,
+wi h adap ive L1 augmen a ion which was developed by Snyder e al. [5], [6], [7]. The con rol archi ec ure used in L2F
+is depic ed in fig. 1. The real- ime aerodynamic modeling under L2F was developed by Morelli [8].
 
 
 
-Fig. 1 Control Architecture used in the NASA Learn-to-Fly project.
+Fig. 1 Con rol Archi ec ure used in he NASA Learn- o-Fly projec .
 
 
 
-The L2F project successfully demonstrated the feasibility of simultaneous control design and real-time aerodynamic
-modeling. However, the NDI control law incorporated the aerodynamic modeling parameters which are learned in
+The L2F projec successfully demons ra ed he feasibili y of simul aneous con rol design and real- ime aerodynamic
+modeling. However, he NDI con rol law incorpora ed he aerodynamic modeling parame ers which are learned in
 
 
 
@@ -168,45 +168,45 @@ modeling. However, the NDI control law incorporated the aerodynamic modeling par
 
 
 
-real-time and are subject to large initial error. This could cause the aircraft to behave in undesirable and unpredictable
+real- ime and are subjec o large ini ial error. This could cause he aircraf o behave in undesirable and unpredic able
 ways.
 
 
 
-This paper proposes a framework of an alternative solution to the L2F problem, performed under the NASA MCAAD
-project and presents initial results, shown to be more compatible with excitation necessary for real-time modeling. This
-solution seeks to remove the influence of the modeling results on the control system by incorporating the real-time
-aerodynamic modeling results exclusively in the control allocator. Figure 2 shows the influence of the modeling on
-the control system, experienced under the L2F project. Figure 3 shows the proposed removal of the influence of the
-modeling on the control under the MCAAD project.
+This paper proposes a framework of an al erna ive solu ion o he L2F problem, performed under he NASA MCAAD
+projec and presen s ini ial resul s, shown o be more compa ible wi h exci a ion necessary for real- ime modeling. This
+solu ion seeks o remove he influence of he modeling resul s on he con rol sys em by incorpora ing he real- ime
+aerodynamic modeling resul s exclusively in he con rol alloca or. Figure 2 shows he influence of he modeling on
+ he con rol sys em, experienced under he L2F projec . Figure 3 shows he proposed removal of he influence of he
+modeling on he con rol under he MCAAD projec .
 
 
 
-Fig. 2 Real-time modeling influence on
-real-time control design under L2F.
+Fig. 2 Real- ime modeling influence on
+real- ime con rol design under L2F.
 
 
 
-Fig. 3 Proposed removal of real-time modeling influ-
-ence on real-time control design under MCAAD.
+Fig. 3 Proposed removal of real- ime modeling influ-
+ence on real- ime con rol design under MCAAD.
 
 
 
-The full extent of the proposed control architecture is shown in fig. 4. Successfully removing the influence of the
-aerodynamics on the control system will allow the control designer to only consider rigid-body equations of motion,
-which will greatly simplify the controls problem. This paper shows that an 𝐻∞-based linear parameter-varying (LPV)
-control law can be used to shape the response of the rigid-body equations of motion into a more compatible response
-with excitation for real-time modeling than that of the NDI control law used in the L2F project while, establishing
-uniform global exponential stability of the rigid body dynamics.
+The full ex en of he proposed con rol archi ec ure is shown in fig. 4. Successfully removing he influence of he
+aerodynamics on he con rol sys em will allow he con rol designer o only consider rigid-body equa ions of mo ion,
+which will grea ly simplify he con rols problem. This paper shows ha an 𝐻∞-based linear parame er-varying (LPV)
+con rol law can be used o shape he response of he rigid-body equa ions of mo ion in o a more compa ible response
+wi h exci a ion for real- ime modeling han ha of he NDI con rol law used in he L2F projec while, es ablishing
+uniform global exponen ial s abili y of he rigid body dynamics.
 
 
 
-Fig. 4 Proposed comprehensive control architecture to be developed under NASA MCAAD project.
+Fig. 4 Proposed comprehensive con rol archi ec ure o be developed under NASA MCAAD projec .
 
 
 
-Successful development of the control architecture shown in fig. 4 will entail the implementation of closed-loop,
-exponentially stabilizing control allocation laws. Johansen showed that this was possible through a control-Lyapunov
+Successful developmen of he con rol archi ec ure shown in fig. 4 will en ail he implemen a ion of closed-loop,
+exponen ially s abilizing con rol alloca ion laws. Johansen showed ha his was possible hrough a con rol-Lyapunov
 
 
 
@@ -222,48 +222,48 @@ exponentially stabilizing control allocation laws. Johansen showed that this was
 
 
 
-design approach which derived an optimal control allocation algorithm which guarantees uniform boundedness and
-uniform global exponential convergence in conjunction with an exponentially stable trajectory-tracking controller [9].
-The 𝐻∞-based LPV controller presented in this paper can serve as the exponentially stable trajectory tracking controller
-necessary for the development of closed-loop stabilizing control allocators.
+design approach which derived an op imal con rol alloca ion algori hm which guaran ees uniform boundedness and
+uniform global exponen ial convergence in conjunc ion wi h an exponen ially s able rajec ory- racking con roller [9].
+The 𝐻∞-based LPV con roller presen ed in his paper can serve as he exponen ially s able rajec ory racking con roller
+necessary for he developmen of closed-loop s abilizing con rol alloca ors.
 
 
 
-Under the proposed control architecture in fig. 4 the control allocation is designed based on aerodynamic modeling
-parameters, which are learned in real-time and are subject to large initial error. Due to this error, the stabilizing allocator
-might not realize the exact moment commanded by the LPV controller. This could cause undesirable and unpredictable
-behavior in the aircraft. To address this problem, an adaptive control allocation element will be used to adjust control
-surface deflection commands. A control-Lyapunov approach can be used to derive these adaptive control allocation
-laws and is shown to prove closed-loop stability [10].
+Under he proposed con rol archi ec ure in fig. 4 he con rol alloca ion is designed based on aerodynamic modeling
+parame ers, which are learned in real- ime and are subjec o large ini ial error. Due o his error, he s abilizing alloca or
+migh no realize he exac momen commanded by he LPV con roller. This could cause undesirable and unpredic able
+behavior in he aircraf . To address his problem, an adap ive con rol alloca ion elemen will be used o adjus con rol
+surface deflec ion commands. A con rol-Lyapunov approach can be used o derive hese adap ive con rol alloca ion
+laws and is shown o prove closed-loop s abili y [10].
 
 
 
-In this paper an LPV control design methodology is presented based on rigid-body equations of motion and is
-shown to be more compatible with real-time modeling methods than the NDI control developed under the L2F project.
-Additionally, this control design using a rigid-body model ensures robustness and exponential stability [11] which
-Johansen shows is necessary for the development of any future stabilizing allocators [9]. This technique could also be
-applied to aircraft models subject to more complex dynamic effects, such as slosh or flex modes. The LPV technique is
-an alternative to the traditional gain scheduling process. The dynamic model and controller are still linear, but they
-are dependent on time-varying parameters whose values can be measured, but are unknown in advance. A traditional
-gain-scheduling approach involves linearizing dynamic models at many trim points and then designing linear time
-invariant (LTI) controllers at each trim point. The global controller is then estimated by interpolating the gains of the
-local controllers. This approach has been successfully implemented in many engineering applications but there is no
-guarantee of exponential stability [12]. The LPV control strategy can show exponential stability for all possible values
-of the parameters and can be implemented like a traditionally gain-scheduled control system [11] [13].
+In his paper an LPV con rol design me hodology is presen ed based on rigid-body equa ions of mo ion and is
+shown o be more compa ible wi h real- ime modeling me hods han he NDI con rol developed under he L2F projec .
+Addi ionally, his con rol design using a rigid-body model ensures robus ness and exponen ial s abili y [11] which
+Johansen shows is necessary for he developmen of any fu ure s abilizing alloca ors [9]. This echnique could also be
+applied o aircraf models subjec o more complex dynamic effec s, such as slosh or flex modes. The LPV echnique is
+an al erna ive o he radi ional gain scheduling process. The dynamic model and con roller are s ill linear, bu hey
+are dependen on ime-varying parame ers whose values can be measured, bu are unknown in advance. A radi ional
+gain-scheduling approach involves linearizing dynamic models a many rim poin s and hen designing linear ime
+invarian (LTI) con rollers a each rim poin . The global con roller is hen es ima ed by in erpola ing he gains of he
+local con rollers. This approach has been successfully implemen ed in many engineering applica ions bu here is no
+guaran ee of exponen ial s abili y [12]. The LPV con rol s ra egy can show exponen ial s abili y for all possible values
+of he parame ers and can be implemen ed like a radi ionally gain-scheduled con rol sys em [11] [13].
 
 
 
-The LPV control strategy requires an affine dynamic system that must be converted into convex polytopic form
-[11]. The rigid-body aircraft model is not affine and will result in an infinite number of Linear Matrix Inequalities
-(LMIs) to determine the controller [11]. This difficulty is overcome using the Tensor Product (TP) model transformation
-to convert the nonaffine system into convex polytopic form. There is then a linear control allocator generated from
-a linearized system model produced by the real-time modeling procedure. The control allocator commands control
-surface deflections such that the moment commanded by the controller is realized. The newly developed LPV control
-law was tested on a nonlinear simulation of the NASA E1 aircraft, depicted in fig. 5.
+The LPV con rol s ra egy requires an affine dynamic sys em ha mus be conver ed in o convex poly opic form
+[11]. The rigid-body aircraf model is no affine and will resul in an infini e number of Linear Ma rix Inequali ies
+(LMIs) o de ermine he con roller [11]. This difficul y is overcome using he Tensor Produc (TP) model ransforma ion
+ o conver he nonaffine sys em in o convex poly opic form. There is hen a linear con rol alloca or genera ed from
+a linearized sys em model produced by he real- ime modeling procedure. The con rol alloca or commands con rol
+surface deflec ions such ha he momen commanded by he con roller is realized. The newly developed LPV con rol
+law was es ed on a nonlinear simula ion of he NASA E1 aircraf , depic ed in fig. 5.
 
 
 
-Fig. 5 NASA E1 Aircraft
+Fig. 5 NASA E1 Aircraf 
 
 
 
@@ -279,22 +279,22 @@ Fig. 5 NASA E1 Aircraft
 
 
 
-The E1 aircraft is a commercially-available 40-percent scale Edge 330 SC remotely-piloted fixed-wing airplane.
-Control surfaces are conventional ailerons and trailing-edge flaps on the wings, along with a conventional rudder and a
-split elevator. E1 is powered by an electric motor driving a fixed-pitch tractor propeller. More information about E1 can
+The E1 aircraf is a commercially-available 40-percen scale Edge 330 SC remo ely-pilo ed fixed-wing airplane.
+Con rol surfaces are conven ional ailerons and railing-edge flaps on he wings, along wi h a conven ional rudder and a
+spli eleva or. E1 is powered by an elec ric mo or driving a fixed-pi ch rac or propeller. More informa ion abou E1 can
 be found in [8, 14, 15].
 
 
 
-III. Excitation for Real-Time Modeling
-In order for the real-time modeling procedure to obtain a nonlinear global aircraft model, the flight data must include
+III. Exci a ion for Real-Time Modeling
+In order for he real- ime modeling procedure o ob ain a nonlinear global aircraf model, he fligh da a mus include
 
 
 
-a wide range of values for the explanatory variables. The programmed test inputs developed and applied as described in
-[8] simultaneously command each of the aircraft control surfaces using inputs with wide-band frequency content. Each
-perturbation 𝑢 𝑗 applied to the 𝑗 𝑡ℎ individual control surface is a sum of selected harmonic sinusoids with individual
-phase shifts, 𝜙𝑘 . The frequencies of these harmonic sinusoids are listed in Table 1.
+a wide range of values for he explana ory variables. The programmed es inpu s developed and applied as described in
+[8] simul aneously command each of he aircraf con rol surfaces using inpu s wi h wide-band frequency con en . Each
+per urba ion 𝑢 𝑗 applied o he 𝑗 𝑡ℎ individual con rol surface is a sum of selec ed harmonic sinusoids wi h individual
+phase shif s, 𝜙𝑘 . The frequencies of hese harmonic sinusoids are lis ed in Table 1.
 
 
 
@@ -322,13 +322,13 @@ phase shifts, 𝜙𝑘 . The frequencies of these harmonic sinusoids are listed 
 
 
 
-The integer 𝑀 is the number of available harmonically-related frequencies. 𝑇 is the time length of excitation, 𝐴𝑘 are the
-amplitudes for the sinusoidal components, and 𝑡 is time. The design of each multisine input is determined by methods
+The in eger 𝑀 is he number of available harmonically-rela ed frequencies. 𝑇 is he ime leng h of exci a ion, 𝐴𝑘 are he
+ampli udes for he sinusoidal componen s, and 𝑡 is ime. The design of each mul isine inpu is de ermined by me hods
 shown in [8].
 
 
 
-Table 1 PTI frequencies for each effector (Hz)
+Table 1 PTI frequencies for each effec or (Hz)
 
 
 
@@ -347,24 +347,24 @@ L. Flap R. Flap L. Ail. R. Ail. Elev. Rud.
 
 
 
-The real-time modeling procedure is also described in detail in [8]. The PTI excitations, which are necessary for
-real-time modeling, produce aircraft responses which the control system sees as disturbances that must be suppressed.
-This creates a fundamental conflict. Good control tends to mitigate disturbances, such as those due to the PTI. However,
-real time modeling needs to observe the aircraft response to the PTI in order to accurately construct global aerodynamic
+The real- ime modeling procedure is also described in de ail in [8]. The PTI exci a ions, which are necessary for
+real- ime modeling, produce aircraf responses which he con rol sys em sees as dis urbances ha mus be suppressed.
+This crea es a fundamen al conflic . Good con rol ends o mi iga e dis urbances, such as hose due o he PTI. However,
+real ime modeling needs o observe he aircraf response o he PTI in order o accura ely cons ruc global aerodynamic
 models.
 
 
 
-IV. LPV Model Derivation
-The MCAAD project presents a challenge in real-time control design: the aircraft must be stabilized and controlled
+IV. LPV Model Deriva ion
+The MCAAD projec presen s a challenge in real- ime con rol design: he aircraf mus be s abilized and con rolled
 
 
 
-without a predefined model. However, a real-time modeling procedure can be performed to generate a global nonlinear
-aerodynamic model. The real-time modeling procedure uses PTI to excite the aircraft response to produce informative
-data. Thus the controller must be effective enough to stabilize and ensure safety of the aircraft, but not suppress
-the response of the aircraft due to the PTI. This is accomplished through a multi-loop control architecture design.
-The outer loop receives a guidance command 𝑟 =
+wi hou a predefined model. However, a real- ime modeling procedure can be performed o genera e a global nonlinear
+aerodynamic model. The real- ime modeling procedure uses PTI o exci e he aircraf response o produce informa ive
+da a. Thus he con roller mus be effec ive enough o s abilize and ensure safe y of he aircraf , bu no suppress
+ he response of he aircraf due o he PTI. This is accomplished hrough a mul i-loop con rol archi ec ure design.
+The ou er loop receives a guidance command 𝑟 =
 
 
 
@@ -373,8 +373,8 @@ The outer loop receives a guidance command 𝑟 =
 
 
 
-]𝑇 and calculates an attitude command
-state (𝜙𝑐𝑚𝑑 , 𝜔2,𝑐𝑚𝑑 , 𝜔3,𝑐𝑚𝑑) by the outer loop of the LPV control method described later in this paper, where
+]𝑇 and calcula es an a i ude command
+s a e (𝜙𝑐𝑚𝑑 , 𝜔2,𝑐𝑚𝑑 , 𝜔3,𝑐𝑚𝑑) by he ou er loop of he LPV con rol me hod described la er in his paper, where
 𝝎 =
 
 
@@ -384,9 +384,9 @@ state (𝜙𝑐𝑚𝑑 , 𝜔2,𝑐𝑚𝑑 , 𝜔3,𝑐𝑚𝑑) by the outer 
 
 
 
-]𝑇 are the body-axis angular rates. Additionally \𝑐𝑚𝑑 = 𝛼𝑐𝑚𝑑 and 𝜔1,𝑐𝑚𝑑 = 0 are added to the
-attitude command state. The inner loop then receives the attitude command state and calculates a moment command
-(𝑀𝑐𝑚𝑑) to be passed to the control allocator. In this section the LPV models used for inner- and outer- loop control
+]𝑇 are he body-axis angular ra es. Addi ionally 𝑐𝑚𝑑 = 𝛼𝑐𝑚𝑑 and 𝜔1,𝑐𝑚𝑑 = 0 are added o he
+a i ude command s a e. The inner loop hen receives he a i ude command s a e and calcula es a momen command
+(𝑀𝑐𝑚𝑑) o be passed o he con rol alloca or. In his sec ion he LPV models used for inner- and ou er- loop con rol
 design are derived.
 
 
@@ -403,7 +403,7 @@ design are derived.
 
 
 
-A state-space representation of an LTI system is:
+A s a e-space represen a ion of an LTI sys em is:
 
 
 
@@ -412,13 +412,13 @@ A state-space representation of an LTI system is:
 
 
 
-Where A, B, C, and D denote the system, input, output, and direct-transmission matrices respectively. In general, aircraft
-dynamics are nonlinear and the LTI representation in eq. 2 is obtained by linearization of a nonlinear model at a specific
-point in the operating range. Linear control methods can be applied to stabilize an LTI system, but the performance of
-the linear controller will deteriorate as the system deviates from the design point. To capture nonlinear effects in the
-linear system, matrices 𝐴, 𝐵, 𝐶, and 𝐷 can be described in terms of a parameter vector p which is unknown in advance,
-but can be measured in real-time. An example of an element in the parameter vector might be angle of attack, attitude
-angles, or airspeed. This yields the LPV model of the system as [13]:
+Where A, B, C, and D deno e he sys em, inpu , ou pu , and direc - ransmission ma rices respec ively. In general, aircraf 
+dynamics are nonlinear and he LTI represen a ion in eq. 2 is ob ained by lineariza ion of a nonlinear model a a specific
+poin in he opera ing range. Linear con rol me hods can be applied o s abilize an LTI sys em, bu he performance of
+ he linear con roller will de eriora e as he sys em devia es from he design poin . To cap ure nonlinear effec s in he
+linear sys em, ma rices 𝐴, 𝐵, 𝐶, and 𝐷 can be described in erms of a parame er vec or p which is unknown in advance,
+bu can be measured in real- ime. An example of an elemen in he parame er vec or migh be angle of a ack, a i ude
+angles, or airspeed. This yields he LPV model of he sys em as [13]:
 
 
 
@@ -427,7 +427,7 @@ angles, or airspeed. This yields the LPV model of the system as [13]:
 
 
 
-The parameter-dependent LPV controller is defined by:
+The parame er-dependen LPV con roller is defined by:
 
 
 
@@ -440,15 +440,15 @@ The parameter-dependent LPV controller is defined by:
 
 
 
-The value, 𝑒, is the error signal that is the difference between the command and the output. The LPV dynamic model and
-the controller are parameter dependent. Therefore, both the LPV dynamic model and the controller are automatically
-updated based on the measured values for p.
+The value, 𝑒, is he error signal ha is he difference be ween he command and he ou pu . The LPV dynamic model and
+ he con roller are parame er dependen . Therefore, bo h he LPV dynamic model and he con roller are au oma ically
+upda ed based on he measured values for p.
 
 
 
-The LPV controllers are derived using Bounded Real Lemma with quadratic 𝐻∞ performance Γ [13]. With
-closed-loop state-space matrices, 𝐴𝑐𝑙 (p), 𝐵𝑐𝑙 (p), 𝐶𝑐𝑙 (p), and 𝐷𝑐𝑙 (p) the systems have quadratic 𝐻∞ performance Γ if
-and only if there exists a single positive definite matrix, 𝑃 such that,
+The LPV con rollers are derived using Bounded Real Lemma wi h quadra ic 𝐻∞ performance Γ [13]. Wi h
+closed-loop s a e-space ma rices, 𝐴𝑐𝑙 (p), 𝐵𝑐𝑙 (p), 𝐶𝑐𝑙 (p), and 𝐷𝑐𝑙 (p) he sys ems have quadra ic 𝐻∞ performance Γ if
+and only if here exis s a single posi ive defini e ma rix, 𝑃 such ha ,
 
 
 
@@ -482,34 +482,34 @@ and only if there exists a single positive definite matrix, 𝑃 such that,�
 
 
 
-for all possible values of p. The Lyapunov function, 𝑉 (𝑥) = 𝑥𝑇𝑃𝑥 then establishes asymptotic stability and the L2
-gain between the input and the output is bounded by | |𝑦 | | < Γ | |𝑢 | |. Quadratic 𝐻∞ performance requires a single fixed
-quadratic Lyapunov function for the entire operating range [13]. Despite the controllers being designed by solving the
-linear matrix inequality (LMIs) given in eq. 5 there are an infinite number of solutions, corresponding to the infinite
-possible trajectories of p. The concept of an Affine Polytopic LPV model has been introduced to overcome this difficulty
-[12] and will be discussed in section IV.A.
+for all possible values of p. The Lyapunov func ion, 𝑉 (𝑥) = 𝑥𝑇𝑃𝑥 hen es ablishes asymp o ic s abili y and he L2
+gain be ween he inpu and he ou pu is bounded by | |𝑦 | | < Γ | |𝑢 | |. Quadra ic 𝐻∞ performance requires a single fixed
+quadra ic Lyapunov func ion for he en ire opera ing range [13]. Despi e he con rollers being designed by solving he
+linear ma rix inequali y (LMIs) given in eq. 5 here are an infini e number of solu ions, corresponding o he infini e
+possible rajec ories of p. The concep of an Affine Poly opic LPV model has been in roduced o overcome his difficul y
+[12] and will be discussed in sec ion IV.A.
 
 
 
-The aircraft model used in both LPV control loops is a rigid-body dynamics model which are fully-known across all
-flight conditions. Use of this rigid-body model renders the controller independent of the real-time modeling algorithm
-which will help mitigate interactions between the real-time modeling and control. The control allocation algorithm,
-described later, uses the results of the real-time aerodynamic modeling algorithm to realize the commanded moment by
-the LPV control loops.
+The aircraf model used in bo h LPV con rol loops is a rigid-body dynamics model which are fully-known across all
+fligh condi ions. Use of his rigid-body model renders he con roller independen of he real- ime modeling algori hm
+which will help mi iga e in erac ions be ween he real- ime modeling and con rol. The con rol alloca ion algori hm,
+described la er, uses he resul s of he real- ime aerodynamic modeling algori hm o realize he commanded momen by
+ he LPV con rol loops.
 
 
 
-To discuss the development of the LPV models, it is assumed that the aircraft dynamics are governed by the standard
-rigid-body equations of motion for gliding flight:
+To discuss he developmen of he LPV models, i is assumed ha he aircraf dynamics are governed by he s andard
+rigid-body equa ions of mo ion for gliding fligh :
 
 
 
-Inner Loop Equations of Motion:
+Inner Loop Equa ions of Mo ion:
 
 
 
-¤𝜙 = 𝜔1 + tan(\) (𝜔2 sin(𝜙) + 𝜔3 cos(𝜙)) (6a)
-¤\ = 𝜔2 cos(\) − 𝜔3 sin(\) (6b)
+¤𝜙 = 𝜔1 + an( ) (𝜔2 sin(𝜙) + 𝜔3 cos(𝜙)) (6a)
+¤ = 𝜔2 cos( ) − 𝜔3 sin( ) (6b)
 
 
 
@@ -529,11 +529,11 @@ Inner Loop Equations of Motion:
 
 
 
-Outer Loop Equations of Motion:
+Ou er Loop Equa ions of Mo ion:
 
 
 
-¤𝛼 = 𝜔2 − tan(𝛽) (cos(𝛼)𝜔1 + sin(𝛼)𝜔1) +
+¤𝛼 = 𝜔2 − an(𝛽) (cos(𝛼)𝜔1 + sin(𝛼)𝜔1) +
 1
 
 
@@ -571,7 +571,7 @@ Outer Loop Equations of Motion:
 
 
 
-Under the following simplifying assumptions:
+Under he following simplifying assump ions:
 
 
 
@@ -596,7 +596,7 @@ Under the following simplifying assumptions:
 
 
 • sin(𝛼)𝜔1 ≈ 0,
-The outer loop equations of motion become:
+The ou er loop equa ions of mo ion become:
 
 
 
@@ -606,7 +606,7 @@ The outer loop equations of motion become:
 
 
 𝑉
-sin(𝜙) tan(𝜙) (8a)
+sin(𝜙) an(𝜙) (8a)
 
 
 
@@ -630,18 +630,18 @@ sin(𝜙) (8b)
 
 
 𝑉
-tan(𝜙) (8d)
+ an(𝜙) (8d)
 
 
 
-The simplifying assumptions, albeit highly restrictive, simplify the controls problem to a tractable problem for
-demonstration of the efficacy of the LPV control law.
+The simplifying assump ions, albei highly res ric ive, simplify he con rols problem o a rac able problem for
+demons ra ion of he efficacy of he LPV con rol law.
 
 
 
-Now separate the LPV model into inner and outer control loops. The outer loop receives a guidance command,
-(𝛼𝑐𝑚𝑑 , 𝛽𝑐𝑚𝑑 , 𝜒𝑐𝑚𝑑) and calculates an attitude state command, (𝜙𝑐𝑚𝑑 , 𝜔2,𝑐𝑚𝑑 , 𝜔3,𝑐𝑚𝑑). Equation 6 and 8 are now
-linearized about an equilibrium point in flight,
+Now separa e he LPV model in o inner and ou er con rol loops. The ou er loop receives a guidance command,
+(𝛼𝑐𝑚𝑑 , 𝛽𝑐𝑚𝑑 , 𝜒𝑐𝑚𝑑) and calcula es an a i ude s a e command, (𝜙𝑐𝑚𝑑 , 𝜔2,𝑐𝑚𝑑 , 𝜔3,𝑐𝑚𝑑). Equa ion 6 and 8 are now
+linearized abou an equilibrium poin in fligh ,
 
 
 
@@ -660,8 +660,8 @@ linearized about an equilibrium point in flight,
 
 
 
-]𝑇 and put into LPV form for both the
-inner and outer loops: 
+]𝑇 and pu in o LPV form for bo h he
+inner and ou er loops: 
 
 
 
@@ -705,7 +705,7 @@ inner and outer loops: 
 
 
 ¤𝜙
-¤\
+¤ 
 ¤𝝎
 
 
@@ -719,7 +719,7 @@ inner and outer loops: 
 
 
 
-\
+ 
 
 
 
@@ -749,7 +749,7 @@ where,
 
 
 (
-cos(𝜙) tan(𝜙) + sin(𝜙) sec2 (𝜙)
+cos(𝜙) an(𝜙) + sin(𝜙) sec2 (𝜙)
 
 
 
@@ -798,7 +798,7 @@ Assuming 𝐼𝑥𝑧 = 0:
 
 
 
-0 0 1 sin(𝜙) tan(\) cos(𝜙) tan(\)
+0 0 1 sin(𝜙) an( ) cos(𝜙) an( )
 0 0 0 cos(𝜙) − sin(𝜙)
 0 0 0 0 0
 0 0 0 0 0
@@ -838,8 +838,8 @@ Assuming 𝐼𝑥𝑧 = 0:
 
 
 
-Defining the parameter vector as the variables that remain in the linearized system, the parameter vectors for the outer
-loop and inner loop LPV controllers are:
+Defining he parame er vec or as he variables ha remain in he linearized sys em, he parame er vec ors for he ou er
+loop and inner loop LPV con rollers are:
 
 
 
@@ -855,7 +855,7 @@ p𝑜 =
 
 p𝑖 =
 [
-𝜙 \
+𝜙 
 
 
 
@@ -863,8 +863,8 @@ p𝑖 =
 
 
 
-A. Affine Polytopic LPV Systems
-Assume that each element of the parameter vector, p =
+A. Affine Poly opic LPV Sys ems
+Assume ha each elemen of he parame er vec or, p =
 
 
 
@@ -874,13 +874,13 @@ Assume that each element of the parameter vector, p =
 
 
 ]
-∈ R𝑁 lies between extreme values 𝑝𝑖
+∈ R𝑁 lies be ween ex reme values 𝑝𝑖
 
 
 
-and 𝑝𝑖 and p lies in a polytope 𝔗 with vertices 𝔗1, 𝔗2, . . .𝔗𝑚. With 𝑝 ∈ 𝔗 and 𝑚 = 2𝑁 [16]. In an affine LPV model
-the system matrices, 𝑆(p) are linear functions of the time-varying parameter vector and can be written as a convex
-combination of the vertex matrices of the parameter polytope, 𝔗 [13].
+and 𝑝𝑖 and p lies in a poly ope 𝔗 wi h ver ices 𝔗1, 𝔗2, . . .𝔗𝑚. Wi h 𝑝 ∈ 𝔗 and 𝑚 = 2𝑁 [16]. In an affine LPV model
+ he sys em ma rices, 𝑆(p) are linear func ions of he ime-varying parame er vec or and can be wri en as a convex
+combina ion of he ver ex ma rices of he parame er poly ope, 𝔗 [13].
 
 
 
@@ -917,23 +917,23 @@ combination of the vertex matrices of the parameter polytope, 𝔗 [13].
 
 
 
-It can be shown that eq. 5 holds for all possible trajectories of p if, and only if, it holds at the vertices, 𝔗𝑖 for all
-𝑖 = 1, . . . 𝑚 [13]. This result allows for an infinite number of LMIs to reduce to a finite number of LMIs due to the
-convexity of the affine LPV system. However, eqs. 9 and 10 are not linear functions of the parameter vector, thus the
-LPV model is not affine. The Tensor Product model transformation is used to generate an affine polytopic LPV system
+I can be shown ha eq. 5 holds for all possible rajec ories of p if, and only if, i holds a he ver ices, 𝔗𝑖 for all
+𝑖 = 1, . . . 𝑚 [13]. This resul allows for an infini e number of LMIs o reduce o a fini e number of LMIs due o he
+convexi y of he affine LPV sys em. However, eqs. 9 and 10 are no linear func ions of he parame er vec or, hus he
+LPV model is no affine. The Tensor Produc model ransforma ion is used o genera e an affine poly opic LPV sys em
 [11].
 
 
 
-B. Tensor Product (TP) Transformation
-Many control problems can be formulated into the affine LPV form, however the aircraft model in the previous
+B. Tensor Produc (TP) Transforma ion
+Many con rol problems can be formula ed in o he affine LPV form, however he aircraf model in he previous
 
 
 
-section is in nonaffine form and has to be converted into affine form to obtain a LPV controller with a finite number of
-LMIs. This conversion process is done through the Tensor Product model transformation based on the Higher Order
-Singular Value Decomposition of tensors (HOSVD). The TP transformation is given in [16] and reviewed here. Begin
-by writing the LPV model as follows:
+sec ion is in nonaffine form and has o be conver ed in o affine form o ob ain a LPV con roller wi h a fini e number of
+LMIs. This conversion process is done hrough he Tensor Produc model ransforma ion based on he Higher Order
+Singular Value Decomposi ion of ensors (HOSVD). The TP ransforma ion is given in [16] and reviewed here. Begin
+by wri ing he LPV model as follows:
 
 
 
@@ -949,8 +949,8 @@ by writing the LPV model as follows:
 
 
 
-The integers 𝑛, 𝑞, and 𝑚 are the number of states, inputs, and outputs respectively. Given bounds on the limits of
-parameter variations, the parameter space, 𝑃 is,
+The in egers 𝑛, 𝑞, and 𝑚 are he number of s a es, inpu s, and ou pu s respec ively. Given bounds on he limi s of
+parame er varia ions, he parame er space, 𝑃 is,
 
 
 
@@ -970,12 +970,12 @@ parameter variations, the parameter space, 𝑃 is,
 
 
 
-The LPV model is evaluated at grid points in the parameter space and is stored as a tensor
-S𝐷 ∈ R𝑀1×𝑀2×···×𝑀𝑁×(𝑛+𝑞)×(𝑛+𝑚) where 𝑀1, 𝑀2, . . . , 𝑀𝑁 are the number of grid lines defined in each dimension
-of the grid. The next step is to apply the HOSVD on the first 𝑁 dimensions of the of the tensor 𝑆𝐷 and discard the
-zero or small singular values, 𝜎𝑘 and their corresponding singular vectors in all dimensions 1, 2, . . . , 𝑁 . This is
-performed using the tool given in [17]. The HOSVD results in a core tensor S and set of matrices 𝑈1, 𝑈2, . . . , 𝑈𝑁
-such that S𝐷 ≈ S ×𝑈1 ×𝑈2 ×𝑈𝑁 . The matrices𝑈1,𝑈2, . . . 𝑈𝑁 contain the continuous weighting functions for each
+The LPV model is evalua ed a grid poin s in he parame er space and is s ored as a ensor
+S𝐷 ∈ R𝑀1×𝑀2×···×𝑀𝑁×(𝑛+𝑞)×(𝑛+𝑚) where 𝑀1, 𝑀2, . . . , 𝑀𝑁 are he number of grid lines defined in each dimension
+of he grid. The nex s ep is o apply he HOSVD on he firs 𝑁 dimensions of he of he ensor 𝑆𝐷 and discard he
+zero or small singular values, 𝜎𝑘 and heir corresponding singular vec ors in all dimensions 1, 2, . . . , 𝑁 . This is
+performed using he ool given in [17]. The HOSVD resul s in a core ensor S and se of ma rices 𝑈1, 𝑈2, . . . , 𝑈𝑁
+such ha S𝐷 ≈ S ×𝑈1 ×𝑈2 ×𝑈𝑁 . The ma rices𝑈1,𝑈2, . . . 𝑈𝑁 con ain he con inuous weigh ing func ions for each
 
 
 
@@ -991,9 +991,9 @@ such that S𝐷 ≈ S ×𝑈1 ×𝑈2 ×𝑈𝑁 . The matrices𝑈1,𝑈2, . . 
 
 
 
-bounded variable. For example the matrix𝑈𝑛 ∈ R is made of weighting functions for the 𝑛𝑡ℎ variable, 𝑤𝑛, 𝑗 (𝑝𝑛) ∈ R𝑀𝑛 ,
-𝑗 = 1, . . . , 𝐼𝑛 and 𝐼𝑛 is the number of weighting functions used in the 𝑛𝑡ℎ dimension of the parameter vector 𝑝𝑛. The
-weighting functions at each vertex can now be defined as,
+bounded variable. For example he ma rix𝑈𝑛 ∈ R is made of weigh ing func ions for he 𝑛𝑡ℎ variable, 𝑤𝑛, 𝑗 (𝑝𝑛) ∈ R𝑀𝑛 ,
+𝑗 = 1, . . . , 𝐼𝑛 and 𝐼𝑛 is he number of weigh ing func ions used in he 𝑛𝑡ℎ dimension of he parame er vec or 𝑝𝑛. The
+weigh ing func ions a each ver ex can now be defined as,
 
 
 
@@ -1007,8 +1007,8 @@ weighting functions at each vertex can now be defined as,
 
 
 
-The purpose of the TP model transformation is to find a LTI vertex system 𝑆𝑟 and weighting functions, 𝑤𝑟 (p) such that
-the system can be written by the following:
+The purpose of he TP model ransforma ion is o find a LTI ver ex sys em 𝑆𝑟 and weigh ing func ions, 𝑤𝑟 (p) such ha 
+ he sys em can be wri en by he following:
 
 
 
@@ -1022,7 +1022,7 @@ the system can be written by the following:
 
 
 
-Convex combinations of the 𝑆𝑟 -LTI vertex system are guaranteed by the following conditions [16]:
+Convex combina ions of he 𝑆𝑟 -LTI ver ex sys em are guaran eed by he following condi ions [16]:
 
 
 
@@ -1051,9 +1051,9 @@ Convex combinations of the 𝑆𝑟 -LTI vertex system are guaranteed by the fol
 
 
 
-The TP method will transform an LPV system, 𝑆(p(𝑡)) into a convex hull of LTI vertex systems, 𝑆𝑟 . This is performed
-for both the inner and outer loops such that, 𝑆𝑖 (p(𝑡)) and 𝑆𝑜 (p(𝑡)) are transformed into 𝑆𝑖,𝑟 and 𝑆𝑜,𝑟 respectively. The
-TP convex-polytopic system representation is an approximation and the error, 𝔢 is given as [16]:𝑆(p) − 𝑅∑︁
+The TP me hod will ransform an LPV sys em, 𝑆(p(𝑡)) in o a convex hull of LTI ver ex sys ems, 𝑆𝑟 . This is performed
+for bo h he inner and ou er loops such ha , 𝑆𝑖 (p(𝑡)) and 𝑆𝑜 (p(𝑡)) are ransformed in o 𝑆𝑖,𝑟 and 𝑆𝑜,𝑟 respec ively. The
+TP convex-poly opic sys em represen a ion is an approxima ion and he error, 𝔢 is given as [16]:𝑆(p) − 𝑅∑︁
 
 
 
@@ -1066,11 +1066,11 @@ TP convex-polytopic system representation is an approximation and the error, �
 
 
 
-During the HOSVD of the inner loop, three singular values were found along the 𝜙 dimension of 𝑆𝑖 (p(𝑡)). Three
-singular values were also found along the \ dimension of 𝑆𝑖 (p(𝑡)). This results in nine vertices in the inner loop. The
-HOSVD of the outer loop found four singular values along the V dimension of 𝑆𝑜 (p(𝑡)) and two singular values along
-the 𝜙 dimension of 𝑆𝑜 (p(𝑡)). This results in eight vertices. The original non-affine LPV model can now be summed
-across all vertices and be rewritten in TP-convex polytopic form as:
+During he HOSVD of he inner loop, hree singular values were found along he 𝜙 dimension of 𝑆𝑖 (p(𝑡)). Three
+singular values were also found along he dimension of 𝑆𝑖 (p(𝑡)). This resul s in nine ver ices in he inner loop. The
+HOSVD of he ou er loop found four singular values along he V dimension of 𝑆𝑜 (p(𝑡)) and wo singular values along
+ he 𝜙 dimension of 𝑆𝑜 (p(𝑡)). This resul s in eigh ver ices. The original non-affine LPV model can now be summed
+across all ver ices and be rewri en in TP-convex poly opic form as:
 
 
 
@@ -1106,7 +1106,7 @@ across all vertices and be rewritten in TP-convex polytopic form as:
 
 
 ¤𝜙
-¤\
+¤ 
 ¤𝜔
 
 
@@ -1131,7 +1131,7 @@ across all vertices and be rewritten in TP-convex polytopic form as:
 
 
 
-\
+ 
 
 
 
@@ -1148,13 +1148,13 @@ across all vertices and be rewritten in TP-convex polytopic form as:
 
 
 
-Where 𝐴𝑖,𝑟 , 𝐵𝑖,𝑟 are extracted from the LTI vertices from the inner loop, 𝑆𝑖,𝑟 . 𝐵𝑜,𝑟 is extracted from the LTI vertices of
-the outer loop, 𝑆𝑜,𝑟 . Several weighting functions, 𝑤𝑖,1 and 𝑤𝑜,2 are depicted in fig. 6 and fig. 7. The boundaries of the
-parameter space are determined by iteratively increasing them until the control design procedure described in section V
-is unable to find a global optimal solution and they are listed in Table 2. Lastly, both TP-convex polytopic models were
-compared with the original LPV models over 1,000 randomly selected points in the parameter space the mean and
-maximum error are calculated by eq. 21 and tabulated in Table 3. It is shown that the error is small and thus both the
-TP-convex polytopic models are good representations of the LPV models.
+Where 𝐴𝑖,𝑟 , 𝐵𝑖,𝑟 are ex rac ed from he LTI ver ices from he inner loop, 𝑆𝑖,𝑟 . 𝐵𝑜,𝑟 is ex rac ed from he LTI ver ices of
+ he ou er loop, 𝑆𝑜,𝑟 . Several weigh ing func ions, 𝑤𝑖,1 and 𝑤𝑜,2 are depic ed in fig. 6 and fig. 7. The boundaries of he
+parame er space are de ermined by i era ively increasing hem un il he con rol design procedure described in sec ion V
+is unable o find a global op imal solu ion and hey are lis ed in Table 2. Las ly, bo h TP-convex poly opic models were
+compared wi h he original LPV models over 1,000 randomly selec ed poin s in he parame er space he mean and
+maximum error are calcula ed by eq. 21 and abula ed in Table 3. I is shown ha he error is small and hus bo h he
+TP-convex poly opic models are good represen a ions of he LPV models.
 
 
 
@@ -1170,22 +1170,22 @@ TP-convex polytopic models are good representations of the LPV models.
 
 
 
-Fig. 6 Weighting function: 𝑤𝑖,1 Fig. 7 Weighting function: 𝑤𝑜,2
+Fig. 6 Weigh ing func ion: 𝑤𝑖,1 Fig. 7 Weigh ing func ion: 𝑤𝑜,2
 
 
 
-Table 2 Parameter bounds and points
+Table 2 Parame er bounds and poin s
 
 
 
-Parameter Min. Max. Unit Grid Points
+Parame er Min. Max. Uni Grid Poin s
 𝜙 -45 45 deg 50
-\ -65 65 deg 50
-𝑉 65 105 ft s−1 10
+ -65 65 deg 50
+𝑉 65 105 f s−1 10
 
 
 
-Table 3 Error Parameters
+Table 3 Error Parame ers
 
 
 
@@ -1194,7 +1194,7 @@ Inner Loop 3.2055 × 10−5 6.7593 × 10−5
 
 
 
-Outer Loop 5.3495 × 10−5 9.4605 × 10−5
+Ou er Loop 5.3495 × 10−5 9.4605 × 10−5
 
 
 
@@ -1210,26 +1210,26 @@ Outer Loop 5.3495 × 10−5 9.4605 × 10−5
 
 
 
-V. Linear Parameter-Varying Control Design
-It is desired that the controller track the guidance commands, but also not suppress the response of the aircraft to the
+V. Linear Parame er-Varying Con rol Design
+I is desired ha he con roller rack he guidance commands, bu also no suppress he response of he aircraf o he
 
 
 
-PTI excitations. The guidance algorithms are described in detail in [18]. To design the LPV control loops to achieve
-adequate tracking performance, there are two penalty filters in the inner loop,𝑊1,𝑖𝑛𝑛𝑒𝑟 and𝑊2,𝑖𝑛𝑛𝑒𝑟 , and one penalty
-filter,𝑊1,𝑜𝑢𝑡𝑒𝑟 in the outer loop. The control architecture is built using the hinfgs MATLAB routine and shown in fig.
+PTI exci a ions. The guidance algori hms are described in de ail in [18]. To design he LPV con rol loops o achieve
+adequa e racking performance, here are wo penal y fil ers in he inner loop,𝑊1,𝑖𝑛𝑛𝑒𝑟 and𝑊2,𝑖𝑛𝑛𝑒𝑟 , and one penal y
+fil er,𝑊1,𝑜𝑢𝑡𝑒𝑟 in he ou er loop. The con rol archi ec ure is buil using he hinfgs MATLAB rou ine and shown in fig.
 8.
 
 
 
-Fig. 8 Detailed 𝐻∞ LPV Control Architecture
+Fig. 8 De ailed 𝐻∞ LPV Con rol Archi ec ure
 
 
 
-The inner loop controller is designed to penalize moment commands inside the PTI bandwidth, through minimization
-of the output of𝑊2,𝑖𝑛𝑛𝑒𝑟 , 𝑍2,𝑖𝑛𝑛𝑒𝑟 . 𝑊2,𝑖𝑛𝑛𝑒𝑟 is chosen as a first-order high-pass Bessel filter with cutoff frequency, 𝜔𝑐,2
-to penalize control signals within the PTI bandwidth and force the control signals above the PTI bandwidth. The cutoff
-frequency was chosen by iteratively increasing the frequency until hinfgs can no longer find a global-optimal controller.
+The inner loop con roller is designed o penalize momen commands inside he PTI bandwid h, hrough minimiza ion
+of he ou pu of𝑊2,𝑖𝑛𝑛𝑒𝑟 , 𝑍2,𝑖𝑛𝑛𝑒𝑟 . 𝑊2,𝑖𝑛𝑛𝑒𝑟 is chosen as a firs -order high-pass Bessel fil er wi h cu off frequency, 𝜔𝑐,2
+ o penalize con rol signals wi hin he PTI bandwid h and force he con rol signals above he PTI bandwid h. The cu off
+frequency was chosen by i era ively increasing he frequency un il hinfgs can no longer find a global-op imal con roller.
 
 
 
@@ -1237,7 +1237,7 @@ frequency was chosen by iteratively increasing the frequency until hinfgs can no
 
 
 
-The state-space of the first order, high-pass, Bessel filter is:
+The s a e-space of he firs order, high-pass, Bessel fil er is:
 
 
 
@@ -1245,8 +1245,8 @@ The state-space of the first order, high-pass, Bessel filter is:
 
 
 
-The moment vector is a three-dimensional vector and thus the first-order, high-pass, Bessel filter is concatenated into a
-three-input, three-output filter to form𝑊2,𝑖𝑛𝑛𝑒𝑟 .
+The momen vec or is a hree-dimensional vec or and hus he firs -order, high-pass, Bessel fil er is conca ena ed in o a
+ hree-inpu , hree-ou pu fil er o form𝑊2,𝑖𝑛𝑛𝑒𝑟 .
 
 
 
@@ -1302,8 +1302,8 @@ three-input, three-output filter to form𝑊2,𝑖𝑛𝑛𝑒𝑟 .
 
 
 
-To ensure adequate response speed, a first-order, low-pass, Bessel filter is put on the tracking commands in the inner-loop.
-The cutoff frequency, 𝜔𝑐,1 is used and the filter is concatenated into a five-input, five-output filter to form,𝑊1,𝑖𝑛𝑛𝑒𝑟 .
+To ensure adequa e response speed, a firs -order, low-pass, Bessel fil er is pu on he racking commands in he inner-loop.
+The cu off frequency, 𝜔𝑐,1 is used and he fil er is conca ena ed in o a five-inpu , five-ou pu fil er o form,𝑊1,𝑖𝑛𝑛𝑒𝑟 .
 
 
 
@@ -1311,7 +1311,7 @@ The cutoff frequency, 𝜔𝑐,1 is used and the filter is concatenated into a f
 
 
 
-The state space of the first-order, low-pass, Bessel filter is:
+The s a e space of he firs -order, low-pass, Bessel fil er is:
 
 
 
@@ -1331,18 +1331,18 @@ The state space of the first-order, low-pass, Bessel filter is:
 
 
 
-Fig. 9 Bode Plots of𝑊1,𝑖𝑛𝑛𝑒𝑟 and𝑊2,𝑖𝑛𝑛𝑒𝑟 Fig. 10 Bode Plots of𝑊1,𝑜𝑢𝑡𝑒𝑟 and𝑊𝑝𝑟𝑒 𝑓 𝑖𝑙𝑡𝑒𝑟
+Fig. 9 Bode Plo s of𝑊1,𝑖𝑛𝑛𝑒𝑟 and𝑊2,𝑖𝑛𝑛𝑒𝑟 Fig. 10 Bode Plo s of𝑊1,𝑜𝑢𝑡𝑒𝑟 and𝑊𝑝𝑟𝑒 𝑓 𝑖𝑙𝑡𝑒𝑟
 
 
 
-The vector 𝑒𝑖 =
+The vec or 𝑒𝑖 =
 [
-𝜙𝑒𝑟𝑟 \𝑒𝑟𝑟 𝝎𝑇𝑒𝑟𝑟
+𝜙𝑒𝑟𝑟 𝑒𝑟𝑟 𝝎𝑇𝑒𝑟𝑟
 
 
 
-]𝑇 is five-dimensional and thus the filter is concatenated into a a five-input,
-five-output filter to form𝑊1,𝑖𝑛𝑛𝑒𝑟 .
+]𝑇 is five-dimensional and hus he fil er is conca ena ed in o a a five-inpu ,
+five-ou pu fil er o form𝑊1,𝑖𝑛𝑛𝑒𝑟 .
 
 
 
@@ -1469,8 +1469,8 @@ five-output filter to form𝑊1,𝑖𝑛𝑛𝑒𝑟 .
 
 
 
-To ensure adequate response speed in the outer-loop controller, a penalty filter on the guidance tracking error,𝑊1,𝑜𝑢𝑡𝑒𝑟
-is added; which is also a first-order, low-pass, Bessel filter with cutoff frequency 𝜔𝑐,𝑜𝑢𝑡𝑒𝑟 .
+To ensure adequa e response speed in he ou er-loop con roller, a penal y fil er on he guidance racking error,𝑊1,𝑜𝑢𝑡𝑒𝑟
+is added; which is also a firs -order, low-pass, Bessel fil er wi h cu off frequency 𝜔𝑐,𝑜𝑢𝑡𝑒𝑟 .
 
 
 
@@ -1478,7 +1478,7 @@ is added; which is also a first-order, low-pass, Bessel filter with cutoff frequ
 
 
 
-The state space of the first-order, low-pass, Bessel filter is:
+The s a e space of he firs -order, low-pass, Bessel fil er is:
 
 
 
@@ -1486,14 +1486,14 @@ The state space of the first-order, low-pass, Bessel filter is:
 
 
 
-The vector 𝑒𝑜 =
+The vec or 𝑒𝑜 =
 [
 𝛼𝑒𝑟𝑟 𝛽𝑒𝑟𝑟 𝜒𝑒𝑟𝑟
 
 
 
-]𝑇 is three-dimensional and thus the filter is concatenated into a three-input,
-three-input filter.
+]𝑇 is hree-dimensional and hus he fil er is conca ena ed in o a hree-inpu ,
+ hree-inpu fil er.
 
 
 
@@ -1558,8 +1558,8 @@ three-input filter.
 
 
 
-Lastly, a prefilter has been added to remove the parameter dependency on the matrix, 𝐵𝑜 [13]. This prefilter is also
-chosen as a first-order Bessel filter with high-cutoff frequency as to not modify the aircraft dynamics.
+Las ly, a prefil er has been added o remove he parame er dependency on he ma rix, 𝐵𝑜 [13]. This prefil er is also
+chosen as a firs -order Bessel fil er wi h high-cu off frequency as o no modify he aircraf dynamics.
 
 
 
@@ -1583,7 +1583,7 @@ chosen as a first-order Bessel filter with high-cutoff frequency as to not modif
 
 
 
-The tracking error command is three-dimensional, thus the prefilter is concatenated into a three-input, three-output filter.
+The racking error command is hree-dimensional, hus he prefil er is conca ena ed in o a hree-inpu , hree-ou pu fil er.
 
 
 
@@ -1673,9 +1673,9 @@ The tracking error command is three-dimensional, thus the prefilter is concatena
 
 
 
-Bode plots of the inner-loop and outer loop filters are given in fig. 9 and 10 respectively. TP-convex polytopic models
-can now be concatenated with the state space models of the filters and put into 𝐻∞ control form to minimize the output
-of the weighting filters, z𝑜 and z𝑖 for both inner and outer loops.
+Bode plo s of he inner-loop and ou er loop fil ers are given in fig. 9 and 10 respec ively. TP-convex poly opic models
+can now be conca ena ed wi h he s a e space models of he fil ers and pu in o 𝐻∞ con rol form o minimize he ou pu 
+of he weigh ing fil ers, z𝑜 and z𝑖 for bo h inner and ou er loops.
 
 
 
@@ -1697,9 +1697,9 @@ z𝑖 = 𝐶1,𝑖 (p)x𝑖 + 𝐷11,𝑖 (p)𝑢𝑜 + 𝐷12,𝑖𝑀
 
 
 
-The values x𝑜 and x𝑖 represent the concatenated state vector for both loops. 𝑥 represents the states of the TP-convex
-polytopic models. z𝑜 and z𝑖 represent the concatenated output of the weighting filters for both loops. 𝑦 represents the
-values of the TP-convex polytopic models. 𝑟 represents the guidance command 𝑟 =
+The values x𝑜 and x𝑖 represen he conca ena ed s a e vec or for bo h loops. 𝑥 represen s he s a es of he TP-convex
+poly opic models. z𝑜 and z𝑖 represen he conca ena ed ou pu of he weigh ing fil ers for bo h loops. 𝑦 represen s he
+values of he TP-convex poly opic models. 𝑟 represen s he guidance command 𝑟 =
 
 
 
@@ -1709,7 +1709,7 @@ values of the TP-convex polytopic models. 𝑟 represents the guidance command �
 
 
 ]𝑇 and 𝑢𝑜
-represents the control command 𝑢𝑜 =
+represen s he con rol command 𝑢𝑜 =
 
 
 
@@ -1763,28 +1763,28 @@ z𝑖 =
 
 
 
-The inner and outer loop controllers were built in MATLAB using the hinfgs MATLAB routine. The quadratic 𝐻∞
-performance was found to be Γ𝑖 = 1.301217 for the inner loop and Γ𝑜 = 1.000021 for the outer loop.
+The inner and ou er loop con rollers were buil in MATLAB using he hinfgs MATLAB rou ine. The quadra ic 𝐻∞
+performance was found o be Γ𝑖 = 1.301217 for he inner loop and Γ𝑜 = 1.000021 for he ou er loop.
 
 
 
 A. NDI Review
-The LPV control algorithm is compared with an existing Nonlinear Dynamic Inversion control algorithm and the
+The LPV con rol algori hm is compared wi h an exis ing Nonlinear Dynamic Inversion con rol algori hm and he
 
 
 
-control surface deflection commands from each controller are compared. The NDI control law is given in [5] and
-reviewed here. To start, the outer-most loop of the NDI converts the 𝜒 guidance commands to attitude commands, 𝜙:
+con rol surface deflec ion commands from each con roller are compared. The NDI con rol law is given in [5] and
+reviewed here. To s ar , he ou er-mos loop of he NDI conver s he 𝜒 guidance commands o a i ude commands, 𝜙:
 
 
 
-𝜙𝑐𝑚𝑑 = Sat45°
+𝜙𝑐𝑚𝑑 = Sa 45°
 −45°
 
 
 
 (
-arctan
+arc an
 
 
 
@@ -1799,12 +1799,12 @@ arctan
 
 
 
-The next inversion step treats 𝜔1, 𝜔2, and 𝜔3 as inputs to the dynamics governing 𝜙, 𝛼, and 𝛽 respectively. Based on the
+The nex inversion s ep rea s 𝜔1, 𝜔2, and 𝜔3 as inpu s o he dynamics governing 𝜙, 𝛼, and 𝛽 respec ively. Based on he
 simplified dynamics in eq. 8:
 
 
 
-𝜔1,𝑐𝑚𝑑 = 𝐾𝜙 (𝜙𝑐𝑚𝑑 − 𝜙) − tan(\) (𝑞 sin(𝜙) + 𝑟 cos(𝜙)) (43a)
+𝜔1,𝑐𝑚𝑑 = 𝐾𝜙 (𝜙𝑐𝑚𝑑 − 𝜙) − an( ) (𝑞 sin(𝜙) + 𝑟 cos(𝜙)) (43a)
 
 
 
@@ -1814,7 +1814,7 @@ simplified dynamics in eq. 8:
 
 
 𝑉
-sin(𝜙) tan(𝜙) (43b)
+sin(𝜙) an(𝜙) (43b)
 
 
 
@@ -1840,7 +1840,7 @@ sin(𝜙) (43c)
 
 
 
-Table 4 Desired frequency calculations
+Table 4 Desired frequency calcula ions
 
 
 
@@ -1853,7 +1853,7 @@ Roll 𝜔𝑛 =
 
 
 
-Pitch 𝜔𝑛 =
+Pi ch 𝜔𝑛 =
 
 
 
@@ -1879,8 +1879,8 @@ Yaw 𝜔𝑛 =
 
 
 
-The fastest inner loop inverts the angular rate commands to produce a desired angular acceleration proportional to the
-angular rate error.
+The fas es inner loop inver s he angular ra e commands o produce a desired angular accelera ion propor ional o he
+angular ra e error.
 
 
 
@@ -1888,9 +1888,9 @@ angular rate error.
 
 
 
-�̂� is the estimate of the current moment on the aircraft, which is determined from real-time modeling results. In order
-to determine the proportionality constants it is assumed the dynamic inversion commands were able to remove the
-nonlinear effects and only the desired linear portions remain. As an example, examine the linearized short-period
+�̂� is he es ima e of he curren momen on he aircraf , which is de ermined from real- ime modeling resul s. In order
+ o de ermine he propor ionali y cons an s i is assumed he dynamic inversion commands were able o remove he
+nonlinear effec s and only he desired linear por ions remain. As an example, examine he linearized shor -period
 dynamics: [
 
 
@@ -1942,7 +1942,7 @@ dynamics: [
 
 
 
-The control parameters are written in terms of the natural frequency and damping of the second order system.
+The con rol parame ers are wri en in erms of he na ural frequency and damping of he second order sys em.
 
 
 
@@ -1951,19 +1951,19 @@ The control parameters are written in terms of the natural frequency and damping
 
 
 
-The desired natural frequency was determined based on the modeling results using the relationship in Table 4 and
-the desired damping ratio was fixed at Z = 0.8. The control parameters for the roll channel (𝐾𝜙 , 𝐾𝑝) and the yaw
-channel (𝐾𝛽 , 𝐾𝑟 ) are determined by the same procedure. The control parameter for the tracking angle, 𝜒 was fixed at
+The desired na ural frequency was de ermined based on he modeling resul s using he rela ionship in Table 4 and
+ he desired damping ra io was fixed a Z = 0.8. The con rol parame ers for he roll channel (𝐾𝜙 , 𝐾𝑝) and he yaw
+channel (𝐾𝛽 , 𝐾𝑟 ) are de ermined by he same procedure. The con rol parame er for he racking angle, 𝜒 was fixed a 
 𝐾𝜒 = 0.375.
 
 
 
-B. AutoThrottle
-Both the LPV and the NDI controllers use the same auto throttle controller to regulate the calibrated airspeed of the
+B. Au oThro le
+Bo h he LPV and he NDI con rollers use he same au o hro le con roller o regula e he calibra ed airspeed of he
 
 
 
-aircraft. A proportional-integral (PI) controller was taken from [5] and used here.
+aircraf . A propor ional-in egral (PI) con roller was aken from [5] and used here.
 
 
 
@@ -1999,21 +1999,21 @@ aircraft. A proportional-integral (PI) controller was taken from [5] and used he
 
 
 
-C. Control Allocation
-Control allocation algorithms are tasked with determining aircraft control surface deflections to achieve the desired
+C. Con rol Alloca ion
+Con rol alloca ion algori hms are asked wi h de ermining aircraf con rol surface deflec ions o achieve he desired
 
 
 
-moments commanded by the controller. Control allocation is generally required for aircraft where the number of control
-effectors exceeds the number of moments (over-actuated). Many researchers have formulated the control allocation
-problem as a constrained-optimization problem [19–25]. The allocator in this paper is taken from the L2F project, [5]
-and is used for both the LPV and NDI control laws.
+momen s commanded by he con roller. Con rol alloca ion is generally required for aircraf where he number of con rol
+effec ors exceeds he number of momen s (over-ac ua ed). Many researchers have formula ed he con rol alloca ion
+problem as a cons rained-op imiza ion problem [19–25]. The alloca or in his paper is aken from he L2F projec , [5]
+and is used for bo h he LPV and NDI con rol laws.
 
 
 
-The real-time modeling procedure gives a matrix 𝐵 ∈ R3×𝑛𝑑 with dimensional control derivatives defining the
-partial derivatives with respect to the 𝑛𝑑 control surface deflections. Given a moment and acceleration command the
-control allocation problem is stated as follows [6]. Find the deflection vector, 𝑢 such that,
+The real- ime modeling procedure gives a ma rix 𝐵 ∈ R3×𝑛𝑑 wi h dimensional con rol deriva ives defining he
+par ial deriva ives wi h respec o he 𝑛𝑑 con rol surface deflec ions. Given a momen and accelera ion command he
+con rol alloca ion problem is s a ed as follows [6]. Find he deflec ion vec or, 𝑢 such ha ,
 
 
 
@@ -2021,11 +2021,11 @@ control allocation problem is stated as follows [6]. Find the deflection vector,
 
 
 
-is minimized, subject to 𝑢𝑚𝑖𝑛 ≤ 𝑢 ≤ 𝑢𝑚𝑎𝑥 and 𝑢𝑝 is the current control surface deflection. In MCAAD the modeling
-determines B, whereas the online control specifies 𝑀𝑢. This formulation of the control allocation problem is a mixed
-optimization problem that combines the error and control minimization problems into a single problem with parameter,
-𝜖 . Minimizing the moment error | |𝐵𝑢 − 𝑀𝑐𝑚𝑑 | |1 is the primary objective of the control allocation designer, but for an
-over-actuated aircraft configuration there are infinitely many solutions. Thus the second term, 𝜖 | |𝑢 − 𝑢𝑝 | | is added to the
+is minimized, subjec o 𝑢𝑚𝑖𝑛 ≤ 𝑢 ≤ 𝑢𝑚𝑎𝑥 and 𝑢𝑝 is he curren con rol surface deflec ion. In MCAAD he modeling
+de ermines B, whereas he online con rol specifies 𝑀𝑢. This formula ion of he con rol alloca ion problem is a mixed
+op imiza ion problem ha combines he error and con rol minimiza ion problems in o a single problem wi h parame er,
+𝜖 . Minimizing he momen error | |𝐵𝑢 − 𝑀𝑐𝑚𝑑 | |1 is he primary objec ive of he con rol alloca ion designer, bu for an
+over-ac ua ed aircraf configura ion here are infini ely many solu ions. Thus he second erm, 𝜖 | |𝑢 − 𝑢𝑝 | | is added o he
 
 
 
@@ -2041,8 +2041,8 @@ over-actuated aircraft configuration there are infinitely many solutions. Thus t
 
 
 
-optimization problem to determine a particular solution. In this research the metric used to define 𝐽 is the 𝑙1 norm
-which is the sum of the absolute values within the norm:
+op imiza ion problem o de ermine a par icular solu ion. In his research he me ric used o define 𝐽 is he 𝑙1 norm
+which is he sum of he absolu e values wi hin he norm:
 
 
 
@@ -2059,19 +2059,19 @@ which is the sum of the absolute values within the norm:
 
 
 
-The control allocation problem in eq. 49 is solved in real time using an efficient algorithm formulated by Bodson using
-linear programming approaches, providing guaranteed convergence in an acceptable period of time [26]. The algorithm
-was based on the revised simplex method [27] with additional refinements, such as anti-cycling, as described in detail in
+The con rol alloca ion problem in eq. 49 is solved in real ime using an efficien algori hm formula ed by Bodson using
+linear programming approaches, providing guaran eed convergence in an accep able period of ime [26]. The algori hm
+was based on he revised simplex me hod [27] wi h addi ional refinemen s, such as an i-cycling, as described in de ail in
 [26].
 
 
 
-VI. Simulation
-As preivously noted, the architecture shown in fig. 8 is built in Simulink ® and the LPV controllers are designed
+VI. Simula ion
+As preivously no ed, he archi ec ure shown in fig. 8 is buil in Simulink ® and he LPV con rollers are designed
 
 
 
-using the hinfgs MATLAB routine. The gains from the two-loops LPV controller gains are now determined by:
+using he hinfgs MATLAB rou ine. The gains from he wo-loops LPV con roller gains are now de ermined by:
 
 
 
@@ -2117,11 +2117,11 @@ Where:
 
 
 
-The implementation of the two-loop LPV control architecture is described in the following subsections.
+The implemen a ion of he wo-loop LPV con rol archi ec ure is described in he following subsec ions.
 
 
 
-A. Outer Loop Implementation
+A. Ou er Loop Implemen a ion
 
 
 
@@ -2178,13 +2178,13 @@ A. Outer Loop Implementation
 
 
 
-The commands calculated by the outer loop controller (𝜙𝑐𝑚𝑑 , 𝜔2,𝑐𝑚𝑑 , 𝜔3,𝑐𝑚𝑑) are then passed through the prefilter
-described in sec. V to produce (𝜙𝑐𝑚𝑑,𝑝 , 𝜔2,𝑐𝑚𝑑,𝑝 , 𝜔3,𝑐𝑚𝑑,𝑝). There is also a saturation function to prevent the outer
+The commands calcula ed by he ou er loop con roller (𝜙𝑐𝑚𝑑 , 𝜔2,𝑐𝑚𝑑 , 𝜔3,𝑐𝑚𝑑) are hen passed hrough he prefil er
+described in sec. V o produce (𝜙𝑐𝑚𝑑,𝑝 , 𝜔2,𝑐𝑚𝑑,𝑝 , 𝜔3,𝑐𝑚𝑑,𝑝). There is also a sa ura ion func ion o preven he ou er
 loop from commanding excessive roll angle.
 
 
 
-𝜙𝑐𝑚𝑑,𝑠𝑎𝑡 = Sat45°
+𝜙𝑐𝑚𝑑,𝑠𝑎𝑡 = Sa 45°
 −45°
 
 
@@ -2199,15 +2199,15 @@ loop from commanding excessive roll angle.
 
 
 
-In order to command a zero flight path angle, pitch angle command is set to angle of attack command.
+In order o command a zero fligh pa h angle, pi ch angle command is se o angle of a ack command.
 
 
 
-\𝑐𝑚𝑑 = 𝛼𝑐𝑚𝑑 (56)
+ 𝑐𝑚𝑑 = 𝛼𝑐𝑚𝑑 (56)
 
 
 
-Body-axis roll rate command, 𝜔1,𝑐𝑚𝑑 is set to zero.
+Body-axis roll ra e command, 𝜔1,𝑐𝑚𝑑 is se o zero.
 
 
 
@@ -2227,7 +2227,7 @@ Body-axis roll rate command, 𝜔1,𝑐𝑚𝑑 is set to zero.
 
 
 
-B. Inner Loop Implementation
+B. Inner Loop Implemen a ion
 
 
 
@@ -2267,7 +2267,7 @@ B. Inner Loop Implementation
 
 
 𝜙𝑐𝑚𝑑,𝑠𝑎𝑡
-\𝑐𝑚𝑑
+ 𝑐𝑚𝑑
 𝜔1.𝑐𝑚𝑑
 𝜔2,𝑐𝑚𝑑,𝑝
 𝜔3,𝑐𝑚𝑑,𝑝
@@ -2284,45 +2284,45 @@ B. Inner Loop Implementation
 
 
 
-The two-loop LPV controller has been tested on a Simulink simulation of the NASA E1 aircraft and compared with the
-results of the NDI controller.
+The wo-loop LPV con roller has been es ed on a Simulink simula ion of he NASA E1 aircraf and compared wi h he
+resul s of he NDI con roller.
 
 
 
-It can be seen from fig. 11 that there is a large initial transient until 5s and then the LPV controller is able to track
-(𝛼, 𝛽) commands well, with an error about ± 5°. The initial transient is caused by the controller’s response to the large
-initial error in 𝜒. When tracking 𝜒 commands, the LPV controller exhibits worse tracking performance than the NDI
-controller with a tracking error about ± 15°.
+I can be seen from fig. 11 ha here is a large ini ial ransien un il 5s and hen he LPV con roller is able o rack
+(𝛼, 𝛽) commands well, wi h an error abou ± 5°. The ini ial ransien is caused by he con roller’s response o he large
+ini ial error in 𝜒. When racking 𝜒 commands, he LPV con roller exhibi s worse racking performance han he NDI
+con roller wi h a racking error abou ± 15°.
 
 
 
-The NDI controller exhibits a better response to the initial 𝜒 error, causing less of an initial transient than the LPV
-controller, as shown in fig. 13. Additionally the guidance commands a step in 𝛼 command at 23s which is not seen
-in the LPV simulation. This step is commanded because of a switch in the guidance block being triggered by high
-altitude. After the initial transient is settled, around 5s, the NDI and LPV exhibit similar tracking characteristics when
-with respect to 𝛼 and 𝛽. The NDI consistently tracks 𝜒 better than the LPV controller, but the NDI has a very large 𝛼
-excursion after the 𝜒 step change at 17s while the LPV does not. Figure 12 and fig. 14 show the attitudes realized by
-both control laws. The LPV controller exhibits a large attitude response in roll angle, 𝜙 which is caused by the large
-initial 𝜒 error. Around 17s a large change in 𝜒 is commanded with results in a large change in roll angle, as realized
-by both the NDI and LPV controllers. Both controllers exhibit similar pitch angle excursions, with a maximum pitch
-angle about +20°. The yaw angle, 𝜓 follows the relationship 𝜓 = 𝜒 − 𝛽 and the resulting change in 𝜓 stems from the
+The NDI con roller exhibi s a be er response o he ini ial 𝜒 error, causing less of an ini ial ransien han he LPV
+con roller, as shown in fig. 13. Addi ionally he guidance commands a s ep in 𝛼 command a 23s which is no seen
+in he LPV simula ion. This s ep is commanded because of a swi ch in he guidance block being riggered by high
+al i ude. Af er he ini ial ransien is se led, around 5s, he NDI and LPV exhibi similar racking charac eris ics when
+wi h respec o 𝛼 and 𝛽. The NDI consis en ly racks 𝜒 be er han he LPV con roller, bu he NDI has a very large 𝛼
+excursion af er he 𝜒 s ep change a 17s while he LPV does no . Figure 12 and fig. 14 show he a i udes realized by
+bo h con rol laws. The LPV con roller exhibi s a large a i ude response in roll angle, 𝜙 which is caused by he large
+ini ial 𝜒 error. Around 17s a large change in 𝜒 is commanded wi h resul s in a large change in roll angle, as realized
+by bo h he NDI and LPV con rollers. Bo h con rollers exhibi similar pi ch angle excursions, wi h a maximum pi ch
+angle abou +20°. The yaw angle, 𝜓 follows he rela ionship 𝜓 = 𝜒 − 𝛽 and he resul ing change in 𝜓 s ems from he
 commanded change in 𝜒.
 
 
 
-Fig. 11 Guidance tracking of the LPV controller Fig. 12 Attitude angles using LPV controller
+Fig. 11 Guidance racking of he LPV con roller Fig. 12 A i ude angles using LPV con roller
 
 
 
-Additionally, the control surface deflections were recorded and they were compared to the commanded PTI control
-surface deflections in both the time domain and the frequency domain.
+Addi ionally, he con rol surface deflec ions were recorded and hey were compared o he commanded PTI con rol
+surface deflec ions in bo h he ime domain and he frequency domain.
 
 
 
-Figure 15 shows the control surface deflections commanded by the NDI controller compared to that of the PTI. The
-deflections correlate well for both left and right flaps. Additionally the deflections correlate well for both left and right
-ailerons until about 17s when there is an aggressive change in 𝜒𝑐𝑚𝑑 which results in an aggressive change in aileron
-command. The elevator and rudder are offset by about 5° from the PTI throughout the simulation.
+Figure 15 shows he con rol surface deflec ions commanded by he NDI con roller compared o ha of he PTI. The
+deflec ions correla e well for bo h lef and righ flaps. Addi ionally he deflec ions correla e well for bo h lef and righ 
+ailerons un il abou 17s when here is an aggressive change in 𝜒𝑐𝑚𝑑 which resul s in an aggressive change in aileron
+command. The eleva or and rudder are offse by abou 5° from he PTI hroughou he simula ion.
 
 
 
@@ -2338,14 +2338,14 @@ command. The elevator and rudder are offset by about 5° from the PTI throughout
 
 
 
-Fig. 13 Guidance tracking of the NDI controller Fig. 14 Attitude angles using NDI controller
+Fig. 13 Guidance racking of he NDI con roller Fig. 14 A i ude angles using NDI con roller
 
 
 
-Figure 16 shows the control surface deflections commanded by the LPV controller compared to that of the PTI.
-The deflections correlate well for both left and right flaps and the left and right ailerons. Around 15s high frequency
-control surface content can be seen, which is expected for the LPV controller. Similar to the NDI controller, the LPV
-commands for elevator and rudder deflection offset about 5°.
+Figure 16 shows he con rol surface deflec ions commanded by he LPV con roller compared o ha of he PTI.
+The deflec ions correla e well for bo h lef and righ flaps and he lef and righ ailerons. Around 15s high frequency
+con rol surface con en can be seen, which is expec ed for he LPV con roller. Similar o he NDI con roller, he LPV
+commands for eleva or and rudder deflec ion offse abou 5°.
 
 
 
@@ -2361,11 +2361,11 @@ commands for elevator and rudder deflection offset about 5°.
 
 
 
-Fig. 15 Control Surface Deflections with NDI Control
+Fig. 15 Con rol Surface Deflec ions wi h NDI Con rol
 
 
 
-Fig. 16 Control Surface Deflections with LPV Control
+Fig. 16 Con rol Surface Deflec ions wi h LPV Con rol
 
 
 
@@ -2381,32 +2381,32 @@ Fig. 16 Control Surface Deflections with LPV Control
 
 
 
-Figure 17 shows the frequency domain content of the PTI and the control surface deflections commanded by the
-NDI control law. The left and right flap correlate well with the peaks of the PTI. The left and right aileron show poor
-correlation at frequencies below 0.5Hz, however at frequencies above 1Hz the control surface deflections start to align
-with the PTI. Similarly, the elevator and aileron do not align with the PTI well at frequencies below 0.5Hz but align
-better at frequencies above 1Hz.
+Figure 17 shows he frequency domain con en of he PTI and he con rol surface deflec ions commanded by he
+NDI con rol law. The lef and righ flap correla e well wi h he peaks of he PTI. The lef and righ aileron show poor
+correla ion a frequencies below 0.5Hz, however a frequencies above 1Hz he con rol surface deflec ions s ar o align
+wi h he PTI. Similarly, he eleva or and aileron do no align wi h he PTI well a frequencies below 0.5Hz bu align
+be er a frequencies above 1Hz.
 
 
 
-Figure 18 shows the frequency domain content of the PTI and the control surface deflections commanded by the
-LPV control law. For all six effectors, there is little distortion in magnitude at frequencies below 0.5Hz and almost none
-at frequencies above 1Hz. It is important to note that the LPV control law commands control surface deflections at a
-higher frequency than the PTI, which allows for minimal distortion.
+Figure 18 shows he frequency domain con en of he PTI and he con rol surface deflec ions commanded by he
+LPV con rol law. For all six effec ors, here is li le dis or ion in magni ude a frequencies below 0.5Hz and almos none
+a frequencies above 1Hz. I is impor an o no e ha he LPV con rol law commands con rol surface deflec ions a a
+higher frequency han he PTI, which allows for minimal dis or ion.
 
 
 
-Fig. 17 Control Surface Frequency Content with NDI Control
+Fig. 17 Con rol Surface Frequency Con en wi h NDI Con rol
 
 
 
-To help quantify the similarity between control surface deflection and commanded PTI deflection in the frequency
-domain with both control laws, the magnitude squared coherence estimate was plotted for each control surface, for both
-control laws. The magnitude squared coherence estimate is a function of frequency which outputs values between 0 and
-1. A value of 1 would indicate perfect coherence (linear dependency), and a value of 0 would indicate no coherence
-[28]. When considering coherence between the PTI and the control surface deflection, a value of 1 would indicate
-that 100% of the control surface deflection is due to PTI. A value of 0 would indicate that none of the control surface
-deflection is due to PTI.
+To help quan ify he similari y be ween con rol surface deflec ion and commanded PTI deflec ion in he frequency
+domain wi h bo h con rol laws, he magni ude squared coherence es ima e was plo ed for each con rol surface, for bo h
+con rol laws. The magni ude squared coherence es ima e is a func ion of frequency which ou pu s values be ween 0 and
+1. A value of 1 would indica e perfec coherence (linear dependency), and a value of 0 would indica e no coherence
+[28]. When considering coherence be ween he PTI and he con rol surface deflec ion, a value of 1 would indica e
+ ha 100% of he con rol surface deflec ion is due o PTI. A value of 0 would indica e ha none of he con rol surface
+deflec ion is due o PTI.
 
 
 
@@ -2420,17 +2420,17 @@ deflection is due to PTI.
 
 
 
-Equation 59 shows how the coherence between two sample signals is calculated. Where, 𝑃𝑥𝑦 is the cross-spectral
-density between x and y. 𝑃𝑥𝑥 and 𝑃𝑦𝑦 are the spectral densities of x and y respectively. Figure 19 shows the coherence
-between the control surface command due to PTI and the control surface command due to the controller.
+Equa ion 59 shows how he coherence be ween wo sample signals is calcula ed. Where, 𝑃𝑥𝑦 is he cross-spec ral
+densi y be ween x and y. 𝑃𝑥𝑥 and 𝑃𝑦𝑦 are he spec ral densi ies of x and y respec ively. Figure 19 shows he coherence
+be ween he con rol surface command due o PTI and he con rol surface command due o he con roller.
 
 
 
-From fig. 19 the flaps show similar coherence between the control surface commands and the PTI for all frequencies.
-For both the left and right ailerons the control surface commands from the LPV controller show consistently better
-coherence with the PTI until roughly 1.75Hz where coherence decreases for both NDI and LPV controllers. Lastly the
-coherence of the PTI with the LPV control surface commands is consistently better that that of the NDI control surface
-commands for the elevator and rudder.
+From fig. 19 he flaps show similar coherence be ween he con rol surface commands and he PTI for all frequencies.
+For bo h he lef and righ ailerons he con rol surface commands from he LPV con roller show consis en ly be er
+coherence wi h he PTI un il roughly 1.75Hz where coherence decreases for bo h NDI and LPV con rollers. Las ly he
+coherence of he PTI wi h he LPV con rol surface commands is consis en ly be er ha ha of he NDI con rol surface
+commands for he eleva or and rudder.
 
 
 
@@ -2446,11 +2446,11 @@ commands for the elevator and rudder.
 
 
 
-Fig. 18 Control Surface Frequency Content with LPV Control
+Fig. 18 Con rol Surface Frequency Con en wi h LPV Con rol
 
 
 
-Fig. 19 Coherence between control surface commands and PTI
+Fig. 19 Coherence be ween con rol surface commands and PTI
 
 
 
@@ -2467,109 +2467,109 @@ Fig. 19 Coherence between control surface commands and PTI
 
 
 VII. Conclusions
-In this work a two-loop LPV control law was designed for the NASA E1 aircraft. The synthesis of both control loops
+In his work a wo-loop LPV con rol law was designed for he NASA E1 aircraf . The syn hesis of bo h con rol loops
 
 
 
-requires an affine LPV model, which was generated from the non-affine kinematic-based E1 model using the TP method.
-The derived two-loop LPV controller is tested on a Simulink® simulation of the NASA E1 aircraft, which compared the
-performance of the LPV controller to a previously designed NDI controller. It was found that the LPV controller is able
-to track guidance commands, but could exhibit slightly worse tracking performance than the NDI controller. Despite the
-slightly worse tracking performance, the LPV controller exhibits desirable characteristics such as its invariance of the
-real-time modeling parameters and its guarantee of exponential stability. Additionally, by commanding higher frequency
-control surface commands, the LPV control law distorts the PTI less, which will minimize interaction between real-time
-modeling and real-time control design.
+requires an affine LPV model, which was genera ed from he non-affine kinema ic-based E1 model using he TP me hod.
+The derived wo-loop LPV con roller is es ed on a Simulink® simula ion of he NASA E1 aircraf , which compared he
+performance of he LPV con roller o a previously designed NDI con roller. I was found ha he LPV con roller is able
+ o rack guidance commands, bu could exhibi sligh ly worse racking performance han he NDI con roller. Despi e he
+sligh ly worse racking performance, he LPV con roller exhibi s desirable charac eris ics such as i s invariance of he
+real- ime modeling parame ers and i s guaran ee of exponen ial s abili y. Addi ionally, by commanding higher frequency
+con rol surface commands, he LPV con rol law dis or s he PTI less, which will minimize in erac ion be ween real- ime
+modeling and real- ime con rol design.
 
 
 
-Future work will entail development of nonlinear-stabilizing control allocation algorithms to and adaptive control
-allocation algorithms.
+Fu ure work will en ail developmen of nonlinear-s abilizing con rol alloca ion algori hms o and adap ive con rol
+alloca ion algori hms.
 
 
 
-Acknowledgments
-The author would like to thank Dr. Eugene Morelli and Dr. Steven Snyder at NASA Langley Research Center for
+Acknowledgmen s
+The au hor would like o hank Dr. Eugene Morelli and Dr. S even Snyder a NASA Langley Research Cen er for
 
 
 
-their thorough guidance and peer review.
+ heir horough guidance and peer review.
 
 
 
 References
-[1] Ward, D., Monaco, J., Barron, R., Bird, R., Virnig, J., and Landers, T., “Self-Designing Controller: Design, Simulation, and
+[1] Ward, D., Monaco, J., Barron, R., Bird, R., Virnig, J., and Landers, T., “Self-Designing Con roller: Design, Simula ion, and
 
 
 
-Flight Test Evaluation,” SBIR Phase II Final Technical Report Contract F49620-94-C-0087, Barron Associates, Inc, November
+Fligh Tes Evalua ion,” SBIR Phase II Final Technical Repor Con rac F49620-94-C-0087, Barron Associa es, Inc, November
 1996.
 
 
 
-[2] Chandler, P., Mears, M., and Pachter, M., “On-line optimizing networks for reconfigurable control,” Proceedings of 32nd IEEE
-Conference on Decision and Control, IEEE, San Antonio, TX, 1993, pp. 2272–2277.
+[2] Chandler, P., Mears, M., and Pach er, M., “On-line op imizing ne works for reconfigurable con rol,” Proceedings of 32nd IEEE
+Conference on Decision and Con rol, IEEE, San An onio, TX, 1993, pp. 2272–2277.
 
 
 
-[3] Durham, W. C., and Bordignon, K. A., “Multiple control effector rate limiting,” Journal of guidance, control, and dynamics,
+[3] Durham, W. C., and Bordignon, K. A., “Mul iple con rol effec or ra e limi ing,” Journal of guidance, con rol, and dynamics,
 Vol. 19, No. 1, 1996, pp. 30–37.
 
 
 
-[4] Bolling, J. G., “Implementation of constrained control allocation techniques using an aerodynamic model of an f-15 aircraft,”
-Master’s thesis, Dept. of Aerospace and Ocean Engineering, Virginia Polytechnic Inst. and State Univ., May 1997.
+[4] Bolling, J. G., “Implemen a ion of cons rained con rol alloca ion echniques using an aerodynamic model of an f-15 aircraf ,”
+Mas er’s hesis, Dep . of Aerospace and Ocean Engineering, Virginia Poly echnic Ins . and S a e Univ., May 1997.
 
 
 
-[5] Snyder, S., Bacon, B., Morelli, E. A., Frost, S., Teubert, C., and Okolo, W., “Online control design for learn-to-fly,” AIAA
-Atmospheric Flight Mechanics Conference, AIAA, June 2018, p. 3311.
+[5] Snyder, S., Bacon, B., Morelli, E. A., Fros , S., Teuber , C., and Okolo, W., “Online con rol design for learn- o-fly,” AIAA
+A mospheric Fligh Mechanics Conference, AIAA, June 2018, p. 3311.
 
 
 
-[6] Snyder, S., “L1 adaptive control within learn-to-fly,” Ph.D. thesis, University of Illinois at Urbana-Champaign, May 2019.
+[6] Snyder, S., “L1 adap ive con rol wi hin learn- o-fly,” Ph.D. hesis, Universi y of Illinois a Urbana-Champaign, May 2019.
 
 
 
-[7] Snyder, S., “Autopilot Design with Learn-to-Fly,” AIAA Scitech 2020 Forum, AIAA, Orlando, Florida, January 2020, p. 0763.
+[7] Snyder, S., “Au opilo Design wi h Learn- o-Fly,” AIAA Sci ech 2020 Forum, AIAA, Orlando, Florida, January 2020, p. 0763.
 
 
 
-[8] Morelli, E. A., “Practical aspects of real-time modeling for the learn-to-fly concept,” 2018 Atmospheric Flight Mechanics
+[8] Morelli, E. A., “Prac ical aspec s of real- ime modeling for he learn- o-fly concep ,” 2018 A mospheric Fligh Mechanics
 Conference, AIAA, June 2018, p. 3309.
 
 
 
-[9] Johansen, T. A., “Optimizing nonlinear control allocation,” 43rd IEEE Conference on Decision and Control (CDC)(IEEE Cat.
-No. 04CH37601), Vol. 4, IEEE, Atlantis, Paradise Island, Bahamas, 2004, pp. 3435–3440.
+[9] Johansen, T. A., “Op imizing nonlinear con rol alloca ion,” 43rd IEEE Conference on Decision and Con rol (CDC)(IEEE Ca .
+No. 04CH37601), Vol. 4, IEEE, A lan is, Paradise Island, Bahamas, 2004, pp. 3435–3440.
 
 
 
-[10] Tjønnås, J., and Johansen, T. A., “Adaptive control allocation,” Automatica, Vol. 44, No. 11, 2008, pp. 2754–2765.
+[10] Tjønnås, J., and Johansen, T. A., “Adap ive con rol alloca ion,” Au oma ica, Vol. 44, No. 11, 2008, pp. 2754–2765.
 
 
 
-[11] Rangajeeva, S. L., and Whidborne, J. F., “Linear parameter varying control of a quadrotor,” 2011 6th International Conference
-on Industrial and Information Systems, IEEE, 2011, pp. 483–488.
+[11] Rangajeeva, S. L., and Whidborne, J. F., “Linear parame er varying con rol of a quadro or,” 2011 6 h In erna ional Conference
+on Indus rial and Informa ion Sys ems, IEEE, 2011, pp. 483–488.
 
 
 
-[12] Chumalee, S., and Whidborne, J. F., “Gain-scheduled H-infinity control via parameter-dependent Lyapunov functions,”
-International Journal of Systems Science, Vol. 46, No. 1, 2015, pp. 125–138.
+[12] Chumalee, S., and Whidborne, J. F., “Gain-scheduled H-infini y con rol via parame er-dependen Lyapunov func ions,”
+In erna ional Journal of Sys ems Science, Vol. 46, No. 1, 2015, pp. 125–138.
 
 
 
-[13] Apkarian, P., Gahinet, P., and Becker, G., “Self-scheduled H infinity control of linear parameter-varying systems: a design
-example,” Automatica, Vol. 31, No. 9, 1995, pp. 1251–1261.
+[13] Apkarian, P., Gahine , P., and Becker, G., “Self-scheduled H infini y con rol of linear parame er-varying sys ems: a design
+example,” Au oma ica, Vol. 31, No. 9, 1995, pp. 1251–1261.
 
 
 
-[14] Heim, E. H., Viken, E., Brandon, J. M., and Croom, M. A., “NASA’s Learn-to-Fly Project Overview,” 2018 Atmospheric Flight
+[14] Heim, E. H., Viken, E., Brandon, J. M., and Croom, M. A., “NASA’s Learn- o-Fly Projec Overview,” 2018 A mospheric Fligh 
 Mechanics Conference, 2018, p. 3307.
 
 
 
-[15] Riddick, S. E., Busan, R. C., Cox, D. E., and Laughter, S. A., “Learn to fly test setup and concept of operations,” 2018
-Atmospheric Flight Mechanics Conference, 2018, p. 3308.
+[15] Riddick, S. E., Busan, R. C., Cox, D. E., and Laugh er, S. A., “Learn o fly es se up and concep of opera ions,” 2018
+A mospheric Fligh Mechanics Conference, 2018, p. 3308.
 
 
 
@@ -2585,66 +2585,66 @@ Atmospheric Flight Mechanics Conference, 2018, p. 3308.
 
 
 
-[16] Petres, Z., “Polytopic decomposition of linear parameter-varying models by tensor-product model transformation,” Ph.D. thesis,
-Budapest University of Technology and Economics, May 2006.
+[16] Pe res, Z., “Poly opic decomposi ion of linear parame er-varying models by ensor-produc model ransforma ion,” Ph.D. hesis,
+Budapes Universi y of Technology and Economics, May 2006.
 
 
 
-[17] Nagy, S., Petres, Z., and Baranyi, P., “TP Tool - A Matlab toolbox for TP model transformation,” Proc. of 8th International
-Symposium of Hungarian Researchers on Computational Intelligence and Informatics, Budapest, Hungary, 2007, pp. 483–495.
+[17] Nagy, S., Pe res, Z., and Baranyi, P., “TP Tool - A Ma lab oolbox for TP model ransforma ion,” Proc. of 8 h In erna ional
+Symposium of Hungarian Researchers on Compu a ional In elligence and Informa ics, Budapes , Hungary, 2007, pp. 483–495.
 
 
 
-[18] Foster, J. V., “Autonomous guidance algorithms for NASA learn-to-fly technology development,” 2018 Atmospheric Flight
+[18] Fos er, J. V., “Au onomous guidance algori hms for NASA learn- o-fly echnology developmen ,” 2018 A mospheric Fligh 
 Mechanics Conference, 2018, p. 3310.
 
 
 
-[19] Petersen, J. A., and Bodson, M., “Constrained quadratic programming techniques for control allocation,” IEEE Transactions on
-Control Systems Technology, Vol. 14, No. 1, 2005, pp. 91–98.
+[19] Pe ersen, J. A., and Bodson, M., “Cons rained quadra ic programming echniques for con rol alloca ion,” IEEE Transac ions on
+Con rol Sys ems Technology, Vol. 14, No. 1, 2005, pp. 91–98.
 
 
 
-[20] Durham, W. C., “Attainable moments for the constrained control allocation problem,” Journal of Guidance, Control, and
+[20] Durham, W. C., “A ainable momen s for he cons rained con rol alloca ion problem,” Journal of Guidance, Con rol, and
 Dynamics, Vol. 17, No. 6, 1994, pp. 1371–1373.
 
 
 
-[21] Enns, D., “Control allocation approaches,” Guidance, navigation, and control conference and exhibit, 1998, p. 4109.
+[21] Enns, D., “Con rol alloca ion approaches,” Guidance, naviga ion, and con rol conference and exhibi , 1998, p. 4109.
 
 
 
-[22] Buffington, J. M., “Modular control law design for the innovative control effectors (ICE) tailless fighter aircraft configuration
-101-3,” Ohio: Airforce Research Laboratory, 1999.
+[22] Buffing on, J. M., “Modular con rol law design for he innova ive con rol effec ors (ICE) ailless figh er aircraf configura ion
+101-3,” Ohio: Airforce Research Labora ory, 1999.
 
 
 
-[23] Burken, J. J., Lu, P., Wu, Z., and Bahm, C., “Two reconfigurable flight-control design methods: Robust servomechanism and
-control allocation,” Journal of Guidance, Control, and Dynamics, Vol. 24, No. 3, 2001, pp. 482–493.
+[23] Burken, J. J., Lu, P., Wu, Z., and Bahm, C., “Two reconfigurable fligh -con rol design me hods: Robus servomechanism and
+con rol alloca ion,” Journal of Guidance, Con rol, and Dynamics, Vol. 24, No. 3, 2001, pp. 482–493.
 
 
 
-[24] Petersen, J. A., and Bodson, M., “Interior-point algorithms for control allocation,” Journal of guidance, control, and dynamics,
+[24] Pe ersen, J. A., and Bodson, M., “In erior-poin algori hms for con rol alloca ion,” Journal of guidance, con rol, and dynamics,
 Vol. 28, No. 3, 2005, pp. 471–480.
 
 
 
-[25] Harkegard, O., “Efficient active set algorithms for solving constrained least squares problems in aircraft control allocation,”
-Proceedings of the 41st IEEE Conference on Decision and Control, 2002., Vol. 2, IEEE, 2002, pp. 1295–1300.
+[25] Harkegard, O., “Efficien ac ive se algori hms for solving cons rained leas squares problems in aircraf con rol alloca ion,”
+Proceedings of he 41s IEEE Conference on Decision and Con rol, 2002., Vol. 2, IEEE, 2002, pp. 1295–1300.
 
 
 
-[26] Bodson, M., “Evaluation of optimization methods for control allocation,” Journal of Guidance, Control, and Dynamics, Vol. 25,
+[26] Bodson, M., “Evalua ion of op imiza ion me hods for con rol alloca ion,” Journal of Guidance, Con rol, and Dynamics, Vol. 25,
 No. 4, 2002, pp. 703–711.
 
 
 
-[27] Luenberger, D. G., Ye, Y., et al., Linear and nonlinear programming, Vol. 2, Reading, MA: Addison-Wesley, 1984.
+[27] Luenberger, D. G., Ye, Y., e al., Linear and nonlinear programming, Vol. 2, Reading, MA: Addison-Wesley, 1984.
 
 
 
-[28] González, A. G., Rodríguez, J., Sagartzazu, X., Schumacher, A., and Isasa, I., “Multiple coherence method in time domain for
-the analysis of the transmission paths of noise and vibrations with non stationary signals,” Proceedings of ISMA 2010, 2010.
+[28] González, A. G., Rodríguez, J., Sagar zazu, X., Schumacher, A., and Isasa, I., “Mul iple coherence me hod in ime domain for
+ he analysis of he ransmission pa hs of noise and vibra ions wi h non s a ionary signals,” Proceedings of ISMA 2010, 2010.
 
 
 
@@ -2655,47 +2655,47 @@ the analysis of the transmission paths of noise and vibrations with non stationa
 
 
 
- 
-Nomenclature
+	
+Nomencla ure
 
- 
-Introduction
+	
+In roduc ion
 
- 
-Excitation for Real-Time Modeling
+	
+Exci a ion for Real-Time Modeling
 
- 
-LPV Model Derivation 
+	
+LPV Model Deriva ion 
 
- 
-Affine Polytopic LPV Systems
+	
+Affine Poly opic LPV Sys ems
 
- 
-Tensor Product (TP) Transformation
+	
+Tensor Produc (TP) Transforma ion
 
 
- 
-Linear Parameter-Varying Control Design
+	
+Linear Parame er-Varying Con rol Design
 
- 
+	
 NDI Review
 
- 
-AutoThrottle
+	
+Au oThro le
 
- 
-Control Allocation
-
-
- 
-Simulation
-
- 
-Outer Loop Implementation
-
- 
-Inner Loop Implementation
+	
+Con rol Alloca ion
 
 
- 
+	
+Simula ion
+
+	
+Ou er Loop Implemen a ion
+
+	
+Inner Loop Implemen a ion
+
+
+	
 Conclusions

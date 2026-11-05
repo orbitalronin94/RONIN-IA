@@ -1,131 +1,127 @@
-Integrating Planning, Diagnosis, and Execution for Vehicle Systems Management
+In egra ing Planning, Diagnosis, and Execu ion for Vehicle Sys ems Managemen 
 
 
 
-Gordon Aaseng1, Minh Do, Jeremy Frank, Chuck Fry, Adam Sweet
-1Intelligent Systems Division, NASA Ames Research Center
+Gordon Aaseng1, Minh Do, Jeremy Frank, Chuck Fry, Adam Swee 
+1In elligen Sys ems Division, NASA Ames Research Cen er
 
 
 
-Authors listed in alphabetical order.
+Au hors lis ed in alphabe ical order.
 
 
 
-Abstract
+Abs rac 
 
 
 
-We describe a prototype Vehicle System Manager (VSM) for
-NASA’s Gateway, a human-capable spacecraft that will also
-be capable of autonomous operations. The VSM consists of
-an execution system, planner, and fault management system,
-integrated via an over-arching mission management compo-
-nent. We describe the VSM architecture and each of its com-
-ponents. We describe a series of use cases, centered on a
-spacecraft propulsive operation that can fail at different times,
-for different reasons, and how the VSM detects and responds
-to these failures. We show the VSM is capable of detecting
-faults and loss of capability, and subsequently replanning, in
-the presence of each failure scenario.
+We describe a pro o ype Vehicle Sys em Manager (VSM) for
+NASA’s Ga eway, a human-capable spacecraf ha will also
+be capable of au onomous opera ions. The VSM consis s of
+an execu ion sys em, planner, and faul managemen sys em,
+in egra ed via an over-arching mission managemen compo-
+nen . We describe he VSM archi ec ure and each of i s com-
+ponen s. We describe a series of use cases, cen ered on a
+spacecraf propulsive opera ion ha can fail a differen imes,
+for differen reasons, and how he VSM de ec s and responds
+ o hese failures. We show he VSM is capable of de ec ing
+faul s and loss of capabili y, and subsequen ly replanning, in
+ he presence of each failure scenario.
 
 
 
-1 Introduction
-NASA plans to construct a habitable spacecraft, currently
-referred to as Gateway (Crusan et al. 2018), in the vicin-
-ity of the Moon. Gateway consists of a Habitat, Airlock,
-Power and Propulsion Element (PPE), and Logistics mod-
-ule. Gateway will support up to 4 crew for 30 days. The PPE
-will provide orbital maintenance, attitude control, commu-
-nications with Earth, space-to-space communications, and
-radio frequency relay capability in support of extravehicular
-activity (EVA) communications. The Habitat provides hab-
-itable volume and short-duration life support functions for
-crew in cislunar space, docking ports, attach points for ex-
-ternal robotics, external science and technology payloads or
-rendezvous sensors, and accommodations for crew exercise,
-science/utilization and stowage. The Airlock provides capa-
-bility to enable astronaut EVAs as well as the potential to
-accommodate docking of additional elements, observation
-ports, or a science utilization airlock. A Logistics module
-will deliver cargo to the Gateway.
+1 In roduc ion
+NASA plans o cons ruc a habi able spacecraf , curren ly
+referred o as Ga eway (Crusan e al. 2018), in he vicin-
+i y of he Moon. Ga eway consis s of a Habi a , Airlock,
+Power and Propulsion Elemen (PPE), and Logis ics mod-
+ule. Ga eway will suppor up o 4 crew for 30 days. The PPE
+will provide orbi al main enance, a i ude con rol, commu-
+nica ions wi h Ear h, space- o-space communica ions, and
+radio frequency relay capabili y in suppor of ex ravehicular
+ac ivi y (EVA) communica ions. The Habi a provides hab-
+i able volume and shor -dura ion life suppor func ions for
+crew in cislunar space, docking por s, a ach poin s for ex-
+ ernal robo ics, ex ernal science and echnology payloads or
+rendezvous sensors, and accommoda ions for crew exercise,
+science/u iliza ion and s owage. The Airlock provides capa-
+bili y o enable as ronau EVAs as well as he po en ial o
+accommoda e docking of addi ional elemen s, observa ion
+por s, or a science u iliza ion airlock. A Logis ics module
+will deliver cargo o he Ga eway.
 
 
 
-The need for autonomy for Gateway is reflected in the
-Gateway concept of operations (Crusan et al. 2018) and its
-requirements, as well as requirements for the first of its com-
-ponents, the PPE (NASA 2018). NASA has developed and
-tested multiple technologies to enable the autonomous op-
-eration of a dormant space habitat. These technologies in-
-clude a Vehicle System Manager (VSM), integrated with
-flight software, to control the habitat. The work in this pa-
-per builds on previous VSM work (Badger, Strawser, and
-Claunch 2019; Aaseng et al. 2018) to develop and demon-
-strate autonomy technology using contemporary flight soft-
+The need for au onomy for Ga eway is reflec ed in he
+Ga eway concep of opera ions (Crusan e al. 2018) and i s
+requiremen s, as well as requiremen s for he firs of i s com-
+ponen s, he PPE (NASA 2018). NASA has developed and
+ es ed mul iple echnologies o enable he au onomous op-
+era ion of a dorman space habi a . These echnologies in-
+clude a Vehicle Sys em Manager (VSM), in egra ed wi h
+fligh sof ware, o con rol he habi a . The work in his pa-
+per builds on previous VSM work (Badger, S rawser, and
+Claunch 2019; Aaseng e al. 2018) o develop and demon-
+s ra e au onomy echnology using con emporary fligh sof -
 
 
 
-ware and automated reasoning technology. The main archi-
-tectural components of the VSM include Fault Management,
-Execution and a Planner, integrated by means of a Mis-
-sion Manager and Metareasoner (M3). The key challenges
-to overcome arise due to the specific interfaces of planning,
-scheduling and fault management, and how M3’s design is
-driven by these interfaces. We describe the latest incarnation
-of our VSM prototype, and demonstrate its use on a propul-
-sive maneuver that can fail for different reasons, at different
-times. We demonstrate the VSM’s ability to detect faults and
-replan in several scenarios derived from this use case.
+ware and au oma ed reasoning echnology. The main archi-
+ ec ural componen s of he VSM include Faul Managemen ,
+Execu ion and a Planner, in egra ed by means of a Mis-
+sion Manager and Me areasoner (M3). The key challenges
+ o overcome arise due o he specific in erfaces of planning,
+scheduling and faul managemen , and how M3’s design is
+driven by hese in erfaces. We describe he la es incarna ion
+of our VSM pro o ype, and demons ra e i s use on a propul-
+sive maneuver ha can fail for differen reasons, a differen 
+ imes. We demons ra e he VSM’s abili y o de ec faul s and
+replan in several scenarios derived from his use case.
 
 
 
-When there are no faults or unexpected events, there is no
-need to replan, and execution of the current plan proceeds
-without disruption. While plan synthesis for complex oper-
-ations such as those for Gateway is an interesting problem,
-we focus on the problem of managing faults, which requires
-detection of the faults, replanning and execution to respond
-to faults, including in the event that mission objectives can
-no longer be accomplished when the fault occurs.
+When here are no faul s or unexpec ed even s, here is no
+need o replan, and execu ion of he curren plan proceeds
+wi hou disrup ion. While plan syn hesis for complex oper-
+a ions such as hose for Ga eway is an in eres ing problem,
+we focus on he problem of managing faul s, which requires
+de ec ion of he faul s, replanning and execu ion o respond
+ o faul s, including in he even ha mission objec ives can
+no longer be accomplished when he faul occurs.
 
 
 
-In general, faults can manifest in a variety of ways. For
-the purposes of the VSM, we are focused on the impact of
-faults on mission plans. It is important to distinguish faults
-from impacts. Fault response may depend not only on what
-fault occurred, but its impact. The loss of a single component
-may either reduce mission capability (the loss of a space-
-craft’s only engine means it can’t perform propulsive ma-
-neuvers) as opposed to cause a loss of redundancy (the loss
-of one of two engines still leaves a spacecraft able to ma-
-neuver.) When faults and impacts are detected at a low level
-of abstraction (say, part of a spacecraft power system), both
-information and some algorithmic work are needed to map
-faults and impacts to the level of abstraction at which plans
-are represented. Thus, understanding the fault management
-technology and level of abstraction is important when dis-
-cussing the design of the VSM as a whole.
+In general, faul s can manifes in a varie y of ways. For
+ he purposes of he VSM, we are focused on he impac of
+faul s on mission plans. I is impor an o dis inguish faul s
+from impac s. Faul response may depend no only on wha 
+faul occurred, bu i s impac . The loss of a single componen 
+may ei her reduce mission capabili y ( he loss of a space-
+craf ’s only engine means i can’ perform propulsive ma-
+neuvers) as opposed o cause a loss of redundancy ( he loss
+of one of wo engines s ill leaves a spacecraf able o ma-
+neuver.) When faul s and impac s are de ec ed a a low level
+of abs rac ion (say, par of a spacecraf power sys em), bo h
+informa ion and some algori hmic work are needed o map
+faul s and impac s o he level of abs rac ion a which plans
+are represen ed. Thus, unders anding he faul managemen 
+ echnology and level of abs rac ion is impor an when dis-
+cussing he design of he VSM as a whole.
 
 
 
-Faults can be transient or permanent; for the purposes of
-this paper, transient faults can be mitigated via fault recovery
-plans or behaviors, and permanent faults persist after mitiga-
-tion efforts. Thus, the VSM has responsibility for determin-
-ing whether a fault is permanent or not. This functionality
-can be implemented in different ways, i.e. at the level of an
-executive, or at a higher level of mission management.
+Faul s can be ransien or permanen ; for he purposes of
+ his paper, ransien faul s can be mi iga ed via faul recovery
+plans or behaviors, and permanen faul s persis af er mi iga-
+ ion effor s. Thus, he VSM has responsibili y for de ermin-
+ing whe her a faul is permanen or no . This func ionali y
+can be implemen ed in differen ways, i.e. a he level of an
+execu ive, or a a higher level of mission managemen .
 
 
 
-The impacts of a permanent fault can vary. Human space-
-craft are highly redundant, so a single fault may lead to loss
-
-
-
-
+The impac s of a permanen faul can vary. Human space-
+craf are highly redundan , so a single faul may lead o loss
 
 
 
@@ -133,161 +129,165 @@ craft are highly redundant, so a single fault may lead to loss
 
 
 
-of redundancy, but not loss of capability. In general, fault
-impacts may lead to replanning. This requires the VSM to
-integrate information from the fault management system and
-other sources to both decide whether replanning is needed,
-and how to construct the planning problem to solve.
 
 
 
-The integration of all components of a VSM requires an
-over-arching component that integrates information from,
-and orchestrates the behavior of, each of the individual com-
-ponents described above. Hearkening back to early work in
-autonomous agents, we introduce a Mission Management
-and Metareasoning function (M3) that executes a continu-
-ous control loop, watching for faults and impacts, and re-
+
+of redundancy, bu no loss of capabili y. In general, faul 
+impac s may lead o replanning. This requires he VSM o
+in egra e informa ion from he faul managemen sys em and
+o her sources o bo h decide whe her replanning is needed,
+and how o cons ruc he planning problem o solve.
+
+
+
+The in egra ion of all componen s of a VSM requires an
+over-arching componen ha in egra es informa ion from,
+and orches ra es he behavior of, each of he individual com-
+ponen s described above. Hearkening back o early work in
+au onomous agen s, we in roduce a Mission Managemen 
+and Me areasoning func ion (M3) ha execu es a con inu-
+ous con rol loop, wa ching for faul s and impac s, and re-
 planning when necessary.
 
 
 
-We implemented our VSM using a flight-software frame-
-work adopted by the Gateway program. Core Flight System
-(cFS) is a platform and project independent software frame-
-work and set of reusable software applications (McComas,
-Wilmot, and Cudmore 2016). There are three key aspects to
-the cFS architecture: a dynamic run-time environment, lay-
-ered software, and a component based design. It is the com-
-bination of these key aspects that makes it suitable for reuse
-on any number of NASA flight projects and/or embedded
-software systems. Figure 1 shows our key autonomy soft-
-ware components operating within the cFS software frame-
-work. Our software components are built as Core Flight Sys-
-tem (cFS) applications and operate over the cFS bus, ex-
-changing messages with other components and utilize cFS
-services. Subsequent sections are dedicated to explain their
-roles and inter-operation in more details.
+We implemen ed our VSM using a fligh -sof ware frame-
+work adop ed by he Ga eway program. Core Fligh Sys em
+(cFS) is a pla form and projec independen sof ware frame-
+work and se of reusable sof ware applica ions (McComas,
+Wilmo , and Cudmore 2016). There are hree key aspec s o
+ he cFS archi ec ure: a dynamic run- ime environmen , lay-
+ered sof ware, and a componen based design. I is he com-
+bina ion of hese key aspec s ha makes i sui able for reuse
+on any number of NASA fligh projec s and/or embedded
+sof ware sys ems. Figure 1 shows our key au onomy sof -
+ware componen s opera ing wi hin he cFS sof ware frame-
+work. Our sof ware componen s are buil as Core Fligh Sys-
+ em (cFS) applica ions and opera e over he cFS bus, ex-
+changing messages wi h o her componen s and u ilize cFS
+services. Subsequen sec ions are dedica ed o explain heir
+roles and in er-opera ion in more de ails.
 
 
 
-In Section 2, we describe a replan/rescheduling problem
-that involves temporal and causal relations between tasks
-with different priorities. We describe each of the components
-of the VSM in more detail in Section 3. In Section 4 we walk
-through several scenarios to describe how the VSM detects
-and replans in the presence of faults. We describe previous
-work in Section Section 5. We conclude the paper with some
-of our future work in Section 6.
+In Sec ion 2, we describe a replan/rescheduling problem
+ ha involves emporal and causal rela ions be ween asks
+wi h differen priori ies. We describe each of he componen s
+of he VSM in more de ail in Sec ion 3. In Sec ion 4 we walk
+ hrough several scenarios o describe how he VSM de ec s
+and replans in he presence of faul s. We describe previous
+work in Sec ion Sec ion 5. We conclude he paper wi h some
+of our fu ure work in Sec ion 6.
 
 
 
-2 Motivating Scenario: Spacecraft Burn
+2 Mo iva ing Scenario: Spacecraf Burn
 Replanning
 
 
 
-Problem Specification: our scenario is centered on a ma-
+Problem Specifica ion: our scenario is cen ered on a ma-
 jor propulsive maneuver, or “burn”, during which one or
-more engines fire to change Gateway’s trajectory or orbit.
-It is common practice to ensure there are two possible (sets
-of) engine(s) prepared to conduct important maneuvers at a
-specified time; this can be thought of as a form of contingent
-plan. The optional engine choice is referred to as the “down-
-mode”. For our scenario, the primary engine is the MAIN,
-a single powerful engine able to generate a large amount of
-thrust. The secondary set of engines that can be used in the
-“down-mode” is the less powerful BACKUP engines. There
-are two important timepoints related to the burn period: time
-of ignition (TIG) and engine shutdown (ES).
+more engines fire o change Ga eway’s rajec ory or orbi .
+I is common prac ice o ensure here are wo possible (se s
+of) engine(s) prepared o conduc impor an maneuvers a a
+specified ime; his can be hough of as a form of con ingen 
+plan. The op ional engine choice is referred o as he “down-
+mode”. For our scenario, he primary engine is he MAIN,
+a single powerful engine able o genera e a large amoun of
+ hrus . The secondary se of engines ha can be used in he
+“down-mode” is he less powerful BACKUP engines. There
+are wo impor an imepoin s rela ed o he burn period: ime
+of igni ion (TIG) and engine shu down (ES).
 
 
 
-There are a series of tasks in the plan constrained relative
-to the TIG and burn duration. The temporal constraints on
-different tasks and time-windows are described below (with
-time units measured in minutes):
+There are a series of asks in he plan cons rained rela ive
+ o he TIG and burn dura ion. The emporal cons rain s on
+differen asks and ime-windows are described below (wi h
+ ime uni s measured in minu es):
 
 
 
-• MAIN and BACKUP burn durations are respectively 4
+• MAIN and BACKUP burn dura ions are respec ively 4
 
 
 
-minutes and 1 hour.
-• The burn is required to be within a Thermal
+minu es and 1 hour.
+• The burn is required o be wi hin a Thermal
 Excursion period. Thermal Excursions
-can last at most two hours. Consecutive Thermal
-Excursions must be separated by at least 10 hours.
+can las a mos wo hours. Consecu ive Thermal
+Excursions mus be separa ed by a leas 10 hours.
 
 
 
-• If the BACKUP engines fire, we need to heat them be-
-forehand by executing a 90 minute BACKUP Preheat;
-the constraint for this action is [TIG - 90, ES].
-This contingent action is needed because if the BACKUP
-downmode burn is needed, it’s not possible to pre-heat
-those engines immediately.
+• If he BACKUP engines fire, we need o hea hem be-
+forehand by execu ing a 90 minu e BACKUP Prehea ;
+ he cons rain for his ac ion is [TIG - 90, ES].
+This con ingen ac ion is needed because if he BACKUP
+downmode burn is needed, i ’s no possible o pre-hea 
+ hose engines immedia ely.
 
 
 
-• If the MAIN is used for the burn, we turn off the main
-engine heaters, and execute MAIN Htr Deact during
-the burn; the relevant constraint is [TIG - 20, ES
-+ 60]. Note the MAIN Htr Deact action can be re-
-moved if the burn downmode is detected and occurs early
-enough, i.e. before TIG - 20. Otherwise, if this action
-was started and the burn downmode occurs late (i.e. in
-the interval [TIG - 20,TIG]), it will end when the
+• If he MAIN is used for he burn, we urn off he main
+engine hea ers, and execu e MAIN H r Deac during
+ he burn; he relevan cons rain is [TIG - 20, ES
++ 60]. No e he MAIN H r Deac ac ion can be re-
+moved if he burn downmode is de ec ed and occurs early
+enough, i.e. before TIG - 20. O herwise, if his ac ion
+was s ar ed and he burn downmode occurs la e (i.e. in
+ he in erval [TIG - 20,TIG]), i will end when he
 longer BACKUP burn ends.
 
 
 
-• Other burn related tasks and their respective durations
+• O her burn rela ed asks and heir respec ive dura ions
 are: (1) Doppler & Ranging: [TIG - 390,
 TIG - 30]; (2) Burn Doppler : [ES + 30,
-ES + 60]; (3) Tank Pressurization: [TIG
-- 120, TIG - 60]; (4) Data Recording &
+ES + 60]; (3) Tank Pressuriza ion: [TIG
+- 120, TIG - 60]; (4) Da a Recording &
 Downlinking: [TIG - 15, ES + 5].
 
 
 
-In addition to the burn related tasks, there are 3 payloads
-(DFTO-1,DFTO-2,DFTO-3) that occur after the burn.
-The temporal constraints on those planned payloads are:
+In addi ion o he burn rela ed asks, here are 3 payloads
+(DFTO-1,DFTO-2,DFTO-3) ha occur af er he burn.
+The emporal cons rain s on hose planned payloads are:
 
 
 
-• Payloads durations are respectively dur(DFTO-1) =
+• Payloads dura ions are respec ively dur(DFTO-1) =
 30, dur(DFTO-2) = 30, dur(DFTO-3) = 60.
 
 
 
-• Payload activities can not overlap.
+• Payload ac ivi ies can no overlap.
 • DFTO-1 and DFTO-3 require a Thermal
 Excursion.
 
 
 
-• DFTO-3 must be performed within the time-window of
+• DFTO-3 mus be performed wi hin he ime-window of
 [TIG + 660, TIG + 780]
 
 
 
-• a 6-hour Ranging activity starts after DFTO-3 ends.
+• a 6-hour Ranging ac ivi y s ar s af er DFTO-3 ends.
 
 
 
-In addition to the constraints above, there are preferences
-the users would like to see satisfied in the final solution:
+In addi ion o he cons rain s above, here are preferences
+ he users would like o see sa isfied in he final solu ion:
 
 
 
-• DFTO-1 ideally should occur within the 2-hour time
-window [TIG + 570, TIG + 690] where the 70m
-DSN antenna is visible (DSN = Deep Space Network).
-There is a DFTO-1-Downlink activity contingent on
-this constraint being respected.
+• DFTO-1 ideally should occur wi hin he 2-hour ime
+window [TIG + 570, TIG + 690] where he 70m
+DSN an enna is visible (DSN = Deep Space Ne work).
+There is a DFTO-1-Downlink ac ivi y con ingen on
+ his cons rain being respec ed.
 
 
 
@@ -295,16 +295,16 @@ this constraint being respected.
 
 
 
-These preferences can be weighted, but for our purposes,
-it is only important to know a total order on the two
-preferences, in the event both can’t be satisfied.
+These preferences can be weigh ed, bu for our purposes,
+i is only impor an o know a o al order on he wo
+preferences, in he even bo h can’ be sa isfied.
 
 
 
-Failure Scenarios: As described in the introduction, our
-VSM is primarily designed around detection of and response
-to faults. This scenario focuses on faults that may cause the
-primary MAIN engine to be unavailable at TIG, causing the
+Failure Scenarios: As described in he in roduc ion, our
+VSM is primarily designed around de ec ion of and response
+ o faul s. This scenario focuses on faul s ha may cause he
+primary MAIN engine o be unavailable a TIG, causing he
 engine down-mode.
 
 
@@ -317,155 +317,155 @@ engine down-mode.
 
 
 
-Fault vs Impact: We differentiate between what has failed
-(e.g. a controller card or switch) and the impact (loss of
-engine that requires burn downmode). The VSM must be
-able to determine both what has failed, and the impact of
-this failure on the plan. Looking ahead to Figure 2 (bottom)
-we see that there are two independent paths of control to
-the MAIN engine. This makes the propulsion system 2-fault
-tolerant; that is, two independent faults are required to lose
-the ability to fire the MAIN engine.
+Faul vs Impac : We differen ia e be ween wha has failed
+(e.g. a con roller card or swi ch) and he impac (loss of
+engine ha requires burn downmode). The VSM mus be
+able o de ermine bo h wha has failed, and he impac of
+ his failure on he plan. Looking ahead o Figure 2 (bo om)
+we see ha here are wo independen pa hs of con rol o
+ he MAIN engine. This makes he propulsion sys em 2-faul 
+ oleran ; ha is, wo independen faul s are required o lose
+ he abili y o fire he MAIN engine.
 
 
 
-Permanent vs. Transient Fault: the faults in our scenario can
-be either permanent or transient. Transient faults can only
-be detected by trying recovery plans and observing their
-success or failure. Recovery plans can be attempted only a
-limited number of times, in this case, 3. The VSM must have
-the ability to determine whether a fault, and subsequent loss
-of capability or redundancy, is a transient or permanent fault.
+Permanen vs. Transien Faul : he faul s in our scenario can
+be ei her permanen or ransien . Transien faul s can only
+be de ec ed by rying recovery plans and observing heir
+success or failure. Recovery plans can be a emp ed only a
+limi ed number of imes, in his case, 3. The VSM mus have
+ he abili y o de ermine whe her a faul , and subsequen loss
+of capabili y or redundancy, is a ransien or permanen faul .
 
 
 
-Impact of faults on the plan: Faults are mapped to im-
-mediate responses and have relatively minimal impact on
-planning. However, the VSM must have the ability to detect
-faults, attempt recovery actions, and determine whether
-those actions succeeded or failed.
+Impac of faul s on he plan: Faul s are mapped o im-
+media e responses and have rela ively minimal impac on
+planning. However, he VSM mus have he abili y o de ec 
+faul s, a emp recovery ac ions, and de ermine whe her
+ hose ac ions succeeded or failed.
 
 
 
-Impact of down-mode on the plan: Since the BACKUP burn
-duration is 15 times the MAIN burn duration (60 min vs 4
-min), all burn-related activities that are tied to the Engine
-Stop (ES) time will need to be rescheduled to different times
-if there is a burn down-mode. Moreover, if the downmode
-happens before the MAIN Htr Deact task starts, then
-we can remove it from the new plan, but otherwise we must
-leave it in the plan, and extend its duration. Finally, the
-required separation of thermal excursions will also cause
-replanning of the DFTO activities at the end of the plan. We
-do not consider faults impacting the BACKUP engine.
+Impac of down-mode on he plan: Since he BACKUP burn
+dura ion is 15 imes he MAIN burn dura ion (60 min vs 4
+min), all burn-rela ed ac ivi ies ha are ied o he Engine
+S op (ES) ime will need o be rescheduled o differen imes
+if here is a burn down-mode. Moreover, if he downmode
+happens before he MAIN H r Deac ask s ar s, hen
+we can remove i from he new plan, bu o herwise we mus 
+leave i in he plan, and ex end i s dura ion. Finally, he
+required separa ion of hermal excursions will also cause
+replanning of he DFTO ac ivi ies a he end of he plan. We
+do no consider faul s impac ing he BACKUP engine.
 
 
 
-The table below illustrates the main features of the burn
+The able below illus ra es he main fea ures of he burn
 down-mode scenarios we have described above. There are a
-total of 4 faults that could occur; of the 15 possible sets of
-faults that occur, we can divide the scenarios into those in
-which the two permanent faults occur, and those in which
-one or no permanent faults occur. Only in the event of two
-permanent faults do we need to consider when the sec-
-ond permanent fault has occurred, either before or after
-PCA-SM-Heater-Deactivation has started. Finally,
-there is the preferences on the DFTO constraints. The result
-is 7 main scenario variations (No fault, transient only, one
-permanent fault, and the four combinations of fault timing
-and preferences when two permanent faults occur).
+ o al of 4 faul s ha could occur; of he 15 possible se s of
+faul s ha occur, we can divide he scenarios in o hose in
+which he wo permanen faul s occur, and hose in which
+one or no permanen faul s occur. Only in he even of wo
+permanen faul s do we need o consider when he sec-
+ond permanen faul has occurred, ei her before or af er
+PCA-SM-Hea er-Deac iva ion has s ar ed. Finally,
+ here is he preferences on he DFTO cons rain s. The resul 
+is 7 main scenario varia ions (No faul , ransien only, one
+permanen faul , and he four combina ions of faul iming
+and preferences when wo permanen faul s occur).
 
 
 
-Class Property # Notes
+Class Proper y # No es
 
 
 
-Fault RPC-open 2 Transient
-Fault PDE-Failed 2 Permanent
-Fault Timing 2 Before/After MAIN Htr Deactivation start
+Faul RPC-open 2 Transien 
+Faul PDE-Failed 2 Permanen 
+Faul Timing 2 Before/Af er MAIN H r Deac iva ion s ar 
 Planner Preferences 2 DFTO order vs DSN coverage
 
 
 
-Table 1: Scenario Variations.
+Table 1: Scenario Varia ions.
 
 
 
 3 VSM Design
-The VSM architecture consists of multiple software compo-
-nents, integrated via a flight software message bus architec-
-ture. The Planner is responsible for revising the burn plan
-in the event of fault or loss of capability resulting in burn
-down-mode. PLEXIL executes plan tasks and returns results.
-Fault management is divided into three components: Fault
-Detection (FD), Diagnostic Executive (DE) and Fault Im-
-pacts Reasoner (FIR). Finally, all components are overseen
-by the Mission Manager and Metareasoner (M3).
+The VSM archi ec ure consis s of mul iple sof ware compo-
+nen s, in egra ed via a fligh sof ware message bus archi ec-
+ ure. The Planner is responsible for revising he burn plan
+in he even of faul or loss of capabili y resul ing in burn
+down-mode. PLEXIL execu es plan asks and re urns resul s.
+Faul managemen is divided in o hree componen s: Faul 
+De ec ion (FD), Diagnos ic Execu ive (DE) and Faul Im-
+pac s Reasoner (FIR). Finally, all componen s are overseen
+by he Mission Manager and Me areasoner (M3).
 
 
 
 3.1 Planner
-While the plan as described above includes a large number
-of features such as causal links, temporal constraints,
-preferences, and contingent actions, for our purposes the
-plan has been generated offline, and so we don’t require
-the planner to perform complex de-novo plan synthesis.
-Instead, the problem to solve is plan repair in the presence
-of unexpected faults and potential impacts. As we will see
-below, the planner’s job is limited to handling the loss of the
-MAIN engine and subsequent burn downmode. The Planner
-is implemented as an MILP solver.
+While he plan as described above includes a large number
+of fea ures such as causal links, emporal cons rain s,
+preferences, and con ingen ac ions, for our purposes he
+plan has been genera ed offline, and so we don’ require
+ he planner o perform complex de-novo plan syn hesis.
+Ins ead, he problem o solve is plan repair in he presence
+of unexpec ed faul s and po en ial impac s. As we will see
+below, he planner’s job is limi ed o handling he loss of he
+MAIN engine and subsequen burn downmode. The Planner
+is implemen ed as an MILP solver.
 
 
 
-MILP Encoding: For each task X in our scenario, there are
-the following variables:
+MILP Encoding: For each ask X in our scenario, here are
+ he following variables:
 
 
 
-• tsx: start time of X (continuous floating point value).
-• tex: end time of X (continuous floating point value).
-• Binary variable bx with bx = 1 means X exist in the final
+• sx: s ar ime of X (con inuous floa ing poin value).
+• ex: end ime of X (con inuous floa ing poin value).
+• Binary variable bx wi h bx = 1 means X exis in he final
 
 
 
-plan and bx = 0 means it is not in the final plan.
+plan and bx = 0 means i is no in he final plan.
 
 
 
-Besides variables associated with tasks, there are the fol-
-lowing various time-points:
+Besides variables associa ed wi h asks, here are he fol-
+lowing various ime-poin s:
 
 
 
-• tTIG: Time of Ignition.
-• tES : Engine Shutdown time.
+• TIG: Time of Igni ion.
+• ES : Engine Shu down ime.
 
 
 
-• In nominal planning where MAIN is used, then tES =
-tTIG + 4.
+• In nominal planning where MAIN is used, hen ES =
+ TIG + 4.
 
 
 
-• In replanning scenario where we downmode to
-BACKUP, then tES = tTIG + 60.
+• In replanning scenario where we downmode o
+BACKUP, hen ES = TIG + 60.
 
 
 
-• tbd: Burn downmode occurrence time.
-• 70m DSN time window [ts70m, te70m] of 2 hours that starts
+• bd: Burn downmode occurrence ime.
+• 70m DSN ime window [ s70m, e70m] of 2 hours ha s ar s
 
 
 
-at 9.5hrs after tTIG: ts70m = tTIG + 570 and te70m =
-ts70m + 120.
+a 9.5hrs af er TIG: s70m = TIG + 570 and e70m =
+ s70m + 120.
 
 
 
-• Thermal Excursion Windows TE1 and TE2 that are 10
-hours apart and lasting up to 2 hours each: [tsTE1, t
+• Thermal Excursion Windows TE1 and TE2 ha are 10
+hours apar and las ing up o 2 hours each: [ sTE1, 
 
 
 
@@ -474,25 +474,25 @@ TE1],
 
 
 
-[tsTE2, t
+[ sTE2, 
 e
 TE2]
 
 
 
-• teTE1 ≤ tsTE1 + 120: up to 2hrs long.
-• teTE2 ≤ tsTE2 + 120: up to 2hrs long.
-• tsTE2 ≥ teTE1 + 600: separate by 10hrs.
+• eTE1 ≤ sTE1 + 120: up o 2hrs long.
+• eTE2 ≤ sTE2 + 120: up o 2hrs long.
+• sTE2 ≥ eTE1 + 600: separa e by 10hrs.
 
 
 
-• Three fixed-duration payload (DFTO1-3):
-[tsDFTO1, t
+• Three fixed-dura ion payload (DFTO1-3):
+[ sDFTO1, 
 
 
 
 e
-DFTO1], [tsDFTO2, t
+DFTO1], [ sDFTO2, 
 
 
 
@@ -501,21 +501,21 @@ DFTO2], and
 
 
 
-[tsDFTO3, t
+[ sDFTO3, 
 e
 DFTO3]
 
 
 
-• teDFTO1 = tsDFTO1 + 25
+• eDFTO1 = sDFTO1 + 25
 
 
 
-• teDFT02 = tsDFTO2 + 25
+• eDFT02 = sDFTO2 + 25
 
 
 
-• teDFTO3 = tsDFTO3 + 60
+• eDFTO3 = sDFTO3 + 60
 
 
 
@@ -531,16 +531,16 @@ Manager
 
 
 
-Storage
+S orage
 
 
 
-Event
+Even 
 Services
 
 
 
-Stored 
+S ored 
 Command
 
 
@@ -550,12 +550,12 @@ TransferScheduler
 
 
 
-Packet
+Packe 
 Manager
 
 
 
-Executive
+Execu ive
 Services
 
 
@@ -573,25 +573,25 @@ Commands
 
 
 
-cFS Applications
+cFS Applica ions
 
 
 
-Real-time Telemetry 
+Real- ime Teleme ry 
 
 
 
-Communication
-Interfaces
+Communica ion
+In erfaces
 
 
 
-Mission Applications
+Mission Applica ions
 
 
 
 1553 Bus
-Support
+Suppor 
 
 
 
@@ -599,23 +599,23 @@ File downlink
 
 
 
-Software
+Sof ware
 Bus
 
 
 
-Instrument
+Ins rumen 
 Manager
 
 
 
 Command
-Ingest
+Inges 
 
 
 
-Telemetry 
-Output
+Teleme ry 
+Ou pu 
 
 
 
@@ -632,16 +632,16 @@ Manager
 
 
 
-Data
+Da a
 
 
 
 Mass
-Storage
+S orage
 
 
 
-File System
+File Sys em
 
 
 
@@ -650,7 +650,7 @@ Services
 
 
 
-Limit
+Limi 
 Checker
 
 
@@ -660,147 +660,147 @@ Wire
 
 
 
-Instruments
+Ins rumen s
 
 
 
-Core Services/Applications
+Core Services/Applica ions
 
 
 
-Inter-task Message Router (Software Bus)
+In er- ask Message Rou er (Sof ware Bus)
 
 
 
-Autonomy Components
+Au onomy Componen s
 
 
 
-Fault 
-Detection
+Faul 
+De ec ion
 
 
 
-Diagnostic 
-Executive
+Diagnos ic 
+Execu ive
 
 
 
-Fault 
-Impacts 
+Faul 
+Impac s 
 
 
 
 Reasoner
-Planning Execution M3
+Planning Execu ion M3
 
 
 
-Figure 1: The VSM Architecture
+Figure 1: The VSM Archi ec ure
 
 
 
-• DFT03 time-window [tsDFT03W
-, teDFT03W
+• DFT03 ime-window [ sDFT03W
+, eDFT03W
 
 
 
 ] where
-the DFT03 task can occur within. This time-window
-starts 11 hours after tTIG and last 2 hours: tsDFT03W
+ he DFT03 ask can occur wi hin. This ime-window
+s ar s 11 hours af er TIG and las 2 hours: sDFT03W
 
 
 
 =
-tTIG + 660 and teDFT03W
+ TIG + 660 and eDFT03W
 
 
 
-= tsDFT03W
+= sDFT03W
 + 120.
 
 
 
-Encoding size optimization: If task X is mandatory (i.e., X
-definitely appears in the final solution), then we can exclude
-bx. Any task that has a fixed duration, then having both tsx
-and tex are redundant and thus we only need one of them.
-Moreover, if there is a fixed-time constraint between the
-start/end time of a given task and Time of Ignition
-(TIG) or Engine Shutdown (ES) then we also do
-not really need to have tsx and/or tex modeled explicitly.
+Encoding size op imiza ion: If ask X is manda ory (i.e., X
+defini ely appears in he final solu ion), hen we can exclude
+bx. Any ask ha has a fixed dura ion, hen having bo h sx
+and ex are redundan and hus we only need one of hem.
+Moreover, if here is a fixed- ime cons rain be ween he
+s ar /end ime of a given ask and Time of Igni ion
+(TIG) or Engine Shu down (ES) hen we also do
+no really need o have sx and/or ex modeled explici ly.
 
 
 
-Fixed-time Constraints:
-• BACKUP Preheat (PH): tsPH = tTIG−90 (starting
+Fixed- ime Cons rain s:
+• BACKUP Prehea (PH): sPH = TIG−90 (s ar ing
 
 
 
-at tTIG − 1.5hrs) and tePH = tES (end at tES).
+a TIG − 1.5hrs) and ePH = ES (end a ES).
 • 6-hour of Doppler & Ranging (DR) (before burn)
 
 
 
-: tsD = tTIG − 390 (starting at tTIG − 6.5hrs) and teD =
-tsD + 360 (last 6 hrs).
+: sD = TIG − 390 (s ar ing a TIG − 6.5hrs) and eD =
+ sD + 360 (las 6 hrs).
 
 
 
-• 30 minutes of Burn Doppler(BD) (after burn):
-tsDR = tES + 30 (starting at tES + 30) and teDR =
-tsDR + 30 (last 30 minutes)
+• 30 minu es of Burn Doppler(BD) (af er burn):
+ sDR = ES + 30 (s ar ing a ES + 30) and eDR =
+ sDR + 30 (las 30 minu es)
 
 
 
-• 1-hour of Tank Pressurization (TP): tsTP =
-tTIG−120 (starting at tTIG−2hrs) and teTP = tsTP +60
-(last 1 hr).
+• 1-hour of Tank Pressuriza ion (TP): sTP =
+ TIG−120 (s ar ing a TIG−2hrs) and eTP = sTP +60
+(las 1 hr).
 
 
 
-• Data Recording and Downlink (DRD):
-tsDRD = tTIG − 15 (starting at tTIG − 15) and
+• Da a Recording and Downlink (DRD):
+ sDRD = TIG − 15 (s ar ing a TIG − 15) and
 
 
 
-teDRD = tES + 5 (end at tES + 5)
+ eDRD = ES + 5 (end a ES + 5)
 
 
 
-• MAIN Htr Deact (PHD): tsPHD = tTIG−20 (start-
-ing at tTIG − 15) and teDRD = tES + 60 (ending at
-tES + 1hr)1.
+• MAIN H r Deac (PHD): sPHD = TIG−20 (s ar -
+ing a TIG − 15) and eDRD = ES + 60 (ending a 
+ ES + 1hr)1.
 
 
 
-Precedence Constraints:
+Precedence Cons rain s:
 
 
 
-• Burn require thermal excursion (within the first thermal
-excursion windows): tTIG > tsTE1, and tES < teTE1.
+• Burn require hermal excursion (wi hin he firs hermal
+excursion windows): TIG > sTE1, and ES < eTE1.
 
 
 
-• DFTOs can’t overlap: let x12, x13, and x23 being the
-binary variables represent the ordering constraints be-
-tween the three payloads. Thus, x12 = 1 implies DFTO1
+• DFTOs can’ overlap: le x12, x13, and x23 being he
+binary variables represen he ordering cons rain s be-
+ ween he hree payloads. Thus, x12 = 1 implies DFTO1
 is before DFTO2 while x12 = 0 means DFTO1 is af-
-ter DFTO2. With M being a large constant, the ”non-
-overlapping” constraint is modeled as follow:
+ er DFTO2. Wi h M being a large cons an , he ”non-
+overlapping” cons rain is modeled as follow:
 
 
 
-• tsDFTO1 − teDFTO2 > M × (x12 − 1)
+• sDFTO1 − eDFTO2 > M × (x12 − 1)
 
 
 
-• tsDFTO2 − teDFTO1 > −M × x12
+• sDFTO2 − eDFTO1 > −M × x12
 
 
 
-• Similar constraints for x13 and x23
+• Similar cons rain s for x13 and x23
 
 
 
@@ -809,22 +809,18 @@ Excursions:
 
 
 
-• tsDFTO1 ≥ tsTE2 and teDFTO1 ≤ teTE2
+• sDFTO1 ≥ sTE2 and eDFTO1 ≤ eTE2
 
 
 
-• tsDFTO3 ≥ tsTE2 and teDFTO3 ≤ teTE2
+• sDFTO3 ≥ sTE2 and eDFTO3 ≤ eTE2
 
 
 
-1This constraint is only active when downmode happens after it
-already starts (i.e., after tTIG − 20). If downmode happens before
-heater Deactivation already started at tTIG − 20 then it will last
-until tES + 60.
-
-
-
-
+1This cons rain is only ac ive when downmode happens af er i 
+already s ar s (i.e., af er TIG − 20). If downmode happens before
+hea er Deac iva ion already s ar ed a TIG − 20 hen i will las 
+un il ES + 60.
 
 
 
@@ -832,163 +828,167 @@ until tES + 60.
 
 
 
-• DFTO1 requires 70m DSN coverage: tsDFTO1 ≥ ts70m
-and teDFTO1 ≤ te70m
 
 
 
-• Timewindow constraint for DFTO3: tsDFTO3 ≥
-tsDFT03W
+
+• DFTO1 requires 70m DSN coverage: sDFTO1 ≥ s70m
+and eDFTO1 ≤ e70m
 
 
 
-and teDFTO3 ≤ teDFT03W
+• Timewindow cons rain for DFTO3: sDFTO3 ≥
+ sDFT03W
+
+
+
+and eDFTO3 ≤ eDFT03W
 
 
 
 Preferences:
-• V1 be the value assigned to satisfying the preference that
-DFTO2 is in the 70m DSN coverage window. Let y1 be a
-binary variable representing if DFTO2 is within the 70m
-DSN coverage window (i.e., y1 = 1 if DFTO2 is within
-the coverage window) and M is sufficiently large num-
+• V1 be he value assigned o sa isfying he preference ha 
+DFTO2 is in he 70m DSN coverage window. Le y1 be a
+binary variable represen ing if DFTO2 is wi hin he 70m
+DSN coverage window (i.e., y1 = 1 if DFTO2 is wi hin
+ he coverage window) and M is sufficien ly large num-
 ber.2
 
 
 
-• tsDFTO2 − ts70m > M × (y1 − 1)
+• sDFTO2 − s70m > M × (y1 − 1)
 
 
 
-• te70m − teDFTO2 > M × (y1 − 1)
+• e70m − eDFTO2 > M × (y1 − 1)
 
 
 
-• V2 be the value assigned to satisfying the preference that
-DFTO1 precedes DFTO2. Similar to the previous pref-
-erence, we will use a binary variable y2 to represent
-the precedence constraint between DFTO1 and DFTO2:
-tsDFTO2 − teDFTO1 > M × (y2 − 1)
+• V2 be he value assigned o sa isfying he preference ha 
+DFTO1 precedes DFTO2. Similar o he previous pref-
+erence, we will use a binary variable y2 o represen 
+ he precedence cons rain be ween DFTO1 and DFTO2:
+ sDFTO2 − eDFTO1 > M × (y2 − 1)
 
 
 
-• bx = y1 for x =DFTO-1-Downlink, that is, if y1 = 1
-we ensure DFTO-1-Downlink is in the plan, otherwise
-DFTO-1-Downlink need not be in the plan.
+• bx = y1 for x =DFTO-1-Downlink, ha is, if y1 = 1
+we ensure DFTO-1-Downlink is in he plan, o herwise
+DFTO-1-Downlink need no be in he plan.
 
 
 
-Objective Function: maximize V1 × y1 + V2 × y2
+Objec ive Func ion: maximize V1 × y1 + V2 × y2
 
 
 
-3.2 Fault Management
-We built our Fault Management applications using a Com-
-mercial Off The Shelf (COTS) diagnostic reasoner, called
-Testability Engineering and Maintenance System (Real
-Time) (TEAMS-RT) (Mathur, Deb, and Pattipati 1998).
-TEAMS-RT uses a declarative model of components, inter-
-connectivity of components and associated information flow
-between them, fault modes that components can suffer from,
-logical tests indicating the presence or absence of faults, a
-and mapping from test results to fault modes.
+3.2 Faul Managemen 
+We buil our Faul Managemen applica ions using a Com-
+mercial Off The Shelf (COTS) diagnos ic reasoner, called
+Tes abili y Engineering and Main enance Sys em (Real
+Time) (TEAMS-RT) (Ma hur, Deb, and Pa ipa i 1998).
+TEAMS-RT uses a declara ive model of componen s, in er-
+connec ivi y of componen s and associa ed informa ion flow
+be ween hem, faul modes ha componen s can suffer from,
+logical es s indica ing he presence or absence of faul s, a
+and mapping from es resul s o faul modes.
 
 
 
-Figure 2 (top) shows a simple TEAMS model fragment,
-consisting of three components, and three associated tests.
-Tests are ’logical tests’ as opposed to physical sensors asso-
-ciated with the hardware. The direction of flow of capability
-is indicated by the arrows. In this example, we see two tests
-pass, and one test fails. Figure 2 (middle) shows the diag-
-nostic matrix (D-Matrix) for this model. Each fault mode
-for each component occupies a row of the D-Matrix, and
-tests occupy columns. A 1 in a matrix cell indexed by (fault-
-mode, test) indicates that the test provides information about
-the fault mode. TEAMS uses a default reasoning assump-
-tion, which is that a passed test exonerates any fault mode
-informed by the results of the test, and that any fault mode
-that is not exonerated is a suspect. If only one suspect is left
-after all tests are evaluated, the fault mode is uniquely identi-
-fied as responsible for the failed tests. Figure 2 (middle) also
+Figure 2 ( op) shows a simple TEAMS model fragmen ,
+consis ing of hree componen s, and hree associa ed es s.
+Tes s are ’logical es s’ as opposed o physical sensors asso-
+cia ed wi h he hardware. The direc ion of flow of capabili y
+is indica ed by he arrows. In his example, we see wo es s
+pass, and one es fails. Figure 2 (middle) shows he diag-
+nos ic ma rix (D-Ma rix) for his model. Each faul mode
+for each componen occupies a row of he D-Ma rix, and
+ es s occupy columns. A 1 in a ma rix cell indexed by (faul -
+mode, es ) indica es ha he es provides informa ion abou 
+ he faul mode. TEAMS uses a defaul reasoning assump-
+ ion, which is ha a passed es exonera es any faul mode
+informed by he resul s of he es , and ha any faul mode
+ ha is no exonera ed is a suspec . If only one suspec is lef 
+af er all es s are evalua ed, he faul mode is uniquely iden i-
+fied as responsible for he failed es s. Figure 2 (middle) also
 
 
 
-2The two constraints ensures that y1 = 1 enforces that DFTO2
-should be within [ts70m, te70m] while the reverse is not true: y1 = 0
-doesn’t enforce NOT-containment. However, our objective func-
-tion will ensure that it’s beneficial to have y1 = 1 so that there is
-no scenario where y1 = 0 while DFTO2 is contained within the
+2The wo cons rain s ensures ha y1 = 1 enforces ha DFTO2
+should be wi hin [ s70m, e70m] while he reverse is no rue: y1 = 0
+doesn’ enforce NOT-con ainmen . However, our objec ive func-
+ ion will ensure ha i ’s beneficial o have y1 = 1 so ha here is
+no scenario where y1 = 0 while DFTO2 is con ained wi hin he
 70m DSN coverage.
 
 
 
-shows the use of the default assumption in reasoning about
-three hypothetical test results shown in the top figure.
+shows he use of he defaul assump ion in reasoning abou 
+ hree hypo he ical es resul s shown in he op figure.
 
 
 
-Fault management is divided into three components; State
-Estimation, Fault Detection and Fault Impacts Reasoning,
+Faul managemen is divided in o hree componen s; S a e
+Es ima ion, Faul De ec ion and Faul Impac s Reasoning,
 all of which use TEAMS models.
 
 
 
-Fault Detection processes system data to determine if
-any defined off-nominal conditions exist. Each off-nominal
-condition is associated with a test, which outputs pass, fail
+Faul De ec ion processes sys em da a o de ermine if
+any defined off-nominal condi ions exis . Each off-nominal
+condi ion is associa ed wi h a es , which ou pu s pass, fail
 or unknown.
 
 
 
-Diagnostic Executive receives test results from Fault
-Detection and packages them to send to TEAMS-RT.
-TEAMS-RT receives the pass, fail and unknown test
-results that correspond to test points in a diagnostic model.
-TEAMS-RT correlates test points with failure modes. A
-failed test can implicate one or more failure modes, while
-a passing test exonerates failures. With sufficient data, a
-single failure mode can be identified that is responsible
-for all failed tests, and an unambiguous failure mode is
-identified. Otherwise, the reasoner determines the smallest
-set of possible failure modes that could be responsible for
-failed tests and presents an ambiguity group of possible
-failures. For the purposes of this paper, we will be working
-with a model that ensures faults can be uniquely isolated,
-and we assume no unknown test results. There are four
-faults DE can detect, as shown in Figure 2 (bottom).
+Diagnos ic Execu ive receives es resul s from Faul 
+De ec ion and packages hem o send o TEAMS-RT.
+TEAMS-RT receives he pass, fail and unknown es 
+resul s ha correspond o es poin s in a diagnos ic model.
+TEAMS-RT correla es es poin s wi h failure modes. A
+failed es can implica e one or more failure modes, while
+a passing es exonera es failures. Wi h sufficien da a, a
+single failure mode can be iden ified ha is responsible
+for all failed es s, and an unambiguous failure mode is
+iden ified. O herwise, he reasoner de ermines he smalles 
+se of possible failure modes ha could be responsible for
+failed es s and presen s an ambigui y group of possible
+failures. For he purposes of his paper, we will be working
+wi h a model ha ensures faul s can be uniquely isola ed,
+and we assume no unknown es resul s. There are four
+faul s DE can de ec , as shown in Figure 2 (bo om).
 
 
 
-Fault Impacts Reasoner (FIR). FIR receives failure in-
-formation from DE and determines the resultant impacts of
-confirmed failures (Aaseng et al. 2015). Impacts include the
-loss of function due to a fault, such as the components that
-have lost electrical power due to a fault in the electrical sys-
-tem. The loss of redundancy due to a fault is also deter-
-mined. Most critical functions in spacecraft depend on re-
-dundancy to assure the availability of the function in spite
-of failures. Of particular concern is any function that could
-be lost by a single additional failure, or has become zero-
-fault tolerant. FIR identifies these changes in redundancy
-to aid with identifying functions at increased risk, helping
-operators to determine next worst failures and take mitiga-
-tion steps to reduce the risks of additional failures, if pos-
-sible. FIR, coupled with DE, draws a crisp distinction be-
-tween failed, that is, broken components, from components
-and functions lost or affected by the failure of a compo-
-nent. The distinction is critical to most effectively take ac-
-tions to continue safe flight while planning the restoration of
-capability through reconfiguration or in-flight repairs. Fig-
-ure 2 (bottom) shows part of the propulsion system TEAMS
-fault model, with two independent control flows ensuring
-the main MAIN engine functions. The loss of a single ’string’
-leads to reduction in capability, while the loss of both strings
-leads to loss of redundancy. The details of how the TEAMS
-model and faults are evaluated to determine loss of capabil-
-ity or redundancy are described in (Aaseng et al. 2015); for
-our purposes, it is enough to know that the VSM receives
-this information from FIR.
+Faul Impac s Reasoner (FIR). FIR receives failure in-
+forma ion from DE and de ermines he resul an impac s of
+confirmed failures (Aaseng e al. 2015). Impac s include he
+loss of func ion due o a faul , such as he componen s ha 
+have los elec rical power due o a faul in he elec rical sys-
+ em. The loss of redundancy due o a faul is also de er-
+mined. Mos cri ical func ions in spacecraf depend on re-
+dundancy o assure he availabili y of he func ion in spi e
+of failures. Of par icular concern is any func ion ha could
+be los by a single addi ional failure, or has become zero-
+faul oleran . FIR iden ifies hese changes in redundancy
+ o aid wi h iden ifying func ions a increased risk, helping
+opera ors o de ermine nex wors failures and ake mi iga-
+ ion s eps o reduce he risks of addi ional failures, if pos-
+sible. FIR, coupled wi h DE, draws a crisp dis inc ion be-
+ ween failed, ha is, broken componen s, from componen s
+and func ions los or affec ed by he failure of a compo-
+nen . The dis inc ion is cri ical o mos effec ively ake ac-
+ ions o con inue safe fligh while planning he res ora ion of
+capabili y hrough reconfigura ion or in-fligh repairs. Fig-
+ure 2 (bo om) shows par of he propulsion sys em TEAMS
+faul model, wi h wo independen con rol flows ensuring
+ he main MAIN engine func ions. The loss of a single ’s ring’
+leads o reduc ion in capabili y, while he loss of bo h s rings
+leads o loss of redundancy. The de ails of how he TEAMS
+model and faul s are evalua ed o de ermine loss of capabil-
+i y or redundancy are described in (Aaseng e al. 2015); for
+our purposes, i is enough o know ha he VSM receives
+ his informa ion from FIR.
 
 
 
@@ -1004,7 +1004,7 @@ RPC1A PDE_1A
 
 
 
-RPC Switch Line
+RPC Swi ch Line
 
 
 
@@ -1016,17 +1016,17 @@ MAIN
 
 
 
-Permanent Fault: no recovery
+Permanen Faul : no recovery
 
 
 
-Transient Fault: temporary loss 
+Transien Faul : emporary loss 
 of PDE card
 
 
 
-Loss of OMSe capability 
-requires loss of both PDE 
+Loss of OMSe capabili y 
+requires loss of bo h PDE 
 
 
 
@@ -1040,8 +1040,8 @@ Supply
 
 
 Power
-Distribution
-Unit (RPC)
+Dis ribu ion
+Uni (RPC)
 
 
 
@@ -1057,102 +1057,98 @@ PDU_RPC_POWER
 
 
 
-PUMP_ROTATION FAIL Test
-PASS Test
+PUMP_ROTATION FAIL Tes 
+PASS Tes 
 
 
 
-Exonerate Power Supply
-Exonerate Power Distribution
+Exonera e Power Supply
+Exonera e Power Dis ribu ion
 
 
 
-Must be Pump 
+Mus be Pump 
 Mechanical Failure!
 
 
 
-Figure 2: TEAMS models used for fault detection. Top: simple TEAMS model and tests. Middle: TEAMS Diagnostic Matrix
-and evaluation of a single set of test results. Bottom: simple TEAMS model of the propulsion system showing multiple paths
-of capability to the main engine.
+Figure 2: TEAMS models used for faul de ec ion. Top: simple TEAMS model and es s. Middle: TEAMS Diagnos ic Ma rix
+and evalua ion of a single se of es resul s. Bo om: simple TEAMS model of he propulsion sys em showing mul iple pa hs
+of capabili y o he main engine.
 
 
 
-3.3 Execution
-The plan is executed by the Plan Execution and Inter-
-change Language (PLEXIL), developed as a collaborative
-effort by NASA and Carnegie Mellon University, and sub-
-sequently released as open-source software (Verma et al.
-2006). PLEXIL is a language for representing flexible robust
-plans intended to be executed in an uncertain and changing
-environment. PLEXIL provides well defined execution se-
-mantics with contingency handling which can be formally
-validated and produces deterministic results given the same
-sequence of environmental inputs. PLEXIL’s Execution En-
-gine (executive) executes stored plans written in the PLEXIL
-language. PLEXIL is responsible for receiving tasks to exe-
-cute from M3, and returning task execution status to M3.
+3.3 Execu ion
+The plan is execu ed by he Plan Execu ion and In er-
+change Language (PLEXIL), developed as a collabora ive
+effor by NASA and Carnegie Mellon Universi y, and sub-
+sequen ly released as open-source sof ware (Verma e al.
+2006). PLEXIL is a language for represen ing flexible robus 
+plans in ended o be execu ed in an uncer ain and changing
+environmen . PLEXIL provides well defined execu ion se-
+man ics wi h con ingency handling which can be formally
+valida ed and produces de erminis ic resul s given he same
+sequence of environmen al inpu s. PLEXIL’s Execu ion En-
+gine (execu ive) execu es s ored plans wri en in he PLEXIL
+language. PLEXIL is responsible for receiving asks o exe-
+cu e from M3, and re urning ask execu ion s a us o M3.
 
 
 
-For the purposes of the VSM, PLEXIL’s job is to execute
-the fault recovery plan tasks. PLEXIL always ’succeeds’ in
-these tasks; the DE message indicates whether the fault per-
-sists or not after the task is completed.
+For he purposes of he VSM, PLEXIL’s job is o execu e
+ he faul recovery plan asks. PLEXIL always ’succeeds’ in
+ hese asks; he DE message indica es whe her he faul per-
+sis s or no af er he ask is comple ed.
 
 
 
 3.4 M3
-The responsibility of the Mission Management and Metarea-
-soning (M3) module is to integrate fault management, plan-
-ning and plan execution. M3 is responsible for tracking the
-execution of each task in the plan, by sending the tasks to
-PLEXIL, and listening to the return status. M3 is also re-
-sponsible for listening for DE and FIR messages, which in-
+The responsibili y of he Mission Managemen and Me area-
+soning (M3) module is o in egra e faul managemen , plan-
+ning and plan execu ion. M3 is responsible for racking he
+execu ion of each ask in he plan, by sending he asks o
+PLEXIL, and lis ening o he re urn s a us. M3 is also re-
+sponsible for lis ening for DE and FIR messages, which in-
 
 
 
-dicate the presence of faults, and the need to replan. Finally,
-M3 is responsible for setting up the planning problem to
-solve. The overall architecture of M3 is shown in Figure 3.
+dica e he presence of faul s, and he need o replan. Finally,
+M3 is responsible for se ing up he planning problem o
+solve. The overall archi ec ure of M3 is shown in Figure 3.
 
 
 
-M3’s job is complicated by the combinations of faults that
-can occur, whether those faults are transient or permanent,
-and the history of previously executed events that can in-
-fluence replanning. Each fault-mode is mapped to a unique
-fault recovery task. As described previously, M3 can rely on
-DE messages to indicate the presence of a unique fault. but
-whether a fault is transient or permanent requires executing
-the fault recovery task. Fault recovery planning is ‘trivial’
-(e.g. look up RPC open-close plan in response to DE mes-
-sage with RPC fault; this simple plan has no conflicts with
-any other tasks in plan, and can execute immediately.) How-
-ever, M3 needs to keep track of whether the recovery plan
-resolves the fault or not by monitoring DE messages after
-execution completes. M3 also needs to keep track of how
-many recovery attempts have been tried.
+M3’s job is complica ed by he combina ions of faul s ha 
+can occur, whe her hose faul s are ransien or permanen ,
+and he his ory of previously execu ed even s ha can in-
+fluence replanning. Each faul -mode is mapped o a unique
+faul recovery ask. As described previously, M3 can rely on
+DE messages o indica e he presence of a unique faul . bu 
+whe her a faul is ransien or permanen requires execu ing
+ he faul recovery ask. Faul recovery planning is ‘ rivial’
+(e.g. look up RPC open-close plan in response o DE mes-
+sage wi h RPC faul ; his simple plan has no conflic s wi h
+any o her asks in plan, and can execu e immedia ely.) How-
+ever, M3 needs o keep rack of whe her he recovery plan
+resolves he faul or no by moni oring DE messages af er
+execu ion comple es. M3 also needs o keep rack of how
+many recovery a emp s have been ried.
 
 
 
-Replanning after loss of capability requires solving the
-MILP after setting up initial state and constraints, which in
-turn depends on both parsing the FIR messages, and preserv-
-ing execution history of previous events.
+Replanning af er loss of capabili y requires solving he
+MILP af er se ing up ini ial s a e and cons rain s, which in
+ urn depends on bo h parsing he FIR messages, and preserv-
+ing execu ion his ory of previous even s.
 
 
 
-We now describe each of these responsibilities of M3 in
-more detail.
+We now describe each of hese responsibili ies of M3 in
+more de ail.
 
 
 
-DE message handling and detection of transient fault:
-
-
-
-
+DE message handling and de ec ion of ransien faul :
 
 
 
@@ -1160,100 +1156,104 @@ DE message handling and detection of transient fault:
 
 
 
-when any fault is detected, we first assume that it is transient
-and try to fix it. This is done by invoking the planner to
-ask for a “fault-fixing” plan Pf to be sent to PLEXIL M3
-then waits for a response from PLEXIL indicating this
-plan executed successfully. After PLEXIL executes Pf ,
-M3 listens to DE’s messages for certain period of time T
-to ensure that the fix’s effect is fully realized. If the DE’s
-messages indicate that the fault is not observed after the
-fixing action, then we know that it’s not permanent and
-can stop the process. As noted above, M3 keeps track of
-the number of recovery attempts, and when a fault can’t be
-resolved within the number of tries specified, the fault is
-considered permanent.
 
 
 
-FIR message handling and permanent faults: in this
-stage, M3 goes through the following steps: First, M3 lis-
-tens to FIR’s messages for certain period of time S to ensure
-that the FIR message content stabilizes. This is necessary be-
-cause the prior attempts to fix the fault may require time to
-settle out. Next, M3 accumulates system information from
-different components such as telemetry and FIR. In our sce-
-narios, M3 must map consequences in FIR to constraints on
-a new planning problem. The simple case is that a FIR con-
-sequence does not lead to replanning at all, e.g. if there is
-only loss of redundancy to the MAIN there is no need to
-replan. In general, though, we would map every loss of ca-
-pability or loss of redundancy option to a decision to replan
-or not. This step also includes determining whether or not
-MAIN Htr Deact has started by examining the history
-of executed tasks. Next, it sends the gathered system infor-
-mation to the planner in the form of a new initial state and
-constraints, to build the burn-replanning problem and wait
-for the planner to return a plan P .
+
+when any faul is de ec ed, we firs assume ha i is ransien 
+and ry o fix i . This is done by invoking he planner o
+ask for a “faul -fixing” plan Pf o be sen o PLEXIL M3
+ hen wai s for a response from PLEXIL indica ing his
+plan execu ed successfully. Af er PLEXIL execu es Pf ,
+M3 lis ens o DE’s messages for cer ain period of ime T
+ o ensure ha he fix’s effec is fully realized. If he DE’s
+messages indica e ha he faul is no observed af er he
+fixing ac ion, hen we know ha i ’s no permanen and
+can s op he process. As no ed above, M3 keeps rack of
+ he number of recovery a emp s, and when a faul can’ be
+resolved wi hin he number of ries specified, he faul is
+considered permanen .
 
 
 
-Referring to Section 3.1, M3 maps a FIR impact
-LOR(MAIN) to update the temporal constraint on tES , tTIG
+FIR message handling and permanen faul s: in his
+s age, M3 goes hrough he following s eps: Firs , M3 lis-
+ ens o FIR’s messages for cer ain period of ime S o ensure
+ ha he FIR message con en s abilizes. This is necessary be-
+cause he prior a emp s o fix he faul may require ime o
+se le ou . Nex , M3 accumula es sys em informa ion from
+differen componen s such as eleme ry and FIR. In our sce-
+narios, M3 mus map consequences in FIR o cons rain s on
+a new planning problem. The simple case is ha a FIR con-
+sequence does no lead o replanning a all, e.g. if here is
+only loss of redundancy o he MAIN here is no need o
+replan. In general, hough, we would map every loss of ca-
+pabili y or loss of redundancy op ion o a decision o replan
+or no . This s ep also includes de ermining whe her or no 
+MAIN H r Deac has s ar ed by examining he his ory
+of execu ed asks. Nex , i sends he ga hered sys em infor-
+ma ion o he planner in he form of a new ini ial s a e and
+cons rain s, o build he burn-replanning problem and wai 
+for he planner o re urn a plan P .
 
 
 
-from tES = tTIG + 4 to tES = tTIG + 60. M3 can also in-
-ternally track variables ex,s and ex,e indicating that task x
-has started or finished, and conditionally set bx = 0 if MAIN
-Htr Deact has not started.
+Referring o Sec ion 3.1, M3 maps a FIR impac 
+LOR(MAIN) o upda e he emporal cons rain on ES , TIG
 
 
 
-M3 design Notes: Fault-fixing plans are pre-determined
-for each fault-mode, and don’t conflict with any other ac-
-tions in the plan,and thus we do not need the planner to
-reason about finding such plans. To keep M3 simple, M3
-invokes the planner and pass the plan to PLEXIL for exe-
-cution. We could have had PLEXIL listen to DE messages
-with a conditional execution loop to try 3 times, but to cen-
-tralize all fault management message handling inside M3,
-we chose to keep PLEXIL plans simple. An interesting is-
-sue that arises when transient faults occur: it is possible for
-a FIR message to indicate loss of redundancy if both control
-paths are impacted by faults, even if one of (or both!) are
-transient faults. Since neither DE nor FIR are able to detect
-transient faults, premature inspection of FIR messages could
-lead VSM to believe replanning is needed. M3 needs to flag
-faults as permanent and wait for fault recovery impacts to
-settle prior to handling FIR messages.
+from ES = TIG + 4 o ES = TIG + 60. M3 can also in-
+ ernally rack variables ex,s and ex,e indica ing ha ask x
+has s ar ed or finished, and condi ionally se bx = 0 if MAIN
+H r Deac has no s ar ed.
 
 
 
-M3 state machine/controller behavior
-Replanning post burn downmode
+M3 design No es: Faul -fixing plans are pre-de ermined
+for each faul -mode, and don’ conflic wi h any o her ac-
+ ions in he plan,and hus we do no need he planner o
+reason abou finding such plans. To keep M3 simple, M3
+invokes he planner and pass he plan o PLEXIL for exe-
+cu ion. We could have had PLEXIL lis en o DE messages
+wi h a condi ional execu ion loop o ry 3 imes, bu o cen-
+ ralize all faul managemen message handling inside M3,
+we chose o keep PLEXIL plans simple. An in eres ing is-
+sue ha arises when ransien faul s occur: i is possible for
+a FIR message o indica e loss of redundancy if bo h con rol
+pa hs are impac ed by faul s, even if one of (or bo h!) are
+ ransien faul s. Since nei her DE nor FIR are able o de ec 
+ ransien faul s, prema ure inspec ion of FIR messages could
+lead VSM o believe replanning is needed. M3 needs o flag
+faul s as permanen and wai for faul recovery impac s o
+se le prior o handling FIR messages.
+
+
+
+M3 s a e machine/con roller behavior
+Replanning pos burn downmode
 
 
 
 Plan
-Actions
+Ac ions
 
 
 
-Left
+Lef 
 Need Plan
 
 
 
-Initiate PLEXIL,
+Ini ia e PLEXIL,
 Commence
-execution
+execu ion
 
 
 
-New Fault 
-/ Impacts
-detected
+New Faul 
+/ Impac s
+de ec ed
 
 
 
@@ -1270,11 +1270,11 @@ PLEXIL
 
 
 PLEXIL 
-Plan Status
+Plan S a us
 
 
 
-Non-empty
+Non-emp y
 plan
 
 
@@ -1283,13 +1283,13 @@ New Plan
 
 
 
-Track PCA Heater state,
-attempted fault recovery,
+Track PCA Hea er s a e,
+a emp ed faul recovery,
 
 
 
-state of fault recovery,
-burn duration,
+s a e of faul recovery,
+burn dura ion,
 
 
 
@@ -1297,17 +1297,17 @@ DFTO preferences
 
 
 
-Executing 
-Plan Action
+Execu ing 
+Plan Ac ion
 
 
 
 Plan
-Completed
+Comple ed
 
 
 
-Request 
+Reques 
 Plan
 
 
@@ -1317,17 +1317,17 @@ ACAWS_FIR
 
 
 
-Based on fault/impacts,
-timeline,
+Based on faul /impac s,
+ imeline,
 
 
 
-flight rules
+fligh rules
 
 
 
 New 
-Information
+Informa ion
 
 
 
@@ -1340,7 +1340,7 @@ plan
 
 
 
-empty
+emp y
 plan
 
 
@@ -1349,56 +1349,56 @@ Figure 3: M3 Logic: Burn Replanning
 
 
 
-4 How It Works
-We evaluated the VSM on all of the scenarios described in
-Section 1. The VSM correctly detected transient vs perma-
-nent faults, and generated the correct plans in all cases.
+4 How I Works
+We evalua ed he VSM on all of he scenarios described in
+Sec ion 1. The VSM correc ly de ec ed ransien vs perma-
+nen faul s, and genera ed he correc plans in all cases.
 
 
 
-Figure 4 shows an example of how the VSM replans
-when the burn down-mode occurs early, i.e. before TIG-20.
-At the top of this figure, we show the original burn plan,
-with the TIG time fixed, and the short 4 minute burn us-
-ing the MAIN engine. The top of the figure also shows the
-fixed 70m DSN window, and the fixed window during which
-DFTO-3 can take place. When the burn downmode is de-
-tected early, which requires both permanent propulsion sys-
-tem faults to have occurred and been detected, the planner
-replans the burn, dropping the MAIN Htr Deact task,
-and also shifting the first thermal excursion window. This
-forces a shift of the later thermal excursion window, which
-forces a choice of which preference to satisfy. We also as-
-sume for this figure that preserving the order DFTO-1,
-DFTO-2 is more important, than DFTO-1 DSN coverage.
-Thus, the final plan preserves this ordering of the DFTOs,
-moving DFTO-1 out of the DSN window; finally, we see
-the DFTO-1-Downlink task dropped from the final plan.
-Space precludes showing the other plans, but the VSM suc-
+Figure 4 shows an example of how he VSM replans
+when he burn down-mode occurs early, i.e. before TIG-20.
+A he op of his figure, we show he original burn plan,
+wi h he TIG ime fixed, and he shor 4 minu e burn us-
+ing he MAIN engine. The op of he figure also shows he
+fixed 70m DSN window, and he fixed window during which
+DFTO-3 can ake place. When he burn downmode is de-
+ ec ed early, which requires bo h permanen propulsion sys-
+ em faul s o have occurred and been de ec ed, he planner
+replans he burn, dropping he MAIN H r Deac ask,
+and also shif ing he firs hermal excursion window. This
+forces a shif of he la er hermal excursion window, which
+forces a choice of which preference o sa isfy. We also as-
+sume for his figure ha preserving he order DFTO-1,
+DFTO-2 is more impor an , han DFTO-1 DSN coverage.
+Thus, he final plan preserves his ordering of he DFTOs,
+moving DFTO-1 ou of he DSN window; finally, we see
+ he DFTO-1-Downlink ask dropped from he final plan.
+Space precludes showing he o her plans, bu he VSM suc-
 cessfully replanned in all 7 scenarios.
 
 
 
 5 Previous Work
-Previous work in the area of intelligent systems often in-
-cludes combinations of planning, execution and fault man-
-agement, but usually not all three. The Autonomous Sci-
-encecraft Experiment (ASE) from JPL (Tran et al. 2004),
-(Sherwood et al. 1998) demonstrated automated planning
-for a low-earth orbiting remote sensing satellite. This plan-
-ner focused on optimizing science, and did not incorpo-
-rate fault management. The T-Rex autonomous agent (Mc-
-Gann et al. 2008), used in undersea robotics, incorporated
-numerous special-purpose planners for path planning, task
-planning, tightly integrated with an execution system; this
-fielded agent also did not incorporate fault management.
+Previous work in he area of in elligen sys ems of en in-
+cludes combina ions of planning, execu ion and faul man-
+agemen , bu usually no all hree. The Au onomous Sci-
+encecraf Experimen (ASE) from JPL (Tran e al. 2004),
+(Sherwood e al. 1998) demons ra ed au oma ed planning
+for a low-ear h orbi ing remo e sensing sa elli e. This plan-
+ner focused on op imizing science, and did no incorpo-
+ra e faul managemen . The T-Rex au onomous agen (Mc-
+Gann e al. 2008), used in undersea robo ics, incorpora ed
+numerous special-purpose planners for pa h planning, ask
+planning, igh ly in egra ed wi h an execu ion sys em; his
+fielded agen also did no incorpora e faul managemen .
 
 
 
-One exception to this rule is the seminal paper on the Re-
-mote Agent (Jónsson et al. 1999) describes the first in-space
-autonomous agent employing AI techniques. The Remote
-Agent included a planner, executive, fault management, and
+One excep ion o his rule is he seminal paper on he Re-
+mo e Agen (Jónsson e al. 1999) describes he firs in-space
+au onomous agen employing AI echniques. The Remo e
+Agen included a planner, execu ive, faul managemen , and
 
 
 
@@ -1477,12 +1477,12 @@ Thermal Excursion
 
 
 
-MAIN Htr Deact
+MAIN H r Deac 
 1 hr 20 + B
 
 
 
-Data Recording / Downlinking
+Da a Recording / Downlinking
 20 mins + B
 
 
@@ -1516,7 +1516,7 @@ Pressure
 
 
 
-MAIN Htr Deact
+MAIN H r Deac 
 1 hr 20 +B
 
 
@@ -1558,7 +1558,7 @@ Thermal Excursion
 
 
 
-Data Recording / Downlinking
+Da a Recording / Downlinking
 20 mins + B
 
 
@@ -1595,98 +1595,98 @@ Burn
 
 
 DFTO1,2 precedence 
-more important than 
+more impor an han 
 DFTO-1 70M DSN coverage
 
 
 
-(B is burn duration
-Ranging Not Shown)
+(B is burn dura ion
+Ranging No Shown)
 
 
 
-Figure 4: VSM Replanning when downmode detected early
+Figure 4: VSM Replanning when downmode de ec ed early
 
 
 
-Mission Manager. A second partial exception is MEXEC
-(Troesch et al. 2020), a planner/execution system evaluated
-for future deep space missions on the ASTERIA Cubesat
-mission, was integrated with fault management, but only to
-the extent that execution would terminate and clear the cur-
-rent plan in the event of a fault.
+Mission Manager. A second par ial excep ion is MEXEC
+(Troesch e al. 2020), a planner/execu ion sys em evalua ed
+for fu ure deep space missions on he ASTERIA Cubesa 
+mission, was in egra ed wi h faul managemen , bu only o
+ he ex en ha execu ion would ermina e and clear he cur-
+ren plan in he even of a faul .
 
 
 
-Our previous work in testing a VSM for human space-
-flight (Aaseng et al. 2018) also demonstrated the integration
-of planning, execution and fault management, integrated via
-CFS. In one scenario, the planner performed load-shed in the
-presence of a power systems fault that limited energy avail-
-ability in an eclipse, with some modest constraints coupling
-pairs of loads. In a second scenario, the planner reasoned
-about faults in one part of the life support system that led to
-shutting down other parts of the life support system. In our
-previous work, PLEXIL was responsible for integrating the
-planner and DE, but did not use information from FIR.
+Our previous work in es ing a VSM for human space-
+fligh (Aaseng e al. 2018) also demons ra ed he in egra ion
+of planning, execu ion and faul managemen , in egra ed via
+CFS. In one scenario, he planner performed load-shed in he
+presence of a power sys ems faul ha limi ed energy avail-
+abili y in an eclipse, wi h some modes cons rain s coupling
+pairs of loads. In a second scenario, he planner reasoned
+abou faul s in one par of he life suppor sys em ha led o
+shu ing down o her par s of he life suppor sys em. In our
+previous work, PLEXIL was responsible for in egra ing he
+planner and DE, bu did no use informa ion from FIR.
 
 
 
-6 Conclusion & Future Work
-We describe a prototype Vehicle System Manager (VSM) for
-NASA’s Gateway, a human-capable spacecraft that will also
-be capable of autonomous operations. This VSM consists
-of an MILP-based replanner, TEAMS-based fault manage-
-ment, and PLEXIL as an executive, integrated via a single
-over-arching M3. We show the VSM is capable of detecting
-and replanning in the presence of different failure scenar-
-ios centered on a propulsive burn down-mode, which alters
-the timing of key activities. These scenarios feature transient
+6 Conclusion & Fu ure Work
+We describe a pro o ype Vehicle Sys em Manager (VSM) for
+NASA’s Ga eway, a human-capable spacecraf ha will also
+be capable of au onomous opera ions. This VSM consis s
+of an MILP-based replanner, TEAMS-based faul manage-
+men , and PLEXIL as an execu ive, in egra ed via a single
+over-arching M3. We show he VSM is capable of de ec ing
+and replanning in he presence of differen failure scenar-
+ios cen ered on a propulsive burn down-mode, which al ers
+ he iming of key ac ivi ies. These scenarios fea ure ransien 
 
 
 
-and permanent failures, detection of loss of capability, and
-preferences and complex temporal constraints on plans.
+and permanen failures, de ec ion of loss of capabili y, and
+preferences and complex emporal cons rain s on plans.
 
 
 
-We have demonstrated replanning of an existing plan fea-
-turing temporal constraints and preferences in the presence
-of faults. Obvious extensions to this include larger plan-
-ning problems with more difficult features such as resources,
+We have demons ra ed replanning of an exis ing plan fea-
+ uring emporal cons rain s and preferences in he presence
+of faul s. Obvious ex ensions o his include larger plan-
+ning problems wi h more difficul fea ures such as resources,
 goals and de-novo causal reasoning.
 
 
 
-We note that FIR can identify loss of redundancy as well
-as loss of capability. In more sophisticated scenarios, M3
-could implement a burn-downmode when the MAIN has lost
-redundancy, and is zero fault tolerant, as opposed to lost.
+We no e ha FIR can iden ify loss of redundancy as well
+as loss of capabili y. In more sophis ica ed scenarios, M3
+could implemen a burn-downmode when he MAIN has los 
+redundancy, and is zero faul oleran , as opposed o los .
 
 
 
-We don’t have a ’declarative’ representation of M3 to rep-
-resent the key design features we describe, such as the DE-
-plan fault recovery mapping, FIR-planner invocation, num-
-ber of attempts prior to declaring a fault permanent, and so
-on. Codifying the configuration of M3 in a fully declarative
-way would formalize its function and enable more sophisti-
-cated behaviors to be specified in a more model-based way.
+We don’ have a ’declara ive’ represen a ion of M3 o rep-
+resen he key design fea ures we describe, such as he DE-
+plan faul recovery mapping, FIR-planner invoca ion, num-
+ber of a emp s prior o declaring a faul permanen , and so
+on. Codifying he configura ion of M3 in a fully declara ive
+way would formalize i s func ion and enable more sophis i-
+ca ed behaviors o be specified in a more model-based way.
 
 
 
-We would like to thank our Johnson Space Center friends
-in the Flight Operations Directorate, in particular David
-Lantz, for all their help in scoping the scenario in order to
-mature the VSM, and the Gateway program and the NASA
-Advanced Exploration System Program for all of their sup-
-port for this work.
+We would like o hank our Johnson Space Cen er friends
+in he Fligh Opera ions Direc ora e, in par icular David
+Lan z, for all heir help in scoping he scenario in order o
+ma ure he VSM, and he Ga eway program and he NASA
+Advanced Explora ion Sys em Program for all of heir sup-
+por for his work.
 
 
 
 References
 Aaseng, G.; Barszcz, E.; Valdez, H.; and Moses, H. 2015.
-Scaling Up Model-Based Diagnostic and Fault Effects Rea-
+Scaling Up Model-Based Diagnos ic and Faul Effec s Rea-
 
 
 
@@ -1698,57 +1698,57 @@ Scaling Up Model-Based Diagnostic and Fault Effects Rea-
 
 
 
-soning for Spacecraft. In Proceedings of the AIAA Confer-
-ence on Space Operations.
-Aaseng, G.; Frank, J.; Iatauro, M.; Knight, C.; Levinson,
-R.; Ossenfort, J.; Scott, M.; Sweet, A.; Csank, J.; Soeder,
+soning for Spacecraf . In Proceedings of he AIAA Confer-
+ence on Space Opera ions.
+Aaseng, G.; Frank, J.; Ia auro, M.; Knigh , C.; Levinson,
+R.; Ossenfor , J.; Sco , M.; Swee , A.; Csank, J.; Soeder,
 J.; Loveless, A.; Carrejo, D.; Ngo, T.; and Greenwood., Z.
-2018. Development and Testing of a Vehicle Management
-System for Autonomous Spacecraft Habitat Operations. In
-Proceedings of the AIAA Conference on Space Operations.
-Badger, J.; Strawser, P.; and Claunch, C. 2019. A Distributed
-Hierarchical Framework for Autonomous Spacecraft Con-
-trol. In Proceedings of the IEEE Aerospace Conference.
-Crusan, J. C.; Smith, R. M.; Craig, D. A.; Caram, J. M.;
-Guidi, J.; Gates, M.; Krezel, J. M.; and Herrmann, N. 2018.
-Deep Space Gateway Concept: Extending Human Presence
-into Cislunar Space. In Proceedings of the IEEE Aerospace
+2018. Developmen and Tes ing of a Vehicle Managemen 
+Sys em for Au onomous Spacecraf Habi a Opera ions. In
+Proceedings of he AIAA Conference on Space Opera ions.
+Badger, J.; S rawser, P.; and Claunch, C. 2019. A Dis ribu ed
+Hierarchical Framework for Au onomous Spacecraf Con-
+ rol. In Proceedings of he IEEE Aerospace Conference.
+Crusan, J. C.; Smi h, R. M.; Craig, D. A.; Caram, J. M.;
+Guidi, J.; Ga es, M.; Krezel, J. M.; and Herrmann, N. 2018.
+Deep Space Ga eway Concep : Ex ending Human Presence
+in o Cislunar Space. In Proceedings of he IEEE Aerospace
 Conference.
-Jónsson, A. K.; Morris, P. H.; Muscettola, N.; and Rajan,
-K. 1999. Next Generation Remote Agent Planner. In Pro-
-ceedings of the Fifth International Symposium on Artificial
-Intelligence, Robotics and Automation in Space.
-Mathur, A.; Deb, S.; and Pattipati, K. 1998. Modeling and
-Real-Time Diagnostics in TEAMS-RT. In Proceedings of
-the American Control Conference.
-McComas, D.; Wilmot, J.; and Cudmore, A. 2016. The Core
-Flight System (cFS) Community: Providing Low Cost Solu-
-tions for Small Spacecraft. In Proceedings of the 30th AIAA
-/USU Conference on Small Satellites.
-McGann, C.; Py, F.; Rajan, K.; Thomas, H.; Henthorn, R.;
-and McEwan, R. 2008. A Deliberative Architecture for AUV
-Control. In Proceedings of the International Conference on
-Robotics and Automation.
-NASA. 2018. Spaceflight Demonstration of a Power
-and Propulsion Element (PPE). https://www.fbo.gov/spg/
-NASA/GRC/OPDC20220/80GRC018R0005/listing.html.
-See Amendment 6: Unique Requirements.
+Jónsson, A. K.; Morris, P. H.; Musce ola, N.; and Rajan,
+K. 1999. Nex Genera ion Remo e Agen Planner. In Pro-
+ceedings of he Fif h In erna ional Symposium on Ar ificial
+In elligence, Robo ics and Au oma ion in Space.
+Ma hur, A.; Deb, S.; and Pa ipa i, K. 1998. Modeling and
+Real-Time Diagnos ics in TEAMS-RT. In Proceedings of
+ he American Con rol Conference.
+McComas, D.; Wilmo , J.; and Cudmore, A. 2016. The Core
+Fligh Sys em (cFS) Communi y: Providing Low Cos Solu-
+ ions for Small Spacecraf . In Proceedings of he 30 h AIAA
+/USU Conference on Small Sa elli es.
+McGann, C.; Py, F.; Rajan, K.; Thomas, H.; Hen horn, R.;
+and McEwan, R. 2008. A Delibera ive Archi ec ure for AUV
+Con rol. In Proceedings of he In erna ional Conference on
+Robo ics and Au oma ion.
+NASA. 2018. Spacefligh Demons ra ion of a Power
+and Propulsion Elemen (PPE). h ps://www.fbo.gov/spg/
+NASA/GRC/OPDC20220/80GRC018R0005/lis ing.h ml.
+See Amendmen 6: Unique Requiremen s.
 Sherwood, R.; Govindjee, A.; Yan, D.; Rabideau, G.; Chien,
-S.; and and, A. F. 1998. Using ASPEN to Automate EO-1
-Activity Planning. In Proceedings of the IEEE Aerospace
+S.; and and, A. F. 1998. Using ASPEN o Au oma e EO-1
+Ac ivi y Planning. In Proceedings of he IEEE Aerospace
 Conference.
-Tran, D.; Chien, S.; Sherwood, R.; Castaño, R.; Cichy, B.;
-Davies, A.; and Rabbideau, G. 2004. The Autonomous Sci-
-encecraft Experiment Onboard the EO-1 Spacecraft. In Pro-
-ceedings of the 19th National Conference on Artificial Intel-
+Tran, D.; Chien, S.; Sherwood, R.; Cas año, R.; Cichy, B.;
+Davies, A.; and Rabbideau, G. 2004. The Au onomous Sci-
+encecraf Experimen Onboard he EO-1 Spacecraf . In Pro-
+ceedings of he 19 h Na ional Conference on Ar ificial In el-
 ligence, 1040 – 1045.
-Troesch, M.; Mirza, F.; Hughes, K.; Rothstein-Dowden, A.;
-Bocchino, R.; Donner, A.; Feather, M.; Smith, B.; Fesq, L.;
+Troesch, M.; Mirza, F.; Hughes, K.; Ro hs ein-Dowden, A.;
+Bocchino, R.; Donner, A.; Fea her, M.; Smi h, B.; Fesq, L.;
 Barker, B.; and Campuzano, B. 2020. MEXEC: An Onboard
-Integrated Planning and Execution Approach for Spacecraft
-Commanding. In Proceedings of the Workshop on Integrated
-Execution and Goal Reasoning (InTEX/GR).
-Verma, V.; Jónsson, A.; Pasareanu, C.; and Iatauro, M. 2006.
-Universal Executive and PLEXIL: Engine and Language for
-Robust Spacecraft Control and Operations. In Proceedings
-of the AIAA Space Conference.
+In egra ed Planning and Execu ion Approach for Spacecraf 
+Commanding. In Proceedings of he Workshop on In egra ed
+Execu ion and Goal Reasoning (InTEX/GR).
+Verma, V.; Jónsson, A.; Pasareanu, C.; and Ia auro, M. 2006.
+Universal Execu ive and PLEXIL: Engine and Language for
+Robus Spacecraf Con rol and Opera ions. In Proceedings
+of he AIAA Space Conference.

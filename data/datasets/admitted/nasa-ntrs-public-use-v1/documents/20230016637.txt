@@ -1,75 +1,75 @@
-Validation of the HyperSolve CFD Solver for Entry Descent and
-Landing Applications
+Valida ion of he HyperSolve CFD Solver for En ry Descen and
+Landing Applica ions
 
 
 
-Kyle B. Thompson∗ , Matthew D. O’Connell† , Andrew D. Hinkle‡ , and Clark C. Pederson§
+Kyle B. Thompson∗ , Ma hew D. O’Connell† , Andrew D. Hinkle‡ , and Clark C. Pederson§
 
 
 
-NASA Langley Research Center,
-Hampton, VA 23681, USA
+NASA Langley Research Cen er,
+Hamp on, VA 23681, USA
 
 
 
-The functional equivalence of the HyperSolve unstructured edge-based, finite-volume
-computational fluid dynamics code to the Langley Aerothermodynamic Upwind Relaxation
-Algorithm multiblock structured grid code is documented for applications of interest to the Entry,
-Descent, and Landing community. A suite of cases using a range of thermochemical gas models
-on relevant vehicle configurations were analyzed with both codes and the results compared. A
-tolerance of ±4% difference in surface pressure and surface heat flux from a benchmark LAURA
-solution was used as the criterion for functional equivalence, and comparisons of flowfield
-quantities are also included to verify that the thermochemical nonequilibrium capabilities in
-HyperSolve match those of the LAURA code. In general, HyperSolve predictions for surface
-pressure and surface heat flux are in close agreement with those predicted by LAURA.
+The func ional equivalence of he HyperSolve uns ruc ured edge-based, fini e-volume
+compu a ional fluid dynamics code o he Langley Aero hermodynamic Upwind Relaxa ion
+Algori hm mul iblock s ruc ured grid code is documen ed for applica ions of in eres o he En ry,
+Descen , and Landing communi y. A sui e of cases using a range of hermochemical gas models
+on relevan vehicle configura ions were analyzed wi h bo h codes and he resul s compared. A
+ olerance of ±4% difference in surface pressure and surface hea flux from a benchmark LAURA
+solu ion was used as he cri erion for func ional equivalence, and comparisons of flowfield
+quan i ies are also included o verify ha he hermochemical nonequilibrium capabili ies in
+HyperSolve ma ch hose of he LAURA code. In general, HyperSolve predic ions for surface
+pressure and surface hea flux are in close agreemen wi h hose predic ed by LAURA.
 
 
 
-I. Introduction
-Using computational fluid dynamics (CFD) to predict surface heat transfer rates and pressure has become a common
+I. In roduc ion
+Using compu a ional fluid dynamics (CFD) o predic surface hea ransfer ra es and pressure has become a common
 
 
 
-practice, particularly for vehicles operating in the hypersonic flow regime. Recently, a series of novel edge-based,
-finite-volume techniques implemented in the HyperSolve CFD code were shown to be effective at achieving accurate
-surface heat transfer predictions over a hemisphere on simplex-element meshes when combined with a mesh adaptation
-technique [1]. While this ability to accurately predict surface heat transfer on simplex meshes is a highly enabling and
-sought after capability [2–4], these techniques were demonstrated using an ideal gas assumption that is typically not
-suitable for the hypersonic flow regime where high-energy physics modeling is required. To employ the HyperSolve CFD
-code to aerothermal analysis for Entry, Descent and Landing (EDL) applications, the code has been extended to support
-thermochemical nonequilibrium modeling with similar functional equivalence to the Langley Aerothermodynamic
-Upwind Relaxation Algorithm (LAURA) multiblock structured finite-volume reacting flow solver [5]. This work focuses
-on validating the surface heat flux and pressure predicted by the HyperSolve finite-volume discretization via LAURA
-benchmark predictions for a series of cases with conditions and geometries that are relevant to EDL applications.
+prac ice, par icularly for vehicles opera ing in he hypersonic flow regime. Recen ly, a series of novel edge-based,
+fini e-volume echniques implemen ed in he HyperSolve CFD code were shown o be effec ive a achieving accura e
+surface hea ransfer predic ions over a hemisphere on simplex-elemen meshes when combined wi h a mesh adap a ion
+ echnique [1]. While his abili y o accura ely predic surface hea ransfer on simplex meshes is a highly enabling and
+sough af er capabili y [2–4], hese echniques were demons ra ed using an ideal gas assump ion ha is ypically no 
+sui able for he hypersonic flow regime where high-energy physics modeling is required. To employ he HyperSolve CFD
+code o aero hermal analysis for En ry, Descen and Landing (EDL) applica ions, he code has been ex ended o suppor 
+ hermochemical nonequilibrium modeling wi h similar func ional equivalence o he Langley Aero hermodynamic
+Upwind Relaxa ion Algori hm (LAURA) mul iblock s ruc ured fini e-volume reac ing flow solver [5]. This work focuses
+on valida ing he surface hea flux and pressure predic ed by he HyperSolve fini e-volume discre iza ion via LAURA
+benchmark predic ions for a series of cases wi h condi ions and geome ries ha are relevan o EDL applica ions.
 
 
 
-The work is this paper consists of three parts: (1) a description of the HyperSolve and LAURA CFD solvers, (2)
-verification of the correctness of the models and numerical methods implemented in HyperSolve via the Method of
-Manufactured Solutions (MMS), and (3) a functional equivalence test suite, similar to a previous effort involving the
-FUN3D and LAURA codes [6]. The MMS verification tests show that HyperSolve achieves the design order of accuracy,
-which is an important step in building developer confidence in the correctness of the numerical methods and models
-implemented. The functional equivalence tests presented are important for building confidence that HyperSolve is able
-to produce similar results with similar mesh resolution as the flight-validated benchmark solver, LAURA. In general,
-HyperSolve surface pressure and surface heat flux predictions closely match those predicted by LAURA when both
-solvers were run on an identical structured mesh.
+The work is his paper consis s of hree par s: (1) a descrip ion of he HyperSolve and LAURA CFD solvers, (2)
+verifica ion of he correc ness of he models and numerical me hods implemen ed in HyperSolve via he Me hod of
+Manufac ured Solu ions (MMS), and (3) a func ional equivalence es sui e, similar o a previous effor involving he
+FUN3D and LAURA codes [6]. The MMS verifica ion es s show ha HyperSolve achieves he design order of accuracy,
+which is an impor an s ep in building developer confidence in he correc ness of he numerical me hods and models
+implemen ed. The func ional equivalence es s presen ed are impor an for building confidence ha HyperSolve is able
+ o produce similar resul s wi h similar mesh resolu ion as he fligh -valida ed benchmark solver, LAURA. In general,
+HyperSolve surface pressure and surface hea flux predic ions closely ma ch hose predic ed by LAURA when bo h
+solvers were run on an iden ical s ruc ured mesh.
 
 
 
 II. HyperSolve and LAURA CFD Solvers Overview
-HyperSolve is an edge-based, finite-volume Navier-Stokes solver, which is being developed at the NASA Langley
+HyperSolve is an edge-based, fini e-volume Navier-S okes solver, which is being developed a he NASA Langley
 
 
 
-Research Center. Both the inviscid and viscous fluxes are computed at the interfaces of dual control volumes around
-each vertex in the mesh. The inviscid fluxes at interfaces of neighboring control volumes are computed by extrapolating
+Research Cen er. Bo h he inviscid and viscous fluxes are compu ed a he in erfaces of dual con rol volumes around
+each ver ex in he mesh. The inviscid fluxes a in erfaces of neighboring con rol volumes are compu ed by ex rapola ing
 
 
 
-∗Research AST, Aerothermodynamics Branch, Member AIAA.
-†Research AST, Hypersonic Airbreathing Propulsion Branch, Member AIAA.
-‡Research AST, Aerothermodynamics Branch, Member AIAA.
-§Research AST, Aerothermodynamics Branch, Member AIAA.
+∗Research AST, Aero hermodynamics Branch, Member AIAA.
+†Research AST, Hypersonic Airbrea hing Propulsion Branch, Member AIAA.
+‡Research AST, Aero hermodynamics Branch, Member AIAA.
+§Research AST, Aero hermodynamics Branch, Member AIAA.
 
 
 
@@ -85,60 +85,60 @@ each vertex in the mesh. The inviscid fluxes at interfaces of neighboring contro
 
 
 
-the solution variables and flux to the interface location. This extrapolation uses gradients computed by an unweighted,
-linear least-squares technique. The viscous fluxes are computed at the same interface as the inviscid fluxes, using
-a weighted, linear least-squares technique in conjunction with the alpha-damping technique by Nishikawa [7]. Full
-details of the HyperSolve edge-based, finite-volume discretization are described in Ref. [1]. HyperSolve is a fluid solver
-dynamically loadable plugin in the T-infinity ecosystem [8], and uses a Jacobian-free Newton-Krylov (JFNK) method to
-iteratively converge the solution to steady state. This JFNK method is implemented via the Enigma library [9], which
-provides a simplified interface to the PETSc [10] library. In this work, the additive-Schwarz-ILU0 preconditioner with
-level-1 domain overlap is used to right-precondition the GMRES Krylov linear solver in PETSc.
+ he solu ion variables and flux o he in erface loca ion. This ex rapola ion uses gradien s compu ed by an unweigh ed,
+linear leas -squares echnique. The viscous fluxes are compu ed a he same in erface as he inviscid fluxes, using
+a weigh ed, linear leas -squares echnique in conjunc ion wi h he alpha-damping echnique by Nishikawa [7]. Full
+de ails of he HyperSolve edge-based, fini e-volume discre iza ion are described in Ref. [1]. HyperSolve is a fluid solver
+dynamically loadable plugin in he T-infini y ecosys em [8], and uses a Jacobian-free New on-Krylov (JFNK) me hod o
+i era ively converge he solu ion o s eady s a e. This JFNK me hod is implemen ed via he Enigma library [9], which
+provides a simplified in erface o he PETSc [10] library. In his work, he addi ive-Schwarz-ILU0 precondi ioner wi h
+level-1 domain overlap is used o righ -precondi ion he GMRES Krylov linear solver in PETSc.
 
 
 
-The LAURA [11] code has been used for decades as a CFD tool to simulate high-energy, reacting flows. LAURA
-has supported numerous NASA missions, including predicting a static instability in the Mars Pathfinder vehicle [12],
-contributing to code verification with FIRE-II [13], and assisting in the design and analysis of the Orion heatshield [14].
-The code solves the reacting flow equations with support for high-energy physics, including thermal and chemical
-nonequilibrium modeling [15], surface catalysis, and ablation [16]. The Symmetric Total Variation Diminishing (STVD)
-scheme [17] is employed for computing the inviscid flux, with a central scheme employed for the viscous flux. The
-latest release of LAURA, version 5.6, includes many new capabilities for simulating reacting flows, including better
-parallel performance, new options for specifying surface roughness and turbulent transition locations to the suite of
-algebraic turbulence models, and improved spline interpolation techniques [18].
+The LAURA [11] code has been used for decades as a CFD ool o simula e high-energy, reac ing flows. LAURA
+has suppor ed numerous NASA missions, including predic ing a s a ic ins abili y in he Mars Pa hfinder vehicle [12],
+con ribu ing o code verifica ion wi h FIRE-II [13], and assis ing in he design and analysis of he Orion hea shield [14].
+The code solves he reac ing flow equa ions wi h suppor for high-energy physics, including hermal and chemical
+nonequilibrium modeling [15], surface ca alysis, and abla ion [16]. The Symme ric To al Varia ion Diminishing (STVD)
+scheme [17] is employed for compu ing he inviscid flux, wi h a cen ral scheme employed for he viscous flux. The
+la es release of LAURA, version 5.6, includes many new capabili ies for simula ing reac ing flows, including be er
+parallel performance, new op ions for specifying surface roughness and urbulen ransi ion loca ions o he sui e of
+algebraic urbulence models, and improved spline in erpola ion echniques [18].
 
 
 
-III. Verification Tests
-Verification tests are essential to building confidence in a CFD code and serve a complementary role to validation.
+III. Verifica ion Tes s
+Verifica ion es s are essen ial o building confidence in a CFD code and serve a complemen ary role o valida ion.
 
 
 
-Traditional verification tests compare a numerical solution to a known, analytical solution to assess the error. For
-HyperSolve, the Method of Manufactured Solutions is used to verify the implementation of the models and numerical
-schemes. In MMS, an analytical solution is chosen for each solution variable. Since the solution does not exactly satisfy
-the governing equations, source terms are added to the right-hand-side of the equation. Several verification test results
+Tradi ional verifica ion es s compare a numerical solu ion o a known, analy ical solu ion o assess he error. For
+HyperSolve, he Me hod of Manufac ured Solu ions is used o verify he implemen a ion of he models and numerical
+schemes. In MMS, an analy ical solu ion is chosen for each solu ion variable. Since he solu ion does no exac ly sa isfy
+ he governing equa ions, source erms are added o he righ -hand-side of he equa ion. Several verifica ion es resul s
 were described in Ref. [1].
 
 
 
-New verification tests have been added to HyperSolve that use the software library called Manufactured Analytical
-Solution Abstraction (MASA) [19]. This library provides both the solution and source terms for many manufactured
-solutions, spanning the Euler equations, the Navier-Stokes equations, and the Favre-averaged Navier Stokes (FANS)
-equations with a Spalart-Allmaras (SA) model. One important aspect of MASA is that it is developed independently of
-the HyperSolve code; the verification tests using MASA compare the HyperSolve models and discretization with a
-solution produced by a third party. This reduces the amount of “teaching to the test” that occurs in verification. The
-following sections focus on the MASA tests for the full Favre-averaged Navier-Stokes equations, though MASA has also
-been used to test the Euler and Navier-Stokes equations.
+New verifica ion es s have been added o HyperSolve ha use he sof ware library called Manufac ured Analy ical
+Solu ion Abs rac ion (MASA) [19]. This library provides bo h he solu ion and source erms for many manufac ured
+solu ions, spanning he Euler equa ions, he Navier-S okes equa ions, and he Favre-averaged Navier S okes (FANS)
+equa ions wi h a Spalar -Allmaras (SA) model. One impor an aspec of MASA is ha i is developed independen ly of
+ he HyperSolve code; he verifica ion es s using MASA compare he HyperSolve models and discre iza ion wi h a
+solu ion produced by a hird par y. This reduces he amoun of “ eaching o he es ” ha occurs in verifica ion. The
+following sec ions focus on he MASA es s for he full Favre-averaged Navier-S okes equa ions, hough MASA has also
+been used o es he Euler and Navier-S okes equa ions.
 
 
 
-A. Turbulence Model and Manufactured Solutions
-There are two different manufactured solutions provided by MASA for the Spalart-Allmaras model, as documented
+A. Turbulence Model and Manufac ured Solu ions
+There are wo differen manufac ured solu ions provided by MASA for he Spalar -Allmaras model, as documen ed
 
 
 
-by Oliver et al. [20]. The first uses sinusoidal functions and no walls, exercising the “free shear” flow behavior of the
-Spalart-Allmaras model,
+by Oliver e al. [20]. The firs uses sinusoidal func ions and no walls, exercising he “free shear” flow behavior of he
+Spalar -Allmaras model,
 
 
 
@@ -265,13 +265,13 @@ ã (𝑥, 𝑦) = ã0 + ã𝑥 cos
 
 
 
-where 𝜌 is average density, 𝑢 is the x-component of the Favre-averaged velocity, 𝑣 is the y-component of the Favre-
-averaged velocity, 𝑝 is average pressure, ã is the Spalart-Allmaras turbulence model working variable, 𝐿 = 1.0, 𝛾 = 1.4,
-and the remaining constants are defined in Table 1.
+where 𝜌 is average densi y, 𝑢 is he x-componen of he Favre-averaged veloci y, 𝑣 is he y-componen of he Favre-
+averaged veloci y, 𝑝 is average pressure, ã is he Spalar -Allmaras urbulence model working variable, 𝐿 = 1.0, 𝛾 = 1.4,
+and he remaining cons an s are defined in Table 1.
 
 
 
-The manufactured solutions are discretized on a unit Cartesian grid with four mesh resolutions considered, starting
+The manufac ured solu ions are discre ized on a uni Car esian grid wi h four mesh resolu ions considered, s ar ing
 
 
 
@@ -287,11 +287,11 @@ The manufactured solutions are discretized on a unit Cartesian grid with four me
 
 
 
-Table 1 Constants used to define the sinusoidal (free-shear) manufactured solution for the FANS equations.
+Table 1 Cons an s used o define he sinusoidal (free-shear) manufac ured solu ion for he FANS equa ions.
 
 
 
-Equation (·)0 (·)𝑥 (·)𝑦 𝑎𝑥 𝑎𝑦
+Equa ion (·)0 (·)𝑥 (·)𝑦 𝑎𝑥 𝑎𝑦
 
 
 
@@ -303,11 +303,11 @@ ã 1.0 0.1 0.2 1.0 0.5
 
 
 
-with 8×8 and ending with 64×64. The 𝐿1 discretization error is plotted as a function of the mesh resolution in Figure 1,
-where ℎ0 is the average grid scale on the coarsest mesh. Both the discretization error at all points and the discretization
-error only at boundary points are plotted, so that any implementation mistakes in the application of boundary conditions
-are apparent. As was mentioned in Section II, the HyperSolve discretization used for this work evaluates the gradients at
-nodes using a linear least-squares method. Second-order accuracy is expected using this method, and this is achieved for
+wi h 8×8 and ending wi h 64×64. The 𝐿1 discre iza ion error is plo ed as a func ion of he mesh resolu ion in Figure 1,
+where ℎ0 is he average grid scale on he coarses mesh. Bo h he discre iza ion error a all poin s and he discre iza ion
+error only a boundary poin s are plo ed, so ha any implemen a ion mis akes in he applica ion of boundary condi ions
+are apparen . As was men ioned in Sec ion II, he HyperSolve discre iza ion used for his work evalua es he gradien s a 
+nodes using a linear leas -squares me hod. Second-order accuracy is expec ed using his me hod, and his is achieved for
 all flow variables.
 
 
@@ -352,7 +352,7 @@ In
 
 
 
-iti
+i i
 al
 
 
@@ -371,15 +371,15 @@ m
 
 
 
-Total Domain
+To al Domain
 
 
 
-density
+densi y
 u
 v
-temperature
-nu-tilde
+ empera ure
+nu- ilde
 slope = 1
 slope = 2
 slope = 3
@@ -406,7 +406,7 @@ In
 
 
 
-iti
+i i
 al
 
 
@@ -429,45 +429,45 @@ Boundary
 
 
 
-density
+densi y
 u
 v
-temperature
-nu-tilde
+ empera ure
+nu- ilde
 slope = 1
 slope = 2
 slope = 3
 
 
 
-HyperSolve MMS Discretization Error
+HyperSolve MMS Discre iza ion Error
 
 
 
-Fig. 1 Convergence of the 𝐿1 norm of the discretization error under refinement for free-shear manufactured
-solution. The grid scale ℎ and the 𝐿1 error are both normalized by their values on the coursest grid.
+Fig. 1 Convergence of he 𝐿1 norm of he discre iza ion error under refinemen for free-shear manufac ured
+solu ion. The grid scale ℎ and he 𝐿1 error are bo h normalized by heir values on he courses grid.
 
 
 
-B. Near-Wall Manufactured Solution
-This is the “physical” or near-wall manufactured solution described by Oliver et al. [20]. It uses an idealized
+B. Near-Wall Manufac ured Solu ion
+This is he “physical” or near-wall manufac ured solu ion described by Oliver e al. [20]. I uses an idealized
 
 
 
-boundary layer profile. The paramters, such as ` and 𝑝0, were set to the values in Ref. [20] with no changes. The
-boundary-layer like solutions can be seen in Fig. 2. While Oliver et al. [20] tested both a low and high Reynolds number
-solution for the Spalart-Allmaras turbulence model, only the high Reynolds number is shown. When tested, the low
-Reynolds number just produced a laminar boundary layer and did not engage the turbulence model. This was not
-considered a valuable test of the coupled FANS equations.
+boundary layer profile. The param ers, such as ` and 𝑝0, were se o he values in Ref. [20] wi h no changes. The
+boundary-layer like solu ions can be seen in Fig. 2. While Oliver e al. [20] es ed bo h a low and high Reynolds number
+solu ion for he Spalar -Allmaras urbulence model, only he high Reynolds number is shown. When es ed, he low
+Reynolds number jus produced a laminar boundary layer and did no engage he urbulence model. This was no 
+considered a valuable es of he coupled FANS equa ions.
 
 
 
-Four meshes were used, each with dimensions of 0.5m×0.03m. The coarsest grid had 69×9 nodes in the streamwise
-and wall-normal directions, respectively. The finest grid had 513×65 nodes. Each successive mesh was refined by a
-factor of 2 in both directions. A quadrilateral mesh was setup for each grid, then decomposed into triangle elements.
-Decomposing into the quadrilateral mesh into triangle elements was done to ensure that the order-of-accuracy is not
-affected by a biased element splitting. The convergence of the high Reynolds-number case is shown in Figure 3, where
-ℎ0 is the average grid scale on the coarsest mesh. Better than second-order convergence was observed for all variables.
+Four meshes were used, each wi h dimensions of 0.5m×0.03m. The coarses grid had 69×9 nodes in he s reamwise
+and wall-normal direc ions, respec ively. The fines grid had 513×65 nodes. Each successive mesh was refined by a
+fac or of 2 in bo h direc ions. A quadrila eral mesh was se up for each grid, hen decomposed in o riangle elemen s.
+Decomposing in o he quadrila eral mesh in o riangle elemen s was done o ensure ha he order-of-accuracy is no 
+affec ed by a biased elemen spli ing. The convergence of he high Reynolds-number case is shown in Figure 3, where
+ℎ0 is he average grid scale on he coarses mesh. Be er han second-order convergence was observed for all variables.
 
 
 
@@ -500,7 +500,7 @@ y
 129x17
 257x33
 513x65
-Exact
+Exac 
 
 
 
@@ -574,29 +574,29 @@ y
 
 
 
-Fig. 2 Flow solution at 𝑥 = 0.75 for the near-wall manufactured solution of the FANS equations.
+Fig. 2 Flow solu ion a 𝑥 = 0.75 for he near-wall manufac ured solu ion of he FANS equa ions.
 
 
 
-IV. Functional Equivalence Tests
-Each functional equivalence test (FET) is run by both the LAURA and HyperSolve codes on an identical multiblock
+IV. Func ional Equivalence Tes s
+Each func ional equivalence es (FET) is run by bo h he LAURA and HyperSolve codes on an iden ical mul iblock
 
 
 
-structured mesh to confirm that HyperSolve is able to provide a similar level of fidelity as LAURA with similar mesh
-resolution. Because the HyperSolve code is an unstructured mesh solver, the multiblock structured mesh is converted
-into an unstructured mesh of hexahedral elements automatically upon startup. The structured mesh is adapted using
-the standard LAURA adaptation algorithm [21] to align the outer boundary to the bow shock and cluster points in
-the boundary region near the vehicle surface. Comparisons of the surface pressure and heat flux are made between
-the HyperSolve and LAURA codes. The choice of pressure and heat flux is due to the typical aerodynamic and
-aerothermodynamic analysis needs of EDL planetary applications. The tolerance of ±4% relative agreement between
-the codes is chosen based on a similar exercise done between the FUN3D and LAURA codes [6]. Table 2 lists the
-thermodynamic model and freestream density 𝜌∞, velocity 𝑉∞, and temperature 𝑇∞, used for each of the validation
-cases considered in this work.
+s ruc ured mesh o confirm ha HyperSolve is able o provide a similar level of fideli y as LAURA wi h similar mesh
+resolu ion. Because he HyperSolve code is an uns ruc ured mesh solver, he mul iblock s ruc ured mesh is conver ed
+in o an uns ruc ured mesh of hexahedral elemen s au oma ically upon s ar up. The s ruc ured mesh is adap ed using
+ he s andard LAURA adap a ion algori hm [21] o align he ou er boundary o he bow shock and clus er poin s in
+ he boundary region near he vehicle surface. Comparisons of he surface pressure and hea flux are made be ween
+ he HyperSolve and LAURA codes. The choice of pressure and hea flux is due o he ypical aerodynamic and
+aero hermodynamic analysis needs of EDL plane ary applica ions. The olerance of ±4% rela ive agreemen be ween
+ he codes is chosen based on a similar exercise done be ween he FUN3D and LAURA codes [6]. Table 2 lis s he
+ hermodynamic model and frees ream densi y 𝜌∞, veloci y 𝑉∞, and empera ure 𝑇∞, used for each of he valida ion
+cases considered in his work.
 
 
 
-Table 2 Validation Test Suite.
+Table 2 Valida ion Tes Sui e.
 
 
 
@@ -605,10 +605,10 @@ IV.A: sphere-cone Ideal Gas 0.0522 1058 116 Laminar
 IV.B: hemisphere Ideal Gas 0.01 1000 200 Laminar
 IV.C: 2D cylinder 5-species air 0.001 5000 200 Laminar
 IV.D: AGARD W18 5-species air 0.01608 929 61.2 Laminar
-IV.E: Spherical Heatshield 5-species air 4.35e-4 6350 244.97 Laminar
+IV.E: Spherical Hea shield 5-species air 4.35e-4 6350 244.97 Laminar
 IV.F: Mars 2020 8-species CO2-N2 0.00364 2000 203 Laminar
-IV.G: MSL Ideal Gas 0.3742 1356.6 73.8 Spalart-Allmaras
-IV.H: CEV Ideal Gas 0.382 1347 369 Spalart-Allmaras
+IV.G: MSL Ideal Gas 0.3742 1356.6 73.8 Spalar -Allmaras
+IV.H: CEV Ideal Gas 0.382 1347 369 Spalar -Allmaras
 
 
 
@@ -659,7 +659,7 @@ In
 
 
 
-iti
+i i
 al
 
 
@@ -678,15 +678,15 @@ m
 
 
 
-Total Domain
+To al Domain
 
 
 
-density
+densi y
 u
 v
-temperature
-nu-tilde
+ empera ure
+nu- ilde
 slope = 1
 slope = 2
 slope = 3
@@ -713,7 +713,7 @@ In
 
 
 
-iti
+i i
 al
 
 
@@ -736,39 +736,39 @@ Boundary
 
 
 
-density
+densi y
 u
 v
-temperature
-nu-tilde
+ empera ure
+nu- ilde
 slope = 1
 slope = 2
 slope = 3
 
 
 
-HyperSolve MMS Discretization Error
+HyperSolve MMS Discre iza ion Error
 
 
 
-Fig. 3 Convergence of the 𝐿1 norm of the discretization error under refinement, for the near-wall manufactured
-solution of the FANS equations.
+Fig. 3 Convergence of he 𝐿1 norm of he discre iza ion error under refinemen , for he near-wall manufac ured
+solu ion of he FANS equa ions.
 
 
 
-A. Axisymmetric Sphere-Cone
-Figure 4a compares the HyperSolve pressure (blue line) and heat flux (red line) to the LAURA solution (error bars
+A. Axisymme ric Sphere-Cone
+Figure 4a compares he HyperSolve pressure (blue line) and hea flux (red line) o he LAURA solu ion (error bars
 
 
 
-representing the LAURA solution value ±4%), with the radial position, 𝑍 , normalized by the maximum radius of the
-sphere-cone, 𝑅. An isothermal wall boundary condition is employed for this case, with the wall temperature set to
-285 K. All surface heat flux and pressure values predicted by HyperSolve are within 4% of the LAURA predictions.
-Figure 4b shows the percent difference of pressure predicted by HyperSolve and LAURA in the flowfield. The largest
-differences in pressure occur near the bow shock, which is to be expected given than LAURA and HyperSolve use
-different flux functions and discretizations that have different shock capturing properties. HyperSolve predicts a higher
-pressure upstream of the spherical cap; however, neither this difference nor the difference in the shock region impacts
-the agreement of the surface pressure between the codes.
+represen ing he LAURA solu ion value ±4%), wi h he radial posi ion, 𝑍 , normalized by he maximum radius of he
+sphere-cone, 𝑅. An iso hermal wall boundary condi ion is employed for his case, wi h he wall empera ure se o
+285 K. All surface hea flux and pressure values predic ed by HyperSolve are wi hin 4% of he LAURA predic ions.
+Figure 4b shows he percen difference of pressure predic ed by HyperSolve and LAURA in he flowfield. The larges 
+differences in pressure occur near he bow shock, which is o be expec ed given han LAURA and HyperSolve use
+differen flux func ions and discre iza ions ha have differen shock cap uring proper ies. HyperSolve predic s a higher
+pressure ups ream of he spherical cap; however, nei her his difference nor he difference in he shock region impac s
+ he agreemen of he surface pressure be ween he codes.
 
 
 
@@ -782,7 +782,7 @@ e
 
 
 a
-t 
+ 
 
 
 
@@ -904,7 +904,7 @@ a
 
 
 
-Heat Flux
+Hea Flux
 
 
 
@@ -920,11 +920,11 @@ LAURA ± 4%
 
 
 
-(a) Surface pressure and heat flux (b) Percent difference of pressure in symmetry plane
+(a) Surface pressure and hea flux (b) Percen difference of pressure in symme ry plane
 
 
 
-Fig. 4 Axisymmetric sphere-cone surface and flowfield comparison.
+Fig. 4 Axisymme ric sphere-cone surface and flowfield comparison.
 
 
 
@@ -941,19 +941,19 @@ Fig. 4 Axisymmetric sphere-cone surface and flowfield comparison.
 
 
 B. Hemisphere
-The geometry and conditions for this case are chosen to match a previous case [1] that demonstrated the efficacy
+The geome ry and condi ions for his case are chosen o ma ch a previous case [1] ha demons ra ed he efficacy
 
 
 
-of anisotropic mesh adaptation for accurately predicting surface heat flux with economical numerical methods in
-HyperSolve. Figure 5a compares the surface pressure and heat flux predicted by HyperSolve and LAURA, with the
-radial position, 𝑍 , normalized by the sphere radius, 𝑅 = 0.5. An isothermal wall boundary condition was used with the
-wall temperature set to 500 K. All the surface heat flux and pressure values along the symmetry plane predicted by
-HyperSolve are within 4% of the LAURA predictions. Figure 5b shows the pressure difference along the symmetry
-plane. As previously seen, the largest difference in pressure is near the bow shock, but there is also a noticeable
-difference at the outflow plane. This difference at the outflow plane can be explained by differences in the extrapolation
-boundary condition implementation in HyperSolve and LAURA. Even with the differences in pressure in the flow field
-at the outflow plane, the surface heat flux and pressure agree very well between HyperSolve and LAURA.
+of aniso ropic mesh adap a ion for accura ely predic ing surface hea flux wi h economical numerical me hods in
+HyperSolve. Figure 5a compares he surface pressure and hea flux predic ed by HyperSolve and LAURA, wi h he
+radial posi ion, 𝑍 , normalized by he sphere radius, 𝑅 = 0.5. An iso hermal wall boundary condi ion was used wi h he
+wall empera ure se o 500 K. All he surface hea flux and pressure values along he symme ry plane predic ed by
+HyperSolve are wi hin 4% of he LAURA predic ions. Figure 5b shows he pressure difference along he symme ry
+plane. As previously seen, he larges difference in pressure is near he bow shock, bu here is also a no iceable
+difference a he ou flow plane. This difference a he ou flow plane can be explained by differences in he ex rapola ion
+boundary condi ion implemen a ion in HyperSolve and LAURA. Even wi h he differences in pressure in he flow field
+a he ou flow plane, he surface hea flux and pressure agree very well be ween HyperSolve and LAURA.
 
 
 
@@ -967,7 +967,7 @@ e
 
 
 a
-t 
+ 
 
 
 
@@ -1074,7 +1074,7 @@ a
 
 
 
-Heat Flux
+Hea Flux
 Pressure
 
 
@@ -1088,7 +1088,7 @@ HyperSolve
 
 
 
-(a) Surface pressure and heat flux along symmetry plane (b) Percent difference of pressure in symmetry plane.
+(a) Surface pressure and hea flux along symme ry plane (b) Percen difference of pressure in symme ry plane.
 
 
 
@@ -1097,33 +1097,33 @@ Fig. 5 Hemisphere surface and flowfield comparison.
 
 
 C. 2D Cylinder
-This is a standard test case in the literature, with the conditions and 5-species air gas model described in Ref. [2].
+This is a s andard es case in he li era ure, wi h he condi ions and 5-species air gas model described in Ref. [2].
 
 
 
-Figure 6a shows that the surface heat flux and pressure predicted by HyperSolve are in excellent agreement with the
-LAURA predictions at all radial positions, 𝑍 , normalized by the cylinder radius, 𝑅. Figure 6b shows a comparison of the
-species mass fractions predicted by both codes along the stagnation line, with the HyperSolve predictions matching the
-LAURA predictions to within 4% except near the bow shock. This demonstrates equivalent chemical nonequilibrium by
-both codes, with the small differences near the bow shock attributable to the differences in the shock capturing abilities
-of both codes.
+Figure 6a shows ha he surface hea flux and pressure predic ed by HyperSolve are in excellen agreemen wi h he
+LAURA predic ions a all radial posi ions, 𝑍 , normalized by he cylinder radius, 𝑅. Figure 6b shows a comparison of he
+species mass frac ions predic ed by bo h codes along he s agna ion line, wi h he HyperSolve predic ions ma ching he
+LAURA predic ions o wi hin 4% excep near he bow shock. This demons ra es equivalen chemical nonequilibrium by
+bo h codes, wi h he small differences near he bow shock a ribu able o he differences in he shock cap uring abili ies
+of bo h codes.
 
 
 
 D. AGARD Working Group 18
-The conditions and geometry for this AGARD Working Group 18 wind tunnel case are described in Ref. [22]. A
+The condi ions and geome ry for his AGARD Working Group 18 wind unnel case are described in Ref. [22]. A
 
 
 
-5-species air model identical to the one used in Section IV.C is employed here, although chemical nonequilibrium effects
-are not expected for these flow conditions. An isothermal wall boundary condition is employed using a noncatalytic
-assumption and a wall temperature of 300 K. Surface heat flux and pressure along the symmetry plane are shown in
-Figure 7a, with excellent agreement between the HyperSolve and LAURA predictions. Figure 7b shows the relative
-difference of the pressure predicted by LAURA and HyperSolve in the symmetry plane. As seen in previous cases, the
-pressure difference is the largest near the bow shock and can be attributed to the same reasons as previously mentioned.
-A difference in pressure near the outflow boundary is also observed, which can be attributed to the difference in how the
-outflow boundary condition is computed in the LAURA and HyperSolve codes. This difference was also observed in
-the comparison of FUN3D and LAURA results [6].
+5-species air model iden ical o he one used in Sec ion IV.C is employed here, al hough chemical nonequilibrium effec s
+are no expec ed for hese flow condi ions. An iso hermal wall boundary condi ion is employed using a nonca aly ic
+assump ion and a wall empera ure of 300 K. Surface hea flux and pressure along he symme ry plane are shown in
+Figure 7a, wi h excellen agreemen be ween he HyperSolve and LAURA predic ions. Figure 7b shows he rela ive
+difference of he pressure predic ed by LAURA and HyperSolve in he symme ry plane. As seen in previous cases, he
+pressure difference is he larges near he bow shock and can be a ribu ed o he same reasons as previously men ioned.
+A difference in pressure near he ou flow boundary is also observed, which can be a ribu ed o he difference in how he
+ou flow boundary condi ion is compu ed in he LAURA and HyperSolve codes. This difference was also observed in
+ he comparison of FUN3D and LAURA resul s [6].
 
 
 
@@ -1149,7 +1149,7 @@ e
 
 
 a
-t 
+ 
 
 
 
@@ -1267,7 +1267,7 @@ a
 
 
 
-Heat Flux
+Hea Flux
 
 
 
@@ -1283,11 +1283,11 @@ LAURA ± 4%
 
 
 
-(a) Surface pressure and heat flux
+(a) Surface pressure and hea flux
 
 
 
-Stagnation Line Position [m]
+S agna ion Line Posi ion [m]
 
 
 
@@ -1307,7 +1307,7 @@ ra
 
 
 c
-ti
+ i
 
 
 
@@ -1370,7 +1370,7 @@ HyperSolve
 
 
 
-(b) Species mass fractions along stagnation line
+(b) Species mass frac ions along s agna ion line
 
 
 
@@ -1388,7 +1388,7 @@ e
 
 
 a
-t 
+ 
 
 
 
@@ -1519,7 +1519,7 @@ a
 
 
 
-Heat Flux
+Hea Flux
 
 
 
@@ -1535,7 +1535,7 @@ LAURA ± 4%
 
 
 
-(a) Surface pressure and heat flux along symmetry plane. (b) Percent difference of pressure in symmetry plane.
+(a) Surface pressure and hea flux along symme ry plane. (b) Percen difference of pressure in symme ry plane.
 
 
 
@@ -1543,31 +1543,31 @@ Fig. 7 AGARD W18 model surface and flowfield comparison.
 
 
 
-E. Capsule Spherical Heatshield
-This case simulates the capsule spherical heat shield, which is similar to the design used by the Apollo Command
+E. Capsule Spherical Hea shield
+This case simula es he capsule spherical hea shield, which is similar o he design used by he Apollo Command
 
 
 
-Module and Orion Crew Module. The geometry and conditions for this case correspond to Case G. in Ref. [6]. A
-5-species air model identical to the one used in Section IV.D is employed here, and a high degree of chemical dissociation
-is expected at this flow condition. An isothermal, fully-catalytic boundary condition is applied to this case, with a wall
-temperature of 750 K. Surface heat flux and pressure along the symmetry plane are shown in Figure 7a, with excellent
-agreement between the HyperSolve and LAURA predictions at all positions along the surface, 𝑍 , normalized by the
-radius of the model, 𝑅. Figure 8b shows the relative difference of the pressure predicted by LAURA and HyperSolve in
-the symmetry plane. As seen in previous cases, the pressure difference is the largest near the bow shock and can be
-attributed to the same reasons as previously mentioned.
+Module and Orion Crew Module. The geome ry and condi ions for his case correspond o Case G. in Ref. [6]. A
+5-species air model iden ical o he one used in Sec ion IV.D is employed here, and a high degree of chemical dissocia ion
+is expec ed a his flow condi ion. An iso hermal, fully-ca aly ic boundary condi ion is applied o his case, wi h a wall
+ empera ure of 750 K. Surface hea flux and pressure along he symme ry plane are shown in Figure 7a, wi h excellen 
+agreemen be ween he HyperSolve and LAURA predic ions a all posi ions along he surface, 𝑍 , normalized by he
+radius of he model, 𝑅. Figure 8b shows he rela ive difference of he pressure predic ed by LAURA and HyperSolve in
+ he symme ry plane. As seen in previous cases, he pressure difference is he larges near he bow shock and can be
+a ribu ed o he same reasons as previously men ioned.
 
 
 
-F. Mars 2020 Entry Vehicle
-This test case focuses on a 70-degree cone with a spherical nose cap, based on the Mars 2020 heatshield. This same
+F. Mars 2020 En ry Vehicle
+This es case focuses on a 70-degree cone wi h a spherical nose cap, based on he Mars 2020 hea shield. This same
 
 
 
-heatshield geometry has been used with minor changes for Viking, Mars Science Laboratory (MSL), and Mars 2020.
-The conditions for this case correspond to trajectory point 16 described in Ref. [23]. An isothermal wall boundary
-condition is employed using a supercatalytic [23] catalytic assumption and a wall temperature of 1000 K. An 8-species
-model consisting of CO2, N2, O2, CO, C, N, O, and N was employed for the gas model, which is assumed to be in
+hea shield geome ry has been used wi h minor changes for Viking, Mars Science Labora ory (MSL), and Mars 2020.
+The condi ions for his case correspond o rajec ory poin 16 described in Ref. [23]. An iso hermal wall boundary
+condi ion is employed using a superca aly ic [23] ca aly ic assump ion and a wall empera ure of 1000 K. An 8-species
+model consis ing of CO2, N2, O2, CO, C, N, O, and N was employed for he gas model, which is assumed o be in
 
 
 
@@ -1593,7 +1593,7 @@ e
 
 
 a
-t 
+ 
 
 
 
@@ -1696,7 +1696,7 @@ a
 
 
 
-Heat Flux
+Hea Flux
 
 
 
@@ -1712,19 +1712,19 @@ LAURA ± 4%
 
 
 
-(a) Surface pressure and heat flux along symmetry plane. (b) Percent difference of pressure in symmetry plane.
+(a) Surface pressure and hea flux along symme ry plane. (b) Percen difference of pressure in symme ry plane.
 
 
 
-Fig. 8 Capsule spherical heatshield surface and flowfield comparison.
+Fig. 8 Capsule spherical hea shield surface and flowfield comparison.
 
 
 
-thermal equilibrium at this flow condition. Figure 9a compares the surface heat flux and pressure along the symmetry
-plane at positions, 𝑍 , normalized by the radius of the vehicle, 𝑅. A discrepancy in the surface heat flux predictions
-by HyperSolve and LAURA is observed between the 𝑍/𝑅 = 0.25 and 𝑍/𝑅 = 0.75. This was the only case where the
-heat flux exceeded the ±4% tolerance, and will be subject to future investigation. As in other cases, Figure 9b shows a
-discrepancy in the flowfield pressures near the bow shock and at the outflow plane.
+ hermal equilibrium a his flow condi ion. Figure 9a compares he surface hea flux and pressure along he symme ry
+plane a posi ions, 𝑍 , normalized by he radius of he vehicle, 𝑅. A discrepancy in he surface hea flux predic ions
+by HyperSolve and LAURA is observed be ween he 𝑍/𝑅 = 0.25 and 𝑍/𝑅 = 0.75. This was he only case where he
+hea flux exceeded he ±4% olerance, and will be subjec o fu ure inves iga ion. As in o her cases, Figure 9b shows a
+discrepancy in he flowfield pressures near he bow shock and a he ou flow plane.
 
 
 
@@ -1738,7 +1738,7 @@ e
 
 
 a
-t 
+ 
 
 
 
@@ -1873,7 +1873,7 @@ a
 
 
 
-Heat Flux
+Hea Flux
 
 
 
@@ -1889,7 +1889,7 @@ LAURA ± 4%
 
 
 
-(a) Surface pressure and heat flux along the symmetry plane (b) Percent difference of pressure in symmetry plane.
+(a) Surface pressure and hea flux along he symme ry plane (b) Percen difference of pressure in symme ry plane.
 
 
 
@@ -1897,19 +1897,19 @@ Fig. 9 Mars 2020 surface and flowfield comparison.
 
 
 
-G. Mars Science Laboratory
-This is a second test case focusing on a 70-degree cone with a spherical nose cap. The geometry is based on an
+G. Mars Science Labora ory
+This is a second es case focusing on a 70-degree cone wi h a spherical nose cap. The geome ry is based on an
 
 
 
-early concept (OML-6 in Ref. [24]) for the Mars Science Laboratory (MSL). While the backshell geometry changed
-significantly between OML-6 and Mars 2020, the forebody differed only slightly. This test case differs from Section IV.F
-in that it is designed to match experiments conducted in the Arnold Engineering Development Center (AEDC) Tunnel
-9 [24], rather than a true flight condition. A high Reynolds Number test condition (Re = 30.2M/ft) was chosen to ensure
-fully turbulent flow, so that the Catris variant [25] of the Spalart-Allmaras turbulence model could be validated. The
-gas was modeled as a single-species nitrogen gas in thermal and chemical equilibrium. An isothermal wall boundary
-condition is used for this case, with a wall temperature of 389.6 K. Figure 10a shows surface heat flux and pressure
-predictions by HyperSolve and LAURA, with excellent agreement between both codes at all positions 𝑍 normalized by
+early concep (OML-6 in Ref. [24]) for he Mars Science Labora ory (MSL). While he backshell geome ry changed
+significan ly be ween OML-6 and Mars 2020, he forebody differed only sligh ly. This es case differs from Sec ion IV.F
+in ha i is designed o ma ch experimen s conduc ed in he Arnold Engineering Developmen Cen er (AEDC) Tunnel
+9 [24], ra her han a rue fligh condi ion. A high Reynolds Number es condi ion (Re = 30.2M/f ) was chosen o ensure
+fully urbulen flow, so ha he Ca ris varian [25] of he Spalar -Allmaras urbulence model could be valida ed. The
+gas was modeled as a single-species ni rogen gas in hermal and chemical equilibrium. An iso hermal wall boundary
+condi ion is used for his case, wi h a wall empera ure of 389.6 K. Figure 10a shows surface hea flux and pressure
+predic ions by HyperSolve and LAURA, wi h excellen agreemen be ween bo h codes a all posi ions 𝑍 normalized by
 
 
 
@@ -1925,8 +1925,8 @@ predictions by HyperSolve and LAURA, with excellent agreement between both codes
 
 
 
-the vehicle radius, 𝑅. Figure 10b shows similar behavior in the pressure along the symmetry plane, with the largest
-differences appearing in regions near the shock and outflow plane.
+ he vehicle radius, 𝑅. Figure 10b shows similar behavior in he pressure along he symme ry plane, wi h he larges 
+differences appearing in regions near he shock and ou flow plane.
 
 
 
@@ -1940,7 +1940,7 @@ e
 
 
 a
-t 
+ 
 
 
 
@@ -2055,7 +2055,7 @@ a
 
 
 
-Heat Flux
+Hea Flux
 
 
 
@@ -2071,27 +2071,27 @@ LAURA ± 4%
 
 
 
-(a) Surface pressure and heat flux along the symmetry plane (b) Percent difference of pressure in symmetry plane.
+(a) Surface pressure and hea flux along he symme ry plane (b) Percen difference of pressure in symme ry plane.
 
 
 
-Fig. 10 Mars Science Laboratory surface and flowfield comparison.
+Fig. 10 Mars Science Labora ory surface and flowfield comparison.
 
 
 
-H. Crew Exploration Vehicle
-This is a second test case with a spherical shield, similar to the geometry in Section IV.E. In this case, the geometry
+H. Crew Explora ion Vehicle
+This is a second es case wi h a spherical shield, similar o he geome ry in Sec ion IV.E. In his case, he geome ry
 
 
 
-is based on the Orion Crew Exploration Vehicle (CEV). The test case is designed to match a wind tunnel test campaign
-conducted in the Arnold Engineering Development Center (AEDC) Tunnel 9 [26]. A high Reynolds Number test
-condition (Re = 31M/ft) was chosen to ensure fully turbulent flow, so that the Catris variant [25] of the Spalart-Allmaras
-turbulence model implementation could be validated. The gas was modeled as a single-species nitrogen gas in thermal
-and chemical equilibrium. An isothermal wall boundary condition is used for this case, with a wall temperature of 369
-K. Figure 11a shows surface heat flux and pressure predictions by HyperSolve and LAURA, with excellent agreement
-between both codes at all positions 𝑍 normalized by the vehicle radius, 𝑅. Figure 11b shows similar behavior in the
-pressure along the symmetry plane, with the largest differences appearing in regions near the shock and outflow plane.
+is based on he Orion Crew Explora ion Vehicle (CEV). The es case is designed o ma ch a wind unnel es campaign
+conduc ed in he Arnold Engineering Developmen Cen er (AEDC) Tunnel 9 [26]. A high Reynolds Number es 
+condi ion (Re = 31M/f ) was chosen o ensure fully urbulen flow, so ha he Ca ris varian [25] of he Spalar -Allmaras
+ urbulence model implemen a ion could be valida ed. The gas was modeled as a single-species ni rogen gas in hermal
+and chemical equilibrium. An iso hermal wall boundary condi ion is used for his case, wi h a wall empera ure of 369
+K. Figure 11a shows surface hea flux and pressure predic ions by HyperSolve and LAURA, wi h excellen agreemen 
+be ween bo h codes a all posi ions 𝑍 normalized by he vehicle radius, 𝑅. Figure 11b shows similar behavior in he
+pressure along he symme ry plane, wi h he larges differences appearing in regions near he shock and ou flow plane.
 
 
 
@@ -2105,7 +2105,7 @@ e
 
 
 a
-t 
+ 
 
 
 
@@ -2220,7 +2220,7 @@ a
 
 
 
-Heat Flux
+Hea Flux
 
 
 
@@ -2236,11 +2236,11 @@ LAURA ± 4%
 
 
 
-(a) Surface pressure and heat flux along the symmetry plane (b) Percent difference of pressure in symmetry plane.
+(a) Surface pressure and hea flux along he symme ry plane (b) Percen difference of pressure in symme ry plane.
 
 
 
-Fig. 11 Crew Exploration Vehicle surface and flowfield comparison.
+Fig. 11 Crew Explora ion Vehicle surface and flowfield comparison.
 
 
 
@@ -2256,94 +2256,94 @@ Fig. 11 Crew Exploration Vehicle surface and flowfield comparison.
 
 
 
-V. Concluding Remarks and Future Work
-A verification and validation study was conducted to ensure that the models and numerical schemes employed in
+V. Concluding Remarks and Fu ure Work
+A verifica ion and valida ion s udy was conduc ed o ensure ha he models and numerical schemes employed in
 
 
 
-HyperSolve compare favorably with the flight-validated benchmark solver, LAURA. The MASA library was used to
-perform code verification using the method of manufactured solutions, demonstrating that HyperSolve achieved design
-order of accuracy in multiple scenarios. Grid convergence studies on sinusoidal and “physical” near-wall manufactured
-solutions demonstrated the expected second-order accuracy when solving the FANS equations using a modified version
-of the Spalart-Allmaras turbulence model.
+HyperSolve compare favorably wi h he fligh -valida ed benchmark solver, LAURA. The MASA library was used o
+perform code verifica ion using he me hod of manufac ured solu ions, demons ra ing ha HyperSolve achieved design
+order of accuracy in mul iple scenarios. Grid convergence s udies on sinusoidal and “physical” near-wall manufac ured
+solu ions demons ra ed he expec ed second-order accuracy when solving he FANS equa ions using a modified version
+of he Spalar -Allmaras urbulence model.
 
 
 
-To validate the ideal gas, thermochemical nonequilibrium, and FANS turbulence model capabilities in HyperSolve,
-a series of validation cases were run with the HyperSolve and LAURA codes to compare surface pressure and heat flux
-predictions. Each case was run on an identical mesh by HyperSolve and LAURA to confirm that HyperSolve is able to
-provide a similar level of fidelity as LAURA with similar mesh resolution. In general, the predicted surface pressure
-and heat flux matched the LAURA predictions to within a ±4% relative difference. All cases exhibited differences
-in pressure along the symmetry plane near the bow shock and most cases also exhibited differences near the outflow
-plane. The differences near the bow shock are expected due to differences in the numerics of the flux capturing schemes
-used by HyperSolve and LAURA. The differences near the outflow plane could be explained by the differences in the
-implementation of the outflow state extrapolation boundary condition employed in HyperSolve and LAURA. None of
-these differences in the flowfield pressure strongly affected the surface heat flux and pressure agreement between the
+To valida e he ideal gas, hermochemical nonequilibrium, and FANS urbulence model capabili ies in HyperSolve,
+a series of valida ion cases were run wi h he HyperSolve and LAURA codes o compare surface pressure and hea flux
+predic ions. Each case was run on an iden ical mesh by HyperSolve and LAURA o confirm ha HyperSolve is able o
+provide a similar level of fideli y as LAURA wi h similar mesh resolu ion. In general, he predic ed surface pressure
+and hea flux ma ched he LAURA predic ions o wi hin a ±4% rela ive difference. All cases exhibi ed differences
+in pressure along he symme ry plane near he bow shock and mos cases also exhibi ed differences near he ou flow
+plane. The differences near he bow shock are expec ed due o differences in he numerics of he flux cap uring schemes
+used by HyperSolve and LAURA. The differences near he ou flow plane could be explained by he differences in he
+implemen a ion of he ou flow s a e ex rapola ion boundary condi ion employed in HyperSolve and LAURA. None of
+ hese differences in he flowfield pressure s rongly affec ed he surface hea flux and pressure agreemen be ween he
 codes.
 
 
 
-Future work will include investigating the difference in surface heat flux seen in the Mars 2020 leeside region, which
-was the only case that showed a disagreement exceeding 4% between the codes. Additionally, the functional equivalence
-testing will be expanded to include higher enthalpy conditions that verify the ionization and thermal nonequilibrium
-capabilities implemented in HyperSolve.
+Fu ure work will include inves iga ing he difference in surface hea flux seen in he Mars 2020 leeside region, which
+was he only case ha showed a disagreemen exceeding 4% be ween he codes. Addi ionally, he func ional equivalence
+ es ing will be expanded o include higher en halpy condi ions ha verify he ioniza ion and hermal nonequilibrium
+capabili ies implemen ed in HyperSolve.
 
 
 
-Acknowledgments
-The authors would like to thank the Entry Systems Modeling Project within the NASA Game Changing Development
+Acknowledgmen s
+The au hors would like o hank he En ry Sys ems Modeling Projec wi hin he NASA Game Changing Developmen 
 
 
 
-Program, Space Technology Mission Directorate for their funding and support of this research.
+Program, Space Technology Mission Direc ora e for heir funding and suppor of his research.
 
 
 
 References
-[1] Thompson, K. B., Nishikawa, H., and Padway, E., “Economical Third-Order Methods for Accurate Surface Heating Predictions
+[1] Thompson, K. B., Nishikawa, H., and Padway, E., “Economical Third-Order Me hods for Accura e Surface Hea ing Predic ions
 
 
 
-on Simplex Element Meshes,” AIAA Paper 2023-2629, 2023.
+on Simplex Elemen Meshes,” AIAA Paper 2023-2629, 2023.
 
 
 
-[2] Gnoffo, P., and White, J. A., “Computational Aerothermodynamic Simulation Issues on Unstructured Grids,” AIAA Paper
+[2] Gnoffo, P., and Whi e, J. A., “Compu a ional Aero hermodynamic Simula ion Issues on Uns ruc ured Grids,” AIAA Paper
 2004–2371, 2004.
 
 
 
-[3] Gnoffo, P. A., “Simulation of Stagnation Region Heating in Hypersonic Flow on Tetrahedral Grids,” AIAA Paper 2007–3960,
+[3] Gnoffo, P. A., “Simula ion of S agna ion Region Hea ing in Hypersonic Flow on Te rahedral Grids,” AIAA Paper 2007–3960,
 2007.
 
 
 
-[4] McCloud, P. L., “Best Practices for Unstructured Grid Shock Fitting,” AIAA Paper 2017–1149, 2017.
+[4] McCloud, P. L., “Bes Prac ices for Uns ruc ured Grid Shock Fi ing,” AIAA Paper 2017–1149, 2017.
 
 
 
-[5] Thompson, K. B., Hollis, B. R., Johnston, C. O., Kleb, B., Lessard, V. R., and Mazaheri, A., “LAURA Users Manual: 5.6,”
-NASA TM-2020-220566, Langley Research Center, 2020.
+[5] Thompson, K. B., Hollis, B. R., Johns on, C. O., Kleb, B., Lessard, V. R., and Mazaheri, A., “LAURA Users Manual: 5.6,”
+NASA TM-2020-220566, Langley Research Cen er, 2020.
 
 
 
-[6] Gnoffo, P., Wood, W., Kleb, B., Alter, S., Padilla, J., and White, J., “Functional Equivalence Acceptance Testing of FUN3D for
-Entry, Descent, and Landing Applications,” AIAA Paper 2013–2558, 2013.
+[6] Gnoffo, P., Wood, W., Kleb, B., Al er, S., Padilla, J., and Whi e, J., “Func ional Equivalence Accep ance Tes ing of FUN3D for
+En ry, Descen , and Landing Applica ions,” AIAA Paper 2013–2558, 2013.
 
 
 
-[7] Nishikawa, H., Nakashima, Y., and Watanabe, N., “Effects of High-Frequency Damping on Iterative Convergence of Implicit
-Viscous Solver,” Journal of Computational Physics, Vol. 348, 2017.
+[7] Nishikawa, H., Nakashima, Y., and Wa anabe, N., “Effec s of High-Frequency Damping on I era ive Convergence of Implici 
+Viscous Solver,” Journal of Compu a ional Physics, Vol. 348, 2017.
 
 
 
 [8] O’Connell, M. D., Druyor, C. T., Thompson, K. B., Jacobson, K. E., Anderson, W. K., Nielsen, E. J., Carlson, J.-R., Park,
-M. A., Jones, W. T., Biedron, R. T., Kleb, B., and Zhang, X., “T-infinity: The Dependency Inversion Principle for Rapid and
-Sustainable Multidisciplinary Software Development,” AIAA Paper 2018–3856, 2018.
+M. A., Jones, W. T., Biedron, R. T., Kleb, B., and Zhang, X., “T-infini y: The Dependency Inversion Principle for Rapid and
+Sus ainable Mul idisciplinary Sof ware Developmen ,” AIAA Paper 2018–3856, 2018.
 
 
 
-[9] Thompson, K. B., and O’Connell, M. D., “Streamlined Convergence Acceleration for CFD Codes,” AIAA Paper 2019-3709,
+[9] Thompson, K. B., and O’Connell, M. D., “S reamlined Convergence Accelera ion for CFD Codes,” AIAA Paper 2019-3709,
 2019.
 
 
@@ -2360,91 +2360,91 @@ Sustainable Multidisciplinary Software Development,” AIAA Paper 2018–3856, 2
 
 
 
-[10] Balay, S., Abhyankar, S., Adams, M. F., Brown, J., Brune, P., Buschelman, K., Dalcin, L., Dener, A., Eijkhout, V., Gropp,
-W. D., Kaushik, D., Knepley, M. G., May, D. A., McInnes, L. C., Mills, R. T., Munson, T., Rupp, K., Sanan, P., Smith, B. F.,
-Zampini, S., Zhang, H., and Zhang, H., “PETSc Users Manual,” Tech. Rep. ANL-95/11 - Revision 3.10, Argonne National
-Laboratory, 2018. URL http://www.mcs.anl.gov/petsc.
+[10] Balay, S., Abhyankar, S., Adams, M. F., Brown, J., Brune, P., Buschelman, K., Dalcin, L., Dener, A., Eijkhou , V., Gropp,
+W. D., Kaushik, D., Knepley, M. G., May, D. A., McInnes, L. C., Mills, R. T., Munson, T., Rupp, K., Sanan, P., Smi h, B. F.,
+Zampini, S., Zhang, H., and Zhang, H., “PETSc Users Manual,” Tech. Rep. ANL-95/11 - Revision 3.10, Argonne Na ional
+Labora ory, 2018. URL h p://www.mcs.anl.gov/pe sc.
 
 
 
-[11] Gnoffo, P. A., “An Upwind-Biased, Point-Implicit Relaxation Algorithm for Viscous, Compressible Perfect-Gas Flows,” NASA
+[11] Gnoffo, P. A., “An Upwind-Biased, Poin -Implici Relaxa ion Algori hm for Viscous, Compressible Perfec -Gas Flows,” NASA
 TP 2953, 1990.
 
 
 
-[12] Braun, R. D., Powell, R. W., Engelund, W. C., Gnoffo, P. A., Weilmuenster, K. J., and Mitcheltree, R. A., “Mars Pathfinder
-six-degree-of-freedom entry analysis,” Journal of Spacecraft and Rockets, Vol. 32, No. 6, 1995, pp. 993–1000.
+[12] Braun, R. D., Powell, R. W., Engelund, W. C., Gnoffo, P. A., Weilmuens er, K. J., and Mi chel ree, R. A., “Mars Pa hfinder
+six-degree-of-freedom en ry analysis,” Journal of Spacecraf and Rocke s, Vol. 32, No. 6, 1995, pp. 993–1000.
 
 
 
-[13] Hash, D., Olejniczak, J., Wright, M., Prabhu, D., Pulsonetti, M., Hollis, B., Gnoffo, P., Barnhardt, M., Nompelis, I., and
-Candler, G., “FIRE II Calculations for Hypersonic Nonequilibrium Aerothermodynamics Code Verification: DPLR, LAURA,
+[13] Hash, D., Olejniczak, J., Wrigh , M., Prabhu, D., Pulsone i, M., Hollis, B., Gnoffo, P., Barnhard , M., Nompelis, I., and
+Candler, G., “FIRE II Calcula ions for Hypersonic Nonequilibrium Aero hermodynamics Code Verifica ion: DPLR, LAURA,
 and US3D,” AIAA Paper 2007-605, 2007.
 
 
 
-[14] Thompson, R., Lessard, V., Jentink, T., and Zoby, V., “Analysis of Compression Pad Cavities for the Orion Heatshield,” AIAA
+[14] Thompson, R., Lessard, V., Jen ink, T., and Zoby, V., “Analysis of Compression Pad Cavi ies for he Orion Hea shield,” AIAA
 Paper 2009-1575, 2009.
 
 
 
-[15] Gnoffo, R. N., P. A.; Gupta, and Shinn, J. L., “Conservation Equations and Physical Models for Hypersonic Air Flows in
+[15] Gnoffo, R. N., P. A.; Gup a, and Shinn, J. L., “Conserva ion Equa ions and Physical Models for Hypersonic Air Flows in
 Thermal and Chemical Nonequilibrium,” Technical Paper 2867, NASA, 1989.
 
 
 
-[16] Johnston, C. O., Gnoffo, P. A., and Mazaheri, A., “Study of Ablation-Flowfield Coupling Relevant to the Orion Heatshield,”
-Journal of Thermophysics and Heat Transfer, Vol. 26, No. 2, 2012, pp. 213–221.
+[16] Johns on, C. O., Gnoffo, P. A., and Mazaheri, A., “S udy of Abla ion-Flowfield Coupling Relevan o he Orion Hea shield,”
+Journal of Thermophysics and Hea Transfer, Vol. 26, No. 2, 2012, pp. 213–221.
 
 
 
-[17] Yee, H. C., “On Symmetric and Upwind TVD Schemes,” NASA TM-86842, 1985.
+[17] Yee, H. C., “On Symme ric and Upwind TVD Schemes,” NASA TM-86842, 1985.
 
 
 
-[18] Thompson, K. B., Johnston, C. O., Hollis, B. R., and Lessard, V., “Recent Improvements to the LAURA and HARA Codes,”
+[18] Thompson, K. B., Johns on, C. O., Hollis, B. R., and Lessard, V., “Recen Improvemen s o he LAURA and HARA Codes,”
 AIAA Paper 3030, 2020.
 
 
 
-[19] Malaya, N., Estacio-Hiroms, K. C., Stogner, R. H., Schulz, K. W., Bauman, P. T., and Carey, G. F., “MASA : A Library for
-Verification Using Manufactured and Analytical Solutions,” Engineering with Computers, Vol. 29, No. 4, 2013, pp. 487–496.
+[19] Malaya, N., Es acio-Hiroms, K. C., S ogner, R. H., Schulz, K. W., Bauman, P. T., and Carey, G. F., “MASA : A Library for
+Verifica ion Using Manufac ured and Analy ical Solu ions,” Engineering wi h Compu ers, Vol. 29, No. 4, 2013, pp. 487–496.
 doi:10.1007/s00366-012-0267-9.
 
 
 
-[20] Oliver, T., Estacio-Hiroms, K., Malaya, N., and Carey, G., “Manufactured Solutions for the Favre-Averaged Navier-Stokes
-Equations with Eddy-Viscosity Turbulence Models,” AIAA Paper 2009-1575, 2012.
+[20] Oliver, T., Es acio-Hiroms, K., Malaya, N., and Carey, G., “Manufac ured Solu ions for he Favre-Averaged Navier-S okes
+Equa ions wi h Eddy-Viscosi y Turbulence Models,” AIAA Paper 2009-1575, 2012.
 
 
 
-[21] Kyle B. Thompson, A. J. W., and Hollis., B. R., “Improvements to the LAURA Mesh Adaptation Algorithm,” AIAA Paper
+[21] Kyle B. Thompson, A. J. W., and Hollis., B. R., “Improvemen s o he LAURA Mesh Adap a ion Algori hm,” AIAA Paper
 2023-4332, 2023.
 
 
 
-[22] Horvath, T. J., McGinley, C. B., and Hannemann, K., “Blunt Body Near-Wake Flow Field at Mach 6,” AIAA Paper 1996-1935,
+[22] Horva h, T. J., McGinley, C. B., and Hannemann, K., “Blun Body Near-Wake Flow Field a Mach 6,” AIAA Paper 1996-1935,
 1996.
 
 
 
-[23] Wise, A., Prabhu, D. K., Johnston, C. O., Saunders, D. A., and Edquist, K. T., “Computational Aerothermodynamic Environments
-for the Mars 2020 Entry Capsule,” AIAA Paper 2018-3116, 2018.
+[23] Wise, A., Prabhu, D. K., Johns on, C. O., Saunders, D. A., and Edquis , K. T., “Compu a ional Aero hermodynamic Environmen s
+for he Mars 2020 En ry Capsule,” AIAA Paper 2018-3116, 2018.
 
 
 
-[24] Hollis, B. R., and Collier, A. S., “Experimental Investigation of Mars Science Laboratory Entry Vehicle Aeroheating in AEDC,”
+[24] Hollis, B. R., and Collier, A. S., “Experimen al Inves iga ion of Mars Science Labora ory En ry Vehicle Aerohea ing in AEDC,”
 NASA TP 219658, 2017.
 
 
 
-[25] Catris, S., and Aupoix, B., “Density Corrections for Turbulence Models,” Aerospace Science and Technology, Vol. 4, No. 1,
+[25] Ca ris, S., and Aupoix, B., “Densi y Correc ions for Turbulence Models,” Aerospace Science and Technology, Vol. 4, No. 1,
 2000, pp. 1–11.
 
 
 
-[26] Hollis, B. R., Berger, K. T., Horvath, T. J., Coblish, J. J., Norris, J. D., Lillard, R. P., and Kirk, B. S., “Aeroheating Testing and
-Predictions for Project Orion Crew Exploration Vehicle,” Journal of Spacecraft and Rockets, Vol. 46, No. 4, 2009, pp. 766–780.
+[26] Hollis, B. R., Berger, K. T., Horva h, T. J., Coblish, J. J., Norris, J. D., Lillard, R. P., and Kirk, B. S., “Aerohea ing Tes ing and
+Predic ions for Projec Orion Crew Explora ion Vehicle,” Journal of Spacecraf and Rocke s, Vol. 46, No. 4, 2009, pp. 766–780.
 doi:10.2514/1.38579.
 
 
@@ -2455,53 +2455,53 @@ doi:10.2514/1.38579.
 
 
 
-http://www.mcs.anl.gov/petsc
+h p://www.mcs.anl.gov/pe sc
 
 
 
- 
-Introduction
+	
+In roduc ion
 
- 
+	
 HyperSolve and LAURA CFD Solvers Overview
 
- 
-Verification Tests
+	
+Verifica ion Tes s
 
- 
-Turbulence Model and Manufactured Solutions
+	
+Turbulence Model and Manufac ured Solu ions
 
- 
-Near-Wall Manufactured Solution
+	
+Near-Wall Manufac ured Solu ion
 
 
- 
-Functional Equivalence Tests
+	
+Func ional Equivalence Tes s
 
- 
-Axisymmetric Sphere-Cone
+	
+Axisymme ric Sphere-Cone
 
- 
+	
 Hemisphere
 
- 
+	
 2D Cylinder
 
- 
+	
 AGARD Working Group 18
 
- 
-Capsule Spherical Heatshield
+	
+Capsule Spherical Hea shield
 
- 
-Mars 2020 Entry Vehicle
+	
+Mars 2020 En ry Vehicle
 
- 
-Mars Science Laboratory
+	
+Mars Science Labora ory
 
- 
-Crew Exploration Vehicle
+	
+Crew Explora ion Vehicle
 
 
- 
-Concluding Remarks and Future Work
+	
+Concluding Remarks and Fu ure Work

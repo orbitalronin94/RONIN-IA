@@ -1,84 +1,84 @@
-Test Results for Autonomous Assembly of Modular Space
-Structures
+Tes Resul s for Au onomous Assembly of Modular Space
+S ruc ures
 
 
 
-John R. Cooper∗, Jacob R. Martin†, and Olive R. Stohlman‡
+John R. Cooper∗, Jacob R. Mar in†, and Olive R. S ohlman‡
 
 
 
-NASA Langley Research Center, Hampton, VA, 23693
+NASA Langley Research Cen er, Hamp on, VA, 23693
 
 
 
-Collin J. Cresta§, Thea V. Avila¶, Radhika Rajaram‖, and Andrew K. McQuarry∗∗
+Collin J. Cres a§, Thea V. Avila¶, Radhika Rajaram‖, and Andrew K. McQuarry∗∗
 
 
 
-Analytical Mechanics Associates, Hampton, VA, 23666
+Analy ical Mechanics Associa es, Hamp on, VA, 23666
 
 
 
-This paper presents test results for autonomous assembly of a modular space structure. A
-Universal Robots UR10e manipulator with a custom end-effector, known as the Grapple Tool,
-was used to join TriTruss structural modules. The TriTrusses and their assembly configuration
-were developed for an in-space assembled telescope conceptual design. The tests presented here
-were performed with a 1:2.8 dimensionally scaled version of the Tri-Trusses. Robot trajectories
-were generated autonomously using a sample-based motion planner and an a-priori worksite
-model. The test results verify the assembly concept of operations as well as the software
-requirements for the Grapple Tool. While the Grapple Tool used in the tests was designed for
-the 1:2.8 scale Tri-Trusses, it has the same actuators, software, and computation architecture
-as the version designed for the full scale structure. The test operations consist of picking up
-two TriTrusses from their stowed locations and joining them to a third TriTruss mounted
-on a test stand and joining them to each other. This constitutes the first three modules of
-the in-space assembled telescope conceptual design. The paper presents the robot behavioral
-architecture, the generated trajectories commanded, the actual trajectories of the robot, and
-actuator performance of the Grapple Tool.
+This paper presen s es resul s for au onomous assembly of a modular space s ruc ure. A
+Universal Robo s UR10e manipula or wi h a cus om end-effec or, known as he Grapple Tool,
+was used o join TriTruss s ruc ural modules. The TriTrusses and heir assembly configura ion
+were developed for an in-space assembled elescope concep ual design. The es s presen ed here
+were performed wi h a 1:2.8 dimensionally scaled version of he Tri-Trusses. Robo rajec ories
+were genera ed au onomously using a sample-based mo ion planner and an a-priori worksi e
+model. The es resul s verify he assembly concep of opera ions as well as he sof ware
+requiremen s for he Grapple Tool. While he Grapple Tool used in he es s was designed for
+ he 1:2.8 scale Tri-Trusses, i has he same ac ua ors, sof ware, and compu a ion archi ec ure
+as he version designed for he full scale s ruc ure. The es opera ions consis of picking up
+ wo TriTrusses from heir s owed loca ions and joining hem o a hird TriTruss moun ed
+on a es s and and joining hem o each o her. This cons i u es he firs hree modules of
+ he in-space assembled elescope concep ual design. The paper presen s he robo behavioral
+archi ec ure, he genera ed rajec ories commanded, he ac ual rajec ories of he robo , and
+ac ua or performance of he Grapple Tool.
 
 
 
-I. Introduction
+I. In roduc ion
 
 
 
-The contribution of this paper is a concept of operations for autonomous assembly of a modular space structure
-validated through hardware tests. In-space servicing, assembly, and manufacturing technologies have the potential
+The con ribu ion of his paper is a concep of opera ions for au onomous assembly of a modular space s ruc ure
+valida ed hrough hardware es s. In-space servicing, assembly, and manufac uring echnologies have he po en ial
 
 
 
-to revolutionize the space ecosystem. NASA’s On-orbit Servicing, Assembly, and Manufacturing 1 mission will
-demonstrate servicing of an existing spacecraft via teleoperated robotics [1]. The introduction of modular structural
-design and autonomous systems can greatly enhance repairability as well as enable new types of spacecraft. This paper
-represents a proof of concept for such an architecture. In the hardware tests presented herein, a Universal Robots UR10e
-manipulator was used to position structural modules to be joined. A custom robotic end-effector, known as the Grapple
-Tool, was used to both grasp modules at their stowed locations and attach them to other modules in the existing structure.
-Once attached, the robot applied a test load to verify the connection was successfully made. Results are presented for an
-assembly of three modules. Figure 1 shows the configuration in the Subscale In-Space Assembly Laboratory at NASA
-Langley Research Center, and figure 2 shows the final state after three modules have been joined.
+ o revolu ionize he space ecosys em. NASA’s On-orbi Servicing, Assembly, and Manufac uring 1 mission will
+demons ra e servicing of an exis ing spacecraf via eleopera ed robo ics [1]. The in roduc ion of modular s ruc ural
+design and au onomous sys ems can grea ly enhance repairabili y as well as enable new ypes of spacecraf . This paper
+represen s a proof of concep for such an archi ec ure. In he hardware es s presen ed herein, a Universal Robo s UR10e
+manipula or was used o posi ion s ruc ural modules o be joined. A cus om robo ic end-effec or, known as he Grapple
+Tool, was used o bo h grasp modules a heir s owed loca ions and a ach hem o o her modules in he exis ing s ruc ure.
+Once a ached, he robo applied a es load o verify he connec ion was successfully made. Resul s are presen ed for an
+assembly of hree modules. Figure 1 shows he configura ion in he Subscale In-Space Assembly Labora ory a NASA
+Langley Research Cen er, and figure 2 shows he final s a e af er hree modules have been joined.
 
 
 
-The testing was performed as part of NASA’s Precision Assembled Space Structure (PASS) project. The design
-reference mission of the project is construction of an in-space assembled telescope based on the concept proposed in the
-NASA in-Space Assembled Telescope (iSAT) Study [2]. The study concludes that in-space assembly is likely the only
-means to achieve a space telescope with aperture greater than 15 m. The design concept has a backbone truss structure
-composed of structural modules, dubbed TriTrusses [3, 4]. A mirror segment would be attached to each TriTruss. Figure
-3 shows the iSAT design concept. The iSAT mirror is 20 m in diameter. The PASS project will perform a full scale
-ground demonstration of the assembly of the backbone truss structure for the mirror. The results presented in this paper
-represent the first steps in the buildup to this demonstration.
+The es ing was performed as par of NASA’s Precision Assembled Space S ruc ure (PASS) projec . The design
+reference mission of he projec is cons ruc ion of an in-space assembled elescope based on he concep proposed in he
+NASA in-Space Assembled Telescope (iSAT) S udy [2]. The s udy concludes ha in-space assembly is likely he only
+means o achieve a space elescope wi h aper ure grea er han 15 m. The design concep has a backbone russ s ruc ure
+composed of s ruc ural modules, dubbed TriTrusses [3, 4]. A mirror segmen would be a ached o each TriTruss. Figure
+3 shows he iSAT design concep . The iSAT mirror is 20 m in diame er. The PASS projec will perform a full scale
+ground demons ra ion of he assembly of he backbone russ s ruc ure for he mirror. The resul s presen ed in his paper
+represen he firs s eps in he buildup o his demons ra ion.
 
 
 
-∗Research Aerospace Engineer, Autonomous Integrated Systems Research Branch, Mail Stop 233.
-†Research Aerospace Engineer, Structural Mechanics and Concepts Branch, Mail Stop 190, AIAA Young Professional Member
-‡Research Aerospace Engineer, Structural Dynamics Branch, Mail Stop 230, AIAA Professional Member
-§Robotics Engineer
-¶Autonomous Systems Software Developer
-‖Robotics Engineer
+∗Research Aerospace Engineer, Au onomous In egra ed Sys ems Research Branch, Mail S op 233.
+†Research Aerospace Engineer, S ruc ural Mechanics and Concep s Branch, Mail S op 190, AIAA Young Professional Member
+‡Research Aerospace Engineer, S ruc ural Dynamics Branch, Mail S op 230, AIAA Professional Member
+§Robo ics Engineer
+¶Au onomous Sys ems Sof ware Developer
+‖Robo ics Engineer
 
 
 
-∗∗Senior Software Developer
+∗∗Senior Sof ware Developer
 
 
 
@@ -94,12 +94,12 @@ represent the first steps in the buildup to this demonstration.
 
 
 
-Fig. 1 Starting state for TriTruss assembly test in the Subscale In-Space Assembly Laboratory at NASA Langley
-Research Center
+Fig. 1 S ar ing s a e for TriTruss assembly es in he Subscale In-Space Assembly Labora ory a NASA Langley
+Research Cen er
 
 
 
-Fig. 2 Fully assembled three-TriTruss system
+Fig. 2 Fully assembled hree-TriTruss sys em
 
 
 
@@ -115,51 +115,51 @@ Fig. 2 Fully assembled three-TriTruss system
 
 
 
-Fig. 3 In-Space Assembled Telescope design concept
+Fig. 3 In-Space Assembled Telescope design concep 
 
 
 
-The test results presented here use a 1:2.8 scale version of the TriTruss also referred to as the 1 m TriTruss since 1 m
-is the length of each side on the triangular face. A single 1 m TriTruss is shown in figure 4. The test results presented
-herein validate the robot trajectory generation pipeline and the Grapple Tool software. The Grapple Tool uses the same
-actuators, electronics, and software as the full scale version.
+The es resul s presen ed here use a 1:2.8 scale version of he TriTruss also referred o as he 1 m TriTruss since 1 m
+is he leng h of each side on he riangular face. A single 1 m TriTruss is shown in figure 4. The es resul s presen ed
+herein valida e he robo rajec ory genera ion pipeline and he Grapple Tool sof ware. The Grapple Tool uses he same
+ac ua ors, elec ronics, and sof ware as he full scale version.
 
 
 
-The remainder of the paper is organized as follows: section II details the methods used for robot trajectory generation,
-section III describes the Grapple Tool design, section IV presents the test procedure for assembling three TriTruss
-modules, section V provides test results and data, and finally conclusions are drawn in section VI.
+The remainder of he paper is organized as follows: sec ion II de ails he me hods used for robo rajec ory genera ion,
+sec ion III describes he Grapple Tool design, sec ion IV presen s he es procedure for assembling hree TriTruss
+modules, sec ion V provides es resul s and da a, and finally conclusions are drawn in sec ion VI.
 
 
 
-II. Trajectory Generation
-The Robot Operating System (ROS2) ecosystem is leveraged for trajectory generation and control of the manipulator
+II. Trajec ory Genera ion
+The Robo Opera ing Sys em (ROS2) ecosys em is leveraged for rajec ory genera ion and con rol of he manipula or
 
 
 
-[5]. The MoveIt motion planning software [6] is used to interface to the Open Motion Planning Library (OMPL) [7].
-Trajectory generation is performed using a model of the robot’s workspace with mesh representations of obstacles.
+[5]. The MoveI mo ion planning sof ware [6] is used o in erface o he Open Mo ion Planning Library (OMPL) [7].
+Trajec ory genera ion is performed using a model of he robo ’s workspace wi h mesh represen a ions of obs acles.
 
 
 
-A six degree of freedom end-effector goal state is provided. This corresponds either to the grasping pose for picking
-up a TriTruss or the insertion pose to connect the TriTruss to the rest of the structure. First, the robot inverse kinematics
-are used to find a robot joint state that satisfies the end-effector goal state. If the resulting joint state is valid, i.e. no
-constraints are violated (joint limits, collision constraints), a Cartesian motion planner finds a motion from the goal
-state to an approach point. This Cartesian motion is executed in reverse to bring the end-effector from the approach
-point to the goal state with the desired payload orientation. This step ensures that the goal state is reachable from the
-approach point. Next, the Rapidly-Exploring Random Trees (RRT) algorithm [8] is used to plan the gross motion from
-the starting state to the approach point. At each step of this pipeline, constraints are checked using a planning scene
-which represents all objects in the robot workspace.
+A six degree of freedom end-effec or goal s a e is provided. This corresponds ei her o he grasping pose for picking
+up a TriTruss or he inser ion pose o connec he TriTruss o he res of he s ruc ure. Firs , he robo inverse kinema ics
+are used o find a robo join s a e ha sa isfies he end-effec or goal s a e. If he resul ing join s a e is valid, i.e. no
+cons rain s are viola ed (join limi s, collision cons rain s), a Car esian mo ion planner finds a mo ion from he goal
+s a e o an approach poin . This Car esian mo ion is execu ed in reverse o bring he end-effec or from he approach
+poin o he goal s a e wi h he desired payload orien a ion. This s ep ensures ha he goal s a e is reachable from he
+approach poin . Nex , he Rapidly-Exploring Random Trees (RRT) algori hm [8] is used o plan he gross mo ion from
+ he s ar ing s a e o he approach poin . A each s ep of his pipeline, cons rain s are checked using a planning scene
+which represen s all objec s in he robo workspace.
 
 
 
 III. Grapple Tool
-The Grapple Tool is used to grasp and attach TriTrusses and was first presented in [9]. The version of the Grapple
+The Grapple Tool is used o grasp and a ach TriTrusses and was firs presen ed in [9]. The version of he Grapple
 
 
 
-Tool used in the tests presented here is designed for the 1:2.8 scale TriTrusses but retains all actuators and electronics,
+Tool used in he es s presen ed here is designed for he 1:2.8 scale TriTrusses bu re ains all ac ua ors and elec ronics,
 
 
 
@@ -175,7 +175,7 @@ Tool used in the tests presented here is designed for the 1:2.8 scale TriTrusses
 
 
 
-Fig. 4 1 meter TriTruss
+Fig. 4 1 me er TriTruss
 
 
 
@@ -195,60 +195,60 @@ Fig. 5 Grapple Tool
 
 
 
-and software of the full scale version. Therefore, these test results validate the Grapple Tool software requirements.
-Figure 5 shows the Grapple Tool used for the tests. It has three prongs for grasping each corner of the triangular
+and sof ware of he full scale version. Therefore, hese es resul s valida e he Grapple Tool sof ware requiremen s.
+Figure 5 shows he Grapple Tool used for he es s. I has hree prongs for grasping each corner of he riangular
 
 
 
-face of the TriTruss. Each prong has an identical set of actuators: three Dynamixel MX-106 rotary servos and one
-MightyZAP 12Lf-78PT-53 linear actuator. Figure 6 shows the configuration of the actuators at each end of the Grapple
-Tool. One rotary servo controls the Post Fingers which are used for grasping the TriTruss. Another rotary servo controls
-the Capture Fingers which grasp a Capture Post attached to the TriTruss that is to be joined with on the existing structure.
-This ensures fine alignment between the two TriTrusses. The final rotary servo is used to rotate the Lock Screwdriver
-while the linear actuator pushes it forward. This mechanism drives a bolt which joins the two TriTrusses.
+face of he TriTruss. Each prong has an iden ical se of ac ua ors: hree Dynamixel MX-106 ro ary servos and one
+Migh yZAP 12Lf-78PT-53 linear ac ua or. Figure 6 shows he configura ion of he ac ua ors a each end of he Grapple
+Tool. One ro ary servo con rols he Pos Fingers which are used for grasping he TriTruss. Ano her ro ary servo con rols
+ he Cap ure Fingers which grasp a Cap ure Pos a ached o he TriTruss ha is o be joined wi h on he exis ing s ruc ure.
+This ensures fine alignmen be ween he wo TriTrusses. The final ro ary servo is used o ro a e he Lock Screwdriver
+while he linear ac ua or pushes i forward. This mechanism drives a bol which joins he wo TriTrusses.
 
 
 
-IV. Test Procedure
-The initial conditions for the test consist of one TriTruss attached to a test stand and the robot and two other
+IV. Tes Procedure
+The ini ial condi ions for he es consis of one TriTruss a ached o a es s and and he robo and wo o her
 
 
 
-TriTrusses in predefined starting poses as shown in figures 1. The test was carried out as follows. Note that in future
-work, manual fine alignment steps will be replaced by a visual servoing algorithm discussed in [9].
+TriTrusses in predefined s ar ing poses as shown in figures 1. The es was carried ou as follows. No e ha in fu ure
+work, manual fine alignmen s eps will be replaced by a visual servoing algori hm discussed in [9].
 
 
 
-1) The robot plans a trajectory to pick up the first TriTruss using the trajectory generation algorithm of section II.
-2) Fine alignment is performed manually using the UR10e teach pendant.
-3) After fine alignment, the Post Fingers close on the TriTruss Grapple Post. At this point, the robot’s payload
+1) The robo plans a rajec ory o pick up he firs TriTruss using he rajec ory genera ion algori hm of sec ion II.
+2) Fine alignmen is performed manually using he UR10e each pendan .
+3) Af er fine alignmen , he Pos Fingers close on he TriTruss Grapple Pos . A his poin , he robo ’s payload
 
 
 
-information is updated using a mass model of the TriTruss.
-4) The trajectory generation algorithm is used to plan a trajectory to the insertion point for the first TriTruss.
-5) Again, manual fine alignment is performed.
-6) The robot switches into a compliance control mode and the Capture Fingers close on the Capture Post attached
+informa ion is upda ed using a mass model of he TriTruss.
+4) The rajec ory genera ion algori hm is used o plan a rajec ory o he inser ion poin for he firs TriTruss.
+5) Again, manual fine alignmen is performed.
+6) The robo swi ches in o a compliance con rol mode and he Cap ure Fingers close on he Cap ure Pos a ached
 
 
 
-to the TriTruss that is being joined. Compliance control allows the Capture Fingers to pull the robot into a final
-position such that the Lock Screwdriver can drive a bolt to join the two TriTrusses.
+ o he TriTruss ha is being joined. Compliance con rol allows he Cap ure Fingers o pull he robo in o a final
+posi ion such ha he Lock Screwdriver can drive a bol o join he wo TriTrusses.
 
 
 
-7) The Lock Screwdriver tightens the bolt to 8.4 Nm using torque feedback from the rotary servo. Once the bolt is
-tightened, the Lock Screwdriver backs out and the Capture Fingers open.
+7) The Lock Screwdriver igh ens he bol o 8.4 Nm using orque feedback from he ro ary servo. Once he bol is
+ igh ened, he Lock Screwdriver backs ou and he Cap ure Fingers open.
 
 
 
-8) The robot applies a 100 N test load in the axial direction of the bolt. This ensures the connection was successful.
-9) The robot payload information is updated to remove the previously held TriTruss.
+8) The robo applies a 100 N es load in he axial direc ion of he bol . This ensures he connec ion was successful.
+9) The robo payload informa ion is upda ed o remove he previously held TriTruss.
 
 
 
-10) Cartesian motion planner is used to drive the robot along a retreat path.
-11) Steps 1-10 are repeated with the second TriTruss to complete a three-truss assembly.
+10) Car esian mo ion planner is used o drive he robo along a re rea pa h.
+11) S eps 1-10 are repea ed wi h he second TriTruss o comple e a hree- russ assembly.
 
 
 
@@ -264,68 +264,68 @@ tightened, the Lock Screwdriver backs out and the Capture Fingers open.
 
 
 
-Fig. 6 Grapple Tool components
+Fig. 6 Grapple Tool componen s
 
 
 
-V. Results
+V. Resul s
 
 
 
-A. Robot Trajectories
-The joint positions and end-effector state of the robot during the assembly operation are shown in the following
+A. Robo Trajec ories
+The join posi ions and end-effec or s a e of he robo during he assembly opera ion are shown in he following
 
 
 
-figures. Figure 7 shows the joint positions for the first trial, figure 8 shows the end-effector states for the first trial, figure
-9 shows the joint positions for the second trial, and figure 10 shows the end-effector states for the second trial.
+figures. Figure 7 shows he join posi ions for he firs rial, figure 8 shows he end-effec or s a es for he firs rial, figure
+9 shows he join posi ions for he second rial, and figure 10 shows he end-effec or s a es for he second rial.
 
 
 
-In both trials the sensed joint positions tracked the desired positions. Slight tracking errors occur when the payload
-changes (TriTruss grabbed or let go) as the robot’s mechanical brakes are engaged during this step.
+In bo h rials he sensed join posi ions racked he desired posi ions. Sligh racking errors occur when he payload
+changes (TriTruss grabbed or le go) as he robo ’s mechanical brakes are engaged during his s ep.
 
 
 
-The end-effector state is represented in a fixed frame attached to the robot base. 𝑥, 𝑦, and 𝑧 represent the Cartesian
-position, and 𝜙, \, and 𝜓 represent 𝑥, 𝑦, and 𝑧 Euler angles respectively. Note the high frequency oscillations in 𝜙 are a
-result of angle wrapping between 𝜋 an −/𝑝𝑖, and this signal is not used for feedback.
+The end-effec or s a e is represen ed in a fixed frame a ached o he robo base. 𝑥, 𝑦, and 𝑧 represen he Car esian
+posi ion, and 𝜙, , and 𝜓 represen 𝑥, 𝑦, and 𝑧 Euler angles respec ively. No e he high frequency oscilla ions in 𝜙 are a
+resul of angle wrapping be ween 𝜋 an −/𝑝𝑖, and his signal is no used for feedback.
 
 
 
-B. Actuator Data
-Positions and currents are plotted for each Grapple Tool actuator during three trials of TriTruss attachment. Figure
+B. Ac ua or Da a
+Posi ions and curren s are plo ed for each Grapple Tool ac ua or during hree rials of TriTruss a achmen . Figure
 
 
 
-11 shows these data for the rotary servo that drives the Capture Fingers as they close around the Capture Post.
-Figure 12 shows the position and current of the rotary servo of the Lock Screwdriver as the bolt is being tightened,
+11 shows hese da a for he ro ary servo ha drives he Cap ure Fingers as hey close around he Cap ure Pos .
+Figure 12 shows he posi ion and curren of he ro ary servo of he Lock Screwdriver as he bol is being igh ened,
 
 
 
-and figure 13 shows the same for the linear actuator of the Lock Screwdriver. Note figure 13 includes the linear actuator
-backing out after successfully driving the bolt.
+and figure 13 shows he same for he linear ac ua or of he Lock Screwdriver. No e figure 13 includes he linear ac ua or
+backing ou af er successfully driving he bol .
 
 
 
-Figure 14 shows the position and current for the rotary servo that drives the Capture Fingers as they open after the
-Lock Screwdriver successfully drives the bolt.
+Figure 14 shows he posi ion and curren for he ro ary servo ha drives he Cap ure Fingers as hey open af er he
+Lock Screwdriver successfully drives he bol .
 
 
 
-Finally, figures 15 and 16 show the position and current of the Lock Screwdriver rotary and linear actuators
-respectively as the bolt is being removed.
+Finally, figures 15 and 16 show he posi ion and curren of he Lock Screwdriver ro ary and linear ac ua ors
+respec ively as he bol is being removed.
 
 
 
-C. Test Load Data
-After joining the TriTrusses, the robot was used to apply a 100 N test load in the direction of the bolt axis. This
+C. Tes Load Da a
+Af er joining he TriTrusses, he robo was used o apply a 100 N es load in he direc ion of he bol axis. This
 
 
 
-ensures that the connection was successful. A force/torque sensor built in to the UR10e was used to verify this load.
-Figure 17 shows the force data in this direction while the test load was applied during the three TriTruss attachment
-trials.
+ensures ha he connec ion was successful. A force/ orque sensor buil in o he UR10e was used o verify his load.
+Figure 17 shows he force da a in his direc ion while he es load was applied during he hree TriTruss a achmen 
+ rials.
 
 
 
@@ -354,7 +354,7 @@ in
 
 
 
-t 
+ 
 0
 
 
@@ -372,7 +372,7 @@ in
 
 
 
-t 
+ 
 1
 
 
@@ -394,7 +394,7 @@ in
 
 
 
-t 
+ 
 2
 
 
@@ -412,7 +412,7 @@ in
 
 
 
-t 
+ 
 3
 
 
@@ -434,13 +434,13 @@ in
 
 
 
-t 
+ 
 4
 
 
 
 0 200 400 600 800 1000 1200
-time (s)
+ ime (s)
 
 
 
@@ -457,7 +457,7 @@ in
 
 
 
-t 
+ 
 5 desired
 
 
@@ -471,13 +471,13 @@ in
 
 
 
-t 
+ 
 po
 
 
 
 si
-ti
+ i
 
 
 
@@ -491,7 +491,7 @@ d)
 
 
 
-Fig. 7 Robot joint angles commanded and measured during trial 1
+Fig. 7 Robo join angles commanded and measured during rial 1
 
 
 
@@ -609,7 +609,7 @@ d)
 
 
 0 200 400 600 800 1000 1200
-time (s)
+ ime (s)
 
 
 
@@ -634,7 +634,7 @@ d)
 
 
 
-Fig. 8 End-effector state during trial 1
+Fig. 8 End-effec or s a e during rial 1
 
 
 
@@ -663,7 +663,7 @@ in
 
 
 
-t 
+ 
 0
 
 
@@ -685,7 +685,7 @@ in
 
 
 
-t 
+ 
 1
 
 
@@ -707,7 +707,7 @@ in
 
 
 
-t 
+ 
 2
 
 
@@ -725,7 +725,7 @@ in
 
 
 
-t 
+ 
 3
 
 
@@ -747,13 +747,13 @@ in
 
 
 
-t 
+ 
 4
 
 
 
 0 200 400 600 800 1000
-time (s)
+ ime (s)
 
 
 
@@ -770,7 +770,7 @@ in
 
 
 
-t 
+ 
 5
 
 
@@ -785,13 +785,13 @@ in
 
 
 
-t 
+ 
 po
 
 
 
 si
-ti
+ i
 
 
 
@@ -805,7 +805,7 @@ d)
 
 
 
-Fig. 9 Robot joint angles commanded and measured during trial 2
+Fig. 9 Robo join angles commanded and measured during rial 2
 
 
 
@@ -919,7 +919,7 @@ d)
 
 
 0 200 400 600 800 1000
-time (s)
+ ime (s)
 
 
 
@@ -944,7 +944,7 @@ d)
 
 
 
-Fig. 10 End-effector state during trial 2
+Fig. 10 End-effec or s a e during rial 2
 
 
 
@@ -960,28 +960,28 @@ Fig. 10 End-effector state during trial 2
 
 
 
-(a) Position (b) Current
+(a) Posi ion (b) Curren 
 
 
 
-Fig. 11 Position and current for the Capture Fingers actuator as the Capture Fingers closed around the Capture
-Post
+Fig. 11 Posi ion and curren for he Cap ure Fingers ac ua or as he Cap ure Fingers closed around he Cap ure
+Pos 
 
 
 
-(a) Position (b) Current
+(a) Posi ion (b) Curren 
 
 
 
-Fig. 12 Position and current for the rotary servo of the Lock Screwdriver as the bolt is being tightened
+Fig. 12 Posi ion and curren for he ro ary servo of he Lock Screwdriver as he bol is being igh ened
 
 
 
-(a) Position (b) Current
+(a) Posi ion (b) Curren 
 
 
 
-Fig. 13 Position and current for the linear actuator of the Lock Screwdriver as the bolt is being tightened
+Fig. 13 Posi ion and curren for he linear ac ua or of he Lock Screwdriver as he bol is being igh ened
 
 
 
@@ -997,28 +997,28 @@ Fig. 13 Position and current for the linear actuator of the Lock Screwdriver as 
 
 
 
-(a) Position (b) Current
+(a) Posi ion (b) Curren 
 
 
 
-Fig. 14 Position and current for the Capture Fingers actuator as the Capture Fingers open after the Lock
-Screwdriver successfully screws the bolt
+Fig. 14 Posi ion and curren for he Cap ure Fingers ac ua or as he Cap ure Fingers open af er he Lock
+Screwdriver successfully screws he bol 
 
 
 
-(a) Position (b) Current
+(a) Posi ion (b) Curren 
 
 
 
-Fig. 15 Position and current for the rotary servo of the Lock Screwdriver as the bolt is being removed
+Fig. 15 Posi ion and curren for he ro ary servo of he Lock Screwdriver as he bol is being removed
 
 
 
-(a) Position (b) Current
+(a) Posi ion (b) Curren 
 
 
 
-Fig. 16 Position and current for the linear actuator of the Lock Screwdriver as the bolt is being removed
+Fig. 16 Posi ion and curren for he linear ac ua or of he Lock Screwdriver as he bol is being removed
 
 
 
@@ -1034,65 +1034,65 @@ Fig. 16 Position and current for the linear actuator of the Lock Screwdriver as 
 
 
 
-Fig. 17 Force applied during test load
+Fig. 17 Force applied during es load
 
 
 
 VI. Conclusion
-The test results presented here verify the feasibility and repeatability of the autonomous assembly concept of
+The es resul s presen ed here verify he feasibili y and repea abili y of he au onomous assembly concep of
 
 
 
-operations. This basic concept can be used to enable new types of spacecraft that can be easily repaired, extended,
-and evolved. The remaining gap is how to integrate visual servoing for fine alignment. Future work will explore this
-concept. Additionally, future tests will further enhance the reliability of the autonomous systems by demonstrating
-larger assemblies with more TriTrusses, and testing with the full scale, 2.8 m TriTrusses and Grapple Tool.
+opera ions. This basic concep can be used o enable new ypes of spacecraf ha can be easily repaired, ex ended,
+and evolved. The remaining gap is how o in egra e visual servoing for fine alignmen . Fu ure work will explore his
+concep . Addi ionally, fu ure es s will fur her enhance he reliabili y of he au onomous sys ems by demons ra ing
+larger assemblies wi h more TriTrusses, and es ing wi h he full scale, 2.8 m TriTrusses and Grapple Tool.
 
 
 
 References
-[1] NASA, “OSAM-1 Mission On-orbit Servicing, Assembly, and Manufacturing 1,” , 2022. URL https://nexis.gsfc.nasa.
-gov/osam-1.html.
+[1] NASA, “OSAM-1 Mission On-orbi Servicing, Assembly, and Manufac uring 1,” , 2022. URL h ps://nexis.gsfc.nasa.
+gov/osam-1.h ml.
 
 
 
-[2] Mukherjee, R., Siegler, N., and Thronson, H., “The future of space astronomy will be built: results from the in-space astronomical
-telescope (iSAT) assembly design study,” 70th International Astronautical Congress, 2019.
+[2] Mukherjee, R., Siegler, N., and Thronson, H., “The fu ure of space as ronomy will be buil : resul s from he in-space as ronomical
+ elescope (iSAT) assembly design s udy,” 70 h In erna ional As ronau ical Congress, 2019.
 
 
 
-[3] Doggett, W., Dorsey, J., Jones, T., Mikulas, M., Teter, J., and Paddock, D., “TriTruss: a new and novel structural concept enabling
-modular space telescopes and space platforms,” International Astronautical Congress, 2019.
+[3] Dogge , W., Dorsey, J., Jones, T., Mikulas, M., Te er, J., and Paddock, D., “TriTruss: a new and novel s ruc ural concep enabling
+modular space elescopes and space pla forms,” In erna ional As ronau ical Congress, 2019.
 
 
 
-[4] Simmons, L., and Song, K., “Testing of Bonds in a TriTruss Module,” AIAA SCITECH 2023 Forum, 2023, p. 1700.
+[4] Simmons, L., and Song, K., “Tes ing of Bonds in a TriTruss Module,” AIAA SCITECH 2023 Forum, 2023, p. 1700.
 
 
 
-[5] Macenski, S., Foote, T., Gerkey, B., Lalancette, C., and Woodall, W., “Robot Operating System 2: Design, architecture, and
-uses in the wild,” Science Robotics, Vol. 7, No. 66, 2022, p. eabm6074. https://doi.org/10.1126/scirobotics.abm6074, URL
-https://www.science.org/doi/abs/10.1126/scirobotics.abm6074.
+[5] Macenski, S., Foo e, T., Gerkey, B., Lalance e, C., and Woodall, W., “Robo Opera ing Sys em 2: Design, archi ec ure, and
+uses in he wild,” Science Robo ics, Vol. 7, No. 66, 2022, p. eabm6074. h ps://doi.org/10.1126/scirobo ics.abm6074, URL
+h ps://www.science.org/doi/abs/10.1126/scirobo ics.abm6074.
 
 
 
-[6] Coleman, D., Sucan, I., Chitta, S., and Correll, N., “Reducing the barrier to entry of complex robotic software: a moveit! case
-study,” arXiv preprint arXiv:1404.3785, 2014.
+[6] Coleman, D., Sucan, I., Chi a, S., and Correll, N., “Reducing he barrier o en ry of complex robo ic sof ware: a movei ! case
+s udy,” arXiv preprin arXiv:1404.3785, 2014.
 
 
 
-[7] Sucan, I. A., Moll, M., and Kavraki, L. E., “The open motion planning library,” IEEE Robotics & Automation Magazine, Vol. 19,
+[7] Sucan, I. A., Moll, M., and Kavraki, L. E., “The open mo ion planning library,” IEEE Robo ics & Au oma ion Magazine, Vol. 19,
 No. 4, 2012, pp. 72–82.
 
 
 
-[8] LaValle, S. M., and Kuffner Jr, J. J., “Randomized kinodynamic planning,” The international journal of robotics research,
+[8] LaValle, S. M., and Kuffner Jr, J. J., “Randomized kinodynamic planning,” The in erna ional journal of robo ics research,
 Vol. 20, No. 5, 2001, pp. 378–400.
 
 
 
-[9] Kelley, B. N., Cooper, J. R., Puig-Navarro, J., Vaughan, M., Waltz, W. J., Allen, B. D., Doggett, W., Avila, T. V., McQuarry,
-A. K., Shazly, S. A., et al., “Designing a Software Architecture for the Precision Assembly of Space Structures,” AIAA SCITECH
+[9] Kelley, B. N., Cooper, J. R., Puig-Navarro, J., Vaughan, M., Wal z, W. J., Allen, B. D., Dogge , W., Avila, T. V., McQuarry,
+A. K., Shazly, S. A., e al., “Designing a Sof ware Archi ec ure for he Precision Assembly of Space S ruc ures,” AIAA SCITECH
 2022 Forum, 2022, p. 2077.
 
 
@@ -1103,43 +1103,43 @@ A. K., Shazly, S. A., et al., “Designing a Software Architecture for the Preci
 
 
 
-https://nexis.gsfc.nasa.gov/osam-1.html
+h ps://nexis.gsfc.nasa.gov/osam-1.h ml
 
 
-https://nexis.gsfc.nasa.gov/osam-1.html
+h ps://nexis.gsfc.nasa.gov/osam-1.h ml
 
 
-https://doi.org/10.1126/scirobotics.abm6074
+h ps://doi.org/10.1126/scirobo ics.abm6074
 
 
-https://www.science.org/doi/abs/10.1126/scirobotics.abm6074
+h ps://www.science.org/doi/abs/10.1126/scirobo ics.abm6074
 
 
 
- 
-Introduction
+	
+In roduc ion
 
- 
-Trajectory Generation
+	
+Trajec ory Genera ion
 
- 
+	
 Grapple Tool
 
- 
-Test Procedure
+	
+Tes Procedure
 
- 
-Results
+	
+Resul s
 
- 
-Robot Trajectories
+	
+Robo Trajec ories
 
- 
-Actuator Data
+	
+Ac ua or Da a
 
- 
-Test Load Data
+	
+Tes Load Da a
 
 
- 
+	
 Conclusion

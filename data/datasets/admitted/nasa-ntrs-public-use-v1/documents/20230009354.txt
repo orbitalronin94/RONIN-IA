@@ -11,57 +11,57 @@ FLIGHT VEHICLE PERFORMANCE ANALYSIS
 
 
 
-Evan J. Anzalone,* Nicholas Hoen,† Thomas Park‡ , and Charles Weyandt§ 
+Evan J. Anzalone,* Nicholas Hoen,† Thomas Park‡ , and Charles Weyand § 
 
 
 
-… or, “It’s in the details, how to make complicated software perform like com-
-plicated hardware.” In attempts to minimize development time and quickly build 
-an operational vehicle, NASA’s Space Launch System (SLS) has had to be inten-
-tional about integrated testing. Constraints on budget and schedule have required 
-balance between testing needs and the desire for an integrated flight vehicle as 
-soon as possible. To provide key insights early in design and analysis cycles, a 
-large amount of effort has shifted into maturing and validating models at the com-
-ponent level with integrated testing as a means to validate their integration. In 
-terms of SLS Navigation, this, and the model-based design approach have pushed 
-explicit requirements for sensor models to be validated against flight hardware to 
-high precision. This paper covers the approach taken to verify and validate the 
-models for the two key navigation sensors on the SLS vehicle, the Redundant 
-Inertial Navigation Sensor and the Rate Gyro Assembly. These models are used 
-in performance evaluation, fault detection, and operations development exten-
-sively. Using a mix of data from hardware vendor documentation and testing re-
-ports, limited in-house testing, and integration activities, these models were able 
-to be validated against flight hardware at multiple levels, from the internal soft-
-ware design to statistical behavior at the raw sensor and integrated box levels. The 
-high level of insight into the hardware elements is instrumental to support flight 
-certification activities and building confidence in SLS Navigation capability. Fo-
-cused testing enabled additional insight and validation that proved invaluable and 
-the resulting insights were used to focus and mature models. Additionally, of hav-
-ing validated performance-based hardware models enables a wide breadth of ac-
-tivities including detailed fault detection studies and integration into future vehi-
-cle frameworks, such as an upper stage and provide a valuable asset to continued 
+… or, “I ’s in he de ails, how o make complica ed sof ware perform like com-
+plica ed hardware.” In a emp s o minimize developmen ime and quickly build 
+an opera ional vehicle, NASA’s Space Launch Sys em (SLS) has had o be in en-
+ ional abou in egra ed es ing. Cons rain s on budge and schedule have required 
+balance be ween es ing needs and he desire for an in egra ed fligh vehicle as 
+soon as possible. To provide key insigh s early in design and analysis cycles, a 
+large amoun of effor has shif ed in o ma uring and valida ing models a he com-
+ponen level wi h in egra ed es ing as a means o valida e heir in egra ion. In 
+ erms of SLS Naviga ion, his, and he model-based design approach have pushed 
+explici requiremen s for sensor models o be valida ed agains fligh hardware o 
+high precision. This paper covers he approach aken o verify and valida e he 
+models for he wo key naviga ion sensors on he SLS vehicle, he Redundan 
+Iner ial Naviga ion Sensor and he Ra e Gyro Assembly. These models are used 
+in performance evalua ion, faul de ec ion, and opera ions developmen ex en-
+sively. Using a mix of da a from hardware vendor documen a ion and es ing re-
+por s, limi ed in-house es ing, and in egra ion ac ivi ies, hese models were able 
+ o be valida ed agains fligh hardware a mul iple levels, from he in ernal sof -
+ware design o s a is ical behavior a he raw sensor and in egra ed box levels. The 
+high level of insigh in o he hardware elemen s is ins rumen al o suppor fligh 
+cer ifica ion ac ivi ies and building confidence in SLS Naviga ion capabili y. Fo-
+cused es ing enabled addi ional insigh and valida ion ha proved invaluable and 
+ he resul ing insigh s were used o focus and ma ure models. Addi ionally, of hav-
+ing valida ed performance-based hardware models enables a wide bread h of ac-
+ ivi ies including de ailed faul de ec ion s udies and in egra ion in o fu ure vehi-
+cle frameworks, such as an upper s age and provide a valuable asse o con inued 
 SLS analysis and design. 
 
 
 
 INTRODUCTION 
-Inserting a payload accurately into a defined orbit is the major requirement of any launch vehicle system. 
+Inser ing a payload accura ely in o a defined orbi is he major requiremen of any launch vehicle sys em. 
 
 
 
-For large vehicles that take years to design, build and fly, verifying this requirement is very complex, espe-
-cially when test flight opportunities are limited or are not available. For the Space Launch System (SLS), a 
-large number of requirements are verified through a combinations of hardware and software testing ̶ both at 
-the component level and at the integrated system level. Hardware characterization is used to feed the devel-
-opment of software models that are used in 6 degree of freedom simulation and hardware-in-the-loop testing. 
+For large vehicles ha ake years o design, build and fly, verifying his requiremen is very complex, espe-
+cially when es fligh oppor uni ies are limi ed or are no available. For he Space Launch Sys em (SLS), a 
+large number of requiremen s are verified hrough a combina ions of hardware and sof ware es ing ̶ bo h a 
+ he componen level and a he in egra ed sys em level. Hardware charac eriza ion is used o feed he devel-
+opmen of sof ware models ha are used in 6 degree of freedom simula ion and hardware-in- he-loop es ing. 
 
 
 
  
-* SLS Navigation co-Lead, EV42 Guidance, Navigation, and Mission Analysis Branch, NASA/MSFC, Huntsville, AL 35801 
-† Aerospace Engineer, EV42 Guidance, Navigation, and Mission Analysis Branch, ESSCA Dynetics, Huntsville, AL 35801 
-‡‡ SLS Navigation co-Lead, EV42 Guidance, Navigation, and Mission Analysis Branch ESSCA/DCI, Huntsville, AL 35801 
-§ Aerospace Engineer, EV42 Guidance Navigation and Mission Analysis Branch , ESSCA/Insight Global, Huntsville, AL, 35801 
+* SLS Naviga ion co-Lead, EV42 Guidance, Naviga ion, and Mission Analysis Branch, NASA/MSFC, Hun sville, AL 35801 
+† Aerospace Engineer, EV42 Guidance, Naviga ion, and Mission Analysis Branch, ESSCA Dyne ics, Hun sville, AL 35801 
+‡‡ SLS Naviga ion co-Lead, EV42 Guidance, Naviga ion, and Mission Analysis Branch ESSCA/DCI, Hun sville, AL 35801 
+§ Aerospace Engineer, EV42 Guidance Naviga ion and Mission Analysis Branch , ESSCA/Insigh Global, Hun sville, AL, 35801 
 
 
 
@@ -77,72 +77,72 @@ opment of software models that are used in 6 degree of freedom simulation and ha
 
 
 
-These hardware and software models are used to demonstrate system capability across a wide variety of 
-vehicle configurations, launch environments, as well as robustness to off-nominal conditions. Cross-compar-
-ison between simulations at various level of hardware integration and with independent model implementa-
-tions are used to provide the necessary evidence to ensure the models are a consistent and accurate represen-
-tation of the system under design. 
+These hardware and sof ware models are used o demons ra e sys em capabili y across a wide varie y of 
+vehicle configura ions, launch environmen s, as well as robus ness o off-nominal condi ions. Cross-compar-
+ison be ween simula ions a various level of hardware in egra ion and wi h independen model implemen a-
+ ions are used o provide he necessary evidence o ensure he models are a consis en and accura e represen-
+ a ion of he sys em under design. 
 
 
 
-This approach is in contrast to that used on other programs, where the vehicle matures through cycles of 
-increased capability, such as the Saturn program, and similar recent development programs, such as that of 
-SpaceX*† or Blue Origin‡, which utilize extensive flight testing and demonstration as secondary missions to 
-evolving integrated capability. Due to the vehicle complexity, schedule, and cost constraints, SLS is allocat-
-ing one test flight, Artemis 1, to demonstrate integrated vehicle capability prior to human flight. As such, 
-there is increased focus and attention to certification activities from individual hardware components up to 
-an integrated stage, with testing focused on filling in analysis gaps, validating software models, and demon-
-strating integration performance prior to integrated vehicle flight. 
+This approach is in con ras o ha used on o her programs, where he vehicle ma ures hrough cycles of 
+increased capabili y, such as he Sa urn program, and similar recen developmen programs, such as ha of 
+SpaceX*† or Blue Origin‡, which u ilize ex ensive fligh es ing and demons ra ion as secondary missions o 
+evolving in egra ed capabili y. Due o he vehicle complexi y, schedule, and cos cons rain s, SLS is alloca -
+ing one es fligh , Ar emis 1, o demons ra e in egra ed vehicle capabili y prior o human fligh . As such, 
+ here is increased focus and a en ion o cer ifica ion ac ivi ies from individual hardware componen s up o 
+an in egra ed s age, wi h es ing focused on filling in analysis gaps, valida ing sof ware models, and demon-
+s ra ing in egra ion performance prior o in egra ed vehicle fligh . 
 
 
 
-This paper documents the approach taken to verify and validate the navigation subsystem of the SLS 
-Block 1 vehicle. The two key elements of this are the navigation hardware and performance models. A de-
-scription of the data products, their source, and their integration are included to provide insight into the sys-
-tem’s capability. Both verification activities, which ensures that the model of the system matches the speci-
-fication, and validation activities, which involves comparisons of the model performance to flight hardware 
-data, detailed in this paper. Together these provide insight into a recommended approach for the usage of 
-models in navigation system design for critical flight systems. 
+This paper documen s he approach aken o verify and valida e he naviga ion subsys em of he SLS 
+Block 1 vehicle. The wo key elemen s of his are he naviga ion hardware and performance models. A de-
+scrip ion of he da a produc s, heir source, and heir in egra ion are included o provide insigh in o he sys-
+ em’s capabili y. Bo h verifica ion ac ivi ies, which ensures ha he model of he sys em ma ches he speci-
+fica ion, and valida ion ac ivi ies, which involves comparisons of he model performance o fligh hardware 
+da a, de ailed in his paper. Toge her hese provide insigh in o a recommended approach for he usage of 
+models in naviga ion sys em design for cri ical fligh sys ems. 
 
 
 
 SLS MODEL-BASED ENGINEERING APPROACH 
-In order to streamline the development process and updates in computational models and process, the 
+In order o s reamline he developmen process and upda es in compu a ional models and process, he 
 
 
 
-SLS program shifted away from a paperwork- and requirement-centric approach to systems capability defi-
-nitions and vehicle design. Lessons learned from the Constellation program led to the implementation of a 
-model-centric approach to vehicle design and internal collaboration among disciplines. In this definition, 
-models can capture multiple facets and include such artifacts as a 3D model, a table of data, or executable 
-code representing some portion of the vehicle. This is in contrast to the use of written documentation to pass 
-requirements between systems and capture design elements. The impact of this is not to eliminate documen-
-tation, but to focus it and allow the models themselves to capture design elements and performance criteria. 
-Similarly including traceability within models is important for documentation and later reference. Addition-
-ally, with the capturing of this information into executable models, it is also possible to gain more insight to 
-integrated systems due to the increased capability and performance of subsystem models. 
+SLS program shif ed away from a paperwork- and requiremen -cen ric approach o sys ems capabili y defi-
+ni ions and vehicle design. Lessons learned from he Cons ella ion program led o he implemen a ion of a 
+model-cen ric approach o vehicle design and in ernal collabora ion among disciplines. In his defini ion, 
+models can cap ure mul iple face s and include such ar ifac s as a 3D model, a able of da a, or execu able 
+code represen ing some por ion of he vehicle. This is in con ras o he use of wri en documen a ion o pass 
+requiremen s be ween sys ems and cap ure design elemen s. The impac of his is no o elimina e documen-
+ a ion, bu o focus i and allow he models hemselves o cap ure design elemen s and performance cri eria. 
+Similarly including raceabili y wi hin models is impor an for documen a ion and la er reference. Addi ion-
+ally, wi h he cap uring of his informa ion in o execu able models, i is also possible o gain more insigh o 
+in egra ed sys ems due o he increased capabili y and performance of subsys em models. 
 
 
 
-For such a large vehicle as SLS, flight testing can be schedule- and cost-limited due to available budget 
-and desired system capability on-dates. This does not reduce the need for confidence in the design being safe, 
-reliable, and meeting performance capabilities prior to flight, particularly for a manned vehicle; instead, it 
-places additional burden on pre-flight analysis to ensure a successful mission. These models thus become 
-key anchors of vehicle integrated analysis and confidence in vehicle performance. The maturity of these grow 
-throughout the program to match hardware design maturity and eventually are used in integrated vehicle 
-simulation models with as much hardware as possible to generate evidence to demonstrate expected vehicle 
-performance. Similarly, additional burden must be taken to ensure the validity and official approval of these 
-models and their results. For SLS, this encompasses the Design Math Model (DMM) processes for model 
-acceptance and release among program elements. A description of this process in detail with regards to the 
-SLS GNC is provided in Emerson et al. 1 
+For such a large vehicle as SLS, fligh es ing can be schedule- and cos -limi ed due o available budge 
+and desired sys em capabili y on-da es. This does no reduce he need for confidence in he design being safe, 
+reliable, and mee ing performance capabili ies prior o fligh , par icularly for a manned vehicle; ins ead, i 
+places addi ional burden on pre-fligh analysis o ensure a successful mission. These models hus become 
+key anchors of vehicle in egra ed analysis and confidence in vehicle performance. The ma uri y of hese grow 
+ hroughou he program o ma ch hardware design ma uri y and even ually are used in in egra ed vehicle 
+simula ion models wi h as much hardware as possible o genera e evidence o demons ra e expec ed vehicle 
+performance. Similarly, addi ional burden mus be aken o ensure he validi y and official approval of hese 
+models and heir resul s. For SLS, his encompasses he Design Ma h Model (DMM) processes for model 
+accep ance and release among program elemen s. A descrip ion of his process in de ail wi h regards o he 
+SLS GNC is provided in Emerson e al. 1 
 
 
 
  
-*https://www.nextbigfuture.com/2018/12/reverse-engineering-spacex-to-learn-how-to-speed-up-technological-develop-
-ment.html 
-† https://www.airspacemag.com/space/is-spacex-changing-the-rocket-equation-132285884/?page=1 
-‡ https://www.engadget.com/2018/02/28/blue-origin-spacex-space-race/ 
+*h ps://www.nex bigfu ure.com/2018/12/reverse-engineering-spacex- o-learn-how- o-speed-up- echnological-develop-
+men .h ml 
+† h ps://www.airspacemag.com/space/is-spacex-changing- he-rocke -equa ion-132285884/?page=1 
+‡ h ps://www.engadge .com/2018/02/28/blue-origin-spacex-space-race/ 
 
 
 
@@ -158,74 +158,74 @@ ment.html
 
 
 
-A major model used to assess the launch vehicle insertion capability, from a guidance and navigation 
-perspective, is the Inertial Navigation System model. This software model mimics the inertial sensor behav-
-ior, onboard software processing, and navigation algorithms that result in an integrated navigation state---
-position, velocity, and attitude---that is used in closed-loop guidance and steering algorithms to meet vehicle-
-level performance requirements. The development, verification, and validation of the SLS INS model has 
-been ongoing for several years. This effort has recently completed in advance of Flight Readiness Analysis 
-Cycle and Design Critical Review activities leading towards the Artemis-1 mission. 
+A major model used o assess he launch vehicle inser ion capabili y, from a guidance and naviga ion 
+perspec ive, is he Iner ial Naviga ion Sys em model. This sof ware model mimics he iner ial sensor behav-
+ior, onboard sof ware processing, and naviga ion algori hms ha resul in an in egra ed naviga ion s a e---
+posi ion, veloci y, and a i ude--- ha is used in closed-loop guidance and s eering algori hms o mee vehicle-
+level performance requiremen s. The developmen , verifica ion, and valida ion of he SLS INS model has 
+been ongoing for several years. This effor has recen ly comple ed in advance of Fligh Readiness Analysis 
+Cycle and Design Cri ical Review ac ivi ies leading owards he Ar emis-1 mission. 
 
 
 
 GNC MODEL DEVELOPMENT RESPONSIBILITIES 
-The SLS Stages Element is responsible for integrating with the Prime Contractor, Boeing, for the design 
+The SLS S ages Elemen is responsible for in egra ing wi h he Prime Con rac or, Boeing, for he design 
 
 
 
-and procurement of component-and system-level hardware based on NASA-provided requirements. The in-
-ertial sensors used in the GN&C architecture for the SLS Block 1 configuration are the Redundant Inertial 
-Navigation Unit (RINU) and the Rate Gyro Assembly (RGA). The Stages Element also has the responsibility 
-of developing any necessary models of the hardware and embedded software of these GN&C sensors. These 
-models would be of sufficient fidelity for integration into Hardware in the Loop (HWIL) laboratories as well 
-into vehicle 6-DOF analysis simulations. 
+and procuremen of componen -and sys em-level hardware based on NASA-provided requiremen s. The in-
+er ial sensors used in he GN&C archi ec ure for he SLS Block 1 configura ion are he Redundan Iner ial 
+Naviga ion Uni (RINU) and he Ra e Gyro Assembly (RGA). The S ages Elemen also has he responsibili y 
+of developing any necessary models of he hardware and embedded sof ware of hese GN&C sensors. These 
+models would be of sufficien fideli y for in egra ion in o Hardware in he Loop (HWIL) labora ories as well 
+in o vehicle 6-DOF analysis simula ions. 
 
 
 
-Vehicle Management (VM) is responsible for the vehicle Mission and Fault Management algorithms, 
-GN&C design, and integrated performance assessment. A major component of this performance assessment 
-for GN&C is based on vehicle 6-DOF simulation analysis. It also is the responsibility of VM to integrate the 
-GN&C sensor models, provided by the Stages element, into any analysis tools—including 6-DOF simulation 
-tools—used in the performance assessments of the GN&C design. 
+Vehicle Managemen (VM) is responsible for he vehicle Mission and Faul Managemen algori hms, 
+GN&C design, and in egra ed performance assessmen . A major componen of his performance assessmen 
+for GN&C is based on vehicle 6-DOF simula ion analysis. I also is he responsibili y of VM o in egra e he 
+GN&C sensor models, provided by he S ages elemen , in o any analysis ools—including 6-DOF simula ion 
+ ools—used in he performance assessmen s of he GN&C design. 
 
 
 
-Through the Stages Element, the hardware vendor provided to the SLS Navigation Team detailed docu-
-mentation and insight on the design and functionality of the RINU and the RGA. This documentation in-
-cluded information on the different sensor error parameters modelled in the Vendor’s own analysis tools as 
-well as details on the contribution of each of these error sources on integrated navigation performance. The 
-Navigation Team also had access to Vendor test data with which to anchor the sensor error models and the 
-performance of the integrated navigation model. The Vendor shared with the team information on the im-
-plementation of algorithms used in the inertial measurement processing as well as in the navigation state 
-estimation. This insight into the internal software of the GN&C sensors also including details on the fault-
-detection capability of the hardware. Through these data deliveries, along with numerous technical data ex-
-changes, the Navigation team gained a level of insight into the hardware and software design, internal and 
-external data interfaces, system performance, and integrated testing of the avionics components allowed the 
-Navigation Team to develop high-fidelity performance models of the navigation sensors. 
+Through he S ages Elemen , he hardware vendor provided o he SLS Naviga ion Team de ailed docu-
+men a ion and insigh on he design and func ionali y of he RINU and he RGA. This documen a ion in-
+cluded informa ion on he differen sensor error parame ers modelled in he Vendor’s own analysis ools as 
+well as de ails on he con ribu ion of each of hese error sources on in egra ed naviga ion performance. The 
+Naviga ion Team also had access o Vendor es da a wi h which o anchor he sensor error models and he 
+performance of he in egra ed naviga ion model. The Vendor shared wi h he eam informa ion on he im-
+plemen a ion of algori hms used in he iner ial measuremen processing as well as in he naviga ion s a e 
+es ima ion. This insigh in o he in ernal sof ware of he GN&C sensors also including de ails on he faul -
+de ec ion capabili y of he hardware. Through hese da a deliveries, along wi h numerous echnical da a ex-
+changes, he Naviga ion eam gained a level of insigh in o he hardware and sof ware design, in ernal and 
+ex ernal da a in erfaces, sys em performance, and in egra ed es ing of he avionics componen s allowed he 
+Naviga ion Team o develop high-fideli y performance models of he naviga ion sensors. 
 
 
 
-The Redundant Inertial Navigation Unit (RINU) is a one-fault tolerant Inertial Navigation System that 
-produces an integrated navigation state---position, velocity, and attitude---as well as angular rate and linear 
-acceleration data for use in the vehicle control software. To support the one-fault tolerance, the RINU con-
-tains redundant accelerometers and gyroscopes as well as Fault Detection, Isolation, and Recovery (FDIR) 
-software used to detect failed sensors and prevents data from failed sensors from being used for any output 
-data. To initialize the navigation system, the RINU performs Gyrocompass Alignment (GCA) to estimate 
-its orientation with respect to an inertial frame. To support the navigation function, the RINU software con-
-tains modules for performing high-rate compensation of the inertial data, computing estimates of gravita-
-tional acceleration, and for integrating the compensated incremental angles and incremental velocities into 
-an estimate of the vehicle position, velocity, and attitude. The RINU also contains hardware and software 
-necessary to support communications with the SLS Flight Computers over redundant MIL-STD-1553B data 
-busses, receiving and responding to commands and data loads, including time synchronization to vehicle 
-time performing hardware built-in tests. 
+The Redundan Iner ial Naviga ion Uni (RINU) is a one-faul oleran Iner ial Naviga ion Sys em ha 
+produces an in egra ed naviga ion s a e---posi ion, veloci y, and a i ude---as well as angular ra e and linear 
+accelera ion da a for use in he vehicle con rol sof ware. To suppor he one-faul olerance, he RINU con-
+ ains redundan accelerome ers and gyroscopes as well as Faul De ec ion, Isola ion, and Recovery (FDIR) 
+sof ware used o de ec failed sensors and preven s da a from failed sensors from being used for any ou pu 
+da a. To ini ialize he naviga ion sys em, he RINU performs Gyrocompass Alignmen (GCA) o es ima e 
+i s orien a ion wi h respec o an iner ial frame. To suppor he naviga ion func ion, he RINU sof ware con-
+ ains modules for performing high-ra e compensa ion of he iner ial da a, compu ing es ima es of gravi a-
+ ional accelera ion, and for in egra ing he compensa ed incremen al angles and incremen al veloci ies in o 
+an es ima e of he vehicle posi ion, veloci y, and a i ude. The RINU also con ains hardware and sof ware 
+necessary o suppor communica ions wi h he SLS Fligh Compu ers over redundan MIL-STD-1553B da a 
+busses, receiving and responding o commands and da a loads, including ime synchroniza ion o vehicle 
+ ime performing hardware buil -in es s. 
 
 
 
- One key part of the RINU performance model is the sensor error model. Since the RINU contains redun-
-dant sensors, the Navigation team simulated each individually to reflect the geometry of the hardware sensor 
-configuration. Stages and the hardware vendor provided NASA with a detailed characterization of the sensor 
-errors and their impacts on the RINU’s navigation performance. These were used to identify key perfor-
-mance metrics of the raw sensor capability and provided scope for primary drivers. 
+ One key par of he RINU performance model is he sensor error model. Since he RINU con ains redun-
+dan sensors, he Naviga ion eam simula ed each individually o reflec he geome ry of he hardware sensor 
+configura ion. S ages and he hardware vendor provided NASA wi h a de ailed charac eriza ion of he sensor 
+errors and heir impac s on he RINU’s naviga ion performance. These were used o iden ify key perfor-
+mance me rics of he raw sensor capabili y and provided scope for primary drivers. 
 
 
 
@@ -241,75 +241,75 @@ mance metrics of the raw sensor capability and provided scope for primary driver
 
 
 
-The hardware supplier also provided detailed descriptions of the algorithms used in the RINU in form of 
-Software Description Documents (SDD). The level of detail in these software descriptions allowed the Nav-
-igation Team to develop high-fidelity models of various modules in the RINU software. Primarily, the team 
-implemented models of the RINU’s Gyrocompass Alignment filter, models of the inertial navigation algo-
-rithms, gravity model, and the high-rate compensations---coning and sculling---of the 𝑑𝑑𝑑𝑑s and 𝑑𝑑𝑑𝑑s used in 
-the navigation algorithms. Additionally, the team developed a detailed model of the FDIR algorithms used 
-to detect and isolate failed sensors. 
+The hardware supplier also provided de ailed descrip ions of he algori hms used in he RINU in form of 
+Sof ware Descrip ion Documen s (SDD). The level of de ail in hese sof ware descrip ions allowed he Nav-
+iga ion Team o develop high-fideli y models of various modules in he RINU sof ware. Primarily, he eam 
+implemen ed models of he RINU’s Gyrocompass Alignmen fil er, models of he iner ial naviga ion algo-
+ri hms, gravi y model, and he high-ra e compensa ions---coning and sculling---of he 𝑑𝑑𝑑𝑑s and 𝑑𝑑𝑑𝑑s used in 
+ he naviga ion algori hms. Addi ionally, he eam developed a de ailed model of he FDIR algori hms used 
+ o de ec and isola e failed sensors. 
 
 
 
-As a part of the RINU model, the Navigation Team developed a model of the RINU’s capability to detect 
-and isolate failed sensors. Specifically, the minimum number of sensors required to produce measurements 
-in orthogonal axes is equal to the number of degrees of freedom for orthogonally arranged sensors; for sensors 
-in a skewed configuration, the minimum is equal to the number of degrees of freedom plus one. The minimum 
-number of sensors required to detect a dissimilar measurement in asymmetric (skewed) arrangement is equal 
-to the number of degrees of freedom plus an additional sensor to resolve the measurement and another addi-
-tional sensor to create an over-determined system capable of fault detection. 
+As a par of he RINU model, he Naviga ion Team developed a model of he RINU’s capabili y o de ec 
+and isola e failed sensors. Specifically, he minimum number of sensors required o produce measuremen s 
+in or hogonal axes is equal o he number of degrees of freedom for or hogonally arranged sensors; for sensors 
+in a skewed configura ion, he minimum is equal o he number of degrees of freedom plus one. The minimum 
+number of sensors required o de ec a dissimilar measuremen in asymme ric (skewed) arrangemen is equal 
+ o he number of degrees of freedom plus an addi ional sensor o resolve he measuremen and ano her addi-
+ ional sensor o crea e an over-de ermined sys em capable of faul de ec ion. 
 
 
 
-The RINU model is used in a variety of stand-alone and integrated 6-DOF tools for to develop several 
-analysis products. The RINU model is integrated into MAVERIC, the vehicle 6-DOF simulation used at 
-MSFC. Integrated GN&C performance is assessed with Monte Carlo runs of MAVERIC. For each vehicle 
-configuration, the GN&C ascent performance is documented in the various volumes of SLS-RPT-080, Space 
-Launch System Program (SLSP) Integrated Guidance, Navigation, and Control (GN&C) Performance As-
-sessment. 
+The RINU model is used in a varie y of s and-alone and in egra ed 6-DOF ools for o develop several 
+analysis produc s. The RINU model is in egra ed in o MAVERIC, he vehicle 6-DOF simula ion used a 
+MSFC. In egra ed GN&C performance is assessed wi h Mon e Carlo runs of MAVERIC. For each vehicle 
+configura ion, he GN&C ascen performance is documen ed in he various volumes of SLS-RPT-080, Space 
+Launch Sys em Program (SLSP) In egra ed Guidance, Naviga ion, and Con rol (GN&C) Performance As-
+sessmen . 
 
 
 
-Additionally, MAVERIC results are used to anchor our assessment of Hardware in the Loop (HWIL) test 
-data. Operating as a stand-alone tool, the RINU model was used to perform an offline gyrocompassing anal-
-ysis outside the MAVERIC simulation. The results of this analysis are used to initialize the RINU navigation 
-model in the vehicle 6-DOF. When performing a large Monte Carlo set, a significant amount of computation 
-time is saved by not having to wait on the RINU model to perform GCA in preparation for ascent flight. The 
-RINU model is also used in developing the flight-specific set of parameters used in the RINU FDIR algo-
-rithms. Additionally, the model was used to determine the sensitivity analysis that was performed to deter-
-mine the sensitivity of RINU FDIR thresholds and false positive failure probability due to increased sensor 
-noise, flexible body dynamics and other un-modeled dynamics. 
+Addi ionally, MAVERIC resul s are used o anchor our assessmen of Hardware in he Loop (HWIL) es 
+da a. Opera ing as a s and-alone ool, he RINU model was used o perform an offline gyrocompassing anal-
+ysis ou side he MAVERIC simula ion. The resul s of his analysis are used o ini ialize he RINU naviga ion 
+model in he vehicle 6-DOF. When performing a large Mon e Carlo se , a significan amoun of compu a ion 
+ ime is saved by no having o wai on he RINU model o perform GCA in prepara ion for ascen fligh . The 
+RINU model is also used in developing he fligh -specific se of parame ers used in he RINU FDIR algo-
+ri hms. Addi ionally, he model was used o de ermine he sensi ivi y analysis ha was performed o de er-
+mine he sensi ivi y of RINU FDIR hresholds and false posi ive failure probabili y due o increased sensor 
+noise, flexible body dynamics and o her un-modeled dynamics. 
 
 
 
-The Rate Gyroscope Assembly (RGA) is a set of three pairs of mutually orthogonal gyroscopes. The 
-RGA samples the gyroscopes internally at a high rate, filters the measurements, and outputs filtered angular 
-rate data on MIL-STD-1553B busses. While the RGA is internally redundant, each pair of rate gyros operates 
-independently. The consolidation or down-selection of the angular rate data across the three channels is 
-handled in the SLS Flight Software on the FCs. As such, the Navigation team chose to represent a single 
-channel of RGA sensors and data processing in the model. Multiple instances of this single channel model 
-were used to simulate outputs to match the hardware flight interface. 
+The Ra e Gyroscope Assembly (RGA) is a se of hree pairs of mu ually or hogonal gyroscopes. The 
+RGA samples he gyroscopes in ernally a a high ra e, fil ers he measuremen s, and ou pu s fil ered angular 
+ra e da a on MIL-STD-1553B busses. While he RGA is in ernally redundan , each pair of ra e gyros opera es 
+independen ly. The consolida ion or down-selec ion of he angular ra e da a across he hree channels is 
+handled in he SLS Fligh Sof ware on he FCs. As such, he Naviga ion eam chose o represen a single 
+channel of RGA sensors and da a processing in he model. Mul iple ins ances of his single channel model 
+were used o simula e ou pu s o ma ch he hardware fligh in erface. 
 
 
 
 MODEL VERIFICATION APPROACH 
-Verification of the RINU and RGA performance models (DMM-CS-0411 and DMM-CS-0410) was per-
+Verifica ion of he RINU and RGA performance models (DMM-CS-0411 and DMM-CS-0410) was per-
 
 
 
-formed according to the V&V requirements in Paragraphs 3.15 of NASA document SLS-RPT-080 Vol 3 
-Revision A, "Space Launch System Program (SLSP) Design Model Delivery Standard"2, which states: 
+formed according o he V&V requiremen s in Paragraphs 3.15 of NASA documen SLS-RPT-080 Vol 3 
+Revision A, "Space Launch Sys em Program (SLSP) Design Model Delivery S andard"2, which s a es: 
 
 
 
-“Model Verification is the process of determining that a computational model accurately represents the 
-underlying mathematical model and its solution from the perspective of the intended uses of the M&S 
-[Model and Simulation]. It includes a set of input/output model test cases that can be used to verify that 
-a model has been implemented correctly, and that span the range of validity of the model. Verification 
-measures the correctness of (a) the mathematical understanding of the underlying physics, (b) the trans-
-lation (i.e., program code that does the computational effort) of the physics-to-mathematics into a model, 
-and (c) the effects and sensitivities of dependent and independent variables on other variables of the 
-model, so that results are indicative of the hardware/system performance.” 
+“Model Verifica ion is he process of de ermining ha a compu a ional model accura ely represen s he 
+underlying ma hema ical model and i s solu ion from he perspec ive of he in ended uses of he M&S 
+[Model and Simula ion]. I includes a se of inpu /ou pu model es cases ha can be used o verify ha 
+a model has been implemen ed correc ly, and ha span he range of validi y of he model. Verifica ion 
+measures he correc ness of (a) he ma hema ical unders anding of he underlying physics, (b) he rans-
+la ion (i.e., program code ha does he compu a ional effor ) of he physics- o-ma hema ics in o a model, 
+and (c) he effec s and sensi ivi ies of dependen and independen variables on o her variables of he 
+model, so ha resul s are indica ive of he hardware/sys em performance.” 
 
 
 
@@ -325,79 +325,79 @@ model, so that results are indicative of the hardware/system performance.”
 
 
 
-The Navigation Team developed several criteria in the verification of the RINU and RGA simulation 
-models. These criteria included: 
+The Naviga ion Team developed several cri eria in he verifica ion of he RINU and RGA simula ion 
+models. These cri eria included: 
 
 
 
-1. Trace of stochastic error parameters and modeling to vendor-provided documentation 
-2. Unit tests of individual error model implementations 
-3. Trace of algorithms and software used to the vendor documentation 
-4. Trace of isolator and latency characteristics to vendor-provided documentation 
-5. Monte-Carlo sets with the simulation model to quantify performance. For the RINU specifically, 
+1. Trace of s ochas ic error parame ers and modeling o vendor-provided documen a ion 
+2. Uni es s of individual error model implemen a ions 
+3. Trace of algori hms and sof ware used o he vendor documen a ion 
+4. Trace of isola or and la ency charac eris ics o vendor-provided documen a ion 
+5. Mon e-Carlo se s wi h he simula ion model o quan ify performance. For he RINU specifically, 
 
 
 
-these Monte Carlo sets included both failed and non-failed sensor configurations. 
-6. Comparison with vendor analysis for RINU FDIR component of model. 
-7. Comparison with vendor performance data from the simulation used by the vendor to verify accu-
+ hese Mon e Carlo se s included bo h failed and non-failed sensor configura ions. 
+6. Comparison wi h vendor analysis for RINU FDIR componen of model. 
+7. Comparison wi h vendor performance da a from he simula ion used by he vendor o verify accu-
 
 
 
-racy requirements. 
-8. Verification of frequency domain behavior of model components which affect the sensors’ fre-
+racy requiremen s. 
+8. Verifica ion of frequency domain behavior of model componen s which affec he sensors’ fre-
 
 
 
 quency domain. 
-9. Comparison with vendor analysis from Software Flight Qualification Test (FQT). 
+9. Comparison wi h vendor analysis from Sof ware Fligh Qualifica ion Tes (FQT). 
 
 
 
-While there was no requirement for the Navigation team to independently verify the RINU and RGA 
-models, members of the team that performed the V&V activity were not the same individuals who developed 
-and implemented the model. As the V&V team discovered issues with the model, the Navigation Team peer-
-reviewed the findings and decided on actions necessary to resolve the discrepancy. The model developers 
-would then implement the solution and present evidence to the V&V team. All V&V issues, along with 
-dispositions were documented in the Verification Report that is delivered with the models. 
+While here was no requiremen for he Naviga ion eam o independen ly verify he RINU and RGA 
+models, members of he eam ha performed he V&V ac ivi y were no he same individuals who developed 
+and implemen ed he model. As he V&V eam discovered issues wi h he model, he Naviga ion Team peer-
+reviewed he findings and decided on ac ions necessary o resolve he discrepancy. The model developers 
+would hen implemen he solu ion and presen evidence o he V&V eam. All V&V issues, along wi h 
+disposi ions were documen ed in he Verifica ion Repor ha is delivered wi h he models. 
 
 
 
-For the individual sensor models in the RINU and RGA component models, the Navigation Team per-
-formed a code inspection to verify the correct implementation. The code inspection was accompanied by 
-low-level unit tests to confirm the expected behavior of the model. For each function in the model, e.g., gyro 
-and accel bias, scale factors, random walks, a test was developed to comparing the output of the component 
-model to an analytically derived result. The data parameters used as inputs to the model were compared 
-against vendor-provided to ensure that the error sources were modeled consistent with the values used by the 
-vendor for verifying accuracy requirements. For error parameters used in the RGA model, comparisons were 
-made to Stages-levied requirements as well as to vendor-supplied capability estimates. For the RINU, the 
-error parameters were compared back to the vendor-developed Navigation Error Budget which documented 
-the vendor’s analysis of the individual gyroscope and accelerometer error terms. 
+For he individual sensor models in he RINU and RGA componen models, he Naviga ion Team per-
+formed a code inspec ion o verify he correc implemen a ion. The code inspec ion was accompanied by 
+low-level uni es s o confirm he expec ed behavior of he model. For each func ion in he model, e.g., gyro 
+and accel bias, scale fac ors, random walks, a es was developed o comparing he ou pu of he componen 
+model o an analy ically derived resul . The da a parame ers used as inpu s o he model were compared 
+agains vendor-provided o ensure ha he error sources were modeled consis en wi h he values used by he 
+vendor for verifying accuracy requiremen s. For error parame ers used in he RGA model, comparisons were 
+made o S ages-levied requiremen s as well as o vendor-supplied capabili y es ima es. For he RINU, he 
+error parame ers were compared back o he vendor-developed Naviga ion Error Budge which documen ed 
+ he vendor’s analysis of he individual gyroscope and accelerome er error erms. 
 
 
 
-The Navigation Team performed a thorough inspection of the RINU model code compared to the vendor 
-software descriptions. The Navigation V&V team annotated the model code with references to the vendor 
-documentation. This allowed the team to trace, line-by-line, the functionality of the model code to RINU 
-software documentation. Any discrepancies in the model were reported to the Navigation team for review 
-and disposition. The model developers implemented the required changes. All modeling discrepancies were 
-documented in the model verification report that is delivered along with the model. 
+The Naviga ion Team performed a horough inspec ion of he RINU model code compared o he vendor 
+sof ware descrip ions. The Naviga ion V&V eam anno a ed he model code wi h references o he vendor 
+documen a ion. This allowed he eam o race, line-by-line, he func ionali y of he model code o RINU 
+sof ware documen a ion. Any discrepancies in he model were repor ed o he Naviga ion eam for review 
+and disposi ion. The model developers implemen ed he required changes. All modeling discrepancies were 
+documen ed in he model verifica ion repor ha is delivered along wi h he model. 
 
 
 
-To verify the navigation performance of the RINU model, the Navigation team performed several Monte 
-Carlo sets, flying the RINU along a specified reference trajectory. These simulation runs were performed 
-with and without sensor failures. The 1-sigma navigation errors from these analyses were compared to the 
-capability estimates of the RINU navigation performance listed in the Navigation Error Budget. Addition-
-ally, the vendor supplied NASA with addition sets of Monte Carlo data used during Formal Qualification 
-Test (FQT) of the RINU software. Comparisons of the one sigma navigation errors showed favorable results. 
-In addition to verifying the performance of the RINU model by comparison to vendor test data, several ana-
-lytical tests were performed by the Navigation team. Since heading error can be analytically predicted, the 
-RINU model was run with a simulated East angular velocity bias. The RINU model’s heading error tracked 
-reasonably well with theoretical predictions. Assuming perfect sensors, the RINU’s ability to track true atti-
-tude were verified simulating gyrocompassing under with no error sources enabled. A Schuler test was per-
-formed with the RINU model to verify that the navigation code in the model performed as expected when 
-navigating in-place. 
+To verify he naviga ion performance of he RINU model, he Naviga ion eam performed several Mon e 
+Carlo se s, flying he RINU along a specified reference rajec ory. These simula ion runs were performed 
+wi h and wi hou sensor failures. The 1-sigma naviga ion errors from hese analyses were compared o he 
+capabili y es ima es of he RINU naviga ion performance lis ed in he Naviga ion Error Budge . Addi ion-
+ally, he vendor supplied NASA wi h addi ion se s of Mon e Carlo da a used during Formal Qualifica ion 
+Tes (FQT) of he RINU sof ware. Comparisons of he one sigma naviga ion errors showed favorable resul s. 
+In addi ion o verifying he performance of he RINU model by comparison o vendor es da a, several ana-
+ly ical es s were performed by he Naviga ion eam. Since heading error can be analy ically predic ed, he 
+RINU model was run wi h a simula ed Eas angular veloci y bias. The RINU model’s heading error racked 
+reasonably well wi h heore ical predic ions. Assuming perfec sensors, he RINU’s abili y o rack rue a i-
+ ude were verified simula ing gyrocompassing under wi h no error sources enabled. A Schuler es was per-
+formed wi h he RINU model o verify ha he naviga ion code in he model performed as expec ed when 
+naviga ing in-place. 
 
 
 
@@ -413,74 +413,74 @@ navigating in-place.
 
 
 
-Frequency Response Verification 
+Frequency Response Verifica ion 
 
 
 
-The Navigation team verified the frequency response of the sensor models by an analysis of the compo-
-nent models that effect the frequency content of the sensor model outputs. The team used vendor-provided 
-data on the transfer functions that model the responses of the chassis and isolators to perform a code inspec-
-tion the implementations of the models of the mechanical interfaces. Then Bode diagrams were used to 
-verify the implementation of the filters matched vendor data. For each of the software components that effect 
-the phase and gain response of the sensor outputs, the Navigation team used vendor-supplied data on the 
-responses of each of filter in the sensors software. Code inspection showed that the models of filters were 
-consistent with vendor documentation. Similarly, Bode diagrams demonstrated that the modeled and pre-
-dicted responses were very similar. Where differences in the vendor’s and the modeled responses differed, 
-the Navigation team demonstrated the model produced a more conservative response—less attenuation but 
-with more phase lag then the vendor analysis. 
+The Naviga ion eam verified he frequency response of he sensor models by an analysis of he compo-
+nen models ha effec he frequency con en of he sensor model ou pu s. The eam used vendor-provided 
+da a on he ransfer func ions ha model he responses of he chassis and isola ors o perform a code inspec-
+ ion he implemen a ions of he models of he mechanical in erfaces. Then Bode diagrams were used o 
+verify he implemen a ion of he fil ers ma ched vendor da a. For each of he sof ware componen s ha effec 
+ he phase and gain response of he sensor ou pu s, he Naviga ion eam used vendor-supplied da a on he 
+responses of each of fil er in he sensors sof ware. Code inspec ion showed ha he models of fil ers were 
+consis en wi h vendor documen a ion. Similarly, Bode diagrams demons ra ed ha he modeled and pre-
+dic ed responses were very similar. Where differences in he vendor’s and he modeled responses differed, 
+ he Naviga ion eam demons ra ed he model produced a more conserva ive response—less a enua ion bu 
+wi h more phase lag hen he vendor analysis. 
 
 
 
-FDIR Verification Activities 
+FDIR Verifica ion Ac ivi ies 
 
 
 
-Due to the unique sensor redundancy scheme, sensor failures have an impact on RINU performance and 
-as a result, the modeling of the sensor pentad and FDIR logic has been included in DMM-CS-0411. Over the 
-course of approximately a year beginning in mid-2013, the DMM-CS-0411 development team worked with 
-the RINU hardware vendor to model RINU FDIR to a level of fidelity suitable for simulating RINU behavior 
-and for FDIR threshold design.The Navigation team implemented the RINU FIDR logic based on the RINU 
-Software Description document supplied by the vendor. The team regularly discussed the FDIR Implemen-
-tation, configuration, and analysis-related details with the RINU vendor at various technical teleconferences. 
-The primary analyst on the vendor side was brought in as a consultant to design FDIR thresholds for the 
-RINU program and to discuss implementation details with the RINU model developers on the Navigation 
-Team. The primary analyst had previously designed the FDIR thresholds for the heritage FTINU design for 
-ULA’s Atlas V EELV. In December of 2013 at a Navigation Technical Interchange Meeting the vendor’s 
-facility, the MSFC team presented the initial set of FDIR verification results vendor. A number of discrep-
-ancies were discovered, tracked, and subsequently resolved resulting in the presentation of detailed verifica-
-tion results at a follow-up Navigation TIM in May of 2014. At the end of the TIM the RINU vendor verbally 
-concurred with the model developers’ implementation of RINU FDIR, accuracy of results, and showed con-
-fidence in the transfer of knowledge required to design RINU FDIR thresholds. 
+Due o he unique sensor redundancy scheme, sensor failures have an impac on RINU performance and 
+as a resul , he modeling of he sensor pen ad and FDIR logic has been included in DMM-CS-0411. Over he 
+course of approxima ely a year beginning in mid-2013, he DMM-CS-0411 developmen eam worked wi h 
+ he RINU hardware vendor o model RINU FDIR o a level of fideli y sui able for simula ing RINU behavior 
+and for FDIR hreshold design.The Naviga ion eam implemen ed he RINU FIDR logic based on he RINU 
+Sof ware Descrip ion documen supplied by he vendor. The eam regularly discussed he FDIR Implemen-
+ a ion, configura ion, and analysis-rela ed de ails wi h he RINU vendor a various echnical eleconferences. 
+The primary analys on he vendor side was brough in as a consul an o design FDIR hresholds for he 
+RINU program and o discuss implemen a ion de ails wi h he RINU model developers on he Naviga ion 
+Team. The primary analys had previously designed he FDIR hresholds for he heri age FTINU design for 
+ULA’s A las V EELV. In December of 2013 a a Naviga ion Technical In erchange Mee ing he vendor’s 
+facili y, he MSFC eam presen ed he ini ial se of FDIR verifica ion resul s vendor. A number of discrep-
+ancies were discovered, racked, and subsequen ly resolved resul ing in he presen a ion of de ailed verifica-
+ ion resul s a a follow-up Naviga ion TIM in May of 2014. A he end of he TIM he RINU vendor verbally 
+concurred wi h he model developers’ implemen a ion of RINU FDIR, accuracy of resul s, and showed con-
+fidence in he ransfer of knowledge required o design RINU FDIR hresholds. 
 
 
 
 MODEL VALIDATION APPROACH 
-For the purposes of this paper, validation analysis focuses on the comparison of the model to flight hard-
+For he purposes of his paper, valida ion analysis focuses on he comparison of he model o fligh hard-
 
 
 
-ware. The intent of this analysis is to provide additional insight outside of algorithm and specification docu-
-mentation. Similarly, this testing allows for an independent check on the assumptions used in interpreting 
-design artifacts. The testing herein focused on the areas of performance that the GNC system is particularly 
-sensitive to. The focus is on several key areas: demonstrated ability to gyrocompass under external dynamics, 
-validation of noise characteristics, frequency response testing, integrated system latency, and validation of 
-navigation performance between the model and a hardware development test unit. All of these tests utilized 
-a flight-like hardware unit with actual sensors and flight software. This unit was produced in advance of 
-flight units to allow for early testing and characterization. The primarily difference between this and actual 
-flight units is the durations and levels involved in acceptance testing at the vendor level. Due to its purpose 
-as a test unit with limited exposure to high vibration or thermal variations, reduced testing was acceptable to 
-meet the needs of the test events. Although the environmental testing was limited, the unit was still put 
-through testing to establish its performance within requirements, focusing on calibration and navigation ac-
-curacy. As such, this platform provides an ideal platform for validation activities. 
+ware. The in en of his analysis is o provide addi ional insigh ou side of algori hm and specifica ion docu-
+men a ion. Similarly, his es ing allows for an independen check on he assump ions used in in erpre ing 
+design ar ifac s. The es ing herein focused on he areas of performance ha he GNC sys em is par icularly 
+sensi ive o. The focus is on several key areas: demons ra ed abili y o gyrocompass under ex ernal dynamics, 
+valida ion of noise charac eris ics, frequency response es ing, in egra ed sys em la ency, and valida ion of 
+naviga ion performance be ween he model and a hardware developmen es uni . All of hese es s u ilized 
+a fligh -like hardware uni wi h ac ual sensors and fligh sof ware. This uni was produced in advance of 
+fligh uni s o allow for early es ing and charac eriza ion. The primarily difference be ween his and ac ual 
+fligh uni s is he dura ions and levels involved in accep ance es ing a he vendor level. Due o i s purpose 
+as a es uni wi h limi ed exposure o high vibra ion or hermal varia ions, reduced es ing was accep able o 
+mee he needs of he es even s. Al hough he environmen al es ing was limi ed, he uni was s ill pu 
+ hrough es ing o es ablish i s performance wi hin requiremen s, focusing on calibra ion and naviga ion ac-
+curacy. As such, his pla form provides an ideal pla form for valida ion ac ivi ies. 
 
 
 
- The validation testing suite utilized this flight hardware within controlled environments and provided 
-targeted excitation to assess specific elements. These areas of focus can be captured in simulation and design 
-documentation but are considered essential to the integrated GNC performance. For example, the key sensi-
-tivity of the navigation performance is to the initial attitude error at the end of gyrocompassing. As such, the 
-ability of the unit to gyrocompass is critical. While the detailed models of SLS do enable a simulation of on-
-pad dynamics under various wind conditions, further hardware testing helps provide additional insight to 
+ The valida ion es ing sui e u ilized his fligh hardware wi hin con rolled environmen s and provided 
+ arge ed exci a ion o assess specific elemen s. These areas of focus can be cap ured in simula ion and design 
+documen a ion bu are considered essen ial o he in egra ed GNC performance. For example, he key sensi-
+ ivi y of he naviga ion performance is o he ini ial a i ude error a he end of gyrocompassing. As such, he 
+abili y of he uni o gyrocompass is cri ical. While he de ailed models of SLS do enable a simula ion of on-
+pad dynamics under various wind condi ions, fur her hardware es ing helps provide addi ional insigh o 
 
 
 
@@ -496,62 +496,62 @@ pad dynamics under various wind conditions, further hardware testing helps provi
 
 
 
-hardware robustness and allow for comparing the response to flight-like as well as worst case on-pad dynam-
-ics. Similarly, to meet the stability requirements of the vehicle, the controls algorithms are designed around 
-the sensors’ dynamics response. This includes both RINU and RGA frequency responses. Validation of these 
-through hardware testing provides the additional confidence needed in assessing control margins and vehicle 
-stability. Similarly, to meet insertion conditions, the onboard guidance algorithms are sensitive to integrated 
-system latency, particularly at engine shutdown. Due to the high velocity of the vehicle, this latency must be 
-taken into account when commanding this event to ensure the proper state is achieved to meet insertion 
-requirements. 
+hardware robus ness and allow for comparing he response o fligh -like as well as wors case on-pad dynam-
+ics. Similarly, o mee he s abili y requiremen s of he vehicle, he con rols algori hms are designed around 
+ he sensors’ dynamics response. This includes bo h RINU and RGA frequency responses. Valida ion of hese 
+ hrough hardware es ing provides he addi ional confidence needed in assessing con rol margins and vehicle 
+s abili y. Similarly, o mee inser ion condi ions, he onboard guidance algori hms are sensi ive o in egra ed 
+sys em la ency, par icularly a engine shu down. Due o he high veloci y of he vehicle, his la ency mus be 
+ aken in o accoun when commanding his even o ensure he proper s a e is achieved o mee inser ion 
+requiremen s. 
 
 
 
-Gyrocompassing Alignment Testing Insights and Results 
+Gyrocompassing Alignmen Tes ing Insigh s and Resul s 
 
 
 
-The first validation test performed focused on testing the RINU’s ability to gyrocompass under simulated 
-on-pad dynamics. This testing is detailed in Geohagan 3, but is summarized here to provide context to the 
-overall effort. For this test, the RINU was mounted onto a large 6 degree of freedom (DOF) table at MSFC 
-and was gyrocompass’ed through a variety of dynamics. The table allowed for comparison between response 
-of the flight hardware and the RINU model to a common set of dynamics. This included both the dynamics 
-used in vendor specification and analysis expected on pad dynamics, as well as scaled up on-pad dynamics 
-to validate robustness under much larger than expected on pad motion. Figure 1 below provides a picture of 
-the RINU mounted onto the table as well as a close-up image of the unit under test. 
+The firs valida ion es performed focused on es ing he RINU’s abili y o gyrocompass under simula ed 
+on-pad dynamics. This es ing is de ailed in Geohagan 3, bu is summarized here o provide con ex o he 
+overall effor . For his es , he RINU was moun ed on o a large 6 degree of freedom (DOF) able a MSFC 
+and was gyrocompass’ed hrough a varie y of dynamics. The able allowed for comparison be ween response 
+of he fligh hardware and he RINU model o a common se of dynamics. This included bo h he dynamics 
+used in vendor specifica ion and analysis expec ed on pad dynamics, as well as scaled up on-pad dynamics 
+ o valida e robus ness under much larger han expec ed on pad mo ion. Figure 1 below provides a pic ure of 
+ he RINU moun ed on o he able as well as a close-up image of he uni under es . 
 
 
 
  
-Figure 1. RINU and 6DOF Table (Left), Close-up View of Integrated RINU (Right) 
+Figure 1. RINU and 6DOF Table (Lef ), Close-up View of In egra ed RINU (Righ ) 
 
 
 
-In addition to validating the performance of the algorithms between the software and hardware models, 
-this testing provided additional insight into several integration constraints, which caused some limitations in 
-post-processing. Two areas of limitation in the test is due to having a multi-rate navigation systems, which 
-is typical for integrated navigation boxes and laid out by sources such as Savage4. Based on the interface of 
-the unit, only the low rate navigation data was available. As such, detailed validation of the sensor error 
-models and processing was reduced. However, this data could be used to enable detailed checks of the 
-onboard navigation software. This testing focused on validation of the implementation of the gyrocompassing 
-algorithms in the RINU model. The other limitation of the test setup was manifested in the form of missed 
-samples. Due to asynchronous nature of the 1553 bus, there is a potential for missed samples of data. While 
-this does not affect in-flight performance since the latest state is always captured by flight software, this does 
-limit the ability to re-create the entire software processing loop within the software model. For example, in 
-Figure 2, missed samples can be seen to cause divergence between the unit under test and the software 
-model. This plot shows the difference between the two solutions. In order to correct this, an interpolated data 
-point was inserted to enable better matching performance, but an exact comparison was not able to be 
-achieved. Even with this limitation though, the algorithms were able to be validated with this testing within 
-expectations. 
+In addi ion o valida ing he performance of he algori hms be ween he sof ware and hardware models, 
+ his es ing provided addi ional insigh in o several in egra ion cons rain s, which caused some limi a ions in 
+pos -processing. Two areas of limi a ion in he es is due o having a mul i-ra e naviga ion sys ems, which 
+is ypical for in egra ed naviga ion boxes and laid ou by sources such as Savage4. Based on he in erface of 
+ he uni , only he low ra e naviga ion da a was available. As such, de ailed valida ion of he sensor error 
+models and processing was reduced. However, his da a could be used o enable de ailed checks of he 
+onboard naviga ion sof ware. This es ing focused on valida ion of he implemen a ion of he gyrocompassing 
+algori hms in he RINU model. The o her limi a ion of he es se up was manifes ed in he form of missed 
+samples. Due o asynchronous na ure of he 1553 bus, here is a po en ial for missed samples of da a. While 
+ his does no affec in-fligh performance since he la es s a e is always cap ured by fligh sof ware, his does 
+limi he abili y o re-crea e he en ire sof ware processing loop wi hin he sof ware model. For example, in 
+Figure 2, missed samples can be seen o cause divergence be ween he uni under es and he sof ware 
+model. This plo shows he difference be ween he wo solu ions. In order o correc his, an in erpola ed da a 
+poin was inser ed o enable be er ma ching performance, bu an exac comparison was no able o be 
+achieved. Even wi h his limi a ion hough, he algori hms were able o be valida ed wi h his es ing wi hin 
+expec a ions. 
 
 
 
-In addition, this test was used to capture static data over a long (24-hr) duration to enable noise charac-
-terization activities. Analysis of this testing provided insight into the readout noise of the RINU’s sensors. 
-The noise of the RINU model showed lower levels than captured with the actual hardware during the static 
-testing. Analysis of this effect led to a model correction in terms of how noise is modeled and highlights 
-potential areas for ambiguity in a sensor specification. For example, for an integrated navigation unit with 
-multi-rate processing, the frequency commiserate with the noise specification is fundamental to the modeling 
+In addi ion, his es was used o cap ure s a ic da a over a long (24-hr) dura ion o enable noise charac-
+ eriza ion ac ivi ies. Analysis of his es ing provided insigh in o he readou noise of he RINU’s sensors. 
+The noise of he RINU model showed lower levels han cap ured wi h he ac ual hardware during he s a ic 
+ es ing. Analysis of his effec led o a model correc ion in erms of how noise is modeled and highligh s 
+po en ial areas for ambigui y in a sensor specifica ion. For example, for an in egra ed naviga ion uni wi h 
+mul i-ra e processing, he frequency commisera e wi h he noise specifica ion is fundamen al o he modeling 
 
 
 
@@ -567,15 +567,15 @@ multi-rate processing, the frequency commiserate with the noise specification is
 
 
 
-of the unit. In this scenario, the modeling of the noise relative to other onboard processing and other box-
-internal effects significantly changed the observed content. To capture this additional noise, the readout noise 
-was increased to provide a better match. This update was then used in Monte Carlo analysis to validate 
-integrated performance against the vehicle requirements. Figure 3 provides a comparison of the noise levels 
-before and after this update with comparison to hardware testing results. The results of this had limited impact 
-on insertion capability, but do have an effect on systems requiring tight attitude for such activities as docking 
-to co-manifested payloads as in the Block 1B vehicle design5. Because of the value from this test, static 
-testing was extended to 36 hours and repeated for the RINU and RGA in later testing. The results of this 
-testing is include in the next section. 
+of he uni . In his scenario, he modeling of he noise rela ive o o her onboard processing and o her box-
+in ernal effec s significan ly changed he observed con en . To cap ure his addi ional noise, he readou noise 
+was increased o provide a be er ma ch. This upda e was hen used in Mon e Carlo analysis o valida e 
+in egra ed performance agains he vehicle requiremen s. Figure 3 provides a comparison of he noise levels 
+before and af er his upda e wi h comparison o hardware es ing resul s. The resul s of his had limi ed impac 
+on inser ion capabili y, bu do have an effec on sys ems requiring igh a i ude for such ac ivi ies as docking 
+ o co-manifes ed payloads as in he Block 1B vehicle design5. Because of he value from his es , s a ic 
+ es ing was ex ended o 36 hours and repea ed for he RINU and RGA in la er es ing. The resul s of his 
+ es ing is include in he nex sec ion. 
 
 
 
@@ -583,12 +583,12 @@ testing is include in the next section.
 
 
 
-Figure 2: GCA Attitude Com-
+Figure 2: GCA A i ude Com-
 parison w/ Frame Drops 
 
 
 
-Figure 3: Noise Dynamics Before and After Update 
+Figure 3: Noise Dynamics Before and Af er Upda e 
 
 
 
@@ -596,22 +596,22 @@ Figure 3: Noise Dynamics Before and After Update
 
 
 
-Static Noise Characterization 
+S a ic Noise Charac eriza ion 
 
 
 
-A series of static and frequency response tests were performed during June 2018 to characterize the per-
-formance of the RINU and RGA inertial navigation sensors. Using data obtained from the static tests as input, 
-an Allan Variance analysis was performed to determine the type of noise present in the hardware and to 
-estimate the standard deviation needed to characterize these types of noise in the sensor simulation models. 
-Allan variance is a time-domain analysis technique in which a data stream is divided into clusters of specified 
-length, the average of each cluster is taken, and a two-point sample variance is calculated from the successive 
-cluster averages6. Put simply, the Allan variance is a method of representing the root mean square (RMS) 
-random-drift errors as a function of averaging times7. 
+A series of s a ic and frequency response es s were performed during June 2018 o charac erize he per-
+formance of he RINU and RGA iner ial naviga ion sensors. Using da a ob ained from he s a ic es s as inpu , 
+an Allan Variance analysis was performed o de ermine he ype of noise presen in he hardware and o 
+es ima e he s andard devia ion needed o charac erize hese ypes of noise in he sensor simula ion models. 
+Allan variance is a ime-domain analysis echnique in which a da a s ream is divided in o clus ers of specified 
+leng h, he average of each clus er is aken, and a wo-poin sample variance is calcula ed from he successive 
+clus er averages6. Pu simply, he Allan variance is a me hod of represen ing he roo mean square (RMS) 
+random-drif errors as a func ion of averaging imes7. 
 
 
 
-Defined in terms of gyro output angle, the Allan variance can be calculated using the following equation: 
+Defined in erms of gyro ou pu angle, he Allan variance can be calcula ed using he following equa ion: 
 
 
 
@@ -637,20 +637,20 @@ Defined in terms of gyro output angle, the Allan variance can be calculated usin
 
 
 
-Defined in terms of accelerometer output, accumulated velocity is substituted for accumulated angle. 
-When plotted in logarithmic scales, the Allan Variance can discriminate different contributing error sources 
-by simply examining the varying slopes on the Allan Deviation plot, as illustrated in Figure 3. This is 
-achieved by relating the Allan Variance expressed in the frequency domain to the power spectral density of 
-various error sources, so that these errors may be expressed in various powers of correlation time6. 
+Defined in erms of accelerome er ou pu , accumula ed veloci y is subs i u ed for accumula ed angle. 
+When plo ed in logari hmic scales, he Allan Variance can discrimina e differen con ribu ing error sources 
+by simply examining he varying slopes on he Allan Devia ion plo , as illus ra ed in Figure 3. This is 
+achieved by rela ing he Allan Variance expressed in he frequency domain o he power spec ral densi y of 
+various error sources, so ha hese errors may be expressed in various powers of correla ion ime6. 
 
 
 
-Body rate and acceleration output obtained from the 36 to 48-hour static tests of the RINU and RGA 
-inertial sensors was used as input into the Allan Variance analysis, and the noise present in the test data was 
-identified in an Allan Deviation plot. This analysis was also performed on data from a 36-hr simulated static 
-test of the RGA sensor model. Assuming statistically independent error sources, the Allan Variance can be 
-expressed as a sum of these terms. Ignoring the sinusoidal and exponentially correlated noise terms for now, 
-the Allan Variance is then of the form: 
+Body ra e and accelera ion ou pu ob ained from he 36 o 48-hour s a ic es s of he RINU and RGA 
+iner ial sensors was used as inpu in o he Allan Variance analysis, and he noise presen in he es da a was 
+iden ified in an Allan Devia ion plo . This analysis was also performed on da a from a 36-hr simula ed s a ic 
+ es of he RGA sensor model. Assuming s a is ically independen error sources, he Allan Variance can be 
+expressed as a sum of hese erms. Ignoring he sinusoidal and exponen ially correla ed noise erms for now, 
+ he Allan Variance is hen of he form: 
 
 
 
@@ -666,11 +666,11 @@ the Allan Variance is then of the form:
 
 
 
-Hardware vs Model GCA Solution Compansoo, TC3R48 
+Hardware vs Model GCA Solu ion Compansoo, TC3R48 
 
 
 
----0.0005 _ Eflt 
+---0.0005 _ Efl 
 
 
 
@@ -683,7 +683,7 @@ Time(sl
 
 
 
-Baseline Model With Updates Matching Quantizat ion and Noise 
+Baseline Model Wi h Upda es Ma ching Quan iza ion and Noise 
 
 
 
@@ -712,8 +712,8 @@ Time(sec)
 
 
 
-The method chosen to extract the noise terms from the Allan Variance consisted of a weighted least mean 
-squares approximation: 
+The me hod chosen o ex rac he noise erms from he Allan Variance consis ed of a weigh ed leas mean 
+squares approxima ion: 
 
 
 
@@ -721,7 +721,7 @@ squares approximation:
 
 
 
-where the Vandermonde matrix 𝑉𝑉 and weighting matrix 𝑊𝑊 are given by: 
+where he Vandermonde ma rix 𝑉𝑉 and weigh ing ma rix 𝑊𝑊 are given by: 
 
 
 
@@ -734,26 +734,26 @@ where the Vandermonde matrix 𝑉𝑉 and weighting matrix 𝑊𝑊 are given by
 
 
 
-The error coefficients for individual noise terms are then computed from the vector of least 
-squares coefficients 𝑪𝑪 as follows: 
+The error coefficien s for individual noise erms are hen compu ed from he vec or of leas 
+squares coefficien s 𝑪𝑪 as follows: 
 
 
 
-• Quantization Noise 𝑄𝑄 = �𝐶𝐶𝑄𝑄 3⁄ 
-• Angle/Velocity Random Walk 𝑁𝑁 = �𝐶𝐶𝑟𝑟𝑟𝑟 
-• Bias Instability 𝐵𝐵 = 0.6648�𝐶𝐶𝐵𝐵 
-• Rate/Acceleration Random Walk 𝐾𝐾 = �3𝐶𝐶𝑟𝑟𝑟𝑟𝑟𝑟 
-• Rate/Acceleration Ramp 𝑅𝑅 = �2𝐶𝐶𝑅𝑅 
+• Quan iza ion Noise 𝑄𝑄 = �𝐶𝐶𝑄𝑄 3⁄ 
+• Angle/Veloci y Random Walk 𝑁𝑁 = �𝐶𝐶𝑟𝑟𝑟𝑟 
+• Bias Ins abili y 𝐵𝐵 = 0.6648�𝐶𝐶𝐵𝐵 
+• Ra e/Accelera ion Random Walk 𝐾𝐾 = �3𝐶𝐶𝑟𝑟𝑟𝑟𝑟𝑟 
+• Ra e/Accelera ion Ramp 𝑅𝑅 = �2𝐶𝐶𝑅𝑅 
 
 
 
-The Allan Deviation plot for the RGA hardware test and simulation model are shown in Figure 5. In the 
-Allan Deviation for the hardware tests, there is clear evidence of sinusoidal noise on the left of the plot, and 
-exponentially correlated noise in the peaks located just right of center. The sinusoidal noise appeared with 
-greater amplitude and lower frequency in the simulation model. The greater prominence of sinusoidal noise 
-in the model is likely due to the higher level of quantization in angle output, an order of magnitude greater 
-than what was computed in the Allan Variance analysis for hardware, and the resulting interaction with in-
-ternal filters. 
+The Allan Devia ion plo for he RGA hardware es and simula ion model are shown in Figure 5. In he 
+Allan Devia ion for he hardware es s, here is clear evidence of sinusoidal noise on he lef of he plo , and 
+exponen ially correla ed noise in he peaks loca ed jus righ of cen er. The sinusoidal noise appeared wi h 
+grea er ampli ude and lower frequency in he simula ion model. The grea er prominence of sinusoidal noise 
+in he model is likely due o he higher level of quan iza ion in angle ou pu , an order of magni ude grea er 
+ han wha was compu ed in he Allan Variance analysis for hardware, and he resul ing in erac ion wi h in-
+ ernal fil ers. 
 
 
 
@@ -761,23 +761,23 @@ ternal filters.
 
 
 
-Figure 4: Typical characteristics of Allan 
-Variance curve. Different contributing error 
+Figure 4: Typical charac eris ics of Allan 
+Variance curve. Differen con ribu ing error 
 
 
 
-sources are distiguished by diffferent slopes along 
-the curve. 
+sources are dis iguished by diffferen slopes along 
+ he curve. 
 
 
 
-Figure 5: Allan Deviation plot for RGA 
-hardware and simulated static test. The im-
+Figure 5: Allan Devia ion plo for RGA 
+hardware and simula ed s a ic es . The im-
 
 
 
-plementation of quantization induced sinusoi-
-dal noise in the Allan Deviation for the RGA 
+plemen a ion of quan iza ion induced sinusoi-
+dal noise in he Allan Devia ion for he RGA 
 
 
 
@@ -785,19 +785,19 @@ model.
 
 
 
-Approximate values for quantization noise, angle random walk, and bias instability were computed for the 
-RGA hardware. The characteristic slopes for rate random walk and rate ramp did not appear for the 36-hour 
-static test. The higher trend line for the model in the Allan Deviation plot indicates that the errors observed 
-in hardware fall within the modeled error budget. 
+Approxima e values for quan iza ion noise, angle random walk, and bias ins abili y were compu ed for he 
+RGA hardware. The charac eris ic slopes for ra e random walk and ra e ramp did no appear for he 36-hour 
+s a ic es . The higher rend line for he model in he Allan Devia ion plo indica es ha he errors observed 
+in hardware fall wi hin he modeled error budge . 
 
 
 
-Frequency Response Testing 
+Frequency Response Tes ing 
 
 
 
-ATA Engineering, Inc., was contracted to perform Frequency Response tests (FRTs) on the RINU and 
-RGA to provide the frequency response functions (FRFs) needed in verifying and validating the inertial 
+ATA Engineering, Inc., was con rac ed o perform Frequency Response es s (FRTs) on he RINU and 
+RGA o provide he frequency response func ions (FRFs) needed in verifying and valida ing he iner ial 
 
 
 
@@ -828,11 +828,11 @@ C
 
 
 Blas 
-rnstabllity 
+rns ablli y 
 
 
 
-Averaging Time (t) 
+Averaging Time ( ) 
 
 
 
@@ -845,8 +845,8 @@ f,! •
 
 
 
-Allan Deviation 
-RGA Delta-0 
+Allan Devia ion 
+RGA Del a-0 
 
 
 
@@ -862,39 +862,39 @@ RGA Delta-0
 
 
 
-sensors used in the SLS GN&C system. Input dynamics describing base motion during the FRT were meas-
-ured by six linear variable differential transducers (LVDTs) and eight accelerometers. An image of the test 
-setup for the RINU taken from ATA’s final report8 is shown in Figure 6. 
+sensors used in he SLS GN&C sys em. Inpu dynamics describing base mo ion during he FRT were meas-
+ured by six linear variable differen ial ransducers (LVDTs) and eigh accelerome ers. An image of he es 
+se up for he RINU aken from ATA’s final repor 8 is shown in Figure 6. 
 
 
 
  
-Figure 6: Overall view of test setup and test facility for the RINU. 
+Figure 6: Overall view of es se up and es facili y for he RINU. 
 
 
 
-RINU and RGA sensor data was logged on a separate system, so the FRT input and output data had to be 
-time-aligned using a combination of digital signal processing and manual adjustment. Data obtained from 
-the FRTs were also used to validate the inertial navigation sensor models. The input dynamics from the test 
-were run through the navigation sensor simulation models in order to assess whether the model outputs pro-
-vide a valid representation of the hardware. According to ATA’s report, the LVDT measurements were most 
-accurate at low frequencies, because displacements at higher frequencies became too small to measure accu-
-rately, while the accelerometer measurements were more accurate for high frequencies but experienced ring-
-ing in the lower-frequency range. Given these characteristics, the LVDT sensor data was used for generating 
-FRFs below 2Hz, and the accelerometers were used for frequencies above 2Hz to reproduce the test inputs 
-as accurately as possible. All FRFs were approximated using Fast Fourier Transformation (FFT) analysis. 
+RINU and RGA sensor da a was logged on a separa e sys em, so he FRT inpu and ou pu da a had o be 
+ ime-aligned using a combina ion of digi al signal processing and manual adjus men . Da a ob ained from 
+ he FRTs were also used o valida e he iner ial naviga ion sensor models. The inpu dynamics from he es 
+were run hrough he naviga ion sensor simula ion models in order o assess whe her he model ou pu s pro-
+vide a valid represen a ion of he hardware. According o ATA’s repor , he LVDT measuremen s were mos 
+accura e a low frequencies, because displacemen s a higher frequencies became oo small o measure accu-
+ra ely, while he accelerome er measuremen s were more accura e for high frequencies bu experienced ring-
+ing in he lower-frequency range. Given hese charac eris ics, he LVDT sensor da a was used for genera ing 
+FRFs below 2Hz, and he accelerome ers were used for frequencies above 2Hz o reproduce he es inpu s 
+as accura ely as possible. All FRFs were approxima ed using Fas Fourier Transforma ion (FFT) analysis. 
 
 
 
-Baseline FRFs for the navigation sensor models were generated using a combination of simulated con-
-tinuous and stepped-sine inputs with modeled sensor errors disabled. The baseline response for the RGA is 
-pictured in Figure 7, overlaying the design envelope. The baselines were compared against FRFs generated 
-using the LVDT and accelerometer inputs with the models’ sensor errors enabled. The model responses to 
-test inputs were then compared against a reconstruction of the observed FRT response to these inputs as 
-measured by the navigation sensors. Because the test data had been time-aligned, a constant time delay be-
-tween input and navigation sensor output had been effectively removed. To aid in the comparison of test data 
-and modeled frequency response, a constant delay was added to the phase response for each test run. The 
-comparisons between the model response and the observed FRT response for one of the RGA gyros is dis-
+Baseline FRFs for he naviga ion sensor models were genera ed using a combina ion of simula ed con-
+ inuous and s epped-sine inpu s wi h modeled sensor errors disabled. The baseline response for he RGA is 
+pic ured in Figure 7, overlaying he design envelope. The baselines were compared agains FRFs genera ed 
+using he LVDT and accelerome er inpu s wi h he models’ sensor errors enabled. The model responses o 
+ es inpu s were hen compared agains a recons ruc ion of he observed FRT response o hese inpu s as 
+measured by he naviga ion sensors. Because he es da a had been ime-aligned, a cons an ime delay be-
+ ween inpu and naviga ion sensor ou pu had been effec ively removed. To aid in he comparison of es da a 
+and modeled frequency response, a cons an delay was added o he phase response for each es run. The 
+comparisons be ween he model response and he observed FRT response for one of he RGA gyros is dis-
 played in Figure 8. 
 
 
@@ -909,8 +909,8 @@ sponse and design envelope
 
 
 Figure 8: RGA hardware and model responses 
-to FRT test input. Phase response in hardware test 
-cannot be tracked accurately at the lower gains in 
+ o FRT es inpu . Phase response in hardware es 
+canno be racked accura ely a he lower gains in 
 
 
 
@@ -939,53 +939,53 @@ RGA Frequency Response
 
 
 
-In general, the FRF reconstructions demonstrated similar gain responses between the RINU and RGA hard-
-ware and their corresponding simulation models. The phase could be matched up reasonably by reintroducing 
-a constant delay into the hardware response, though the phase could not be tracked well in the higher-fre-
-quency regions where gain begins to roll off. Overall, the precision with which FRF reconstructions of the 
-hardware response could be produced appeared to be limited by physical limitations of the shaker table, 
-particularly at low frequencies, the need to protect the hardware from excessive environments, and accel-
-erometer or displacement sensor calibration errors. 
+In general, he FRF recons ruc ions demons ra ed similar gain responses be ween he RINU and RGA hard-
+ware and heir corresponding simula ion models. The phase could be ma ched up reasonably by rein roducing 
+a cons an delay in o he hardware response, hough he phase could no be racked well in he higher-fre-
+quency regions where gain begins o roll off. Overall, he precision wi h which FRF recons ruc ions of he 
+hardware response could be produced appeared o be limi ed by physical limi a ions of he shaker able, 
+par icularly a low frequencies, he need o pro ec he hardware from excessive environmen s, and accel-
+erome er or displacemen sensor calibra ion errors. 
 
 
 
-Development Test Unit/Integrated Comparisons 
+Developmen Tes Uni /In egra ed Comparisons 
 
 
 
-Analysis of stand-alone hardware testing and detailed modeling is very important in being able to predict 
-vehicle performance. Most hardware testing is performed with a test set interface with limited non-flight 
-conditions, and usually performed with an engineering development unit (EDU). The next step in hardware 
-testing is system integration testing, using HWIL, which plays an important part in the full testing program. 
-For the SLS program, HWIL testing is done with a RINU development test unit (DTU), which has the same 
-parts and software as a flight RINU, but with the sensors replaced with a PAM card, which provides the unit 
-with an external interface to a dynamics simulation. The dynamic simulation (ARTEMIS) provides dynam-
-ics, actuator and some sensor modeling independent of MAVERIC. 
+Analysis of s and-alone hardware es ing and de ailed modeling is very impor an in being able o predic 
+vehicle performance. Mos hardware es ing is performed wi h a es se in erface wi h limi ed non-fligh 
+condi ions, and usually performed wi h an engineering developmen uni (EDU). The nex s ep in hardware 
+ es ing is sys em in egra ion es ing, using HWIL, which plays an impor an par in he full es ing program. 
+For he SLS program, HWIL es ing is done wi h a RINU developmen es uni (DTU), which has he same 
+par s and sof ware as a fligh RINU, bu wi h he sensors replaced wi h a PAM card, which provides he uni 
+wi h an ex ernal in erface o a dynamics simula ion. The dynamic simula ion (ARTEMIS) provides dynam-
+ics, ac ua or and some sensor modeling independen of MAVERIC. 
 
 
 
-But the benefits of HWIL testing is not just to ensure the hardware and software all interact correctly 
-together, although that is also a critical need and invaluable risk mitigation tool. For us, this test environment 
-provided opportunities to analyze, validate and improve our modeling of the sensor, system and how we 
-evaluate them. Evaluating the performance of the HWIL sensors allowed us to validate and better understand 
-the latency of the sensors. By using the ARTEMIS system, we were able to inject temporary biases into the 
-sensors and measure the latency of the sensor response, using a bus monitor of the 1553 traffic. Because the 
-RINU and RGAs both have internal filters that were not part of the latency budget, we had to compensate for 
-that by analytically removing the filter response to determine the net latency. Latency is important for control 
-system stability, but critical for affecting orbit injection and determining when to shut down the engines. 
-With multiple runs, we were able to accurately measure actual latency and compare it with hardware speci-
-fications and expected variations due to asynchronous operation and variability. 
+Bu he benefi s of HWIL es ing is no jus o ensure he hardware and sof ware all in erac correc ly 
+ oge her, al hough ha is also a cri ical need and invaluable risk mi iga ion ool. For us, his es environmen 
+provided oppor uni ies o analyze, valida e and improve our modeling of he sensor, sys em and how we 
+evalua e hem. Evalua ing he performance of he HWIL sensors allowed us o valida e and be er unders and 
+ he la ency of he sensors. By using he ARTEMIS sys em, we were able o injec emporary biases in o he 
+sensors and measure he la ency of he sensor response, using a bus moni or of he 1553 raffic. Because he 
+RINU and RGAs bo h have in ernal fil ers ha were no par of he la ency budge , we had o compensa e for 
+ ha by analy ically removing he fil er response o de ermine he ne la ency. La ency is impor an for con rol 
+sys em s abili y, bu cri ical for affec ing orbi injec ion and de ermining when o shu down he engines. 
+Wi h mul iple runs, we were able o accura ely measure ac ual la ency and compare i wi h hardware speci-
+fica ions and expec ed varia ions due o asynchronous opera ion and variabili y. 
 
 
 
-Previous latency measurement methodologies at the system level focused on a method showing a phase 
-lag response from the controller by injecting sinusoidal biases. Due to the system noise and sensitivity of the 
-controller, as well as the 20 millisecond (msec) quantization of the controller process, preliminary testing in 
-MAVERIC showed that this method would not be possible to resolve latency levels accurate enough to val-
-idate latency specifications. Thus, a new method was developed using larger, short duration, square wave 
-biases that caused only temporary disturbances to the controllers and allowed much finer (<1 msec) meas-
-urement of the latency, as well as step-wise change evaluation through the flight computer and actuator com-
-mands at a system level. Figure 9 below provides a sample of the data used to perform the measurements/anal-
+Previous la ency measuremen me hodologies a he sys em level focused on a me hod showing a phase 
+lag response from he con roller by injec ing sinusoidal biases. Due o he sys em noise and sensi ivi y of he 
+con roller, as well as he 20 millisecond (msec) quan iza ion of he con roller process, preliminary es ing in 
+MAVERIC showed ha his me hod would no be possible o resolve la ency levels accura e enough o val-
+ida e la ency specifica ions. Thus, a new me hod was developed using larger, shor dura ion, square wave 
+biases ha caused only emporary dis urbances o he con rollers and allowed much finer (<1 msec) meas-
+uremen of he la ency, as well as s ep-wise change evalua ion hrough he fligh compu er and ac ua or com-
+mands a a sys em level. Figure 9 below provides a sample of he da a used o perform he measuremen s/anal-
 ysis. 
 
 
@@ -1003,52 +1003,52 @@ ysis.
 
 
  
-This effort also involved spending time to better understand the internal working of the sensor and how 
+This effor also involved spending ime o be er unders and he in ernal working of he sensor and how 
 
 
 
-it applied to latency that hadn’t previously been studied to the same level of detail, and comparing this to the 
-MAVERIC models. This resulted in a correction to the RINU navigation timing model where a time correc-
-tion had been incorrectly applied. It also resulted in an RGA latency estimation change, even though the RGA 
-is only a model in the hardware in the loop simulation, the additional focus and difference in what was used 
-in MAVERIC prompted questions of the hardware vendor, which showed the latency specification included 
-latency that was part of the 100 Hz update that was already modeled and thus was too large. The testing 
-validated all other latency related values being used in the performance simulation. 
+i applied o la ency ha hadn’ previously been s udied o he same level of de ail, and comparing his o he 
+MAVERIC models. This resul ed in a correc ion o he RINU naviga ion iming model where a ime correc-
+ ion had been incorrec ly applied. I also resul ed in an RGA la ency es ima ion change, even hough he RGA 
+is only a model in he hardware in he loop simula ion, he addi ional focus and difference in wha was used 
+in MAVERIC promp ed ques ions of he hardware vendor, which showed he la ency specifica ion included 
+la ency ha was par of he 100 Hz upda e ha was already modeled and hus was oo large. The es ing 
+valida ed all o her la ency rela ed values being used in he performance simula ion. 
 
 
 
-The process of evaluating the sensors at the 1553 data rather than output from the flight computer, espe-
-cially due to the large temporary biases used to determine latency, discovered that there were cancelling 
-alignment transformation errors in the flight computer software and the ARTEMIS transformation to the 
-RGA frame. This went undetected through other testing that focused on flight software output and simulation 
-SLS frame states, rather than sensor states. While this did not affect the detailed modeling in MAVERIC 
-(which was shown to be correct), this allowed us to discover and correct a flight software error that may not 
-have been discovered until much later in the program, or not detected until flight, resulting in a catastrophic 
-system failure. This provided further evidence of the importance of analyzing data at every interface and not 
-just an end-to-end analysis. 
+The process of evalua ing he sensors a he 1553 da a ra her han ou pu from he fligh compu er, espe-
+cially due o he large emporary biases used o de ermine la ency, discovered ha here were cancelling 
+alignmen ransforma ion errors in he fligh compu er sof ware and he ARTEMIS ransforma ion o he 
+RGA frame. This wen unde ec ed hrough o her es ing ha focused on fligh sof ware ou pu and simula ion 
+SLS frame s a es, ra her han sensor s a es. While his did no affec he de ailed modeling in MAVERIC 
+(which was shown o be correc ), his allowed us o discover and correc a fligh sof ware error ha may no 
+have been discovered un il much la er in he program, or no de ec ed un il fligh , resul ing in a ca as rophic 
+sys em failure. This provided fur her evidence of he impor ance of analyzing da a a every in erface and no 
+jus an end- o-end analysis. 
 
 
 
-One of the critical outputs of the RINU is the integrated navigation state during flight and the correspond-
-ing timetag that represents the time of validity. This data is used on SLS for both guidance and in determining 
-the time to start engine shutdown, and is a primary contributor to orbit injection accuracy. The latency testing 
-and analysis pointed out one error in the MAVERIC correction, where a correction to the timetag due to an 
-internal RINU software correction was not being performed. 
+One of he cri ical ou pu s of he RINU is he in egra ed naviga ion s a e during fligh and he correspond-
+ing ime ag ha represen s he ime of validi y. This da a is used on SLS for bo h guidance and in de ermining 
+ he ime o s ar engine shu down, and is a primary con ribu or o orbi injec ion accuracy. The la ency es ing 
+and analysis poin ed ou one error in he MAVERIC correc ion, where a correc ion o he ime ag due o an 
+in ernal RINU sof ware correc ion was no being performed. 
 
 
 
-The comparison of the System-Integration-Lab (SIL) RINU DTU output, which includes the ARTEMIS 
-simulation of the vehicle dynamics and actuator interaction to MAVERIC was also performed to validate the 
-SIL RINU DTU navigation states were accurate enough to allow other system requirements verification using 
-the flight software and avionics EDUs. This comparison has been used to identify several ARTEMIS issues 
-during development. As the ARTEMIS models were corrected and improved, and the navigation errors and 
-orbit insertion accuracies became closer, more accurate comparisons to MAVERIC outputs were performed. 
-While it is understood that there are small inherent differences that the SIL introduces, we endeavored to 
-understand what these differences were, and how much of a difference these made. In the process of doing 
-this, the SLS navigation team provided insight into further differences. When a comparison of the improved 
-ARTEMIS and RINU/DTU navigation state error (time aligned, navigation state versus dynamics model 
-“truth” state for position, velocity and attitude) appeared to show better performance than the MAVERIC 
-simulation was showing. 
+The comparison of he Sys em-In egra ion-Lab (SIL) RINU DTU ou pu , which includes he ARTEMIS 
+simula ion of he vehicle dynamics and ac ua or in erac ion o MAVERIC was also performed o valida e he 
+SIL RINU DTU naviga ion s a es were accura e enough o allow o her sys em requiremen s verifica ion using 
+ he fligh sof ware and avionics EDUs. This comparison has been used o iden ify several ARTEMIS issues 
+during developmen . As he ARTEMIS models were correc ed and improved, and he naviga ion errors and 
+orbi inser ion accuracies became closer, more accura e comparisons o MAVERIC ou pu s were performed. 
+While i is unders ood ha here are small inheren differences ha he SIL in roduces, we endeavored o 
+unders and wha hese differences were, and how much of a difference hese made. In he process of doing 
+ his, he SLS naviga ion eam provided insigh in o fur her differences. When a comparison of he improved 
+ARTEMIS and RINU/DTU naviga ion s a e error ( ime aligned, naviga ion s a e versus dynamics model 
+“ ru h” s a e for posi ion, veloci y and a i ude) appeared o show be er performance han he MAVERIC 
+simula ion was showing. 
 
 
 
@@ -1079,7 +1079,7 @@ or
 
 
 pu
-t
+ 
 
 
 
@@ -1115,12 +1115,12 @@ U
 
 
 O
-ut
+u 
 
 
 
 pu
-t
+ 
 
 
 
@@ -1168,8 +1168,8 @@ r
 
 
 
-Figure 9: Time History Data of Induced Dynamics to Asses Latency at Input (Top), Sensor Out-
-put (Middle), and Actuator Output (Bottom) 
+Figure 9: Time His ory Da a of Induced Dynamics o Asses La ency a Inpu (Top), Sensor Ou -
+pu (Middle), and Ac ua or Ou pu (Bo om) 
 
 
 
@@ -1193,52 +1193,52 @@ put (Middle), and Actuator Output (Bottom)
 
 
 
-The detailed analysis into both the ARTEMIS and MAVERIC models provided additional validation of 
-good correlation. It also brought focus onto the process of calculating the navigation error, which is simula-
-tion-only calculation (truth states of actual flight are not available, although post-processing using upper 
-stage GPS data and ground tracking data can provide a better estimate for post-flight analysis). A comparison 
-of the ARTEMIS team navigation error and navigation/MAVERIC team allowed us to discover minor errors 
-on both sides. The ARTEMIS data did not provide propagation between the RINU navigation timetag based 
-states and the states of the simulation truth. The simulation truth states are updated at 2.5 msec, and these 
-steps are broken further into 1200 Hz incremental angle and velocity changes to feed into the RINU DTU. 
-The states of the RINU are internally filtered, and the timetag also corrects for expected internal latencies, 
-resulting in timetags that are not aligned closer than 2.5 msec. However, the expected accuracy of this results 
-in small (<50 feet) errors. The errors between the two simulations was still several hundred feet. Independent 
-determination of the navigation errors that performed separate time alignment and propagation for both sim-
-ulations showed performance much closer than that shown in MAVERIC, which had previously been evalu-
-ated and determined to be accurate. This additional analysis provided the direction to evaluate the navigation 
-error performed in MAVERIC. This resulted in two error findings. One was an error using the timetag from 
-an incorrect RINU subaddress. This error was actually introduced due to the high level of modeling of the 
-multiple, complex RINU outputs with similar mnemonics. Once discovered, it was also found that this time-
-tag mnemonic error propagated into the state used for guidance and engine shut-down determining. Correct-
-ing it improved the orbit injection accuracy. 
+The de ailed analysis in o bo h he ARTEMIS and MAVERIC models provided addi ional valida ion of 
+good correla ion. I also brough focus on o he process of calcula ing he naviga ion error, which is simula-
+ ion-only calcula ion ( ru h s a es of ac ual fligh are no available, al hough pos -processing using upper 
+s age GPS da a and ground racking da a can provide a be er es ima e for pos -fligh analysis). A comparison 
+of he ARTEMIS eam naviga ion error and naviga ion/MAVERIC eam allowed us o discover minor errors 
+on bo h sides. The ARTEMIS da a did no provide propaga ion be ween he RINU naviga ion ime ag based 
+s a es and he s a es of he simula ion ru h. The simula ion ru h s a es are upda ed a 2.5 msec, and hese 
+s eps are broken fur her in o 1200 Hz incremen al angle and veloci y changes o feed in o he RINU DTU. 
+The s a es of he RINU are in ernally fil ered, and he ime ag also correc s for expec ed in ernal la encies, 
+resul ing in ime ags ha are no aligned closer han 2.5 msec. However, he expec ed accuracy of his resul s 
+in small (<50 fee ) errors. The errors be ween he wo simula ions was s ill several hundred fee . Independen 
+de ermina ion of he naviga ion errors ha performed separa e ime alignmen and propaga ion for bo h sim-
+ula ions showed performance much closer han ha shown in MAVERIC, which had previously been evalu-
+a ed and de ermined o be accura e. This addi ional analysis provided he direc ion o evalua e he naviga ion 
+error performed in MAVERIC. This resul ed in wo error findings. One was an error using he ime ag from 
+an incorrec RINU subaddress. This error was ac ually in roduced due o he high level of modeling of he 
+mul iple, complex RINU ou pu s wi h similar mnemonics. Once discovered, i was also found ha his ime-
+ ag mnemonic error propaga ed in o he s a e used for guidance and engine shu -down de ermining. Correc -
+ing i improved he orbi injec ion accuracy. 
 
 
 
-A larger magnitude error was also discovered in the navigation error calculation that is performed each 
-navigation step in the MAVERIC simulation. While this error did not affect injection performance, it mate-
-rialized as a larger than expected navigation error. When the error was corrected, it resulted in much improved 
-comparative results with the SIL results, as shown in Figure 10. The larger attitude errors in the SIL is traced 
-directly to the 2.5 msec asynchronous operation of the ARTEMIS simulation and DTU, coupled with high 
-roll and pitch-over maneuvers performed shortly after lift-off. 
+A larger magni ude error was also discovered in he naviga ion error calcula ion ha is performed each 
+naviga ion s ep in he MAVERIC simula ion. While his error did no affec injec ion performance, i ma e-
+rialized as a larger han expec ed naviga ion error. When he error was correc ed, i resul ed in much improved 
+compara ive resul s wi h he SIL resul s, as shown in Figure 10. The larger a i ude errors in he SIL is raced 
+direc ly o he 2.5 msec asynchronous opera ion of he ARTEMIS simula ion and DTU, coupled wi h high 
+roll and pi ch-over maneuvers performed shor ly af er lif -off. 
 
 
 
  
-Figure 10: Navigation Error Comparisons between SIL and MAVERIC Models 
+Figure 10: Naviga ion Error Comparisons be ween SIL and MAVERIC Models 
 
 
 
 CONCLUSIONS AND FUTURE WORK 
-This paper provides a summary of the approach taken by the SLS Navigation Team for verification and 
+This paper provides a summary of he approach aken by he SLS Naviga ion Team for verifica ion and 
 
 
 
-validation of sensor models in support of the SLS program. This extensive effort provided a high level of 
+valida ion of sensor models in suppor of he SLS program. This ex ensive effor provided a high level of 
 
 
 
-,::k~ ~: ;gatioa:•••~:;a 
+,::k~ ~: ;ga ioa:•••~:;a 
 0 
 
 
@@ -1289,70 +1289,70 @@ Time (sec)
 
 
 
-confidence in understanding and assessing sensor and integrated performance across a wide variety of mis-
-sion scenarios. The investment in this analysis results in mature analysis with a strong tie to hardware results, 
-enabling a large amount of understanding and insight into the design for flight. Validation of the models prior 
-to flight is a necessary step to assure key stakeholders and engineering management of the vehicle’s capability 
-in the path to flight. During previous design cycles, the INS model has been used to assess on-pad alignment 
-under expected environments, in-flight navigation accuracy, and response to fault events9. Similarly, the 
-RGA models have been used to validate controller response and stability to in-flight disturbances and have 
-been used extensively in developing fault detection algorithms10. Additionally, this model was used to de-
-velop Mission and Fault Management criteria that drive autonomous vehicle operation. Lastly, the frequency 
-response testing has informed SLS Control algorithm design and stability assessments, helping to anchor 
-those results with hardware data. 
+confidence in unders anding and assessing sensor and in egra ed performance across a wide varie y of mis-
+sion scenarios. The inves men in his analysis resul s in ma ure analysis wi h a s rong ie o hardware resul s, 
+enabling a large amoun of unders anding and insigh in o he design for fligh . Valida ion of he models prior 
+ o fligh is a necessary s ep o assure key s akeholders and engineering managemen of he vehicle’s capabili y 
+in he pa h o fligh . During previous design cycles, he INS model has been used o assess on-pad alignmen 
+under expec ed environmen s, in-fligh naviga ion accuracy, and response o faul even s9. Similarly, he 
+RGA models have been used o valida e con roller response and s abili y o in-fligh dis urbances and have 
+been used ex ensively in developing faul de ec ion algori hms10. Addi ionally, his model was used o de-
+velop Mission and Faul Managemen cri eria ha drive au onomous vehicle opera ion. Las ly, he frequency 
+response es ing has informed SLS Con rol algori hm design and s abili y assessmen s, helping o anchor 
+ hose resul s wi h hardware da a. 
 
 
 
-Over the course of this analysis, several key items were identified that should be noted for future and 
-similar efforts. It is important to be careful about readout noise specification and the rate at which that noise 
-is applied in modeling. Hardware testing can easily validate this and help to match the model to hardware. 
-While time-consuming and data-intensive, Allan Variance assessment of the sensors under static conditions 
-proved very useful, allowing for a statistical assessment of the error behavior. Similarly, it is important to 
-maintain focus on purpose of models, such as an interface emulator or a performance model. But it is also 
-important to maintain an awareness of the sensor ICD and ensure matching of the sensor outputs ahead of 
-FSW integration and testing, i.e. maintaining an output structure matching the ICD in terms of data content 
-rather than specific message structure such as modeling all health and status information. During analysis for 
-the vehicle, integrated latency became very important to characterize and understand due to its impact on 
-controller lag and insertion accuracy. This testing of an integrated system can only be performed in a hard-
-ware-in-the-loop environment allowing inclusion of FSW and integrated flight hardware. 
+Over he course of his analysis, several key i ems were iden ified ha should be no ed for fu ure and 
+similar effor s. I is impor an o be careful abou readou noise specifica ion and he ra e a which ha noise 
+is applied in modeling. Hardware es ing can easily valida e his and help o ma ch he model o hardware. 
+While ime-consuming and da a-in ensive, Allan Variance assessmen of he sensors under s a ic condi ions 
+proved very useful, allowing for a s a is ical assessmen of he error behavior. Similarly, i is impor an o 
+main ain focus on purpose of models, such as an in erface emula or or a performance model. Bu i is also 
+impor an o main ain an awareness of he sensor ICD and ensure ma ching of he sensor ou pu s ahead of 
+FSW in egra ion and es ing, i.e. main aining an ou pu s ruc ure ma ching he ICD in erms of da a con en 
+ra her han specific message s ruc ure such as modeling all heal h and s a us informa ion. During analysis for 
+ he vehicle, in egra ed la ency became very impor an o charac erize and unders and due o i s impac on 
+con roller lag and inser ion accuracy. This es ing of an in egra ed sys em can only be performed in a hard-
+ware-in- he-loop environmen allowing inclusion of FSW and in egra ed fligh hardware. 
 
 
 
-The biggest enabler of this effort is the large amount of integration and support between the NASA de-
-velopers, the prime contractor, Boeing, and the hardware vendor, Honeywell. This team was well integrated 
-throughout the hardware development and model integration process with Boeing and NASA Stages being 
-the primary customers of the model. This model was used by NASA VM in performance assessment. As 
-such, reviews after each test event and integrated validation and verification activity included key personnel 
-across each organization to provide confidence and insight into the model and hardware. The amount of 
-documentation provided enabled a large amount of insight into performance of the units and its capability. 
-Additionally, use of data from Acceptance and Qualification testing is also a great asset, although its use may 
-be limited if representative truth data is not available. A key lesson of this work is to focus on hardware 
-testing to fill in known gaps and provide confidence in areas of high sensitivity. Due to flying heritage-based 
-sensors, the hardware tests were designed to capture insight into expected performance in focused areas. As 
-such, a flight-like development unit with live sensors was critical for GCA testing and detailed static analysis. 
-A particular interest of these sensors is their frequency response at low frequencies. This proved difficult to 
-assess, due to having to induce low frequency dynamics at low magnitudes to limit aging of the units. Even 
-with this, the results still provided key insight into confirming the overall response and behavior of the units 
-under test. 
+The bigges enabler of his effor is he large amoun of in egra ion and suppor be ween he NASA de-
+velopers, he prime con rac or, Boeing, and he hardware vendor, Honeywell. This eam was well in egra ed 
+ hroughou he hardware developmen and model in egra ion process wi h Boeing and NASA S ages being 
+ he primary cus omers of he model. This model was used by NASA VM in performance assessmen . As 
+such, reviews af er each es even and in egra ed valida ion and verifica ion ac ivi y included key personnel 
+across each organiza ion o provide confidence and insigh in o he model and hardware. The amoun of 
+documen a ion provided enabled a large amoun of insigh in o performance of he uni s and i s capabili y. 
+Addi ionally, use of da a from Accep ance and Qualifica ion es ing is also a grea asse , al hough i s use may 
+be limi ed if represen a ive ru h da a is no available. A key lesson of his work is o focus on hardware 
+ es ing o fill in known gaps and provide confidence in areas of high sensi ivi y. Due o flying heri age-based 
+sensors, he hardware es s were designed o cap ure insigh in o expec ed performance in focused areas. As 
+such, a fligh -like developmen uni wi h live sensors was cri ical for GCA es ing and de ailed s a ic analysis. 
+A par icular in eres of hese sensors is heir frequency response a low frequencies. This proved difficul o 
+assess, due o having o induce low frequency dynamics a low magni udes o limi aging of he uni s. Even 
+wi h his, he resul s s ill provided key insigh in o confirming he overall response and behavior of he uni s 
+under es . 
 
 
 
-Another key takeaway from this work is the need for oversampling, particularly in the case of asynchro-
-nous hardware interfaces such as 1553. This problem exhibited itself in gyrocompassing testing as missed 
-data frames and limited the ability to perform cross-verification between the model and hardware. To address 
-this issue, the frequency response test utilized a higher sampling rate than the standard output of the unit 
-under test to ensure no missed samples. While this did cause increased complexity in post-processing soft-
-ware, having the data on-hand is well worth the effort. This oversampling isn’t needed in SLS Block 1 flight 
-due to the vehicle always having access to the latest navigation state data, since the sensor observations are 
-integrated within the RINU, rather than in SLS FSW. 
+Ano her key akeaway from his work is he need for oversampling, par icularly in he case of asynchro-
+nous hardware in erfaces such as 1553. This problem exhibi ed i self in gyrocompassing es ing as missed 
+da a frames and limi ed he abili y o perform cross-verifica ion be ween he model and hardware. To address 
+ his issue, he frequency response es u ilized a higher sampling ra e han he s andard ou pu of he uni 
+under es o ensure no missed samples. While his did cause increased complexi y in pos -processing sof -
+ware, having he da a on-hand is well wor h he effor . This oversampling isn’ needed in SLS Block 1 fligh 
+due o he vehicle always having access o he la es naviga ion s a e da a, since he sensor observa ions are 
+in egra ed wi hin he RINU, ra her han in SLS FSW. 
 
 
 
-The navigation team is taking these lessons learned and applying them to model development, verifica-
-tion, and validation for new sensor models needed for the B1B EUS, particularly GPS. A key area of differ-
-ence is in terms of onboard software. For GPS receivers, the performance can ultimately be traced back to 
-the tracking loops internal to the device. This is typically implemented in digital logic as opposed to typical 
-software. To model these in real-time requires running the model at a very high rate in order to model the 
+The naviga ion eam is aking hese lessons learned and applying hem o model developmen , verifica-
+ ion, and valida ion for new sensor models needed for he B1B EUS, par icularly GPS. A key area of differ-
+ence is in erms of onboard sof ware. For GPS receivers, he performance can ul ima ely be raced back o 
+ he racking loops in ernal o he device. This is ypically implemen ed in digi al logic as opposed o ypical 
+sof ware. To model hese in real- ime requires running he model a a very high ra e in order o model he 
 
 
 
@@ -1368,65 +1368,65 @@ software. To model these in real-time requires running the model at a very high 
 
 
 
-high frequency radio signals involved. As such, the scope of modeling will need to be balanced between the 
-needs of performance capability and runtime concerns in an integrated simulation. Conversely, through the 
-use of RF simulators, extensive testing can be performed on flight-like units to provide a high level of insight 
-into the operational characteristics of the device. Similarly, for a multi-sensor system, integrated system level 
-verification and validation is necessary to validate performance and ensure operational capability. The les-
-sons learned from the verification and validation has provided a large amount of benefit. The final result of 
-this effort, the RINU and RGA models, have been tested to a high level of confidence prior to the first SLS 
-flight, and allow for extensive analysis and development for future designs. Post-fight, these models will be 
-reviewed to validate how well they match during flight conditions and provide further confidence. It is the 
-hope of the authors that as the industry moves towards an ever increasing usage of software models and 
-simulation to develop confidence and performance assessment, these lessons learned and approach can pro-
-vide a starting or comparison point for other missions. 
+high frequency radio signals involved. As such, he scope of modeling will need o be balanced be ween he 
+needs of performance capabili y and run ime concerns in an in egra ed simula ion. Conversely, hrough he 
+use of RF simula ors, ex ensive es ing can be performed on fligh -like uni s o provide a high level of insigh 
+in o he opera ional charac eris ics of he device. Similarly, for a mul i-sensor sys em, in egra ed sys em level 
+verifica ion and valida ion is necessary o valida e performance and ensure opera ional capabili y. The les-
+sons learned from he verifica ion and valida ion has provided a large amoun of benefi . The final resul of 
+ his effor , he RINU and RGA models, have been es ed o a high level of confidence prior o he firs SLS 
+fligh , and allow for ex ensive analysis and developmen for fu ure designs. Pos -figh , hese models will be 
+reviewed o valida e how well hey ma ch during fligh condi ions and provide fur her confidence. I is he 
+hope of he au hors ha as he indus ry moves owards an ever increasing usage of sof ware models and 
+simula ion o develop confidence and performance assessmen , hese lessons learned and approach can pro-
+vide a s ar ing or comparison poin for o her missions. 
 
 
 
 ACKNOWLEDGMENTS 
-The work included herein represents multiple years of effort and the contribution of several previous SLS 
+The work included herein represen s mul iple years of effor and he con ribu ion of several previous SLS 
 
 
 
-navigation team members must be acknowledged. The majority of the work supporting gyrocompassing anal-
-ysis was completed by William Bernard, Kevin Geohagan, and Dennis Strickland. Similarly, the frequency 
-analysis testing was conducted under contract by ATA Technologies, whose results were used to in frequency 
-response testing. NASA Flight Software and GNC personnel were essentially to this testing and analysis of 
-the results, particularly Jeff Brouwer. The development team and program staff at Honeywell and Boeing 
-were instrumental in providing the documentation, data artifacts, and test hardware used in the testing of the 
-RINU and RGA units. Similarly, the team would like to acknowledge the support of SLS VM and Stages 
-leadership, principally Joey Broome and Lisa Blue for their support of these hardware testing validation. 
-Lastly, the team would like to acknowledge the former team lead, Emerson Oliver, who helped plan, acquire 
-funding, defend, and execute these testing activities. 
+naviga ion eam members mus be acknowledged. The majori y of he work suppor ing gyrocompassing anal-
+ysis was comple ed by William Bernard, Kevin Geohagan, and Dennis S rickland. Similarly, he frequency 
+analysis es ing was conduc ed under con rac by ATA Technologies, whose resul s were used o in frequency 
+response es ing. NASA Fligh Sof ware and GNC personnel were essen ially o his es ing and analysis of 
+ he resul s, par icularly Jeff Brouwer. The developmen eam and program s aff a Honeywell and Boeing 
+were ins rumen al in providing he documen a ion, da a ar ifac s, and es hardware used in he es ing of he 
+RINU and RGA uni s. Similarly, he eam would like o acknowledge he suppor of SLS VM and S ages 
+leadership, principally Joey Broome and Lisa Blue for heir suppor of hese hardware es ing valida ion. 
+Las ly, he eam would like o acknowledge he former eam lead, Emerson Oliver, who helped plan, acquire 
+funding, defend, and execu e hese es ing ac ivi ies. 
 
 
 
 REFERENCES 
-1 Oliver, T.E, et al, “SLS Model-Based Design: A Navigation Perspective,” Proceedings of the AAS Guidance and Con-
-trol Conference, Breckenridge, CO., 2018. 
-2 NASA/SLS Program, “Space Launch Program Integrated Guidance, Navigation, and Control Performance Assessment, 
-Volume 3: Appendices C-G, Verification, Validation, and Test”, National Aeronautics and Space Administration, 2014. 
-3 Geohagan, K.W., Bernard, W.P., Oliver, T.E., et al, “6DOF Testing of the SLS Inertial Navigation Unit”, Proceedings 
-of the AAS Guidance and Control Conference, Breckenridge, CO., 2018. 
-4 Savage, Paul G. "Strapdown inertial navigation integration algorithm design part 2: Velocity and position algorithms." 
-Journal of Guidance, Control, and Dynamics 21.2 (1998): 208-221. 
-5 Oliver, T.E., Park, T., et al, “Space Launch System Block 1B Preliminary Navigation System Design”, Proceedings of 
-the AAS Guidance and Control Conference, Breckenridge, CO., 2018. 
-6 Ng, L. C.. “On the application of Allan variance method for ring laser gyro performance characterization (No. UCRL-
-ID-115695)”, Lawrence Livermore National Lab., CA (United States), 1993. 
-7 El-Sheimy, N., Hou, H., Niu, X. “Analysis and modeling of inertial sensors using Allan variance”, IEEE Transactions 
-on Instrumentation and Measurement, 57(1), 140-149, 2007. 
-8 ATA Engineering, “Final Report on NASA SLS RGA and RINU Frequency Response Testing Revision 1”, ATA En-
+1 Oliver, T.E, e al, “SLS Model-Based Design: A Naviga ion Perspec ive,” Proceedings of he AAS Guidance and Con-
+ rol Conference, Breckenridge, CO., 2018. 
+2 NASA/SLS Program, “Space Launch Program In egra ed Guidance, Naviga ion, and Con rol Performance Assessmen , 
+Volume 3: Appendices C-G, Verifica ion, Valida ion, and Tes ”, Na ional Aeronau ics and Space Adminis ra ion, 2014. 
+3 Geohagan, K.W., Bernard, W.P., Oliver, T.E., e al, “6DOF Tes ing of he SLS Iner ial Naviga ion Uni ”, Proceedings 
+of he AAS Guidance and Con rol Conference, Breckenridge, CO., 2018. 
+4 Savage, Paul G. "S rapdown iner ial naviga ion in egra ion algori hm design par 2: Veloci y and posi ion algori hms." 
+Journal of Guidance, Con rol, and Dynamics 21.2 (1998): 208-221. 
+5 Oliver, T.E., Park, T., e al, “Space Launch Sys em Block 1B Preliminary Naviga ion Sys em Design”, Proceedings of 
+ he AAS Guidance and Con rol Conference, Breckenridge, CO., 2018. 
+6 Ng, L. C.. “On he applica ion of Allan variance me hod for ring laser gyro performance charac eriza ion (No. UCRL-
+ID-115695)”, Lawrence Livermore Na ional Lab., CA (Uni ed S a es), 1993. 
+7 El-Sheimy, N., Hou, H., Niu, X. “Analysis and modeling of iner ial sensors using Allan variance”, IEEE Transac ions 
+on Ins rumen a ion and Measuremen , 57(1), 140-149, 2007. 
+8 ATA Engineering, “Final Repor on NASA SLS RGA and RINU Frequency Response Tes ing Revision 1”, ATA En-
 gineering, San Diego, CA, 2018. 
-9 Anzalone, E., “Optimization of Second Fault Detection Thresholds to Maximize Mission Probability of Success”, Pro-
-ceedings of the AAS Guidance and Control Conference, Breckenridge, CO., 2018. 
-10 Park, T., Oliver, T.E., Smith, A. “Sensor Data Quality and Angular Rate Down-Selection Algorithms on SLS EM-1,” 
-Proceedings of the AAS Guidance and Control Conference, Breckenridge, CO., 2018. 
+9 Anzalone, E., “Op imiza ion of Second Faul De ec ion Thresholds o Maximize Mission Probabili y of Success”, Pro-
+ceedings of he AAS Guidance and Con rol Conference, Breckenridge, CO., 2018. 
+10 Park, T., Oliver, T.E., Smi h, A. “Sensor Da a Quali y and Angular Ra e Down-Selec ion Algori hms on SLS EM-1,” 
+Proceedings of he AAS Guidance and Con rol Conference, Breckenridge, CO., 2018. 
 
 
 
 
 
 
- 
-Hardware Verification and Validation for a Navigation Sensor Software Model in Support of Flight Vehicle Performance Analysis
+	
+Hardware Verifica ion and Valida ion for a Naviga ion Sensor Sof ware Model in Suppor of Fligh Vehicle Performance Analysis

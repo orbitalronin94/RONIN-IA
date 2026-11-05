@@ -1,79 +1,79 @@
-Validation of Two-phase Flow Modeling Techniques in
-Loci-Stream using Axial Jet Pressure Control and Autogenous
+Valida ion of Two-phase Flow Modeling Techniques in
+Loci-S ream using Axial Je Pressure Con rol and Au ogenous
 
 
 
-Pressurization Experiments
+Pressuriza ion Experimen s
 
 
 
-Chintan S. Patel ∗
+Chin an S. Pa el ∗
 
 
 
-Qualis LLC (Amentum Space Exploration Group), NASA Marshall Space Flight Center, Huntsville, AL
+Qualis LLC (Amen um Space Explora ion Group), NASA Marshall Space Fligh Cen er, Hun sville, AL
 
 
 
-Improvements to computational fluid dynamics modeling of cryogenic fluid management
-operations are presented with experimental validations. Modeling improvements includes
-utilizing improved delayed detaches eddy simulation to more effectively model turbulence
-compared to the Reynolds-averaged Navier Stokes modeling, modeling temperature dependent
-tank solid properties to capture large variation in thermodynamic properties at cryogenic
-conditions, modeling real gas equation of state for hydrogen instead of ideal gas behavior, and
-an on-going effort to improve interface turbulence transport for the volume of fluid method.
-Two flight-scale ground tests, five K-site tank axial jet pressure control experiments and an
-Engineering Design Unit tank autogenous pressurization experiment are validated and show
-the effectiveness of the improved modeling techniques. The successful validation establishes
-further trust in these models for flight project support and provides a pathway for maturation
-of in-development interface turbulence damping model for the volume of fluid method for more
-generalized applications.
+Improvemen s o compu a ional fluid dynamics modeling of cryogenic fluid managemen 
+opera ions are presen ed wi h experimen al valida ions. Modeling improvemen s includes
+u ilizing improved delayed de aches eddy simula ion o more effec ively model urbulence
+compared o he Reynolds-averaged Navier S okes modeling, modeling empera ure dependen 
+ ank solid proper ies o cap ure large varia ion in hermodynamic proper ies a cryogenic
+condi ions, modeling real gas equa ion of s a e for hydrogen ins ead of ideal gas behavior, and
+an on-going effor o improve in erface urbulence ranspor for he volume of fluid me hod.
+Two fligh -scale ground es s, five K-si e ank axial je pressure con rol experimen s and an
+Engineering Design Uni ank au ogenous pressuriza ion experimen are valida ed and show
+ he effec iveness of he improved modeling echniques. The successful valida ion es ablishes
+fur her rus in hese models for fligh projec suppor and provides a pa hway for ma ura ion
+of in-developmen in erface urbulence damping model for he volume of fluid me hod for more
+generalized applica ions.
 
 
 
-I. Nomenclature
+I. Nomencla ure
 
 
 
-𝐵 = Damping factor in smooth wall turbulence frequency equation promulgated in Menter’s SST model
-𝑓𝑑 = Blending parameter in improved delayed detached eddy simulation model
+𝐵 = Damping fac or in smoo h wall urbulence frequency equa ion promulga ed in Men er’s SST model
+𝑓𝑑 = Blending parame er in improved delayed de ached eddy simula ion model
 𝑡 = Time
-𝑦 = Interface normal distance
-𝛽 = Constant in Menter’s SST model
-𝜇 = Dynamic viscosity
-𝜔 = Turbulence dissipation rate (turbulence frequency)
-𝜌 = Density
+𝑦 = In erface normal dis ance
+𝛽 = Cons an in Men er’s SST model
+𝜇 = Dynamic viscosi y
+𝜔 = Turbulence dissipa ion ra e ( urbulence frequency)
+𝜌 = Densi y
 
 
 
-II. Introduction
+II. In roduc ion
 
 
 
-NASA’s near-future long-term space missions necessitate advancements in cryogenic fluid management (CFM)
-technologies, which is a critical technology for NASA’s Artemis missions. CFM deals with safe, low cost, and
+NASA’s near-fu ure long- erm space missions necessi a e advancemen s in cryogenic fluid managemen (CFM)
+ echnologies, which is a cri ical echnology for NASA’s Ar emis missions. CFM deals wi h safe, low cos , and
 
 
 
-reliable long-term propellant storage; pressure control and propellant location control in the tank for engine operations; as
-well as tank draining and filling. Consequently, NASA Space Technology Mission Directorate (STMD) has established
-the CFM Portfolio Project (CFMPP) to improve CFM technologies for upcoming missions. In addition to advanced
-hardware development and demonstration, there is a need for accurate modeling of cryogenic system behavior to support
-rapid, reliable, and low-cost spacecraft design and operation. CFM Modeling Portfolio within CFMPP aims to improve,
-develop, and validate modeling capabilities.
+reliable long- erm propellan s orage; pressure con rol and propellan loca ion con rol in he ank for engine opera ions; as
+well as ank draining and filling. Consequen ly, NASA Space Technology Mission Direc ora e (STMD) has es ablished
+ he CFM Por folio Projec (CFMPP) o improve CFM echnologies for upcoming missions. In addi ion o advanced
+hardware developmen and demons ra ion, here is a need for accura e modeling of cryogenic sys em behavior o suppor 
+rapid, reliable, and low-cos spacecraf design and opera ion. CFM Modeling Por folio wi hin CFMPP aims o improve,
+develop, and valida e modeling capabili ies.
 
 
 
-As part of the CFM modeling portfolio, the Propulsion Engineering Fluid Dynamics branch (ER42) at NASA
-Marshall Space Flight Center (MSFC) has been tasked with assessing and improving computational fluid dynamics
-(CFD) tools used to support future and current flight projects such as Human Lander System and Commercial Lunar
-Payload Services. CFD modeling is indispensable for accurately simulating and understanding these problems with
-high fidelity. We are engaged in improving and validating two-phase models in the Loci-STREAM CFD code to predict
+As par of he CFM modeling por folio, he Propulsion Engineering Fluid Dynamics branch (ER42) a NASA
+Marshall Space Fligh Cen er (MSFC) has been asked wi h assessing and improving compu a ional fluid dynamics
+(CFD) ools used o suppor fu ure and curren fligh projec s such as Human Lander Sys em and Commercial Lunar
+Payload Services. CFD modeling is indispensable for accura ely simula ing and unders anding hese problems wi h
+high fideli y. We are engaged in improving and valida ing wo-phase models in he Loci-STREAM CFD code o predic 
 various CFM phenomena.
 
 
 
-∗Computational Fluid Dynamicist, Fluid Dynamics Branch (ER42), NASA MSFC
+∗Compu a ional Fluid Dynamicis , Fluid Dynamics Branch (ER42), NASA MSFC
 
 
 
@@ -89,62 +89,62 @@ various CFM phenomena.
 
 
 
-An accurate capture of the gas-liquid interface dynamics is the primary modeling bottleneck. The interface dynamics
-includes altered interface turbulence transport, phase change, and thermal transport. Additionally, turbulence modeling
-away from the interface is another significant challenge for CFM modeling. Low speed but high Rayleigh number
-natural convection is often encountered in CFM problems and is difficult to model using Reynolds average Navier-Stokes
-(RANS) turbulence models. Moreover, CFM operations with high Rayleigh number as well as high Reynolds number
-flows might also pose more modeling challenges.
+An accura e cap ure of he gas-liquid in erface dynamics is he primary modeling bo leneck. The in erface dynamics
+includes al ered in erface urbulence ranspor , phase change, and hermal ranspor . Addi ionally, urbulence modeling
+away from he in erface is ano her significan challenge for CFM modeling. Low speed bu high Rayleigh number
+na ural convec ion is of en encoun ered in CFM problems and is difficul o model using Reynolds average Navier-S okes
+(RANS) urbulence models. Moreover, CFM opera ions wi h high Rayleigh number as well as high Reynolds number
+flows migh also pose more modeling challenges.
 
 
 
-In this paper, previous autogenous pressurization predictions [1] are updated with an improved modeling and axial
-jet based pressure control test [2] is expanded to contain five tests. Implementation of turbulence transport model for
-volume of fluid (VOF) method is described. Utility of a hybrid RANS and implicit LES approach was also described
-to improve the temperature predictions of the RANS model. Validation of our modeling techniques and CFD solver
-Loci-Stream-VOF are demonstrated.
+In his paper, previous au ogenous pressuriza ion predic ions [1] are upda ed wi h an improved modeling and axial
+je based pressure con rol es [2] is expanded o con ain five es s. Implemen a ion of urbulence ranspor model for
+volume of fluid (VOF) me hod is described. U ili y of a hybrid RANS and implici LES approach was also described
+ o improve he empera ure predic ions of he RANS model. Valida ion of our modeling echniques and CFD solver
+Loci-S ream-VOF are demons ra ed.
 
 
 
-III. Test Descriptions
+III. Tes Descrip ions
 
 
 
-A. K-site Tank - Axial Jet Pressure Control
+A. K-si e Tank - Axial Je Pressure Con rol
 
 
 
-1. Testing Facilities
-Axial jet pressure control tests were conducted at the NASA Glenn Research Center’s K-site testing facility [3].
+1. Tes ing Facili ies
+Axial je pressure con rol es s were conduc ed a he NASA Glenn Research Cen er’s K-si e es ing facili y [3].
 
 
 
-These tests provide time-transience of pressure and temperature data during the tank depressurization. An ellipsoidal
-tank with 2.2𝑚 major diameter and 1.83𝑚 minor diameter was insulated with multi-layer insulation (MLI) and housed
-inside a vacuum chamber. The Shuttle Centaur tank mixer was installed along the minor axis of the tank, which also
-aligns with the direction of the gravity. The nozzle diameter was 22.1𝑚𝑚 and the nozzle outlet was located on the
-tank major axis 0.51𝑚 from the tank bottom. Figure 1 illustrates the configuration. A battery of sensors are places
-inside and on the tank for temperature, pressure and fill level measurements. Figure 2 demonstrates the locations of the
-temperature probes.
+These es s provide ime- ransience of pressure and empera ure da a during he ank depressuriza ion. An ellipsoidal
+ ank wi h 2.2𝑚 major diame er and 1.83𝑚 minor diame er was insula ed wi h mul i-layer insula ion (MLI) and housed
+inside a vacuum chamber. The Shu le Cen aur ank mixer was ins alled along he minor axis of he ank, which also
+aligns wi h he direc ion of he gravi y. The nozzle diame er was 22.1𝑚𝑚 and he nozzle ou le was loca ed on he
+ ank major axis 0.51𝑚 from he ank bo om. Figure 1 illus ra es he configura ion. A ba ery of sensors are places
+inside and on he ank for empera ure, pressure and fill level measuremen s. Figure 2 demons ra es he loca ions of he
+ empera ure probes.
 
 
 
-Fig. 1 Cross-sections illustrating test configuration
+Fig. 1 Cross-sec ions illus ra ing es configura ion
 
 
 
-2. Experimental Procedure
-First, the heat leakage rate of 4.2𝑊/𝑚2 was calculated by measuring the steady liquid hydrogen boil-off rate. Then
+2. Experimen al Procedure
+Firs , he hea leakage ra e of 4.2𝑊/𝑚2 was calcula ed by measuring he s eady liquid hydrogen boil-off ra e. Then
 
 
 
-the tank was filled with liquid hydrogen, the hardware was brought to saturated liquid condition, and the tank was
-vented until a target pressure is achieved before the tank was locked up. Wall-adjacent liquid hydrogen warms due to the
-heat leak to the tank and being lower density buoys up to the gas-liquid interface. A temperature gradient forms along
-the tank height with warmer and lighter liquid at the top. Initial temperature distribution was reconstructed from the
-temperature probes data. The test is initiated by turning on the mixer at a set mass flow rate. The mixer circulates the
-cooler liquid hydrogen from the bottom of the tank to the interface - cooling the interface. The ullage pressure drops
-over time as the saturation temperature and pressure drops at the interface. Depressurization stops when the liquid
+ he ank was filled wi h liquid hydrogen, he hardware was brough o sa ura ed liquid condi ion, and he ank was
+ven ed un il a arge pressure is achieved before he ank was locked up. Wall-adjacen liquid hydrogen warms due o he
+hea leak o he ank and being lower densi y buoys up o he gas-liquid in erface. A empera ure gradien forms along
+ he ank heigh wi h warmer and ligh er liquid a he op. Ini ial empera ure dis ribu ion was recons ruc ed from he
+ empera ure probes da a. The es is ini ia ed by urning on he mixer a a se mass flow ra e. The mixer circula es he
+cooler liquid hydrogen from he bo om of he ank o he in erface - cooling he in erface. The ullage pressure drops
+over ime as he sa ura ion empera ure and pressure drops a he in erface. Depressuriza ion s ops when he liquid
 
 
 
@@ -160,11 +160,11 @@ over time as the saturation temperature and pressure drops at the interface. Dep
 
 
 
-Fig. 2 Temperature sensor locations inside the K-site tank
+Fig. 2 Tempera ure sensor loca ions inside he K-si e ank
 
 
 
-Case Fill Volume [%] Fill Height [m] Mixer Flow Rate [𝑚3/ℎ𝑟] Initial Tank Pressure [bar]
+Case Fill Volume [%] Fill Heigh [m] Mixer Flow Ra e [𝑚3/ℎ𝑟] Ini ial Tank Pressure [bar]
 434 86.3 1.45 (79.1%) 3.47 1.861
 436 85.3 1.43 (78.0%) 1.82 1.870
 449 49.1 0.93 (50.7%) 3.41 1.861
@@ -173,42 +173,42 @@ Case Fill Volume [%] Fill Height [m] Mixer Flow Rate [𝑚3/ℎ𝑟] Initial Tan
 
 
 
-Table 1 K-site axial jet pressure control tests used for validation
+Table 1 K-si e axial je pressure con rol es s used for valida ion
 
 
 
-becomes isothermal due to the continuous mixing, which ends the test. Five test cases are employed for the validation.
-Test conditions - fill levels, mixer flowrates and initial tank pressures are shown in Table 1.
+becomes iso hermal due o he con inuous mixing, which ends he es . Five es cases are employed for he valida ion.
+Tes condi ions - fill levels, mixer flowra es and ini ial ank pressures are shown in Table 1.
 
 
 
-B. EDU Tank - Autogenous Pressurization
-A brief background behind the EDU tank tests is provide in Patel et al [1].
+B. EDU Tank - Au ogenous Pressuriza ion
+A brief background behind he EDU ank es s is provide in Pa el e al [1].
 
 
 
-1. Testing Facilities
-The cylindrical double-domed tank is constructed with 2 mm thick 2219 aluminum and has an internal volume of
+1. Tes ing Facili ies
+The cylindrical double-domed ank is cons ruc ed wi h 2 mm hick 2219 aluminum and has an in ernal volume of
 
 
 
-4.367 m3. The tank cylinder has a radius of 0.852 m and height of 2.334 m, and the half oblate spheroids have a minor
-radius of 0.615 m. The tank is insulated with spray-on foam insulation (SOFI) as well as multi-layer insulation (MLI)
-for insulation in vacuum conditions. The tank was mounted in vacuum chamber on a stand with struts at NASA MSFC
-test stand 300. A series of pressure and temperature sensors (Figure 3) were located on horizontal and vertical rakes
-inside the tank, on the diffuser inlet, the tank wall, and the MLI layers. [1]
+4.367 m3. The ank cylinder has a radius of 0.852 m and heigh of 2.334 m, and he half obla e spheroids have a minor
+radius of 0.615 m. The ank is insula ed wi h spray-on foam insula ion (SOFI) as well as mul i-layer insula ion (MLI)
+for insula ion in vacuum condi ions. The ank was moun ed in vacuum chamber on a s and wi h s ru s a NASA MSFC
+ es s and 300. A series of pressure and empera ure sensors (Figure 3) were loca ed on horizon al and ver ical rakes
+inside he ank, on he diffuser inle , he ank wall, and he MLI layers. [1]
 
 
 
-2. Experimental Procedure
-For this autogenous pressurization modeling test, the tank was filled with liquid hydrogen, vented at the atmospheric
+2. Experimen al Procedure
+For his au ogenous pressuriza ion modeling es , he ank was filled wi h liquid hydrogen, ven ed a he a mospheric
 
 
 
-pressure to achieve a saturated gas-liquid interface and then locked-up at 90% fill volume. Temperature probes data
-show that a uniform initial temperature was achieved. All drain valves remained closed throughout the test. Gaseous
-hydrogen pressurant at 297 K temperature was introduced into the ullage through the diffuser for approximately 100
-seconds. The measured diffuser mass flow history is shown in Figure 4 along with the corresponding ullage pressure. [1]
+pressure o achieve a sa ura ed gas-liquid in erface and hen locked-up a 90% fill volume. Tempera ure probes da a
+show ha a uniform ini ial empera ure was achieved. All drain valves remained closed hroughou he es . Gaseous
+hydrogen pressuran a 297 K empera ure was in roduced in o he ullage hrough he diffuser for approxima ely 100
+seconds. The measured diffuser mass flow his ory is shown in Figure 4 along wi h he corresponding ullage pressure. [1]
 
 
 
@@ -224,37 +224,37 @@ seconds. The measured diffuser mass flow history is shown in Figure 4 along with
 
 
 
-(a) CAD model of the IVF-1000 tank with the internals (b) Fluid sensors inside the tank
+(a) CAD model of he IVF-1000 ank wi h he in ernals (b) Fluid sensors inside he ank
 
 
 
-(c) Solid wall sensors on tank structure (d) Locations of Fluid Sensors (measured from tank bottom)
+(c) Solid wall sensors on ank s ruc ure (d) Loca ions of Fluid Sensors (measured from ank bo om)
 
 
 
-Fig. 3 Temperature and pressure sensors
+Fig. 3 Tempera ure and pressure sensors
 
 
 
-Fig. 4 Diffuser massflow and corresponding tank pressure
+Fig. 4 Diffuser massflow and corresponding ank pressure
 
 
 
-IV. Computational Model
-The salient physics pertaining to the problem is retained and inconsequential and secondary effects are ignored for
+IV. Compu a ional Model
+The salien physics per aining o he problem is re ained and inconsequen ial and secondary effec s are ignored for
 
 
 
-practical computational modeling.
+prac ical compu a ional modeling.
 
 
 
-A. Governing Equations
-The governing equations for mass, momentum, and energy conservation; phase change model; two phase sharp
+A. Governing Equa ions
+The governing equa ions for mass, momen um, and energy conserva ion; phase change model; wo phase sharp
 
 
 
-interface model; and interface turbulence transport are already described in our previous work [1]. Since both CFM
+in erface model; and in erface urbulence ranspor are already described in our previous work [1]. Since bo h CFM
 
 
 
@@ -270,50 +270,50 @@ interface model; and interface turbulence transport are already described in our
 
 
 
-operations involve turbulent flows, RANS equations are used.
+opera ions involve urbulen flows, RANS equa ions are used.
 
 
 
 B. Turbulence Modeling
-Menter’s 2003 shear stress transport (SST) model is primarily utilized for turbulence modeling [4], but improved
+Men er’s 2003 shear s ress ranspor (SST) model is primarily u ilized for urbulence modeling [4], bu improved
 
 
 
-delayed detached eddy simulation (IDDES) approach [5] is also used to address the problem of excess turbulence
-transport in RANS turbulence model. It is a hybrid RANS-LES model where unresolved scales - typically near-wall
-regions and high shear or vorticity regions where mesh refinement for LES resolution is impractical - are modeled with
-RANS equations and resolved scales are modeled with sub-grid scale (SGS) modeling. An implicit LES approach is
-used where the grid-induced dissipation provides the sub-grid scales. The blending parameter, 𝑓𝑑 distinguishes the
-resolved and unresolved regions. RANS mode is indicated by 𝑓𝑑 = 1 and SGS mode is indicated by 𝑓𝑑 = 0.
+delayed de ached eddy simula ion (IDDES) approach [5] is also used o address he problem of excess urbulence
+ ranspor in RANS urbulence model. I is a hybrid RANS-LES model where unresolved scales - ypically near-wall
+regions and high shear or vor ici y regions where mesh refinemen for LES resolu ion is imprac ical - are modeled wi h
+RANS equa ions and resolved scales are modeled wi h sub-grid scale (SGS) modeling. An implici LES approach is
+used where he grid-induced dissipa ion provides he sub-grid scales. The blending parame er, 𝑓𝑑 dis inguishes he
+resolved and unresolved regions. RANS mode is indica ed by 𝑓𝑑 = 1 and SGS mode is indica ed by 𝑓𝑑 = 0.
 
 
 
-1. Interface Turbulence Transport
-Experiments like those by Fabre et al [6] show altered turbulence at the gas-liquid interface. Damped turbulence
+1. In erface Turbulence Transpor 
+Experimen s like hose by Fabre e al [6] show al ered urbulence a he gas-liquid in erface. Damped urbulence
 
 
 
-kinetic energy on the gas side of the interface and mild enhancement of turbulence kinetic energy on the liquid side of
-the interface was observed. Rashidi et al [7] observed streak formations at the interface that are similar to the wall.
-Direct numerical simulation (DNS) data from Lombardi et al [8] also show wall-like near interface characteristics
-on the gas side and enhanced turbulence transport on the liquid side. DNS study by Fulgosi et al [9] found gas side
-near-interface turbulence to be similar to a wall’s viscous sub-layer, but the turbulence kinetic energy is not zero at the
-interface. Still, they observed similarities in the near-interface turbulence distributions which indicates that a general
-RANS model is plausible. Jofre et al [10] studied bubbly flow using LES and found that modeling turbulence damping
-on the gas side of the interface produced satisfactory comparison to DNS near the interface.
+kine ic energy on he gas side of he in erface and mild enhancemen of urbulence kine ic energy on he liquid side of
+ he in erface was observed. Rashidi e al [7] observed s reak forma ions a he in erface ha are similar o he wall.
+Direc numerical simula ion (DNS) da a from Lombardi e al [8] also show wall-like near in erface charac eris ics
+on he gas side and enhanced urbulence ranspor on he liquid side. DNS s udy by Fulgosi e al [9] found gas side
+near-in erface urbulence o be similar o a wall’s viscous sub-layer, bu he urbulence kine ic energy is no zero a he
+in erface. S ill, hey observed similari ies in he near-in erface urbulence dis ribu ions which indica es ha a general
+RANS model is plausible. Jofre e al [10] s udied bubbly flow using LES and found ha modeling urbulence damping
+on he gas side of he in erface produced sa isfac ory comparison o DNS near he in erface.
 
 
 
-These observations are encapsulated in our simple but effective interface turbulence model for the two-phase sharp
-interface method [1] where gas-side of the interface is treated wall-like, and liquid side of the interface has no boundary
+These observa ions are encapsula ed in our simple bu effec ive in erface urbulence model for he wo-phase sharp
+in erface me hod [1] where gas-side of he in erface is rea ed wall-like, and liquid side of he in erface has no boundary
 influence.
 
 
 
-For VOF simulations, asymmetric interface turbulence transport (ITT) model is implemented based on the work by
-Fan et al [11], which builds upon Egorov’s approach of increasing turbulence frequency, 𝜔 in the interfacial regions
-where low turbulence is desired [12]. An asymmetric damping approach is implemented where the turbulence on the
-gas side is damped, and the liquid side is enhanced in the near-interface region.
+For VOF simula ions, asymme ric in erface urbulence ranspor (ITT) model is implemen ed based on he work by
+Fan e al [11], which builds upon Egorov’s approach of increasing urbulence frequency, 𝜔 in he in erfacial regions
+where low urbulence is desired [12]. An asymme ric damping approach is implemen ed where he urbulence on he
+gas side is damped, and he liquid side is enhanced in he near-in erface region.
 
 
 
@@ -322,7 +322,7 @@ gas side is damped, and the liquid side is enhanced in the near-interface region
 
 
 
-= Production + Destruction + Dissipation + Transformation (1)
+= Produc ion + Des ruc ion + Dissipa ion + Transforma ion (1)
 
 
 
@@ -350,27 +350,27 @@ gas side is damped, and the liquid side is enhanced in the near-interface region
 
 
 
-The destruction term in the 𝜔-equation (Equation 1) is −𝛽𝜌𝜔2. Based on Wilcox’s asymptotic solution for 𝜔 in the
-viscous sublayer (Equation 2)[13], a wall 𝜔 value is specified by Menter (Equation 3)[14]. The ITT model employs
-Menter’s wall solution as a source term (Equation 4) to the 𝜔-equation on the gas side of the interface. A corresponding
-term enhances the turbulence transport on the liquid side of the interface [11].
+The des ruc ion erm in he 𝜔-equa ion (Equa ion 1) is −𝛽𝜌𝜔2. Based on Wilcox’s asymp o ic solu ion for 𝜔 in he
+viscous sublayer (Equa ion 2)[13], a wall 𝜔 value is specified by Men er (Equa ion 3)[14]. The ITT model employs
+Men er’s wall solu ion as a source erm (Equa ion 4) o he 𝜔-equa ion on he gas side of he in erface. A corresponding
+ erm enhances he urbulence ranspor on he liquid side of he in erface [11].
 
 
 
-Menter indicates that the asymptotic behavior of 𝜔 as described by Wilcox [13] is satisfied by Equation 3 as long as
-𝑦+ < 3 [14]. He supplies 𝐵 = 10 for a smooth no-slip wall. The turbulence damping on the gas side of the interface
-due to a liquid cannot be higher than the damping caused by a wall and therefore values much higher than 10 may not
-be justified without a well-elucidated reasoning. Yet many studies [15][16][17] including Fan et al do so. They are
-likely compensating for an insufficient mesh resolution, i.e., an interface first cell height, Δ𝑦 > 3𝑦+ and possibly other
-factors described in the last paragraph of this section. But such arbitrarily tuned high values could lead to non-physical
-damping. Indeed, while using very high B, Fan et al deviated away from the turbulence kinetic energy data from their
-validation experiments and also underpredicted the pressure gradients.
+Men er indica es ha he asymp o ic behavior of 𝜔 as described by Wilcox [13] is sa isfied by Equa ion 3 as long as
+𝑦+ < 3 [14]. He supplies 𝐵 = 10 for a smoo h no-slip wall. The urbulence damping on he gas side of he in erface
+due o a liquid canno be higher han he damping caused by a wall and herefore values much higher han 10 may no 
+be jus ified wi hou a well-elucida ed reasoning. Ye many s udies [15][16][17] including Fan e al do so. They are
+likely compensa ing for an insufficien mesh resolu ion, i.e., an in erface firs cell heigh , Δ𝑦 > 3𝑦+ and possibly o her
+fac ors described in he las paragraph of his sec ion. Bu such arbi rarily uned high values could lead o non-physical
+damping. Indeed, while using very high B, Fan e al devia ed away from he urbulence kine ic energy da a from heir
+valida ion experimen s and also underpredic ed he pressure gradien s.
 
 
 
-Author’s first recommended approach is to employ a well-resolved mesh with low 𝑦+ and not to exceed the damping
-factor value of 10. When such refinement is impractical, a pre-devised scaling factor as a function of an estimated
-interface 𝑦+ should be used in order to avoid non-physical behaviors. The author intends to take up the problem of
+Au hor’s firs recommended approach is o employ a well-resolved mesh wi h low 𝑦+ and no o exceed he damping
+fac or value of 10. When such refinemen is imprac ical, a pre-devised scaling fac or as a func ion of an es ima ed
+in erface 𝑦+ should be used in order o avoid non-physical behaviors. The au hor in ends o ake up he problem of
 
 
 
@@ -386,35 +386,35 @@ interface 𝑦+ should be used in order to avoid non-physical behaviors. The aut
 
 
 
-developing a scaling technique in the future. Developing an interface modeling approach based on Wilcox’s original
-method of calculating near-wall 𝜔 distribution (Equation 2) instead of Menter’s simplified method of computing only
-the wall 𝜔 value (Equation 3) may also be particularly fruitful.
+developing a scaling echnique in he fu ure. Developing an in erface modeling approach based on Wilcox’s original
+me hod of calcula ing near-wall 𝜔 dis ribu ion (Equa ion 2) ins ead of Men er’s simplified me hod of compu ing only
+ he wall 𝜔 value (Equa ion 3) may also be par icularly frui ful.
 
 
 
-Beyond the compensation for insufficient mesh refinement by tuning B, these studies including the present one may
-be missing some important flow physics that arise from the gas-liquid interactions differing from a wall-fluid interaction.
-The author’s hypothesis is that because the turbulence transport depends on the interface tangent velocity gradient, the
-missing flow physics may include the effects of relative gas-liquid molecular viscosities and densities, as well as the
-presence and degree of flow reversal (i.e., "boundary-layer" separation) at the interface. If the aforementioned modeling
-techniques do not provide satisfactory modeling fidelity, these hypotheses may need to be explored in the future.
+Beyond he compensa ion for insufficien mesh refinemen by uning B, hese s udies including he presen one may
+be missing some impor an flow physics ha arise from he gas-liquid in erac ions differing from a wall-fluid in erac ion.
+The au hor’s hypo hesis is ha because he urbulence ranspor depends on he in erface angen veloci y gradien , he
+missing flow physics may include he effec s of rela ive gas-liquid molecular viscosi ies and densi ies, as well as he
+presence and degree of flow reversal (i.e., "boundary-layer" separa ion) a he in erface. If he aforemen ioned modeling
+ echniques do no provide sa isfac ory modeling fideli y, hese hypo heses may need o be explored in he fu ure.
 
 
 
-C. K-site Tank - Axial Jet Pressure Control
+C. K-si e Tank - Axial Je Pressure Con rol
 
 
 
-1. Geometry
-Tank internal probes rakes are unimportant to the pressurization predictions and are removed from the computational
+1. Geome ry
+Tank in ernal probes rakes are unimpor an o he pressuriza ion predic ions and are removed from he compu a ional
 
 
 
-model. The tank is modeled as an axisymmetric tank because no significant circumferential velocity components
-are expected. A 1-degree tank sector is modeled. All the circumferential velocities are zeroed out in the governing
-equations. Tank solids are not modeled because they are not expected to have trivial impact on the depressurization rate.
-A test simulation without the heat leakage to the tank walls yielded no significant differences in the depressurization
-trend compared to simulations where heat leakage is modeled – indicating that small amount of heat transfer between
+model. The ank is modeled as an axisymme ric ank because no significan circumferen ial veloci y componen s
+are expec ed. A 1-degree ank sec or is modeled. All he circumferen ial veloci ies are zeroed ou in he governing
+equa ions. Tank solids are no modeled because hey are no expec ed o have rivial impac on he depressuriza ion ra e.
+A es simula ion wi hou he hea leakage o he ank walls yielded no significan differences in he depressuriza ion
+ rend compared o simula ions where hea leakage is modeled – indica ing ha small amoun of hea ransfer be ween
 
 
 
@@ -433,11 +433,11 @@ cases
 
 
 
-(d) Refined mesh at the jet inlet (e) Refined Mesh at the interface and in the jet shear layer
+(d) Refined mesh a he je inle (e) Refined Mesh a he in erface and in he je shear layer
 
 
 
-Fig. 5 Meshes for K-site tank axial jet pressure control simulations
+Fig. 5 Meshes for K-si e ank axial je pressure con rol simula ions
 
 
 
@@ -453,63 +453,63 @@ Fig. 5 Meshes for K-site tank axial jet pressure control simulations
 
 
 
-the tank fluids and the tank walls does not significantly impact the problem.
-The mixer inlet and outlet locations are known along with the jet nozzle diameter, but the precise geometry of the
+ he ank fluids and he ank walls does no significan ly impac he problem.
+The mixer inle and ou le loca ions are known along wi h he je nozzle diame er, bu he precise geome ry of he
 
 
 
-mixer is unknown and is approximated. The pump/mixer internals are not modeled. These approximations are expected
-to be inconsequential to time-accurate pressure predictions because minor flow variation near the bottom of the tank
-is not expected to impact either the interfacial dynamics or the convection currents - both of which are expected to
-primarily influence the depressurization.
+mixer is unknown and is approxima ed. The pump/mixer in ernals are no modeled. These approxima ions are expec ed
+ o be inconsequen ial o ime-accura e pressure predic ions because minor flow varia ion near he bo om of he ank
+is no expec ed o impac ei her he in erfacial dynamics or he convec ion curren s - bo h of which are expec ed o
+primarily influence he depressuriza ion.
 
 
 
 2. Mesh
-Six unstructured hexahedral meshes are created. Three of them are shown in the Figure 5. Each mesh has refinement
+Six uns ruc ured hexahedral meshes are crea ed. Three of hem are shown in he Figure 5. Each mesh has refinemen 
 
 
 
-in the regions of high shear, i.e., jet shear region and near the interface to sufficiently resolve the flow and thermal
-dynamics. The nominal mesh is 123 thousand cells for a 1-deg axisymmetric sector, which is equivalent to 44 million
-cells for a 3-dimensional domain. First cell wall-normal height is always 1 × 10−4 m to capture boundary layer flow
-with 𝑦+ <= 1. Interface normal first cell height as low as 5 × 10−5 m are tested. Largest cell edge length is restricted to
-5 × 10−3 m and is refined up to 1 × 10−3 m. A mesh independent solution is obtained and discussed in V.A.3.
+in he regions of high shear, i.e., je shear region and near he in erface o sufficien ly resolve he flow and hermal
+dynamics. The nominal mesh is 123 housand cells for a 1-deg axisymme ric sec or, which is equivalen o 44 million
+cells for a 3-dimensional domain. Firs cell wall-normal heigh is always 1 × 10−4 m o cap ure boundary layer flow
+wi h 𝑦+ <= 1. In erface normal firs cell heigh as low as 5 × 10−5 m are es ed. Larges cell edge leng h is res ric ed o
+5 × 10−3 m and is refined up o 1 × 10−3 m. A mesh independen solu ion is ob ained and discussed in V.A.3.
 
 
 
-3. Initial Conditions
-Tank conditions shown in the table 1 are used to initialize liquid fill level and ullage pressure. Axially varying
+3. Ini ial Condi ions
+Tank condi ions shown in he able 1 are used o ini ialize liquid fill level and ullage pressure. Axially varying
 
 
 
-temperature profile is initialized based on the temperature probe data available for each test. A typical profile has
-the coolest temperature at the tank bottom with a sharp thermal gradient at the interface and approximately linear
-temperature increase in the ullage away from the interface. Radial temperature variation is not considered owing to a
-lack of such data. The initial convection current and corresponding thermal gradients were expected to have negligible
-impact because the axial jet velocity is two to three orders of magnitude higher than the natural convection velocity and
-is expected to drive the pressure trends. Indeed, a test simulation initialized from a few minutes of self-pressurization
-simulation to set-up temperature and velocity distribution showed no noteworthy impact on the depressurization rate
-prediction.
+ empera ure profile is ini ialized based on he empera ure probe da a available for each es . A ypical profile has
+ he cooles empera ure a he ank bo om wi h a sharp hermal gradien a he in erface and approxima ely linear
+ empera ure increase in he ullage away from he in erface. Radial empera ure varia ion is no considered owing o a
+lack of such da a. The ini ial convec ion curren and corresponding hermal gradien s were expec ed o have negligible
+impac because he axial je veloci y is wo o hree orders of magni ude higher han he na ural convec ion veloci y and
+is expec ed o drive he pressure rends. Indeed, a es simula ion ini ialized from a few minu es of self-pressuriza ion
+simula ion o se -up empera ure and veloci y dis ribu ion showed no no ewor hy impac on he depressuriza ion ra e
+predic ion.
 
 
 
-4. Boundary Conditions
-Tank walls were supplied with constant heat flux of 4.2 W/m2 to simulate the heat leak. A symmetry boundary
+4. Boundary Condi ions
+Tank walls were supplied wi h cons an hea flux of 4.2 W/m2 o simula e he hea leak. A symme ry boundary
 
 
 
-condition is applied on the sector planes of the axisymmetric model. The pump outlet is modeled in the computational
-domain as a constant velocity inlet boundary condition with a constant temperature, and the pump inlet is modeled as a
-constant volume outlet from the tank. In reality, as the test progresses, the jet-induced mixing in the liquid hydrogen
-warms up the inlet temperatures - reducing the efficacy of the jet to reduce the tank pressure as the test progresses.
-Tests were run for about 500 seconds for the test 449 to ascertain sensitivity to the warming jet. A time-varying
-(increasing) inlet temperature was applied by averaging outlet temperature from a previous simulation. This sensitivity
-tests were quantitatively non-conservative but were expected to be qualitative useful. The tests showed no impact on the
+condi ion is applied on he sec or planes of he axisymme ric model. The pump ou le is modeled in he compu a ional
+domain as a cons an veloci y inle boundary condi ion wi h a cons an empera ure, and he pump inle is modeled as a
+cons an volume ou le from he ank. In reali y, as he es progresses, he je -induced mixing in he liquid hydrogen
+warms up he inle empera ures - reducing he efficacy of he je o reduce he ank pressure as he es progresses.
+Tes s were run for abou 500 seconds for he es 449 o ascer ain sensi ivi y o he warming je . A ime-varying
+(increasing) inle empera ure was applied by averaging ou le empera ure from a previous simula ion. This sensi ivi y
+ es s were quan i a ively non-conserva ive bu were expec ed o be quali a ive useful. The es s showed no impac on he
 
 
 
-Fig. 6 Test 449 interface shape predicted by the VOF method
+Fig. 6 Tes 449 in erface shape predic ed by he VOF me hod
 
 
 
@@ -525,63 +525,63 @@ Fig. 6 Test 449 interface shape predicted by the VOF method
 
 
 
-depressurization rate, and the cases were run with the constant temperature. Later it was found that not modeling jet
-warming impacts at the later part of the longer run tests with higher massflow rates, i.e., tests 449 and 457 and results in
-underprediction of the pressure.
+depressuriza ion ra e, and he cases were run wi h he cons an empera ure. La er i was found ha no modeling je 
+warming impac s a he la er par of he longer run es s wi h higher massflow ra es, i.e., es s 449 and 457 and resul s in
+underpredic ion of he pressure.
 
 
 
-For the sharp interface turbulence boundaries, gas-side is treated wall-like as usual. But the liquid side treatment
-deviated from the no-treatment approach (extrapolated boundary) to wall-like treatment to counterbalance the
-overprediction of turbulent kinetic energy arising from not modeling the non-planarity of the interface. The interface is
-assumed to be flat for the sharp interface solution, but the flat interface becomes non-planar when the jet impinges it
-(Figure 6). The change in flowfield would lower the velocities on the liquid side of the interface as well as turbulent
-kinetic energy than predicted by a planar interface. Wall-like turbulence modeling allows counterbalancing this modeling
-deficiency by lowering effective turbulent kinetic energy near the liquid side interface.
+For he sharp in erface urbulence boundaries, gas-side is rea ed wall-like as usual. Bu he liquid side rea men 
+devia ed from he no- rea men approach (ex rapola ed boundary) o wall-like rea men o coun erbalance he
+overpredic ion of urbulen kine ic energy arising from no modeling he non-planari y of he in erface. The in erface is
+assumed o be fla for he sharp in erface solu ion, bu he fla in erface becomes non-planar when he je impinges i 
+(Figure 6). The change in flowfield would lower he veloci ies on he liquid side of he in erface as well as urbulen 
+kine ic energy han predic ed by a planar in erface. Wall-like urbulence modeling allows coun erbalancing his modeling
+deficiency by lowering effec ive urbulen kine ic energy near he liquid side in erface.
 
 
 
-D. EDU Tank - Autogenous Pressurization
+D. EDU Tank - Au ogenous Pressuriza ion
 
 
 
-1. Geometry
-Axisymmetric flow is assumed. Tank internals are removed with the exception of the forward diffuser, which is
+1. Geome ry
+Axisymme ric flow is assumed. Tank in ernals are removed wi h he excep ion of he forward diffuser, which is
 
 
 
-simplified (Figure 7) to have three annular cylindrical slots with same exit area as the original diffuser .
-The heat transfer between the room temperature gaseous hydrogen and the tank’s walls at the liquid hydrogen
+simplified (Figure 7) o have hree annular cylindrical slo s wi h same exi area as he original diffuser .
+The hea ransfer be ween he room empera ure gaseous hydrogen and he ank’s walls a he liquid hydrogen
 
 
 
-cryogenic temperature has significant impact on the ullage pressure. So, conjugate heat transfer analysis is conducted to
-model the heat transfer between the tank walls, diffuser walls, and the fluids.
+cryogenic empera ure has significan impac on he ullage pressure. So, conjuga e hea ransfer analysis is conduc ed o
+model he hea ransfer be ween he ank walls, diffuser walls, and he fluids.
 
 
 
-(a) Cross-section of the original tank CAD model [18] (b) Cross-section of the CFD domain
+(a) Cross-sec ion of he original ank CAD model [18] (b) Cross-sec ion of he CFD domain
 
 
 
-Fig. 7 Tank Model with and without Tank Internals
+Fig. 7 Tank Model wi h and wi hou Tank In ernals
 
 
 
 2. Mesh
-Mesh is refined to capture the important flow features of the high-speed diffuser flow, low velocity ullage flow with
+Mesh is refined o cap ure he impor an flow fea ures of he high-speed diffuser flow, low veloci y ullage flow wi h
 
 
 
-convection and heat transfer between ullage gas at cryogenic temperatures and pressurant gas at room temperature, and
-the sharp thermal gradient at the fluid-wall boundary as well as the gas-liquid interface. Seven unstructured hexahedral
-meshes with varying resolution in the diffuser, ullage and interface regions are used for this validation. A representative
-sample is presented in the Figure 8. To accurately calculate the heat transfer between the wall and the fluid, wall
-integration approach was used, i.e., mesh y+ is 1 or lower at the tank walls. The wall boundary first cell height was
-varied between 1× 10−4 m and 5× 10−5 m. The nominal cell edge length in the ullage varies between 2.5 mm and 7 mm.
-The first cell heights on both sides of the gas-liquid interface vary between 1 × 10−4 m and 1 × 10−6 m to accurately
-capture the altered turbulence characteristics, mass transfer, and heat transfer across the interface. The baseline mesh has
-an equivalent three dimensional cell count of 18.8 million (Figure 8b). Mesh sensitivity is presented in Section V.B.4.
+convec ion and hea ransfer be ween ullage gas a cryogenic empera ures and pressuran gas a room empera ure, and
+ he sharp hermal gradien a he fluid-wall boundary as well as he gas-liquid in erface. Seven uns ruc ured hexahedral
+meshes wi h varying resolu ion in he diffuser, ullage and in erface regions are used for his valida ion. A represen a ive
+sample is presen ed in he Figure 8. To accura ely calcula e he hea ransfer be ween he wall and he fluid, wall
+in egra ion approach was used, i.e., mesh y+ is 1 or lower a he ank walls. The wall boundary firs cell heigh was
+varied be ween 1× 10−4 m and 5× 10−5 m. The nominal cell edge leng h in he ullage varies be ween 2.5 mm and 7 mm.
+The firs cell heigh s on bo h sides of he gas-liquid in erface vary be ween 1 × 10−4 m and 1 × 10−6 m o accura ely
+cap ure he al ered urbulence charac eris ics, mass ransfer, and hea ransfer across he in erface. The baseline mesh has
+an equivalen hree dimensional cell coun of 18.8 million (Figure 8b). Mesh sensi ivi y is presen ed in Sec ion V.B.4.
 
 
 
@@ -601,76 +601,76 @@ an equivalent three dimensional cell count of 18.8 million (Figure 8b). Mesh sen
 
 
 
-Fig. 8 Three of the mesh resolutions tested for obtaining mesh independent solutions
+Fig. 8 Three of he mesh resolu ions es ed for ob aining mesh independen solu ions
 
 
 
-3. Initial Conditions
-The initial temperature distribution is uniform throughout the tank fluids, and the walls and corresponds to the
+3. Ini ial Condi ions
+The ini ial empera ure dis ribu ion is uniform hroughou he ank fluids, and he walls and corresponds o he
 
 
 
-saturation condition for hydrogen at the initial pressure of 100 kPa.
+sa ura ion condi ion for hydrogen a he ini ial pressure of 100 kPa.
 
 
 
-4. Boundary Conditions
-Time-varying massflow and temperatures were measured during the test and are prescribed at the diffuser inlet. The
+4. Boundary Condi ions
+Time-varying massflow and empera ures were measured during he es and are prescribed a he diffuser inle . The
 
 
 
-measurements across the 40 MLI temperature probes show that the tank is well-insulated in the vacuum chamber, so
-tank external wall is considered adiabatic.
+measuremen s across he 40 MLI empera ure probes show ha he ank is well-insula ed in he vacuum chamber, so
+ ank ex ernal wall is considered adiaba ic.
 
 
 
-A diffuser inlet turbulence intensity of 5% with eddy viscosity ratio of 1000 are prescribed based on the expectation
-of medium to high turbulence. Several simulation tests were carried out to ascertain impact of initial turbulence and
-diffuser inlet turbulence. They show the pressurization predictions to be insensitive to a wide range of diffuser inlet
-turbulence conditions.
+A diffuser inle urbulence in ensi y of 5% wi h eddy viscosi y ra io of 1000 are prescribed based on he expec a ion
+of medium o high urbulence. Several simula ion es s were carried ou o ascer ain impac of ini ial urbulence and
+diffuser inle urbulence. They show he pressuriza ion predic ions o be insensi ive o a wide range of diffuser inle 
+ urbulence condi ions.
 
 
 
-For conjugate heat transfer analysis, a tight fit between mating solids was assumed and a small thermal contact
-resistance of 1𝑒 − 16 was supplied for their contact surfaces.
+For conjuga e hea ransfer analysis, a igh fi be ween ma ing solids was assumed and a small hermal con ac 
+resis ance of 1𝑒 − 16 was supplied for heir con ac surfaces.
 
 
 
-E. Fluid Properties
-Fluid and solid material properties were evaluated from the current National Institute of Standards and Technology
+E. Fluid Proper ies
+Fluid and solid ma erial proper ies were evalua ed from he curren Na ional Ins i u e of S andards and Technology
 
 
 
-(NIST) databases [19]. The liquid hydrogen converts to para-hydrogen isomeric state after sufficiently long storage.
-Since the flow dynamics is dominated by the liquid interactions in the K-site axial jet experiments, liquid hydrogen
-is assumed to be in the para-hydrogen state. For the autogenous pressurization, vapor flow dynamics dominates the
-pressurization and only the near interface liquid participates in the process. The newly liquefied gas converts to the
-ortho-hydrogen isomeric state at the interface. Owing to these reasons, the liquid is modeled in the ortho-hydrogen
-isomeric state for the modeling of the autogenous pressurization experiment. The liquid hydrogen is assumed to be a
-Boussinesq fluid to model the buoyancy effect. Since the liquid temperature does not vary considerably during the test,
-constant thermal and transport properties are modeled.
+(NIST) da abases [19]. The liquid hydrogen conver s o para-hydrogen isomeric s a e af er sufficien ly long s orage.
+Since he flow dynamics is domina ed by he liquid in erac ions in he K-si e axial je experimen s, liquid hydrogen
+is assumed o be in he para-hydrogen s a e. For he au ogenous pressuriza ion, vapor flow dynamics domina es he
+pressuriza ion and only he near in erface liquid par icipa es in he process. The newly liquefied gas conver s o he
+or ho-hydrogen isomeric s a e a he in erface. Owing o hese reasons, he liquid is modeled in he or ho-hydrogen
+isomeric s a e for he modeling of he au ogenous pressuriza ion experimen . The liquid hydrogen is assumed o be a
+Boussinesq fluid o model he buoyancy effec . Since he liquid empera ure does no vary considerably during he es ,
+cons an hermal and ranspor proper ies are modeled.
 
 
 
-The vapor is modeled as an ideal gas. Sutherland’s law was used to model temperature dependent vapor viscosity
+The vapor is modeled as an ideal gas. Su herland’s law was used o model empera ure dependen vapor viscosi y
 
 
 
-Parameters Description Value
-𝜌𝑙 Liquid density 70.78 kg/m3
+Parame ers Descrip ion Value
+𝜌𝑙 Liquid densi y 70.78 kg/m3
 
 
 
-𝑐𝑝𝑙 Liquid specific heat at constant pressure 9758.00 J/Kg/K
-𝑘𝑙 Liquid thermal conductivity 0.1008 W/m/K
-𝜇𝑙 Liquid dynamic viscosity 1.3446 × 10−5 kg/m/s
-𝛼𝑙 Liquid volume expansion coefficient 0.016 58 K
-𝐿 Latent heat 436 480.0 J/kg
-𝜎 Surface tension 0.001 776 N/m
+𝑐𝑝𝑙 Liquid specific hea a cons an pressure 9758.00 J/Kg/K
+𝑘𝑙 Liquid hermal conduc ivi y 0.1008 W/m/K
+𝜇𝑙 Liquid dynamic viscosi y 1.3446 × 10−5 kg/m/s
+𝛼𝑙 Liquid volume expansion coefficien 0.016 58 K
+𝐿 La en hea 436 480.0 J/kg
+𝜎 Surface ension 0.001 776 N/m
 
 
 
-Table 2 Thermodynamic properties of liquid hydrogen at 20.3450 K and 133000.0 Pa
+Table 2 Thermodynamic proper ies of liquid hydrogen a 20.3450 K and 133000.0 Pa
 
 
 
@@ -686,92 +686,92 @@ Table 2 Thermodynamic properties of liquid hydrogen at 20.3450 K and 133000.0 Pa
 
 
 
-Parameters Description Value
-𝜌 Density Ideal gas EOS or Tabulated real gas
-𝑐𝑝𝑔 Specific heat at constant pressure Function of temperature
-𝑘𝑔 Thermal conductivity Function of temperature
-𝜇𝑔 Liquid dynamic viscosity Function of temperature
+Parame ers Descrip ion Value
+𝜌 Densi y Ideal gas EOS or Tabula ed real gas
+𝑐𝑝𝑔 Specific hea a cons an pressure Func ion of empera ure
+𝑘𝑔 Thermal conduc ivi y Func ion of empera ure
+𝜇𝑔 Liquid dynamic viscosi y Func ion of empera ure
 
 
 
-Table 3 Thermodynamic properties of hydrogen vapor
+Table 3 Thermodynamic proper ies of hydrogen vapor
 
 
 
-Parameters Description Value
-𝜌𝐴𝑙 Density of Aluminum 2219 2840.0 kg/m3
+Parame ers Descrip ion Value
+𝜌𝐴𝑙 Densi y of Aluminum 2219 2840.0 kg/m3
 
 
 
-𝜌𝑆𝑆 Density of Steel 304 7930.0 kg/m3
+𝜌𝑆𝑆 Densi y of S eel 304 7930.0 kg/m3
 
 
 
-𝑐𝑝 Specific heat at constant pressure Functions of temperature
-𝑘 Thermal conductivity Functions of temperature
+𝑐𝑝 Specific hea a cons an pressure Func ions of empera ure
+𝑘 Thermal conduc ivi y Func ions of empera ure
 
 
 
-Table 4 Thermodynamic Properties of Aluminum 2219 and Stainless Steel 304
+Table 4 Thermodynamic Proper ies of Aluminum 2219 and S ainless S eel 304
 
 
 
-and conductivity. Since gaseous hydrogen deviates about 12% from the ideal gas behavior [18], real gas is also modeled
-using tabular equation of state, thermal properties and transport properties from the NIST database. But the choice of
-vapor’s equation of state was found to have little influence on the pressurization prediction.
+and conduc ivi y. Since gaseous hydrogen devia es abou 12% from he ideal gas behavior [18], real gas is also modeled
+using abular equa ion of s a e, hermal proper ies and ranspor proper ies from he NIST da abase. Bu he choice of
+vapor’s equa ion of s a e was found o have li le influence on he pressuriza ion predic ion.
 
 
 
-The EDU tank wall is modeled with temperature-dependent aluminum 2219 thermal properties [20], and diffuser is
-modeled with temperature-dependent stainless steel 304 thermal properties from NIST. The properties of ortho-hydrogen
-liquid (Table 2), hydrogen vapor (Table 3), tank wall, and diffuser wall (Table 4) are listed in the tables below.
+The EDU ank wall is modeled wi h empera ure-dependen aluminum 2219 hermal proper ies [20], and diffuser is
+modeled wi h empera ure-dependen s ainless s eel 304 hermal proper ies from NIST. The proper ies of or ho-hydrogen
+liquid (Table 2), hydrogen vapor (Table 3), ank wall, and diffuser wall (Table 4) are lis ed in he ables below.
 
 
 
-F. Discretization and Solver Set-up
-Spatial discretization is either first order upwind (FOU) or second order upwind (SOU) - except for the VOF
+F. Discre iza ion and Solver Se -up
+Spa ial discre iza ion is ei her firs order upwind (FOU) or second order upwind (SOU) - excep for he VOF
 
 
 
-equations, which are always solved using the FOU scheme. Time integration is performed using the implicit first
+equa ions, which are always solved using he FOU scheme. Time in egra ion is performed using he implici firs 
 order backward difference formula or second order backward difference formula. SIMPLEC scheme was used for
-pressure-velocity coupling. The second order schemes are preferred but the first order schemes are used when second
-order schemes are not stable. All simulations are well-converged with low residuals and 2-4 order of magnitude residual
-drops during Newton-Raphson iterations.
+pressure-veloci y coupling. The second order schemes are preferred bu he firs order schemes are used when second
+order schemes are no s able. All simula ions are well-converged wi h low residuals and 2-4 order of magni ude residual
+drops during New on-Raphson i era ions.
 
 
 
-Spatial resolution is discussed in Sections IV.C.2 and IV.D.2. Temporal resolution in the range of 5e-4 seconds
-to 1 seconds are tested. All predictions are independent of spatial resolution, temporal resolution and mass transfer
-accommodation factor. The insensitivities are demonstrated in the Results section.
+Spa ial resolu ion is discussed in Sec ions IV.C.2 and IV.D.2. Temporal resolu ion in he range of 5e-4 seconds
+ o 1 seconds are es ed. All predic ions are independen of spa ial resolu ion, emporal resolu ion and mass ransfer
+accommoda ion fac or. The insensi ivi ies are demons ra ed in he Resul s sec ion.
 
 
 
-V. Results
-Time-accurate tank pressure prediction is the primary validation goal. The probe temperature predictions are also
+V. Resul s
+Time-accura e ank pressure predic ion is he primary valida ion goal. The probe empera ure predic ions are also
 
 
 
-compared and discussed as a secondary quantity of interest. The sharp interface method approach is the primary focus
-of the study, but the pressure prediction improvement with the VOF method owing to the ITT module is also briefly
+compared and discussed as a secondary quan i y of in eres . The sharp in erface me hod approach is he primary focus
+of he s udy, bu he pressure predic ion improvemen wi h he VOF me hod owing o he ITT module is also briefly
 discussed.
 
 
 
-A. K-site Tank - Axial Jet Pressure Control
+A. K-si e Tank - Axial Je Pressure Con rol
 
 
 
-1. Tank Pressurization
-Across the five tests, the CFD predictions agree well with the tests, with a maximum relative error in pressure drop
+1. Tank Pressuriza ion
+Across he five es s, he CFD predic ions agree well wi h he es s, wi h a maximum rela ive error in pressure drop
 
 
 
-being -16.88% for the experiment 457 – demonstrating a reliable modeling capability. The time traces of the predicted
-and the actual ullage pressures are shown in Figure 9. Note: As described in Section IV.C.4, in contrast to the earlier
-finding, tests with higher flowrates and longer depressurization times, i.e., tests 449 and 457, were found to be affected
-by the jet warming effect that is not accounted for. Taking this effect into account, the maximum error is expected to be
-much lower than -16.88%.
+being -16.88% for he experimen 457 – demons ra ing a reliable modeling capabili y. The ime races of he predic ed
+and he ac ual ullage pressures are shown in Figure 9. No e: As described in Sec ion IV.C.4, in con ras o he earlier
+finding, es s wi h higher flowra es and longer depressuriza ion imes, i.e., es s 449 and 457, were found o be affec ed
+by he je warming effec ha is no accoun ed for. Taking his effec in o accoun , he maximum error is expec ed o be
+much lower han -16.88%.
 
 
 
@@ -787,26 +787,26 @@ much lower than -16.88%.
 
 
 
-Fig. 9 Pressure prediction over time using sharp interface method compared with the test data
+Fig. 9 Pressure predic ion over ime using sharp in erface me hod compared wi h he es da a
 
 
 
-As the cold liquid from the tank bottom impinges the warmer interface, the interface cools due to the forced
-convection. A corresponding drop in the saturation temperature at the interface initiates condensation of the vapor. The
-vapor also cools due to the conductive and the convective cooling. Both processes lower the ullage pressure. The phase
-change phenomenon takes place around 1-100 micrometer length scale and the resulting latent heat exchange could
-produce high temperature gradient near the interface. This temperature gradient must be captured accurately because the
-vapor pressure is strongly affected by the interface temperature as evidenced by Antoine equation (Equation 11 in Patel
-et al[1]). The first cell height of at least 1× 10−4 m normal to the interface was necessary to resolve the thermal gradient
-resulting from the complex interactions of the forced convection, the interfacial turbulence and the latent heat exchange.
+As he cold liquid from he ank bo om impinges he warmer in erface, he in erface cools due o he forced
+convec ion. A corresponding drop in he sa ura ion empera ure a he in erface ini ia es condensa ion of he vapor. The
+vapor also cools due o he conduc ive and he convec ive cooling. Bo h processes lower he ullage pressure. The phase
+change phenomenon akes place around 1-100 microme er leng h scale and he resul ing la en hea exchange could
+produce high empera ure gradien near he in erface. This empera ure gradien mus be cap ured accura ely because he
+vapor pressure is s rongly affec ed by he in erface empera ure as evidenced by An oine equa ion (Equa ion 11 in Pa el
+e al[1]). The firs cell heigh of a leas 1× 10−4 m normal o he in erface was necessary o resolve he hermal gradien 
+resul ing from he complex in erac ions of he forced convec ion, he in erfacial urbulence and he la en hea exchange.
 
 
 
-Fig. 10 Composite contour plot of Test 434 at 60 seconds shows temperature on the left side and turbulence
-viscosity ratio along with the streamlines and velocity vectors on the right hand side. The jet impinges the
-interface and depressurizes the tank through condensation and cooling of the ullage vapor. As the jet flows
-over the tank wall, it entrains and convects the hotter liquid which rises back up due to the buoyancy creating
-Rayleigh-Taylor and Kelvin-Helmholtz instabilities resulting in turbulent mixing of the liquid.
+Fig. 10 Composi e con our plo of Tes 434 a 60 seconds shows empera ure on he lef side and urbulence
+viscosi y ra io along wi h he s reamlines and veloci y vec ors on he righ hand side. The je impinges he
+in erface and depressurizes he ank hrough condensa ion and cooling of he ullage vapor. As he je flows
+over he ank wall, i en rains and convec s he ho er liquid which rises back up due o he buoyancy crea ing
+Rayleigh-Taylor and Kelvin-Helmhol z ins abili ies resul ing in urbulen mixing of he liquid.
 
 
 
@@ -822,63 +822,63 @@ Rayleigh-Taylor and Kelvin-Helmholtz instabilities resulting in turbulent mixing
 
 
 
-Figure 10 demonstrates the physical processes of axial jet based tank depressurization at the tank-scale through the
-temperature and turbulent viscosity ratio contours. The turbulent mixing induced by the mixer flow in the previously
-quiescent liquid governs how quickly the tank temperatures homogenizes in the liquid region of the tank. Near the
-gas-liquid interface, the cooling of the interface due to the jet is not uniform across the interface. The highest temperature
-gradient between the gas and liquid is found near the jet impingement location. This region is responsible for the
-maximum cooling and condensation of the vapor. After the impingement, the jet warms up downstream as it mixes with
-the warmer liquid, absorbs latent heat energy from condensation of the gas, and absorbs sensible heat from the warmer
-gas. The depressurization plateaus as the liquid temperature homogenizes over time.
+Figure 10 demons ra es he physical processes of axial je based ank depressuriza ion a he ank-scale hrough he
+ empera ure and urbulen viscosi y ra io con ours. The urbulen mixing induced by he mixer flow in he previously
+quiescen liquid governs how quickly he ank empera ures homogenizes in he liquid region of he ank. Near he
+gas-liquid in erface, he cooling of he in erface due o he je is no uniform across he in erface. The highes empera ure
+gradien be ween he gas and liquid is found near he je impingemen loca ion. This region is responsible for he
+maximum cooling and condensa ion of he vapor. Af er he impingemen , he je warms up downs ream as i mixes wi h
+ he warmer liquid, absorbs la en hea energy from condensa ion of he gas, and absorbs sensible hea from he warmer
+gas. The depressuriza ion pla eaus as he liquid empera ure homogenizes over ime.
 
 
 
-The depressurization is the fastest, and the pressure drop is the largest (test 434) when the tank fill level and jet flow
-rate are higher because of the availability of the large amount of cooler bulk liquid to absorb thermal energy from the
-interfacial liquid. When the jet flow rate is low, slow and long-sustained, linear depressurization occurs (Test 459). Our
-CFD is able to predict depressurization at all regimes of jet flowrates, and at both high and low propellant fill levels.
+The depressuriza ion is he fas es , and he pressure drop is he larges ( es 434) when he ank fill level and je flow
+ra e are higher because of he availabili y of he large amoun of cooler bulk liquid o absorb hermal energy from he
+in erfacial liquid. When he je flow ra e is low, slow and long-sus ained, linear depressuriza ion occurs (Tes 459). Our
+CFD is able o predic depressuriza ion a all regimes of je flowra es, and a bo h high and low propellan fill levels.
 
 
 
-The newly implemented ITT module in the Loci-Stream-VOF also drastically improves the predictions of VOF
-method (Figure 11). But the refined mesh resolution required at the interface to accurately capture the fluid-thermal
-dynamics restricts the timestep owing to the explicit time-integration requirement of the VOF advection equation where
-the Courant number must be maintained much lower than unity for numerical stability. More importantly, the inevitable
-spurious velocities and instabilities introduced at the interface by the geometrically accurate VOF method make the
-solution numerically unstable. More work is being done to alleviate these issues with the VOF method.
+The newly implemen ed ITT module in he Loci-S ream-VOF also dras ically improves he predic ions of VOF
+me hod (Figure 11). Bu he refined mesh resolu ion required a he in erface o accura ely cap ure he fluid- hermal
+dynamics res ric s he imes ep owing o he explici ime-in egra ion requiremen of he VOF advec ion equa ion where
+ he Couran number mus be main ained much lower han uni y for numerical s abili y. More impor an ly, he inevi able
+spurious veloci ies and ins abili ies in roduced a he in erface by he geome rically accura e VOF me hod make he
+solu ion numerically uns able. More work is being done o allevia e hese issues wi h he VOF me hod.
 
 
 
-Fig. 11 ITT model significantly improves the predictions with the VOF approach, but the VOF approach is
-unstable at the required 0.1 mm near-interface length-scale. VOF stability enhancements are planned in the near
-future.
+Fig. 11 ITT model significan ly improves he predic ions wi h he VOF approach, bu he VOF approach is
+uns able a he required 0.1 mm near-in erface leng h-scale. VOF s abili y enhancemen s are planned in he near
+fu ure.
 
 
 
-2. Tank Temperatures and Turbulence Modeling
-For each of the five tests, CFD temperature data was extracted at the location where experimental temperature rake
+2. Tank Tempera ures and Turbulence Modeling
+For each of he five es s, CFD empera ure da a was ex rac ed a he loca ion where experimen al empera ure rake
 
 
 
-data is available. Here, we note that the probe locations (Figure 3) were extracted as accurately as possible from the
-available tank documentations which lacked some location information and judicious assumptions were made based on
-the available data and the schematics of probe locations. Small uncertainty in probe locations remain.
+da a is available. Here, we no e ha he probe loca ions (Figure 3) were ex rac ed as accura ely as possible from he
+available ank documen a ions which lacked some loca ion informa ion and judicious assump ions were made based on
+ he available da a and he schema ics of probe loca ions. Small uncer ain y in probe loca ions remain.
 
 
 
-A related pressing problem in the CFM modeling community is that of the accurate prediction of the turbulence
-transport. For this particular problem, jet mixing with the quiescent liquid creates high shear stress and consequently
-highly turbulent flow in the mixing region, but in the rest of the tank, away from the near-wall regions, the turbulence
-transport is expected to be much lower. Further, the altered turbulence transport at the interface is already discussed.
-Here, temperature data is used as an indirect indicator for the turbulence transport to gain insight into turbulence
+A rela ed pressing problem in he CFM modeling communi y is ha of he accura e predic ion of he urbulence
+ ranspor . For his par icular problem, je mixing wi h he quiescen liquid crea es high shear s ress and consequen ly
+highly urbulen flow in he mixing region, bu in he res of he ank, away from he near-wall regions, he urbulence
+ ranspor is expec ed o be much lower. Fur her, he al ered urbulence ranspor a he in erface is already discussed.
+Here, empera ure da a is used as an indirec indica or for he urbulence ranspor o gain insigh in o urbulence
 modeling.
 
 
 
-While Menter’s SST model predicts the pressurization satisfactorily (Figure 9), the temperature comparison is less
-satisfactory, but IDDES model captures the temperature trends almost always better or at least as well as the SST model
-(Figure 12, 13, and 14). It is evident that the temperatures in the tank are more homogenized due to the overpredicted
-turbulence transport by the SST model. The IDDES model suppresses the SST model’s overprediction 15. The switch
+While Men er’s SST model predic s he pressuriza ion sa isfac orily (Figure 9), he empera ure comparison is less
+sa isfac ory, bu IDDES model cap ures he empera ure rends almos always be er or a leas as well as he SST model
+(Figure 12, 13, and 14). I is eviden ha he empera ures in he ank are more homogenized due o he overpredic ed
+ urbulence ranspor by he SST model. The IDDES model suppresses he SST model’s overpredic ion 15. The swi ch
 
 
 
@@ -894,11 +894,11 @@ turbulence transport by the SST model. The IDDES model suppresses the SST model�
 
 
 
-Fig. 12 Comparing SST and IDDES temperature predictions with the test data at the interface rake for Test 449
+Fig. 12 Comparing SST and IDDES empera ure predic ions wi h he es da a a he in erface rake for Tes 449
 
 
 
-Fig. 13 Comparing SST and IDDES temperature predictions with the test data in the ullage for Test 449
+Fig. 13 Comparing SST and IDDES empera ure predic ions wi h he es da a in he ullage for Tes 449
 
 
 
@@ -914,29 +914,29 @@ Fig. 13 Comparing SST and IDDES temperature predictions with the test data in th
 
 
 
-Fig. 14 Comparing SST and IDDES temperature predictions with the test data on the axial rake for Test 449
+Fig. 14 Comparing SST and IDDES empera ure predic ions wi h he es da a on he axial rake for Tes 449
 
 
 
-(a) Menter’s SST turbulence model (b) IDDES model: 𝑓𝑑 and turbulence viscosity ratio
+(a) Men er’s SST urbulence model (b) IDDES model: 𝑓𝑑 and urbulence viscosi y ra io
 
 
 
-Fig. 15 Turbulent viscosity ratio comparison between Menter’s SST 2003 model and IDDES 2012 model shows
-reduced viscosity ratio with IDDES method. Probe temperature comparisons indicate that IDDES’s turbulence
-viscosity ratio field prediction is more accurate.
+Fig. 15 Turbulen viscosi y ra io comparison be ween Men er’s SST 2003 model and IDDES 2012 model shows
+reduced viscosi y ra io wi h IDDES me hod. Probe empera ure comparisons indica e ha IDDES’s urbulence
+viscosi y ra io field predic ion is more accura e.
 
 
 
-to SGS model in some flow regions avoids the excess turbulence transport observed in the SST model and improves the
-temperature predictions.
+ o SGS model in some flow regions avoids he excess urbulence ranspor observed in he SST model and improves he
+ empera ure predic ions.
 
 
 
-With turbulence modeling, there are almost always drawbacks that need to be balanced with the benefits. The
-two-equation RANS models are relatively simple and have been time-tested for a wide-range of engineering applications,
-but they fail to be satisfactory for many CFM operations. While the IDDES model improves upon the RANS models by
-ameliorating non-physically high turbulence mixing regions in RANS model, their mesh-dependent nature requires
+Wi h urbulence modeling, here are almos always drawbacks ha need o be balanced wi h he benefi s. The
+ wo-equa ion RANS models are rela ively simple and have been ime- es ed for a wide-range of engineering applica ions,
+bu hey fail o be sa isfac ory for many CFM opera ions. While he IDDES model improves upon he RANS models by
+ameliora ing non-physically high urbulence mixing regions in RANS model, heir mesh-dependen na ure requires
 
 
 
@@ -952,62 +952,62 @@ ameliorating non-physically high turbulence mixing regions in RANS model, their 
 
 
 
-careful meshing and an a priori understanding of at least some flow physics.
-Current recommendation is evaluating the problem with both modeling approaches and then evaluating each against
+careful meshing and an a priori unders anding of a leas some flow physics.
+Curren recommenda ion is evalua ing he problem wi h bo h modeling approaches and hen evalua ing each agains 
 
 
 
-known physical processes. In our problem, the jet mixing process provides that grounding. If the mesh is too refined in
-the jet shear layer, it is treated with SGS turbulence instead of RANS turbulence and the mixing in the shear layer is
-under-predicted. Since jet mixing is a canonical and well-understood turbulence problem, the jet spreading acts as a
-check on the accuracy of the turbulence modeling. The solution then is to sufficiently coarsen the jet mixing regions to
-ensure RANS modeling in that region with the IDDES method. Note that the IDDES solution is still mesh independent
-in any other region. i.e., the pressure prediction is unaffected by further mesh refinement.
+known physical processes. In our problem, he je mixing process provides ha grounding. If he mesh is oo refined in
+ he je shear layer, i is rea ed wi h SGS urbulence ins ead of RANS urbulence and he mixing in he shear layer is
+under-predic ed. Since je mixing is a canonical and well-unders ood urbulence problem, he je spreading ac s as a
+check on he accuracy of he urbulence modeling. The solu ion hen is o sufficien ly coarsen he je mixing regions o
+ensure RANS modeling in ha region wi h he IDDES me hod. No e ha he IDDES solu ion is s ill mesh independen 
+in any o her region. i.e., he pressure predic ion is unaffec ed by fur her mesh refinemen .
 
 
 
-While this mesh-dependence is a drawback for the IDDES modeling technique, our current approach is to rely on
-flawed yet time-tested RANS predictions while simultaneously gaining insights from the IDDES for the problem and
-future turbulence modeling improvement. While the RANS approach is too diffusive, both approaches predict the
-pressurization of the tank well because the turbulence treatment at the gas-liquid interface drives the problem dynamics
-and are identically for both approaches.
+While his mesh-dependence is a drawback for he IDDES modeling echnique, our curren approach is o rely on
+flawed ye ime- es ed RANS predic ions while simul aneously gaining insigh s from he IDDES for he problem and
+fu ure urbulence modeling improvemen . While he RANS approach is oo diffusive, bo h approaches predic he
+pressuriza ion of he ank well because he urbulence rea men a he gas-liquid in erface drives he problem dynamics
+and are iden ically for bo h approaches.
 
 
 
-3. Mesh Sensitivity
-Several computational meshes were tested to achieve a mesh independent solution. For brevity, three of the meshes
+3. Mesh Sensi ivi y
+Several compu a ional meshes were es ed o achieve a mesh independen solu ion. For brevi y, hree of he meshes
 
 
 
-are shown here to demonstrate mesh independence (Figure 16).
+are shown here o demons ra e mesh independence (Figure 16).
 
 
 
-Fig. 16 Mesh Sensitivity Fig. 17 Timestep Sensitivity
+Fig. 16 Mesh Sensi ivi y Fig. 17 Times ep Sensi ivi y
 
 
 
-4. Timestep Sensitivity
-Timestep independent predictions are obtained for less than or equal to 1 × 10−2 s timestep for the sharp interface
+4. Times ep Sensi ivi y
+Times ep independen predic ions are ob ained for less han or equal o 1 × 10−2 s imes ep for he sharp in erface
 
 
 
-predictions. In fact, little sensitivity to timesteps is shown below 0.1 s timestep (Figure 17).
+predic ions. In fac , li le sensi ivi y o imes eps is shown below 0.1 s imes ep (Figure 17).
 
 
 
-5. Accommodation Factor Sensitivity
-Accommodation factor in the Hertz-Knudsen-Schrage equation (Equation 11 in Patel et al [1]) is a coefficient that
+5. Accommoda ion Fac or Sensi ivi y
+Accommoda ion fac or in he Her z-Knudsen-Schrage equa ion (Equa ion 11 in Pa el e al [1]) is a coefficien ha 
 
 
 
-linearly modulates the rate of evaporation/condensation. Its value is expected to be a function of fluid property, and
-thermodynamic state. Some experimentally calculated values of the accommodation factor are available in literature for
-certain fluids but tend to vary in a wide range. This uncertainty is a more serious concern for thermodynamically open
-systems where mass in being added or remove from the system. But for the accommodation factor value greater than
-1e-4, the closed systems predictions seem to show almost no dependence on the accommodation factor value [21]. This
-feature has observed in previously in the self-pressurization tests and is now replicated in the axial jet pressure control
-tests (Figure 18).
+linearly modula es he ra e of evapora ion/condensa ion. I s value is expec ed o be a func ion of fluid proper y, and
+ hermodynamic s a e. Some experimen ally calcula ed values of he accommoda ion fac or are available in li era ure for
+cer ain fluids bu end o vary in a wide range. This uncer ain y is a more serious concern for hermodynamically open
+sys ems where mass in being added or remove from he sys em. Bu for he accommoda ion fac or value grea er han
+1e-4, he closed sys ems predic ions seem o show almos no dependence on he accommoda ion fac or value [21]. This
+fea ure has observed in previously in he self-pressuriza ion es s and is now replica ed in he axial je pressure con rol
+ es s (Figure 18).
 
 
 
@@ -1023,11 +1023,11 @@ tests (Figure 18).
 
 
 
-Fig. 18 Accommodation Factor Sensitivity
+Fig. 18 Accommoda ion Fac or Sensi ivi y
 
 
 
-B. EDU Tank - Autogenous Pressurization
+B. EDU Tank - Au ogenous Pressuriza ion
 
 
 
@@ -1035,32 +1035,32 @@ B. EDU Tank - Autogenous Pressurization
 
 
 
-(a) Pressure vs Time (b) Pressurization Rate vs Time
+(a) Pressure vs Time (b) Pressuriza ion Ra e vs Time
 
 
 
-Fig. 19 Pressure and pressurization rate compared with the experiment
+Fig. 19 Pressure and pressuriza ion ra e compared wi h he experimen 
 
 
 
-Pressure is predicted with a high accuracy (Figure 19a). Compared to the maximum pressure change during
-the test, the peak pressure is predicted with only 5.3% relative error. The pressure prediction is considerably more
-accurate compared to the previous prediction [1] - primarily owing to improved conjugate heat transfer modeling with
-temperature-dependent solid thermal properties for the tank solids as well as the improvement in the modeling of phase
-change energy source term.
+Pressure is predic ed wi h a high accuracy (Figure 19a). Compared o he maximum pressure change during
+ he es , he peak pressure is predic ed wi h only 5.3% rela ive error. The pressure predic ion is considerably more
+accura e compared o he previous predic ion [1] - primarily owing o improved conjuga e hea ransfer modeling wi h
+ empera ure-dependen solid hermal proper ies for he ank solids as well as he improvemen in he modeling of phase
+change energy source erm.
 
 
 
-The forward diffuser valve is partially opened from for the first 45 seconds, after which the flow rate is increased as
-shown in Figure 4. Pressurization rate increases sharply with the increase in the diffuser mass flow rate. This transition
-is also captured time-accurately by the CFD analysis. The pressurization rate is compared in the Figure 19b and also
-captured satisfactorily.
+The forward diffuser valve is par ially opened from for he firs 45 seconds, af er which he flow ra e is increased as
+shown in Figure 4. Pressuriza ion ra e increases sharply wi h he increase in he diffuser mass flow ra e. This ransi ion
+is also cap ured ime-accura ely by he CFD analysis. The pressuriza ion ra e is compared in he Figure 19b and also
+cap ured sa isfac orily.
 
 
 
-The peak pressurization rate in the test is 2000 Pa/s (see Figure 19b, which is three orders of magnitude higher than
-the rate observed in the K-site tank self-pressurization experiments [22] [21], so the interface temperature gradients and
-turbulence transport must be carefully modeled for a successful validation.
+The peak pressuriza ion ra e in he es is 2000 Pa/s (see Figure 19b, which is hree orders of magni ude higher han
+ he ra e observed in he K-si e ank self-pressuriza ion experimen s [22] [21], so he in erface empera ure gradien s and
+ urbulence ranspor mus be carefully modeled for a successful valida ion.
 
 
 
@@ -1076,32 +1076,32 @@ turbulence transport must be carefully modeled for a successful validation.
 
 
 
-(a) Turbulence viscosity ratio at 20 seconds (b) Velocity magnitude at 20 seconds
+(a) Turbulence viscosi y ra io a 20 seconds (b) Veloci y magni ude a 20 seconds
 
 
 
-(c) Turbulence viscosity ratio at 60 seconds (d) Velocity magnitude at 60 seconds
+(c) Turbulence viscosi y ra io a 60 seconds (d) Veloci y magni ude a 60 seconds
 
 
 
-(e) Turbulence viscosity ratio at 80 seconds (f) Velocity magnitude at 80 seconds
+(e) Turbulence viscosi y ra io a 80 seconds (f) Veloci y magni ude a 80 seconds
 
 
 
-Fig. 20 Turbulent viscosity ratio and velocity magnitude shows evolution of flowfield over time
+Fig. 20 Turbulen viscosi y ra io and veloci y magni ude shows evolu ion of flowfield over ime
 
 
 
-Multiple flow dynamics are interacting in the pressurization process. The compression of the cold ullage gas by the
-introduction of the hot gas at 298 K temperature increases the pressure and the temperature of the entire ullage through
-the isochoric compression process. The trickling hot diffuser inflow simply rises up (Figure 20b) in the tank due to the
-buoyancy effect at the low inflow rates, but as the inflow rate increases the inflow penetrates a bit further the ullage gas
-and increases turbulence transport. This turbulence transport also alters the ullage temperature and pressure. Further,
-as soon as the pressure and the temperature of the ullage increases, the interface phase equilibrium is disturbed and
-condensation of the ullage initiates in addition to the sensible heat transfer at the interface. The latent heat released by
-the vapor during the condensation increases the interface temperature. The interfacial dynamics is further affected by
-the near-interface turbulence characteristics, which plays a significant role in pressure prediction and discussed in the
-next section. Evolution of the flowfield is shown in the Figure 20.
+Mul iple flow dynamics are in erac ing in he pressuriza ion process. The compression of he cold ullage gas by he
+in roduc ion of he ho gas a 298 K empera ure increases he pressure and he empera ure of he en ire ullage hrough
+ he isochoric compression process. The rickling ho diffuser inflow simply rises up (Figure 20b) in he ank due o he
+buoyancy effec a he low inflow ra es, bu as he inflow ra e increases he inflow pene ra es a bi fur her he ullage gas
+and increases urbulence ranspor . This urbulence ranspor also al ers he ullage empera ure and pressure. Fur her,
+as soon as he pressure and he empera ure of he ullage increases, he in erface phase equilibrium is dis urbed and
+condensa ion of he ullage ini ia es in addi ion o he sensible hea ransfer a he in erface. The la en hea released by
+ he vapor during he condensa ion increases he in erface empera ure. The in erfacial dynamics is fur her affec ed by
+ he near-in erface urbulence charac eris ics, which plays a significan role in pressure predic ion and discussed in he
+nex sec ion. Evolu ion of he flowfield is shown in he Figure 20.
 
 
 
@@ -1117,13 +1117,13 @@ next section. Evolution of the flowfield is shown in the Figure 20.
 
 
 
-Fig. 21 Temperature across the interface over time shown on three different length scales on an increasingly
-refined length scale (clockwise from top left)
+Fig. 21 Tempera ure across he in erface over ime shown on hree differen leng h scales on an increasingly
+refined leng h scale (clockwise from op lef )
 
 
 
-Fig. 22 Eddy viscosity ratio across the interface over time shown on three different length scales on an
-increasingly refined length scale (clockwise from top left)
+Fig. 22 Eddy viscosi y ra io across he in erface over ime shown on hree differen leng h scales on an
+increasingly refined leng h scale (clockwise from op lef )
 
 
 
@@ -1139,48 +1139,48 @@ increasingly refined length scale (clockwise from top left)
 
 
 
-2. Interface Temperature and Turbulence
-The temperature gradient at the interface needs to be modeled and captured with high accuracy because the ullage
+2. In erface Tempera ure and Turbulence
+The empera ure gradien a he in erface needs o be modeled and cap ured wi h high accuracy because he ullage
 
 
 
-pressure is strongly affected by the interface temperature as evidenced by the Antoine equation (Equation 11 in Patel et
-al[1]). A 0.2 K error in temperature prediction at the interface would result in 14% error in pressure prediction based on
-the saturation curve of hydrogen. Again, an interface normal first cell height of at least 0.1 mm is found to be crucial to
-resolve the sharp thermal gradients (Figure 21) resulting from the complex interactions of the forced convection, the
-altered interfacial turbulence transport and the latent heat exchange. A larger first cell height results in an incorrect
-thermal gradient prediction and consequently an incorrect ullage pressure prediction.
+pressure is s rongly affec ed by he in erface empera ure as evidenced by he An oine equa ion (Equa ion 11 in Pa el e 
+al[1]). A 0.2 K error in empera ure predic ion a he in erface would resul in 14% error in pressure predic ion based on
+ he sa ura ion curve of hydrogen. Again, an in erface normal firs cell heigh of a leas 0.1 mm is found o be crucial o
+resolve he sharp hermal gradien s (Figure 21) resul ing from he complex in erac ions of he forced convec ion, he
+al ered in erfacial urbulence ranspor and he la en hea exchange. A larger firs cell heigh resul s in an incorrec 
+ hermal gradien predic ion and consequen ly an incorrec ullage pressure predic ion.
 
 
 
-Fig. 23 Tank pressure sensitivity to the interface turbulence
+Fig. 23 Tank pressure sensi ivi y o he in erface urbulence
 
 
 
-Further, the interface turbulence has a large impact on the pressurization trend. The causal link is illustrated in
-Figure 23. Turbulence modeling is discussed in Section IV.B.1. Evolution of turbulence kinetic energy is shown in
-Figure 22 to demonstrate sharp change in turbulence transport across the interface. Only if this transport is modeled
-with sufficient accuracy, the eddy conductivity near the interface and consequently temperature of the interface can be
-captured accurately.
+Fur her, he in erface urbulence has a large impac on he pressuriza ion rend. The causal link is illus ra ed in
+Figure 23. Turbulence modeling is discussed in Sec ion IV.B.1. Evolu ion of urbulence kine ic energy is shown in
+Figure 22 o demons ra e sharp change in urbulence ranspor across he in erface. Only if his ranspor is modeled
+wi h sufficien accuracy, he eddy conduc ivi y near he in erface and consequen ly empera ure of he in erface can be
+cap ured accura ely.
 
 
 
-3. Fluid and Solid Temperatures
-The locations of the liquid temperature probes used in the test are obtained from the tank’s CAD model, but the
+3. Fluid and Solid Tempera ures
+The loca ions of he liquid empera ure probes used in he es are ob ained from he ank’s CAD model, bu he
 
 
 
-locations of the solid temperature probes were not available in this CAD model, so they are visually approximated from
-a test schematic.
+loca ions of he solid empera ure probes were no available in his CAD model, so hey are visually approxima ed from
+a es schema ic.
 
 
 
-The diffuser temperature is predicted quite well (Figure 24b, but the tank wall temperatures at the probe D5439
-is not. While the CFD captures the temperature stratification trends in the ullage well, the quantitative comparisons
-are unsatisfactory (Figure 24a). The reason behind these deviations is not well understood and is an active area of
-investigation. Turbulence modeling was initially suspected of excessive turbulent mixing (Figure 20c and 20e) which
-homogenizes the temperatures, but the laminar and IDDES modeling showed little improvement in the temperature
-prediction, so a true cause remains unidentified.
+The diffuser empera ure is predic ed qui e well (Figure 24b, bu he ank wall empera ures a he probe D5439
+is no . While he CFD cap ures he empera ure s ra ifica ion rends in he ullage well, he quan i a ive comparisons
+are unsa isfac ory (Figure 24a). The reason behind hese devia ions is no well unders ood and is an ac ive area of
+inves iga ion. Turbulence modeling was ini ially suspec ed of excessive urbulen mixing (Figure 20c and 20e) which
+homogenizes he empera ures, bu he laminar and IDDES modeling showed li le improvemen in he empera ure
+predic ion, so a rue cause remains uniden ified.
 
 
 
@@ -1188,7 +1188,7 @@ prediction, so a true cause remains unidentified.
 
 
 
-Fig. 24 Probes temperature comparison with the experiment
+Fig. 24 Probes empera ure comparison wi h he experimen 
 
 
 
@@ -1204,41 +1204,41 @@ Fig. 24 Probes temperature comparison with the experiment
 
 
 
-4. Mesh Sensitivity
-Several computational meshes are tested for understanding the problem dynamics, and mesh sensitivity study. Figure
+4. Mesh Sensi ivi y
+Several compu a ional meshes are es ed for unders anding he problem dynamics, and mesh sensi ivi y s udy. Figure
 
 
 
-25 demonstrate the mesh independent solution. While the coarse mesh slightly underpredicts the pressure peak, all
-mesh are in reasonable agreement with the test data and further refinement is not justified.
+25 demons ra e he mesh independen solu ion. While he coarse mesh sligh ly underpredic s he pressure peak, all
+mesh are in reasonable agreemen wi h he es da a and fur her refinemen is no jus ified.
 
 
 
-Fig. 25 Mesh Sensitivity Fig. 26 Timestep Sensitivity
+Fig. 25 Mesh Sensi ivi y Fig. 26 Times ep Sensi ivi y
 
 
 
-5. Timestep Sensitivity
-The timestep independent predictions are obtained for less than or equal to 0.005 s timestep for the sharp interface
+5. Times ep Sensi ivi y
+The imes ep independen predic ions are ob ained for less han or equal o 0.005 s imes ep for he sharp in erface
 
 
 
-predictions when using the refined mesh (Figure 26).
+predic ions when using he refined mesh (Figure 26).
 
 
 
-6. Accommodation Factor Sensitivity
-See the discussion in V.A.5. For thermodynamically open system such as this autogenous pressurization problem,
+6. Accommoda ion Fac or Sensi ivi y
+See he discussion in V.A.5. For hermodynamically open sys em such as his au ogenous pressuriza ion problem,
 
 
 
-predictions could be sensitive to the accommodation factor. Therefore, a large range of values ranging from 1e-4 to 1
-are tested. Similar to the observations from the closed systems, the pressure predictions are found to be insensitive at or
-above the value of 1e-3 (Figure 27).
+predic ions could be sensi ive o he accommoda ion fac or. Therefore, a large range of values ranging from 1e-4 o 1
+are es ed. Similar o he observa ions from he closed sys ems, he pressure predic ions are found o be insensi ive a or
+above he value of 1e-3 (Figure 27).
 
 
 
-Fig. 27 Accommodation Factor Sensitivity
+Fig. 27 Accommoda ion Fac or Sensi ivi y
 
 
 
@@ -1255,98 +1255,98 @@ Fig. 27 Accommodation Factor Sensitivity
 
 
 VI. Conclusion
-Turbulence modeling plays a central role in the reliable predictions of cryogenic fluid management operations
+Turbulence modeling plays a cen ral role in he reliable predic ions of cryogenic fluid managemen opera ions
 
 
 
-because it modulates phase change and interfacial heat transfer. Turbulence modeling approaches for the bulk fluid and
-gas-liquid interface are investigated to develop a reliable and practical predictive model for supporting the flight projects.
+because i modula es phase change and in erfacial hea ransfer. Turbulence modeling approaches for he bulk fluid and
+gas-liquid in erface are inves iga ed o develop a reliable and prac ical predic ive model for suppor ing he fligh projec s.
 
 
 
-Two ground-based flight-sized CFM tests are used to validate our modeling techniques using sharp interface method.
-The modeling technique reliably predicts axial jet based pressure control across different jet flow rates and tank fill
-heights. Improving the conjugate heat transfer modeling with temperature-dependent thermal properties for the solids
-and an enhanced interface heat transfer modeling improved the time-accurate pressure prediction for the autogenous
-pressurization test. Interface turbulence transport modeling for the VOF method also shows significant improvements in
-predictive capabilities in the early development phase. Sensitivities to spatial resolution, temporal resolution, and phase
-change accommodation factor are evaluated to ensure that the validation is independent of these parameters.
+Two ground-based fligh -sized CFM es s are used o valida e our modeling echniques using sharp in erface me hod.
+The modeling echnique reliably predic s axial je based pressure con rol across differen je flow ra es and ank fill
+heigh s. Improving he conjuga e hea ransfer modeling wi h empera ure-dependen hermal proper ies for he solids
+and an enhanced in erface hea ransfer modeling improved he ime-accura e pressure predic ion for he au ogenous
+pressuriza ion es . In erface urbulence ranspor modeling for he VOF me hod also shows significan improvemen s in
+predic ive capabili ies in he early developmen phase. Sensi ivi ies o spa ial resolu ion, emporal resolu ion, and phase
+change accommoda ion fac or are evalua ed o ensure ha he valida ion is independen of hese parame ers.
 
 
 
-For the K-site tank tests, the unsatisfactory temperatures predictions from the RANS model are improved with
-IDDES modeling. IDDES modeling primarily achieves this by preventing over-prediction of turbulent viscosity by
-the RANS model. The IDDES model’s blending parameter that switches from RANS turbulence modeling to SGS
-turbulence modeling could be mesh sensitive, so some a priori understanding of expected flow physics is hugely
-beneficial. A cogent solution could be to compare the IDDES predictions with the RANS predictions to ensure
-elimination of the mesh-dependency. Future work may explore validation of other explicit or implicit LES approaches
-for better temperature predictions.
+For he K-si e ank es s, he unsa isfac ory empera ures predic ions from he RANS model are improved wi h
+IDDES modeling. IDDES modeling primarily achieves his by preven ing over-predic ion of urbulen viscosi y by
+ he RANS model. The IDDES model’s blending parame er ha swi ches from RANS urbulence modeling o SGS
+ urbulence modeling could be mesh sensi ive, so some a priori unders anding of expec ed flow physics is hugely
+beneficial. A cogen solu ion could be o compare he IDDES predic ions wi h he RANS predic ions o ensure
+elimina ion of he mesh-dependency. Fu ure work may explore valida ion of o her explici or implici LES approaches
+for be er empera ure predic ions.
 
 
 
-The early development of the interface turbulence damping model for the VOF approach significantly improves the
-predictions, but the solution is hampered by the stability issues at the required near-interface length-scale. The stability
-improvements and damping model improvements are planned in the near future. Once the stability issues are resolved,
-the modeling techniques for larger 𝑦+ interface meshes will be explored.
+The early developmen of he in erface urbulence damping model for he VOF approach significan ly improves he
+predic ions, bu he solu ion is hampered by he s abili y issues a he required near-in erface leng h-scale. The s abili y
+improvemen s and damping model improvemen s are planned in he near fu ure. Once he s abili y issues are resolved,
+ he modeling echniques for larger 𝑦+ in erface meshes will be explored.
 
 
 
-The VOF approach will extend the application of the turbulence modeling techniques to the moving and morphing
-interface problems including the CFM operations in the micro-gravity environments.
+The VOF approach will ex end he applica ion of he urbulence modeling echniques o he moving and morphing
+in erface problems including he CFM opera ions in he micro-gravi y environmen s.
 
 
 
-The successful validation of our modeling techniques against these flight-scale tank experiments builds further
-confidence in reliability of our CFD tools for a wider range of CFM applications for supporting design of the long-term
-space flight missions.
+The successful valida ion of our modeling echniques agains hese fligh -scale ank experimen s builds fur her
+confidence in reliabili y of our CFD ools for a wider range of CFM applica ions for suppor ing design of he long- erm
+space fligh missions.
 
 
 
-Acknowledgments
-The NASA High-End Computing (HEC) Program, through the NASA Advanced Supercomputing (NAS) Division at
+Acknowledgmen s
+The NASA High-End Compu ing (HEC) Program, hrough he NASA Advanced Supercompu ing (NAS) Division a 
 
 
 
-Ames Research Center provided the computational resources for these simulations. The author is thankful to colleagues
-Edward Reske and Brandon Williams for sharing the CAD model, previous simulation set-up and their insights. The
-author is also thankful to colleagues Jacob Brodnick, H. Q. Yang, and NASA Glenn Research Center’s CFM team for
+Ames Research Cen er provided he compu a ional resources for hese simula ions. The au hor is hankful o colleagues
+Edward Reske and Brandon Williams for sharing he CAD model, previous simula ion se -up and heir insigh s. The
+au hor is also hankful o colleagues Jacob Brodnick, H. Q. Yang, and NASA Glenn Research Cen er’s CFM eam for
 helpful discussions.
 
 
 
 References
-[1] Patel, C., and Williams, B., “Validation of Loci-Stream for Autogenous Pressurization of Cryogenic Propellant Tank,” AIAA
+[1] Pa el, C., and Williams, B., “Valida ion of Loci-S ream for Au ogenous Pressuriza ion of Cryogenic Propellan Tank,” AIAA
 
 
 
-SCITECH 2024 Forum, 2024. https://doi.org/10.2514/6.2024-0544, URL https://arc.aiaa.org/doi/abs/10.2514/6.2024-0544.
+SCITECH 2024 Forum, 2024. h ps://doi.org/10.2514/6.2024-0544, URL h ps://arc.aiaa.org/doi/abs/10.2514/6.2024-0544.
 
 
 
-[2] Reske, E., and Brodnick, J., “Validation of a Computational Fluid Dynamics Model of Axial Jet Mixing for Cryogenic
-Propellant Tank Pressure Control,” AIAA SCITECH 2024 Forum, 2024. https://doi.org/10.2514/6.2024-0545, URL https:
+[2] Reske, E., and Brodnick, J., “Valida ion of a Compu a ional Fluid Dynamics Model of Axial Je Mixing for Cryogenic
+Propellan Tank Pressure Con rol,” AIAA SCITECH 2024 Forum, 2024. h ps://doi.org/10.2514/6.2024-0545, URL h ps:
 //arc.aiaa.org/doi/abs/10.2514/6.2024-0545.
 
 
 
-[3] Moran, M. E., McNelis, N. B., Kudlac, M. T., Haberbusch, M. S., and Satorino, G., “Experimental Results of Hydrogen Slosh
-in a 62 Cubic Foot (1750 Liter) Tank,” 1994.
+[3] Moran, M. E., McNelis, N. B., Kudlac, M. T., Haberbusch, M. S., and Sa orino, G., “Experimen al Resul s of Hydrogen Slosh
+in a 62 Cubic Foo (1750 Li er) Tank,” 1994.
 
 
 
-[4] Menter, F., Kuntz, M., and Langtry, R., “Ten years of industrial experience with the SST turbulence model,” Heat and Mass
+[4] Men er, F., Kun z, M., and Lang ry, R., “Ten years of indus rial experience wi h he SST urbulence model,” Hea and Mass
 Transfer, Vol. 4, 2003.
 
 
 
-[5] Gritskevich, M. S., Garbaruk, A. V., Schütze, J., and Menter, F. R., “Development of DDES and IDDES Formulations
-for the k- Shear Stress Transport Model,” Flow, Turbulence and Combustion, Vol. 88, No. 3, 2012, pp. 431–449.
-https://doi.org/10.1007/s10494-011-9378-4, URL https://doi.org/10.1007/s10494-011-9378-4.
+[5] Gri skevich, M. S., Garbaruk, A. V., Schü ze, J., and Men er, F. R., “Developmen of DDES and IDDES Formula ions
+for he k- Shear S ress Transpor Model,” Flow, Turbulence and Combus ion, Vol. 88, No. 3, 2012, pp. 431–449.
+h ps://doi.org/10.1007/s10494-011-9378-4, URL h ps://doi.org/10.1007/s10494-011-9378-4.
 
 
 
-[6] Fabre, J., Suzanne, C., and Masbernat, L., “EXPERIMENTAL DATA SET NO. 7: STRATIFIED FLOW, PART I: LOCAL
-STRUCTURE,” Multiphase Science and Technology, Vol. 3, No. 1-4, 1987, pp. 285–301.
+[6] Fabre, J., Suzanne, C., and Masberna , L., “EXPERIMENTAL DATA SET NO. 7: STRATIFIED FLOW, PART I: LOCAL
+STRUCTURE,” Mul iphase Science and Technology, Vol. 3, No. 1-4, 1987, pp. 285–301.
 
 
 
@@ -1356,119 +1356,119 @@ STRUCTURE,” Multiphase Science and Technology, Vol. 3, No. 1-4, 1987, pp. 285�
 
 
 
-https://doi.org/10.2514/6.2024-0544
+h ps://doi.org/10.2514/6.2024-0544
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2024-0544
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2024-0544
 
 
-https://doi.org/10.2514/6.2024-0545
+h ps://doi.org/10.2514/6.2024-0545
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2024-0545
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2024-0545
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2024-0545
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2024-0545
 
 
-https://doi.org/10.1007/s10494-011-9378-4
+h ps://doi.org/10.1007/s10494-011-9378-4
 
 
-https://doi.org/10.1007/s10494-011-9378-4
-
-
-
+h ps://doi.org/10.1007/s10494-011-9378-4
 
 
 
 
 
-[7] Rashidi, M., and Banerjee, S., “The effect of boundary conditions and shear rate on streak formation and breakdown in turbulent
-channel flows,” Physics of Fluids A: Fluid Dynamics, Vol. 2, No. 10, 1990, pp. 1827–1838. https://doi.org/10.1063/1.857656,
-URL https://doi.org/10.1063/1.857656.
 
 
 
-[8] Lombardi, P., De Angelis, V., and Banerjee, S., “Direct numerical simulation of near-interface turbulence in coupled
-gas-liquid flow,” Physics of Fluids, Vol. 8, No. 6, 1996, pp. 1643–1665. https://doi.org/10.1063/1.868937, URL https:
+[7] Rashidi, M., and Banerjee, S., “The effec of boundary condi ions and shear ra e on s reak forma ion and breakdown in urbulen 
+channel flows,” Physics of Fluids A: Fluid Dynamics, Vol. 2, No. 10, 1990, pp. 1827–1838. h ps://doi.org/10.1063/1.857656,
+URL h ps://doi.org/10.1063/1.857656.
+
+
+
+[8] Lombardi, P., De Angelis, V., and Banerjee, S., “Direc numerical simula ion of near-in erface urbulence in coupled
+gas-liquid flow,” Physics of Fluids, Vol. 8, No. 6, 1996, pp. 1643–1665. h ps://doi.org/10.1063/1.868937, URL h ps:
 //doi.org/10.1063/1.868937.
 
 
 
-[9] Fulgosi, M., Lakehal, D., Banerjee, S., and Angelis, V. D., “Direct numerical simulation of turbulence in a sheared
-air–water flow with a deformable interface,” Journal of Fluid Mechanics, Vol. 482, 2003, pp. 319 – 345. URL https:
-//api.semanticscholar.org/CorpusID:120893786.
+[9] Fulgosi, M., Lakehal, D., Banerjee, S., and Angelis, V. D., “Direc numerical simula ion of urbulence in a sheared
+air–wa er flow wi h a deformable in erface,” Journal of Fluid Mechanics, Vol. 482, 2003, pp. 319 – 345. URL h ps:
+//api.seman icscholar.org/CorpusID:120893786.
 
 
 
-[10] Jofre, L., Dodd, M. S., Grau, J., and Torres, R., “Near-interface flow modeling in large-eddy simulation of two-phase turbulence,”
-International Journal of Multiphase Flow, Vol. 132, 2020, p. 103406. https://doi.org/https://doi.org/10.1016/j.ijmultiphaseflow.
-2020.103406, URL https://www.sciencedirect.com/science/article/pii/S0301932220305152.
+[10] Jofre, L., Dodd, M. S., Grau, J., and Torres, R., “Near-in erface flow modeling in large-eddy simula ion of wo-phase urbulence,”
+In erna ional Journal of Mul iphase Flow, Vol. 132, 2020, p. 103406. h ps://doi.org/h ps://doi.org/10.1016/j.ijmul iphaseflow.
+2020.103406, URL h ps://www.sciencedirec .com/science/ar icle/pii/S0301932220305152.
 
 
 
-[11] Fan, W., and Anglart, H., “Progress in Phenomenological Modeling of Turbulence Damping around a Two-Phase Interface,”
-Fluids, Vol. 4, No. 3, 2019. https://doi.org/10.3390/fluids4030136, URL https://www.mdpi.com/2311-5521/4/3/136.
+[11] Fan, W., and Anglar , H., “Progress in Phenomenological Modeling of Turbulence Damping around a Two-Phase In erface,”
+Fluids, Vol. 4, No. 3, 2019. h ps://doi.org/10.3390/fluids4030136, URL h ps://www.mdpi.com/2311-5521/4/3/136.
 
 
 
-[12] Egorov, Y., Boucker, M., Martin, A., Pigny, S., Scheuerer, M., and Willemsen, S., “Validation of CFD codes with PTS-relevant
-test cases, 5th Euratom Framework,” Programme ECORA project, 2004, pp. 91–116.
+[12] Egorov, Y., Boucker, M., Mar in, A., Pigny, S., Scheuerer, M., and Willemsen, S., “Valida ion of CFD codes wi h PTS-relevan 
+ es cases, 5 h Eura om Framework,” Programme ECORA projec , 2004, pp. 91–116.
 
 
 
-[13] Wilcox, D. C., “Reassessment of the scale-determining equation for advanced turbulence models,” AIAA Journal, Vol. 26,
-No. 11, 1988, pp. 1299–1310. https://doi.org/10.2514/3.10041, URL https://doi.org/10.2514/3.10041.
+[13] Wilcox, D. C., “Reassessmen of he scale-de ermining equa ion for advanced urbulence models,” AIAA Journal, Vol. 26,
+No. 11, 1988, pp. 1299–1310. h ps://doi.org/10.2514/3.10041, URL h ps://doi.org/10.2514/3.10041.
 
 
 
-[14] Menter, F. R., “Two-equation eddy-viscosity turbulence models for engineering applications,” AIAA Journal, Vol. 32, No. 8,
-1994, pp. 1598–1605. https://doi.org/10.2514/3.12149, URL https://doi.org/10.2514/3.12149.
+[14] Men er, F. R., “Two-equa ion eddy-viscosi y urbulence models for engineering applica ions,” AIAA Journal, Vol. 32, No. 8,
+1994, pp. 1598–1605. h ps://doi.org/10.2514/3.12149, URL h ps://doi.org/10.2514/3.12149.
 
 
 
-[15] Gada, V. H., Tandon, M. P., Elias, J., Vikulov, R., and Lo, S., “A large scale interface multi-fluid model for simulating multiphase
-flows,” Applied Mathematical Modelling, Vol. 44, 2017, pp. 189–204. https://doi.org/https://doi.org/10.1016/j.apm.2017.02.030,
-URL https://www.sciencedirect.com/science/article/pii/S0307904X17301269.
+[15] Gada, V. H., Tandon, M. P., Elias, J., Vikulov, R., and Lo, S., “A large scale in erface mul i-fluid model for simula ing mul iphase
+flows,” Applied Ma hema ical Modelling, Vol. 44, 2017, pp. 189–204. h ps://doi.org/h ps://doi.org/10.1016/j.apm.2017.02.030,
+URL h ps://www.sciencedirec .com/science/ar icle/pii/S0307904X17301269.
 
 
 
-[16] Kassemi, M., Hauser, D. M., Kartuzova, O. V., and l. Hylton, S., “Development and Validation of Two-Phase CFD Models for
-Key Elements of Propellant Tank CFM Operations in 1G and Microgravity – An Overview,” AIAA SCITECH 2023 Forum,
-2023. https://doi.org/10.2514/6.2023-1218, URL https://arc.aiaa.org/doi/abs/10.2514/6.2023-1218.
+[16] Kassemi, M., Hauser, D. M., Kar uzova, O. V., and l. Hyl on, S., “Developmen and Valida ion of Two-Phase CFD Models for
+Key Elemen s of Propellan Tank CFM Opera ions in 1G and Microgravi y – An Overview,” AIAA SCITECH 2023 Forum,
+2023. h ps://doi.org/10.2514/6.2023-1218, URL h ps://arc.aiaa.org/doi/abs/10.2514/6.2023-1218.
 
 
 
-[17] Kartuzova, O. V., Kassemi, M., and Hauser, D. M., “CFD Model Development of a Cryogenic Storage Tank Self-Pressurization
-in Normal Gravity and Validation against SHIIVER Experiment,” AIAA SCITECH 2023 Forum, 2023. https://doi.org/10.2514/
-6.2023-1412, URL https://arc.aiaa.org/doi/abs/10.2514/6.2023-1412.
+[17] Kar uzova, O. V., Kassemi, M., and Hauser, D. M., “CFD Model Developmen of a Cryogenic S orage Tank Self-Pressuriza ion
+in Normal Gravi y and Valida ion agains SHIIVER Experimen ,” AIAA SCITECH 2023 Forum, 2023. h ps://doi.org/10.2514/
+6.2023-1412, URL h ps://arc.aiaa.org/doi/abs/10.2514/6.2023-1412.
 
 
 
-[18] Stewart, M., “Pressurization of a Flightweight, Liquid Hydrogen Tank: Evaporation &amp; Condensation at the Liquid/Vapor
-Interface,” 53rd AIAA/SAE/ASEE Joint Propulsion Conference, 2017. https://doi.org/10.2514/6.2017-4916, URL https:
+[18] S ewar , M., “Pressuriza ion of a Fligh weigh , Liquid Hydrogen Tank: Evapora ion &amp; Condensa ion a he Liquid/Vapor
+In erface,” 53rd AIAA/SAE/ASEE Join Propulsion Conference, 2017. h ps://doi.org/10.2514/6.2017-4916, URL h ps:
 //arc.aiaa.org/doi/abs/10.2514/6.2017-4916.
 
 
 
-[19] Linstrom, P., and Mallard, W., “Editors,” NIST Chemistry WebBook, NIST Std. Ref. Database Number 69, NIST, 2005. URL
-http://webbook.nist.gov.
+[19] Lins rom, P., and Mallard, W., “Edi ors,” NIST Chemis ry WebBook, NIST S d. Ref. Da abase Number 69, NIST, 2005. URL
+h p://webbook.nis .gov.
 
 
 
-[20] Simon, N., Drexler, E., and Reed, R., “Review of Cryogenic Mechanical and Thermal Properties of Al-Li Alloys and Alloy
-2219,” 1991, pp. 173–178. URL https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nistir3971.pdf.
+[20] Simon, N., Drexler, E., and Reed, R., “Review of Cryogenic Mechanical and Thermal Proper ies of Al-Li Alloys and Alloy
+2219,” 1991, pp. 173–178. URL h ps://nvlpubs.nis .gov/nis pubs/Legacy/IR/nis ir3971.pdf.
 
 
 
-[21] Patel, C., Yang, H. Q., and Williams, B., “Validation of Gas-Liquid Sharp Interface Model in Loci-Stream for Propellant Tank
-Self-pressurization under Normal Gravity,” AIAA SCITECH 2024 Forum, 2024. https://doi.org/10.2514/6.2024-0543, URL
-https://arc.aiaa.org/doi/abs/10.2514/6.2024-0543.
+[21] Pa el, C., Yang, H. Q., and Williams, B., “Valida ion of Gas-Liquid Sharp In erface Model in Loci-S ream for Propellan Tank
+Self-pressuriza ion under Normal Gravi y,” AIAA SCITECH 2024 Forum, 2024. h ps://doi.org/10.2514/6.2024-0543, URL
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2024-0543.
 
 
 
-[22] Yang, H. Q., Patel, C. S., and Williams, B. R., “Validation of Cryogenic Propellant Tank Self-Pressurization,” AIAA SCITECH
-2023 Forum, 2023. https://doi.org/10.2514/6.2023-1411, URL https://arc.aiaa.org/doi/abs/10.2514/6.2023-1411.
+[22] Yang, H. Q., Pa el, C. S., and Williams, B. R., “Valida ion of Cryogenic Propellan Tank Self-Pressuriza ion,” AIAA SCITECH
+2023 Forum, 2023. h ps://doi.org/10.2514/6.2023-1411, URL h ps://arc.aiaa.org/doi/abs/10.2514/6.2023-1411.
 
 
 
@@ -1478,229 +1478,229 @@ https://arc.aiaa.org/doi/abs/10.2514/6.2024-0543.
 
 
 
-https://doi.org/10.1063/1.857656
+h ps://doi.org/10.1063/1.857656
 
 
-https://doi.org/10.1063/1.857656
+h ps://doi.org/10.1063/1.857656
 
 
-https://doi.org/10.1063/1.868937
+h ps://doi.org/10.1063/1.868937
 
 
-https://doi.org/10.1063/1.868937
+h ps://doi.org/10.1063/1.868937
 
 
-https://doi.org/10.1063/1.868937
+h ps://doi.org/10.1063/1.868937
 
 
-https://api.semanticscholar.org/CorpusID:120893786
+h ps://api.seman icscholar.org/CorpusID:120893786
 
 
-https://api.semanticscholar.org/CorpusID:120893786
+h ps://api.seman icscholar.org/CorpusID:120893786
 
 
-https://doi.org/https://doi.org/10.1016/j.ijmultiphaseflow.2020.103406
+h ps://doi.org/h ps://doi.org/10.1016/j.ijmul iphaseflow.2020.103406
 
 
-https://doi.org/https://doi.org/10.1016/j.ijmultiphaseflow.2020.103406
+h ps://doi.org/h ps://doi.org/10.1016/j.ijmul iphaseflow.2020.103406
 
 
-https://www.sciencedirect.com/science/article/pii/S0301932220305152
+h ps://www.sciencedirec .com/science/ar icle/pii/S0301932220305152
 
 
-https://doi.org/10.3390/fluids4030136
+h ps://doi.org/10.3390/fluids4030136
 
 
-https://www.mdpi.com/2311-5521/4/3/136
+h ps://www.mdpi.com/2311-5521/4/3/136
 
 
-https://doi.org/10.2514/3.10041
+h ps://doi.org/10.2514/3.10041
 
 
-https://doi.org/10.2514/3.10041
+h ps://doi.org/10.2514/3.10041
 
 
-https://doi.org/10.2514/3.12149
+h ps://doi.org/10.2514/3.12149
 
 
-https://doi.org/10.2514/3.12149
+h ps://doi.org/10.2514/3.12149
 
 
-https://doi.org/https://doi.org/10.1016/j.apm.2017.02.030
+h ps://doi.org/h ps://doi.org/10.1016/j.apm.2017.02.030
 
 
-https://www.sciencedirect.com/science/article/pii/S0307904X17301269
+h ps://www.sciencedirec .com/science/ar icle/pii/S0307904X17301269
 
 
-https://doi.org/10.2514/6.2023-1218
+h ps://doi.org/10.2514/6.2023-1218
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2023-1218
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2023-1218
 
 
-https://doi.org/10.2514/6.2023-1412
+h ps://doi.org/10.2514/6.2023-1412
 
 
-https://doi.org/10.2514/6.2023-1412
+h ps://doi.org/10.2514/6.2023-1412
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2023-1412
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2023-1412
 
 
-https://doi.org/10.2514/6.2017-4916
+h ps://doi.org/10.2514/6.2017-4916
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2017-4916
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2017-4916
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2017-4916
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2017-4916
 
 
-http://webbook.nist.gov
+h p://webbook.nis .gov
 
 
-https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nistir3971.pdf
+h ps://nvlpubs.nis .gov/nis pubs/Legacy/IR/nis ir3971.pdf
 
 
-https://doi.org/10.2514/6.2024-0543
+h ps://doi.org/10.2514/6.2024-0543
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2024-0543
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2024-0543
 
 
-https://doi.org/10.2514/6.2023-1411
+h ps://doi.org/10.2514/6.2023-1411
 
 
-https://arc.aiaa.org/doi/abs/10.2514/6.2023-1411
+h ps://arc.aiaa.org/doi/abs/10.2514/6.2023-1411
 
 
 
- 
-Nomenclature
+	
+Nomencla ure
 
- 
-Introduction
+	
+In roduc ion
 
- 
-Test Descriptions
+	
+Tes Descrip ions
 
- 
-K-site Tank - Axial Jet Pressure Control
+	
+K-si e Tank - Axial Je Pressure Con rol
 
- 
-Testing Facilities
+	
+Tes ing Facili ies
 
- 
-Experimental Procedure
+	
+Experimen al Procedure
 
 
- 
-EDU Tank - Autogenous Pressurization
+	
+EDU Tank - Au ogenous Pressuriza ion
 
- 
-Testing Facilities
+	
+Tes ing Facili ies
 
- 
-Experimental Procedure
+	
+Experimen al Procedure
 
 
 
- 
-Computational Model
+	
+Compu a ional Model
 
- 
-Governing Equations
+	
+Governing Equa ions
 
- 
+	
 Turbulence Modeling
 
- 
-Interface Turbulence Transport
+	
+In erface Turbulence Transpor 
 
 
- 
-K-site Tank - Axial Jet Pressure Control
+	
+K-si e Tank - Axial Je Pressure Con rol
 
- 
-Geometry
+	
+Geome ry
 
- 
+	
 Mesh
 
- 
-Initial Conditions
+	
+Ini ial Condi ions
 
- 
-Boundary Conditions
+	
+Boundary Condi ions
 
 
- 
-EDU Tank - Autogenous Pressurization
+	
+EDU Tank - Au ogenous Pressuriza ion
 
- 
-Geometry
+	
+Geome ry
 
- 
+	
 Mesh
 
- 
-Initial Conditions
+	
+Ini ial Condi ions
 
- 
-Boundary Conditions
-
-
- 
-Fluid Properties
-
- 
-Discretization and Solver Set-up
+	
+Boundary Condi ions
 
 
- 
-Results
+	
+Fluid Proper ies
 
- 
-K-site Tank - Axial Jet Pressure Control
-
- 
-Tank Pressurization
-
- 
-Tank Temperatures and Turbulence Modeling
-
- 
-Mesh Sensitivity
-
- 
-Timestep Sensitivity
-
- 
-Accommodation Factor Sensitivity
+	
+Discre iza ion and Solver Se -up
 
 
- 
-EDU Tank - Autogenous Pressurization
+	
+Resul s
 
- 
+	
+K-si e Tank - Axial Je Pressure Con rol
+
+	
+Tank Pressuriza ion
+
+	
+Tank Tempera ures and Turbulence Modeling
+
+	
+Mesh Sensi ivi y
+
+	
+Times ep Sensi ivi y
+
+	
+Accommoda ion Fac or Sensi ivi y
+
+
+	
+EDU Tank - Au ogenous Pressuriza ion
+
+	
 Tank Pressure
 
- 
-Interface Temperature and Turbulence
+	
+In erface Tempera ure and Turbulence
 
- 
-Fluid and Solid Temperatures
+	
+Fluid and Solid Tempera ures
 
- 
-Mesh Sensitivity
+	
+Mesh Sensi ivi y
 
- 
-Timestep Sensitivity
+	
+Times ep Sensi ivi y
 
- 
-Accommodation Factor Sensitivity
+	
+Accommoda ion Fac or Sensi ivi y
 
 
 
- 
+	
 Conclusion

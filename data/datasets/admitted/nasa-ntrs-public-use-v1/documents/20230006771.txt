@@ -1,69 +1,69 @@
-Hybrid Modeling of Unmanned Aerial Vehicle Electric
-Powertrain for Fault Detection and Diagnostics
+Hybrid Modeling of Unmanned Aerial Vehicle Elec ric
+Power rain for Faul De ec ion and Diagnos ics
 
 
 
-Matteo Corbetta∗
+Ma eo Corbe a∗
 
 
 
-KBR Inc., NASA Ames Research Center, Moffett Field, CA, 94035
+KBR Inc., NASA Ames Research Cen er, Moffe Field, CA, 94035
 
 
 
-Katelyn Jarvis† and Stefan Schuet‡
-NASA Ames Research Center, Moffett Field, CA, 94035
+Ka elyn Jarvis† and S efan Schue ‡
+NASA Ames Research Cen er, Moffe Field, CA, 94035
 
 
 
-This paper shows the application of hybrid physics-informed machine learning to a rep-
-resentative electric powertrain for unmanned aerial vehicles. The model is composed of
-physics-derived principles and empirical equations, as well as fully connected networks that are
-strategically placed within the model to substitute equations that are subject to large uncertainty.
-Polynomial fitting driven by heuristics or empirical observations is replaced by more flexible
-networks that can minimize the error between model predictions and observations without
-being restricted to a predefined functional form. This approach allows training of networks
-deep inside the model and unknown parameters in a single learning stage. It has already
-been applied to Li-ion batteries in the past, and in this work the application is extended to
-include other electric powertrain components, specifically an electronic speed controller with
-pulse-width modulation, and brush-less DC motor with connected propeller. Training and
-testing of the model is carried out using experimental data from Li-ion battery discharge in a
-laboratory environment and synthetic data from simulated speed controller, three-phase motor
-and fixed-pitch propeller.
+This paper shows he applica ion of hybrid physics-informed machine learning o a rep-
+resen a ive elec ric power rain for unmanned aerial vehicles. The model is composed of
+physics-derived principles and empirical equa ions, as well as fully connec ed ne works ha are
+s ra egically placed wi hin he model o subs i u e equa ions ha are subjec o large uncer ain y.
+Polynomial fi ing driven by heuris ics or empirical observa ions is replaced by more flexible
+ne works ha can minimize he error be ween model predic ions and observa ions wi hou 
+being res ric ed o a predefined func ional form. This approach allows raining of ne works
+deep inside he model and unknown parame ers in a single learning s age. I has already
+been applied o Li-ion ba eries in he pas , and in his work he applica ion is ex ended o
+include o her elec ric power rain componen s, specifically an elec ronic speed con roller wi h
+pulse-wid h modula ion, and brush-less DC mo or wi h connec ed propeller. Training and
+ es ing of he model is carried ou using experimen al da a from Li-ion ba ery discharge in a
+labora ory environmen and syn he ic da a from simula ed speed con roller, hree-phase mo or
+and fixed-pi ch propeller.
 
 
 
-Nomenclature
+Nomencla ure
 
 
 
-𝛼 = battery symmetry factor
-𝛿𝜔 = neural network model for rotor speed error correction
-\ = rotor angle
-_𝑚 = motor flux-linkage
-_1,2 = loss function hyper-parameters
+𝛼 = ba ery symme ry fac or
+𝛿𝜔 = neural ne work model for ro or speed error correc ion
+ = ro or angle
+_𝑚 = mo or flux-linkage
+_1,2 = loss func ion hyper-parame ers
 ` = mean value
-𝜌 = air density
-Σ = covariance matrix
+𝜌 = air densi y
+Σ = covariance ma rix
 𝜎2 = variance
-𝜏 = torque
-𝜔 = rotor angular velocity
+𝜏 = orque
+𝜔 = ro or angular veloci y
 𝐴 = Ampere
-𝑎 = activation function hyper-parameter
-𝐵 = friction coefficient
-𝑏 = neural network bias
-𝐶𝑇,𝑄 = propeller thrust and torque constants
-𝑐𝑇,𝑝 = non-dimensional propeller thrust and power constants
-𝐷 = propeller diameter
-𝑒 = back-EMF voltage
-𝐹 = Faraday constant
-𝐹𝑇 = propeller thrust
+𝑎 = ac iva ion func ion hyper-parame er
+𝐵 = fric ion coefficien 
+𝑏 = neural ne work bias
+𝐶𝑇,𝑄 = propeller hrus and orque cons an s
+𝑐𝑇,𝑝 = non-dimensional propeller hrus and power cons an s
+𝐷 = propeller diame er
+𝑒 = back-EMF vol age
+𝐹 = Faraday cons an 
+𝐹𝑇 = propeller hrus 
 
 
 
-∗Research Engineer, Science and Space Solutions, KBR, Inc.
-†Applied Mathematician, Intelligent Systems Division, NASA Ames Research Center, N269-3 Moffett Field, CA.
-‡Insert Job Title, Department Name, Address/Mail Stop, and AIAA Member Grade (if any) for third author.
+∗Research Engineer, Science and Space Solu ions, KBR, Inc.
+†Applied Ma hema ician, In elligen Sys ems Division, NASA Ames Research Cen er, N269-3 Moffe Field, CA.
+‡Inser Job Ti le, Depar men Name, Address/Mail S op, and AIAA Member Grade (if any) for hird au hor.
 
 
 
@@ -79,73 +79,73 @@ _1,2 = loss function hyper-parameters
 
 
 
-𝑭(·) = commutation logic vector function
-𝑓𝑠 = back-emf trapezoidal function
-𝐼 = mass moment of inertia
-𝑖 = current
-𝐽𝑖 = current density
-𝐾𝑡 = motor torque constant
-𝐿 = self-inductance
-ℓ = loss function
-𝑚 = number of electrons transferred during reaction
-𝑞 = electrical charge
-𝑅 = universal gas constant
-𝑅𝑜 = battery lumped resistance
-𝑅𝑠 = motor armature resistance
-𝑇 = temperature
-𝑡 = time
-𝑡ℎ = throttle
-𝑈 = potential
+𝑭(·) = commu a ion logic vec or func ion
+𝑓𝑠 = back-emf rapezoidal func ion
+𝐼 = mass momen of iner ia
+𝑖 = curren 
+𝐽𝑖 = curren densi y
+𝐾𝑡 = mo or orque cons an 
+𝐿 = self-induc ance
+ℓ = loss func ion
+𝑚 = number of elec rons ransferred during reac ion
+𝑞 = elec rical charge
+𝑅 = universal gas cons an 
+𝑅𝑜 = ba ery lumped resis ance
+𝑅𝑠 = mo or arma ure resis ance
+𝑇 = empera ure
+𝑡 = ime
+𝑡ℎ = hro le
+𝑈 = po en ial
 V = volume
-𝑉 = voltage, Volt
-𝑤 = neural network weight
-𝑥 = mole fraction
+𝑉 = vol age, Vol 
+𝑤 = neural ne work weigh 
+𝑥 = mole frac ion
 
 
 
-I. Introduction
+I. In roduc ion
 
 
 
-Forecasts on the future of aeronautics suggest a drastic increase in electric aircraft entering low-altitude airspace
-in the near future. Both small Unmanned Aerial Vehicles (UAVs) and urban air mobility vehicles are expected to
+Forecas s on he fu ure of aeronau ics sugges a dras ic increase in elec ric aircraf en ering low-al i ude airspace
+in he near fu ure. Bo h small Unmanned Aerial Vehicles (UAVs) and urban air mobili y vehicles are expec ed o
 
 
 
-operate in complex urban environments at high frequency, resulting in a high number of take-off and landings per
-unit time. To adapt to these new design and operational requirements, aircraft are expected to be equipped with new
-electric powertrains subject to unknown failure modes and degradation patterns. Precise fault detection and failure
-prediction systems will be necessary, not only to maintain or exceed current aviation safety standards and optimize
-maintenance policies, but also to enable high-level autonomous decision making and improve system resilience to
-unexpected disruptions.
+opera e in complex urban environmen s a high frequency, resul ing in a high number of ake-off and landings per
+uni ime. To adap o hese new design and opera ional requiremen s, aircraf are expec ed o be equipped wi h new
+elec ric power rains subjec o unknown failure modes and degrada ion pa erns. Precise faul de ec ion and failure
+predic ion sys ems will be necessary, no only o main ain or exceed curren avia ion safe y s andards and op imize
+main enance policies, bu also o enable high-level au onomous decision making and improve sys em resilience o
+unexpec ed disrup ions.
 
 
 
-Fault detection and diagnosis requires knowledge about the discrepancy between how a system is currently behaving
-and how it is expected to perform when healthy. When current sensor measurements deviate too far from the expected,
-a fault may be occurring, and once identified, diagnostic and mitigation efforts can begin. The ability to distinguish
-anomalous conditions requires a model of the healthy system, whose accuracy is high enough to detect faults when
-compared with sensor measurements. While a variety of modeling techniques can be used to accurately describe the
-system (e.g. physics-based, data-driven, or hybrid), all models result in some error. One key challenge of fault detection
-is determining when discrepancies between model predictions and system measurements are meaningful faults, and
-when the differences can be attributed to modeling errors. Success in fault detection and diagnostics requires a model
-that is well-calibrated to the physical system it describes.
+Faul de ec ion and diagnosis requires knowledge abou he discrepancy be ween how a sys em is curren ly behaving
+and how i is expec ed o perform when heal hy. When curren sensor measuremen s devia e oo far from he expec ed,
+a faul may be occurring, and once iden ified, diagnos ic and mi iga ion effor s can begin. The abili y o dis inguish
+anomalous condi ions requires a model of he heal hy sys em, whose accuracy is high enough o de ec faul s when
+compared wi h sensor measuremen s. While a varie y of modeling echniques can be used o accura ely describe he
+sys em (e.g. physics-based, da a-driven, or hybrid), all models resul in some error. One key challenge of faul de ec ion
+is de ermining when discrepancies be ween model predic ions and sys em measuremen s are meaningful faul s, and
+when he differences can be a ribu ed o modeling errors. Success in faul de ec ion and diagnos ics requires a model
+ ha is well-calibra ed o he physical sys em i describes.
 
 
 
-Given this new set of challenges driven by new vehicle design, new operational requirements, and new environments,
-the goal of this work is to explore a novel surrogate model architecture based on Hybrid Physics-Informed Neural
-Networks (H-PINNs), and apply it to aircraft electric propulsion systems and fault detection. In the recent years, this
-blending of physical and engineering knowledge within machine learning algorithms has been explored. In the area of
-neural networks, one of the seminal works can be attributed to Daw and co-workers in lake temperature modeling [1].
-They introduced a physical constraint on one of the variables of interest (water density) in the loss function used to train
-a neural network model. The constraint was very simple yet effective: water density must increase with depth. If such
-relationship is not satisfied, then the loss should rise proportionally. Subsequently, a paper by Raissi et al. [2] applied
-the same philosophy to the modeling of partial differential equations. In this work, the differential equations, as well as
-the initial and boundary conditions, were embedded in the loss function, encouraging the training to find solutions
-that satisfied the physical constraints. This methodology has been extended to a number of applications where partial
-differential equations or stochastic differential equations fully describe the system. More recently, Lu et al. worked on a
-deep neural network architecture to learn nonlinear operators, for cases where the differential equations are not known
+Given his new se of challenges driven by new vehicle design, new opera ional requiremen s, and new environmen s,
+ he goal of his work is o explore a novel surroga e model archi ec ure based on Hybrid Physics-Informed Neural
+Ne works (H-PINNs), and apply i o aircraf elec ric propulsion sys ems and faul de ec ion. In he recen years, his
+blending of physical and engineering knowledge wi hin machine learning algori hms has been explored. In he area of
+neural ne works, one of he seminal works can be a ribu ed o Daw and co-workers in lake empera ure modeling [1].
+They in roduced a physical cons rain on one of he variables of in eres (wa er densi y) in he loss func ion used o rain
+a neural ne work model. The cons rain was very simple ye effec ive: wa er densi y mus increase wi h dep h. If such
+rela ionship is no sa isfied, hen he loss should rise propor ionally. Subsequen ly, a paper by Raissi e al. [2] applied
+ he same philosophy o he modeling of par ial differen ial equa ions. In his work, he differen ial equa ions, as well as
+ he ini ial and boundary condi ions, were embedded in he loss func ion, encouraging he raining o find solu ions
+ ha sa isfied he physical cons rain s. This me hodology has been ex ended o a number of applica ions where par ial
+differen ial equa ions or s ochas ic differen ial equa ions fully describe he sys em. More recen ly, Lu e al. worked on a
+deep neural ne work archi ec ure o learn nonlinear opera ors, for cases where he differen ial equa ions are no known
 
 
 
@@ -161,76 +161,76 @@ deep neural network architecture to learn nonlinear operators, for cases where t
 
 
 
-[3]. Other attempts to connect physics to neural networks include Lagrangian and Hamiltonian networks, neural ordinary
-differential equations and others. Gaussian processes provide another physics-informed machine learning method,
-where it is possible to draw samples from a distribution conditioned on linear differential equations, as summarized in
-[4]. Lastly, data-driven discovery of governing equations of physical systems has also been discussed in a number of
-recent papers including [5, 6], and [7].
+[3]. O her a emp s o connec physics o neural ne works include Lagrangian and Hamil onian ne works, neural ordinary
+differen ial equa ions and o hers. Gaussian processes provide ano her physics-informed machine learning me hod,
+where i is possible o draw samples from a dis ribu ion condi ioned on linear differen ial equa ions, as summarized in
+[4]. Las ly, da a-driven discovery of governing equa ions of physical sys ems has also been discussed in a number of
+recen papers including [5, 6], and [7].
 
 
 
-In this work, we present a novel H-PINN modeling method and apply it to describing aircraft propulsion systems. Our
-approach differs from the methodologies discussed above, and takes advantage of the ability of deep learning libraries
-to perform automatic differentiation of models. We do not try to embed physical knowledge in a pure data-driven
-model, but rather build an empirical model composed of physics-based principles and phenomenological equations, and
-place small neural networks and trainable parameters within the model. These data-driven kernels (fully-connected
-networks (FCN) with one or more hidden layers) are strategically placed within the physics-based model to replace
-empirical equations previously obtained through curve-fitting or other empirical procedures. Additionally, we define
-some single-value parameters, either directly or indirectly related to the physics of the system, as trainable through
-gradient descent, achievable through the automatic differentiation feature of the deep learning package. While similar
-approaches have been applied to other modeling and prediction problems, to the best of our knowledge, they have never
-been applied to a propulsion system like the one presented here.
+In his work, we presen a novel H-PINN modeling me hod and apply i o describing aircraf propulsion sys ems. Our
+approach differs from he me hodologies discussed above, and akes advan age of he abili y of deep learning libraries
+ o perform au oma ic differen ia ion of models. We do no ry o embed physical knowledge in a pure da a-driven
+model, bu ra her build an empirical model composed of physics-based principles and phenomenological equa ions, and
+place small neural ne works and rainable parame ers wi hin he model. These da a-driven kernels (fully-connec ed
+ne works (FCN) wi h one or more hidden layers) are s ra egically placed wi hin he physics-based model o replace
+empirical equa ions previously ob ained hrough curve-fi ing or o her empirical procedures. Addi ionally, we define
+some single-value parame ers, ei her direc ly or indirec ly rela ed o he physics of he sys em, as rainable hrough
+gradien descen , achievable hrough he au oma ic differen ia ion fea ure of he deep learning package. While similar
+approaches have been applied o o her modeling and predic ion problems, o he bes of our knowledge, hey have never
+been applied o a propulsion sys em like he one presen ed here.
 
 
 
-This specific approach was initially proposed by Viana and co-authors [8–11], and has successfully been applied to
-Li-ion battery discharge predictions in [12]. In the work presented here, we extend the modeling effort from [12] to a
-powertrain system composed of a Li-ion battery, electronic speed controller (ESC), brushless-DC (BLDC) motor and
-dual-blade propeller typical of small UAVs. The physics-based portion of our model includes an electro-chemistry
-Li-ion battery model, a simplified ESC (wihtout PWM, using a simple proportional modulation), a single-phase DC
-motor model, and a propeller. In the battery model, we train two parameters, 𝑅0 and 𝑞𝑚𝑎𝑥 , related to the battery residual
-capacity and the battery internal resistance, respectively, together with two FCNs to compensate for the output voltage
-estimate error from the simplified Nernst’s equation. In the simplified single-phase BLDC motor model, we train the
-armature resistance 𝑅𝑠 and the friction coefficient 𝐵, as well as a FCN after the rotor speed estimate from the BLDC
-motor to correct for any rotor speed prediction error. By combining physics-based knowledge with neural networks, we
-develop a more accurate powertrain model that is well-calibrated to a healthy system and therefore easily lends to fault
-detection and diagnosis.
+This specific approach was ini ially proposed by Viana and co-au hors [8–11], and has successfully been applied o
+Li-ion ba ery discharge predic ions in [12]. In he work presen ed here, we ex end he modeling effor from [12] o a
+power rain sys em composed of a Li-ion ba ery, elec ronic speed con roller (ESC), brushless-DC (BLDC) mo or and
+dual-blade propeller ypical of small UAVs. The physics-based por ion of our model includes an elec ro-chemis ry
+Li-ion ba ery model, a simplified ESC (wih ou PWM, using a simple propor ional modula ion), a single-phase DC
+mo or model, and a propeller. In he ba ery model, we rain wo parame ers, 𝑅0 and 𝑞𝑚𝑎𝑥 , rela ed o he ba ery residual
+capaci y and he ba ery in ernal resis ance, respec ively, oge her wi h wo FCNs o compensa e for he ou pu vol age
+es ima e error from he simplified Nerns ’s equa ion. In he simplified single-phase BLDC mo or model, we rain he
+arma ure resis ance 𝑅𝑠 and he fric ion coefficien 𝐵, as well as a FCN af er he ro or speed es ima e from he BLDC
+mo or o correc for any ro or speed predic ion error. By combining physics-based knowledge wi h neural ne works, we
+develop a more accura e power rain model ha is well-calibra ed o a heal hy sys em and herefore easily lends o faul 
+de ec ion and diagnosis.
 
 
 
-II. Powertrain Architecture and Models
-The powertrain is modeled according to the diagram in Fig. 1. A Li-ion battery is connected to a DC/DC converter,
+II. Power rain Archi ec ure and Models
+The power rain is modeled according o he diagram in Fig. 1. A Li-ion ba ery is connec ed o a DC/DC conver er,
 
 
 
-which provides voltage to the ESC. The ESC is composed of a pulse-width-modulation (PWM) unit and MOSFET
-switches. It generates a three-phase voltage which drives the BLDC motor to produce the torque necessary to drive the
-propeller, which ultimately produces the desired thrust. Inputs and outputs of the sub-systems are highlighted in cyan in
-Fig. 1. The observed values include measurements of voltage, current, and temperature at the battery level, 𝑉𝑏, 𝑖𝑏, 𝑇𝑏,
-respectively, as well as at the motor level 𝑉𝑚, 𝑖𝑚, 𝑇𝑚, and are indicated by black arrows in Fig. 1. These values are
-representative of typical sensor readings for small UAVs without dedicated or advanced sensors and measurement
-systems. The input to the PWM module defines a square wave indicating intervals of “on” and “off”, where the period is
-given by the operating frequency. For example, an input of 𝑢=0.7 into the PWM means the square wave is split into two
-parts, 70% “on” and 30% “off.” The PWM carrier frequency, for the propulsion system we used as reference, is on the
+which provides vol age o he ESC. The ESC is composed of a pulse-wid h-modula ion (PWM) uni and MOSFET
+swi ches. I genera es a hree-phase vol age which drives he BLDC mo or o produce he orque necessary o drive he
+propeller, which ul ima ely produces he desired hrus . Inpu s and ou pu s of he sub-sys ems are highligh ed in cyan in
+Fig. 1. The observed values include measuremen s of vol age, curren , and empera ure a he ba ery level, 𝑉𝑏, 𝑖𝑏, 𝑇𝑏,
+respec ively, as well as a he mo or level 𝑉𝑚, 𝑖𝑚, 𝑇𝑚, and are indica ed by black arrows in Fig. 1. These values are
+represen a ive of ypical sensor readings for small UAVs wi hou dedica ed or advanced sensors and measuremen 
+sys ems. The inpu o he PWM module defines a square wave indica ing in ervals of “on” and “off”, where he period is
+given by he opera ing frequency. For example, an inpu of 𝑢=0.7 in o he PWM means he square wave is spli in o wo
+par s, 70% “on” and 30% “off.” The PWM carrier frequency, for he propulsion sys em we used as reference, is on he
 order of 16-32 kHz.
 
 
 
-The trainable elements of the model are implemented in PyTorch and shown in red in Fig. 1. In the battery module,
-parameters 𝑞𝑚𝑎𝑥 , 𝑅0 are indirectly connected to physical quantities, and drive the rate of change of voltage discharge.
-Additionally, two FCNs are used to compensate for the error of the equilibrium potential calculated by the simplified
-Nernst’s equation, and are defined as non-ideal voltage correction terms, 𝑉𝑛𝑖 (one for the positive and one for the
-negative side of the electrode). In the motor module, two other physics-derived quantities are learned during training.
-These trainable values are the motor armature resistance 𝑅𝑠 and the friction coefficient 𝐵, affecting the current and
-rotor speed rates-of-change, respectively. To highlight the flexibility of the approach, we additionally added one FCN
-after the BLDC motor model estimate, aimed at correcting the error between rotor speed predictions and observations
-extracted from the data set. More details on the trainable elements are discussed later in the dedicated sub-sections.
+The rainable elemen s of he model are implemen ed in PyTorch and shown in red in Fig. 1. In he ba ery module,
+parame ers 𝑞𝑚𝑎𝑥 , 𝑅0 are indirec ly connec ed o physical quan i ies, and drive he ra e of change of vol age discharge.
+Addi ionally, wo FCNs are used o compensa e for he error of he equilibrium po en ial calcula ed by he simplified
+Nerns ’s equa ion, and are defined as non-ideal vol age correc ion erms, 𝑉𝑛𝑖 (one for he posi ive and one for he
+nega ive side of he elec rode). In he mo or module, wo o her physics-derived quan i ies are learned during raining.
+These rainable values are he mo or arma ure resis ance 𝑅𝑠 and he fric ion coefficien 𝐵, affec ing he curren and
+ro or speed ra es-of-change, respec ively. To highligh he flexibili y of he approach, we addi ionally added one FCN
+af er he BLDC mo or model es ima e, aimed a correc ing he error be ween ro or speed predic ions and observa ions
+ex rac ed from he da a se . More de ails on he rainable elemen s are discussed la er in he dedica ed sub-sec ions.
 
 
 
-Some ESCs have built-in data recording capability, which include estimates of the rotor speed coming from
-embedded motor sensors (e.g., HALL effect sensors) or other estimation methods. This is the case of the ESC we used
-as reference. Therefore, in this work, we assume that an unbiased estimate of the rotor speed, 𝜔, is available to train
+Some ESCs have buil -in da a recording capabili y, which include es ima es of he ro or speed coming from
+embedded mo or sensors (e.g., HALL effec sensors) or o her es ima ion me hods. This is he case of he ESC we used
+as reference. Therefore, in his work, we assume ha an unbiased es ima e of he ro or speed, 𝜔, is available o rain
 
 
 
@@ -246,7 +246,7 @@ as reference. Therefore, in this work, we assume that an unbiased estimate of th
 
 
 
-<latexit sha1_base64="zofqEO3oKx9tO2zfvce180nfPoI=">AAAB+HicbVDLSsNAFJ3UV62PRl26GSyCCymJFHVZ6sZlFfuANoTJdNIOnUeYmQg19EvcuFDErZ/izr9x2mahrQcuHM65l3vviRJGtfG8b6ewtr6xuVXcLu3s7u2X3YPDtpapwqSFJZOqGyFNGBWkZahhpJsognjESCca38z8ziNRmkrxYCYJCTgaChpTjIyVQrfcl5wMUZjdh/ocNqahW/Gq3hxwlfg5qYAczdD96g8kTjkRBjOkdc/3EhNkSBmKGZmW+qkmCcJjNCQ9SwXiRAfZ/PApPLXKAMZS2RIGztXfExniWk94ZDs5MiO97M3E/7xeauLrIKMiSQ0ReLEoThk0Es5SgAOqCDZsYgnCitpbIR4hhbCxWZVsCP7yy6ukfVH1L6u1u1ql3sjjKIJjcALOgA+uQB3cgiZoAQxS8AxewZvz5Lw4787HorXg5DNH4A+czx8UApK4</latexit>!Rs,B
+<la exi sha1_base64="zofqEO3oKx9 O2zfvce180nfPoI=">AAAB+HicbVDLSsNAFJ3UV62PRl26GSyCCymJFHVZ6sZlFfuANoTJdNIOnUeYmQg19EvcuFDErZ/izr9x2mahrQcuHM65l3vviRJG fG8b6ew r6xuVXcLu3s7u2X3YPD papwqSFJZOqGyFNGBWkZahhpJsognjESCca38z8ziNRmkrxYCYJCTgaChpTjIyVQrfcl5wMUZjdh/ocNqahW/Gq3hxwlfg5qYAczdD96g8kTjkRBjOkdc/3EhNkSBmKGZmW+qkmCcJjNCQ9SwXiRAfZ/PApPLXKAMZS2RIGz XfExniWk94ZDs5MiO97M3E/7xeauLrIKMiSQ0ReLEoThk0Es5SgAOqCDZsYgnCi pbIR4hhbCxWZVsCP7yy6ukfVH1L6u1u1ql3sjjKIJjcALOgA+uQB3cgiZoAQxS8AxewZvz5Lw4787HorXg5DNH4A+czx8UApK4</la exi >!Rs,B
 
 
 
@@ -254,7 +254,7 @@ PWM
 
 
 
-Battery
+Ba ery
 
 
 
@@ -266,7 +266,7 @@ BLDC
 
 
 
-<latexit sha1_base64="H3dZNedWO3kIn4g4Dj+sqLbx8DE=">AAACCXicbVC7SgNBFJ2Nrxhfq5Y2g0GwCrsS1DJoYxnBPCAbwuzsTTJk9sHMXTEs29r4KzYWitj6B3b+jZNHoYkHLhzOuXfm3uMnUmh0nG+rsLK6tr5R3Cxtbe/s7tn7B00dp4pDg8cyVm2faZAiggYKlNBOFLDQl9DyR9cTv3UPSos4usNxAt2QDSLRF5yhkXo29RAecPpOpiDIMy8AiayXeXEIA5bnPbvsVJwp6DJx56RM5qj37C8viHkaQoRcMq07rpNgN2MKBZeQl7xUQ8L4iA2gY2jEQtDdbLpBTk+MEtB+rExFSKfq74mMhVqPQ990hgyHetGbiP95nRT7l91MREmKEPHZR/1UUozpJBYaCAUc5dgQxpUwu1I+ZIpxNOGVTAju4snLpHlWcc8r1dtquXY1j6NIjsgxOSUuuSA1ckPqpEE4eSTP5JW8WU/Wi/VufcxaC9Z85pD8gfX5A4Wim4E=</latexit>
+<la exi sha1_base64="H3dZNedWO3kIn4g4Dj+sqLbx8DE=">AAACCXicbVC7SgNBFJ2Nrxhfq5Y2g0GwCrsS1DJoYxnBPCAbwuzsTTJk9sHMXTEs29r4KzYWi j6B3b+jZNHoYkHLhzOuXfm3uMnUmh0nG+rsLK6 r5R3Cx be/s7 n7B00dp4pDg8cyVm2faZAiggYKlNBOFLDQl9DyR9cTv3UPSos4usNxA 2QDSLRF5yhkXo29RAecPpOpiDIMy8AiayXeXEIA5bnPbvsVJwp6DJx56RM5qj37C8viHkaQoRcMq07rpNgN2MKBZeQl7xUQ8L4iA2gY2jEQ DdbLpBTk+ME B+rExFSKfq74mMhVqPQ990hgyHe GbiP95nRT7l91MREmKEPHZR/1UUozpJBYaCAUc5dgQxpUwu1I+ZIpxNOGVTAju4snLpHlWcc8r1d quXY1j6NIjsgxOSUuuSA1ckPqpEE4eSTP5JW8WU/Wi/VufcxaC9Z85pD8gfX5A4Wim4E=</la exi >
 
 
 
@@ -274,7 +274,7 @@ BLDC
 
 
 
-<latexit sha1_base64="CLgfbj8XCXBv+RGAnHij9Zjy7ds=">AAAB/nicbVDLSsNAFJ3UV62vqLhyEyyCq5JIUZdFQVxW6AvaECbTaTt0MgkzN2IIAX/FjQtF3Pod7vwbp2kW2nrgwuGce+fOPX7EmQLb/jZKK6tr6xvlzcrW9s7unrl/0FFhLAltk5CHsudjRTkTtA0MOO1FkuLA57TrT29mfveBSsVC0YIkom6Ax4KNGMGgJc88GgB9hPydlCRYZOmt18o8s2rX7BzWMnEKUkUFmp75NRiGJA6oAMKxUn3HjsBNsQRGOM0qg1jRCJMpHtO+pgIHVLlpvjazTrUytEah1CXAytXfEykOlEoCX3cGGCZq0ZuJ/3n9GEZXbspEFAMVZL5oFHMLQmuWhTVkkhLgiSaYSKb/apEJlpiATqyiQ3AWT14mnfOac1Gr39erjesijjI6RifoDDnoEjXQHWqiNiIoRc/oFb0ZT8aL8W58zFtLRjFziP7A+PwBSnGWWg==</latexit>
+<la exi sha1_base64="CLgfbj8XCXBv+RGAnHij9Zjy7ds=">AAAB/nicbVDLSsNAFJ3UV62vqLhyEyyCq5JIUZdFQVxW6AvaECbTaT 0MgkzN2IIAX/FjQ F3Pod7vwbp2kW2nrgwuGce+fOPX7EmQLb/jZKK6 r6xvlzcrW9s7unrl/0FFhLAl k5CHsudjRTkT A0MOO1FkuLA57TrT29mfveBSsVC0YIkom6Ax4KNGMGgJc88GgB9hPydlCRYZOm 18o8s2rX7BzWMnEKUkUFmp75NRiGJA6oAMKxUn3HjsBNsQRGOM0qg1jRCJMpH O+pgIHVLlpvjazTrUy Eah1CXAy XfEykOlEoCX3cGGCZq0ZuJ/3n9GEZXbspEFAMVZL5oFHMLQmuWhTVkkhLgiSaYSKb/apEJlpiATqyiQ3AWT14mnfOac1Gr39erjesijjI6RifoDDnoEjXQHWqiNiIoRc/oFb0ZT8aL8W58zF LRjFziP7A+PwBSnGWWg==</la exi >
 
 
 
@@ -282,7 +282,7 @@ FT
 
 
 
-<latexit sha1_base64="VN5dNM2cNfF0y8girliakEElWKY=">AAACCHicbVC7TsMwFHXKq5RXgZEBiwqJAVUJqoCxgoWxSPQhtVXkuE5r1XEi+wYRRR1Z+BUWBhBi5RPY+BvcNAO0HMnW0Tn3Xl8fLxJcg21/W4Wl5ZXVteJ6aWNza3unvLvX0mGsKGvSUISq4xHNBJesCRwE60SKkcATrO2Nr6d++54pzUN5B0nE+gEZSu5zSsBIbvmwB+wBsjkpTYicpNwlp5i73vSiE7dcsat2BrxInJxUUI6GW/7qDUIaB0wCFUTrrmNH0E+JAk4Fm5R6sWYRoWMyZF1DJQmY7qfZAhN8bJQB9kNljgScqb87UhJonQSeqQwIjPS8NxX/87ox+Jf9lMsoBibp7CE/FhhCPE0FD7hiFERiCKGKm10xHRFFKJjsSiYEZ/7Li6R1VnXOq7XbWqV+lcdRRAfoCJ0gB12gOrpBDdREFD2iZ/SK3qwn68V6tz5mpQUr79lHf2B9/gDbQJnb</latexit>
+<la exi sha1_base64="VN5dNM2cNfF0y8girliakEElWKY=">AAACCHicbVC7TsMwFHXKq5RXgZEBiwqJAVUJqoCxgoWxSPQh VXkuE5r1XEi+wYRRR1Z+BUWBhBi5RPY+BvcNAO0HMnW0Tn3Xl8fLxJcg21/W4Wl5ZXV eJ6aWNza3unvLvX0mGsKGvSUISq4xHNBJesCRwE60SKkcATrO2Nr6d++54pzUN5B0nE+gEZSu5zSsBIbvmwB+wBsjkpTYicpNwlp5i73vSiE7dcsa 2BrxInJxUUI6GW/7qDUIaB0wCFUTrrmNH0E+JAk4Fm5R6sWYRoWMyZF1DJQmY7qfZAhN8bJQB9kNljgScqb87UhJonQSeqQwIjPS8NxX/87ox+Jf9lMsoBibp7CE/FhhCPE0FD7hiFERiCKGKm10xHRFFKJjsSiYEZ/7Li6R1VnXOq7XbWqV+lcdRRAfoCJ0gB12gOrpBDdREFD2iZ/SK3qwn68V6 z5mpQUr79lHf2B9/gDbQJnb</la exi >
 
 
 
@@ -290,11 +290,11 @@ ia, ib, ic
 
 
 
-<latexit sha1_base64="DG2xzlKYBSGANlkCmHyaiLAx90s=">AAAB7XicbVDLSgNBEJyNrxhfUY9eBoPgKexKUI9BLx4jmAckS5id9CZj5rHMzAphyT948aCIV//Hm3/jJNmDJhY0FFXddHdFCWfG+v63V1hb39jcKm6Xdnb39g/Kh0cto1JNoUkVV7oTEQOcSWhaZjl0Eg1ERBza0fh25refQBum5IOdJBAKMpQsZpRYJ7V6SsCQ9MsVv+rPgVdJkJMKytHol796A0VTAdJSTozpBn5iw4xoyyiHaamXGkgIHZMhdB2VRIAJs/m1U3zmlAGOlXYlLZ6rvycyIoyZiMh1CmJHZtmbif953dTG12HGZJJakHSxKE45tgrPXscDpoFaPnGEUM3crZiOiCbUuoBKLoRg+eVV0rqoBpfV2n2tUr/J4yiiE3SKzlGArlAd3aEGaiKKHtEzekVvnvJevHfvY9Fa8PKZY/QH3ucPkx+PJA==</latexit>!
+<la exi sha1_base64="DG2xzlKYBSGANlkCmHyaiLAx90s=">AAAB7XicbVDLSgNBEJyNrxhfUY9eBoPgKexKUI9BLx4jmAckS5id9CZj5rHMzAphyT948aCIV//Hm3/jJNmDJhY0FFXddHdFCWfG+v63V1hb39jcKm6Xdnb39g/Kh0c o1JNoUkVV7oTEQOcSWhaZjl0Eg1ERBza0fh25refQBum5IOdJBAKMpQsZpRYJ7V6SsCQ9MsVv+rPgVdJkJMKy Hol796A0VTAdJSTozpBn5iw4xoyyiHaamXGkgIHZMhdB2VRIAJs/m1U3zmlAGOlXYlLZ6rvycyIoyZiMh1CmJHZ mbif953dTG12HGZJJakHSxKE45 grPXscDpoFaPnGEUM3crZiOiCbUuoBKLoRg+eVV0rqoBpfV2n2 Ur/J4yiiE3SKzlGArlAd3aEGaiKKH EzekVvnvJevHfvY9Fa8PKZY/QH3ucPkx+PJA==</la exi >!
 
 
 
-<latexit sha1_base64="YIc7eD1idbB7PUcMCBpU4IUJ7Gs=">AAACBnicbVDJSgNBEO2JW4xb1KMIjUHwIGFGgnoMevEYxSyQxNDTqSRNeha7ayRhmJMXf8WLB0W8+g3e/Bs7y0ETHxQ83qvq6npuKIVG2/62UguLS8sr6dXM2vrG5lZ2e6eig0hxKPNABqrmMg1S+FBGgRJqoQLmuRKqbv9y5FcfQGkR+Lc4DKHpsa4vOoIzNFIru99AGOD4nVhBO4nv72KPDZJjetOyk1Y2Z+ftMeg8caYkR6YotbJfjXbAIw985JJpXXfsEJsxUyi4hCTTiDSEjPdZF+qG+swD3YzH6xN6aJQ27QTKlI90rP6eiJmn9dBzTafHsKdnvZH4n1ePsHPejIUfRgg+nyzqRJJiQEeZ0LZQwFEODWFcCfNXyntMMY4muYwJwZk9eZ5UTvLOab5wXcgVL6ZxpMkeOSBHxCFnpEiuSImUCSeP5Jm8kjfryXqx3q2PSWvKms7skj+wPn8AC4KZew==</latexit>
+<la exi sha1_base64="YIc7eD1idbB7PUcMCBpU4IUJ7Gs=">AAACBnicbVDJSgNBEO2JW4xb1KMIjUHwIGFGgnoMevEYxSyQxNDTqSRNeha7ayRhmJMXf8WLB0W8+g3e/Bs7y0ETHxQ83qvq6npuKIVG2/62UguLS8sr6dXM2vrG5lZ2e6eig0hxKPNABqrmMg1S+FBGgRJqoQLmuRKqbv9y5FcfQGkR+Lc4DKHpsa4vOoIzNFIru99AGOD4nVhBO4nv72KPDZJje Oyk1Y2Z+f Meg8caYkR6Yo bJfjXbAIw985JJpXXfsEJsxUyi4hCTTiDSEjPdZF+qG+swD3YzH6xN6aJQ27QTKlI90rP6eiJmn9dBzTafHsKdnvZH4n1ePsHPejIUfRgg+nyzqRJJiQEeZ0LZQwFEODWFcCfNXyn MMY4muYwJwZk9eZ5UTvLOab5wXcgVL6ZxpMkeOSBHxCFnpEiuSImUCSeP5Jm8kjfryXqx3q2PSWvKms7skj+wPn8AC4KZew==</la exi >
 
 
 
@@ -302,16 +302,16 @@ qmax, R0
 
 
 
-<latexit sha1_base64="CzNKf6ciyCTBI214EZQKL5k0oUM=">AAACAHicbVC7SgNBFJ31GeMramFhMxgECwm7EtQyxMYyinlAsiyzk5tkyOyDmbtiWLbxV2wsFLH1M+z8GyePQhMPXDicc+/cucePpdBo29/W0vLK6tp6biO/ubW9s1vY22/oKFEc6jySkWr5TIMUIdRRoIRWrIAFvoSmP7we+80HUFpE4T2OYnAD1g9FT3CGRvIKhx2ER5y8kyroZumdp89oNfMKRbtkT0AXiTMjRTJDzSt8dboRTwIIkUumdduxY3RTplBwCVm+k2iIGR+yPrQNDVkA2k0nizN6YpQu7UXKVIh0ov6eSFmg9SjwTWfAcKDnvbH4n9dOsHflpiKME4SQTxf1EkkxouM0aFco4ChHhjCuhPkr5QOmGEeTWd6E4MyfvEga5yXnolS+LRcr1VkcOXJEjskpccglqZAbUiN1wklGnskrebOerBfr3fqYti5Zs5kD8gfW5w8UbZa3</latexit>
+<la exi sha1_base64="CzNKf6ciyCTBI214EZQKL5k0oUM=">AAACAHicbVC7SgNBFJ31GeMramFhMxgECwm7E QyxMYyinlAsiyzk5 kyOyDmb iWLbxV2wsFLH1M+z8GyePQhMPXDicc+/cucePpdBo29/W0vLK6 p6biO/ubW9s1vY22/oKFEc6jySkWr5TIMUIdRRoIRWrIAFvoSmP7we+80HUFpE4T2OYnAD1g9FT3CGRvIKhx2ER5y8kyroZumdp89oNfMKRb kT0AXiTMjRTJDzS 8dboRTwIIkUumdduxY3RTplBwCVm+k2iIGR+yPrQNDVkA2k0nizN6YpQu7UXKVIh0ov6eSFmg9SjwTWfAcKDnvbH4n9dOsHflpiKME4SQTxf1EkkxouM0aFco4ChHhjCuhPkr5QOmGEeTWd6E4MyfvEga5yXnolS+LRcr1VkcOXJEjskpccglqZAbUiN1wklGnskrebOerBfr3fqY i5Zs5kD8gfW5w8UbZa3</la exi >
 
 
 
-Rs, B <latexit sha1_base64="Ke+1qFlrZAsb8PjNCiogqc8tZn0=">AAACAXicbVBNS8NAEN34WetX1YvgJVgETyWRoh6LXjxWsB/QlrLZTtqlm03YnYghxIt/xYsHRbz6L7z5b9y2OWjrg4HHezM7O8+LBNfoON/W0vLK6tp6YaO4ubW9s1va22/qMFYMGiwUoWp7VIPgEhrIUUA7UkADT0DLG19P/NY9KM1DeYdJBL2ADiX3OaNopH7psIvwgNN3UpZQmaVdpHEfsn6p7FScKexF4uakTHLU+6Wv7iBkcQASmaBad1wnwl5KFXImICt2Yw0RZWM6hI6hkgage+l0c2afGGVg+6EyJdGeqr8nUhponQSe6QwojvS8NxH/8zox+pe9lMsoRpBstsiPhY2hPYnDHnAFDEViCGWKm7/abEQVZWhCK5oQ3PmTF0nzrOKeV6q31XLtKo+jQI7IMTklLrkgNXJD6qRBGHkkz+SVvFlP1ov1bn3MWpesfOaA/IH1+QMGEZfp</latexit>⌧e
-<latexit sha1_base64="m/eIMnXSu28/+GgSECSeQ4tb1Ts=">AAACAXicbVDLSsNAFJ34rPUVdSO4CRbBVUmkqMuiG5cV7APaECbTSTt0MgkzN2IIceOvuHGhiFv/wp1/4zTNQlsPXDicc+/cucePOVNg29/G0vLK6tp6ZaO6ubW9s2vu7XdUlEhC2yTikez5WFHOBG0DA057saQ49Dnt+pPrqd+9p1KxSNxBGlM3xCPBAkYwaMkzDwdAH6B4JyMpFnk2AJx4PPfMml23C1iLxClJDZVoeebXYBiRJKQCCMdK9R07BjfDEhjhNK8OEkVjTCZ4RPuaChxS5WbF5tw60crQCiKpS4BVqL8nMhwqlYa+7gwxjNW8NxX/8/oJBJduxkScABVktihIuAWRNY3DGjJJCfBUE0wk03+1yBhLTECHVtUhOPMnL5LOWd05rzduG7XmVRlHBR2hY3SKHHSBmugGtVAbEfSIntErejOejBfj3fiYtS4Z5cwB+gPj8wcQtJfw</latexit>⌧l
+Rs, B <la exi sha1_base64="Ke+1qFlrZAsb8PjNCiogqc8 Zn0=">AAACAXicbVBNS8NAEN34We X1YvgJVgETyWRoh6LXjxWsB/QlrLZT qlm03YnYghxI /xYsHRbz6L7z5b9y2OWjrg4HHezM7O8+LBNfoON/W0vLK6 p6YaO4ubW9s1va22/qMFYMGiwUoWp7VIPgEhrIUUA7UkADT0DLG19P/NY9KM1DeYdJBL2ADiX3OaNopH7psIvwgNN3UpZQmaVdpHEfsn6p7FScKexF4uakTHLU+6Wv7iBkcQASmaBad1wnwl5KFXImIC 2Yw0RZWM6hI6hkgage+l0c2afGGVg+6EyJdGeqr8nUhponQSe6QwojvS8NxH/8zox+pe9lMsoRpBs siPhY2hPYnDHnAFDEViCGWKm7/abEQVZWhCK5oQ3PmTF0nzrOKeV6q31XL Ko+jQI7IMTklLrkgNXJD6qRBGHkkz+SVvFlP1ov1bn3MWpesfOaA/IH1+QMGEZfp</la exi >⌧e
+<la exi sha1_base64="m/eIMnXSu28/+GgSECSeQ4 b1Ts=">AAACAXicbVDLSsNAFJ34rPUVdSO4CRbBVUmkqMuiG5cV7APaECbTST 0MgkzN2IIceOvuHGhiFv/wp1/4zTNQlsPXDicc+/cucePOVNg29/G0vLK6 p6ZaO6ubW9s2vu7XdUlEhC2yTikez5WFHOBG0DA057saQ49Dn +pPrqd+9p1KxSNxBGlM3xCPBAkYwaMkzDwdAH6B4JyMpFnk2AJx4PPfMml23C1iLxClJDZVoeebXYBiRJKQCCMdK9R07BjfDEhjhNK8OEkVjTCZ4RPuaChxS5WbF5 w60crQCiKpS4BVqL8nMhwqlYa+7gwxjNW8NxX/8/oJBJduxkScABVk ihIuAWRNY3DGjJJCfBUE0wk03+1yBhLTECHV UhOPMnL5LOWd05rzduG7XmVRlHBR2hY3SKHHSBmugG VAbEfSIn ErejOejBfj3fiY S4Z5cwB+gPj8wcQ Jfw</la exi >⌧l
 
 
 
-<latexit sha1_base64="cIULs2GG07KUyKUQrpo0YD5w4jg=">AAACB3icbVDLSsNAFJ3UV62vqEtBBovgQkoiRV0W3bisYB+QhjKZTtqhk0mYuRFLyM6Nv+LGhSJu/QV3/o3Tx0JbD1w4nHPv3LknSATX4DjfVmFpeWV1rbhe2tjc2t6xd/eaOk4VZQ0ai1i1A6KZ4JI1gINg7UQxEgWCtYLh9dhv3TOleSzvYJQwPyJ9yUNOCRipax92gD3A5J2MjojMsxR3uMSec4pdP+/aZafiTIAXiTsjZTRDvWt/dXoxTSMmgQqitec6CfgZUcCpYHmpk2qWEDokfeYZKknEtJ9N9uf42Cg9HMbKlAQ8UX9PZCTSehQFpjMiMNDz3lj8z/NSCC/9jMskBSbpdFGYCgwxHoeCe1wxCmJkCKGKm79iOiCKUDDRlUwI7vzJi6R5VnHPK9Xbarl2NYujiA7QETpBLrpANXSD6qiBKHpEz+gVvVlP1ov1bn1MWwvWbGYf/YH1+QN4l5kI</latexit>
+<la exi sha1_base64="cIULs2GG07KUyKUQrpo0YD5w4jg=">AAACB3icbVDLSsNAFJ3UV62vqE BBovgQkoiRV0W3bisYB+QhjKZT qhk0mYuRFLyM6Nv+LGhSJu/QV3/o3Tx0JbD1w4nHPv3LknSATX4DjfVmFpeWV1rbhe2 jc2 6xd/eaOk4VZQ0ai1i1A6KZ4JI1gINg7UQxEgWC YLh9dhv3TOleSzvYJQwPyJ9yUNOCRipax92gD3A5J2MjojMsxR3uMSec4pdP+/aZafiTIAXiTsjZTRDvW /dXoxTSMmgQqi ec6CfgZUcCpYHmpk2qWEDokfeYZKknE J9N9uf42Cg9HMbKlAQ8UX9PZCTSehQFpjMiMNDz3lj8z/NSCC/9jMskBSbpdFGYCgwxHoeCe1wxCmJkCKGKm79iOiCKUDDRlUwI7vzJi6R5VnHPK9Xbarl2NYujiA7QETpBLrpANXSD6qiBKHpEz+gVvVlP1ov1bn1MWwvWbGYf/YH1+QN4l5kI</la exi >
 
 
 
@@ -319,7 +319,7 @@ u 2 [0, 1]
 
 
 
-<latexit sha1_base64="+EOfUvj+iXm8/Y67FwxlxLWNess=">AAAB/nicbVDLSsNAFJ3UV62vqLhyEyyCq5JIUZdFNy4r2Ae0IUymk3boZBJmbsQQAv6KGxeKuPU73Pk3TtMstPXAhcM5986de/yYMwW2/W1UVlbX1jeqm7Wt7Z3dPXP/oKuiRBLaIRGPZN/HinImaAcYcNqPJcWhz2nPn97M/N4DlYpF4h7SmLohHgsWMIJBS555NAT6CMU7GUmxyLOuZ+eeWbcbdgFrmTglqaMSbc/8Go4ikoRUAOFYqYFjx+BmWAIjnOa1YaJojMkUj+lAU4FDqtysWJtbp1oZWUEkdQmwCvX3RIZDpdLQ150hhola9Gbif94ggeDKzZiIE6CCzBcFCbcgsmZZWCMmKQGeaoKJZPqvFplgiQnoxGo6BGfx5GXSPW84F43mXbPeui7jqKJjdILOkIMuUQvdojbqIIIy9Ixe0ZvxZLwY78bHvLVilDOH6A+Mzx8sLZZG</latexit>
+<la exi sha1_base64="+EOfUvj+iXm8/Y67FwxlxLWNess=">AAAB/nicbVDLSsNAFJ3UV62vqLhyEyyCq5JIUZdFNy4r2Ae0IUymk3boZBJmbsQQAv6KGxeKuPU73Pk3T Ms PXAhcM5986de/yYMwW2/W1UVlbX1jeqm7W 7Z3dPXP/oKuiRBLaIRGPZN/HinImaAcYcNqPJcWhz2nPn97M/N4DlYpF4h7SmLohHgsWMIJBS555NAT6CMU7GUmxyLOuZ+eeWbcbdgFrmTglqaMSbc/8Go4ikoRUAOFYqYFjx+BmWAIjnOa1YaJojMkUj+lAU4FDq ysWJ bp1oZWUEkdQmwCvX3RIZDpdLQ150hhola9Gbif94ggeDKzZiIE6CCzBcFCbcgsmZZWCMmKQGeaoKJZPqvFplgiQnoxGo6BGfx5GXSPW84F43mXbPeui7jqKJjdILOkIMuUQvdojbqIIIy9Ixe0ZvxZLwY78bHvLVilDOH6A+Mzx8sLZZG</la exi >
 
 
 
@@ -327,7 +327,7 @@ V0
 
 
 
-<latexit sha1_base64="DNZLE0BuOQMWj9PT2APoMFuUQpY=">AAACCHicbVC7TsMwFHXKq5RXgJEBiwqJAVUJqoCxgoWxSDSt1FaR47qtVceJ7BtEFXVk4VdYGECIlU9g429w0wzQciRbR+fce319glhwDY7zbRWWlldW14rrpY3Nre0de3fP01GiKGvQSESqFRDNBJesARwEa8WKkTAQrBmMrqd+854pzSN5B+OYdUMykLzPKQEj+fZhB9gDZHNSOiZykno+OcWeH0wvOvHtslNxMuBF4uakjHLUffur04toEjIJVBCt264TQzclCjgVbFLqJJrFhI7IgLUNlSRkuptmC0zwsVF6uB8pcyTgTP3dkZJQ63EYmMqQwFDPe1PxP6+dQP+ym3IZJ8AknT3UTwSGCE9TwT2uGAUxNoRQxc2umA6JIhRMdiUTgjv/5UXinVXc80r1tlquXeVxFNEBOkInyEUXqIZuUB01EEWP6Bm9ojfryXqx3q2PWWnBynv20R9Ynz+DFJmi</latexit>
+<la exi sha1_base64="DNZLE0BuOQMWj9PT2APoMFuUQpY=">AAACCHicbVC7TsMwFHXKq5RXgJEBiwqJAVUJqoCxgoWxSDS 1FaR47q VceJ7B EFXVk4VdYGECIlU9g429w0wzQciRbR+fce319glhwDY7zbRWWlldW14rrpY3Nre0de3fP01GiKGvQSESqFRDNBJesARwEa8WKkTAQrBmMrqd+854pzSN5B+OYdUMykLzPKQEj+fZhB9gDZHNSOiZykno+OcWeH0wvOvH slNxMuBF4uakjHLUffur04 oEjIJVBC 264TQzclCjgVbFLqJJrFhI7IgLUNlSRkup mC0zwsVF6uB8pcyTgTP3dkZJQ63EYmMqQwFDPe1PxP6+dQP+ym3IZJ8AknT3UTwSGCE9TwT2uGAUxNoRQxc2umA6JIhRMdiUTgjv/5UXinVXc80r1 lquXeVxFNEBOkInyEUXqIZuUB01EEWP6Bm9ojfryXqx3q2PWWnBynv20R9Ynz+DFJmi</la exi >
 
 
 
@@ -335,7 +335,7 @@ Va, Vb, Vc
 
 
 
-<latexit sha1_base64="93qELj2M2ul5SrRtuhj7OuustOk=">AAAB9HicbVDLSsNAFL2pr1pfVZduBovgQkoiRV0W3bis0Be0IUymk3boZJLOTAol9DvcuFDErR/jzr9x0mahrQfu5XDOvcyd48ecKW3b31ZhY3Nre6e4W9rbPzg8Kh+ftFWUSEJbJOKR7PpYUc4EbWmmOe3GkuLQ57Tjjx8yvzOlUrFINPUspm6Ih4IFjGBtJLft+VeIZa3p+V65YlftBdA6cXJSgRwNr/zVH0QkCanQhGOleo4dazfFUjPC6bzUTxSNMRnjIe0ZKnBIlZsujp6jC6MMUBBJU0Kjhfp7I8WhUrPQN5Mh1iO16mXif14v0cGdmzIRJ5oKsnwoSDjSEcoSQAMmKdF8ZggmkplbERlhiYk2OZVMCM7ql9dJ+7rq3FRrT7VK/T6PowhncA6X4MAt1OERGtACAhN4hld4s6bWi/VufSxHC1a+cwp/YH3+APszkPM=</latexit>
+<la exi sha1_base64="93qELj2M2ul5SrR uhj7Ouus Ok=">AAAB9HicbVDLSsNAFL2pr1pfVZduBovgQkoiRV0W3bis0Be0IUymk3boZJLOTAol9DvcuFDErR/jzr9x0mahrQfu5XDOvcyd48ecKW3b31ZhY3Nre6e4W9rbPzg8Kh+f FWUSEJbJOKR7PpYUc4EbWmmOe3GkuLQ57Tjjx8yvzOlUrFINPUspm6Ih4IFjGB JLf +VeIZa3p+V65Ylf BdA6cXJSgRwNr/zVH0QkCanQhGOleo4dazfFUjPC6bzUTxSNMRnjIe0ZKnBIlZsujp6jC6MMUBBJU0Kjhfp7I8WhUrPQN5Mh1iO16mXif14v0cGdmzIRJ5oKsnwoSDjSEcoSQAMmKdF8ZggmkplbERlhiYk2OZVMCM7ql9dJ+7rq3FRrT7VK/T6PowhncA6X4MA 1OERG ACAhN4hld4s6bWi/VufSxHC1a+cwp/YH3+APszkPM=</la exi >
 
 
 
@@ -343,7 +343,7 @@ Vb, ib, Tb
 
 
 
-<latexit sha1_base64="hRbCHipoNGt1uizLO6aA/aIGiO4=">AAAB9XicbVDLSgMxFL3js9ZX1aWbYBFcSJmRoi6LblxW6AvaccikaRuaZIYko5Sh/+HGhSJu/Rd3/o2ZdhbaeuBeDufcS25OGHOmjet+Oyura+sbm4Wt4vbO7t5+6eCwpaNEEdokEY9UJ8SaciZp0zDDaSdWFIuQ03Y4vs389iNVmkWyYSYx9QUeSjZgBBsrPbQCcY5Y1hqBQEGp7FbcGdAy8XJShhz1oPTV60ckEVQawrHWXc+NjZ9iZRjhdFrsJZrGmIzxkHYtlVhQ7aezq6fo1Cp9NIiULWnQTP29kWKh9USEdlJgM9KLXib+53UTM7j2UybjxFBJ5g8NEo5MhLIIUJ8pSgyfWIKJYvZWREZYYWJsUEUbgrf45WXSuqh4l5XqfbVcu8njKMAxnMAZeHAFNbiDOjSBgIJneIU358l5cd6dj/noipPvHMEfOJ8/h3aRPg==</latexit>
+<la exi sha1_base64="hRbCHipoNG 1uizLO6aA/aIGiO4=">AAAB9XicbVDLSgMxFL3js9ZX1aWbYBFcSJmRoi6LblxW6AvaccikaRuaZIYko5Sh/+HGhSJu/Rd3/o2ZdhbaeuBeDufcS25OGHOmje +Oyura+sbm4W 4vbO7 5+6eCwpaNEEdokEY9UJ8SaciZp0zDDaSdWFIuQ03Y4vs389iNVmkWyYSYx9QUeSjZgBBsrPbQCcY5Y1hqBQEGp7FbcGdAy8XJShhz1oPTV60ckEVQawrHWXc+NjZ9iZRjhdFrsJZrGmIzxkHY lVhQ7aezq6fo1Cp9NIiULWnQTP29kWKh9USEdlJgM9KLXib+53UTM7j2UybjxFBJ5g8NEo5MhLIIUJ8pSgyfWIKJYvZWREZYYWJsUEUbgrf45WXSuqh4l5XqfbVcu8njKMAxnMAZeHAFNbiDOjSBgIJneIU358l5cd6dj/noipPvHMEfOJ8/h3aRPg==</la exi >
 
 
 
@@ -351,7 +351,7 @@ Vm, im, Tm
 
 
 
-<latexit sha1_base64="0/7xdv0zOtaVkCKzoZTPERqXrks=">AAACAHicbVBNS8NAEN3Ur1q/oh48eAkWwVNJpKjHohePFewHtKVstpN26WYTdidiCbn4V7x4UMSrP8Ob/8Ztm4O2Phh4vDezs/P8WHCNrvttFVZW19Y3ipulre2d3T17/6Cpo0QxaLBIRKrtUw2CS2ggRwHtWAENfQEtf3wz9VsPoDSP5D1OYuiFdCh5wBlFI/Xtoy7CI87eSRUMsrTZTyXPsr5ddivuDM4y8XJSJjnqffurO4hYEoJEJqjWHc+NsZdShZwJyErdRENM2ZgOoWOopCHoXjpbnDmnRhk4QaRMSXRm6u+JlIZaT0LfdIYUR3rRm4r/eZ0Eg6teymWcIEg2XxQkwsHImabhDLgChmJiCGWKm786bEQVZWgyK5kQvMWTl0nzvOJdVKp31XLtOo+jSI7JCTkjHrkkNXJL6qRBGMnIM3klb9aT9WK9Wx/z1oKVzxySP7A+fwBUj5eJ</latexit>
+<la exi sha1_base64="0/7xdv0zO aVkCKzoZTPERqXrks=">AAACAHicbVBNS8NAEN3Ur1q/oh48eAkWwVNJpKjHohePFewH KVs pN26WYTdidiCbn4V7x4UMSrP8Ob/8Z m4O2Phh4vDezs/P8WHCNrv FVZW19Y3ipulre2d3T17/6Cpo0QxaLBIRKr Uw2CS2ggRwH WAENfQE f3wz9VsPoDSP5D1OYuiFdCh5wBlFI/X oy7CI87eSRUMsrTZTyXPsr5ddivuDM4y8XJSJjnqffurO4hYEoJEJqjWHc+NsZdShZwJyErdRENM2ZgOoWOopCHoXjpbnDmnRhk4QaRMSXRm6u+JlIZaT0LfdIYUR3rRm4r/eZ0Eg6 eymWcIEg2XxQkwsHImabhDLgChmJiCGWKm786bEQVZWgyK5kQvMWTl0nzvOJdVKp31XL Oo+jSI7JCTkjHrkkNXJL6qRBGMnIM3klb9aT9WK9Wx/z1oKVzxySP7A+fwBUj5eJ</la exi >
 
 
 
@@ -367,31 +367,31 @@ DC/DC
 
 
 
-Fig. 1 Block diagram of the powertrain model. Subscripts for measurements 𝑉 , 𝑖, 𝑇 refers to either “battery” 𝑏
-or “motor” 𝑚, while subscripts 𝑎, 𝑏, and 𝑐 for voltage 𝑉 and current 𝑖 refer to the three-phase signals. Trainable
-elements are displayed in red, and include battery parameters 𝑞𝑚𝑎𝑥 , 𝑅0, motor parameters 𝑅𝑠 , 𝐵, as well as an
-FCNs (indicated with red network architectures) used to compensate for the errors of the simplified Nernst’s
-equation 𝑉𝑛𝑖 and rotor speed estimates 𝜔.
+Fig. 1 Block diagram of he power rain model. Subscrip s for measuremen s 𝑉 , 𝑖, 𝑇 refers o ei her “ba ery” 𝑏
+or “mo or” 𝑚, while subscrip s 𝑎, 𝑏, and 𝑐 for vol age 𝑉 and curren 𝑖 refer o he hree-phase signals. Trainable
+elemen s are displayed in red, and include ba ery parame ers 𝑞𝑚𝑎𝑥 , 𝑅0, mo or parame ers 𝑅𝑠 , 𝐵, as well as an
+FCNs (indica ed wi h red ne work archi ec ures) used o compensa e for he errors of he simplified Nerns ’s
+equa ion 𝑉𝑛𝑖 and ro or speed es ima es 𝜔.
 
 
 
-the hybrid model on real data. We also assume that the accuracy of this estimate is adequate for diagnostic purposes.
-When available, we refer to realistic battery, motor, ESC and propeller parameter values, either from the a small UAV
-propulsion system manufacturer KDE or the NASA Prognostics Data Repository, battery dataset # 11.
+ he hybrid model on real da a. We also assume ha he accuracy of his es ima e is adequa e for diagnos ic purposes.
+When available, we refer o realis ic ba ery, mo or, ESC and propeller parame er values, ei her from he a small UAV
+propulsion sys em manufac urer KDE or he NASA Prognos ics Da a Reposi ory, ba ery da ase # 11.
 
 
 
-A. Li-ion Battery
-The model we chose for this application is a simplified electro-chemistry model developed for real-time or quasi-
+A. Li-ion Ba ery
+The model we chose for his applica ion is a simplified elec ro-chemis ry model developed for real- ime or quasi-
 
 
 
-real-time applications [13, 14], and it has already been utilized for a H-PINN approach in [12]. Therefore, we only
-report here the fundamentals of the model, and the interested reader is referred to the original paper [13] and the hybrid
-modeling paper [12] for a comprehensive description. This model is based on nonlinear ordinary differential equations
-instead of PDEs to speed up computation, at the cost of some accuracy loss. The core equations include a modified
-Nernst’s equation for the equilibrium potential 𝑉𝑈 (Eq. (1)), and the Butler-Volmer equation used to derive the surface
-overpotential 𝑉[ (Eq. (2)).
+real- ime applica ions [13, 14], and i has already been u ilized for a H-PINN approach in [12]. Therefore, we only
+repor here he fundamen als of he model, and he in eres ed reader is referred o he original paper [13] and he hybrid
+modeling paper [12] for a comprehensive descrip ion. This model is based on nonlinear ordinary differen ial equa ions
+ins ead of PDEs o speed up compu a ion, a he cos of some accuracy loss. The core equa ions include a modified
+Nerns ’s equa ion for he equilibrium po en ial 𝑉𝑈 (Eq. (1)), and he Bu ler-Volmer equa ion used o derive he surface
+overpo en ial 𝑉[ (Eq. (2)).
 
 
 
@@ -438,9 +438,9 @@ arcsinh
 
 
 
-Term 𝑈0 is the reference potential and subscript 𝑖 refers to the positive and negative side of the electrode, 𝑖 = {𝑝, 𝑛}
-(note: subscript 𝑖 should not be confused with current). The term 𝐽𝑖,0 is the exchange current density [13, 15]. The
-observable voltage can be approximated using
+Term 𝑈0 is he reference po en ial and subscrip 𝑖 refers o he posi ive and nega ive side of he elec rode, 𝑖 = {𝑝, 𝑛}
+(no e: subscrip 𝑖 should no be confused wi h curren ). The erm 𝐽𝑖,0 is he exchange curren densi y [13, 15]. The
+observable vol age can be approxima ed using
 
 
 
@@ -454,10 +454,10 @@ observable voltage can be approximated using
 
 
 
-https://www.kdedirect.com/products/kde4213xf-360
+h ps://www.kdedirec .com/produc s/kde4213xf-360
 
 
-https://www.nasa.gov/content/prognostics-center-of-excellence-data-set-repository
+h ps://www.nasa.gov/con en /prognos ics-cen er-of-excellence-da a-se -reposi ory
 
 
 
@@ -470,56 +470,56 @@ Layer 𝑉𝑛𝑖,𝑛 𝑉𝑛𝑖, 𝑝
 
 
 
-input 1 1
+inpu 1 1
 hidden layer #1 - 8
 hidden layer #2 - 4
-output layer 1 1
+ou pu layer 1 1
 
 
 
-Table 1 Number of neurons for the two FCNs used to approximate the voltage correction terms. The model for
-𝑉𝑛𝑖,𝑛 is linear, while the model for 𝑉𝑛𝑖, 𝑝 has two hidden layers. We chose tanh as non-linear activation function
-for the hidden layers of 𝑉𝑛𝑖, 𝑝 , while the output node is linear.
+Table 1 Number of neurons for he wo FCNs used o approxima e he vol age correc ion erms. The model for
+𝑉𝑛𝑖,𝑛 is linear, while he model for 𝑉𝑛𝑖, 𝑝 has wo hidden layers. We chose anh as non-linear ac iva ion func ion
+for he hidden layers of 𝑉𝑛𝑖, 𝑝 , while he ou pu node is linear.
 
 
 
-where 𝑉𝑜 is the nominal voltage drop approximated by the lumped internal resistance 𝑅𝑜 times the input current 𝑖𝑎𝑝𝑝 ,
+where 𝑉𝑜 is he nominal vol age drop approxima ed by he lumped in ernal resis ance 𝑅𝑜 imes he inpu curren 𝑖𝑎𝑝𝑝 ,
 𝑉𝑜 = 𝑅𝑜 𝑖𝑎𝑝𝑝 .
 
 
 
-Equation (1) contains the non-ideal voltage correction term,𝑉𝑛𝑖 . In the original formulation [13, 15], it was estimated
-as a function of the mole fraction 𝑥 by a polynomial expansion. The hybrid model, however, leverages FCNs to learn
-the relationship between the mole fraction 𝑥 and 𝑉𝑛𝑖 during training, instead of using a predetermined, off-line fitting
-procedure. The hidden state vector, 𝒉, is composed of temperature 𝑇 , nominal voltage drop 𝑉𝑜, surface over-potentials
-𝑉[ , and charges for the positive and negative side of bulk and surface of the battery, 𝑞𝑝 , 𝑞𝑠, respectively. The input
-to the model is a scalar quantity representing the current required by the motor, 𝑖𝑎𝑝𝑝, and the output of the model is
-voltage, 𝑉 . The state-space transition is defined by first order ordinary differential equations. We omit further details for
-the sake of brevity, and refer the reader to [13, 15] for additional information, including the equations parameterized by
+Equa ion (1) con ains he non-ideal vol age correc ion erm,𝑉𝑛𝑖 . In he original formula ion [13, 15], i was es ima ed
+as a func ion of he mole frac ion 𝑥 by a polynomial expansion. The hybrid model, however, leverages FCNs o learn
+ he rela ionship be ween he mole frac ion 𝑥 and 𝑉𝑛𝑖 during raining, ins ead of using a prede ermined, off-line fi ing
+procedure. The hidden s a e vec or, 𝒉, is composed of empera ure 𝑇 , nominal vol age drop 𝑉𝑜, surface over-po en ials
+𝑉[ , and charges for he posi ive and nega ive side of bulk and surface of he ba ery, 𝑞𝑝 , 𝑞𝑠, respec ively. The inpu 
+ o he model is a scalar quan i y represen ing he curren required by he mo or, 𝑖𝑎𝑝𝑝, and he ou pu of he model is
+vol age, 𝑉 . The s a e-space ransi ion is defined by firs order ordinary differen ial equa ions. We omi fur her de ails for
+ he sake of brevi y, and refer he reader o [13, 15] for addi ional informa ion, including he equa ions parame erized by
 𝑞𝑚𝑎𝑥 and 𝑅0.
 
 
 
-Given a current input profile, the values of 𝑞𝑚𝑎𝑥 and 𝑅0 affect both the rate of change of voltage discharge and the
-time to reach the end of discharge. However, the best fit of 𝑞𝑚𝑎𝑥 , and 𝑅0 may vary from battery-to-battery because of
-manufacturing process variability or uncertainty of the environmental conditions. To improve predictions of voltage
-discharge curves, we set them as single-value parameters to be learned during training. Therefore, the set of hybrid
-model parameters to be learned contains all weights and biases of the FCNs to estimate the non-ideal voltage corrections
-and the physics-derived parameters 𝑞𝑚𝑎𝑥 and 𝑅0. As already discussed in [12], these parameters are also affected by
-aging, as capacity decreases and resistance increases with usage. However, we do not model aging effects in this work,
-and the interested reader can refer to [12] for further details.
+Given a curren inpu profile, he values of 𝑞𝑚𝑎𝑥 and 𝑅0 affec bo h he ra e of change of vol age discharge and he
+ ime o reach he end of discharge. However, he bes fi of 𝑞𝑚𝑎𝑥 , and 𝑅0 may vary from ba ery- o-ba ery because of
+manufac uring process variabili y or uncer ain y of he environmen al condi ions. To improve predic ions of vol age
+discharge curves, we se hem as single-value parame ers o be learned during raining. Therefore, he se of hybrid
+model parame ers o be learned con ains all weigh s and biases of he FCNs o es ima e he non-ideal vol age correc ions
+and he physics-derived parame ers 𝑞𝑚𝑎𝑥 and 𝑅0. As already discussed in [12], hese parame ers are also affec ed by
+aging, as capaci y decreases and resis ance increases wi h usage. However, we do no model aging effec s in his work,
+and he in eres ed reader can refer o [12] for fur her de ails.
 
 
 
-We assumed the battery to be fully charged when starting the training, so 𝑥𝑝,0 = 0.4 and 𝑥𝑛,0 = 0.6 for the type of
-battery we selected, which is a single cell Lithium-ion 18650 with nominal voltage of 3.7 V and nominal capacity of
+We assumed he ba ery o be fully charged when s ar ing he raining, so 𝑥𝑝,0 = 0.4 and 𝑥𝑛,0 = 0.6 for he ype of
+ba ery we selec ed, which is a single cell Li hium-ion 18650 wi h nominal vol age of 3.7 V and nominal capaci y of
 2200 mAh.
 
 
 
-The FCN models receive the corresponding positive or negative mole fraction as input and returns the non-ideal
-voltage correction term as output, 𝑉𝑛𝑖, 𝑝 = 𝑉𝑛𝑖, 𝑝 (𝑥𝑝), 𝑉𝑛𝑖,𝑛 = 𝑉𝑛𝑖,𝑛 (𝑥𝑛). We used the architectures originally proposed
-in [12], summarized in Table 1. Their simplicity allows us to write the model explicitly in compact forms:
+The FCN models receive he corresponding posi ive or nega ive mole frac ion as inpu and re urns he non-ideal
+vol age correc ion erm as ou pu , 𝑉𝑛𝑖, 𝑝 = 𝑉𝑛𝑖, 𝑝 (𝑥𝑝), 𝑉𝑛𝑖,𝑛 = 𝑉𝑛𝑖,𝑛 (𝑥𝑛). We used he archi ec ures originally proposed
+in [12], summarized in Table 1. Their simplici y allows us o wri e he model explici ly in compac forms:
 
 
 
@@ -534,7 +534,7 @@ in [12], summarized in Table 1. Their simplicity allows us to write the model ex
 
 𝑤
 (𝑘,3)
-𝑝 tanh ©­«
+𝑝 anh ©­«
 
 
 
@@ -545,7 +545,7 @@ in [12], summarized in Table 1. Their simplicity allows us to write the model ex
 
 
 ( 𝑗 ,2)
-𝑝 tanh
+𝑝 anh
 
 
 
@@ -572,23 +572,23 @@ in [12], summarized in Table 1. Their simplicity allows us to write the model ex
 
 
 
-Network parameter 𝑤 (𝑖,𝑚)
-𝑝 indicates the weight of the 𝑖th node, in the 𝑚th layer of the model for positive side of the
+Ne work parame er 𝑤 (𝑖,𝑚)
+𝑝 indica es he weigh of he 𝑖 h node, in he 𝑚 h layer of he model for posi ive side of he
 
 
 
-electrode. The same notation applies to biases 𝑏. Variables 𝑥𝑛, 𝑥𝑝 are mole fractions, input to the respective models.
-The summations 𝑗 = {1, . . . , 8}, 𝑘 = {1, . . . , 4} indicate the number of nodes per layer. The voltage correction term for
-the negative electrode is a linear model.
+elec rode. The same no a ion applies o biases 𝑏. Variables 𝑥𝑛, 𝑥𝑝 are mole frac ions, inpu o he respec ive models.
+The summa ions 𝑗 = {1, . . . , 8}, 𝑘 = {1, . . . , 4} indica e he number of nodes per layer. The vol age correc ion erm for
+ he nega ive elec rode is a linear model.
 
 
 
-B. Brush-less DC Motor
-The motor model implemented in PyTorch is a standard BLDC motor model, which we use as lower-fidelity model
+B. Brush-less DC Mo or
+The mo or model implemen ed in PyTorch is a s andard BLDC mo or model, which we use as lower-fideli y model
 
 
 
-when compared against the three-phase model used to generate the data. With this single-phase model, the motor is
+when compared agains he hree-phase model used o genera e he da a. Wi h his single-phase model, he mo or is
 
 
 
@@ -604,7 +604,7 @@ when compared against the three-phase model used to generate the data. With this
 
 
 
-fully described by the following coupled electromechanical equations:
+fully described by he following coupled elec romechanical equa ions:
 
 
 
@@ -635,58 +635,58 @@ d𝑡
 
 
 
-where 𝑒 = 𝐾𝑡 𝜔 is the back-EMF voltage, 𝜏𝑒 = 𝐾𝑡 𝑖 is the driving torque, and 𝑉𝑚 is the input voltage to the motor,
-defined in Section II.C. The rotor inertia 𝐼 is the sum of the propeller inertia and the motor shaft inertia, though the
-latter is often neglected since it is much smaller than the former. The state vector describing the motor is [𝑖, 𝜔]⊤. The
-input vector is [𝑉𝑚, 𝜏𝑙 (𝜔)]⊤, which makes the system non-linear because of the non-linear dependency of the load
-torque from the rotor speed 𝜔.
+where 𝑒 = 𝐾𝑡 𝜔 is he back-EMF vol age, 𝜏𝑒 = 𝐾𝑡 𝑖 is he driving orque, and 𝑉𝑚 is he inpu vol age o he mo or,
+defined in Sec ion II.C. The ro or iner ia 𝐼 is he sum of he propeller iner ia and he mo or shaf iner ia, hough he
+la er is of en neglec ed since i is much smaller han he former. The s a e vec or describing he mo or is [𝑖, 𝜔]⊤. The
+inpu vec or is [𝑉𝑚, 𝜏𝑙 (𝜔)]⊤, which makes he sys em non-linear because of he non-linear dependency of he load
+ orque from he ro or speed 𝜔.
 
 
 
-The parameters to be learned during training are: (i) the lumped parameter representing the armature resistance
-𝑅𝑠 for the electrical equation and (ii) the friction coefficient 𝐵 for the mechanical equation. They are initialized with
-values from either the manufacturers’ data sheet or, when not available (like in the case of 𝐵), from previous estimates
-of off-line runs of the model for similar motors. To select these parameters, we performed a sensitivity analysis off-line.
-We evaluated the effect of different parameter values onto the overall output of the model in terms of current and rotor
-speed profiles, and also evaluated what parameters are likely to change at the onset of faults or degradation. For example,
-armature resistance 𝑅𝑠 is likely to change because of winding insulation degradation, while friction coefficient 𝐵 is
-often hard to retrieve from manufacturers’ data sheets and subject to large uncertainty.
+The parame ers o be learned during raining are: (i) he lumped parame er represen ing he arma ure resis ance
+𝑅𝑠 for he elec rical equa ion and (ii) he fric ion coefficien 𝐵 for he mechanical equa ion. They are ini ialized wi h
+values from ei her he manufac urers’ da a shee or, when no available (like in he case of 𝐵), from previous es ima es
+of off-line runs of he model for similar mo ors. To selec hese parame ers, we performed a sensi ivi y analysis off-line.
+We evalua ed he effec of differen parame er values on o he overall ou pu of he model in erms of curren and ro or
+speed profiles, and also evalua ed wha parame ers are likely o change a he onse of faul s or degrada ion. For example,
+arma ure resis ance 𝑅𝑠 is likely o change because of winding insula ion degrada ion, while fric ion coefficien 𝐵 is
+of en hard o re rieve from manufac urers’ da a shee s and subjec o large uncer ain y.
 
 
 
-C. Electronic Speed Controller
-Since we are adopting a single-phase motor model, we eliminated the complexity related to the pulse-width
+C. Elec ronic Speed Con roller
+Since we are adop ing a single-phase mo or model, we elimina ed he complexi y rela ed o he pulse-wid h
 
 
 
-modulation and the ESC switches forcing the three-phase dynamics. Both voltage and current are scalar quantities.
-Therefore, we can drive the motor speed by multiplying the throttle value by the voltage coming from the DC/DC
-converter, 𝑉𝑚 = 𝑉0 𝑢. At this stage, we assume the DC/DC converter is capable of providing constant voltage with no
-fluctuations, but the framework allows the modeling of the converter to be embedded in the powertrain.
+modula ion and he ESC swi ches forcing he hree-phase dynamics. Bo h vol age and curren are scalar quan i ies.
+Therefore, we can drive he mo or speed by mul iplying he hro le value by he vol age coming from he DC/DC
+conver er, 𝑉𝑚 = 𝑉0 𝑢. A his s age, we assume he DC/DC conver er is capable of providing cons an vol age wi h no
+fluc ua ions, bu he framework allows he modeling of he conver er o be embedded in he power rain.
 
 
 
-D. Fixed-Pitch Propeller
-The simplest propeller model assumes aerodynamic thrust 𝐹𝑇 and torque 𝜏𝑙 to be proportional to the square of
+D. Fixed-Pi ch Propeller
+The simples propeller model assumes aerodynamic hrus 𝐹𝑇 and orque 𝜏𝑙 o be propor ional o he square of
 
 
 
-the rotor speed, 𝜔2, through two constants: 𝐹𝑇 = 𝐶𝑇 𝜔
+ he ro or speed, 𝜔2, hrough wo cons an s: 𝐹𝑇 = 𝐶𝑇 𝜔
 2, and 𝜏𝑙 = 𝐶𝑄 𝜔
 
 
 
-2. The values of 𝐶𝑇 and 𝐶𝑄 are not constant
-in the real system, as they depend on propeller translational velocity, rotational speed, induced velocity, and other
-aerodynamic parameters. However, approximating these values with two constants learned from data may be enough
-for powertrain diagnostics purposes. It should be noted that more complex propeller models could be implemented
-without losing the capability to learn model parameters through the deep learning framework, provided that equations
-are differentiable. For example, we implemented a more complex motor model presented in [16], where thrust and
-torque are computed by combining blade element and blade element momentum theory to account for the effect of the
-propeller axial speed, angular velocity, and induced velocity (see original paper Section II.D.3, and equations (7-9)).
-However, for an operating condition with no axial speed (which is expected in a powertrain test bed, for example), the
-resulting thrust and torque are still linearly proportional in 𝜔2, thus providing no additional benefit. For that reason, we
-decided to adopt the simplest equations for thrust and torque, with:
+2. The values of 𝐶𝑇 and 𝐶𝑄 are no cons an 
+in he real sys em, as hey depend on propeller ransla ional veloci y, ro a ional speed, induced veloci y, and o her
+aerodynamic parame ers. However, approxima ing hese values wi h wo cons an s learned from da a may be enough
+for power rain diagnos ics purposes. I should be no ed ha more complex propeller models could be implemen ed
+wi hou losing he capabili y o learn model parame ers hrough he deep learning framework, provided ha equa ions
+are differen iable. For example, we implemen ed a more complex mo or model presen ed in [16], where hrus and
+ orque are compu ed by combining blade elemen and blade elemen momen um heory o accoun for he effec of he
+propeller axial speed, angular veloci y, and induced veloci y (see original paper Sec ion II.D.3, and equa ions (7-9)).
+However, for an opera ing condi ion wi h no axial speed (which is expec ed in a power rain es bed, for example), he
+resul ing hrus and orque are s ill linearly propor ional in 𝜔2, hus providing no addi ional benefi . For ha reason, we
+decided o adop he simples equa ions for hrus and orque, wi h:
 
 
 
@@ -705,19 +705,19 @@ decided to adopt the simplest equations for thrust and torque, with:
 
 
 
-where 𝑐𝑇 , 𝑐𝑝 non-dimensional coefficients for thrust and power equal to 0.08 and 0.035, respectively, 𝜌 = 1.225 kg /
-m3 is the reference value for air density, and 𝐷 = 0.3937 mm is the diameter of the propeller. The non-dimensional
-aerodynamic coefficients were obtained from APC Propellers for the propeller closest to the one we used as reference,
-with dimensions 15.5" × 5.3, dual blade, as already done in [17].
+where 𝑐𝑇 , 𝑐𝑝 non-dimensional coefficien s for hrus and power equal o 0.08 and 0.035, respec ively, 𝜌 = 1.225 kg /
+m3 is he reference value for air densi y, and 𝐷 = 0.3937 mm is he diame er of he propeller. The non-dimensional
+aerodynamic coefficien s were ob ained from APC Propellers for he propeller closes o he one we used as reference,
+wi h dimensions 15.5" × 5.3, dual blade, as already done in [17].
 
 
 
-E. Neural Network for Rotor Speed Error Correction
-We placed a FCN at the output of the motor model, to compensate for the error observed between predictions and
+E. Neural Ne work for Ro or Speed Error Correc ion
+We placed a FCN a he ou pu of he mo or model, o compensa e for he error observed be ween predic ions and
 
 
 
-observations of the rotor speed:
+observa ions of he ro or speed:
 𝜔 = 𝜔𝑅𝑠 ,𝐵 + 𝛿𝜔 (𝑡, 𝜔𝑅𝑠 ,𝐵, 𝑉, 𝑡ℎ) ,
 
 
@@ -728,7 +728,7 @@ observations of the rotor speed:
 
 
 
-https://www.apcprop.com
+h ps://www.apcprop.com
 
 
 
@@ -759,7 +759,7 @@ https://www.apcprop.com
 
 
 vo
-lta
+l a
 
 
 
@@ -785,13 +785,13 @@ rre
 
 
 
-nt
+n 
 , A
 
 
 
 0 500 1000 1500 2000 2500
-time, s
+ ime, s
 
 
 
@@ -816,7 +816,7 @@ time, s
 
 
 vo
-lta
+l a
 
 
 
@@ -854,7 +854,7 @@ rre
 
 
 
-nt
+n 
 , A
 
 
@@ -885,7 +885,7 @@ nt
 
 
 ro
-to
+ o
 
 
 
@@ -926,7 +926,7 @@ ad
 
 
 ro
-to
+ o
 
 
 
@@ -958,7 +958,7 @@ ad
 
 
 ro
-to
+ o
 
 
 
@@ -985,12 +985,12 @@ ad
 
 
 
-th
+ h
 ro
 
 
 
-ttl
+ l
 e,
 
 
@@ -1007,12 +1007,12 @@ e,
 
 
 
-th
+ h
 ro
 
 
 
-ttl
+ l
 e,
 
 
@@ -1029,12 +1029,12 @@ e,
 
 
 
-th
+ h
 ro
 
 
 
-ttl
+ l
 e,
 
 
@@ -1047,24 +1047,24 @@ e,
 
 
 
-Fig. 2 Samples from (a) Li-ion battery (lab) and (b) powertrain (synthetic) data sets. Left subplots (2a) show
-constant and random discharge curves from the data set used to train the Li-ion battery model. The top panel
-shows a constant-discharge curve, while the bottom panel shows a random-discharge curve. The left and right
-y-axes refer to voltage and current values, respectively. The input current is further highlighted as a dashed-red
-line. Right subplots (2b) show examples of rotor speed and throttle signals used to train the powertrain model
-assuming a sinusoidal, constant, and step-wise constant input profile.
+Fig. 2 Samples from (a) Li-ion ba ery (lab) and (b) power rain (syn he ic) da a se s. Lef subplo s (2a) show
+cons an and random discharge curves from he da a se used o rain he Li-ion ba ery model. The op panel
+shows a cons an -discharge curve, while he bo om panel shows a random-discharge curve. The lef and righ 
+y-axes refer o vol age and curren values, respec ively. The inpu curren is fur her highligh ed as a dashed-red
+line. Righ subplo s (2b) show examples of ro or speed and hro le signals used o rain he power rain model
+assuming a sinusoidal, cons an , and s ep-wise cons an inpu profile.
 
 
 
-where the neural network model is defined by 𝛿𝜔 and takes as input time, estimate of rotor speed from the physics-based
-model, 𝜔𝑅𝑠 ,𝐵, input voltage 𝑉 , and throttle 𝑡ℎ. Neural network input quantities 𝜔𝑅𝑠 ,𝐵, 𝑉, 𝑡ℎ are normalized using the
-min-max approach to ensure values remain within the range [0, 1], while time 𝑡 can be normalized using the modulus
-operator. We chose a neural network with 2 hidden layers, 512 neurons each, 4 inputs and 1 output. A clear distinction
-between the FCN we used for the non-ideal voltage correction in the battery model and this FCN is the oscillatory
-and periodic behavior this model has to replicate. The rotor speed residuals are unbounded in time, and therefore the
-network needs to replicate the periodic behavior of such residuals regardless of the absolute time value, which is in line
-with the nature of the dynamic system when reaching its stationary behavior. Therefore, we used an activation function
-specifically designed to improve predictions of periodic functions from [18],
+where he neural ne work model is defined by 𝛿𝜔 and akes as inpu ime, es ima e of ro or speed from he physics-based
+model, 𝜔𝑅𝑠 ,𝐵, inpu vol age 𝑉 , and hro le 𝑡ℎ. Neural ne work inpu quan i ies 𝜔𝑅𝑠 ,𝐵, 𝑉, 𝑡ℎ are normalized using he
+min-max approach o ensure values remain wi hin he range [0, 1], while ime 𝑡 can be normalized using he modulus
+opera or. We chose a neural ne work wi h 2 hidden layers, 512 neurons each, 4 inpu s and 1 ou pu . A clear dis inc ion
+be ween he FCN we used for he non-ideal vol age correc ion in he ba ery model and his FCN is he oscilla ory
+and periodic behavior his model has o replica e. The ro or speed residuals are unbounded in ime, and herefore he
+ne work needs o replica e he periodic behavior of such residuals regardless of he absolu e ime value, which is in line
+wi h he na ure of he dynamic sys em when reaching i s s a ionary behavior. Therefore, we used an ac iva ion func ion
+specifically designed o improve predic ions of periodic func ions from [18],
 
 
 
@@ -1078,27 +1078,27 @@ sin2 (𝑎 𝑥)
 
 
 
-where 𝑎 is a hyper-parameter to be trained together with the neural network weights and biases. More details can
-be found in the original paper [18]. In our off-line testing this activation function has proven to be very effective at
-representing periodic behavior, albeit we were not able to obtain the desired fitting of the residuals as described in
-Section IV.
+where 𝑎 is a hyper-parame er o be rained oge her wi h he neural ne work weigh s and biases. More de ails can
+be found in he original paper [18]. In our off-line es ing his ac iva ion func ion has proven o be very effec ive a 
+represen ing periodic behavior, albei we were no able o ob ain he desired fi ing of he residuals as described in
+Sec ion IV.
 
 
 
-III. Data Sets and Model Training Details
-The data set utilized to train the Li-ion battery model is composed of both low-amperage, constant discharge cycles
+III. Da a Se s and Model Training De ails
+The da a se u ilized o rain he Li-ion ba ery model is composed of bo h low-amperage, cons an discharge cycles
 
 
 
-carried out at 1A, useful to estimate the residual capacity of the battery, and step-wise random loading discharges where
-the current load is sampled from a uniform distribution 𝑖 ∼ U([1, 4]), 𝑖 ∈ R, every 300 s, which is more representative
-of a real operational profile. Figure 2a shows an example of input current and output voltage from a constant discharge
-(upper panel) and random-walk discharge (bottom panel) from Battery # 2 in the "Randomized Battery Usage" data set,
-NASA Prognostics Data Repository. The batteries were subject to several loading cycles to observe the effect of battery
-aging, however, aging is not discussed in this work; all results reported here refer to discharge curves from the early
-stages of the battery life. Although the data set is sampled at 1 Hz, we down-sample the constant discharge curves to 0.1
-Hz to speed up training, since the voltage dynamic is slow-changing when the battery is subject to constant, low current
-input values.
+carried ou a 1A, useful o es ima e he residual capaci y of he ba ery, and s ep-wise random loading discharges where
+ he curren load is sampled from a uniform dis ribu ion 𝑖 ∼ U([1, 4]), 𝑖 ∈ R, every 300 s, which is more represen a ive
+of a real opera ional profile. Figure 2a shows an example of inpu curren and ou pu vol age from a cons an discharge
+(upper panel) and random-walk discharge (bo om panel) from Ba ery # 2 in he "Randomized Ba ery Usage" da a se ,
+NASA Prognos ics Da a Reposi ory. The ba eries were subjec o several loading cycles o observe he effec of ba ery
+aging, however, aging is no discussed in his work; all resul s repor ed here refer o discharge curves from he early
+s ages of he ba ery life. Al hough he da a se is sampled a 1 Hz, we down-sample he cons an discharge curves o 0.1
+Hz o speed up raining, since he vol age dynamic is slow-changing when he ba ery is subjec o cons an , low curren 
+inpu values.
 
 
 
@@ -1108,7 +1108,7 @@ input values.
 
 
 
-https://www.nasa.gov/content/prognostics-center-of-excellence-data-set-repository
+h ps://www.nasa.gov/con en /prognos ics-cen er-of-excellence-da a-se -reposi ory
 
 
 
@@ -1117,77 +1117,77 @@ https://www.nasa.gov/content/prognostics-center-of-excellence-data-set-repositor
 
 
 
-To train the BLDC model parameters and the FCN to compensate for rotor speed prediction errors, we generated
-synthetic data from a higher-fidelity powertrain model, composed of a Li-ion Battery, ESC with PWM, three-phase
-BLDC motor, and fixed-pitch propeller. The model parameters for BLDC and ESC were taken from the datasheet of
-UAV propulsion system we used as reference, KDE. The time series used for training include throttle values, voltage
-values from the DC/DC converter (assumed constant for simplicity at this stage), and rotor speed, which is used as a
-dependent variable (output) of the powertrain. Figure 2b shows three examples of time series according to the three
-different types of input profiles we selected for training: constant (top panel), step-wise constant (middle panel), and
-sinusoidal (bottom panel) throttle. All profiles start from a stationary condition with null input and null rotor speed and
-are run for 0.5 s with a time step size of d𝑡 = 10−4 s. Throttle value(s), frequency of oscillation, and time instant(s)
-of throttle change are randomly sampled for each run. Throttle is sampled from a uniform distribution U([0.1, 1]),
-and that applies for all three types of input profiles. Frequency for the sinusoidal load is sampled between 4 and 20
-Hz following a uniform distribution, U([4, 20]). The mean value of the sinusoidal profile is sampled from the same
-distribution of the throttle, U([0.1, 1]), and the amplitude of the sinusoid is kept fixed to 1/3, with cutoffs at 0 and 1
-whenever the total signal exceeds those limits. For the step-wise constant profile, the two time instants at which the
-throttle changes are sampled within the time vector range, again following a uniform distribution. The Appendix V
-reports the details of the ESC with PWM and three-phase BLDC motor model used to generate the training data set.
+To rain he BLDC model parame ers and he FCN o compensa e for ro or speed predic ion errors, we genera ed
+syn he ic da a from a higher-fideli y power rain model, composed of a Li-ion Ba ery, ESC wi h PWM, hree-phase
+BLDC mo or, and fixed-pi ch propeller. The model parame ers for BLDC and ESC were aken from he da ashee of
+UAV propulsion sys em we used as reference, KDE. The ime series used for raining include hro le values, vol age
+values from he DC/DC conver er (assumed cons an for simplici y a his s age), and ro or speed, which is used as a
+dependen variable (ou pu ) of he power rain. Figure 2b shows hree examples of ime series according o he hree
+differen ypes of inpu profiles we selec ed for raining: cons an ( op panel), s ep-wise cons an (middle panel), and
+sinusoidal (bo om panel) hro le. All profiles s ar from a s a ionary condi ion wi h null inpu and null ro or speed and
+are run for 0.5 s wi h a ime s ep size of d𝑡 = 10−4 s. Thro le value(s), frequency of oscilla ion, and ime ins an (s)
+of hro le change are randomly sampled for each run. Thro le is sampled from a uniform dis ribu ion U([0.1, 1]),
+and ha applies for all hree ypes of inpu profiles. Frequency for he sinusoidal load is sampled be ween 4 and 20
+Hz following a uniform dis ribu ion, U([4, 20]). The mean value of he sinusoidal profile is sampled from he same
+dis ribu ion of he hro le, U([0.1, 1]), and he ampli ude of he sinusoid is kep fixed o 1/3, wi h cu offs a 0 and 1
+whenever he o al signal exceeds hose limi s. For he s ep-wise cons an profile, he wo ime ins an s a which he
+ hro le changes are sampled wi hin he ime vec or range, again following a uniform dis ribu ion. The Appendix V
+repor s he de ails of he ESC wi h PWM and hree-phase BLDC mo or model used o genera e he raining da a se .
 
 
 
-In the data training implementation, we fit the battery parameters and FCNs separately from the motor parameters and
-rotor speed correction FCN. This improves the computational efficiency and numerical stability of training. Additionally,
-since the battery parameters are independent of the motor model and are trained with separate loss functions, this
-separate optimization is equivalent to training the entire system together.
+In he da a raining implemen a ion, we fi he ba ery parame ers and FCNs separa ely from he mo or parame ers and
+ro or speed correc ion FCN. This improves he compu a ional efficiency and numerical s abili y of raining. Addi ionally,
+since he ba ery parame ers are independen of he mo or model and are rained wi h separa e loss func ions, his
+separa e op imiza ion is equivalen o raining he en ire sys em oge her.
 
 
 
-A. Battery Model Training
-The battery model is trained with four voltage-discharge curves for each battery, two constant-discharge and two
+A. Ba ery Model Training
+The ba ery model is rained wi h four vol age-discharge curves for each ba ery, wo cons an -discharge and wo
 
 
 
-random-walk discharge curves per specimen. Given inter-specimen variability, the battery model has a pair of (𝑞𝑚𝑎𝑥 ,
-𝑅0) values for each physical battery. However, the FCNs used to compensate the error of the equilibrium potential
-can be shared across all batteries, as found out in [12]. By so doing, the number of samples used to train the FCN
-is the product of the number of curves for each battery specimen times the number of specimens. Fitting required
-pre-training of the FCNs to ensure the non-ideal voltage correction would assume meaningful values throughout
-training [12]. We used a linear curve to pre-train the network for 𝑉𝑛𝑖,𝑛 to obtain a range of values similar to the one
-necessary in the battery model, and we used a piece-wise linear curve as a simplified representation of the error that
-𝑉𝑛𝑖, 𝑝 has to compensate for. Specifically, the pre-training linear curve for 𝑉𝑛𝑖,𝑛 has been defined by the two points
-(0.0,−8𝑒 − 4), (0.6, 2𝑒 − 4) while the piece-wise linear curve for 𝑉𝑛𝑖, 𝑝 has been defined as 𝑉𝑛𝑖, 𝑝 = −0.8 𝑥 + 4.3 for
+random-walk discharge curves per specimen. Given in er-specimen variabili y, he ba ery model has a pair of (𝑞𝑚𝑎𝑥 ,
+𝑅0) values for each physical ba ery. However, he FCNs used o compensa e he error of he equilibrium po en ial
+can be shared across all ba eries, as found ou in [12]. By so doing, he number of samples used o rain he FCN
+is he produc of he number of curves for each ba ery specimen imes he number of specimens. Fi ing required
+pre- raining of he FCNs o ensure he non-ideal vol age correc ion would assume meaningful values hroughou 
+ raining [12]. We used a linear curve o pre- rain he ne work for 𝑉𝑛𝑖,𝑛 o ob ain a range of values similar o he one
+necessary in he ba ery model, and we used a piece-wise linear curve as a simplified represen a ion of he error ha 
+𝑉𝑛𝑖, 𝑝 has o compensa e for. Specifically, he pre- raining linear curve for 𝑉𝑛𝑖,𝑛 has been defined by he wo poin s
+(0.0,−8𝑒 − 4), (0.6, 2𝑒 − 4) while he piece-wise linear curve for 𝑉𝑛𝑖, 𝑝 has been defined as 𝑉𝑛𝑖, 𝑝 = −0.8 𝑥 + 4.3 for
 𝑥𝑝 ∈ [0.4, 0.97] and 𝑉𝑛𝑖, 𝑝 = −19 𝑥 + 22 for 𝑥𝑝 ∈ [0.97, 1].
 
 
 
-The FCN for 𝑉𝑛𝑖, 𝑝 was pre-trained for 3000 epochs, while the FCN for 𝑉𝑛𝑖,𝑛 was trained for 1000 epochs. The
-learning rate was set to 2e-1 for both networks, and they were initialized with the standard PyTorch initialization function
-for linear layers. After being pre-trained, the FCNs were embedded in the hybrid Battery model, and both physics-derived
-parameters 𝑞𝑚𝑎𝑥 , 𝑅0 as well as weights and biases of the FCNs were trained simultaneously. We used different learning
-rates for the physics parameters and the network weights, to minimize the chance of exploding and vanishing gradients.
-We also added limits to 𝑞𝑚𝑎𝑥 , 𝑅0 to ensure they remaining within the range of physically-meaningful values. The
-parameters are summarized in Table 2.
+The FCN for 𝑉𝑛𝑖, 𝑝 was pre- rained for 3000 epochs, while he FCN for 𝑉𝑛𝑖,𝑛 was rained for 1000 epochs. The
+learning ra e was se o 2e-1 for bo h ne works, and hey were ini ialized wi h he s andard PyTorch ini ializa ion func ion
+for linear layers. Af er being pre- rained, he FCNs were embedded in he hybrid Ba ery model, and bo h physics-derived
+parame ers 𝑞𝑚𝑎𝑥 , 𝑅0 as well as weigh s and biases of he FCNs were rained simul aneously. We used differen learning
+ra es for he physics parame ers and he ne work weigh s, o minimize he chance of exploding and vanishing gradien s.
+We also added limi s o 𝑞𝑚𝑎𝑥 , 𝑅0 o ensure hey remaining wi hin he range of physically-meaningful values. The
+parame ers are summarized in Table 2.
 
 
 
-B. BLDC Motor Model Training and Rotor Speed Error Correction
-Similarly to the battery model, we chose different learning rates for the physics-derived parameters and the FCN
+B. BLDC Mo or Model Training and Ro or Speed Error Correc ion
+Similarly o he ba ery model, we chose differen learning ra es for he physics-derived parame ers and he FCN
 
 
 
-dedicated to the rotor speed error correction, summarized in Table 2. Furthermore, to show the flexibility of the
-proposed model and training framework, we implemented a custom loss function. We modified the standard loss
-function to embed our partial knowledge on the BLDC model parameters in the form of a prior distribution. We
-introduced a distance measure between parameter estimates obtained during training and our prior knowledge defined as
-a multi-variate Gaussian distribution. Because of this custom loss function, we did not include limits for the armature
-resistance or friction coefficients.
+dedica ed o he ro or speed error correc ion, summarized in Table 2. Fur hermore, o show he flexibili y of he
+proposed model and raining framework, we implemen ed a cus om loss func ion. We modified he s andard loss
+func ion o embed our par ial knowledge on he BLDC model parame ers in he form of a prior dis ribu ion. We
+in roduced a dis ance measure be ween parame er es ima es ob ained during raining and our prior knowledge defined as
+a mul i-varia e Gaussian dis ribu ion. Because of his cus om loss func ion, we did no include limi s for he arma ure
+resis ance or fric ion coefficien s.
 
 
 
-To implement this, we chose the Mahalanobis distance measure [19], since its definition is based on the same
-parameters of the multi-variate Gaussian: mean vector and covariance matrix. The total loss is then the sum of the
-root mean square error driven by the data (with added regularization) and the Mahalanobis distance of the parameter
+To implemen his, we chose he Mahalanobis dis ance measure [19], since i s defini ion is based on he same
+parame ers of he mul i-varia e Gaussian: mean vec or and covariance ma rix. The o al loss is hen he sum of he
+roo mean square error driven by he da a (wi h added regulariza ion) and he Mahalanobis dis ance of he parame er
 
 
 
@@ -1197,7 +1197,7 @@ root mean square error driven by the data (with added regularization) and the Ma
 
 
 
-https://www.kdedirect.com/products/kde4213xf-360
+h ps://www.kdedirec .com/produc s/kde4213xf-360
 
 
 
@@ -1206,7 +1206,7 @@ https://www.kdedirect.com/products/kde4213xf-360
 
 
 
-Parameter 𝑞𝑚𝑎𝑥 𝑅0 𝑤𝑉𝑛𝑖
+Parame er 𝑞𝑚𝑎𝑥 𝑅0 𝑤𝑉𝑛𝑖
 , 𝑏𝑉𝑛𝑖
 
 
@@ -1215,30 +1215,30 @@ Parameter 𝑞𝑚𝑎𝑥 𝑅0 𝑤𝑉𝑛𝑖
 
 
 
-learning rate 1.2e-3 1e-3 2e-3 5.e-3 1e-2 1e-4
-regularization multiplier 0 0 1e-10 0 0 1e-6
-limits (0.5., 2.34) · 10e4 (0.005, 1.0) - - - -
+learning ra e 1.2e-3 1e-3 2e-3 5.e-3 1e-2 1e-4
+regulariza ion mul iplier 0 0 1e-10 0 0 1e-6
+limi s (0.5., 2.34) · 10e4 (0.005, 1.0) - - - -
 
 
 
-Table 2 Training parameters for the battery, BLDC motor parameters, as well as the FCNs. Terms 𝑤, 𝑏 refer
-to weights and biases, and subscripts 𝑉𝑛𝑖 , 𝛿𝜔 indicate the FCN dedicated to the non-ideal voltage or rotor speed
-error correction, respectively.
+Table 2 Training parame ers for he ba ery, BLDC mo or parame ers, as well as he FCNs. Terms 𝑤, 𝑏 refer
+ o weigh s and biases, and subscrip s 𝑉𝑛𝑖 , 𝛿𝜔 indica e he FCN dedica ed o he non-ideal vol age or ro or speed
+error correc ion, respec ively.
 
 
 
-Battery # 1 2 3 4 5 6 7 8
+Ba ery # 1 2 3 4 5 6 7 8
 RMSE 0.0609 0.0465 0.0269 0.0253 0.0253 0.0269 0.0359 0.0934
 MAD 0.2939 0.2081 0.1435 0.1679 0.1905 0.2165 0.1859 0.2632
 
 
 
-Table 3 Voltage prediction root mean square error (RMSE) and maximum absolute deviation (MAD) in Volts,
-V. Values are averaged over 5 blind tests on random discharge profiles.
+Table 3 Vol age predic ion roo mean square error (RMSE) and maximum absolu e devia ion (MAD) in Vol s,
+V. Values are averaged over 5 blind es s on random discharge profiles.
 
 
 
-estimates from their prior distribution:
+es ima es from heir prior dis ribu ion:
 
 
 
@@ -1266,19 +1266,19 @@ estimates from their prior distribution:
 
 
 
-\
+ 
 (𝜽 − 𝝁𝜽) . (3)
 
 
 
-Vector 𝜽 contains the estimate of the BLDC model parameters at each training iteration, 𝜽 = [𝑅𝑠 , 𝐵]⊤. Vector
+Vec or 𝜽 con ains he es ima e of he BLDC model parame ers a each raining i era ion, 𝜽 = [𝑅𝑠 , 𝐵]⊤. Vec or
 𝝁𝜽 = [`𝑅𝑠
 
 
 
-, `𝐵]⊤ is the expected value of those parameters that we obtained from the manufacturer’s datasheet and
-previous off-line estimates. Matrix Σ𝜽 is the covariance matrix, derived by our guess of the potential minimum or
-maximum value of those parameters for such a motor. We assumed the covariance to be diagonal, Σ𝜽 = diag(𝜎2
+, `𝐵]⊤ is he expec ed value of hose parame ers ha we ob ained from he manufac urer’s da ashee and
+previous off-line es ima es. Ma rix Σ𝜽 is he covariance ma rix, derived by our guess of he po en ial minimum or
+maximum value of hose parame ers for such a mo or. We assumed he covariance o be diagonal, Σ𝜽 = diag(𝜎2
 
 
 
@@ -1292,37 +1292,37 @@ maximum value of those parameters for such a motor. We assumed the covariance to
 
 
 
-Although correlations may be present, we ignore them when introducing our prior knowledge in the loss function.
-Equation (3) has been written assuming 𝑛 data-points in the time series describing the rotor speed from data, �̂�, and
-its corresponding prediction from the model, 𝝎, and weights and biases of the neural network are in vectors 𝒘 and 𝒃,
-respectively. _2 is a multiplicative factor used to scale the importance of the embedded prior distribution against the
-error coming from the data, and has been chosen to be 1e-3 after observing the magnitude of the two quantities (root
-mean square error from data and Mahalanobis distance) in a few preliminary trials. An 𝑙 − 2 regularization for weights
-and biases of the FCN for the rotor speed error correction has also been added to the loss function, using _1 = 1𝑒 − 6.
-Although Bayesian optimization or other techniques for hyper-parameter optimization are readily available in literature,
-we did not investigate the optimization of _1 or _2 for the sake of brevity.
+Al hough correla ions may be presen , we ignore hem when in roducing our prior knowledge in he loss func ion.
+Equa ion (3) has been wri en assuming 𝑛 da a-poin s in he ime series describing he ro or speed from da a, �̂�, and
+i s corresponding predic ion from he model, 𝝎, and weigh s and biases of he neural ne work are in vec ors 𝒘 and 𝒃,
+respec ively. _2 is a mul iplica ive fac or used o scale he impor ance of he embedded prior dis ribu ion agains he
+error coming from he da a, and has been chosen o be 1e-3 af er observing he magni ude of he wo quan i ies (roo 
+mean square error from da a and Mahalanobis dis ance) in a few preliminary rials. An 𝑙 − 2 regulariza ion for weigh s
+and biases of he FCN for he ro or speed error correc ion has also been added o he loss func ion, using _1 = 1𝑒 − 6.
+Al hough Bayesian op imiza ion or o her echniques for hyper-parame er op imiza ion are readily available in li era ure,
+we did no inves iga e he op imiza ion of _1 or _2 for he sake of brevi y.
 
 
 
-IV. Results
+IV. Resul s
 
 
 
-A. Li-ion Battery Voltage Discharge Predictions
-A summary of voltage discharge predictions for batteries # 1 to # 8 is reported in Fig. 3. The test set for each battery
+A. Li-ion Ba ery Vol age Discharge Predic ions
+A summary of vol age discharge predic ions for ba eries # 1 o # 8 is repor ed in Fig. 3. The es se for each ba ery
 
 
 
-is composed of 5 discharge curves recorded during experiments right after the training and validation curves. This
-choice was dictated by the fact that we did not include aging effects into 𝑞𝑚𝑎𝑥 , 𝑅𝑜 for these tests (as discussed in Section
-II.A). The model performed worse on Battery #1 and #8, while performing similarly for the other batteries. Particularly
-on Battery # 8, two predictions appear very far from the experimental discharge curves (see Figure 3, bottom right,
-green and blue solid lines for the observed voltage and dashed lines for the predicted voltage). We did not identify, at
-this stage, the reason for these big discrepancies between predictions and observations of those specific discharge curves,
-as the other predictions appear in line with the observations. The prediction error for discharges of Battery #1 is also
-higher than the average, although it seems to be equally spread across all the 5 discharge curves that we have tested.
-Table 3 summarizes the RMSE and MAD for the test sets for all batteries, measured in Volts, V. Each error measure is
-the average over the 5 test curves displayed in Fig. 3.
+is composed of 5 discharge curves recorded during experimen s righ af er he raining and valida ion curves. This
+choice was dic a ed by he fac ha we did no include aging effec s in o 𝑞𝑚𝑎𝑥 , 𝑅𝑜 for hese es s (as discussed in Sec ion
+II.A). The model performed worse on Ba ery #1 and #8, while performing similarly for he o her ba eries. Par icularly
+on Ba ery # 8, wo predic ions appear very far from he experimen al discharge curves (see Figure 3, bo om righ ,
+green and blue solid lines for he observed vol age and dashed lines for he predic ed vol age). We did no iden ify, a 
+ his s age, he reason for hese big discrepancies be ween predic ions and observa ions of hose specific discharge curves,
+as he o her predic ions appear in line wi h he observa ions. The predic ion error for discharges of Ba ery #1 is also
+higher han he average, al hough i seems o be equally spread across all he 5 discharge curves ha we have es ed.
+Table 3 summarizes he RMSE and MAD for he es se s for all ba eries, measured in Vol s, V. Each error measure is
+ he average over he 5 es curves displayed in Fig. 3.
 
 
 
@@ -1339,7 +1339,7 @@ the average over the 5 test curves displayed in Fig. 3.
 
 
 0 500 1000 1500 2000 2500 3000
-time, s
+ ime, s
 
 
 
@@ -1364,24 +1364,24 @@ time, s
 
 
 vo
-lta
+l a
 ge
 ,V
 
 
 
 Model
-Data
+Da a
 
 
 
 Model
-Data
+Da a
 
 
 
 0 500 1000 1500 2000 2500 3000 3500
-time, s
+ ime, s
 
 
 
@@ -1406,14 +1406,14 @@ time, s
 
 
 vo
-lta
+l a
 ge
 ,V
 
 
 
 0 1000 2000 3000 4000
-time, s
+ ime, s
 
 
 
@@ -1442,19 +1442,19 @@ time, s
 
 
 vo
-lta
+l a
 ge
 ,V
 
 
 
 Model
-Data
+Da a
 
 
 
 0 500 1000 1500 2000 2500 3000 3500
-time, s
+ ime, s
 
 
 
@@ -1483,19 +1483,19 @@ time, s
 
 
 vo
-lta
+l a
 ge
 ,V
 
 
 
 Model
-Data
+Da a
 
 
 
 0 500 1000 1500 2000 2500 3000 3500 4000
-time, s
+ ime, s
 
 
 
@@ -1524,19 +1524,19 @@ time, s
 
 
 vo
-lta
+l a
 ge
 ,V
 
 
 
 Model
-Data
+Da a
 
 
 
 0 500 1000 1500 2000 2500 3000
-time, s
+ ime, s
 
 
 
@@ -1561,19 +1561,19 @@ time, s
 
 
 vo
-lta
+l a
 ge
 ,V
 
 
 
 Model
-Data
+Da a
 
 
 
 0 500 1000 1500 2000 2500 3000
-time, s
+ ime, s
 
 
 
@@ -1598,19 +1598,19 @@ time, s
 
 
 vo
-lta
+l a
 ge
 ,V
 
 
 
 Model
-Data
+Da a
 
 
 
 0 500 1000 1500 2000 2500
-time, s
+ ime, s
 
 
 
@@ -1635,20 +1635,20 @@ time, s
 
 
 vo
-lta
+l a
 ge
 ,V
 
 
 
 Model
-Data
+Da a
 
 
 
-Fig. 3 Voltage discharge curves observed in experiments and model predictions, in order from top left (Battery
-1) to bottom right (Battery 8). The solid colored lines represent the observed experimental values, while the
-dashed colored lines represent the model predictions.
+Fig. 3 Vol age discharge curves observed in experimen s and model predic ions, in order from op lef (Ba ery
+1) o bo om righ (Ba ery 8). The solid colored lines represen he observed experimen al values, while he
+dashed colored lines represen he model predic ions.
 
 
 
@@ -1664,9 +1664,9 @@ dashed colored lines represent the model predictions.
 
 
 
-Data
-Model, default ,
-Model, train ,
+Da a
+Model, defaul ,
+Model, rain ,
 
 
 
@@ -1674,7 +1674,7 @@ Model, train ,
 
 
 
-time, s
+ ime, s
 
 
 
@@ -1704,7 +1704,7 @@ time, s
 
 300
 ro
-to
+ o
 r
 sp
 ee
@@ -1715,22 +1715,22 @@ s
 
 
 
-<latexit sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9tOc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZtaEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epYthksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9YvltyyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JAtsZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuCtvrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3PpatOSebOYU/cD5/AJdPjM8=</latexit>
+<la exi sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9 Oc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZ aEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epY hksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9Yvl yyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JA sZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuC vrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3Ppa OSebOYU/cD5/AJdPjM8=</la exi >
 
 
 
 B
-<latexit sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoOt+O4WV1bX1jeJmaWt7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKRtFKD/c90ytX3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+TvtCcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPqt5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</latexit>
+<la exi sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoO +O4WV1bX1jeJmaW 7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKR FKD/c90y X3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+Tv CcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPq 5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</la exi >
 
 
 
 Rs
-<latexit sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9tOc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZtaEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epYthksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9YvltyyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JAtsZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuCtvrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3PpatOSebOYU/cD5/AJdPjM8=</latexit>
+<la exi sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9 Oc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZ aEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epY hksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9Yvl yyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JA sZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuC vrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3Ppa OSebOYU/cD5/AJdPjM8=</la exi >
 
 
 
 B
-<latexit sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoOt+O4WV1bX1jeJmaWt7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKRtFKD/c90ytX3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+TvtCcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPqt5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</latexit>
+<la exi sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoO +O4WV1bX1jeJmaW 7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKR FKD/c90y X3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+Tv CcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPq 5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</la exi >
 
 
 
@@ -1742,28 +1742,28 @@ Rs
 
 
 
-Data
-Model, default ,
-Model, train , , FCN
+Da a
+Model, defaul ,
+Model, rain , , FCN
 
 
 
-<latexit sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9tOc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZtaEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epYthksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9YvltyyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JAtsZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuCtvrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3PpatOSebOYU/cD5/AJdPjM8=</latexit>
+<la exi sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9 Oc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZ aEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epY hksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9Yvl yyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JA sZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuC vrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3Ppa OSebOYU/cD5/AJdPjM8=</la exi >
 
 
 
 B
-<latexit sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoOt+O4WV1bX1jeJmaWt7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKRtFKD/c90ytX3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+TvtCcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPqt5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</latexit>
+<la exi sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoO +O4WV1bX1jeJmaW 7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKR FKD/c90y X3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+Tv CcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPq 5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</la exi >
 
 
 
 Rs
-<latexit sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9tOc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZtaEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epYthksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9YvltyyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JAtsZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuCtvrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3PpatOSebOYU/cD5/AJdPjM8=</latexit>
+<la exi sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9 Oc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZ aEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epY hksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9Yvl yyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JA sZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuC vrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3Ppa OSebOYU/cD5/AJdPjM8=</la exi >
 
 
 
 B
-<latexit sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoOt+O4WV1bX1jeJmaWt7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKRtFKD/c90ytX3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+TvtCcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPqt5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</latexit>
+<la exi sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoO +O4WV1bX1jeJmaW 7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKR FKD/c90y X3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+Tv CcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPq 5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</la exi >
 
 
 
@@ -1775,7 +1775,7 @@ Rs
 
 
 
-time, s
+ ime, s
 
 
 
@@ -1808,7 +1808,7 @@ time, s
 
 
 ro
-to
+ o
 r
 sp
 ee
@@ -1823,55 +1823,55 @@ s
 
 
 
-Fig. 4 Example of rotor speed prediction on a test (unseen) curve before and after training the physical
-parameters 𝑅, 𝐵 of the BLDC motor model (a), and when training both physical parameters and neural network
-for rotor speed error correction (b).
+Fig. 4 Example of ro or speed predic ion on a es (unseen) curve before and af er raining he physical
+parame ers 𝑅, 𝐵 of he BLDC mo or model (a), and when raining bo h physical parame ers and neural ne work
+for ro or speed error correc ion (b).
 
 
 
-B. Rotor Speed Predictions
-In this sub-section we report the results of the BLDC motor model parameter learning, as well as the training of
+B. Ro or Speed Predic ions
+In his sub-sec ion we repor he resul s of he BLDC mo or model parame er learning, as well as he raining of
 
 
 
-the FCN for rotor speed error correction. A first attempt is shown in Fig. 4. First, we trained the BLDC motor model
-parameters only (Fig. 4a), and then we combined the training of the physics-derived parameters and the FCN for rotor
-speed error correction (Fig. 4b). Both results where obtained using a batch size of 4 curves randomly selected from the
-training set at each epoch. Training only 𝑅𝑠 and 𝐵 allows the model to capture the main trend of the rotor speed curve.
-The ramp-up is perfectly captured, and the amplitude of the oscillations due to the sinusoidal throttle input profile are
-captured better than with the default parameters (Fig. 4a). However, there is still some discrepancy between data and
-model, and so we additionally train the FCN to capture this residual. We find that the introduction of this FCN does not
-produce any additional benefit, as visible in Fig. 4(b). Additionally, a series of training runs performed over different
-batch sizes, learning rates, and initialization of weights and biases did not show performance improvements. These
-results were consistent over several test curves, despite only one test curve shown here for brevity. At this stage, we did
-not identify any systematic issue within the models or with the training procedure.
+ he FCN for ro or speed error correc ion. A firs a emp is shown in Fig. 4. Firs , we rained he BLDC mo or model
+parame ers only (Fig. 4a), and hen we combined he raining of he physics-derived parame ers and he FCN for ro or
+speed error correc ion (Fig. 4b). Bo h resul s where ob ained using a ba ch size of 4 curves randomly selec ed from he
+ raining se a each epoch. Training only 𝑅𝑠 and 𝐵 allows he model o cap ure he main rend of he ro or speed curve.
+The ramp-up is perfec ly cap ured, and he ampli ude of he oscilla ions due o he sinusoidal hro le inpu profile are
+cap ured be er han wi h he defaul parame ers (Fig. 4a). However, here is s ill some discrepancy be ween da a and
+model, and so we addi ionally rain he FCN o cap ure his residual. We find ha he in roduc ion of his FCN does no 
+produce any addi ional benefi , as visible in Fig. 4(b). Addi ionally, a series of raining runs performed over differen 
+ba ch sizes, learning ra es, and ini ializa ion of weigh s and biases did no show performance improvemen s. These
+resul s were consis en over several es curves, despi e only one es curve shown here for brevi y. A his s age, we did
+no iden ify any sys ema ic issue wi hin he models or wi h he raining procedure.
 
 
 
-In an attempt to improve fits, we then tried training the parameters 𝑅𝑠 and 𝐵 first, and then used a single training
-curve to train the FCN weights and biases. This resulted in an improved fit, as seen on two different sinusoidal-input
-curves in Figure 5. The zoomed subplots highlight the improvement of model predictions when the FCN is embedded.
-Thus, the neural network is indeed capable of compensating for (some of) the rotor speed discrepancy when trained on a
-single curve, but it converges to a sub-optimal solution when the training contains many curves as done in the previous
-test from Fig. 4 (a).
+In an a emp o improve fi s, we hen ried raining he parame ers 𝑅𝑠 and 𝐵 firs , and hen used a single raining
+curve o rain he FCN weigh s and biases. This resul ed in an improved fi , as seen on wo differen sinusoidal-inpu 
+curves in Figure 5. The zoomed subplo s highligh he improvemen of model predic ions when he FCN is embedded.
+Thus, he neural ne work is indeed capable of compensa ing for (some of) he ro or speed discrepancy when rained on a
+single curve, bu i converges o a sub-op imal solu ion when he raining con ains many curves as done in he previous
+ es from Fig. 4 (a).
 
 
 
-Based on our analyses, we speculate that this issue is caused by inconsistent error trends between the predictions from
-the physics-based model (without FCN) and observations across multiple rotor speed curves. In this case, including two
-trained physical parameters and one FCN at the end of the model, right before comparing predictions to observations,
-did not give enough flexibility to the single-phase model. It it likely that the FCN averages out the prediction error
-among multiple curves, thus producing an “average” correction that does not significantly improve any single prediction
-when compared to a model with only 𝑅𝑠 , 𝐵 as trainable parameters.
+Based on our analyses, we specula e ha his issue is caused by inconsis en error rends be ween he predic ions from
+ he physics-based model (wi hou FCN) and observa ions across mul iple ro or speed curves. In his case, including wo
+ rained physical parame ers and one FCN a he end of he model, righ before comparing predic ions o observa ions,
+did no give enough flexibili y o he single-phase model. I i likely ha he FCN averages ou he predic ion error
+among mul iple curves, hus producing an “average” correc ion ha does no significan ly improve any single predic ion
+when compared o a model wi h only 𝑅𝑠 , 𝐵 as rainable parame ers.
 
 
 
-It is possible that the discrepancy between data and model predictions may be caused by the stiffness of the
-single-phase BLDC motor model with only two trainable parameters. Adding more parameters to be trained could make
-the powertrain model more flexible and therefore compensate for the discrepancy. However, another, possible explanation
-is that the loss landscape generated by a mixture of physics-based and neural network parameters might be particularly
-challenging, making it hard to find a good local minima. In that case, careful tuning of training hyper-parameters (like
-optimizer parameters) or other training methods could be beneficial.
+I is possible ha he discrepancy be ween da a and model predic ions may be caused by he s iffness of he
+single-phase BLDC mo or model wi h only wo rainable parame ers. Adding more parame ers o be rained could make
+ he power rain model more flexible and herefore compensa e for he discrepancy. However, ano her, possible explana ion
+is ha he loss landscape genera ed by a mix ure of physics-based and neural ne work parame ers migh be par icularly
+challenging, making i hard o find a good local minima. In ha case, careful uning of raining hyper-parame ers (like
+op imizer parame ers) or o her raining me hods could be beneficial.
 
 
 
@@ -1887,7 +1887,7 @@ optimizer parameters) or other training methods could be beneficial.
 
 
 
-Data ; Model:
+Da a ; Model:
 
 
 
@@ -1895,7 +1895,7 @@ Data ; Model:
 
 
 
-time, s
+ ime, s
 
 
 
@@ -1925,7 +1925,7 @@ time, s
 
 600
 ro
-to
+ o
 r
 sp
 ee
@@ -1936,21 +1936,21 @@ s
 
 
 
-Train , <latexit sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9tOc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZtaEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epYthksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9YvltyyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JAtsZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuCtvrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3PpatOSebOYU/cD5/AJdPjM8=</latexit>
+Train , <la exi sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9 Oc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZ aEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epY hksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9Yvl yyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JA sZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuC vrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3Ppa OSebOYU/cD5/AJdPjM8=</la exi >
 
 
 
 B
-<latexit sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoOt+O4WV1bX1jeJmaWt7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKRtFKD/c90ytX3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+TvtCcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPqt5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</latexit>
+<la exi sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoO +O4WV1bX1jeJmaW 7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKR FKD/c90y X3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+Tv CcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPq 5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</la exi >
 
 
 
-Rs Train , , FCN<latexit sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9tOc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZtaEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epYthksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9YvltyyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JAtsZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuCtvrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3PpatOSebOYU/cD5/AJdPjM8=</latexit>
+Rs Train , , FCN<la exi sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9 Oc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZ aEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epY hksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9Yvl yyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JA sZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuC vrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3Ppa OSebOYU/cD5/AJdPjM8=</la exi >
 
 
 
 B
-<latexit sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoOt+O4WV1bX1jeJmaWt7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKRtFKD/c90ytX3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+TvtCcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPqt5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</latexit>
+<la exi sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoO +O4WV1bX1jeJmaW 7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKR FKD/c90y X3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+Tv CcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPq 5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</la exi >
 
 
 
@@ -1966,7 +1966,7 @@ Rs
 
 
 
-time, s
+ ime, s
 
 
 
@@ -2007,7 +2007,7 @@ time, s
 
 
 ro
-to
+ o
 r
 sp
 ee
@@ -2018,21 +2018,21 @@ s
 
 
 
-Data ; Model: Train , <latexit sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9tOc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZtaEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epYthksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9YvltyyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JAtsZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuCtvrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3PpatOSebOYU/cD5/AJdPjM8=</latexit>
+Da a ; Model: Train , <la exi sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9 Oc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZ aEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epY hksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9Yvl yyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JA sZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuC vrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3Ppa OSebOYU/cD5/AJdPjM8=</la exi >
 
 
 
 B
-<latexit sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoOt+O4WV1bX1jeJmaWt7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKRtFKD/c90ytX3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+TvtCcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPqt5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</latexit>
+<la exi sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoO +O4WV1bX1jeJmaW 7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKR FKD/c90y X3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+Tv CcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPq 5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</la exi >
 
 
 
-Rs Train , , FCN<latexit sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9tOc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZtaEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epYthksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9YvltyyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JAtsZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuCtvrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3PpatOSebOYU/cD5/AJdPjM8=</latexit>
+Rs Train , , FCN<la exi sha1_base64="nHV6ZkUj2uHQz28RjqNxNOP9 Oc=">AAAB6HicbVDLTgJBEOzFF+IL9ehlIjHxRHYNUY8ELx4hkUcCGzI79MLI7OxmZ aEEL7AiweN8eonefNvHGAPClbSSaWqO91dQSK4Nq777eQ2Nre2d/K7hb39g8Oj4vFJS8epY hksYhVJ6AaBZfYNNwI7CQKaRQIbAfju7nffkKleSwfzCRBP6JDyUPOqLFSo9Yvl yyuwBZJ15GSpCh3i9+9QYxSyOUhgmqdddzE+NPqTKcCZwVeqnGhLIxHWLXUkkj1P50ceiMXFhlQMJY2ZKGLNTfE1MaaT2JA sZUTPSq95c/M/rpia89adcJqlByZaLwlQQE5P512TAFTIjJpZQpri9lbARVZQZm03BhuC vrxOWldl77pcaVRK1VoWRx7O4BwuwYMbqMI91KEJDBCe4RXenEfnxXl3Ppa OSebOYU/cD5/AJdPjM8=</la exi >
 
 
 
 B
-<latexit sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoOt+O4WV1bX1jeJmaWt7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKRtFKD/c90ytX3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+TvtCcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPqt5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</latexit>
+<la exi sha1_base64="8qD5qn3LR7w4mmqE9M8EHDT2fxE=">AAAB6nicbVDLSgNBEOyNrxhfUY9eBoPgKeyKqMegF4/xkQckS5idzCZDZmeXmV4hLPkELx4U8eoXefNvnCR70MSChqKqm+6uIJHCoO +O4WV1bX1jeJmaW 7Z3evvH/QNHGqGW+wWMa6HVDDpVC8gQIlbyea0yiQvBWMbqZ+64lrI2L1iOOE+xEdKBEKR FKD/c90y X3Ko7A1kmXk4qkKPeK391+zFLI66QSWpMx3MT9DOqUTDJJ6VuanhC2YgOeMdSRSNu/Gx26oScWKVPwljbUkhm6u+JjEbGjKPAdkYUh2bRm4r/eZ0Uwys/EypJkSs2XxSmkmBMpn+Tv CcoRxbQpkW9lbChlRThjadkg3BW3x5mTTPq 5F9fzuvFK7zuMowhEcwyl4cAk1uIU6NIDBAJ7hFd4c6bw4787HvLXg5DOH8AfO5w84wo3F</la exi >
 
 
 
@@ -2044,61 +2044,61 @@ Rs
 
 
 
-Fig. 5 Two examples of model predictions using a single curve as training data. The dashed orange line refers to
-the model without FCN for rotor speed error correction, while the dash-dotted red line refers to the full model
-where both 𝑅𝑠 , 𝐵 and the FCN are trained.
+Fig. 5 Two examples of model predic ions using a single curve as raining da a. The dashed orange line refers o
+ he model wi hou FCN for ro or speed error correc ion, while he dash-do ed red line refers o he full model
+where bo h 𝑅𝑠 , 𝐵 and he FCN are rained.
 
 
 
 V. Conclusion
-This paper presented the application of a hybrid physics-informed machine learning approach to a powertrain system
+This paper presen ed he applica ion of a hybrid physics-informed machine learning approach o a power rain sys em
 
 
 
-representative of those that can be found in small UAVs. The approach leveraged the PyTorch deep learning library and,
-thanks to its automatic differentiation capability, allowed learning both physics-derived parameters as well as weights
-and biases of neural networks strategically placed within the empirical model. The powertrain model can be seen as a
-system-of-system model, albeit the sub-system models are simple, and this work allowed us to analyze advantages and
-challenges related to the implementation of the proposed approach.
+represen a ive of hose ha can be found in small UAVs. The approach leveraged he PyTorch deep learning library and,
+ hanks o i s au oma ic differen ia ion capabili y, allowed learning bo h physics-derived parame ers as well as weigh s
+and biases of neural ne works s ra egically placed wi hin he empirical model. The power rain model can be seen as a
+sys em-of-sys em model, albei he sub-sys em models are simple, and his work allowed us o analyze advan ages and
+challenges rela ed o he implemen a ion of he proposed approach.
 
 
 
-One such difficulty is network pre-training. We found that if neural networks are deep inside the model, pre-training
-is necessary to successfully train the whole hybrid model. Without pre-training, the random output of the neural
-network, caused by the random initialization of its weights, produces values that are not meaningful for the rest of the
-physics-driven model. In the example shown here, we had a basic understanding of values and trend of the non-ideal
-voltage correction term, which helped us set up an effective pre-training stage. But this step can be challenging in cases
-where there is no knowledge of what the neural networks output is supposed to be.
+One such difficul y is ne work pre- raining. We found ha if neural ne works are deep inside he model, pre- raining
+is necessary o successfully rain he whole hybrid model. Wi hou pre- raining, he random ou pu of he neural
+ne work, caused by he random ini ializa ion of i s weigh s, produces values ha are no meaningful for he res of he
+physics-driven model. In he example shown here, we had a basic unders anding of values and rend of he non-ideal
+vol age correc ion erm, which helped us se up an effec ive pre- raining s age. Bu his s ep can be challenging in cases
+where here is no knowledge of wha he neural ne works ou pu is supposed o be.
 
 
 
-Another challenge is driven by the simultaneous training of physics-derived parameters and network weights and
-biases, as we observed in the rotor speed prediction case. This work has shown mixed results. In the battery model, the
-simultaneous training of 𝑞𝑚𝑎𝑥 , 𝑅0 and the FCNs for voltage error correction converged to results that can be considered
-acceptable for voltage discharge prediction. However, the simultaneous training of 𝑅𝑠 , 𝐵 and the FCN for rotor speed
-error correction in the motor model did not produce the desired outcome, with the effect of the FCN being almost
-negligible if not trained on a single curve after 𝑅𝑠 and 𝐵 were already trained. As we speculated earlier, this result
-might be caused by the stiffness of the model we chose, thus deserving further study.
+Ano her challenge is driven by he simul aneous raining of physics-derived parame ers and ne work weigh s and
+biases, as we observed in he ro or speed predic ion case. This work has shown mixed resul s. In he ba ery model, he
+simul aneous raining of 𝑞𝑚𝑎𝑥 , 𝑅0 and he FCNs for vol age error correc ion converged o resul s ha can be considered
+accep able for vol age discharge predic ion. However, he simul aneous raining of 𝑅𝑠 , 𝐵 and he FCN for ro or speed
+error correc ion in he mo or model did no produce he desired ou come, wi h he effec of he FCN being almos 
+negligible if no rained on a single curve af er 𝑅𝑠 and 𝐵 were already rained. As we specula ed earlier, his resul 
+migh be caused by he s iffness of he model we chose, hus deserving fur her s udy.
 
 
 
-We also observed slow convergence of the model due to the dynamic nature of the system. By using a deep learning
-library like PyTorch, both battery and motor dynamic equations need to be solved by integrating forward in time,
-replicating the forward propagation pass of a recurrent neural network cell. Therefore, all input curves (current and
-throttle profiles) have to be fed sequentially to the model. This makes the training fairly slow when compared against
-pure data-driven models. This is likely to be caused by the forward pass of the physics model and the computation
-of the gradient through physics-derived equations, which is typically more complicated than standard neural network
-architectures. Its complexity increases with the complexity of the model, thus suggesting that training large hybrid
-models might require GPUs or other advanced computing hardware. It should also be noticed, however, that other
-implementations of the Li-ion battery model in Tensorflow has shown much faster computation time, at the cost of less
-flexibility of implementation.
+We also observed slow convergence of he model due o he dynamic na ure of he sys em. By using a deep learning
+library like PyTorch, bo h ba ery and mo or dynamic equa ions need o be solved by in egra ing forward in ime,
+replica ing he forward propaga ion pass of a recurren neural ne work cell. Therefore, all inpu curves (curren and
+ hro le profiles) have o be fed sequen ially o he model. This makes he raining fairly slow when compared agains 
+pure da a-driven models. This is likely o be caused by he forward pass of he physics model and he compu a ion
+of he gradien hrough physics-derived equa ions, which is ypically more complica ed han s andard neural ne work
+archi ec ures. I s complexi y increases wi h he complexi y of he model, hus sugges ing ha raining large hybrid
+models migh require GPUs or o her advanced compu ing hardware. I should also be no iced, however, ha o her
+implemen a ions of he Li-ion ba ery model in Tensorflow has shown much fas er compu a ion ime, a he cos of less
+flexibili y of implemen a ion.
 
 
 
-Future steps of this work include a deeper analysis of the training of the FCN for rotor speed error correction, to
-understand the reason why the FCN cannot generalize the function learned from the residuals. After some preliminary
-tests, we observed that the architecture for the FCN used for the rotor speed error correction is capable of predicting
-complex residual functions. However, the successful training was performed off-line by treating the residuals as a
+Fu ure s eps of his work include a deeper analysis of he raining of he FCN for ro or speed error correc ion, o
+unders and he reason why he FCN canno generalize he func ion learned from he residuals. Af er some preliminary
+ es s, we observed ha he archi ec ure for he FCN used for he ro or speed error correc ion is capable of predic ing
+complex residual func ions. However, he successful raining was performed off-line by rea ing he residuals as a
 
 
 
@@ -2114,40 +2114,40 @@ complex residual functions. However, the successful training was performed off-l
 
 
 
-mapping function between input variables (𝑡, 𝜔𝑅𝑠 ,𝐵, 𝑉, 𝑡ℎ) and observed rotor speed. In addition, the single-phase
-BLDC motor model might require more parameters, other than 𝑅𝑠 and 𝐵, to be trained to better fit the observations
-from the three-phase model. This might allow the FCN to focus on the oscillatory residuals and avoid compensating for
-biases. Training the model on real powertrain data obtained in a laboratory environment would then help us evaluate the
-prediction performance of the model for future diagnostic applications.
+mapping func ion be ween inpu variables (𝑡, 𝜔𝑅𝑠 ,𝐵, 𝑉, 𝑡ℎ) and observed ro or speed. In addi ion, he single-phase
+BLDC mo or model migh require more parame ers, o her han 𝑅𝑠 and 𝐵, o be rained o be er fi he observa ions
+from he hree-phase model. This migh allow he FCN o focus on he oscilla ory residuals and avoid compensa ing for
+biases. Training he model on real power rain da a ob ained in a labora ory environmen would hen help us evalua e he
+predic ion performance of he model for fu ure diagnos ic applica ions.
 
 
 
-Despite these challenges and future extensions, the H-PINN work presented here provides a novel, hybrid approach
-to modeling aircraft electric propulsion systems. The embedding of the models in the PyTorch deep learning framework
-allowed a modular approach where physics-derived or empirical parameters and data-driven kernels can be trained
-simultaneously without the need for separate fitting methods. The dynamic nature of PyTorch graphs allow the forward
-integration in time with no restriction of length of time series as well as the use of variable d𝑡 during the simulation, which
-is another advantage for physical and engineering system models when compared to other deep learning frameworks
-like TensorFlow. We are expecting, in the near future, to capture the nominal dynamics of a UAV powertrain system
-with this modeling approach and to further investigate fault detection and diagnostic capabilities.
+Despi e hese challenges and fu ure ex ensions, he H-PINN work presen ed here provides a novel, hybrid approach
+ o modeling aircraf elec ric propulsion sys ems. The embedding of he models in he PyTorch deep learning framework
+allowed a modular approach where physics-derived or empirical parame ers and da a-driven kernels can be rained
+simul aneously wi hou he need for separa e fi ing me hods. The dynamic na ure of PyTorch graphs allow he forward
+in egra ion in ime wi h no res ric ion of leng h of ime series as well as he use of variable d𝑡 during he simula ion, which
+is ano her advan age for physical and engineering sys em models when compared o o her deep learning frameworks
+like TensorFlow. We are expec ing, in he near fu ure, o cap ure he nominal dynamics of a UAV power rain sys em
+wi h his modeling approach and o fur her inves iga e faul de ec ion and diagnos ic capabili ies.
 
 
 
 Appendix
-This section summarizes the details of the electronic speed controller and three-phase motor model used to generate
+This sec ion summarizes he de ails of he elec ronic speed con roller and hree-phase mo or model used o genera e
 
 
 
-the dataset.
+ he da ase .
 
 
 
-A. Three-Phase BLDC Motor Model
-The synthetic data used to train the powertrain model were generated using a typical first-order, linear vector equation
+A. Three-Phase BLDC Mo or Model
+The syn he ic da a used o rain he power rain model were genera ed using a ypical firs -order, linear vec or equa ion
 
 
 
-that links the three phase current, three-phase voltage, and back-EMF voltage of the motor:
+ ha links he hree phase curren , hree-phase vol age, and back-EMF vol age of he mo or:
 
 
 
@@ -2158,24 +2158,24 @@ d𝑡
 
 
 
-where the vector terms represent three-phase quantities: 𝑽 = [𝑉𝑎, 𝑉𝑏, 𝑉𝑐]⊤, 𝒊 = [𝑖𝑎, 𝑖𝑏, 𝑖𝑐]⊤, and 𝒆 = [𝑒𝑎, 𝑒𝑏, 𝑒𝑐]⊤.
-Matrices 𝑅𝑠 and 𝐿𝑀 are diagonal and constant, and indicate the stator resistance and inductance, respectively. Particularly,
-matrix 𝐿𝑀 has been “diagonalized” by assuming that the self-inductance of the winding is the same for all three phases
-and a non salient rotor, such that the reluctance of the rotor is constant [20]. The back-EMF voltage equation is given by
-the flux linkage _𝑚 times the rotor speed 𝜔 and the vector-valued trapezoidal function 𝒇 𝑠 (\),
+where he vec or erms represen hree-phase quan i ies: 𝑽 = [𝑉𝑎, 𝑉𝑏, 𝑉𝑐]⊤, 𝒊 = [𝑖𝑎, 𝑖𝑏, 𝑖𝑐]⊤, and 𝒆 = [𝑒𝑎, 𝑒𝑏, 𝑒𝑐]⊤.
+Ma rices 𝑅𝑠 and 𝐿𝑀 are diagonal and cons an , and indica e he s a or resis ance and induc ance, respec ively. Par icularly,
+ma rix 𝐿𝑀 has been “diagonalized” by assuming ha he self-induc ance of he winding is he same for all hree phases
+and a non salien ro or, such ha he reluc ance of he ro or is cons an [20]. The back-EMF vol age equa ion is given by
+ he flux linkage _𝑚 imes he ro or speed 𝜔 and he vec or-valued rapezoidal func ion 𝒇 𝑠 ( ),
 
 
 
-𝒆 = 𝜔_𝑚 𝒇 𝑠 (\) . (5)
+𝒆 = 𝜔_𝑚 𝒇 𝑠 ( ) . (5)
 
 
 
-For completeness, we report in Eq. (6) the trapezoidal function we used, as many options according to the type of motor
-are available in literature.
+For comple eness, we repor in Eq. (6) he rapezoidal func ion we used, as many op ions according o he ype of mo or
+are available in li era ure.
 
 
 
-𝒇 𝑠 (\) =
+𝒇 𝑠 ( ) =
 
 
 
@@ -2183,15 +2183,15 @@ are available in literature.
 
 
 
-[1,−1,−𝜋/6 \ + 1] if 0 < \ ≤ 𝜋/3
-[1, 𝜋/6 (\ − 𝜋/3) − 1,−1] if 𝜋/3 < \ ≤ 2𝜋/3
-[−𝜋/6 (\ − 2𝜋/3) + 1, 1,−1] if 2𝜋/3 < \ ≤ 𝜋
+[1,−1,−𝜋/6 + 1] if 0 < ≤ 𝜋/3
+[1, 𝜋/6 ( − 𝜋/3) − 1,−1] if 𝜋/3 < ≤ 2𝜋/3
+[−𝜋/6 ( − 2𝜋/3) + 1, 1,−1] if 2𝜋/3 < ≤ 𝜋
 
 
 
-[−1, 1, 𝜋/6 (\ − 𝜋) − 1] if 𝜋 < \ ≤ 4𝜋/3
-[−1,−𝜋/6 (\ − 3𝜋/2) + 1, 1] if 4𝜋/3 < \ ≤ 5𝜋/3
-[𝜋/6 (\ − 5𝜋/6) − 1,−1, 1] otherwise
+[−1, 1, 𝜋/6 ( − 𝜋) − 1] if 𝜋 < ≤ 4𝜋/3
+[−1,−𝜋/6 ( − 3𝜋/2) + 1, 1] if 4𝜋/3 < ≤ 5𝜋/3
+[𝜋/6 ( − 5𝜋/6) − 1,−1, 1] o herwise
 
 
 
@@ -2199,8 +2199,8 @@ are available in literature.
 
 
 
-The electromagnetic torque driving the motor is the sum of the product of in-phase back-EMF and current values divided
-by the rotor speed, Eq. (7). The mechanical equation is the same as the single-phase BLDC motor model, Eq. (8).
+The elec romagne ic orque driving he mo or is he sum of he produc of in-phase back-EMF and curren values divided
+by he ro or speed, Eq. (7). The mechanical equa ion is he same as he single-phase BLDC mo or model, Eq. (8).
 
 
 
@@ -2243,18 +2243,18 @@ d𝑡
 
 
 
-B. Electronic Speed Controller with Pulse-Width Modulation
-The ESC necessary to simulate the three-phase motor model is composed of the PWM unit that produces a
+B. Elec ronic Speed Con roller wi h Pulse-Wid h Modula ion
+The ESC necessary o simula e he hree-phase mo or model is composed of he PWM uni ha produces a
 
 
 
-high-frequency square wave to modulate the input voltage to the motor, and the commutation logic that defines the
-three-phase voltages 𝑉𝑎, 𝑉𝑏, 𝑉𝑐 according to the rotor position \. We used a commutation logic vector 𝑭(\) given by
-the following condition equation:
+high-frequency square wave o modula e he inpu vol age o he mo or, and he commu a ion logic ha defines he
+ hree-phase vol ages 𝑉𝑎, 𝑉𝑏, 𝑉𝑐 according o he ro or posi ion . We used a commu a ion logic vec or 𝑭( ) given by
+ he following condi ion equa ion:
 
 
 
-𝑭(\) =
+𝑭( ) =
 
 
 
@@ -2262,15 +2262,15 @@ the following condition equation:
 
 
 
-[1,−1, 0] if 0 < \ ≤ 𝜋/3
-[1, 0,−1] if 𝜋/3 < \ ≤ 2𝜋/3
-[0, 1,−1] if 2𝜋/3 < \ ≤ 𝜋
+[1,−1, 0] if 0 < ≤ 𝜋/3
+[1, 0,−1] if 𝜋/3 < ≤ 2𝜋/3
+[0, 1,−1] if 2𝜋/3 < ≤ 𝜋
 
 
 
-[−1, 1, 0] if 𝜋 < \ ≤ 4𝜋/3
-[−1, 0, 1] if 4𝜋/3 < \ ≤ 5𝜋/3
-[0,−1, 1] otherwise
+[−1, 1, 0] if 𝜋 < ≤ 4𝜋/3
+[−1, 0, 1] if 4𝜋/3 < ≤ 5𝜋/3
+[0,−1, 1] o herwise
 
 
 
@@ -2278,81 +2278,81 @@ the following condition equation:
 
 
 
-It should be noticed that the choice of 𝑭(\) is dictated by the back-emf function 𝒇 𝑠 (\) from (6). The pulse-width
-modulated signal is replicated using a square wave with carrier frequency between 16 kHz and 32 kHz, according to the
-specification from the BLDC motor manufacturer KDE. As mentioned in Section II, the width of the carrier wave which
-is “on” is dictated by the input throttle.
+I should be no iced ha he choice of 𝑭( ) is dic a ed by he back-emf func ion 𝒇 𝑠 ( ) from (6). The pulse-wid h
+modula ed signal is replica ed using a square wave wi h carrier frequency be ween 16 kHz and 32 kHz, according o he
+specifica ion from he BLDC mo or manufac urer KDE. As men ioned in Sec ion II, he wid h of he carrier wave which
+is “on” is dic a ed by he inpu hro le.
 
 
 
-Acknowledgments
-This work was supported by the System-Wide Safety (SWS) project under the Airspace Operations and Safety
+Acknowledgmen s
+This work was suppor ed by he Sys em-Wide Safe y (SWS) projec under he Airspace Opera ions and Safe y
 
 
 
-Program within the NASA Aeronautics Research Mission Directorate (ARMD). The contribution of Matteo Corbetta
-was performed under NASA Ames Research Center, Contract No. 80ARC020D0010.
+Program wi hin he NASA Aeronau ics Research Mission Direc ora e (ARMD). The con ribu ion of Ma eo Corbe a
+was performed under NASA Ames Research Cen er, Con rac No. 80ARC020D0010.
 
 
 
 References
-[1] Daw, A., Karpatne, A., Watkins, W., Read, J., and Kumar, V., “Physics-guided neural networks (pgnn): An application in lake
+[1] Daw, A., Karpa ne, A., Wa kins, W., Read, J., and Kumar, V., “Physics-guided neural ne works (pgnn): An applica ion in lake
 
 
 
-temperature modeling,” arXiv preprint arXiv:1710.11431, 2017.
+ empera ure modeling,” arXiv preprin arXiv:1710.11431, 2017.
 
 
 
-[2] Raissi, M., Perdikaris, P., and Karniadakis, G. E., “Physics-informed neural networks: A deep learning framework for solving
-forward and inverse problems involving nonlinear partial differential equations,” Journal of Computational physics, Vol. 378,
+[2] Raissi, M., Perdikaris, P., and Karniadakis, G. E., “Physics-informed neural ne works: A deep learning framework for solving
+forward and inverse problems involving nonlinear par ial differen ial equa ions,” Journal of Compu a ional physics, Vol. 378,
 2019, pp. 686–707.
 
 
 
-[3] Lu, L., Jin, P., Pang, G., Zhang, Z., and Karniadakis, G. E., “Learning nonlinear operators via DeepONet based on the universal
-approximation theorem of operators,” Nature Machine Intelligence, Vol. 3, No. 3, 2021, pp. 218–229.
+[3] Lu, L., Jin, P., Pang, G., Zhang, Z., and Karniadakis, G. E., “Learning nonlinear opera ors via DeepONe based on he universal
+approxima ion heorem of opera ors,” Na ure Machine In elligence, Vol. 3, No. 3, 2021, pp. 218–229.
 
 
 
-[4] Jidling, C., Wahlström, N., Wills, A., and Schön, T. B., “Linearly constrained Gaussian processes,” Advances in Neural
-Information Processing Systems, Vol. 30, 2017.
+[4] Jidling, C., Wahls röm, N., Wills, A., and Schön, T. B., “Linearly cons rained Gaussian processes,” Advances in Neural
+Informa ion Processing Sys ems, Vol. 30, 2017.
 
 
 
-[5] Brunton, S. L., Proctor, J. L., and Kutz, J. N., “Discovering governing equations from data by sparse identification of nonlinear
-dynamical systems,” Proceedings of the national academy of sciences, Vol. 113, No. 15, 2016, pp. 3932–3937.
+[5] Brun on, S. L., Proc or, J. L., and Ku z, J. N., “Discovering governing equa ions from da a by sparse iden ifica ion of nonlinear
+dynamical sys ems,” Proceedings of he na ional academy of sciences, Vol. 113, No. 15, 2016, pp. 3932–3937.
 
 
 
-[6] Rudy, S. H., Brunton, S. L., Proctor, J. L., and Kutz, J. N., “Data-driven discovery of partial differential equations,” Science
+[6] Rudy, S. H., Brun on, S. L., Proc or, J. L., and Ku z, J. N., “Da a-driven discovery of par ial differen ial equa ions,” Science
 advances, Vol. 3, No. 4, 2017, p. e1602614.
 
 
 
-[7] Champion, K., Lusch, B., Kutz, J. N., and Brunton, S. L., “Data-driven discovery of coordinates and governing equations,”
-Proceedings of the National Academy of Sciences, Vol. 116, No. 45, 2019, pp. 22445–22451.
+[7] Champion, K., Lusch, B., Ku z, J. N., and Brun on, S. L., “Da a-driven discovery of coordina es and governing equa ions,”
+Proceedings of he Na ional Academy of Sciences, Vol. 116, No. 45, 2019, pp. 22445–22451.
 
 
 
-[8] Nascimento, R. G., Fricke, K., and Viana, F. A. C., “A tutorial on solving ordinary differential equations using Python and
-hybrid physics-informed neural networks,” Engineering Applications of Artificial Intelligence, Vol. 96, 2020, p. 103996.
-https://doi.org/10.1016/j.engappai.2020.103996, URL https://www.sciencedirect.com/science/article/pii/S095219762030292X.
+[8] Nascimen o, R. G., Fricke, K., and Viana, F. A. C., “A u orial on solving ordinary differen ial equa ions using Py hon and
+hybrid physics-informed neural ne works,” Engineering Applica ions of Ar ificial In elligence, Vol. 96, 2020, p. 103996.
+h ps://doi.org/10.1016/j.engappai.2020.103996, URL h ps://www.sciencedirec .com/science/ar icle/pii/S095219762030292X.
 
 
 
-[9] Dourado, A., and Viana, F. A., “Physics-informed neural networks for missing physics estimation in cumulative damage models:
-a case study in corrosion fatigue,” Journal of Computing and Information Science in Engineering, Vol. 20, No. 6, 2020.
+[9] Dourado, A., and Viana, F. A., “Physics-informed neural ne works for missing physics es ima ion in cumula ive damage models:
+a case s udy in corrosion fa igue,” Journal of Compu ing and Informa ion Science in Engineering, Vol. 20, No. 6, 2020.
 
 
 
-[10] Yucesan, Y. A., and Viana, F. A., “Hybrid physics-informed neural networks for main bearing fatigue prognosis with visual
-grease inspection,” Computers in Industry, Vol. 125, 2021, p. 103386.
+[10] Yucesan, Y. A., and Viana, F. A., “Hybrid physics-informed neural ne works for main bearing fa igue prognosis wi h visual
+grease inspec ion,” Compu ers in Indus ry, Vol. 125, 2021, p. 103386.
 
 
 
-[11] Yucesan, Y. A., and Viana, F. A., “A physics-informed neural network for wind turbine main bearing fatigue,” International
-Journal of Prognostics and Health Management, Vol. 11, No. 1, 2020.
+[11] Yucesan, Y. A., and Viana, F. A., “A physics-informed neural ne work for wind urbine main bearing fa igue,” In erna ional
+Journal of Prognos ics and Heal h Managemen , Vol. 11, No. 1, 2020.
 
 
 
@@ -2362,63 +2362,63 @@ Journal of Prognostics and Health Management, Vol. 11, No. 1, 2020.
 
 
 
-https://www.kdedirect.com/products/kde4213xf-360
+h ps://www.kdedirec .com/produc s/kde4213xf-360
 
 
-https://doi.org/10.1016/j.engappai.2020.103996
+h ps://doi.org/10.1016/j.engappai.2020.103996
 
 
-https://www.sciencedirect.com/science/article/pii/S095219762030292X
-
-
-
+h ps://www.sciencedirec .com/science/ar icle/pii/S095219762030292X
 
 
 
 
 
-[12] Nascimento, R. G., Corbetta, M., Kulkarni, C. S., and Viana, F. A. C., “Hybrid physics-informed neural networks for lithium-ion
-battery modeling and prognosis,” Journal of Power Sources, Vol. 513, 2021, p. 230526. https://doi.org/10.1016/j.jpowsour.
+
+
+
+[12] Nascimen o, R. G., Corbe a, M., Kulkarni, C. S., and Viana, F. A. C., “Hybrid physics-informed neural ne works for li hium-ion
+ba ery modeling and prognosis,” Journal of Power Sources, Vol. 513, 2021, p. 230526. h ps://doi.org/10.1016/j.jpowsour.
 2021.230526.
 
 
 
-[13] Daigle, M. J., and Kulkarni, C. S., “Electrochemistry-based battery modeling for prognostics,” Annual Conference of the
-Prognostics and Health Management Society, PHM Society, New Orleans, USA, 2013, p. 13 pages.
+[13] Daigle, M. J., and Kulkarni, C. S., “Elec rochemis ry-based ba ery modeling for prognos ics,” Annual Conference of he
+Prognos ics and Heal h Managemen Socie y, PHM Socie y, New Orleans, USA, 2013, p. 13 pages.
 
 
 
-[14] Bole, B., Kulkarni, C. S., and Daigle, M., “Adaptation of an electrochemistry-based Li-ion battery model to account for
-deterioration observed under randomized use,” Annual Conference of the Prognostics and Health Management Society, PHM
-Society, 2014, p. 9 pages.
+[14] Bole, B., Kulkarni, C. S., and Daigle, M., “Adap a ion of an elec rochemis ry-based Li-ion ba ery model o accoun for
+de eriora ion observed under randomized use,” Annual Conference of he Prognos ics and Heal h Managemen Socie y, PHM
+Socie y, 2014, p. 9 pages.
 
 
 
-[15] Karthikeyan, D. K., Sikha, G., and White, R. E., “Thermodynamic model development for lithium intercalation electrodes,”
+[15] Kar hikeyan, D. K., Sikha, G., and Whi e, R. E., “Thermodynamic model developmen for li hium in ercala ion elec rodes,”
 Journal of Power Sources, Vol. 185, No. 2, 2008, pp. 1398–1407.
 
 
 
-[16] Khan, W., and Nahon, M., “Toward an accurate physics-based UAV thruster model,” IEEE/ASME Transactions on Mechatronics,
+[16] Khan, W., and Nahon, M., “Toward an accura e physics-based UAV hrus er model,” IEEE/ASME Transac ions on Mecha ronics,
 Vol. 18, No. 4, 2013, pp. 1269–1279.
 
 
 
-[17] Palanisamy, R. P., Kulkarni, C. S., Corbetta, M., and Banerjee, P., “Fault detection and Performance Monitoring of Propellers in
-Electric UAV,” 2022 IEEE Aerospace Conference (AERO), IEEE, 2022, pp. 1–6.
+[17] Palanisamy, R. P., Kulkarni, C. S., Corbe a, M., and Banerjee, P., “Faul de ec ion and Performance Moni oring of Propellers in
+Elec ric UAV,” 2022 IEEE Aerospace Conference (AERO), IEEE, 2022, pp. 1–6.
 
 
 
-[18] Ziyin, L., Hartwig, T., and Ueda, M., “Neural networks fail to learn periodic functions and how to fix it,” Advances in Neural
-Information Processing Systems, Vol. 33, 2020, pp. 1583–1594.
+[18] Ziyin, L., Har wig, T., and Ueda, M., “Neural ne works fail o learn periodic func ions and how o fix i ,” Advances in Neural
+Informa ion Processing Sys ems, Vol. 33, 2020, pp. 1583–1594.
 
 
 
-[19] Mahalanobis, P. C., “On the generalized distance in statistics,” National Institute of Science of India, 1936.
+[19] Mahalanobis, P. C., “On he generalized dis ance in s a is ics,” Na ional Ins i u e of Science of India, 1936.
 
 
 
-[20] Rambabu, S., “Modeling and control of a brushless DC motor,” Master’s thesis, National Institute of Technology Rourkela,
+[20] Rambabu, S., “Modeling and con rol of a brushless DC mo or,” Mas er’s hesis, Na ional Ins i u e of Technology Rourkela,
 2007.
 
 
@@ -2429,60 +2429,60 @@ Information Processing Systems, Vol. 33, 2020, pp. 1583–1594.
 
 
 
-https://doi.org/10.1016/j.jpowsour.2021.230526
+h ps://doi.org/10.1016/j.jpowsour.2021.230526
 
 
-https://doi.org/10.1016/j.jpowsour.2021.230526
+h ps://doi.org/10.1016/j.jpowsour.2021.230526
 
 
 
- 
-Introduction
+	
+In roduc ion
 
- 
-Powertrain Architecture and Models
+	
+Power rain Archi ec ure and Models
 
- 
-Li-ion Battery
+	
+Li-ion Ba ery
 
- 
-Brush-less DC Motor
+	
+Brush-less DC Mo or
 
- 
-Electronic Speed Controller
+	
+Elec ronic Speed Con roller
 
- 
-Fixed-Pitch Propeller
+	
+Fixed-Pi ch Propeller
 
- 
-Neural Network for Rotor Speed Error Correction
-
-
- 
-Data Sets and Model Training Details
-
- 
-Battery Model Training
-
- 
-BLDC Motor Model Training and Rotor Speed Error Correction
+	
+Neural Ne work for Ro or Speed Error Correc ion
 
 
- 
-Results
+	
+Da a Se s and Model Training De ails
 
- 
-Li-ion Battery Voltage Discharge Predictions
+	
+Ba ery Model Training
 
- 
-Rotor Speed Predictions
+	
+BLDC Mo or Model Training and Ro or Speed Error Correc ion
 
 
- 
+	
+Resul s
+
+	
+Li-ion Ba ery Vol age Discharge Predic ions
+
+	
+Ro or Speed Predic ions
+
+
+	
 Conclusion
 
- 
-Three-Phase BLDC Motor Model
+	
+Three-Phase BLDC Mo or Model
 
- 
-Electronic Speed Controller with Pulse-Width Modulation
+	
+Elec ronic Speed Con roller wi h Pulse-Wid h Modula ion

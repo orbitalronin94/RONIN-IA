@@ -1,5 +1,5 @@
-Avoid/minimize datasets* with
- variable-length datatypes
+Avoid/minimize da ase s* wi h
+ variable-leng h da a ypes
 
 
 
@@ -7,9 +7,9 @@ IN31B-0653
 
 
 
-This work was supported by NASA/GSFC under Raytheon Technologies contract number 80GSFC21CA001 and does 
-not contain technology or Technical Data controlled under either the U.S. Traffic in Arms Regulations or the U.S. Export 
-Administration Regulations.
+This work was suppor ed by NASA/GSFC under Ray heon Technologies con rac number 80GSFC21CA001 and does 
+no con ain echnology or Technical Da a con rolled under ei her he U.S. Traffic in Arms Regula ions or he U.S. Expor 
+Adminis ra ion Regula ions.
 
 
 
@@ -17,31 +17,31 @@ Aleksandar Jelenak, Dana Robinson (NASA EED-3/HDF Group)
 
 
 
-Strategies and Software for
-Optimizing HDF5/netCDF-4 Files in the Cloud
+S ra egies and Sof ware for
+Op imizing HDF5/ne CDF-4 Files in he Cloud
 
 
 
-Cloud-optimized 
-HDF5/netCDF-4 file
+Cloud-op imized 
+HDF5/ne CDF-4 file
 
 
 
-Consolidated internal 
-metadata
+Consolida ed in ernal 
+me ada a
 
 
 
-Requirement
-Large dataset* chunk size
+Requiremen 
+Large da ase * chunk size
 
 
 
-Requirement
+Requiremen 
 
 
 
-Recommendation
+Recommenda ion
 
 
 
@@ -49,25 +49,25 @@ Recommendation
 
 
 
-Strategy #1: 
-Create file using Paged Aggregation
-• Internal file metadata and raw (dataset) 
+S ra egy #1: 
+Crea e file using Paged Aggrega ion
+• In ernal file me ada a and raw (da ase ) 
 
 
 
-data are stored as separate file pages 
+da a are s ored as separa e file pages 
 of user-specified size.
-• Content is always read one file page at 
+• Con en is always read one file page a 
 
 
 
-a time.
-• Set file page size large enough for 
+a ime.
+• Se file page size large enough for 
 
 
 
-entire internal metadata or 4—8 
-dataset chunks.
+en ire in ernal me ada a or 4—8 
+da ase chunks.
 
 
 
@@ -76,163 +76,163 @@ Page Buffering when reading from file
 
 
 
-internal metadata and raw data file 
+in ernal me ada a and raw da a file 
 pages.
 • Page buffer size ≥ one file page size.
-• This cache can significantly reduce the 
+• This cache can significan ly reduce he 
 
 
 
-number of data read operations.
+number of da a read opera ions.
 
 
 
-Strategy #2: 
-Create file with a large metadata block
-• A metadata block is a contiguous block 
+S ra egy #2: 
+Crea e file wi h a large me ada a block
+• A me ada a block is a con iguous block 
 
 
 
-of bytes in a file for internal metadata.
-• Large enough metadata block can 
+of by es in a file for in ernal me ada a.
+• Large enough me ada a block can 
 
 
 
-gather all internal metadata in one 
-place at the start of the file.
-• The library caches first 16MiB* of the 
+ga her all in ernal me ada a in one 
+place a he s ar of he file.
+• The library caches firs 16MiB* of he 
 
 
 
-file so reading info from the metadata 
-block is very fast. Strategy #3: 
+file so reading info from he me ada a 
+block is very fas . S ra egy #3: 
 
 
 
-File content description in its user block
-• User block are bytes at the beginning of a 
+File con en descrip ion in i s user block
+• User block are by es a he beginning of a 
 
 
 
-file that HDF5 library skips so any content 
-can be stored.
-• Put file content description of any format in 
+file ha HDF5 library skips so any con en 
+can be s ored.
+• Pu file con en descrip ion of any forma in 
 
 
 
-the file’s user block. (Compressed is fine.)
-• Get the user block content with one simple 
+ he file’s user block. (Compressed is fine.)
+• Ge he user block con en wi h one simple 
 
 
 
-data read, even without HDF5 library.
+da a read, even wi hou HDF5 library.
 
 
 
-Create file with a 2MiB user block
+Crea e file wi h a 2MiB user block
 Example #1:
-import h5netcdf
-h5netcdf.File(‘co.nc', mode='w', userblock_size=2*1024*1024 ...)
+impor h5ne cdf
+h5ne cdf.File(‘co.nc', mode='w', userblock_size=2*1024*1024 ...)
 
 
 
 Example #2:
-import h5py
+impor h5py
 h5py.File('co.h5', mode='w', userblock_size=2*1024*1024, ...)
 
 
 
-*mebibytes
+*mebiby es
 
 
 
-Write content to user block
+Wri e con en o user block
 Example #1:
-with open('co.h5', 'wb') as bin_file:
- bin_file.write(b'Hello user block!’)
+wi h open('co.h5', 'wb') as bin_file:
+ bin_file.wri e(b'Hello user block!’)
 
 
 
 Example #2:
-$ h5repack --block=NUM_BYTES --ublock=user_block.file in.h5 out.h5
+$ h5repack --block=NUM_BYTES --ublock=user_block.file in.h5 ou .h5
 
 
 
-Create file with an 8MiB metadata block
+Crea e file wi h an 8MiB me ada a block
 Example #1:
-import h5netcdf
-h5netcdf.File('co.nc', mode='w', meta_block_size=8*1024*1024, ...)
+impor h5ne cdf
+h5ne cdf.File('co.nc', mode='w', me a_block_size=8*1024*1024, ...)
 
 
 
 Example #2:
-import h5py
-h5py.File('co.h5', mode='w', meta_block_size=8*1024*1024, ...)
+impor h5py
+h5py.File('co.h5', mode='w', me a_block_size=8*1024*1024, ...)
 
 
 
 Example #3:
-$ h5repack –-metadata_block_size=NUM_BYTES in.h5 out.h5
+$ h5repack –-me ada a_block_size=NUM_BYTES in.h5 ou .h5
 
 
 
-Create a paged aggregated file with 16MiB file page size:
+Crea e a paged aggrega ed file wi h 16MiB file page size:
 
 
 
 Example #1:
-import h5netcdf
-h5netcdf.File('co.nc', mode='w', fs_strategy='page', fs_page_size=16*1024*1024, ...)
+impor h5ne cdf
+h5ne cdf.File('co.nc', mode='w', fs_s ra egy='page', fs_page_size=16*1024*1024, ...)
 
 
 
 Example #2:
-import h5py
-h5py.File('co.h5', mode='w', fs_strategy='page,' fs_page_size=8*1024*1024, ...)
+impor h5py
+h5py.File('co.h5', mode='w', fs_s ra egy='page,' fs_page_size=8*1024*1024, ...)
 
 
 
 Example #3:
-$ h5repack –S PAGE –G PAGE_SIZE_BYTES in.h5 out.h5
+$ h5repack –S PAGE –G PAGE_SIZE_BYTES in.h5 ou .h5
 
 
 
-Open a paged aggregated file with a 128MiB page buffer:
+Open a paged aggrega ed file wi h a 128MiB page buffer:
 
 
 
 Example #1:
-import h5netcdf
-h5netcdf.File('s3://mybucket/co.h5', mode='r', driver='ros3’, 
- page_buf_size=128*1024*1024, aws_region=b'us-west-2', ...)
+impor h5ne cdf
+h5ne cdf.File('s3://mybucke /co.h5', mode='r', driver='ros3’, 
+ page_buf_size=128*1024*1024, aws_region=b'us-wes -2', ...)
 
 
 
 Example #2:
-import h5py
-h5py.File('s3://mybucket/co.h5', mode='r', driver='ros3’, 
- page_buf_size=128*1024*1024, aws_region=b'us-west-2', ...)
+impor h5py
+h5py.File('s3://mybucke /co.h5', mode='r', driver='ros3’, 
+ page_buf_size=128*1024*1024, aws_region=b'us-wes -2', ...)
 
 
 
-• Large chunks (in bytes) reduce the overall number 
-of data read operations and improve performance.
+• Large chunks (in by es) reduce he overall number 
+of da a read opera ions and improve performance.
 • HDF5 library keeps a chunk cache for every open 
 
 
 
-dataset, which size can be individually set.
-• Keeping more chunks in the chunk cache can 
+da ase , which size can be individually se .
+• Keeping more chunks in he chunk cache can 
 
 
 
-significantly improve performance.
-• Chunk sizes of 1-4MiB* size seem optimal for both 
+significan ly improve performance.
+• Chunk sizes of 1-4MiB* size seem op imal for bo h 
 
 
 
-file system and cloud object storage.
-*mebibytes
+file sys em and cloud objec s orage.
+*mebiby es
 
 
 
@@ -240,56 +240,56 @@ file system and cloud object storage.
 
 
 
-Set 16MiB chunk cache for all datasets in a file
-Example #1: Create an HDF5 file 
-import h5py
-h5py.File('co.h5', mode='w', rdcc_nbytes=16*1024*1024, ...)
+Se 16MiB chunk cache for all da ase s in a file
+Example #1: Crea e an HDF5 file 
+impor h5py
+h5py.File('co.h5', mode='w', rdcc_nby es=16*1024*1024, ...)
 
 
 
-Example #2: Open an HDF5 file in S3 for reading (page buffer set at 128MiB, too). Applies only to files 
-created with paged aggregation.
-import h5py
-h5py.File('s3://mybucket/co.h5', mode='r', driver='ros3’, rdcc_nbytes=16*1024*1024, 
- page_buf_size=128*1024*1024, aws_region=b'us-west-2', ...)
+Example #2: Open an HDF5 file in S3 for reading (page buffer se a 128MiB, oo). Applies only o files 
+crea ed wi h paged aggrega ion.
+impor h5py
+h5py.File('s3://mybucke /co.h5', mode='r', driver='ros3’, rdcc_nby es=16*1024*1024, 
+ page_buf_size=128*1024*1024, aws_region=b'us-wes -2', ...)
 
 
 
-Example #3: Create a netCDF-4 file
-import h5netcdf
-h5netcdf.File('co.nc', mode='w', rdcc_nbytes=16*1024*1024, ...)
+Example #3: Crea e a ne CDF-4 file
+impor h5ne cdf
+h5ne cdf.File('co.nc', mode='w', rdcc_nby es=16*1024*1024, ...)
 
 
 
-Example #4: Create a netCDF-4 file in S3 for reading (also set page buffer to 128MiB). Applies only to 
-files created with paged aggregation.
-import h5netcdf as nc
-with nc.File(
- 's3://mybucket/co.h5', mode='r', driver='ros3', rdcc_nbytes=16*1024*1024, 
- page_buf_size=128*1024*1024, aws_region=b'us-west-2', ...) as f:
- dset = f.create_variable('x', ...)
+Example #4: Crea e a ne CDF-4 file in S3 for reading (also se page buffer o 128MiB). Applies only o 
+files crea ed wi h paged aggrega ion.
+impor h5ne cdf as nc
+wi h nc.File(
+ 's3://mybucke /co.h5', mode='r', driver='ros3', rdcc_nby es=16*1024*1024, 
+ page_buf_size=128*1024*1024, aws_region=b'us-wes -2', ...) as f:
+ dse = f.crea e_variable('x', ...)
 
 
 
-Set 16MiB chunk cache for only one dataset in a file
+Se 16MiB chunk cache for only one da ase in a file
 Example #1: 
-import h5py
-with h5py.File('co.h5', mode='w', ...) as f:
- dset = f.create_dataset('x', rdcc_nbytes=16*1024*1024, ...)
+impor h5py
+wi h h5py.File('co.h5', mode='w', ...) as f:
+ dse = f.crea e_da ase ('x', rdcc_nby es=16*1024*1024, ...)
 
 
 
-Example #2: Open a file in S3 for reading (page buffer set at 128MiB). Applies only to files created 
-with paged aggregation.
-import h5py
-with h5py.File('s3://mybucket/co.h5', mode='r', driver='ros3’, 
- page_buf_size=128*1024*1024, aws_region=b'us-west-2', ...) as f:
- dset = f.require_dataset('x’, ..., rdcc_nbytes=16*1024*1024)
+Example #2: Open a file in S3 for reading (page buffer se a 128MiB). Applies only o files crea ed 
+wi h paged aggrega ion.
+impor h5py
+wi h h5py.File('s3://mybucke /co.h5', mode='r', driver='ros3’, 
+ page_buf_size=128*1024*1024, aws_region=b'us-wes -2', ...) as f:
+ dse = f.require_da ase ('x’, ..., rdcc_nby es=16*1024*1024)
 
 
 
-Ingredients: 
-• Python 3.9 or later
+Ingredien s: 
+• Py hon 3.9 or la er
 • h5py 3.10
-• h5netcdf 1.3.0
+• h5ne cdf 1.3.0
 • HDF5 library 1.14.2

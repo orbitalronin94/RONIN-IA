@@ -1,85 +1,85 @@
-Ground-Based Vision Tracker for Advanced Air Mobility and
-Urban Air Mobility
+Ground-Based Vision Tracker for Advanced Air Mobili y and
+Urban Air Mobili y
 
 
 
-Evan Kawamura ∗1, Keerthana Kannan †1, Thomas Lombaerts ‡1, Vahram Stepanyan§1, Chester Dolph ¶2, and Corey
-Ippolito �1
+Evan Kawamura ∗1, Keer hana Kannan †1, Thomas Lombaer s ‡1, Vahram S epanyan§1, Ches er Dolph ¶2, and Corey
+Ippoli o �1
 
 
 
-1NASA Ames Research Center, Moffett Field, Mountain View, CA 94035
-2NASA Langley Research Center, 1 Nasa Dr, Hampton, VA 23666
+1NASA Ames Research Cen er, Moffe Field, Moun ain View, CA 94035
+2NASA Langley Research Cen er, 1 Nasa Dr, Hamp on, VA 23666
 
 
 
-Advanced Air Mobility (AAM) Air Mobility and Urban Air Mobility (UAM) require aircraft
-surveillance and monitoring for safety and security. Persistent tracking of flying objects
-provides Air Traffic Control (ATC) and Air Traffic Management (ATM) continuous coverage
-and knowledge of the national airspace system (NAS). Given the significant disparity in the
-number of AAM and UAM aircraft compared to commercial aircraft in the NAS, coupled with
-the dense AAM/UAM operations in urban environments, employing the existing ATC/ATM
-architectures poses considerable challenges. A first step in creating a similar ATC/ATM
-architecture for AAM/UAM will require ground-based and airborne-based sensors to provide
-monitoring, which will be difficult in urban environments due to GPS degradation. This paper
-proposes a vision-based tracking method with static cameras by utilizing image subtraction and
-blob detection, which avoids adding additional electromagnetic interferences in the environment
-with sensors such as radar. The ground-based vision tracker (GBVT) outputs the detected
-objects’ azimuth and elevation angles from unmanned aerial system (UAS) flight tests. Future
-and ongoing work includes sending the detected objects’ azimuth and elevation angles as inputs
-for an extended Kalman filter (EKF) to estimate the position and velocity of the detected object.
+Advanced Air Mobili y (AAM) Air Mobili y and Urban Air Mobili y (UAM) require aircraf 
+surveillance and moni oring for safe y and securi y. Persis en racking of flying objec s
+provides Air Traffic Con rol (ATC) and Air Traffic Managemen (ATM) con inuous coverage
+and knowledge of he na ional airspace sys em (NAS). Given he significan dispari y in he
+number of AAM and UAM aircraf compared o commercial aircraf in he NAS, coupled wi h
+ he dense AAM/UAM opera ions in urban environmen s, employing he exis ing ATC/ATM
+archi ec ures poses considerable challenges. A firs s ep in crea ing a similar ATC/ATM
+archi ec ure for AAM/UAM will require ground-based and airborne-based sensors o provide
+moni oring, which will be difficul in urban environmen s due o GPS degrada ion. This paper
+proposes a vision-based racking me hod wi h s a ic cameras by u ilizing image sub rac ion and
+blob de ec ion, which avoids adding addi ional elec romagne ic in erferences in he environmen 
+wi h sensors such as radar. The ground-based vision racker (GBVT) ou pu s he de ec ed
+objec s’ azimu h and eleva ion angles from unmanned aerial sys em (UAS) fligh es s. Fu ure
+and ongoing work includes sending he de ec ed objec s’ azimu h and eleva ion angles as inpu s
+for an ex ended Kalman fil er (EKF) o es ima e he posi ion and veloci y of he de ec ed objec .
 
 
 
-I. Introduction
+I. In roduc ion
 
 
 
-Advanced Air Mobility (AAM) and Urban Air Mobility (UAM) require aircraft surveillance and monitoring for
-safety and security purposes. Since there will be numerous more AAM/UAM aircraft than commercial airplanes
+Advanced Air Mobili y (AAM) and Urban Air Mobili y (UAM) require aircraf surveillance and moni oring for
+safe y and securi y purposes. Since here will be numerous more AAM/UAM aircraf han commercial airplanes
 
 
 
-flying in the airspace, it will be difficult to scale conventional Air Traffic Control (ATC) and Air Traffic Management
-(ATM) procedures and protocol for AAM/UAM concepts of operation. One way to reduce scaling complexities and
-increase efficiency is to implement distributed sensors in the enivronment for passively monitoring the airspace. Then,
-the distributed sensors can provide aircraft tracking information to the modified ATC/ATM architectures by leverging
-automatic and passive tracking capabilities. Therefore, these modified ATC/ATM architectures will have an efficient
-and scalable solution for monitoring the airspace by having increased awareness, path planning, and contingency
-management. This paper focuses on vision-based tracking with ground-based distributed sensors in the envrironment.
+flying in he airspace, i will be difficul o scale conven ional Air Traffic Con rol (ATC) and Air Traffic Managemen 
+(ATM) procedures and pro ocol for AAM/UAM concep s of opera ion. One way o reduce scaling complexi ies and
+increase efficiency is o implemen dis ribu ed sensors in he enivronmen for passively moni oring he airspace. Then,
+ he dis ribu ed sensors can provide aircraf racking informa ion o he modified ATC/ATM archi ec ures by leverging
+au oma ic and passive racking capabili ies. Therefore, hese modified ATC/ATM archi ec ures will have an efficien 
+and scalable solu ion for moni oring he airspace by having increased awareness, pa h planning, and con ingency
+managemen . This paper focuses on vision-based racking wi h ground-based dis ribu ed sensors in he envrironmen .
 
 
 
-There are research efforts for vision-based tracking. A real-time, adaptive visual algorithm with Multiple-Instance
-(MI) learning approach, Multiple-Classifier (MC) voting mechanism, and Multiple-Resolution (MR) representation
-strategy solves online learning and tracking arbitrary aircraft and intruders in the air with experimental results [1].
-Combining a vision-based target tracker with a neural network and a Kalman filter creates an adaptive target state
-estimator [2]. A survey of on-road vision-based vehicle detectors shows a wide variety of monocular and stereo
-vision-based trackers [3]. An Incremental Focus of Attention (IFA) hierarchical architecture provides robust, adaptive,
-and real-time vision-based tracking [4]. Combining onboard inertial navigation system (INS) telemetry data and a
-ground-based monocular camera running optical flow into an Extended Kalman Filter (EKF) leads to robust and accurate
-state estimation of the tracked unmanned aerial vehicle (UAV) [5].
+There are research effor s for vision-based racking. A real- ime, adap ive visual algori hm wi h Mul iple-Ins ance
+(MI) learning approach, Mul iple-Classifier (MC) vo ing mechanism, and Mul iple-Resolu ion (MR) represen a ion
+s ra egy solves online learning and racking arbi rary aircraf and in ruders in he air wi h experimen al resul s [1].
+Combining a vision-based arge racker wi h a neural ne work and a Kalman fil er crea es an adap ive arge s a e
+es ima or [2]. A survey of on-road vision-based vehicle de ec ors shows a wide varie y of monocular and s ereo
+vision-based rackers [3]. An Incremen al Focus of A en ion (IFA) hierarchical archi ec ure provides robus , adap ive,
+and real- ime vision-based racking [4]. Combining onboard iner ial naviga ion sys em (INS) eleme ry da a and a
+ground-based monocular camera running op ical flow in o an Ex ended Kalman Fil er (EKF) leads o robus and accura e
+s a e es ima ion of he racked unmanned aerial vehicle (UAV) [5].
 
 
 
-∗Computer/GNC Engineer, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View, CA 94035, USA.
-†Software Engineer, KBR Wyle Services, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View, CA 94035,
+∗Compu er/GNC Engineer, In elligen Sys ems Division, NASA Ames Research Cen er, Moffe Field, Moun ain View, CA 94035, USA.
+†Sof ware Engineer, KBR Wyle Services, In elligen Sys ems Division, NASA Ames Research Cen er, Moffe Field, Moun ain View, CA 94035,
 
 
 
 USA.
-‡Aerospace Research Engineer, KBR Wyle Services, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View,
+‡Aerospace Research Engineer, KBR Wyle Services, In elligen Sys ems Division, NASA Ames Research Cen er, Moffe Field, Moun ain View,
 
 
 
 CA 94035, USA.
-§Aerospace Research Engineer, KBR Wyle Services, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View,
+§Aerospace Research Engineer, KBR Wyle Services, In elligen Sys ems Division, NASA Ames Research Cen er, Moffe Field, Moun ain View,
 
 
 
 CA 94035, USA.
-¶Aerospace Engineer, Aeronautics Systems Engineering Branch, NASA Langley Research Center, 1 Nasa Dr, Hampton, VA 23666.
-�Aerospace Scientist, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View, CA 94035, USA
+¶Aerospace Engineer, Aeronau ics Sys ems Engineering Branch, NASA Langley Research Cen er, 1 Nasa Dr, Hamp on, VA 23666.
+�Aerospace Scien is , In elligen Sys ems Division, NASA Ames Research Cen er, Moffe Field, Moun ain View, CA 94035, USA
 
 
 
@@ -95,50 +95,50 @@ CA 94035, USA.
 
 
 
-The proposed research in this paper demonstrates a ground-based vision tracker for distributed cameras in an urban
-environment to simulate future AAM/UAM operations for monitoring the airspace. Post-processing a ground-based
-camera’s video of a UAV flight shows preliminary image subtraction results of capturing a moving UAV across the
-camera’s field of view. This extended abstract provides the preliminary results and next steps for the ground-based
-vision tracker (GBVT).
+The proposed research in his paper demons ra es a ground-based vision racker for dis ribu ed cameras in an urban
+environmen o simula e fu ure AAM/UAM opera ions for moni oring he airspace. Pos -processing a ground-based
+camera’s video of a UAV fligh shows preliminary image sub rac ion resul s of cap uring a moving UAV across he
+camera’s field of view. This ex ended abs rac provides he preliminary resul s and nex s eps for he ground-based
+vision racker (GBVT).
 
 
 
-II. Proposed Solution
-There are two proposed methods for GBVT: MATLAB and OpenCV (C++), and both utilize image subtraction and
+II. Proposed Solu ion
+There are wo proposed me hods for GBVT: MATLAB and OpenCV (C++), and bo h u ilize image sub rac ion and
 
 
 
-blob detection. Figure 1 shows the MATLAB image subtraction flowchart, while Figure 2 shows the OpenCV image
-subtraction flowchart. There are similar steps in the procedure but with differences due to programming language and
-data storage.
+blob de ec ion. Figure 1 shows he MATLAB image sub rac ion flowchar , while Figure 2 shows he OpenCV image
+sub rac ion flowchar . There are similar s eps in he procedure bu wi h differences due o programming language and
+da a s orage.
 
 
 
-Fig. 1 MATLAB Image Subtraction Flowchart
+Fig. 1 MATLAB Image Sub rac ion Flowchar 
 
 
 
-III. Preliminary Results
-A preliminary distributed sensing test involved one ground-based and fixed-angle camera to obtain flight test data
+III. Preliminary Resul s
+A preliminary dis ribu ed sensing es involved one ground-based and fixed-angle camera o ob ain fligh es da a
 
 
 
-for testing the GBVT. The UAS flew horizontally from left to right across the camera’s field of view, and the camera
-specs for this preliminary flight test are given in Table 1. Figure 3 shows the sensor locations (yellow circles), and their
+for es ing he GBVT. The UAS flew horizon ally from lef o righ across he camera’s field of view, and he camera
+specs for his preliminary fligh es are given in Table 1. Figure 3 shows he sensor loca ions (yellow circles), and heir
 
 
 
-Table 1 Camera Specs for Preliminary Flight Test
+Table 1 Camera Specs for Preliminary Fligh Tes 
 
 
 
 Spec Value
-Horizontal Field of View (◦) 110
+Horizon al Field of View (◦) 110
 
 
 
-Vertical Field of View (◦) 57.6
-Aspect Ratio 1.91
+Ver ical Field of View (◦) 57.6
+Aspec Ra io 1.91
 
 
 
@@ -151,8 +151,8 @@ FPS 60
 
 
 
-locations are given in Table 2 [6, 7]. Here are the tentative UAS flight test plans with the same trajectories but with
-different distributed sensing hardware and software:
+loca ions are given in Table 2 [6, 7]. Here are he en a ive UAS fligh es plans wi h he same rajec ories bu wi h
+differen dis ribu ed sensing hardware and sof ware:
 
 
 
@@ -168,26 +168,26 @@ different distributed sensing hardware and software:
 
 
 
-Fig. 2 OpenCV Image Subtraction Flowchart
+Fig. 2 OpenCV Image Sub rac ion Flowchar 
 
 
 
-1) May 2023: GoPro Hero10 Black cameras at each ground-based sensor node
-2) June 2023: FLIR BlackFly cameras with Fujinon lens at each ground-based sensor node
-3) July 2023: obtain real-time image tracker and connect to Ref. [8]’s vision-based EKF tracker for real-time
+1) May 2023: GoPro Hero10 Black cameras a each ground-based sensor node
+2) June 2023: FLIR BlackFly cameras wi h Fujinon lens a each ground-based sensor node
+3) July 2023: ob ain real- ime image racker and connec o Ref. [8]’s vision-based EKF racker for real- ime
 
 
 
-estimation
-4) August 2023: run image tracker in the larger DS system
+es ima ion
+4) Augus 2023: run image racker in he larger DS sys em
 
 
 
-Table 2 NASA Ames Build 1 Scenario Sensor Locations
+Table 2 NASA Ames Build 1 Scenario Sensor Loca ions
 
 
 
-Location Latitude (◦) Longitude (◦)
+Loca ion La i ude (◦) Longi ude (◦)
 1 37.429540 -122.067712
 2 37.425155 -122.059832
 3 37.423476 -122.061238
@@ -196,34 +196,34 @@ O 37.426861 -122.066015
 
 
 
-Different GoPro Hero10 Black camera lens and modes will be selected and optimized to have the UAV within at
-least two camera fields of view throughout most of the UAV’s flight path (see Figure 3), and the estimated horizontal
+Differen GoPro Hero10 Black camera lens and modes will be selec ed and op imized o have he UAV wi hin a 
+leas wo camera fields of view hroughou mos of he UAV’s fligh pa h (see Figure 3), and he es ima ed horizon al
 field of view per camera is 40◦. ∗
 
 
 
-Table 3 shows the FLIR BlackFly camera specs. † Ideally, the BlackFly camera fields of view will resemble the
-GoPro Hero10 Black fields of view to keep the experimental setup as consistent as possible. Since lens selection and
-procurement for the FLIR BlackFly cameras are ongoing, the first UAS flight test will use the GoPro Hero10 Black
-cameras as mentioned earlier.
+Table 3 shows he FLIR BlackFly camera specs. † Ideally, he BlackFly camera fields of view will resemble he
+GoPro Hero10 Black fields of view o keep he experimen al se up as consis en as possible. Since lens selec ion and
+procuremen for he FLIR BlackFly cameras are ongoing, he firs UAS fligh es will use he GoPro Hero10 Black
+cameras as men ioned earlier.
 
 
 
-Figure 4 shows the architecture diagram for the four image trackers for the Ames Build 1 scenario. Each image
-tracker will run at some TBD frequency and receive RGB images. Then, each image tracker will compute the azimuth
-and elevation angles for detected and tracked objects within their fields of view, which feeds into the data assocation
-problem of keeping track of many objects [9]. Finally, the associated object’s azimuth and elevation angles from multiple
-views will be sent to the vision-based tracker EKF presented in Ref. [8].
+Figure 4 shows he archi ec ure diagram for he four image rackers for he Ames Build 1 scenario. Each image
+ racker will run a some TBD frequency and receive RGB images. Then, each image racker will compu e he azimu h
+and eleva ion angles for de ec ed and racked objec s wi hin heir fields of view, which feeds in o he da a assoca ion
+problem of keeping rack of many objec s [9]. Finally, he associa ed objec ’s azimu h and eleva ion angles from mul iple
+views will be sen o he vision-based racker EKF presen ed in Ref. [8].
 
 
 
-Figure 5 shows the intermediate steps during image subtraction with the original and masked image after applying
-image subtraction. Figure 5a shows the current image, and Figure 5b shows the subtracted image after applying the
+Figure 5 shows he in ermedia e s eps during image sub rac ion wi h he original and masked image af er applying
+image sub rac ion. Figure 5a shows he curren image, and Figure 5b shows he sub rac ed image af er applying he
 
 
 
-∗https://community.gopro.com/s/article/HERO10-Black-Digital-Lenses-FOV-Informations?language=en_US
-†https://www.flir.com/products/blackfly-s-usb3/?model=BFS-U3-123S6C-C&vertical=machine+vision&segment=iis
+∗h ps://communi y.gopro.com/s/ar icle/HERO10-Black-Digi al-Lenses-FOV-Informa ions?language=en_US
+†h ps://www.flir.com/produc s/blackfly-s-usb3/?model=BFS-U3-123S6C-C&ver ical=machine+vision&segmen =iis
 
 
 
@@ -239,7 +239,7 @@ image subtraction. Figure 5a shows the current image, and Figure 5b shows the su
 
 
 
-Fig. 3 Ames Research Center Flight Test - Build 1: sensor stations (yellow)
+Fig. 3 Ames Research Cen er Fligh Tes - Build 1: sensor s a ions (yellow)
 
 
 
@@ -248,13 +248,13 @@ Table 3 BlackFly Camera Specs
 
 
 Name Value
-FLIR BlackFly Part number: BFS-U3-123S6C-C
+FLIR BlackFly Par number: BFS-U3-123S6C-C
 
 
 
-Pixel width 4096
-Pixel height 3000
-Aspect ratio 1.365
+Pixel wid h 4096
+Pixel heigh 3000
+Aspec ra io 1.365
 
 
 
@@ -280,43 +280,43 @@ Dimensions in mm (W x H x L) 29 x 29 x 30
 
 
 
-Fig. 4 Ames Research Center Flight Test - Build 1: sensor stations (yellow) and computing units (green)
+Fig. 4 Ames Research Cen er Fligh Tes - Build 1: sensor s a ions (yellow) and compu ing uni s (green)
 
 
 
-steps shown earlier in Figure 1: the intensity factor is 5, and the threshold pixel value is 240 such that all pixels below
-240 will be eliminated.
+s eps shown earlier in Figure 1: he in ensi y fac or is 5, and he hreshold pixel value is 240 such ha all pixels below
+240 will be elimina ed.
 
 
 
-(a) Original Image (b) Mask after Image Subtraction
+(a) Original Image (b) Mask af er Image Sub rac ion
 
 
 
-Fig. 5 Image Subtraction Results: Frame 2480
+Fig. 5 Image Sub rac ion Resul s: Frame 2480
 
 
 
-Preliminary tests in MATLAB include tracking five objects with image subtraction and blob detection (bwareafilt) ‡.
-Objects (centroids) 2-4 might be cars since they have relatively low and flat elevation angles between approximately 40
-and 55 seconds, which corresponds to cars in the video (see Figure 6). The fifth detection has random outliers and not
-shown for brevity. The average runtime per iteration is 0.2675 seconds, which demonstrates near real-time capabilities.
-The video was recorded at 60 frames per second, and the frame subtraction step is 55 frames to provide sufficient time
-and difference to detect the UAV motion. Preliminary tuning shows that the frame subtraction can be reduced down to
-30 frames (0.5 seconds for a 60 fps camera), but there are multiple non-UAV detections, i.e., false positives.
+Preliminary es s in MATLAB include racking five objec s wi h image sub rac ion and blob de ec ion (bwareafil ) ‡.
+Objec s (cen roids) 2-4 migh be cars since hey have rela ively low and fla eleva ion angles be ween approxima ely 40
+and 55 seconds, which corresponds o cars in he video (see Figure 6). The fif h de ec ion has random ou liers and no 
+shown for brevi y. The average run ime per i era ion is 0.2675 seconds, which demons ra es near real- ime capabili ies.
+The video was recorded a 60 frames per second, and he frame sub rac ion s ep is 55 frames o provide sufficien ime
+and difference o de ec he UAV mo ion. Preliminary uning shows ha he frame sub rac ion can be reduced down o
+30 frames (0.5 seconds for a 60 fps camera), bu here are mul iple non-UAV de ec ions, i.e., false posi ives.
 
 
 
-The OpenCV C++ image tracker also utilizes image subtraction § and blob detection ¶. It currently has a calibration
-phase where it takes the first 150 frames to learn the background model and uses the OpenCV MOG2 Background
-Subtractor. For rendering and tracking, none of the detections, matching, or plotting occur until after the calibration
-phase. Two drawbacks for the current implementation of the OpenCV image tracker are: 1) the image tracker does
+The OpenCV C++ image racker also u ilizes image sub rac ion § and blob de ec ion ¶. I curren ly has a calibra ion
+phase where i akes he firs 150 frames o learn he background model and uses he OpenCV MOG2 Background
+Sub rac or. For rendering and racking, none of he de ec ions, ma ching, or plo ing occur un il af er he calibra ion
+phase. Two drawbacks for he curren implemen a ion of he OpenCV image racker are: 1) he image racker does
 
 
 
-‡https://www.mathworks.com/help/images/ref/bwareafilt.html
-§https://docs.opencv.org/3.4/d1/dc5/tutorial_background_subtraction.html
-¶https://learnopencv.com/blob-detection-using-opencv-python-c/
+‡h ps://www.ma hworks.com/help/images/ref/bwareafil .h ml
+§h ps://docs.opencv.org/3.4/d1/dc5/ u orial_background_sub rac ion.h ml
+¶h ps://learnopencv.com/blob-de ec ion-using-opencv-py hon-c/
 
 
 
@@ -332,7 +332,7 @@ phase. Two drawbacks for the current implementation of the OpenCV image tracker 
 
 
 
-Centroid 1: Azimuth and Elevation Angles
+Cen roid 1: Azimu h and Eleva ion Angles
 
 
 
@@ -363,7 +363,7 @@ im
 
 
 u
-th
+ h
 
 
 
@@ -417,7 +417,7 @@ le
 
 v
 a
-ti
+ i
 o
 n
  A
@@ -438,11 +438,11 @@ g
 
 
 
-(a) Object 1 (UAV)
+(a) Objec 1 (UAV)
 
 
 
-Centroid 2: Azimuth and Elevation Angles
+Cen roid 2: Azimu h and Eleva ion Angles
 
 
 
@@ -473,7 +473,7 @@ im
 
 
 u
-th
+ h
 
 
 
@@ -523,7 +523,7 @@ le
 
 v
 a
-ti
+ i
 o
 n
  A
@@ -544,8 +544,8 @@ g
 
 
 
-(b) Object 2 (car)
-Centroid 3: Azimuth and Elevation Angles
+(b) Objec 2 (car)
+Cen roid 3: Azimu h and Eleva ion Angles
 
 
 
@@ -576,7 +576,7 @@ im
 
 
 u
-th
+ h
 
 
 
@@ -630,7 +630,7 @@ le
 
 v
 a
-ti
+ i
 o
 n
  A
@@ -651,11 +651,11 @@ g
 
 
 
-(c) Object 3 (car)
+(c) Objec 3 (car)
 
 
 
-Centroid 4: Azimuth and Elevation Angles
+Cen roid 4: Azimu h and Eleva ion Angles
 
 
 
@@ -694,7 +694,7 @@ im
 
 
 u
-th
+ h
 
 
 
@@ -744,7 +744,7 @@ le
 
 v
 a
-ti
+ i
 o
 n
  A
@@ -765,11 +765,11 @@ g
 
 
 
-(d) Object 4 (car)
+(d) Objec 4 (car)
 
 
 
-Fig. 6 MATLAB Image Tracker Azimuth and Elevation Angles per Detection
+Fig. 6 MATLAB Image Tracker Azimu h and Eleva ion Angles per De ec ion
 
 
 
@@ -785,11 +785,11 @@ Fig. 6 MATLAB Image Tracker Azimuth and Elevation Angles per Detection
 
 
 
-not track the UAV for the frames during the calibration phase, and 2) it must find the UAV in the first frame after the
-calibration phase, i.e., frame 151 in this preliminary test. The number of frames during the calibration phase is arbitrary,
-and future work may consider a more robust and flexible image tracker framework to avoid needing to detect the UAV in
-the first frame immediately after the calibration phase. For simplicity, the tracker currently detects the UAV and only
-considers future detections that are within an overlap distance of:
+no rack he UAV for he frames during he calibra ion phase, and 2) i mus find he UAV in he firs frame af er he
+calibra ion phase, i.e., frame 151 in his preliminary es . The number of frames during he calibra ion phase is arbi rary,
+and fu ure work may consider a more robus and flexible image racker framework o avoid needing o de ec he UAV in
+ he firs frame immedia ely af er he calibra ion phase. For simplici y, he racker curren ly de ec s he UAV and only
+considers fu ure de ec ions ha are wi hin an overlap dis ance of:
 
 
 
@@ -797,7 +797,7 @@ overlap = 𝑑 − 2 · overlap radius (1)
 
 
 
-Figure 7 shows a diagram of the distance between two detections and the overlap radius. Future work for the OpenCV
+Figure 7 shows a diagram of he dis ance be ween wo de ec ions and he overlap radius. Fu ure work for he OpenCV
 
 
 
@@ -805,10 +805,10 @@ Fig. 7 Overlap Radius Diagram
 
 
 
-image tracker may include new detections such as cars, birds, etc. like the MATLAB version. Figure 8 shows the
-azimuth and elevation angles of the tracked UAV for the OpenCV C++ implementation shown earlier in Figure 2. The
-goal is to run GBVT in real-time, so whatever method works accurately and quickly will be selected for implementation
-during the July and August 2023 flight tests.
+image racker may include new de ec ions such as cars, birds, e c. like he MATLAB version. Figure 8 shows he
+azimu h and eleva ion angles of he racked UAV for he OpenCV C++ implemen a ion shown earlier in Figure 2. The
+goal is o run GBVT in real- ime, so wha ever me hod works accura ely and quickly will be selec ed for implemen a ion
+during he July and Augus 2023 fligh es s.
 
 
 
@@ -816,7 +816,7 @@ during the July and August 2023 flight tests.
 
 
 
-time (seconds)
+ ime (seconds)
 
 
 
@@ -855,7 +855,7 @@ im
 
 
 u
-th
+ h
 
 
 
@@ -878,11 +878,11 @@ le
 
 
 
-Azimuth Angle vs. Time
+Azimu h Angle vs. Time
 
 
 
-(a) Azimuth Angle
+(a) Azimu h Angle
 
 
 
@@ -890,7 +890,7 @@ Azimuth Angle vs. Time
 
 
 
-time (seconds)
+ ime (seconds)
 
 
 
@@ -920,7 +920,7 @@ a
 
 
 
-ti
+ i
 o
 
 
@@ -945,24 +945,24 @@ le
 
 
 
-Elevation Angle vs. Time
+Eleva ion Angle vs. Time
 
 
 
-(b) Elevation Angle
+(b) Eleva ion Angle
 
 
 
-Fig. 8 Tracked UAV Azimuth and Elevation Angles
+Fig. 8 Tracked UAV Azimu h and Eleva ion Angles
 
 
 
 IV. Significance
-The UAV flight test video shows promising results for ground-based distributed sensing of the airspace for tracking
+The UAV fligh es video shows promising resul s for ground-based dis ribu ed sensing of he airspace for racking
 
 
 
-and monitoring AAM/UAM aircraft in scenarios such as corridor surveillance. Future AAM/UAM operations will require
+and moni oring AAM/UAM aircraf in scenarios such as corridor surveillance. Fu ure AAM/UAM opera ions will require
 
 
 
@@ -978,70 +978,70 @@ and monitoring AAM/UAM aircraft in scenarios such as corridor surveillance. Futu
 
 
 
-ground-based and airborne-based sensors for monitoring the airspace, and it will be complex in urban environments
-due to GPS degradation. Ultimately, experiments with UAS flight tests and real-time GBVT will lead towards initial
-attempts in creating AAM/UAM distributed sensing architecture that resembles ATC/ATM.
+ground-based and airborne-based sensors for moni oring he airspace, and i will be complex in urban environmen s
+due o GPS degrada ion. Ul ima ely, experimen s wi h UAS fligh es s and real- ime GBVT will lead owards ini ial
+a emp s in crea ing AAM/UAM dis ribu ed sensing archi ec ure ha resembles ATC/ATM.
 
 
 
-Acknowledgments
-The authors would like to thank the Transformative Tools and Technologies (TTT) Project under the NASA
+Acknowledgmen s
+The au hors would like o hank he Transforma ive Tools and Technologies (TTT) Projec under he NASA
 
 
 
-Aeronautics Research Mission Directorate (ARMD) for funding this research. The authors would also like to thank Loc
-Tran for his expertise in image processing and computer vision.
+Aeronau ics Research Mission Direc ora e (ARMD) for funding his research. The au hors would also like o hank Loc
+Tran for his exper ise in image processing and compu er vision.
 
 
 
 References
-[1] Fu, C., Carrio, A., Olivares-Mendez, M. A., Suarez-Fernandez, R., and Campoy, P., “Robust real-time vision-based aircraft
+[1] Fu, C., Carrio, A., Olivares-Mendez, M. A., Suarez-Fernandez, R., and Campoy, P., “Robus real- ime vision-based aircraf 
 
 
 
-tracking from unmanned aerial vehicles,” 2014 ieee international conference on robotics and automation (ICRA), IEEE, 2014,
+ racking from unmanned aerial vehicles,” 2014 ieee in erna ional conference on robo ics and au oma ion (ICRA), IEEE, 2014,
 pp. 5441–5446.
 
 
 
-[2] Sattigeri, R., Johnson, E., Calise, A., and Ha, J., “Vision-based target tracking with adaptive target state estimator,” AIAA
-Guidance, Navigation and Control Conference and Exhibit, 2007, p. 6828.
+[2] Sa igeri, R., Johnson, E., Calise, A., and Ha, J., “Vision-based arge racking wi h adap ive arge s a e es ima or,” AIAA
+Guidance, Naviga ion and Con rol Conference and Exhibi , 2007, p. 6828.
 
 
 
-[3] Sivaraman, S., and Trivedi, M. M., “Looking at vehicles on the road: A survey of vision-based vehicle detection, tracking, and
-behavior analysis,” IEEE transactions on intelligent transportation systems, Vol. 14, No. 4, 2013, pp. 1773–1795.
+[3] Sivaraman, S., and Trivedi, M. M., “Looking a vehicles on he road: A survey of vision-based vehicle de ec ion, racking, and
+behavior analysis,” IEEE ransac ions on in elligen ranspor a ion sys ems, Vol. 14, No. 4, 2013, pp. 1773–1795.
 
 
 
-[4] Toyama, K., and Hager, G. D., “Incremental focus of attention for robust vision-based tracking,” International Journal of
-Computer Vision, Vol. 35, 1999, pp. 45–63.
+[4] Toyama, K., and Hager, G. D., “Incremen al focus of a en ion for robus vision-based racking,” In erna ional Journal of
+Compu er Vision, Vol. 35, 1999, pp. 45–63.
 
 
 
-[5] Joo, S., Ippolito, C., Al-Ali, K., and Yeh, Y.-H., “Vision aided inertial navigation with measurement delay for fixed-wing
+[5] Joo, S., Ippoli o, C., Al-Ali, K., and Yeh, Y.-H., “Vision aided iner ial naviga ion wi h measuremen delay for fixed-wing
 unmanned aerial vehicle landing,” 2008 IEEE aerospace conference, IEEE, 2008, pp. 1–9.
 
 
 
-[6] Kannan, K., Baculi, J., Lombaerts, T., Kawamura, E., Gorospe, G., Holforty, W., Ippolito, C., Stepanyan, V., Dolph, C., and
-Brown, N., “A Simulation Architecture for Air Traffic Over Urban Environments Supporting Autonomy Research in Advanced
-Air Mobility,” AIAA SciTech 2023 Forum, AIAA-2023-0895, 2023. https://doi.org/10.2514/6.2023-0895.
+[6] Kannan, K., Baculi, J., Lombaer s, T., Kawamura, E., Gorospe, G., Holfor y, W., Ippoli o, C., S epanyan, V., Dolph, C., and
+Brown, N., “A Simula ion Archi ec ure for Air Traffic Over Urban Environmen s Suppor ing Au onomy Research in Advanced
+Air Mobili y,” AIAA SciTech 2023 Forum, AIAA-2023-0895, 2023. h ps://doi.org/10.2514/6.2023-0895.
 
 
 
-[7] Stepanyan, V., Kannan, K., Kawamura, E., Lombaerts, T., and Ippolito, C., “Target Tracking with Distributed Sensing and
-Optimal Data Migration,” AIAA SciTech 2023 Forum, AIAA-2023-2194, 2023. https://doi.org/10.2514/6.2023-2194.
+[7] S epanyan, V., Kannan, K., Kawamura, E., Lombaer s, T., and Ippoli o, C., “Targe Tracking wi h Dis ribu ed Sensing and
+Op imal Da a Migra ion,” AIAA SciTech 2023 Forum, AIAA-2023-2194, 2023. h ps://doi.org/10.2514/6.2023-2194.
 
 
 
-[8] Lombaerts, T., Kannan, K., Kawamura, E., Dolph, C., Stepanyan, V., George, G., and Ippolito, C., “Distributed Ground Sensor
-Fusion Based Object Tracking for Autonomous Advanced Air Mobility Operations,” AIAA SciTech 2023 Forum, AIAA-2023-0896,
-2023. https://doi.org/10.2514/6.2023-0896.
+[8] Lombaer s, T., Kannan, K., Kawamura, E., Dolph, C., S epanyan, V., George, G., and Ippoli o, C., “Dis ribu ed Ground Sensor
+Fusion Based Objec Tracking for Au onomous Advanced Air Mobili y Opera ions,” AIAA SciTech 2023 Forum, AIAA-2023-0896,
+2023. h ps://doi.org/10.2514/6.2023-0896.
 
 
 
-[9] Russell, S. J., and Norvig, P., Artificial Intelligence A Modern Approach, 3rd ed., Pearson Education, Inc., 2010.
+[9] Russell, S. J., and Norvig, P., Ar ificial In elligence A Modern Approach, 3rd ed., Pearson Educa ion, Inc., 2010.
 
 
 
@@ -1051,24 +1051,24 @@ Fusion Based Object Tracking for Autonomous Advanced Air Mobility Operations,”
 
 
 
-https://doi.org/10.2514/6.2023-0895
+h ps://doi.org/10.2514/6.2023-0895
 
 
-https://doi.org/10.2514/6.2023-2194
+h ps://doi.org/10.2514/6.2023-2194
 
 
-https://doi.org/10.2514/6.2023-0896
+h ps://doi.org/10.2514/6.2023-0896
 
 
 
- 
-Introduction
+	
+In roduc ion
 
- 
-Proposed Solution
+	
+Proposed Solu ion
 
- 
-Preliminary Results
+	
+Preliminary Resul s
 
- 
+	
 Significance

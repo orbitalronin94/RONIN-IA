@@ -1,13 +1,13 @@
-Validation of a Mid-Fidelity Approach for Aircraft Stability and
-Control Characterization
+Valida ion of a Mid-Fideli y Approach for Aircraf S abili y and
+Con rol Charac eriza ion
 
 
 
-Benjamin M. Simmons∗ and Steven C. Geuther†
+Benjamin M. Simmons∗ and S even C. Geu her†
 
 
 
-NASA Langley Research Center, Hampton, Virginia 23681
+NASA Langley Research Cen er, Hamp on, Virginia 23681
 
 
 
@@ -15,60 +15,60 @@ Vivek Ahuja‡
 
 
 
-Research in Flight, Austin, Texas 78750
+Research in Fligh , Aus in, Texas 78750
 
 
 
-This paper describes an efficient computational approach for aircraft aerodynamic model
-development intended for use in flight dynamics simulations. A commercial surface-vorticity
-flow solver called FlightStream® is employed to predict performance, stability, and control
-characteristics for a NASA subscale electric vertical takeoff and landing aircraft in its isolated-
-airframe configuration. A framework is described to rapidly convert OpenVSP geometry into a
-form compatible with the FlightStream® software. FlightStream® predictions for the variation
-of aerodynamic force and moment coefficients with airflow angles and control surface deflection
-angles are compared to static wind-tunnel data to illustrate the process and assess the accuracy
-of FlightStream® solutions. The results and approach presented in this paper are encouraging
-for use in rapid aerodynamic modeling and flight dynamics simulation development early in the
-aircraft design process.
+This paper describes an efficien compu a ional approach for aircraf aerodynamic model
+developmen in ended for use in fligh dynamics simula ions. A commercial surface-vor ici y
+flow solver called Fligh S ream® is employed o predic performance, s abili y, and con rol
+charac eris ics for a NASA subscale elec ric ver ical akeoff and landing aircraf in i s isola ed-
+airframe configura ion. A framework is described o rapidly conver OpenVSP geome ry in o a
+form compa ible wi h he Fligh S ream® sof ware. Fligh S ream® predic ions for he varia ion
+of aerodynamic force and momen coefficien s wi h airflow angles and con rol surface deflec ion
+angles are compared o s a ic wind- unnel da a o illus ra e he process and assess he accuracy
+of Fligh S ream® solu ions. The resul s and approach presen ed in his paper are encouraging
+for use in rapid aerodynamic modeling and fligh dynamics simula ion developmen early in he
+aircraf design process.
 
 
 
-Nomenclature
+Nomencla ure
 
 
 
-𝑏 = wingspan, ft
-𝐶𝐿 , 𝐶𝐷 , 𝐶𝑌 = lift, drag, and side force coefficients
-𝐶𝑙 , 𝐶𝑚, 𝐶𝑛 = body-axis rolling, pitching, and yawing moment coefficients
-𝑐 = mean aerodynamic chord, ft
-L, D, 𝑌 = lift, drag, and side force components, lbf
-𝐿, 𝑀 , 𝑁 = body-axis rolling, pitching and yawing moment components, ft·lbf
-𝑛1, 𝑛2,..., 𝑛6 = propeller rotational speeds, revolutions/s
-𝑝, 𝑞, 𝑟 = body-axis angular velocity components, rad/s or deg/s
+𝑏 = wingspan, f 
+𝐶𝐿 , 𝐶𝐷 , 𝐶𝑌 = lif , drag, and side force coefficien s
+𝐶𝑙 , 𝐶𝑚, 𝐶𝑛 = body-axis rolling, pi ching, and yawing momen coefficien s
+𝑐 = mean aerodynamic chord, f 
+L, D, 𝑌 = lif , drag, and side force componen s, lbf
+𝐿, 𝑀 , 𝑁 = body-axis rolling, pi ching and yawing momen componen s, f ·lbf
+𝑛1, 𝑛2,..., 𝑛6 = propeller ro a ional speeds, revolu ions/s
+𝑝, 𝑞, 𝑟 = body-axis angular veloci y componen s, rad/s or deg/s
 𝑞 = 1
 
 
 
 2 𝜌𝑉
-2 = freestream dynamic pressure, lbf/ft2
+2 = frees ream dynamic pressure, lbf/f 2
 
 
 
-𝑆 = wing reference area, ft2
-𝑉 = freestream velocity, ft/s
-𝛼 = angle of attack, rad or deg
+𝑆 = wing reference area, f 2
+𝑉 = frees ream veloci y, f /s
+𝛼 = angle of a ack, rad or deg
 𝛽 = angle of sideslip, rad or deg
-𝛿𝑐1 , 𝛿𝑐2 ,..., 𝛿𝑐6 = collective pitch angles, rad or deg
-𝛿 𝑓1 , 𝛿 𝑓2 ,..., 𝛿 𝑓6 = flaperon deflection angles, rad or deg
-𝛿𝑡1 , 𝛿𝑡2 , 𝛿𝑡3 , 𝛿𝑡4 = nacelle tilt angles, rad or deg
-𝛿𝑟 = rudder deflection angle, rad or deg
-𝛿𝑠 = stabilator deflection angle, rad or deg
+𝛿𝑐1 , 𝛿𝑐2 ,..., 𝛿𝑐6 = collec ive pi ch angles, rad or deg
+𝛿 𝑓1 , 𝛿 𝑓2 ,..., 𝛿 𝑓6 = flaperon deflec ion angles, rad or deg
+𝛿𝑡1 , 𝛿𝑡2 , 𝛿𝑡3 , 𝛿𝑡4 = nacelle il angles, rad or deg
+𝛿𝑟 = rudder deflec ion angle, rad or deg
+𝛿𝑠 = s abila or deflec ion angle, rad or deg
 
 
 
-∗Research Engineer, Flight Dynamics Branch, MS 308, Member AIAA.
-†Aerospace Engineer, Aeronautics Systems Engineering Branch, MS 238.
-‡CEO, Research in Flight, Senior Member AIAA.
+∗Research Engineer, Fligh Dynamics Branch, MS 308, Member AIAA.
+†Aerospace Engineer, Aeronau ics Sys ems Engineering Branch, MS 238.
+‡CEO, Research in Fligh , Senior Member AIAA.
 
 
 
@@ -84,82 +84,82 @@ L, D, 𝑌 = lift, drag, and side force components, lbf
 
 
 
-I. Introduction
-Many complex distributed hybrid and electric propulsion aircraft have emerged to enable future Advanced Air
+I. In roduc ion
+Many complex dis ribu ed hybrid and elec ric propulsion aircraf have emerged o enable fu ure Advanced Air
 
 
 
-Mobility (AAM) transportation missions [1–5]. There are many design concepts with a variety of mission profiles
-including vertical takeoff and landing (VTOL), short takeoff and landing (STOL), and conventional takeoff and landing
-(CTOL) configurations. Although the operational utility of distributed propulsion aircraft has great potential, there
-are many research areas that need to be addressed prior to introduction of these unique vehicles for AAM missions in
-the national airspace system. Vehicle technical challenges include: airworthiness certification, air traffic management,
-pilot-operator interface, handling qualities, simplified vehicle operations, contingency management, vehicle autonomy,
-and flight controls strategies. One important enabling tool for many research efforts is a vehicle flight dynamics
-simulation driven by an aero-propulsive model. Efficient and accurate aero-propulsive model development, however, is
-challenged by several vehicle attributes including: many control surfaces and propulsors, substantial propulsion-airframe
-interactions, and large flight envelopes that need to be characterized by a global aero-propulsive model.
+Mobili y (AAM) ranspor a ion missions [1–5]. There are many design concep s wi h a varie y of mission profiles
+including ver ical akeoff and landing (VTOL), shor akeoff and landing (STOL), and conven ional akeoff and landing
+(CTOL) configura ions. Al hough he opera ional u ili y of dis ribu ed propulsion aircraf has grea po en ial, here
+are many research areas ha need o be addressed prior o in roduc ion of hese unique vehicles for AAM missions in
+ he na ional airspace sys em. Vehicle echnical challenges include: airwor hiness cer ifica ion, air raffic managemen ,
+pilo -opera or in erface, handling quali ies, simplified vehicle opera ions, con ingency managemen , vehicle au onomy,
+and fligh con rols s ra egies. One impor an enabling ool for many research effor s is a vehicle fligh dynamics
+simula ion driven by an aero-propulsive model. Efficien and accura e aero-propulsive model developmen , however, is
+challenged by several vehicle a ribu es including: many con rol surfaces and propulsors, subs an ial propulsion-airframe
+in erac ions, and large fligh envelopes ha need o be charac erized by a global aero-propulsive model.
 
 
 
-Previous research has investigated methods for efficient full-envelope electric VTOL (eVTOL) aircraft aero-propulsive
-model development using computational fluid dynamics (CFD) simulations [6, 7] and wind-tunnel testing [8–13]. These
-techniques were successful in developing accurate aero-propulsive models well-suited for flight dynamics simulations of
-complex aircraft; however, they required time consuming CFD simulations with substantial subject matter expertise
-to effectively execute or the availability of a physical aircraft model and wind-tunnel test facility. Other related work
-has investigated using low-to-mid fidelity analytical and/or computational methods for developing dynamic models
-applicable for flight controls applications [14–19].
+Previous research has inves iga ed me hods for efficien full-envelope elec ric VTOL (eVTOL) aircraf aero-propulsive
+model developmen using compu a ional fluid dynamics (CFD) simula ions [6, 7] and wind- unnel es ing [8–13]. These
+ echniques were successful in developing accura e aero-propulsive models well-sui ed for fligh dynamics simula ions of
+complex aircraf ; however, hey required ime consuming CFD simula ions wi h subs an ial subjec ma er exper ise
+ o effec ively execu e or he availabili y of a physical aircraf model and wind- unnel es facili y. O her rela ed work
+has inves iga ed using low- o-mid fideli y analy ical and/or compu a ional me hods for developing dynamic models
+applicable for fligh con rols applica ions [14–19].
 
 
 
-The present effort builds on this previous eVTOL aircraft modeling research to make progress towards developing
-an approach for rapid aero-propulsive model development using mid-fidelity computational experiments, allowing a
-flight dynamics model to be developed early in the aircraft design process. This paper specifically focuses on prediction
-of performance, stability, and control characteristics for a NASA subscale eVTOL aircraft in its isolated-airframe
-configuration (i.e., without propellers installed). Future work is expected to be expanded to powered-airframe studies
-focused on reduced order aero-propulsive model development suitable for flight dynamics simulations. Contributions of
-this paper include development of an approach enabling efficient computational prediction of vehicle aerodynamics
-and comparison of the results to static wind-tunnel data. FlightStream®, a commercial surface-vorticity flow solver
-developed by Research in Flight [20], is employed to compute aerodynamic forces and moments as a function of airflow
-angles, body-axis angular velocity, and control surface deflection angles which yields an isolated-airframe aerodynamic
-model suitable to perform flight simulations. FlightStream® has been used previously to develop aerodynamic
-predictions for aircraft with significant propeller-airframe interactions at a fraction of the expense of running CFD
-simulations [21–29]. FlightStream® has also been successfully applied to make aerodynamic predictions for numerous
-other aircraft configurations and components [30–41].
+The presen effor builds on his previous eVTOL aircraf modeling research o make progress owards developing
+an approach for rapid aero-propulsive model developmen using mid-fideli y compu a ional experimen s, allowing a
+fligh dynamics model o be developed early in he aircraf design process. This paper specifically focuses on predic ion
+of performance, s abili y, and con rol charac eris ics for a NASA subscale eVTOL aircraf in i s isola ed-airframe
+configura ion (i.e., wi hou propellers ins alled). Fu ure work is expec ed o be expanded o powered-airframe s udies
+focused on reduced order aero-propulsive model developmen sui able for fligh dynamics simula ions. Con ribu ions of
+ his paper include developmen of an approach enabling efficien compu a ional predic ion of vehicle aerodynamics
+and comparison of he resul s o s a ic wind- unnel da a. Fligh S ream®, a commercial surface-vor ici y flow solver
+developed by Research in Fligh [20], is employed o compu e aerodynamic forces and momen s as a func ion of airflow
+angles, body-axis angular veloci y, and con rol surface deflec ion angles which yields an isola ed-airframe aerodynamic
+model sui able o perform fligh simula ions. Fligh S ream® has been used previously o develop aerodynamic
+predic ions for aircraf wi h significan propeller-airframe in erac ions a a frac ion of he expense of running CFD
+simula ions [21–29]. Fligh S ream® has also been successfully applied o make aerodynamic predic ions for numerous
+o her aircraf configura ions and componen s [30–41].
 
 
 
-The paper is organized as follows: Section II introduces the research aircraft. Section III presents background
-information on the FlightStream® flow solver software. The process used to automatically execute FlightStream®
+The paper is organized as follows: Sec ion II in roduces he research aircraf . Sec ion III presen s background
+informa ion on he Fligh S ream® flow solver sof ware. The process used o au oma ically execu e Fligh S ream®
 
 
 
-simulations starting from OpenVSP geometry is outlined in Sec. IV. Comparisons of FlightStream® predictions to
-wind-tunnel data are shown in Sec. V. Overall conclusions are summarized in Sec. VI.
+simula ions s ar ing from OpenVSP geome ry is ou lined in Sec. IV. Comparisons of Fligh S ream® predic ions o
+wind- unnel da a are shown in Sec. V. Overall conclusions are summarized in Sec. VI.
 
 
 
-II. Aircraft
-The modeling approach developed in this paper is applied to the Research Aircraft for eVTOL Enabling techNologies
+II. Aircraf 
+The modeling approach developed in his paper is applied o he Research Aircraf for eVTOL Enabling echNologies
 
 
 
-(RAVEN) Subscale Wind Tunnel and Flight Test (SWFT) model built at NASA Langley Research Center (LaRC).
-The RAVEN SWFT is a 28.625% scale version of the RAVEN 1000-lb eVTOL aircraft concept [42], which has been
-conceptualized as a collaborative effort between NASA LaRC and the Georgia Institute of Technology. The RAVEN
-aircraft is a tilt-rotor eVTOL aircraft configuration with six variable-pitch propellers. The front four propellers tilt
-forward and are operational throughout the entire flight envelope. The rear two propellers do not tilt and serve as
-lifting propellers in hover and transition. The rear propellers are inactive in forward flight. The aircraft control surfaces
-included six flaperons, an all moving stabilator, and a rudder. In total, the vehicle has 24 independent control effectors:
+(RAVEN) Subscale Wind Tunnel and Fligh Tes (SWFT) model buil a NASA Langley Research Cen er (LaRC).
+The RAVEN SWFT is a 28.625% scale version of he RAVEN 1000-lb eVTOL aircraf concep [42], which has been
+concep ualized as a collabora ive effor be ween NASA LaRC and he Georgia Ins i u e of Technology. The RAVEN
+aircraf is a il -ro or eVTOL aircraf configura ion wi h six variable-pi ch propellers. The fron four propellers il 
+forward and are opera ional hroughou he en ire fligh envelope. The rear wo propellers do no il and serve as
+lif ing propellers in hover and ransi ion. The rear propellers are inac ive in forward fligh . The aircraf con rol surfaces
+included six flaperons, an all moving s abila or, and a rudder. In o al, he vehicle has 24 independen con rol effec ors:
 
 
 
-• Six propeller rotational speeds (𝑛1, 𝑛2, ..., 𝑛6)
-• Six propeller collective pitch angles (𝛿𝑐1 , 𝛿𝑐2 ,..., 𝛿𝑐6 )
-• Four nacelle tilt angles (𝛿𝑡1 , 𝛿𝑡2 , 𝛿𝑡3 , 𝛿𝑡4 )
-• Six flaperon deflection angles (𝛿 𝑓1 , 𝛿 𝑓2 ,..., 𝛿 𝑓6 )
-• One stabilator deflection angle (𝛿𝑠)
-• One rudder deflection angle (𝛿𝑟 )
+• Six propeller ro a ional speeds (𝑛1, 𝑛2, ..., 𝑛6)
+• Six propeller collec ive pi ch angles (𝛿𝑐1 , 𝛿𝑐2 ,..., 𝛿𝑐6 )
+• Four nacelle il angles (𝛿𝑡1 , 𝛿𝑡2 , 𝛿𝑡3 , 𝛿𝑡4 )
+• Six flaperon deflec ion angles (𝛿 𝑓1 , 𝛿 𝑓2 ,..., 𝛿 𝑓6 )
+• One s abila or deflec ion angle (𝛿𝑠)
+• One rudder deflec ion angle (𝛿𝑟 )
 
 
 
@@ -175,10 +175,10 @@ included six flaperons, an all moving stabilator, and a rudder. In total, the ve
 
 
 
-A schematic of the RAVEN aircraft with annotations showing the vehicle propulsor and control surface definitions is
-shown in Fig. 1. Flaperon and stabilator deflections are defined as positive trailing edge downward. Rudder deflection is
-defined as positive trailing edge left. As currently configured, propeller 1, 3, and 5 rotate counterclockwise and propeller
-2, 4, and 6 rotate clockwise, as viewed from the perspective of each respective electric motor.
+A schema ic of he RAVEN aircraf wi h anno a ions showing he vehicle propulsor and con rol surface defini ions is
+shown in Fig. 1. Flaperon and s abila or deflec ions are defined as posi ive railing edge downward. Rudder deflec ion is
+defined as posi ive railing edge lef . As curren ly configured, propeller 1, 3, and 5 ro a e coun erclockwise and propeller
+2, 4, and 6 ro a e clockwise, as viewed from he perspec ive of each respec ive elec ric mo or.
 
 
 
@@ -251,26 +251,26 @@ defined as positive trailing edge left. As currently configured, propeller 1, 3,
 
 
 
-Fig. 1 RAVEN control effector definitions.
+Fig. 1 RAVEN con rol effec or defini ions.
 
 
 
-The RAVEN SWFT, pictured in the NASA Langley 12-Foot Low-Speed Tunnel (LST) [43] in Fig. 2, is a subscale
-aircraft configuration designed as a flight dynamics and controls testbed to advance eVTOL aircraft technology. As its
-name suggests, the vehicle is designed for use in both wind-tunnel and flight-test experiments. The RAVEN SWFT was
+The RAVEN SWFT, pic ured in he NASA Langley 12-Foo Low-Speed Tunnel (LST) [43] in Fig. 2, is a subscale
+aircraf configura ion designed as a fligh dynamics and con rols es bed o advance eVTOL aircraf echnology. As i s
+name sugges s, he vehicle is designed for use in bo h wind- unnel and fligh - es experimen s. The RAVEN SWFT was
 
 
 
-(a) Front view (cruise configuration) (b) Overhead view (hover configuration)
+(a) Fron view (cruise configura ion) (b) Overhead view (hover configura ion)
 
 
 
-(c) Side view (mid-transition configuration) (d) Rear view (mid-transition configuration)
+(c) Side view (mid- ransi ion configura ion) (d) Rear view (mid- ransi ion configura ion)
 
 
 
-Fig. 2 RAVEN SWFT mounted in the NASA Langley 12-Foot Low-Speed Tunnel.
-(Credit: Lee Pollard, NASA Langley Research Center)
+Fig. 2 RAVEN SWFT moun ed in he NASA Langley 12-Foo Low-Speed Tunnel.
+(Credi : Lee Pollard, NASA Langley Research Cen er)
 
 
 
@@ -286,90 +286,90 @@ Fig. 2 RAVEN SWFT mounted in the NASA Langley 12-Foot Low-Speed Tunnel.
 
 
 
-developed at NASA LaRC as one of several subscale eVTOL research aircraft intended to explore their unique flight
-characteristics and resolve implementation challenges to help bring similar full-scale vehicles into mainstream operation.
-Previous aircraft have included the LA-8 [44, 45] and GL-10 [46], which have enabled research in computational
-aerodynamic predictions [27, 37], wind-tunnel testing [8, 11, 47], high incidence angle propeller aerodynamics [48–50],
-aero-propulsive modeling [9, 12, 13, 46, 51], flight controls [52, 53], and flight-test strategies [54–57].
+developed a NASA LaRC as one of several subscale eVTOL research aircraf in ended o explore heir unique fligh 
+charac eris ics and resolve implemen a ion challenges o help bring similar full-scale vehicles in o mains ream opera ion.
+Previous aircraf have included he LA-8 [44, 45] and GL-10 [46], which have enabled research in compu a ional
+aerodynamic predic ions [27, 37], wind- unnel es ing [8, 11, 47], high incidence angle propeller aerodynamics [48–50],
+aero-propulsive modeling [9, 12, 13, 46, 51], fligh con rols [52, 53], and fligh - es s ra egies [54–57].
 
 
 
-Initial RAVEN SWFT wind-tunnel tests have been performed in the 12-Foot LST for the isolated 19.5-inch
-variable-pitch propeller [58], the isolated airframe (without propellers operating), and powered airframe (with propellers
-operating). RAVEN SWFT wind-tunnel data collected during the isolated airframe experiments is used as validation
-data for FlightStream® predictions shown later in the paper.
+Ini ial RAVEN SWFT wind- unnel es s have been performed in he 12-Foo LST for he isola ed 19.5-inch
+variable-pi ch propeller [58], he isola ed airframe (wi hou propellers opera ing), and powered airframe (wi h propellers
+opera ing). RAVEN SWFT wind- unnel da a collec ed during he isola ed airframe experimen s is used as valida ion
+da a for Fligh S ream® predic ions shown la er in he paper.
 
 
 
-III. FlightStream® Background
-The mid-fidelity flow solutions for this effort were performed using the FlightStream® viscous surface-vorticity
+III. Fligh S ream® Background
+The mid-fideli y flow solu ions for his effor were performed using he Fligh S ream® viscous surface-vor ici y
 
 
 
-flow solver. FlightStream® has been developed by Research in Flight [20] as a highly efficient compressible subsonic,
-three-dimensional viscous-coupled, surface-vorticity panel-method flow solver. FlightStream® allows for rapid analysis
-of unconventional aircraft in both powered and unpowered configurations. The FlightStream® flow solver has been
-developed under several NASA and USAF Small Business Innovation Research (SBIR) developmental contract
+flow solver. Fligh S ream® has been developed by Research in Fligh [20] as a highly efficien compressible subsonic,
+ hree-dimensional viscous-coupled, surface-vor ici y panel-me hod flow solver. Fligh S ream® allows for rapid analysis
+of unconven ional aircraf in bo h powered and unpowered configura ions. The Fligh S ream® flow solver has been
+developed under several NASA and USAF Small Business Innova ion Research (SBIR) developmen al con rac 
 awards [59–63].
 
 
 
-FlightStream® makes use of the resolved surface-vorticity to compute aerodynamic load distributions using advanced
-Fast Multipole Method and wake proximity avoidance algorithms. These innovations allow FlightStream® to generate
-aerodynamic results in minutes for multirotor simulations using an unstructured surface mesh. FlightStream® works
-directly with commercial computer-aided design (CAD) software for its geometry input by merging the surface boundary
-conditions with the analytical CAD provided by the designer. FlightStream® also works with OpenVSP [64, 65] and
-The Engineering Sketch Pad [66]. As part of NASA SBIR work [59, 60], FlightStream® was expanded to allow for
-nonlinear aerodynamics, including unsteady flow, prediction of the onset of stall, 𝐶𝐿max , and post-stall aerodynamics.
-Key features of FlightStream® are summarized in Table 1.
+Fligh S ream® makes use of he resolved surface-vor ici y o compu e aerodynamic load dis ribu ions using advanced
+Fas Mul ipole Me hod and wake proximi y avoidance algori hms. These innova ions allow Fligh S ream® o genera e
+aerodynamic resul s in minu es for mul iro or simula ions using an uns ruc ured surface mesh. Fligh S ream® works
+direc ly wi h commercial compu er-aided design (CAD) sof ware for i s geome ry inpu by merging he surface boundary
+condi ions wi h he analy ical CAD provided by he designer. Fligh S ream® also works wi h OpenVSP [64, 65] and
+The Engineering Ske ch Pad [66]. As par of NASA SBIR work [59, 60], Fligh S ream® was expanded o allow for
+nonlinear aerodynamics, including uns eady flow, predic ion of he onse of s all, 𝐶𝐿max , and pos -s all aerodynamics.
+Key fea ures of Fligh S ream® are summarized in Table 1.
 
 
 
-Table 1 Summary of key FlightStream® features
+Table 1 Summary of key Fligh S ream® fea ures
 
 
 
-1. The use of unstructured surface meshes (volume meshing is not required).
-2. A subsonic, transonic, and supersonic panel-method solver capable of solutions in seconds.
-3. A Fast Multipole Method solver allowing very large mesh sizes solved in seconds-to-minutes with
+1. The use of uns ruc ured surface meshes (volume meshing is no required).
+2. A subsonic, ransonic, and supersonic panel-me hod solver capable of solu ions in seconds.
+3. A Fas Mul ipole Me hod solver allowing very large mesh sizes solved in seconds- o-minu es wi h
 
 
 
-𝑂 (𝑛 log 𝑛) efficiency in the potential flow solver.
-4. Nonlinear solver capabilities which include models for the boundary layer and flow separation.
-5. A fully steady or unsteady time-domain solver.
-6. Advanced control surface modeling and flight control system integration capabilities.
-7. Fluid-structure interactions modeling with embedded static and dynamic aeroelastic, flutter, and
+𝑂 (𝑛 log 𝑛) efficiency in he po en ial flow solver.
+4. Nonlinear solver capabili ies which include models for he boundary layer and flow separa ion.
+5. A fully s eady or uns eady ime-domain solver.
+6. Advanced con rol surface modeling and fligh con rol sys em in egra ion capabili ies.
+7. Fluid-s ruc ure in erac ions modeling wi h embedded s a ic and dynamic aeroelas ic, flu er, and
 
 
 
-aeroservoelastic modeling tools integrated with the core flow solvers.
-8. The ability to execute of six-degree-of-freedom (6DOF) motion simulations.
-9. A modern user interface/experience with a fully-scriptable application programming interface (API).
+aeroservoelas ic modeling ools in egra ed wi h he core flow solvers.
+8. The abili y o execu e of six-degree-of-freedom (6DOF) mo ion simula ions.
+9. A modern user in erface/experience wi h a fully-scrip able applica ion programming in erface (API).
 
 
 
-10. Integration with commercial and open-source CAD software.
+10. In egra ion wi h commercial and open-source CAD sof ware.
 
 
 
 IV. Aerodynamic Modeling Approach
-A new approach was formulated and applied to convert OpenVSP [64] geometry into a form compatible with the
+A new approach was formula ed and applied o conver OpenVSP [64] geome ry in o a form compa ible wi h he
 
 
 
-FlightStream® software [20]. This was followed by automatic execution of flow simulations using the FlightStream®
+Fligh S ream® sof ware [20]. This was followed by au oma ic execu ion of flow simula ions using he Fligh S ream®
 
 
 
-scripting capabilities. The steps are as follows:
-1) Create an OpenVSP model for the aircraft geometry. A RAVEN SWFT OpenVSP model in its cruise (forward
+scrip ing capabili ies. The s eps are as follows:
+1) Crea e an OpenVSP model for he aircraf geome ry. A RAVEN SWFT OpenVSP model in i s cruise (forward
 
 
 
-flight) configuration was developed for this study. The vehicle components modeled in OpenVSP included
-the fuselage, main wing, horizontal tail, vertical tail, propellers, landing gear, inboard sponsons, outboard
-nacelles, and simplified representations of the electric motors. The model is a 28.625%-scale version of the
+fligh ) configura ion was developed for his s udy. The vehicle componen s modeled in OpenVSP included
+ he fuselage, main wing, horizon al ail, ver ical ail, propellers, landing gear, inboard sponsons, ou board
+nacelles, and simplified represen a ions of he elec ric mo ors. The model is a 28.625%-scale version of he
 
 
 
@@ -385,12 +385,12 @@ nacelles, and simplified representations of the electric motors. The model is a 
 
 
 
-1000-lb RAVEN OpenVSP model with slight modifications made to emulate the as-built RAVEN SWFT aircraft
-geometry. The RAVEN SWFT OpenVSP model is shown in Fig. 3.
+1000-lb RAVEN OpenVSP model wi h sligh modifica ions made o emula e he as-buil RAVEN SWFT aircraf 
+geome ry. The RAVEN SWFT OpenVSP model is shown in Fig. 3.
 
 
 
-(a) Isolated airframe (b) Powered airframe
+(a) Isola ed airframe (b) Powered airframe
 
 
 
@@ -398,41 +398,41 @@ Fig. 3 RAVEN SWFT OpenVSP model.
 
 
 
-2) Adjust the tessellation and clustering for each component in the OpenVSP model. The FlightStream® User
-Guide [67] contains guidance on how to set mesh controls for lifting and non-lifting components to facilitate
-successful grid generation in FlightStream®. Furthermore, it is important to ensure that the OpenVSP mesh
-resolution is finer than the mesh resolution used in FlightStream®.
+2) Adjus he essella ion and clus ering for each componen in he OpenVSP model. The Fligh S ream® User
+Guide [67] con ains guidance on how o se mesh con rols for lif ing and non-lif ing componen s o facili a e
+successful grid genera ion in Fligh S ream®. Fur hermore, i is impor an o ensure ha he OpenVSP mesh
+resolu ion is finer han he mesh resolu ion used in Fligh S ream®.
 
 
 
-3) Export the aircraft geometry from OpenVSP by creating a degenerate geometry (DegenGeom) file. For
-this work, the DegenGeom m-file export option was used to create a script that could be run in MATLAB®. The
-propeller components were not included in the DegenGeom file, but their locations were stored to be incorporated
-into the model later in the process.
+3) Expor he aircraf geome ry from OpenVSP by crea ing a degenera e geome ry (DegenGeom) file. For
+ his work, he DegenGeom m-file expor op ion was used o crea e a scrip ha could be run in MATLAB®. The
+propeller componen s were no included in he DegenGeom file, bu heir loca ions were s ored o be incorpora ed
+in o he model la er in he process.
 
 
 
-4) Convert the DegenGeom file into a Component Cross Section (CCS) file. The CCS file, discussed in the
-FlightStream® User Guide [67], is a text file that allows the user to import aircraft geometry into FlightStream®
+4) Conver he DegenGeom file in o a Componen Cross Sec ion (CCS) file. The CCS file, discussed in he
+Fligh S ream® User Guide [67], is a ex file ha allows he user o impor aircraf geome ry in o Fligh S ream®
 
 
 
-in a manner suitable for automatic mesh generation. The CCS file also allows the user to define control surfaces
-and set several meshing options. For this work, a MATLAB® script was written to automatically convert the
-DegenGeom m-file into the CCS file format along with control surface positions and certain user-specified
-meshing parameters. The RAVEN SWFT isolated-airframe FlightStream® representation created from the CCS
+in a manner sui able for au oma ic mesh genera ion. The CCS file also allows he user o define con rol surfaces
+and se several meshing op ions. For his work, a MATLAB® scrip was wri en o au oma ically conver he
+DegenGeom m-file in o he CCS file forma along wi h con rol surface posi ions and cer ain user-specified
+meshing parame ers. The RAVEN SWFT isola ed-airframe Fligh S ream® represen a ion crea ed from he CCS
 file is shown in Fig. 4.
 
 
 
-Fig. 4 RAVEN SWFT isolated-airframe FlightStream® mesh and boundary conditions.
+Fig. 4 RAVEN SWFT isola ed-airframe Fligh S ream® mesh and boundary condi ions.
 
 
 
-5) Perform a mesh refinement study. Executing a mesh refinement study for each geometric component is an
-essential task to ensure that FlightStream® predictions are reliable and accurate. For each isolated component,
-the first step is to perform a mesh refinement study in the direction of the highest curvature, while holding
-the number of grid points in the lower curvature direction fixed to a reasonably dense value. The results have
+5) Perform a mesh refinemen s udy. Execu ing a mesh refinemen s udy for each geome ric componen is an
+essen ial ask o ensure ha Fligh S ream® predic ions are reliable and accura e. For each isola ed componen ,
+ he firs s ep is o perform a mesh refinemen s udy in he direc ion of he highes curva ure, while holding
+ he number of grid poin s in he lower curva ure direc ion fixed o a reasonably dense value. The resul s have
 
 
 
@@ -448,44 +448,44 @@ the number of grid points in the lower curvature direction fixed to a reasonably
 
 
 
-sufficiently converged when the percent difference of the dominant force and moment components between
-neighboring grid refinement levels is less than 1-2%, which specifies the number of grid points that should be
-used for subsequent analyses. The second step is to perform a mesh refinement study in the lower curvature
-direction while holding the number of grid points in the higher curvature direction fixed to the value determined
-in the first step. For the most reliable results, the mesh refinement study should be performed at a non-zero angle
-of incidence relative to the oncoming flow (i.e., running the analysis at a non-zero angle of attack and angle of
-sideslip) and using the inviscid solver (i.e., viscous coupling and flow separation options should be disabled). For
-this work, the grid refinement was adjusted in a CCS file using the user-defined meshing parameters “Mesh_U”
-and “Mesh_V” [67]. The mesh refinement process is demonstrated for the RAVEN SWFT main wing in Fig. 5.
-A mesh refinement study is first performed in the chordwise direction by varying the number of chordwise grid
-points while holding the spanwise grid fixed at 40 points. Figure 5a shows that the percent difference of the
-𝐶𝐿 and 𝐶𝑚 values is less than 1% using 200 chordwise points, which was selected as the number of chordwise
-grid points for the wing. A mesh refinement study was then performed in the spanwise direction holding the
-chordwise grid fixed at 200 points. As shown in Fig. 5b, the 𝐶𝐿 and 𝐶𝑚 values appear to sufficiently converge
-using 50 spanwise grid points.
+sufficien ly converged when he percen difference of he dominan force and momen componen s be ween
+neighboring grid refinemen levels is less han 1-2%, which specifies he number of grid poin s ha should be
+used for subsequen analyses. The second s ep is o perform a mesh refinemen s udy in he lower curva ure
+direc ion while holding he number of grid poin s in he higher curva ure direc ion fixed o he value de ermined
+in he firs s ep. For he mos reliable resul s, he mesh refinemen s udy should be performed a a non-zero angle
+of incidence rela ive o he oncoming flow (i.e., running he analysis a a non-zero angle of a ack and angle of
+sideslip) and using he inviscid solver (i.e., viscous coupling and flow separa ion op ions should be disabled). For
+ his work, he grid refinemen was adjus ed in a CCS file using he user-defined meshing parame ers “Mesh_U”
+and “Mesh_V” [67]. The mesh refinemen process is demons ra ed for he RAVEN SWFT main wing in Fig. 5.
+A mesh refinemen s udy is firs performed in he chordwise direc ion by varying he number of chordwise grid
+poin s while holding he spanwise grid fixed a 40 poin s. Figure 5a shows ha he percen difference of he
+𝐶𝐿 and 𝐶𝑚 values is less han 1% using 200 chordwise poin s, which was selec ed as he number of chordwise
+grid poin s for he wing. A mesh refinemen s udy was hen performed in he spanwise direc ion holding he
+chordwise grid fixed a 200 poin s. As shown in Fig. 5b, he 𝐶𝐿 and 𝐶𝑚 values appear o sufficien ly converge
+using 50 spanwise grid poin s.
 
 
 
-(a) Step 1: chordwise grid refinement (40 spanwise points) (b) Step 2: spanwise grid refinement (200 chordwise points)
+(a) S ep 1: chordwise grid refinemen (40 spanwise poin s) (b) S ep 2: spanwise grid refinemen (200 chordwise poin s)
 
 
 
-Fig. 5 Mesh refinement study for the RAVEN SWFT wing (inviscid solver, 𝜶 = 2 deg, 𝜷 = 0 deg, 𝑽 = 54.3 ft/s).
+Fig. 5 Mesh refinemen s udy for he RAVEN SWFT wing (inviscid solver, 𝜶 = 2 deg, 𝜷 = 0 deg, 𝑽 = 54.3 f /s).
 
 
 
-6) Create FlightStream® script files to automatically execute simulations. A MATLAB® script was written
-to automatically generate a FlightStream® script file for each simulation run. The FlightStream® script files
-were configured to perform tasks such as importing a CCS file, creating coordinate systems, creating propellers
-(modeled as Conway actuator discs [68]), specifying boundary conditions, setting flow solver options, setting
-control effector settings, running FlightStream® simulations, and saving results.
+6) Crea e Fligh S ream® scrip files o au oma ically execu e simula ions. A MATLAB® scrip was wri en
+ o au oma ically genera e a Fligh S ream® scrip file for each simula ion run. The Fligh S ream® scrip files
+were configured o perform asks such as impor ing a CCS file, crea ing coordina e sys ems, crea ing propellers
+(modeled as Conway ac ua or discs [68]), specifying boundary condi ions, se ing flow solver op ions, se ing
+con rol effec or se ings, running Fligh S ream® simula ions, and saving resul s.
 
 
 
-7) Execute FlightStream® script files to generate aerodynamic predictions. A MATLAB® script was written to
-automatically run a set of FlightStream® script files for automatic data generation for an arbitrary number of
-flow conditions and control effector settings. An example RAVEN SWFT powered-airframe FlightStream® flow
-solution visualization is shown in Fig. 6.
+7) Execu e Fligh S ream® scrip files o genera e aerodynamic predic ions. A MATLAB® scrip was wri en o
+au oma ically run a se of Fligh S ream® scrip files for au oma ic da a genera ion for an arbi rary number of
+flow condi ions and con rol effec or se ings. An example RAVEN SWFT powered-airframe Fligh S ream® flow
+solu ion visualiza ion is shown in Fig. 6.
 
 
 
@@ -501,13 +501,13 @@ solution visualization is shown in Fig. 6.
 
 
 
-Fig. 6 Example powered-airframe FlightStream® surface pressure predictions for the RAVEN SWFT aircraft.
+Fig. 6 Example powered-airframe Fligh S ream® surface pressure predic ions for he RAVEN SWFT aircraf .
 
 
 
-The set of procedures outlined in this section is summarized in Fig. 7. This process allows FlightStream® solutions
-to be run automatically at a variety of user-specified flight conditions for efficient prediction of applied forces and
-moments which can be used for aerodynamic database development.
+The se of procedures ou lined in his sec ion is summarized in Fig. 7. This process allows Fligh S ream® solu ions
+ o be run au oma ically a a varie y of user-specified fligh condi ions for efficien predic ion of applied forces and
+momen s which can be used for aerodynamic da abase developmen .
 
 
 
@@ -528,19 +528,19 @@ CCS File
 
 
 
-Batch Script 
+Ba ch Scrip 
 
 
 
-Execution
+Execu ion
 
 
 
-Script 
+Scrip 
 
 
 
-Generation
+Genera ion
 
 
 
@@ -548,11 +548,11 @@ Mesh
 
 
 
-Refinement
+Refinemen 
 
 
 
-FlightStream
+Fligh S ream
 
 
 
@@ -560,37 +560,37 @@ Aerodynamic
 
 
 
-Predictions
+Predic ions
 
 
 
-Experiment 
+Experimen 
 
 
 
-Information
+Informa ion
 
 
 
-Aircraft 
+Aircraf 
 
 
 
-Geometry
+Geome ry
 
 
 
-Fig. 7 Process to execute FlightStream® simulations.
+Fig. 7 Process o execu e Fligh S ream® simula ions.
 
 
 
-V. Results
-To demonstrate and validate the approach outlined in the previous section, FlightStream® was used to compute
+V. Resul s
+To demons ra e and valida e he approach ou lined in he previous sec ion, Fligh S ream® was used o compu e
 
 
 
-predictions of the isolated-airframe performance, stability, and control characteristics for the RAVEN SWFT aircraft.
-This includes computing the nondimensional aerodynamic force coefficients
+predic ions of he isola ed-airframe performance, s abili y, and con rol charac eris ics for he RAVEN SWFT aircraf .
+This includes compu ing he nondimensional aerodynamic force coefficien s
 
 
 
@@ -615,7 +615,7 @@ D
 
 
 
-and moment coefficients
+and momen coefficien s
 𝐶𝑙 =
 
 
@@ -646,8 +646,8 @@ and moment coefficients
 
 
 
-variation with angle of attack, angle of sideslip, angular rates, and control surface deflection angles. The current
-estimated RAVEN SWFT forward flight center of gravity position was used as the moment reference location. Several
+varia ion wi h angle of a ack, angle of sideslip, angular ra es, and con rol surface deflec ion angles. The curren 
+es ima ed RAVEN SWFT forward fligh cen er of gravi y posi ion was used as he momen reference loca ion. Several
 
 
 
@@ -663,60 +663,60 @@ estimated RAVEN SWFT forward flight center of gravity position was used as the m
 
 
 
-comparisons of FlightStream® predictions to wind-tunnel data collected for the RAVEN SWFT aircraft were made
-to validate FlightStream® solutions and determine suitable FlightStream® settings for modeling the RAVEN SWFT
-aircraft. FlightStream® solutions were run with a fully turbulent boundary layer and the pressure-based calculations
-were taken as the final results. Inviscid solutions were run for all cases; furthermore, angle of attack and angle of sideslip
-sweeps were performed with Stratford flow separation models enabled [59]. For this paper, the FlightStream® solutions
-were executed with the viscous coupling option disabled. FlightStream® Build #3092023 was used to compute the
-results shown in this paper.
+comparisons of Fligh S ream® predic ions o wind- unnel da a collec ed for he RAVEN SWFT aircraf were made
+ o valida e Fligh S ream® solu ions and de ermine sui able Fligh S ream® se ings for modeling he RAVEN SWFT
+aircraf . Fligh S ream® solu ions were run wi h a fully urbulen boundary layer and he pressure-based calcula ions
+were aken as he final resul s. Inviscid solu ions were run for all cases; fur hermore, angle of a ack and angle of sideslip
+sweeps were performed wi h S ra ford flow separa ion models enabled [59]. For his paper, he Fligh S ream® solu ions
+were execu ed wi h he viscous coupling op ion disabled. Fligh S ream® Build #3092023 was used o compu e he
+resul s shown in his paper.
 
 
 
-The static wind-tunnel data used for validation of the FlightStream® solutions were collected using randomized test
-factor sweeps and statistically designed experiments (e.g., see Refs. [69, 70]) varying the airflow angles and control
-surface deflection angles. The data were collected in this manner to quantify the uncertainty of the wind-tunnel
-measurements and enable development of a response surface equation (RSE) for each aerodynamic force and moment
-component. Note that the randomized data collection strategy is intended to expose and characterize the uncertainty in
-the measured data and, consequently, makes the raw data quality look noisier than a traditional one-factor-at-a-time
-sweep where a single test factor is varied by sequentially increasing or decreasing its value. The wind-tunnel data are
-plotted as individual data points with repeat points shown where available to convey the magnitude of the measurement
-uncertainty. The wind-tunnel data are also displayed in the form of RSE predictions of the mean response along with a
-95% confidence interval (CI) on the mean response and a 95% prediction interval (PI) characterizing the uncertainty in
-the response predictions for individual data points [70]. All wind-tunnel data were collected at a dynamic pressure of
-𝑞 = 3.5 psf (freestream velocity of 𝑉 = 54.3 ft/s at standard sea level conditions) and, accordingly, the FlightStream®
+The s a ic wind- unnel da a used for valida ion of he Fligh S ream® solu ions were collec ed using randomized es 
+fac or sweeps and s a is ically designed experimen s (e.g., see Refs. [69, 70]) varying he airflow angles and con rol
+surface deflec ion angles. The da a were collec ed in his manner o quan ify he uncer ain y of he wind- unnel
+measuremen s and enable developmen of a response surface equa ion (RSE) for each aerodynamic force and momen 
+componen . No e ha he randomized da a collec ion s ra egy is in ended o expose and charac erize he uncer ain y in
+ he measured da a and, consequen ly, makes he raw da a quali y look noisier han a radi ional one-fac or-a -a- ime
+sweep where a single es fac or is varied by sequen ially increasing or decreasing i s value. The wind- unnel da a are
+plo ed as individual da a poin s wi h repea poin s shown where available o convey he magni ude of he measuremen 
+uncer ain y. The wind- unnel da a are also displayed in he form of RSE predic ions of he mean response along wi h a
+95% confidence in erval (CI) on he mean response and a 95% predic ion in erval (PI) charac erizing he uncer ain y in
+ he response predic ions for individual da a poin s [70]. All wind- unnel da a were collec ed a a dynamic pressure of
+𝑞 = 3.5 psf (frees ream veloci y of 𝑉 = 54.3 f /s a s andard sea level condi ions) and, accordingly, he Fligh S ream®
 
 
 
-solutions were run at these freestream settings.
+solu ions were run a hese frees ream se ings.
 
 
 
-A. Angle of Attack and Sideslip Sweep Predictions
-Figure 8 shows FlightStream® predictions and wind-tunnel measurements of the lift, drag, and pitching moment
+A. Angle of A ack and Sideslip Sweep Predic ions
+Figure 8 shows Fligh S ream® predic ions and wind- unnel measuremen s of he lif , drag, and pi ching momen 
 
 
 
-coefficients for an angle of attack sweep at 𝛽 = 0 deg. The results for two types of FlightStream® flow simulations are
-shown: an inviscid flow simulation and a flow simulation including the effects of flow separation (using the FlightStream®
+coefficien s for an angle of a ack sweep a 𝛽 = 0 deg. The resul s for wo ypes of Fligh S ream® flow simula ions are
+shown: an inviscid flow simula ion and a flow simula ion including he effec s of flow separa ion (using he Fligh S ream®
 
 
 
-axial flow separation setting for the wing and horizontal tail, and the FlightStream® longitudinal crossflow setting for
-the fuselage and sponsons). The lift coefficient variation with angle of attack is well captured by both FlightStream®
+axial flow separa ion se ing for he wing and horizon al ail, and he Fligh S ream® longi udinal crossflow se ing for
+ he fuselage and sponsons). The lif coefficien varia ion wi h angle of a ack is well cap ured by bo h Fligh S ream®
 
 
 
-solutions below stall. The solution with flow separation modeled accurately predicts the stall location and maximum lift
-coefficient, as a result of employing the axial flow separation model on the wing and horizontal tail. The overall drag
-coefficient is underpredicted by the inviscid model, but the curvature matches the wind-tunnel data reasonably well.
-Below stall, the solution including flow separation effects better approximates the drag variation with angle of attack.
-This improvement was primarily gained by employing the longitudinal crossflow model for the fuselage and sponsons.
-The post-stall drag increase exhibited in the wind-tunnel data is not captured by either FlightStream® solution. The
+solu ions below s all. The solu ion wi h flow separa ion modeled accura ely predic s he s all loca ion and maximum lif 
+coefficien , as a resul of employing he axial flow separa ion model on he wing and horizon al ail. The overall drag
+coefficien is underpredic ed by he inviscid model, bu he curva ure ma ches he wind- unnel da a reasonably well.
+Below s all, he solu ion including flow separa ion effec s be er approxima es he drag varia ion wi h angle of a ack.
+This improvemen was primarily gained by employing he longi udinal crossflow model for he fuselage and sponsons.
+The pos -s all drag increase exhibi ed in he wind- unnel da a is no cap ured by ei her Fligh S ream® solu ion. The
 
 
 
-Fig. 8 Angle of attack sweep at �̄� = 3.5 psf (𝑽 = 54.3 ft/s), 𝜷 = 0 deg, and zero control surface deflection.
+Fig. 8 Angle of a ack sweep a �̄� = 3.5 psf (𝑽 = 54.3 f /s), 𝜷 = 0 deg, and zero con rol surface deflec ion.
 
 
 
@@ -732,49 +732,49 @@ Fig. 8 Angle of attack sweep at �̄� = 3.5 psf (𝑽 = 54.3 ft/s), 𝜷 = 0 
 
 
 
-pitching moment variation with angle of attack is reasonably well predicted by the inviscid FlightStream® solution for
-an angle of attack greater than approximately 2 deg. The solution with flow separation includes non-physical nonlinear
-behavior in the angle of attack range of 5 to 11 deg as a result of non-smooth introduction of the flow separation models,
-which is expected to be addressed and improved in a future version of FlightStream®. Furthermore, both FlightStream®
+pi ching momen varia ion wi h angle of a ack is reasonably well predic ed by he inviscid Fligh S ream® solu ion for
+an angle of a ack grea er han approxima ely 2 deg. The solu ion wi h flow separa ion includes non-physical nonlinear
+behavior in he angle of a ack range of 5 o 11 deg as a resul of non-smoo h in roduc ion of he flow separa ion models,
+which is expec ed o be addressed and improved in a fu ure version of Fligh S ream®. Fur hermore, bo h Fligh S ream®
 
 
 
-solutions do not capture the decreasing stability, and eventual instability, of the pitching moment slope exhibited in the
-wind-tunnel data at a negative angle of attack. Resolving this discrepancy will be the subject of future work.
+solu ions do no cap ure he decreasing s abili y, and even ual ins abili y, of he pi ching momen slope exhibi ed in he
+wind- unnel da a a a nega ive angle of a ack. Resolving his discrepancy will be he subjec of fu ure work.
 
 
 
-Figure 9 shows FlightStream® predictions and wind-tunnel measurements of side force, rolling moment, and yawing
-moment coefficients for an angle of sideslip sweep at 𝛼 = 2 deg. To aid in comparison of the FlightStream® results
-and wind-tunnel measurements, small asymmetries in the lateral-directional force and moment measurements have
-been removed by subtracting the force and moment values at 𝛽 = 0 deg from all of the data. Two FlightStream® flow
-solutions are shown: an inviscid solution and a solution computed using the crossflow flow separation model enabled on
-the fuselage. For 𝐶𝑌 , the FlightStream® solution with flow separation well-represents the measured wind-tunnel data;
-the inviscid FlightStream® solution predicts a slope that is lower in magnitude compared to the wind-tunnel data. For
-𝐶𝑙 , both FlightStream® model predictions agree well with the wind-tunnel data, with the inviscid solution slightly more
-closely following the mean response predicted by the RSE. For 𝐶𝑛, the inviscid FlightStream® model exhibits a better
-match to the wind-tunnel data compared to the model with flow separation enabled, which overpredicts the yaw stiffness.
+Figure 9 shows Fligh S ream® predic ions and wind- unnel measuremen s of side force, rolling momen , and yawing
+momen coefficien s for an angle of sideslip sweep a 𝛼 = 2 deg. To aid in comparison of he Fligh S ream® resul s
+and wind- unnel measuremen s, small asymme ries in he la eral-direc ional force and momen measuremen s have
+been removed by sub rac ing he force and momen values a 𝛽 = 0 deg from all of he da a. Two Fligh S ream® flow
+solu ions are shown: an inviscid solu ion and a solu ion compu ed using he crossflow flow separa ion model enabled on
+ he fuselage. For 𝐶𝑌 , he Fligh S ream® solu ion wi h flow separa ion well-represen s he measured wind- unnel da a;
+ he inviscid Fligh S ream® solu ion predic s a slope ha is lower in magni ude compared o he wind- unnel da a. For
+𝐶𝑙 , bo h Fligh S ream® model predic ions agree well wi h he wind- unnel da a, wi h he inviscid solu ion sligh ly more
+closely following he mean response predic ed by he RSE. For 𝐶𝑛, he inviscid Fligh S ream® model exhibi s a be er
+ma ch o he wind- unnel da a compared o he model wi h flow separa ion enabled, which overpredic s he yaw s iffness.
 
 
 
-Fig. 9 Angle of sideslip sweep at �̄� = 3.5 psf (𝑽 = 54.3 ft/s), 𝜶 = 2 deg, and zero control surface deflection.
+Fig. 9 Angle of sideslip sweep a �̄� = 3.5 psf (𝑽 = 54.3 f /s), 𝜶 = 2 deg, and zero con rol surface deflec ion.
 
 
 
-The 𝛼 and 𝛽 stability derivatives at 𝛼 = 2 deg and 𝛽 = 0 deg computed from the wind-tunnel-derived RSEs
-and FlightStream® predictions using a smoothed polynomial representation of the data are shown in Table 2. The
-inviscid FlightStream® stability derivative predictions are closer to the wind-tunnel derived values compared to
-the flow separation model predictions, except for 𝐶𝑌𝛽 where the flow separation model prediction is closer to the
-wind-tunnel-derived value.
+The 𝛼 and 𝛽 s abili y deriva ives a 𝛼 = 2 deg and 𝛽 = 0 deg compu ed from he wind- unnel-derived RSEs
+and Fligh S ream® predic ions using a smoo hed polynomial represen a ion of he da a are shown in Table 2. The
+inviscid Fligh S ream® s abili y deriva ive predic ions are closer o he wind- unnel derived values compared o
+ he flow separa ion model predic ions, excep for 𝐶𝑌𝛽 where he flow separa ion model predic ion is closer o he
+wind- unnel-derived value.
 
 
 
-Table 2 Comparison of static stability derivatives at �̄� = 3.5 psf (𝑽 = 54.3 ft/s), 𝜶 = 2 deg, and 𝜷 = 0 deg
+Table 2 Comparison of s a ic s abili y deriva ives a �̄� = 3.5 psf (𝑽 = 54.3 f /s), 𝜶 = 2 deg, and 𝜷 = 0 deg
 
 
 
-FlightStream FlightStream
-Parameter Wind Tunnel (inviscid) (flow separation)
+Fligh S ream Fligh S ream
+Parame er Wind Tunnel (inviscid) (flow separa ion)
 
 
 
@@ -811,55 +811,55 @@ Parameter Wind Tunnel (inviscid) (flow separation)
 
 
 
-B. Control Surface Effectiveness Predictions
-Each of the control surfaces were modeled in FlightStream® by specifying their geometry in the CCS file and
+B. Con rol Surface Effec iveness Predic ions
+Each of he con rol surfaces were modeled in Fligh S ream® by specifying heir geome ry in he CCS file and
 
 
 
-executing geometry rotation commands in the FlightStream® script files where applicable. Because the aircraft has an
-all-moving stabilator, the stabilator deflections were modeled by rotating the whole horizontal tail component about
-its hinge point. The flaperon and rudder control surfaces were modeled using two different approaches possible in
-FlightStream®: morphing control surfaces and physically separating/deflecting control surfaces, which are depicted in
-Fig. 10a and Fig. 10b, respectively. The morphing surface approach rotates the surface about its hinge location which
-stretches the mesh and maintains a continuous trailing edge on the lifting surface. The separated surface approach
-results in a gap between the deflected control surface and lifting surface with a separate trailing edge on each component.
-To expedite the FlightStream® computations, the stabilator predictions were run without the landing gear, sponsons,
-motor representations, and nacelles. Similarly, the rudder and flaperon FlightStream® solutions were computed by only
-including the vertical tail and main wing components, respectively. Only inviscid FlightStream® solutions at 𝛼 = 2 deg
-and 𝛽 = 0 deg were executed for the control surface predictions shown in this paper.
+execu ing geome ry ro a ion commands in he Fligh S ream® scrip files where applicable. Because he aircraf has an
+all-moving s abila or, he s abila or deflec ions were modeled by ro a ing he whole horizon al ail componen abou 
+i s hinge poin . The flaperon and rudder con rol surfaces were modeled using wo differen approaches possible in
+Fligh S ream®: morphing con rol surfaces and physically separa ing/deflec ing con rol surfaces, which are depic ed in
+Fig. 10a and Fig. 10b, respec ively. The morphing surface approach ro a es he surface abou i s hinge loca ion which
+s re ches he mesh and main ains a con inuous railing edge on he lif ing surface. The separa ed surface approach
+resul s in a gap be ween he deflec ed con rol surface and lif ing surface wi h a separa e railing edge on each componen .
+To expedi e he Fligh S ream® compu a ions, he s abila or predic ions were run wi hou he landing gear, sponsons,
+mo or represen a ions, and nacelles. Similarly, he rudder and flaperon Fligh S ream® solu ions were compu ed by only
+including he ver ical ail and main wing componen s, respec ively. Only inviscid Fligh S ream® solu ions a 𝛼 = 2 deg
+and 𝛽 = 0 deg were execu ed for he con rol surface predic ions shown in his paper.
 
 
 
-(a) Morphing control surface deflection (b) Physical control surface deflection
+(a) Morphing con rol surface deflec ion (b) Physical con rol surface deflec ion
 
 
 
-Fig. 10 Comparison of FlightStream® control surface deflection options.
+Fig. 10 Comparison of Fligh S ream® con rol surface deflec ion op ions.
 
 
 
-Figure 11 shows a stabilator sweep comparison between the inviscid FlightStream® solution and wind-tunnel
-measurements. The plot shows the change in lift, drag, and pitching moment coefficients relative to zero stabilator
-deflection. The FlightStream® predictions show overall good agreement with the wind-tunnel data. The FlightStream®
+Figure 11 shows a s abila or sweep comparison be ween he inviscid Fligh S ream® solu ion and wind- unnel
+measuremen s. The plo shows he change in lif , drag, and pi ching momen coefficien s rela ive o zero s abila or
+deflec ion. The Fligh S ream® predic ions show overall good agreemen wi h he wind- unnel da a. The Fligh S ream®
 
 
 
-solution is seen to slightly overpredict the change in lift and pitching moment due to stabilator deflection.
+solu ion is seen o sligh ly overpredic he change in lif and pi ching momen due o s abila or deflec ion.
 
 
 
-Fig. 11 Stabilator sweep at �̄� = 3.5 psf (𝑽 = 54.3 ft/s), 𝜶 = 2 deg, and 𝜷 = 0 deg.
+Fig. 11 S abila or sweep a �̄� = 3.5 psf (𝑽 = 54.3 f /s), 𝜶 = 2 deg, and 𝜷 = 0 deg.
 
 
 
-A rudder sweep comparison between wind-tunnel data and FlightStream® predictions for 𝐶𝑌 , 𝐶𝑙 , and 𝐶𝑛 is shown
-in Fig. 12. The results for morphing and physical control rudder deflection models are similar and agree well with the
-wind-tunnel data. The FlightStream® solution slightly overpredicts the yawing moment resulting from rudder deflection
-exhibited in the wind-tunnel data.
+A rudder sweep comparison be ween wind- unnel da a and Fligh S ream® predic ions for 𝐶𝑌 , 𝐶𝑙 , and 𝐶𝑛 is shown
+in Fig. 12. The resul s for morphing and physical con rol rudder deflec ion models are similar and agree well wi h he
+wind- unnel da a. The Fligh S ream® solu ion sligh ly overpredic s he yawing momen resul ing from rudder deflec ion
+exhibi ed in he wind- unnel da a.
 
 
 
-Figures 13-15 show FlightStream® left inboard, midboard, and outboard flaperon sweep predictions compared to
+Figures 13-15 show Fligh S ream® lef inboard, midboard, and ou board flaperon sweep predic ions compared o
 
 
 
@@ -875,24 +875,24 @@ Figures 13-15 show FlightStream® left inboard, midboard, and outboard flaperon 
 
 
 
-Fig. 12 Rudder sweep at �̄� = 3.5 psf (𝑽 = 54.3 ft/s), 𝜶 = 2 deg, and 𝜷 = 0 deg.
+Fig. 12 Rudder sweep a �̄� = 3.5 psf (𝑽 = 54.3 f /s), 𝜶 = 2 deg, and 𝜷 = 0 deg.
 
 
 
-wind-tunnel data for 𝐶𝐿 , 𝐶𝐷 , and 𝐶𝑙 . The right wing flaperon FlightStream® predictions were nearly identical and
-are, thus, not shown. For this study, the morphing control surface approach yielded more reliable solutions for the
-flaperons and is the only deflection method shown on the plots. The outboard flaperon predictions (𝛿 𝑓1) agree very
-well with the wind-tunnel data with only a slight over-prediction of control effectiveness. The midboard and inboard
-flaperon deflections (𝛿 𝑓2 and 𝛿 𝑓3 ) agree reasonably well with the wind-tunnel data, but overpredict the flaperon control
-effectiveness for lift and rolling moment production.
+wind- unnel da a for 𝐶𝐿 , 𝐶𝐷 , and 𝐶𝑙 . The righ wing flaperon Fligh S ream® predic ions were nearly iden ical and
+are, hus, no shown. For his s udy, he morphing con rol surface approach yielded more reliable solu ions for he
+flaperons and is he only deflec ion me hod shown on he plo s. The ou board flaperon predic ions (𝛿 𝑓1) agree very
+well wi h he wind- unnel da a wi h only a sligh over-predic ion of con rol effec iveness. The midboard and inboard
+flaperon deflec ions (𝛿 𝑓2 and 𝛿 𝑓3 ) agree reasonably well wi h he wind- unnel da a, bu overpredic he flaperon con rol
+effec iveness for lif and rolling momen produc ion.
 
 
 
-Fig. 13 Left outboard flaperon sweep at �̄� = 3.5 psf (𝑽 = 54.3 ft/s), 𝜶 = 2 deg, and 𝜷 = 0 deg.
+Fig. 13 Lef ou board flaperon sweep a �̄� = 3.5 psf (𝑽 = 54.3 f /s), 𝜶 = 2 deg, and 𝜷 = 0 deg.
 
 
 
-Fig. 14 Left midboard flaperon sweep at �̄� = 3.5 psf (𝑽 = 54.3 ft/s), 𝜶 = 2 deg, and 𝜷 = 0 deg.
+Fig. 14 Lef midboard flaperon sweep a �̄� = 3.5 psf (𝑽 = 54.3 f /s), 𝜶 = 2 deg, and 𝜷 = 0 deg.
 
 
 
@@ -908,28 +908,28 @@ Fig. 14 Left midboard flaperon sweep at �̄� = 3.5 psf (𝑽 = 54.3 ft/s), �
 
 
 
-Fig. 15 Left inboard flaperon sweep at �̄� = 3.5 psf (𝑽 = 54.3 ft/s), 𝜶 = 2 deg, and 𝜷 = 0 deg.
+Fig. 15 Lef inboard flaperon sweep a �̄� = 3.5 psf (𝑽 = 54.3 f /s), 𝜶 = 2 deg, and 𝜷 = 0 deg.
 
 
 
-The control derivatives at 𝛼 = 2 deg and 𝛽 = 0 deg computed from the wind-tunnel-derived RSEs and FlightStream®
+The con rol deriva ives a 𝛼 = 2 deg and 𝛽 = 0 deg compu ed from he wind- unnel-derived RSEs and Fligh S ream®
 
 
 
-predictions using a smoothed polynomial representation of the data are shown in Table 3. The FlightStream® control
-derivative computations are for the morphing rudder and morphing flaperon predictions. The FlightStream® control
-derivative predictions are seen to overpredict the control effectiveness compared to the wind-tunnel-derived values, as
-would be expected from an inviscid flow solution. However, given the low computational expense of the mid-fidelity
-aerodynamic prediction tool, the FlightStream® control derivative predictions are acceptably close to the wind-tunnel
-results.
+predic ions using a smoo hed polynomial represen a ion of he da a are shown in Table 3. The Fligh S ream® con rol
+deriva ive compu a ions are for he morphing rudder and morphing flaperon predic ions. The Fligh S ream® con rol
+deriva ive predic ions are seen o overpredic he con rol effec iveness compared o he wind- unnel-derived values, as
+would be expec ed from an inviscid flow solu ion. However, given he low compu a ional expense of he mid-fideli y
+aerodynamic predic ion ool, he Fligh S ream® con rol deriva ive predic ions are accep ably close o he wind- unnel
+resul s.
 
 
 
-Table 3 Comparison of control derivatives at �̄� = 3.5 psf (𝑽 = 54.3 ft/s), 𝜶 = 2 deg, and 𝜷 = 0 deg
+Table 3 Comparison of con rol deriva ives a �̄� = 3.5 psf (𝑽 = 54.3 f /s), 𝜶 = 2 deg, and 𝜷 = 0 deg
 
 
 
-Parameter Wind Tunnel FlightStream
+Parame er Wind Tunnel Fligh S ream
 𝐶𝐿𝛿𝑠
 
 
@@ -1008,14 +1008,14 @@ Parameter Wind Tunnel FlightStream
 
 
 
-C. Dynamic Derivative Predictions
-FlightStream® can be used to predict dynamic derivatives using both its Stability and Control Toolbox and by setting
+C. Dynamic Deriva ive Predic ions
+Fligh S ream® can be used o predic dynamic deriva ives using bo h i s S abili y and Con rol Toolbox and by se ing
 
 
 
-a rotational flowfield. The later approach was used for this work so that a sweep of rotation rates about the aircraft
-center of gravity location could be collected. The results generally agreed with physical intuition, but are not shown
-because wind-tunnel data was not used to validate the predictions. Future dynamic wind-tunnel testing is expected to
+a ro a ional flowfield. The la er approach was used for his work so ha a sweep of ro a ion ra es abou he aircraf 
+cen er of gravi y loca ion could be collec ed. The resul s generally agreed wi h physical in ui ion, bu are no shown
+because wind- unnel da a was no used o valida e he predic ions. Fu ure dynamic wind- unnel es ing is expec ed o
 
 
 
@@ -1031,95 +1031,95 @@ because wind-tunnel data was not used to validate the predictions. Future dynami
 
 
 
-yield dynamic derivative values that can be compared to FlightStream® predictions.
+yield dynamic deriva ive values ha can be compared o Fligh S ream® predic ions.
 
 
 
 VI. Conclusions
-FlightStream®, a mid-fidelity surface-vorticity flow solver, was employed to predict the variation of aerodynamic
+Fligh S ream®, a mid-fideli y surface-vor ici y flow solver, was employed o predic he varia ion of aerodynamic
 
 
 
-force and moment coefficients with airflow angles, angular rates, and control surface deflection angles to analyze aircraft
-performance, stability, and control characteristics. The analysis approach was applied to the RAVEN SWFT aircraft in
-its isolated-airframe configuration. The FlightStream® results were compared to static wind-tunnel data collected for the
-RAVEN SWFT aircraft. The general character of the FlightStream® predictions agree well with the wind-tunnel data.
-The computational predictions were deemed a sufficiently accurate representation of the actual aircraft aerodynamics,
-prefaced with the understanding that FlightStream® is a mid-fidelity tool that yields quick flow solutions accessible
-early in the aircraft design process. Given the suitable results obtained for the isolated airframe, future work seeks to
-apply and refine the approach for the RAVEN SWFT powered airframe, as well as other eVTOL aircraft configurations,
-to enable development of aero-propulsive models intended for use in flight dynamics simulations. Future work is also
-expected to include using the FlightStream® viscous coupling settings, validation of dynamic derivative predictions,
-and enhancement of the range of applicability and accuracy for control surface deflection predictions.
+force and momen coefficien s wi h airflow angles, angular ra es, and con rol surface deflec ion angles o analyze aircraf 
+performance, s abili y, and con rol charac eris ics. The analysis approach was applied o he RAVEN SWFT aircraf in
+i s isola ed-airframe configura ion. The Fligh S ream® resul s were compared o s a ic wind- unnel da a collec ed for he
+RAVEN SWFT aircraf . The general charac er of he Fligh S ream® predic ions agree well wi h he wind- unnel da a.
+The compu a ional predic ions were deemed a sufficien ly accura e represen a ion of he ac ual aircraf aerodynamics,
+prefaced wi h he unders anding ha Fligh S ream® is a mid-fideli y ool ha yields quick flow solu ions accessible
+early in he aircraf design process. Given he sui able resul s ob ained for he isola ed airframe, fu ure work seeks o
+apply and refine he approach for he RAVEN SWFT powered airframe, as well as o her eVTOL aircraf configura ions,
+ o enable developmen of aero-propulsive models in ended for use in fligh dynamics simula ions. Fu ure work is also
+expec ed o include using he Fligh S ream® viscous coupling se ings, valida ion of dynamic deriva ive predic ions,
+and enhancemen of he range of applicabili y and accuracy for con rol surface deflec ion predic ions.
 
 
 
-Acknowledgments
-This research was funded by the NASA Aeronautics Research Mission Directorate (ARMD) Transformational Tools
+Acknowledgmen s
+This research was funded by he NASA Aeronau ics Research Mission Direc ora e (ARMD) Transforma ional Tools
 
 
 
-and Technologies (TTT) project and Convergent Aeronautics Solutions (CAS) project. Wind-tunnel test support was
-provided by Ronald Busan, Wes O’Neal, Gregory Howland, Matthew Gray, Neil Coffey, Clinton Duncan, Earl Harris,
+and Technologies (TTT) projec and Convergen Aeronau ics Solu ions (CAS) projec . Wind- unnel es suppor was
+provided by Ronald Busan, Wes O’Neal, Gregory Howland, Ma hew Gray, Neil Coffey, Clin on Duncan, Earl Harris,
 and Richard Thorpe.
 
 
 
 References
-[1] Johnson, W., Silva, C., and Solis, E., “Concept Vehicles for VTOL Air Taxi Operations,” AHS Technical Conference on
+[1] Johnson, W., Silva, C., and Solis, E., “Concep Vehicles for VTOL Air Taxi Opera ions,” AHS Technical Conference on
 
 
 
-Aeromechanics Design for Transformative Vertical Flight, Jan. 2018.
+Aeromechanics Design for Transforma ive Ver ical Fligh , Jan. 2018.
 
 
 
-[2] Silva, C., Johnson, W., Antcliff, K. R., and Patterson, M. D., “VTOL Urban Air Mobility Concept Vehicles for Technology
-Development,” 2018 Aviation Technology, Integration, and Operations Conference, AIAA Paper 2018-3847, Jun. 2018.
-https://doi.org/10.2514/6.2018-3847.
+[2] Silva, C., Johnson, W., An cliff, K. R., and Pa erson, M. D., “VTOL Urban Air Mobili y Concep Vehicles for Technology
+Developmen ,” 2018 Avia ion Technology, In egra ion, and Opera ions Conference, AIAA Paper 2018-3847, Jun. 2018.
+h ps://doi.org/10.2514/6.2018-3847.
 
 
 
 [3] Saeed, A. S., Younes, A. B., Cai, C., and Cai, G., “A survey of hybrid Unmanned Aerial Vehicles,” Progress in Aerospace
-Sciences, Vol. 98, 2018, pp. 91–105. https://doi.org/10.1016/j.paerosci.2018.03.007.
+Sciences, Vol. 98, 2018, pp. 91–105. h ps://doi.org/10.1016/j.paerosci.2018.03.007.
 
 
 
-[4] Kim, H. D., Perry, A. T., and Ansell, P. J., “A Review of Distributed Electric Propulsion Concepts for Air Vehicle Technology,”
-2018 AIAA/IEEE Electric Aircraft Technologies Symposium, AIAA Paper 2018-4998, Jul. 2018. https://doi.org/10.2514/6.2018-
+[4] Kim, H. D., Perry, A. T., and Ansell, P. J., “A Review of Dis ribu ed Elec ric Propulsion Concep s for Air Vehicle Technology,”
+2018 AIAA/IEEE Elec ric Aircraf Technologies Symposium, AIAA Paper 2018-4998, Jul. 2018. h ps://doi.org/10.2514/6.2018-
 4998.
 
 
 
-[5] Johnson, W., and Silva, C., “NASA Concept Vehicles and the Engineering of Advanced Air Mobility Aircraft,” The Aeronautical
-Journal, Vol. 126, No. 1295, 2022, pp. 59–91. https://doi.org/10.1017/aer.2021.92.
+[5] Johnson, W., and Silva, C., “NASA Concep Vehicles and he Engineering of Advanced Air Mobili y Aircraf ,” The Aeronau ical
+Journal, Vol. 126, No. 1295, 2022, pp. 59–91. h ps://doi.org/10.1017/aer.2021.92.
 
 
 
-[6] Murphy, P. C., Buning, P. G., and Simmons, B. M., “Rapid Aero Modeling for Urban Air Mobility Aircraft in Computational
-Experiments,” AIAA SciTech 2021 Forum, AIAA Paper 2021-1002, Jan. 2021. https://doi.org/10.2514/6.2021-1002.
+[6] Murphy, P. C., Buning, P. G., and Simmons, B. M., “Rapid Aero Modeling for Urban Air Mobili y Aircraf in Compu a ional
+Experimen s,” AIAA SciTech 2021 Forum, AIAA Paper 2021-1002, Jan. 2021. h ps://doi.org/10.2514/6.2021-1002.
 
 
 
-[7] Simmons, B. M., Buning, P. G., and Murphy, P. C., “Full-Envelope Aero-Propulsive Model Identification for Lift+Cruise
-Aircraft Using Computational Experiments,” AIAA AVIATION 2021 Forum, AIAA Paper 2021-3170, Aug. 2021. https:
+[7] Simmons, B. M., Buning, P. G., and Murphy, P. C., “Full-Envelope Aero-Propulsive Model Iden ifica ion for Lif +Cruise
+Aircraf Using Compu a ional Experimen s,” AIAA AVIATION 2021 Forum, AIAA Paper 2021-3170, Aug. 2021. h ps:
 //doi.org/10.2514/6.2021-3170.
 
 
 
-[8] Busan, R. C., Rothhaar, P. M., Croom, M. A., Murphy, P. C., Grafton, S. B., and O’Neal, A. W., “Enabling Advanced
-Wind-Tunnel Research Methods Using the NASA Langley 12-Foot Low Speed Tunnel,” 14th AIAA Aviation Technology,
-Integration, and Operations Conference, AIAA Paper 2014-3000, Jun. 2014. https://doi.org/10.2514/6.2014-3000.
+[8] Busan, R. C., Ro hhaar, P. M., Croom, M. A., Murphy, P. C., Graf on, S. B., and O’Neal, A. W., “Enabling Advanced
+Wind-Tunnel Research Me hods Using he NASA Langley 12-Foo Low Speed Tunnel,” 14 h AIAA Avia ion Technology,
+In egra ion, and Opera ions Conference, AIAA Paper 2014-3000, Jun. 2014. h ps://doi.org/10.2514/6.2014-3000.
 
 
 
-[9] Murphy, P. C., and Landman, D., “Experiment Design for Complex VTOL Aircraft with Distributed Propulsion and Tilt Wing,”
-AIAA Atmospheric Flight Mechanics Conference, AIAA Paper 2015-0017, Jan. 2015. https://doi.org/10.2514/6.2015-0017.
+[9] Murphy, P. C., and Landman, D., “Experimen Design for Complex VTOL Aircraf wi h Dis ribu ed Propulsion and Til Wing,”
+AIAA A mospheric Fligh Mechanics Conference, AIAA Paper 2015-0017, Jan. 2015. h ps://doi.org/10.2514/6.2015-0017.
 
 
 
-[10] Murphy, P. C., Simmons, B. M., Hatke, D. B., and Busan, R. C., “Rapid Aero Modeling for Urban Air Mobility Aircraft in
-Wind-Tunnel Tests,” AIAA SciTech 2021 Forum, AIAA Paper 2021-1644, Jan. 2021. https://doi.org/10.2514/6.2021-1644.
+[10] Murphy, P. C., Simmons, B. M., Ha ke, D. B., and Busan, R. C., “Rapid Aero Modeling for Urban Air Mobili y Aircraf in
+Wind-Tunnel Tes s,” AIAA SciTech 2021 Forum, AIAA Paper 2021-1644, Jan. 2021. h ps://doi.org/10.2514/6.2021-1644.
 
 
 
@@ -1129,144 +1129,144 @@ Wind-Tunnel Tests,” AIAA SciTech 2021 Forum, AIAA Paper 2021-1644, Jan. 2021. 
 
 
 
-https://doi.org/10.2514/6.2018-3847
+h ps://doi.org/10.2514/6.2018-3847
 
 
-https://doi.org/10.1016/j.paerosci.2018.03.007
+h ps://doi.org/10.1016/j.paerosci.2018.03.007
 
 
-https://doi.org/10.2514/6.2018-4998
+h ps://doi.org/10.2514/6.2018-4998
 
 
-https://doi.org/10.2514/6.2018-4998
+h ps://doi.org/10.2514/6.2018-4998
 
 
-https://doi.org/10.1017/aer.2021.92
+h ps://doi.org/10.1017/aer.2021.92
 
 
-https://doi.org/10.2514/6.2021-1002
+h ps://doi.org/10.2514/6.2021-1002
 
 
-https://doi.org/10.2514/6.2021-3170
+h ps://doi.org/10.2514/6.2021-3170
 
 
-https://doi.org/10.2514/6.2021-3170
+h ps://doi.org/10.2514/6.2021-3170
 
 
-https://doi.org/10.2514/6.2014-3000
+h ps://doi.org/10.2514/6.2014-3000
 
 
-https://doi.org/10.2514/6.2015-0017
+h ps://doi.org/10.2514/6.2015-0017
 
 
-https://doi.org/10.2514/6.2021-1644
-
-
-
+h ps://doi.org/10.2514/6.2021-1644
 
 
 
 
 
-[11] Busan, R. C., Murphy, P. C., Hatke, D. B., and Simmons, B. M., “Wind Tunnel Testing Techniques for a Tandem Tilt-
-Wing, Distributed Electric Propulsion VTOL Aircraft,” AIAA SciTech 2021 Forum, AIAA Paper 2021-1189, Jan. 2021.
-https://doi.org/10.2514/6.2021-1189.
 
 
 
-[12] Simmons, B. M., and Murphy, P. C., “Aero-Propulsive Modeling for Tilt-Wing, Distributed Propulsion Aircraft Using Wind
-Tunnel Data,” Journal of Aircraft, Vol. 59, No. 5, 2022, pp. 1162–1178. https://doi.org/10.2514/1.C036351.
+[11] Busan, R. C., Murphy, P. C., Ha ke, D. B., and Simmons, B. M., “Wind Tunnel Tes ing Techniques for a Tandem Til -
+Wing, Dis ribu ed Elec ric Propulsion VTOL Aircraf ,” AIAA SciTech 2021 Forum, AIAA Paper 2021-1189, Jan. 2021.
+h ps://doi.org/10.2514/6.2021-1189.
 
 
 
-[13] Simmons, B. M., Morelli, E. A., Busan, R. C., Hatke, D. B., and O’Neal, A. W., “Aero-Propulsive Modeling for eVTOL
-Aircraft Using Wind Tunnel Testing with Multisine Inputs,” AIAA AVIATION 2022 Forum, AIAA Paper 2022-3603, Jun. 2022.
-https://doi.org/10.2514/6.2022-3603.
+[12] Simmons, B. M., and Murphy, P. C., “Aero-Propulsive Modeling for Til -Wing, Dis ribu ed Propulsion Aircraf Using Wind
+Tunnel Da a,” Journal of Aircraf , Vol. 59, No. 5, 2022, pp. 1162–1178. h ps://doi.org/10.2514/1.C036351.
 
 
 
-[14] Cook, J. W., and Hauser, J., “A Strip Theory Approach to Dynamic Modeling of eVTOL Aircraft,” AIAA SciTech 2021 Forum,
-AIAA Paper 2021-1720, Jan. 2021. https://doi.org/10.2514/6.2021-1720.
+[13] Simmons, B. M., Morelli, E. A., Busan, R. C., Ha ke, D. B., and O’Neal, A. W., “Aero-Propulsive Modeling for eVTOL
+Aircraf Using Wind Tunnel Tes ing wi h Mul isine Inpu s,” AIAA AVIATION 2022 Forum, AIAA Paper 2022-3603, Jun. 2022.
+h ps://doi.org/10.2514/6.2022-3603.
 
 
 
-[15] May, M. S., Milz, D., and Looye, G., “Dynamic Modeling and Analysis of Tilt-Wing Electric Vertical Take-Off and
-Landing Vehicles,” AIAA SciTech 2022 Forum, AIAA Paper 2022-0263, San Diego, CA & Virtual, Jan. 2022. https:
+[14] Cook, J. W., and Hauser, J., “A S rip Theory Approach o Dynamic Modeling of eVTOL Aircraf ,” AIAA SciTech 2021 Forum,
+AIAA Paper 2021-1720, Jan. 2021. h ps://doi.org/10.2514/6.2021-1720.
+
+
+
+[15] May, M. S., Milz, D., and Looye, G., “Dynamic Modeling and Analysis of Til -Wing Elec ric Ver ical Take-Off and
+Landing Vehicles,” AIAA SciTech 2022 Forum, AIAA Paper 2022-0263, San Diego, CA & Vir ual, Jan. 2022. h ps:
 //doi.org/10.2514/6.2022-0263.
 
 
 
-[16] Perdolt, D., Milz, D., May, M., and Thiele, M., “Efficient Mid-Fidelity Aerodynamic Modeling of a Tilt-Wing eVTOL for
-Control Applications,” 33th Congress of the International Council of the Aeronautical Sciences, ICAS Paper 2022-0860, Sep.
+[16] Perdol , D., Milz, D., May, M., and Thiele, M., “Efficien Mid-Fideli y Aerodynamic Modeling of a Til -Wing eVTOL for
+Con rol Applica ions,” 33 h Congress of he In erna ional Council of he Aeronau ical Sciences, ICAS Paper 2022-0860, Sep.
 2022.
 
 
 
-[17] May, M. S., Milz, D., and Looye, G., “Semi-Empirical Aerodynamic Modeling Approach for Tandem Tilt-Wing eVTOL Control
-Design Applications,” AIAA SciTech 2023 Forum, AIAA Paper 2023-1529, Jan. 2023. https://doi.org/10.2514/6.2023-1529.
+[17] May, M. S., Milz, D., and Looye, G., “Semi-Empirical Aerodynamic Modeling Approach for Tandem Til -Wing eVTOL Con rol
+Design Applica ions,” AIAA SciTech 2023 Forum, AIAA Paper 2023-1529, Jan. 2023. h ps://doi.org/10.2514/6.2023-1529.
 
 
 
-[18] Chakraborty, I., and Mishra, A. A., “Sizing and Analysis of a Lift-Plus-Cruise Aircraft with Electrified Propulsion,” Journal of
-Aircraft, Published online 31 October 2022, pp. 1–19 (Article in Advance). https://doi.org/10.2514/1.C037044.
+[18] Chakrabor y, I., and Mishra, A. A., “Sizing and Analysis of a Lif -Plus-Cruise Aircraf wi h Elec rified Propulsion,” Journal of
+Aircraf , Published online 31 Oc ober 2022, pp. 1–19 (Ar icle in Advance). h ps://doi.org/10.2514/1.C037044.
 
 
 
-[19] Comer, A. M., and Chakraborty, I., “Total Energy Flight Control Architecture Optimization for a Lift-Plus-Cruise Aircraft,”
-AIAA SciTech 2023 Forum, AIAA Paper 2023-0399, Jan. 2023. https://doi.org/10.2514/6.2023-0399.
+[19] Comer, A. M., and Chakrabor y, I., “To al Energy Fligh Con rol Archi ec ure Op imiza ion for a Lif -Plus-Cruise Aircraf ,”
+AIAA SciTech 2023 Forum, AIAA Paper 2023-0399, Jan. 2023. h ps://doi.org/10.2514/6.2023-0399.
 
 
 
-[20] “FlightStream®: Fast Aerodynamics with Fidelity,” Research in Flight, https://researchinflight.com/index.html, Accessed 29
-October 2022.
+[20] “Fligh S ream®: Fas Aerodynamics wi h Fideli y,” Research in Fligh , h ps://researchinfligh .com/index.h ml, Accessed 29
+Oc ober 2022.
 
 
 
-[21] Sandoz, B., Ahuja, V., and Hartfield, R. J., “Longitudinal Aerodynamic Characteristics of a V/STOL Tilt-wing Four-Propeller
-Transport Model using a Surface Vorticity Flow Solver,” 2018 AIAA Aerospace Sciences Meeting, AIAA Paper 2018-2070, Jan.
-2018. https://doi.org/10.2514/6.2018-2070.
+[21] Sandoz, B., Ahuja, V., and Har field, R. J., “Longi udinal Aerodynamic Charac eris ics of a V/STOL Til -wing Four-Propeller
+Transpor Model using a Surface Vor ici y Flow Solver,” 2018 AIAA Aerospace Sciences Mee ing, AIAA Paper 2018-2070, Jan.
+2018. h ps://doi.org/10.2514/6.2018-2070.
 
 
 
-[22] Blaesser, N. J., “Propeller-Wing Integration on the Parallel Electric-Gas Architecture with Synergistic Utilization Scheme
-(PEGASUS) Aircraft,” AIAA SciTech 2019 Forum, AIAA Paper 2019-1809, Jan. 2019. https://doi.org/10.2514/6.2019-1809.
+[22] Blaesser, N. J., “Propeller-Wing In egra ion on he Parallel Elec ric-Gas Archi ec ure wi h Synergis ic U iliza ion Scheme
+(PEGASUS) Aircraf ,” AIAA SciTech 2019 Forum, AIAA Paper 2019-1809, Jan. 2019. h ps://doi.org/10.2514/6.2019-1809.
 
 
 
-[23] Hartfield, R. J., Ahuja, V., and Chakraborty, I., “Aero-Propulsive Analysis for Contemporary Conceptual Design,” AIAA
-Aviation 2019 Forum, AIAA Paper 2019-3019, June 2019. https://doi.org/10.2514/6.2019-3019.
+[23] Har field, R. J., Ahuja, V., and Chakrabor y, I., “Aero-Propulsive Analysis for Con emporary Concep ual Design,” AIAA
+Avia ion 2019 Forum, AIAA Paper 2019-3019, June 2019. h ps://doi.org/10.2514/6.2019-3019.
 
 
 
-[24] Fei, X., “Evaluation of a Commercial Surface Vorticity Flow Solver for the Modeling of Propeller-Wing Interaction,” AIAA
-SciTech 2019 Forum, AIAA Paper 2019-1046, Jan. 2019. https://doi.org/10.2514/6.2019-1046.
+[24] Fei, X., “Evalua ion of a Commercial Surface Vor ici y Flow Solver for he Modeling of Propeller-Wing In erac ion,” AIAA
+SciTech 2019 Forum, AIAA Paper 2019-1046, Jan. 2019. h ps://doi.org/10.2514/6.2019-1046.
 
 
 
-[25] Chakraborty, I., Ahuja, V., Comer, A., and Mulekar, O., “Development of a Modeling, Flight Simulation, and Control
-Analysis Capability for Novel Vehicle Configurations,” AIAA Aviation 2019 Forum, AIAA Paper 2019-3112, Jun. 2019.
-https://doi.org/10.2514/6.2019-3112.
+[25] Chakrabor y, I., Ahuja, V., Comer, A., and Mulekar, O., “Developmen of a Modeling, Fligh Simula ion, and Con rol
+Analysis Capabili y for Novel Vehicle Configura ions,” AIAA Avia ion 2019 Forum, AIAA Paper 2019-3112, Jun. 2019.
+h ps://doi.org/10.2514/6.2019-3112.
 
 
 
-[26] Soikkeli, J. S. E., “Vertical Tail Reduction Through Differential Thrust,” Master’s thesis, Delft University of Technology, Mar.
+[26] Soikkeli, J. S. E., “Ver ical Tail Reduc ion Through Differen ial Thrus ,” Mas er’s hesis, Delf Universi y of Technology, Mar.
 2020.
 
 
 
-[27] Geuther, S. C., and Fei, X., “LA-8 Computational Analysis and Validation Studies Using FlightStream,” AIAA SciTech 2021
-Forum, AIAA Paper 2021-1191, Jan. 2021. https://doi.org/10.2514/6.2021-1191.
+[27] Geu her, S. C., and Fei, X., “LA-8 Compu a ional Analysis and Valida ion S udies Using Fligh S ream,” AIAA SciTech 2021
+Forum, AIAA Paper 2021-1191, Jan. 2021. h ps://doi.org/10.2514/6.2021-1191.
 
 
 
-[28] Hoogreef, M. F. M., and Soikkeli, J. S. E., “Flight dynamics and control assessment for differential thrust aircraft in engine
-inoperative conditions including aero-propulsive effects,” CEAS Aeronautical Journal, Vol. 13, No. 3, 2022, pp. 739–762.
-https://doi.org/10.1007/s13272-022-00591-5.
+[28] Hoogreef, M. F. M., and Soikkeli, J. S. E., “Fligh dynamics and con rol assessmen for differen ial hrus aircraf in engine
+inopera ive condi ions including aero-propulsive effec s,” CEAS Aeronau ical Journal, Vol. 13, No. 3, 2022, pp. 739–762.
+h ps://doi.org/10.1007/s13272-022-00591-5.
 
 
 
-[29] Ahuja, V., and Litherland, B. L., “Comparison of Aerodynamic Analysis Tools Applied to a Propeller-Blown Wing,” AIAA
-SciTech 2023 Forum, AIAA Paper 2023-1753, Jan. 2023. https://doi.org/10.2514/6.2023-1753.
+[29] Ahuja, V., and Li herland, B. L., “Comparison of Aerodynamic Analysis Tools Applied o a Propeller-Blown Wing,” AIAA
+SciTech 2023 Forum, AIAA Paper 2023-1753, Jan. 2023. h ps://doi.org/10.2514/6.2023-1753.
 
 
 
@@ -1276,58 +1276,58 @@ SciTech 2023 Forum, AIAA Paper 2023-1753, Jan. 2023. https://doi.org/10.2514/6.2
 
 
 
-https://doi.org/10.2514/6.2021-1189
+h ps://doi.org/10.2514/6.2021-1189
 
 
-https://doi.org/10.2514/1.C036351
+h ps://doi.org/10.2514/1.C036351
 
 
-https://doi.org/10.2514/6.2022-3603
+h ps://doi.org/10.2514/6.2022-3603
 
 
-https://doi.org/10.2514/6.2021-1720
+h ps://doi.org/10.2514/6.2021-1720
 
 
-https://doi.org/10.2514/6.2022-0263
+h ps://doi.org/10.2514/6.2022-0263
 
 
-https://doi.org/10.2514/6.2022-0263
+h ps://doi.org/10.2514/6.2022-0263
 
 
-https://doi.org/10.2514/6.2023-1529
+h ps://doi.org/10.2514/6.2023-1529
 
 
-https://doi.org/10.2514/1.C037044
+h ps://doi.org/10.2514/1.C037044
 
 
-https://doi.org/10.2514/6.2023-0399
+h ps://doi.org/10.2514/6.2023-0399
 
 
-https://researchinflight.com/index.html
+h ps://researchinfligh .com/index.h ml
 
 
-https://doi.org/10.2514/6.2018-2070
+h ps://doi.org/10.2514/6.2018-2070
 
 
-https://doi.org/10.2514/6.2019-1809
+h ps://doi.org/10.2514/6.2019-1809
 
 
-https://doi.org/10.2514/6.2019-3019
+h ps://doi.org/10.2514/6.2019-3019
 
 
-https://doi.org/10.2514/6.2019-1046
+h ps://doi.org/10.2514/6.2019-1046
 
 
-https://doi.org/10.2514/6.2019-3112
+h ps://doi.org/10.2514/6.2019-3112
 
 
-https://doi.org/10.2514/6.2021-1191
+h ps://doi.org/10.2514/6.2021-1191
 
 
-https://doi.org/10.1007/s13272-022-00591-5
+h ps://doi.org/10.1007/s13272-022-00591-5
 
 
-https://doi.org/10.2514/6.2023-1753
+h ps://doi.org/10.2514/6.2023-1753
 
 
 
@@ -1336,107 +1336,107 @@ https://doi.org/10.2514/6.2023-1753
 
 
 
-[30] Ahuja, V., and Hartfield, R. J., “Aerodynamic Loads over Arbitrary Bodies by Method of Integrated Circulation,” Journal of
-Aircraft, Vol. 53, No. 6, 2016, pp. 1719–1730. https://doi.org/10.2514/1.C033619.
+[30] Ahuja, V., and Har field, R. J., “Aerodynamic Loads over Arbi rary Bodies by Me hod of In egra ed Circula ion,” Journal of
+Aircraf , Vol. 53, No. 6, 2016, pp. 1719–1730. h ps://doi.org/10.2514/1.C033619.
 
 
 
-[31] Olson, E. D., and Albertson, C. W., “Aircraft High-Lift Aerodynamic Analysis Using a Surface-Vorticity Solver,” 54th AIAA
-Aerospace Sciences Meeting, AIAA Paper 2016-0779, Jan. 2016. https://doi.org/10.2514/6.2016-0779.
+[31] Olson, E. D., and Alber son, C. W., “Aircraf High-Lif Aerodynamic Analysis Using a Surface-Vor ici y Solver,” 54 h AIAA
+Aerospace Sciences Mee ing, AIAA Paper 2016-0779, Jan. 2016. h ps://doi.org/10.2514/6.2016-0779.
 
 
 
-[32] Johnson, S., Hartfield, R. J., van Dommelen, D., and Ahuja, V., “Investigation of the Static Longitudinal Characteristics of a
-Full-Scale Light Single-Engine Airplane using a Surface Vorticity Solver,” 2018 AIAA Aerospace Sciences Meeting, AIAA
-Paper 2018-1259, Jan. 2018. https://doi.org/10.2514/6.2018-1259.
+[32] Johnson, S., Har field, R. J., van Dommelen, D., and Ahuja, V., “Inves iga ion of he S a ic Longi udinal Charac eris ics of a
+Full-Scale Ligh Single-Engine Airplane using a Surface Vor ici y Solver,” 2018 AIAA Aerospace Sciences Mee ing, AIAA
+Paper 2018-1259, Jan. 2018. h ps://doi.org/10.2514/6.2018-1259.
 
 
 
-[33] Ahuja, V., Little, D. S., Majdalani, J., and Hartfield, R., “Integrated Computational Aeroacoustics for UAM Design. Part 1. Farassat
-F1A Formulation,” AIAA AVIATION 2022 Forum, AIAA Paper 2022-3954, Jun. 2022. https://doi.org/10.2514/6.2022-3954.
+[33] Ahuja, V., Li le, D. S., Majdalani, J., and Har field, R., “In egra ed Compu a ional Aeroacous ics for UAM Design. Par 1. Farassa 
+F1A Formula ion,” AIAA AVIATION 2022 Forum, AIAA Paper 2022-3954, Jun. 2022. h ps://doi.org/10.2514/6.2022-3954.
 
 
 
-[34] Pastor, G., Hartfield, R., and Ahuja, V., “Expedited Solutions for Propeller Analysis,” AIAA SciTech 2022 Forum, AIAA Paper
-2022-1158, Jan. 2022. https://doi.org/10.2514/6.2022-1158.
+[34] Pas or, G., Har field, R., and Ahuja, V., “Expedi ed Solu ions for Propeller Analysis,” AIAA SciTech 2022 Forum, AIAA Paper
+2022-1158, Jan. 2022. h ps://doi.org/10.2514/6.2022-1158.
 
 
 
-[35] DiMaggio, G. A., Hartfield, R. J., and Ahuja, V., “Rapid Prediction of Hybrid Wing Body Aerodynamics,” AIAA AVIATION
-2022 Forum, AIAA Paper 2022-3298, Jun. 2022. https://doi.org/10.2514/6.2022-3298.
+[35] DiMaggio, G. A., Har field, R. J., and Ahuja, V., “Rapid Predic ion of Hybrid Wing Body Aerodynamics,” AIAA AVIATION
+2022 Forum, AIAA Paper 2022-3298, Jun. 2022. h ps://doi.org/10.2514/6.2022-3298.
 
 
 
-[36] Pastor, G., Hartfield, R., Ahuja, V., and McClearen, J., “Numerical and Experimental Testing of a Coaxial Propeller for UAM
-Applications,” AIAA AVIATION 2022 Forum, AIAA Paper 2022-3683, Jun. 2022. https://doi.org/10.2514/6.2022-3683.
+[36] Pas or, G., Har field, R., Ahuja, V., and McClearen, J., “Numerical and Experimen al Tes ing of a Coaxial Propeller for UAM
+Applica ions,” AIAA AVIATION 2022 Forum, AIAA Paper 2022-3683, Jun. 2022. h ps://doi.org/10.2514/6.2022-3683.
 
 
 
-[37] Ahuja, V., and Hartfield, R. J., “Reduced-Order Aerodynamics with the Method of Integrated Circulation,” AIAA SciTech 2022
-Forum, AIAA Paper 2022-0005, Jan. 2022. https://doi.org/10.2514/6.2022-0005.
+[37] Ahuja, V., and Har field, R. J., “Reduced-Order Aerodynamics wi h he Me hod of In egra ed Circula ion,” AIAA SciTech 2022
+Forum, AIAA Paper 2022-0005, Jan. 2022. h ps://doi.org/10.2514/6.2022-0005.
 
 
 
-[38] Collins, W. F., Hartfield, R. J., and Ahuja, V., “Pressure Distributions for Bodies of Revolution in Compressible Flows Using an
-Advanced Panel Method,” AIAA SciTech 2023 Forum, AIAA Paper 2023-2271, 2023. https://doi.org/10.2514/6.2023-2271.
+[38] Collins, W. F., Har field, R. J., and Ahuja, V., “Pressure Dis ribu ions for Bodies of Revolu ion in Compressible Flows Using an
+Advanced Panel Me hod,” AIAA SciTech 2023 Forum, AIAA Paper 2023-2271, 2023. h ps://doi.org/10.2514/6.2023-2271.
 
 
 
-[39] Ahuja, V., Hartfield, R. J., and Ciliberti, D., “Three-dimensional Viscous Coupling & Flow Separation Enhancements to an
-Inviscid Surface Vorticity Flow Solver,” AIAA SciTech 2023 Forum, AIAA Paper 2023-2455, National Harbor, MD & Online,
-2023. https://doi.org/10.2514/6.2023-2455.
+[39] Ahuja, V., Har field, R. J., and Ciliber i, D., “Three-dimensional Viscous Coupling & Flow Separa ion Enhancemen s o an
+Inviscid Surface Vor ici y Flow Solver,” AIAA SciTech 2023 Forum, AIAA Paper 2023-2455, Na ional Harbor, MD & Online,
+2023. h ps://doi.org/10.2514/6.2023-2455.
 
 
 
-[40] DiMaggio, G. A., Hartfield, R. J., and Ahuja, V., “Hybrid Wing Body Pitch Control with a Surface-Vorticity Solver,” AIAA
-SciTech 2023 Forum, AIAA Paper 2023-0623, Jan. 2023. https://doi.org/10.2514/6.2023-0623.
+[40] DiMaggio, G. A., Har field, R. J., and Ahuja, V., “Hybrid Wing Body Pi ch Con rol wi h a Surface-Vor ici y Solver,” AIAA
+SciTech 2023 Forum, AIAA Paper 2023-0623, Jan. 2023. h ps://doi.org/10.2514/6.2023-0623.
 
 
 
-[41] Wang, X., Hartfield, R. J., and Ahuja, V., “Prediction of Duct Airfoil Aerodynamics using Surface Vorticity,” AIAA SciTech
-2023 Forum, AIAA Paper 2023-1949, Jan. 2023. https://doi.org/10.2514/6.2023-1949.
+[41] Wang, X., Har field, R. J., and Ahuja, V., “Predic ion of Duc Airfoil Aerodynamics using Surface Vor ici y,” AIAA SciTech
+2023 Forum, AIAA Paper 2023-1949, Jan. 2023. h ps://doi.org/10.2514/6.2023-1949.
 
 
 
-[42] German, B. J., Jha, A., Whiteside, S. K. S., and Welstead, J. R., “Overview of the Research Aircraft for eVTOL Enabling
-techNologies (RAVEN) Activity,” AIAA AVIATION 2023 Forum, June 2023. To be published.
+[42] German, B. J., Jha, A., Whi eside, S. K. S., and Wels ead, J. R., “Overview of he Research Aircraf for eVTOL Enabling
+ echNologies (RAVEN) Ac ivi y,” AIAA AVIATION 2023 Forum, June 2023. To be published.
 
 
 
-[43] “NASA Langley 12-Foot Low-Speed Tunnel,” https://researchdirectorate.larc.nasa.gov/12-foot-low-speed-tunnel-12-ft-lst/,
+[43] “NASA Langley 12-Foo Low-Speed Tunnel,” h ps://researchdirec ora e.larc.nasa.gov/12-foo -low-speed- unnel-12-f -ls /,
 Accessed 18 April 2023.
 
 
 
-[44] McSwain, R. G., Geuther, S. C., Howland, G., Patterson, M. D., Whiteside, S. K., and North, D. D., “An Experimental Approach
-to a Rapid Propulsion and Aeronautics Concepts Testbed,” NASA TM–2020-220437, Jan. 2020.
+[44] McSwain, R. G., Geu her, S. C., Howland, G., Pa erson, M. D., Whi eside, S. K., and Nor h, D. D., “An Experimen al Approach
+ o a Rapid Propulsion and Aeronau ics Concep s Tes bed,” NASA TM–2020-220437, Jan. 2020.
 
 
 
-[45] North, D. D., Busan, R. C., and Howland, G., “Design and Fabrication of the Langley Aerodrome No. 8 Distributed Electric
-Propulsion VTOL Testbed,” AIAA SciTech 2021 Forum, AIAA Paper 2021-1188, Jan. 2021. https://doi.org/10.2514/6.2021-1188.
+[45] Nor h, D. D., Busan, R. C., and Howland, G., “Design and Fabrica ion of he Langley Aerodrome No. 8 Dis ribu ed Elec ric
+Propulsion VTOL Tes bed,” AIAA SciTech 2021 Forum, AIAA Paper 2021-1188, Jan. 2021. h ps://doi.org/10.2514/6.2021-1188.
 
 
 
-[46] Rothhaar, P. M., Murphy, P. C., Bacon, B. J., Gregory, I. M., Grauer, J. A., Busan, R. C., and Croom, M. A., “NASA Langley
-Distributed Propulsion VTOL Tilt-Wing Aircraft Testing, Modeling, Simulation, Control, and Flight Test Development,”
-14th AIAA Aviation Technology, Integration, and Operations Conference, AIAA Paper 2014-2999, Jun. 2014. https:
+[46] Ro hhaar, P. M., Murphy, P. C., Bacon, B. J., Gregory, I. M., Grauer, J. A., Busan, R. C., and Croom, M. A., “NASA Langley
+Dis ribu ed Propulsion VTOL Til -Wing Aircraf Tes ing, Modeling, Simula ion, Con rol, and Fligh Tes Developmen ,”
+14 h AIAA Avia ion Technology, In egra ion, and Opera ions Conference, AIAA Paper 2014-2999, Jun. 2014. h ps:
 //doi.org/10.2514/6.2014-2999.
 
 
 
-[47] Geuther, S. C., North, D. D., and Busan, R. C., “Investigation of a Tandem Tilt-wing VTOL Aircraft in the NASA Langley
-12-Foot Low-Speed Tunnel,” NASA TM–2020–5003178, Jun. 2020.
+[47] Geu her, S. C., Nor h, D. D., and Busan, R. C., “Inves iga ion of a Tandem Til -wing VTOL Aircraf in he NASA Langley
+12-Foo Low-Speed Tunnel,” NASA TM–2020–5003178, Jun. 2020.
 
 
 
-[48] Simmons, B. M., and Hatke, D. B., “Investigation of High Incidence Angle Propeller Aerodynamics for Subscale eVTOL
-Aircraft,” NASA TM–20210014010, May 2021.
+[48] Simmons, B. M., and Ha ke, D. B., “Inves iga ion of High Incidence Angle Propeller Aerodynamics for Subscale eVTOL
+Aircraf ,” NASA TM–20210014010, May 2021.
 
 
 
-[49] Simmons, B. M., “System Identification for Propellers at High Incidence Angles,” Journal of Aircraft, Vol. 58, No. 6, 2021, pp.
-1336–1350. https://doi.org/10.2514/1.C036329.
+[49] Simmons, B. M., “Sys em Iden ifica ion for Propellers a High Incidence Angles,” Journal of Aircraf , Vol. 58, No. 6, 2021, pp.
+1336–1350. h ps://doi.org/10.2514/1.C036329.
 
 
 
@@ -1446,166 +1446,166 @@ Aircraft,” NASA TM–20210014010, May 2021.
 
 
 
-https://doi.org/10.2514/1.C033619
+h ps://doi.org/10.2514/1.C033619
 
 
-https://doi.org/10.2514/6.2016-0779
+h ps://doi.org/10.2514/6.2016-0779
 
 
-https://doi.org/10.2514/6.2018-1259
+h ps://doi.org/10.2514/6.2018-1259
 
 
-https://doi.org/10.2514/6.2022-3954
+h ps://doi.org/10.2514/6.2022-3954
 
 
-https://doi.org/10.2514/6.2022-1158
+h ps://doi.org/10.2514/6.2022-1158
 
 
-https://doi.org/10.2514/6.2022-3298
+h ps://doi.org/10.2514/6.2022-3298
 
 
-https://doi.org/10.2514/6.2022-3683
+h ps://doi.org/10.2514/6.2022-3683
 
 
-https://doi.org/10.2514/6.2022-0005
+h ps://doi.org/10.2514/6.2022-0005
 
 
-https://doi.org/10.2514/6.2023-2271
+h ps://doi.org/10.2514/6.2023-2271
 
 
-https://doi.org/10.2514/6.2023-2455
+h ps://doi.org/10.2514/6.2023-2455
 
 
-https://doi.org/10.2514/6.2023-0623
+h ps://doi.org/10.2514/6.2023-0623
 
 
-https://doi.org/10.2514/6.2023-1949
+h ps://doi.org/10.2514/6.2023-1949
 
 
-https://researchdirectorate.larc.nasa.gov/12-foot-low-speed-tunnel-12-ft-lst/
+h ps://researchdirec ora e.larc.nasa.gov/12-foo -low-speed- unnel-12-f -ls /
 
 
-https://doi.org/10.2514/6.2021-1188
+h ps://doi.org/10.2514/6.2021-1188
 
 
-https://doi.org/10.2514/6.2014-2999
+h ps://doi.org/10.2514/6.2014-2999
 
 
-https://doi.org/10.2514/6.2014-2999
+h ps://doi.org/10.2514/6.2014-2999
 
 
-https://doi.org/10.2514/1.C036329
-
-
-
+h ps://doi.org/10.2514/1.C036329
 
 
 
 
 
-[50] Stratton, M., and Landman, D., “Wind Tunnel Test and Empirical Modeling of Tilt-Rotor Performance for eVTOL Applications,”
-AIAA SciTech 2021 Forum, AIAA Paper 2021-0834, Jan. 2021. https://doi.org/10.2514/6.2021-0834.
 
 
 
-[51] Simmons, B. M., “Evaluation of Response Surface Experiment Designs for Distributed Propulsion Aircraft Aero-Propulsive
-Modeling,” AIAA SciTech 2023 Forum, AIAA Paper 2023-2251, Jan. 2023. https://doi.org/10.2514/6.2023-2251.
+[50] S ra on, M., and Landman, D., “Wind Tunnel Tes and Empirical Modeling of Til -Ro or Performance for eVTOL Applica ions,”
+AIAA SciTech 2021 Forum, AIAA Paper 2021-0834, Jan. 2021. h ps://doi.org/10.2514/6.2021-0834.
 
 
 
-[52] Cooper, J. R., Ackerman, K. A., Rothhaar, P. M., and Gregory, I. M., “Autonomous Path-Following for a Tilt-Wing, Distributed
-Electric Propulsion, Vertical Take-Off and Landing Unmanned Aerial System in Hover Mode,” NASA TM–2018–220109, Nov.
+[51] Simmons, B. M., “Evalua ion of Response Surface Experimen Designs for Dis ribu ed Propulsion Aircraf Aero-Propulsive
+Modeling,” AIAA SciTech 2023 Forum, AIAA Paper 2023-2251, Jan. 2023. h ps://doi.org/10.2514/6.2023-2251.
+
+
+
+[52] Cooper, J. R., Ackerman, K. A., Ro hhaar, P. M., and Gregory, I. M., “Au onomous Pa h-Following for a Til -Wing, Dis ribu ed
+Elec ric Propulsion, Ver ical Take-Off and Landing Unmanned Aerial Sys em in Hover Mode,” NASA TM–2018–220109, Nov.
 2018.
 
 
 
-[53] Cook, J., and Gregory, I., “A Robust Uniform Control Approach for VTOL Aircraft,” VFS Autonomous VTOL Technical
-Meeting and Electric VTOL Symposium, Jan. 2021.
+[53] Cook, J., and Gregory, I., “A Robus Uniform Con rol Approach for VTOL Aircraf ,” VFS Au onomous VTOL Technical
+Mee ing and Elec ric VTOL Symposium, Jan. 2021.
 
 
 
-[54] McSwain, R. G., Glaab, L. J., and Theodore, C. R., “Greased Lightning (GL-10) Performance Flight Research – Flight Data
-Report,” NASA TM–2017–219794, Nov. 2017.
+[54] McSwain, R. G., Glaab, L. J., and Theodore, C. R., “Greased Ligh ning (GL-10) Performance Fligh Research – Fligh Da a
+Repor ,” NASA TM–2017–219794, Nov. 2017.
 
 
 
-[55] Fredericks, W. J., McSwain, R. G., Beaton, B. F., Klassman, D. W., and Theodore, C. R., “Greased Lightning (GL-10) Flight
-Testing Campaign,” NASA TM–2017–219643, Jul. 2017.
+[55] Fredericks, W. J., McSwain, R. G., Bea on, B. F., Klassman, D. W., and Theodore, C. R., “Greased Ligh ning (GL-10) Fligh 
+Tes ing Campaign,” NASA TM–2017–219643, Jul. 2017.
 
 
 
-[56] North, D. D., “Flight Testing of a Scale Urban Air Mobility Technology Testbed,” AIAA SciTech 2021 Forum, AIAA Presentation,
-Jan. 2021. https://ntrs.nasa.gov/citations/20205010998, Accessed 17 October 2022.
+[56] Nor h, D. D., “Fligh Tes ing of a Scale Urban Air Mobili y Technology Tes bed,” AIAA SciTech 2021 Forum, AIAA Presen a ion,
+Jan. 2021. h ps://n rs.nasa.gov/ci a ions/20205010998, Accessed 17 Oc ober 2022.
 
 
 
-[57] Simmons, B. M., “System Identification Approach for eVTOL Aircraft Demonstrated Using Simulated Flight Data,” Journal of
-Aircraft, Published online 30 January 2023, pp. 1–16 (Article in Advance). https://doi.org/10.2514/1.C036896.
+[57] Simmons, B. M., “Sys em Iden ifica ion Approach for eVTOL Aircraf Demons ra ed Using Simula ed Fligh Da a,” Journal of
+Aircraf , Published online 30 January 2023, pp. 1–16 (Ar icle in Advance). h ps://doi.org/10.2514/1.C036896.
 
 
 
-[58] Simmons, B. M., “Efficient Variable-Pitch Propeller Aerodynamic Model Development for Vectored-Thrust eVTOL Aircraft,”
-AIAA AVIATION 2022 Forum, AIAA Paper 2022-3817, Jun. 2022. https://doi.org/10.2514/6.2022-3817.
+[58] Simmons, B. M., “Efficien Variable-Pi ch Propeller Aerodynamic Model Developmen for Vec ored-Thrus eVTOL Aircraf ,”
+AIAA AVIATION 2022 Forum, AIAA Paper 2022-3817, Jun. 2022. h ps://doi.org/10.2514/6.2022-3817.
 
 
 
-[59] Ahuja, V., Burkhalter, J., and Hartfield, R., “Robust Prediction of High Lift Using Surface Vorticity,” NASA Small Business
-Innovative Research (SBIR) Contract Award, Phase II, NNX17CL12C, 2017.
+[59] Ahuja, V., Burkhal er, J., and Har field, R., “Robus Predic ion of High Lif Using Surface Vor ici y,” NASA Small Business
+Innova ive Research (SBIR) Con rac Award, Phase II, NNX17CL12C, 2017.
 
 
 
-[60] Ahuja, V., Chakraborty, I., and Hartfield, R., “Modular Generalized Framework for Assessing Aircraft Aero-Propulsive,
-Stability, and Control Characteristics,” NASA Transformational Tools & Technologies Transformative (TTT) Aeronautics
-Concepts Program Award, 80LARC19C0013, 2018-2021.
+[60] Ahuja, V., Chakrabor y, I., and Har field, R., “Modular Generalized Framework for Assessing Aircraf Aero-Propulsive,
+S abili y, and Con rol Charac eris ics,” NASA Transforma ional Tools & Technologies Transforma ive (TTT) Aeronau ics
+Concep s Program Award, 80LARC19C0013, 2018-2021.
 
 
 
-[61] Ahuja, V., Chakraborty, I., and Hartfield, R., “Air Vehicle Gust Response Analysis for Early Design,” NASA Small Business
-Innovative Research (SBIR) Contract Award, Phase II, 80NSSC21C0025, 2020-2022.
+[61] Ahuja, V., Chakrabor y, I., and Har field, R., “Air Vehicle Gus Response Analysis for Early Design,” NASA Small Business
+Innova ive Research (SBIR) Con rac Award, Phase II, 80NSSC21C0025, 2020-2022.
 
 
 
-[62] Ahuja, V., Hunsaker, D., and Hartfield, R., “A Rapid Aerodynamic Prediction Tool for Maneuvering Hypersonic Air Vehicles,”
-USAF AFWERX Small Business Innovative Research (SBIR) Contract Award, Phase I, FX22D-OTCSO1-0129, 2022.
+[62] Ahuja, V., Hunsaker, D., and Har field, R., “A Rapid Aerodynamic Predic ion Tool for Maneuvering Hypersonic Air Vehicles,”
+USAF AFWERX Small Business Innova ive Research (SBIR) Con rac Award, Phase I, FX22D-OTCSO1-0129, 2022.
 
 
 
-[63] Ahuja, V., Hunsaker, D., and Hartfield, R., “A Multi-Fidelity Supersonic Flow Solver for Preliminary Design & Optimization,”
-USAF AFWERX Small Business Innovative Research (SBIR) Contract Award, Phase II, FA864922P0081, 2023.
+[63] Ahuja, V., Hunsaker, D., and Har field, R., “A Mul i-Fideli y Supersonic Flow Solver for Preliminary Design & Op imiza ion,”
+USAF AFWERX Small Business Innova ive Research (SBIR) Con rac Award, Phase II, FA864922P0081, 2023.
 
 
 
-[64] “OpenVSP,” https://openvsp.org/, Version 3.31.1.
+[64] “OpenVSP,” h ps://openvsp.org/, Version 3.31.1.
 
 
 
-[65] McDonald, R. A., and Gloudemans, J. R., “Open Vehicle Sketch Pad: An Open Source Parametric Geometry and Analysis Tool
-for Conceptual Aircraft Design,” AIAA SciTech 2022 Forum, AIAA Paper 2022-0004, Jan. 2022. https://doi.org/10.2514/6.2022-
+[65] McDonald, R. A., and Gloudemans, J. R., “Open Vehicle Ske ch Pad: An Open Source Parame ric Geome ry and Analysis Tool
+for Concep ual Aircraf Design,” AIAA SciTech 2022 Forum, AIAA Paper 2022-0004, Jan. 2022. h ps://doi.org/10.2514/6.2022-
 0004.
 
 
 
-[66] Haimes, R., and Dannenhoffer, J., “The Engineering Sketch Pad: A Solid-Modeling, Feature-Based, Web-Enabled System for
-Building Parametric Geometry,” 21st AIAA Computational Fluid Dynamics Conference, AIAA Paper 2013-3073, June 2013.
-https://doi.org/10.2514/6.2013-3073.
+[66] Haimes, R., and Dannenhoffer, J., “The Engineering Ske ch Pad: A Solid-Modeling, Fea ure-Based, Web-Enabled Sys em for
+Building Parame ric Geome ry,” 21s AIAA Compu a ional Fluid Dynamics Conference, AIAA Paper 2013-3073, June 2013.
+h ps://doi.org/10.2514/6.2013-3073.
 
 
 
-[67] “FlightStream User Guide,” Research in Flight, Version 2021.2.
+[67] “Fligh S ream User Guide,” Research in Fligh , Version 2021.2.
 
 
 
-[68] Conway, J. T., “Analytical Solutions for the Actuator Disk with Variable Radial Distribution of Load,” Journal of Fluid
-Mechanics, Vol. 297, 1995, pp. 327–355. https://doi.org/10.1017/S0022112095003120.
+[68] Conway, J. T., “Analy ical Solu ions for he Ac ua or Disk wi h Variable Radial Dis ribu ion of Load,” Journal of Fluid
+Mechanics, Vol. 297, 1995, pp. 327–355. h ps://doi.org/10.1017/S0022112095003120.
 
 
 
-[69] Montgomery, D. C., Design And Analysis of Experiments, 8th ed., John Wiley & Sons, Inc., Hoboken, NJ, 2013.
+[69] Mon gomery, D. C., Design And Analysis of Experimen s, 8 h ed., John Wiley & Sons, Inc., Hoboken, NJ, 2013.
 
 
 
-[70] Myers, R. H., Montgomery, D. C., and Anderson-Cook, C. M., Response Surface Methodology: Process and Product
-Optimization Using Designed Experiments, 4th ed., John Wiley & Sons, 2016.
+[70] Myers, R. H., Mon gomery, D. C., and Anderson-Cook, C. M., Response Surface Me hodology: Process and Produc 
+Op imiza ion Using Designed Experimen s, 4 h ed., John Wiley & Sons, 2016.
 
 
 
@@ -1615,61 +1615,61 @@ Optimization Using Designed Experiments, 4th ed., John Wiley & Sons, 2016.
 
 
 
-https://doi.org/10.2514/6.2021-0834
+h ps://doi.org/10.2514/6.2021-0834
 
 
-https://doi.org/10.2514/6.2023-2251
+h ps://doi.org/10.2514/6.2023-2251
 
 
-https://ntrs.nasa.gov/citations/20205010998
+h ps://n rs.nasa.gov/ci a ions/20205010998
 
 
-https://doi.org/10.2514/1.C036896
+h ps://doi.org/10.2514/1.C036896
 
 
-https://doi.org/10.2514/6.2022-3817
+h ps://doi.org/10.2514/6.2022-3817
 
 
-https://openvsp.org/
+h ps://openvsp.org/
 
 
-https://doi.org/10.2514/6.2022-0004
+h ps://doi.org/10.2514/6.2022-0004
 
 
-https://doi.org/10.2514/6.2022-0004
+h ps://doi.org/10.2514/6.2022-0004
 
 
-https://doi.org/10.2514/6.2013-3073
+h ps://doi.org/10.2514/6.2013-3073
 
 
-https://doi.org/10.1017/S0022112095003120
+h ps://doi.org/10.1017/S0022112095003120
 
 
 
- 
-Introduction
+	
+In roduc ion
 
- 
-Aircraft
+	
+Aircraf 
 
- 
-FlightStream® Background
+	
+Fligh S ream® Background
 
- 
+	
 Aerodynamic Modeling Approach
 
- 
-Results
+	
+Resul s
 
- 
-Angle of Attack and Sideslip Sweep Predictions
+	
+Angle of A ack and Sideslip Sweep Predic ions
 
- 
-Control Surface Effectiveness Predictions
+	
+Con rol Surface Effec iveness Predic ions
 
- 
-Dynamic Derivative Predictions
+	
+Dynamic Deriva ive Predic ions
 
 
- 
+	
 Conclusions

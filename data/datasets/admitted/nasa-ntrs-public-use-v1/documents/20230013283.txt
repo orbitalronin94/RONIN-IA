@@ -1,75 +1,75 @@
-menagerie: An Automated Approach to Launch Vehicle Design
+menagerie: An Au oma ed Approach o Launch Vehicle Design
 
 
 
-Patrick D. Dees∗
+Pa rick D. Dees∗
 
 
 
-NASA Marshall Space Flight Center, Huntsville Al, 35808, USA
+NASA Marshall Space Fligh Cen er, Hun sville Al, 35808, USA
 
 
 
-The Advanced Concepts Office (ACO) at NASA Marshall Space Flight Center (MSFC)
-has been performing conceptual design of launch vehicles since the Space Transportation
-System Program. As part of its duties ACO has been tasked with investigating the effects of
-known and potential threats and opportunities to a myriad of launch vehicle concepts, launch
-sites, and mission profiles known as the launch space. As the launch space becomes more
-crowded and busy with launch providers and their vehicles, the legacy method of prescribing
-each design discipline to a single human Subject Matter Expert (SME) has become infeasible.
-Rapidly changing launch, economical, and political constraints require rapid evaluation of their
-effects. While moving into this future of rapid response does require streamlining of data and
-processes, it does not however lead directly to reinventing the wheel. Flight-validated analysis
-tools, procedures, and lessons learned can be effectively leveraged to bring the experience
-from decades of government and commercial flight programs to the new paradigm. In this
-publication we describe the aggregation of all previous launch vehicle design efforts of ACO into
-an automated and integrated toolchain called menagerie. The toolchain utilizes a suite of NASA,
-Air Force Research Lab (AFRL), and ACO-developed tools and processes to evaluate launch
-vehicle concepts, mission profiles, and trades in a fraction of the time previously required.
+The Advanced Concep s Office (ACO) a NASA Marshall Space Fligh Cen er (MSFC)
+has been performing concep ual design of launch vehicles since he Space Transpor a ion
+Sys em Program. As par of i s du ies ACO has been asked wi h inves iga ing he effec s of
+known and po en ial hrea s and oppor uni ies o a myriad of launch vehicle concep s, launch
+si es, and mission profiles known as he launch space. As he launch space becomes more
+crowded and busy wi h launch providers and heir vehicles, he legacy me hod of prescribing
+each design discipline o a single human Subjec Ma er Exper (SME) has become infeasible.
+Rapidly changing launch, economical, and poli ical cons rain s require rapid evalua ion of heir
+effec s. While moving in o his fu ure of rapid response does require s reamlining of da a and
+processes, i does no however lead direc ly o reinven ing he wheel. Fligh -valida ed analysis
+ ools, procedures, and lessons learned can be effec ively leveraged o bring he experience
+from decades of governmen and commercial fligh programs o he new paradigm. In his
+publica ion we describe he aggrega ion of all previous launch vehicle design effor s of ACO in o
+an au oma ed and in egra ed oolchain called menagerie. The oolchain u ilizes a sui e of NASA,
+Air Force Research Lab (AFRL), and ACO-developed ools and processes o evalua e launch
+vehicle concep s, mission profiles, and rades in a frac ion of he ime previously required.
 
 
 
-I. Nomenclature
+I. Nomencla ure
 
 
 
-𝐴𝐶𝑂 = Advanced Concepts Office
-𝐴𝐹𝑅𝐿 = Air Force Research Laboratory
-𝐶𝐹𝐷 = Computational Fluid Dynamics
-𝐹𝐸𝐴 = Finite Element Analysis
-𝐺𝐿𝑂𝑀 = Gross Lift Off Mass
-𝐺𝑅𝐴 = Ground Rules and Assumptions
-𝐺𝑅𝐴𝑀 = Global Reference Atmosphere Model
-𝐿𝑎𝑅𝐶 = Langley Research Center
-𝑀𝐷𝐴𝑇𝐶𝑂𝑀 = Missile Data Compendium
-𝑀𝑆𝐹𝐶 = Marshall Space Flight Center
-𝑁𝐴𝑆𝐴 = National Aeronautics and Space Administration
-𝑂𝑀𝐿 = Outer Mold Line
-𝑃𝑂𝑆𝑇 = Program to Optimize Simulated Trajectories II
-𝑆𝐴𝐴 = Space Act Agreement
-𝑆𝐿𝑆 = Space Launch System
-𝑆𝑀𝐸 = Subject Matter Expert
-𝑆𝑀𝐹 = Stage Mass Fraction
-𝑇/𝑊 = Thrust-to-Weight Ratio
+𝐴𝐶𝑂 = Advanced Concep s Office
+𝐴𝐹𝑅𝐿 = Air Force Research Labora ory
+𝐶𝐹𝐷 = Compu a ional Fluid Dynamics
+𝐹𝐸𝐴 = Fini e Elemen Analysis
+𝐺𝐿𝑂𝑀 = Gross Lif Off Mass
+𝐺𝑅𝐴 = Ground Rules and Assump ions
+𝐺𝑅𝐴𝑀 = Global Reference A mosphere Model
+𝐿𝑎𝑅𝐶 = Langley Research Cen er
+𝑀𝐷𝐴𝑇𝐶𝑂𝑀 = Missile Da a Compendium
+𝑀𝑆𝐹𝐶 = Marshall Space Fligh Cen er
+𝑁𝐴𝑆𝐴 = Na ional Aeronau ics and Space Adminis ra ion
+𝑂𝑀𝐿 = Ou er Mold Line
+𝑃𝑂𝑆𝑇 = Program o Op imize Simula ed Trajec ories II
+𝑆𝐴𝐴 = Space Ac Agreemen 
+𝑆𝐿𝑆 = Space Launch Sys em
+𝑆𝑀𝐸 = Subjec Ma er Exper 
+𝑆𝑀𝐹 = S age Mass Frac ion
+𝑇/𝑊 = Thrus - o-Weigh Ra io
 
 
 
-II. Introduction
+II. In roduc ion
 
 
 
-Conceptual design is a regime of rapid, critical changes. While the cost committed is low and design freedom is
-high it is imperative to investigate the impact of as many aspects of a design as possible. Previous studies have
+Concep ual design is a regime of rapid, cri ical changes. While he cos commi ed is low and design freedom is
+high i is impera ive o inves iga e he impac of as many aspec s of a design as possible. Previous s udies have
 
 
 
-shown that up to 75% of the total Life Cycle Cost of a system is committed during Conceptual Design [1], resulting from
-downstream metrics such as reliability, safety, manufacturability, and operations cost being impacted by down-selection
-during this phase [2–4]. A typical downfall in this phase of design is that it is also the lowest point of design knowledge,
+shown ha up o 75% of he o al Life Cycle Cos of a sys em is commi ed during Concep ual Design [1], resul ing from
+downs ream me rics such as reliabili y, safe y, manufac urabili y, and opera ions cos being impac ed by down-selec ion
+during his phase [2–4]. A ypical downfall in his phase of design is ha i is also he lowes poin of design knowledge,
 
 
 
-∗Integrated Space Transportation Team Lead, NASA MSFC ED04 Advanced Concepts, AIAA Member
+∗In egra ed Space Transpor a ion Team Lead, NASA MSFC ED04 Advanced Concep s, AIAA Member
 
 
 
@@ -85,80 +85,80 @@ during this phase [2–4]. A typical downfall in this phase of design is that it
 
 
 
-and so conceptual designers strive to generate as much information as possible about the design in this phase to best set
-a foundation for any program to follow.
+and so concep ual designers s rive o genera e as much informa ion as possible abou he design in his phase o bes se 
+a founda ion for any program o follow.
 
 
 
-The Advanced Concepts Office (ACO) at Marshall Space Flight Center (MSFC) is a part of providing the conceptual
-design of launch vehicles within National Aeronautics and Space Administration (NASA) for Pre-Phase A and Phase A
-concept studies. ACO operates as rapid turnaround analysis group that can cover broad design spaces of vehicles [5].
-Several analysis tools used by menagerie have historically been a part of the ACO design process but were partitioned to
-different analysts within ACO [6]. The launch vehicle design process in this form required manual data transfer between
-analysts for a single design cycle. Multiple design cycles are typically recommended and warranted, with each transfer
-of data involving the risk of human error in transcription and communication. As we move beyond point designs and
-into sensitivity and trade space analysis the legacy procedure of ACO becomes infeasible. Modern trade studies embrace
-that the inter connectivity of complex systems require exploration of the multivariate space to effectively capture the
-integrated system response to a myriad of design factor changes [7–9]. These studies require large amounts of data to
-properly evaluate the space and resolve borders of feasibility.
+The Advanced Concep s Office (ACO) a Marshall Space Fligh Cen er (MSFC) is a par of providing he concep ual
+design of launch vehicles wi hin Na ional Aeronau ics and Space Adminis ra ion (NASA) for Pre-Phase A and Phase A
+concep s udies. ACO opera es as rapid urnaround analysis group ha can cover broad design spaces of vehicles [5].
+Several analysis ools used by menagerie have his orically been a par of he ACO design process bu were par i ioned o
+differen analys s wi hin ACO [6]. The launch vehicle design process in his form required manual da a ransfer be ween
+analys s for a single design cycle. Mul iple design cycles are ypically recommended and warran ed, wi h each ransfer
+of da a involving he risk of human error in ranscrip ion and communica ion. As we move beyond poin designs and
+in o sensi ivi y and rade space analysis he legacy procedure of ACO becomes infeasible. Modern rade s udies embrace
+ ha he in er connec ivi y of complex sys ems require explora ion of he mul ivaria e space o effec ively cap ure he
+in egra ed sys em response o a myriad of design fac or changes [7–9]. These s udies require large amoun s of da a o
+properly evalua e he space and resolve borders of feasibili y.
 
 
 
-Over the last several years ACO has combined a set of in-house, NASA, and Air Force Research Lab (AFRL)
-analysis tools to develop an integrated, automated, and generic launch vehicle sizing environment called menagerie.
-The menagerie toolchain streamlines the process of executing trade studies by removing the human requirement of
-manually moving data from one spot to another, coordinating with other analysts to ensure all necessary data has been
-communicated, error checking inputs and outputs, and integrating the data from all disciplines of design. Instead,
-our analysts are able to focus on the creation of highly flexible analysis templates which are generally capable, and
-in customizing them for novel technologies and concepts. The full design team can spend more time on defining the
-problem, trade space, and metrics to track as automation saves time running the numerous data points necessary to
-resolve interdependencies in the trade space. In tandem, the design team and customer can far more rapidly execute,
-analyze, and iterate to learn from each previous study and maximize the information gathered in a far shortened amount
-of time. Finally, the customer knows that the maximum throughput is being applied by handing the evaluation of the
-trade space to an automated system which will work day in, day out, week in, and weekend.
+Over he las several years ACO has combined a se of in-house, NASA, and Air Force Research Lab (AFRL)
+analysis ools o develop an in egra ed, au oma ed, and generic launch vehicle sizing environmen called menagerie.
+The menagerie oolchain s reamlines he process of execu ing rade s udies by removing he human requiremen of
+manually moving da a from one spo o ano her, coordina ing wi h o her analys s o ensure all necessary da a has been
+communica ed, error checking inpu s and ou pu s, and in egra ing he da a from all disciplines of design. Ins ead,
+our analys s are able o focus on he crea ion of highly flexible analysis empla es which are generally capable, and
+in cus omizing hem for novel echnologies and concep s. The full design eam can spend more ime on defining he
+problem, rade space, and me rics o rack as au oma ion saves ime running he numerous da a poin s necessary o
+resolve in erdependencies in he rade space. In andem, he design eam and cus omer can far more rapidly execu e,
+analyze, and i era e o learn from each previous s udy and maximize he informa ion ga hered in a far shor ened amoun 
+of ime. Finally, he cus omer knows ha he maximum hroughpu is being applied by handing he evalua ion of he
+ rade space o an au oma ed sys em which will work day in, day ou , week in, and weekend.
 
 
 
-Moving to an automated approach does not immediately lead to leaving behind the vast stores of knowledge in our
-Subject Matter Expert (SME) analysts. These SMEs are centrally involved in the creation of template files for use in
-automation and exploration of analysis within their discipline to find more effective methods and expand our capabilities.
-The menagerie toolchain also employs heuristics derived from lessons learned across decades of experience in launch
-vehicle design and flight programs which cannot be sourced from anywhere else. As new lessons learned emerge in
-the quickly shifting launch, cis-lunar, and beyond operations we are continually updating and upgrading to position
-ourselves as a leading resource in complex launch and space architecture studies.
+Moving o an au oma ed approach does no immedia ely lead o leaving behind he vas s ores of knowledge in our
+Subjec Ma er Exper (SME) analys s. These SMEs are cen rally involved in he crea ion of empla e files for use in
+au oma ion and explora ion of analysis wi hin heir discipline o find more effec ive me hods and expand our capabili ies.
+The menagerie oolchain also employs heuris ics derived from lessons learned across decades of experience in launch
+vehicle design and fligh programs which canno be sourced from anywhere else. As new lessons learned emerge in
+ he quickly shif ing launch, cis-lunar, and beyond opera ions we are con inually upda ing and upgrading o posi ion
+ourselves as a leading resource in complex launch and space archi ec ure s udies.
 
 
 
 III. Tools
-Analytical tools in use by the menagerie toolchain fall into two general categories: those developed by ACO
+Analy ical ools in use by he menagerie oolchain fall in o wo general ca egories: hose developed by ACO
 
 
 
-and those developed elsewhere. In the case of ACO-External tools, Python wrappers have been developed to aid in
-integration with the other modules, handle common errors, are responsible for execution of the external tool, and ensure
-the output is translated to the appropriate format.
+and hose developed elsewhere. In he case of ACO-Ex ernal ools, Py hon wrappers have been developed o aid in
+in egra ion wi h he o her modules, handle common errors, are responsible for execu ion of he ex ernal ool, and ensure
+ he ou pu is ransla ed o he appropria e forma .
 
 
 
-A. ACO-External
+A. ACO-Ex ernal
 
 
 
-1. Global Reference Atmosphere Model (GRAM)
-GRAM is a collection of empirical data and analytical models for the prediction of atmospheric conditions. It is
+1. Global Reference A mosphere Model (GRAM)
+GRAM is a collec ion of empirical da a and analy ical models for he predic ion of a mospheric condi ions. I is
 
 
 
-developed and maintained by the Natural Environments Branch of NASA MSFC and the Atmospheric Flight and Entry
-Systems Branch of NASA Langley Research Center (LaRC). Since its first version in 1974 it has been continually
-updated and optimized and currently can deliver data on Earth, Mars, Venus, Jupiter, Titan, Neptune, and Uranus.
-Outputs of a GRAM execution include atmospheric conditions as a function of altitude such as pressure, density,
-temperature, speed of sound, and species concentrations. For Earth simulations there are also integrated datasets of
-recorded atmospheric data for a multitude of spacecraft launch sites. One of its unique features is the ability to inject
-spatial and temporal perturbations to the atmospheric and winds data, allowing for statistical investigation into best,
-worst, and expected performance of trans-atmospheric vehicles [10]. A current application of GRAM-generated data is
-to provide seasonal atmospheric predictions for use by ACO to predict performance variations of the Space Launch
-System (SLS).
+developed and main ained by he Na ural Environmen s Branch of NASA MSFC and he A mospheric Fligh and En ry
+Sys ems Branch of NASA Langley Research Cen er (LaRC). Since i s firs version in 1974 i has been con inually
+upda ed and op imized and curren ly can deliver da a on Ear h, Mars, Venus, Jupi er, Ti an, Nep une, and Uranus.
+Ou pu s of a GRAM execu ion include a mospheric condi ions as a func ion of al i ude such as pressure, densi y,
+ empera ure, speed of sound, and species concen ra ions. For Ear h simula ions here are also in egra ed da ase s of
+recorded a mospheric da a for a mul i ude of spacecraf launch si es. One of i s unique fea ures is he abili y o injec 
+spa ial and emporal per urba ions o he a mospheric and winds da a, allowing for s a is ical inves iga ion in o bes ,
+wors , and expec ed performance of rans-a mospheric vehicles [10]. A curren applica ion of GRAM-genera ed da a is
+ o provide seasonal a mospheric predic ions for use by ACO o predic performance varia ions of he Space Launch
+Sys em (SLS).
 
 
 
@@ -174,36 +174,36 @@ System (SLS).
 
 
 
-2. Missile Data Compendium (MDATCOM)
-MDATCOM is a conceptual design tool for estimating the aerodynamic coefficients of an axisymmetric body in a
+2. Missile Da a Compendium (MDATCOM)
+MDATCOM is a concep ual design ool for es ima ing he aerodynamic coefficien s of an axisymme ric body in a
 
 
 
-wide variety of configurations. It has been developed and maintained by the U.S. Army Aviation and Missile Research,
-Development, and Engineering Center (AMRDEC) at the Redstone Arsenal and the Aerospace Vehicles Technical
-Assessment and Simulation Branch of AFRL at Wright-Patterson Air Force Base. Since its inception in 1984 it has
-been used in a multitude of conceptual design studies. Inputs to MDATCOM are the outer mold line (OML) of the
-vehicle and the attitudes and atmospheric conditions at which the aerodynamic coefficients should be evaluated. Outputs
-of an MDATCOM run include coefficients of lift, drag, axial side and normal force, pitch yaw and roll moment, and
-derivatives with respect to angle of attack [11]. A current application of MDATCOM-generated data is to provide
-first-cut aerodynamic data of axisymmetric launch vehicles in the commercial space for ACO internal use and external
-Space Act Agreement (SAA) customers.
+wide varie y of configura ions. I has been developed and main ained by he U.S. Army Avia ion and Missile Research,
+Developmen , and Engineering Cen er (AMRDEC) a he Reds one Arsenal and he Aerospace Vehicles Technical
+Assessmen and Simula ion Branch of AFRL a Wrigh -Pa erson Air Force Base. Since i s incep ion in 1984 i has
+been used in a mul i ude of concep ual design s udies. Inpu s o MDATCOM are he ou er mold line (OML) of he
+vehicle and he a i udes and a mospheric condi ions a which he aerodynamic coefficien s should be evalua ed. Ou pu s
+of an MDATCOM run include coefficien s of lif , drag, axial side and normal force, pi ch yaw and roll momen , and
+deriva ives wi h respec o angle of a ack [11]. A curren applica ion of MDATCOM-genera ed da a is o provide
+firs -cu aerodynamic da a of axisymme ric launch vehicles in he commercial space for ACO in ernal use and ex ernal
+Space Ac Agreemen (SAA) cus omers.
 
 
 
-3. Program to Optimize Simulated Trajectories II (POST)
-POST is an event-drive, point-mass trajectory simulation software with discrete parameter targeting and optimization
+3. Program o Op imize Simula ed Trajec ories II (POST)
+POST is an even -drive, poin -mass rajec ory simula ion sof ware wi h discre e parame er arge ing and op imiza ion
 
 
 
-capability developed by the Atmospheric Flight and Entry Systems Branch of NASA LaRC [12]. It has been continuously
-updated and in use across NASA and industry since its inception in the 1970s. In its current form it is capable of 3- and
-6-Degree Of Freedom (DOF) analysis both in and out of atmospheric conditions and with branching trajectories for
-modeling Return To Landing Site (RTLS) and other reoverable stage activities. Inputs to POST are a vehicle definition
-according to their input file specifications, selections of atmospheric, gravity, heating and other models included in the
-POST source, settings for the optimizer to include indepenedent and dependent variables and an optimization target, and
-finally a sequence of events for the vehicle to perform. POST is currently in use by ACO [13] and LaRC for launch
-vehicle ascent modeling and optimization [14].
+capabili y developed by he A mospheric Fligh and En ry Sys ems Branch of NASA LaRC [12]. I has been con inuously
+upda ed and in use across NASA and indus ry since i s incep ion in he 1970s. In i s curren form i is capable of 3- and
+6-Degree Of Freedom (DOF) analysis bo h in and ou of a mospheric condi ions and wi h branching rajec ories for
+modeling Re urn To Landing Si e (RTLS) and o her reoverable s age ac ivi ies. Inpu s o POST are a vehicle defini ion
+according o heir inpu file specifica ions, selec ions of a mospheric, gravi y, hea ing and o her models included in he
+POST source, se ings for he op imizer o include indepeneden and dependen variables and an op imiza ion arge , and
+finally a sequence of even s for he vehicle o perform. POST is curren ly in use by ACO [13] and LaRC for launch
+vehicle ascen modeling and op imiza ion [14].
 
 
 
@@ -211,41 +211,41 @@ B. ACO-Developed
 
 
 
-1. dyreqt
-Dyreqt is a general capability developed by ACO for the modular build-up of multiple space elements partaking in a
+1. dyreq 
+Dyreq is a general capabili y developed by ACO for he modular build-up of mul iple space elemen s par aking in a
 
 
 
-complex branching mission with optimization under constraints [15]. It has been in development for over a decade and in
-continual use by ACO and academia [16] for complex space architecture studies. In its current form each space element
-is defined as a collection of subelements representing propulsion systems, propellant tank(s), and other subsystems such
-as avionics, thermal protection, and secondary structures. Resource paths such as those between propulsive subelements
-and their associated tanks, power generation subelements such as solar panels, reactors, and batteries to computational
-subelements, mechanicsms and actuators, and heat generating subelements to heat disposal elements are supported.
-Boil-off of cryogenic subelements are supported as a function of their environmental conditions. Aggregation and
-separation of elements to and from branches composing a complex mission trajectory are supported. The tool is
-developed in Python utilizing the openMDAO [17] framework, with an API layer for constructing the design problem to
-evaluate. Inputs for dyreqt are Python dictionary definitions of the space elements involved in the architecture and a
-series of trajectory branches also defined as Python dictionaries, and where along the trajectory each space element first
-enters the architecture. Additionally, some setup of the openMDAO problem is also required to fine-tune optimization.
-Outputs of dyreqt are a multitude, typically those tracked for menagerie problems are the propellant loadings of each
-launch vehicle element stage and the gross mass of a vehicle stack.
+complex branching mission wi h op imiza ion under cons rain s [15]. I has been in developmen for over a decade and in
+con inual use by ACO and academia [16] for complex space archi ec ure s udies. In i s curren form each space elemen 
+is defined as a collec ion of subelemen s represen ing propulsion sys ems, propellan ank(s), and o her subsys ems such
+as avionics, hermal pro ec ion, and secondary s ruc ures. Resource pa hs such as hose be ween propulsive subelemen s
+and heir associa ed anks, power genera ion subelemen s such as solar panels, reac ors, and ba eries o compu a ional
+subelemen s, mechanicsms and ac ua ors, and hea genera ing subelemen s o hea disposal elemen s are suppor ed.
+Boil-off of cryogenic subelemen s are suppor ed as a func ion of heir environmen al condi ions. Aggrega ion and
+separa ion of elemen s o and from branches composing a complex mission rajec ory are suppor ed. The ool is
+developed in Py hon u ilizing he openMDAO [17] framework, wi h an API layer for cons ruc ing he design problem o
+evalua e. Inpu s for dyreq are Py hon dic ionary defini ions of he space elemen s involved in he archi ec ure and a
+series of rajec ory branches also defined as Py hon dic ionaries, and where along he rajec ory each space elemen firs 
+en ers he archi ec ure. Addi ionally, some se up of he openMDAO problem is also required o fine- une op imiza ion.
+Ou pu s of dyreq are a mul i ude, ypically hose racked for menagerie problems are he propellan loadings of each
+launch vehicle elemen s age and he gross mass of a vehicle s ack.
 
 
 
 2. zephyr
-Zephyr is a wrapper for POST and a suite of tools for running trajectory trade studies which has been in development
+Zephyr is a wrapper for POST and a sui e of ools for running rajec ory rade s udies which has been in developmen 
 
 
 
-since 2015 in ACO. The POST wrapper portion of the tool takes in the location of a template input file and a Python
-dictionary of data for filling the template. The POST wrapper handles error checking the inputs against the template file,
-supplying the template file with default settings not provided in the inputs, running the POST executable, and parsing the
-output to detect errors. The parsed output is then used with a set of heuristics modeling the manual process by which a
-human trajectory analyst works on a trajectory problem to determine what next to do. Options are whether the vehicle
-and/or mission is infeasible, another run of the optimizer is advisable, or if some small tweaks to the inputs would result
-in a more optimal ascent [18]. The POST wrapper core is orchestrated by other portions of the tool which are aimed at
-efficient trade-space exploration by strategically spending more time on cases [19, 20] within the tradespace expected to
+since 2015 in ACO. The POST wrapper por ion of he ool akes in he loca ion of a empla e inpu file and a Py hon
+dic ionary of da a for filling he empla e. The POST wrapper handles error checking he inpu s agains he empla e file,
+supplying he empla e file wi h defaul se ings no provided in he inpu s, running he POST execu able, and parsing he
+ou pu o de ec errors. The parsed ou pu is hen used wi h a se of heuris ics modeling he manual process by which a
+human rajec ory analys works on a rajec ory problem o de ermine wha nex o do. Op ions are whe her he vehicle
+and/or mission is infeasible, ano her run of he op imizer is advisable, or if some small weaks o he inpu s would resul 
+in a more op imal ascen [18]. The POST wrapper core is orches ra ed by o her por ions of he ool which are aimed a 
+efficien rade-space explora ion by s ra egically spending more ime on cases [19, 20] wi hin he radespace expec ed o
 
 
 
@@ -261,85 +261,85 @@ efficient trade-space exploration by strategically spending more time on cases [
 
 
 
-have more leverage so that their converged information can be spread to their nearest neighbors [21]. Overall inputs to
-zephyr are a set of cases to optimize, the template trajectory file location, and output metrics to extract from optimized
-trajectories. Outputs are pulled from the time history of optimized trajectories, typical examples of which are ignition
-Thrust-to-Weight (T/W) and Gross Lift Off Mass (GLOM), payload delivered to a target orbit, maximum dynamic
-pressure and acceleration, and the times and altitudes of any separation events.
+have more leverage so ha heir converged informa ion can be spread o heir neares neighbors [21]. Overall inpu s o
+zephyr are a se of cases o op imize, he empla e rajec ory file loca ion, and ou pu me rics o ex rac from op imized
+ rajec ories. Ou pu s are pulled from he ime his ory of op imized rajec ories, ypical examples of which are igni ion
+Thrus - o-Weigh (T/W) and Gross Lif Off Mass (GLOM), payload delivered o a arge orbi , maximum dynamic
+pressure and accelera ion, and he imes and al i udes of any separa ion even s.
 
 
 
 3. airheads
-Airheads is a wrapper for GRAM developed in ACO starting in 2022. Its configuration file sets locations of the
+Airheads is a wrapper for GRAM developed in ACO s ar ing in 2022. I s configura ion file se s loca ions of he
 
 
 
-resources it requires, such as the particular GRAM executable and location of SPICE kernels. Its inputs are the location
-of the template input file to fill and a Python dictionary dictating the planetary body, launch and/or landing site, and date
-for atmospheric modeling. It handles error checking the inputs against the template file, supplying the template file with
-default settings not provided in the inputs, running the appropriate GRAM executable, and parsing the output to detect
-errors in operation. The outputs of GRAM are then converted into the tabular format used by POST for interpolation.
-and placed in the appropriate directory.
+resources i requires, such as he par icular GRAM execu able and loca ion of SPICE kernels. I s inpu s are he loca ion
+of he empla e inpu file o fill and a Py hon dic ionary dic a ing he plane ary body, launch and/or landing si e, and da e
+for a mospheric modeling. I handles error checking he inpu s agains he empla e file, supplying he empla e file wi h
+defaul se ings no provided in he inpu s, running he appropria e GRAM execu able, and parsing he ou pu o de ec 
+errors in opera ion. The ou pu s of GRAM are hen conver ed in o he abular forma used by POST for in erpola ion.
+and placed in he appropria e direc ory.
 
 
 
 4. aerogen
-Aerogen is a wrapper for MDATCOM developed in ACO starting in 2022. Its configuration file sets locations
+Aerogen is a wrapper for MDATCOM developed in ACO s ar ing in 2022. I s configura ion file se s loca ions
 
 
 
-of the resources it requires, such as the default location of the MDATCOM executable. Its inputs are the location
-of the template input file to fill and a python dictionary dictating the vehicle OML and the attitude and atmospheric
-conditions to evaluate. It handles error checking the inputs against the template file, supplying the template file with
-default settings not provided in the inputs, copying the MDATCOM executable to the directory where the filled input
-file resides, executing MDATCOM, and parsing the output to detect errros in operation. The outputs of MDATCOM are
-then converted into the tabular format used by POST for interpolation, and placed into the appropriate directory.
+of he resources i requires, such as he defaul loca ion of he MDATCOM execu able. I s inpu s are he loca ion
+of he empla e inpu file o fill and a py hon dic ionary dic a ing he vehicle OML and he a i ude and a mospheric
+condi ions o evalua e. I handles error checking he inpu s agains he empla e file, supplying he empla e file wi h
+defaul se ings no provided in he inpu s, copying he MDATCOM execu able o he direc ory where he filled inpu 
+file resides, execu ing MDATCOM, and parsing he ou pu o de ec errros in opera ion. The ou pu s of MDATCOM are
+ hen conver ed in o he abular forma used by POST for in erpola ion, and placed in o he appropria e direc ory.
 
 
 
 IV. Toolchain
-The menagerie toolchain is composed of a series of analytical tools and subroutines orchestrated by Python code.
+The menagerie oolchain is composed of a series of analy ical ools and subrou ines orches ra ed by Py hon code.
 
 
 
-The process relies on several template files for the major tools which are used by automation to represent the different
-configurations under study. ACO has developed generic template files for single- and two-stage vehicle templates for all
-tools which cover a majority of cases. However, it is expected that each study will have some bespoke element which
-necessitates customization. The general steps for the environment are shown in Figure 1 below, with each step in the
-process detailed in the following subsections.
+The process relies on several empla e files for he major ools which are used by au oma ion o represen he differen 
+configura ions under s udy. ACO has developed generic empla e files for single- and wo-s age vehicle empla es for all
+ ools which cover a majori y of cases. However, i is expec ed ha each s udy will have some bespoke elemen which
+necessi a es cus omiza ion. The general s eps for he environmen are shown in Figure 1 below, wi h each s ep in he
+process de ailed in he following subsec ions.
 
 
 
-A. Ground Rules and Assumptions (GRA)
-A first step in any study is to come to agreement on modeling methods, defaults, and appropriate levels of fidelity.
+A. Ground Rules and Assump ions (GRA)
+A firs s ep in any s udy is o come o agreemen on modeling me hods, defaul s, and appropria e levels of fideli y.
 
 
 
-In this phase there are multiple conversations between the ACO team and the customer, with ACO developing baseline
-models of the launch vehicle technology under consideration and iterating until the level of detail is satisfactory. The
-full set of default ACO GRA are also reviewed to ensure that there is no assumption or default being used by ACO the
-customer disagrees with. Additionally, expectations on data products and output metrics are set so that the study data
-can be used to answer as many questions as possible. To streamline this process, ACO retains and updates a document
-similar to this publication holding detailed descriptions of the tools in use by menagerie, the types of templates already
-available for the tools, defaults for each analysis, and optional model upgrades which are already available. ACO also
-retains and updates a GRA document tailored specifically to the study which over-rules any data in the base defaults
-document.
+In his phase here are mul iple conversa ions be ween he ACO eam and he cus omer, wi h ACO developing baseline
+models of he launch vehicle echnology under considera ion and i era ing un il he level of de ail is sa isfac ory. The
+full se of defaul ACO GRA are also reviewed o ensure ha here is no assump ion or defaul being used by ACO he
+cus omer disagrees wi h. Addi ionally, expec a ions on da a produc s and ou pu me rics are se so ha he s udy da a
+can be used o answer as many ques ions as possible. To s reamline his process, ACO re ains and upda es a documen 
+similar o his publica ion holding de ailed descrip ions of he ools in use by menagerie, he ypes of empla es already
+available for he ools, defaul s for each analysis, and op ional model upgrades which are already available. ACO also
+re ains and upda es a GRA documen ailored specifically o he s udy which over-rules any da a in he base defaul s
+documen .
 
 
 
-The GRA are then fed forward in each study in the form of default values, constraints, requirements, and sequences
-of events.
+The GRA are hen fed forward in each s udy in he form of defaul values, cons rain s, requiremen s, and sequences
+of even s.
 
 
 
-B. Atmosphere Modeling
-The first step in each study is to generate any atmospheric data required. ACO employs the Global Reference
+B. A mosphere Modeling
+The firs s ep in each s udy is o genera e any a mospheric da a required. ACO employs he Global Reference
 
 
 
-Atmosphere Model (GRAM) which is capable of outputting a mixture of measured and calculated data for Earth, Mars,
-and other bodies in our solar system [10]. Inputs for this step are the planetary bodies involved in the study, date ranges
-for the mission(s) under consideration, and selected launch and/or landing sites. These inputs are relayed to airheads
+A mosphere Model (GRAM) which is capable of ou pu ing a mix ure of measured and calcula ed da a for Ear h, Mars,
+and o her bodies in our solar sys em [10]. Inpu s for his s ep are he plane ary bodies involved in he s udy, da e ranges
+for he mission(s) under considera ion, and selec ed launch and/or landing si es. These inpu s are relayed o airheads
 
 
 
@@ -355,44 +355,44 @@ for the mission(s) under consideration, and selected launch and/or landing sites
 
 
 
-Fig. 1 𝑁2 Diagram of the menagerie toolchain.
+Fig. 1 𝑁2 Diagram of he menagerie oolchain.
 
 
 
-which handles their usage, and results in atmospheric conditions such as pressure, temperature, density, speed of sound,
-and species concentrations. These outputs are then translated into the tabular format accepted by POST to be used as
-included data.
+which handles heir usage, and resul s in a mospheric condi ions such as pressure, empera ure, densi y, speed of sound,
+and species concen ra ions. These ou pu s are hen ransla ed in o he abular forma accep ed by POST o be used as
+included da a.
 
 
 
-C. Initial Sizing
-A first-pass approximation of the vehicle weights according to a candidate mission is performed by dyreqt. It takes
+C. Ini ial Sizing
+A firs -pass approxima ion of he vehicle weigh s according o a candida e mission is performed by dyreq . I akes
 
 
 
-in ranges of vehicle parameters and mission profiles from the GRA such as desired payload, number of stages, Stage
-Mass Fraction (SMF), Thrust and Specific Impulse of propulsion systems, propellant fluid selections, planetary body,
-launch site, target orbit, and others. A generic openMDAO problem is posed to optimize a delta-V (dV) split among the
-stages present according to their individual configuration and the dV required to perform the mission. Dyreqt is not
-currently capable of representing trans-atmospheric flight so an additional percentage is typically added to the calculated
-mission profile. Outputs of the generic dyreqt problem are the optimized dV and propellant loadings of each stage.
+in ranges of vehicle parame ers and mission profiles from he GRA such as desired payload, number of s ages, S age
+Mass Frac ion (SMF), Thrus and Specific Impulse of propulsion sys ems, propellan fluid selec ions, plane ary body,
+launch si e, arge orbi , and o hers. A generic openMDAO problem is posed o op imize a del a-V (dV) spli among he
+s ages presen according o heir individual configura ion and he dV required o perform he mission. Dyreq is no 
+curren ly capable of represen ing rans-a mospheric fligh so an addi ional percen age is ypically added o he calcula ed
+mission profile. Ou pu s of he generic dyreq problem are he op imized dV and propellan loadings of each s age.
 
 
 
-D. Configuration
-In each design iteration the configuration of the vehicle is calculated. This module is typically unique to each study.
+D. Configura ion
+In each design i era ion he configura ion of he vehicle is calcula ed. This module is ypically unique o each s udy.
 
 
 
-It takes in data related to the propellant components of the vehicle such as propellant fluid(s) selection and their state
-(temperature, pressure) to size tanks, skirts, and intertank sections. Payload system geometry selection (Von-Karman,
-Tangent Ogive, etc.), payload amount, and minimum payload density are used to size a payload system with nosecone
-and cylindrical fairing. Engine size is assumed or calculated and used to size engine compartments, thrust structures,
-and interstage elements as appropriate. The final vehicle configuration is amalgamated from these parts according to
-the customer’s specifications and can be customized for multiple general shapes (e.g. vertical vs. horizontal). The
-configuration module outputs the essential dimensions of the vehicle such as total length, maximum width, etc. as well
-as dimensions of individual components such as tank dome and barrel section height. In addition, the configuration data
-is then used to calculate the OML.
+I akes in da a rela ed o he propellan componen s of he vehicle such as propellan fluid(s) selec ion and heir s a e
+( empera ure, pressure) o size anks, skir s, and in er ank sec ions. Payload sys em geome ry selec ion (Von-Karman,
+Tangen Ogive, e c.), payload amoun , and minimum payload densi y are used o size a payload sys em wi h nosecone
+and cylindrical fairing. Engine size is assumed or calcula ed and used o size engine compar men s, hrus s ruc ures,
+and in ers age elemen s as appropria e. The final vehicle configura ion is amalgama ed from hese par s according o
+ he cus omer’s specifica ions and can be cus omized for mul iple general shapes (e.g. ver ical vs. horizon al). The
+configura ion module ou pu s he essen ial dimensions of he vehicle such as o al leng h, maximum wid h, e c. as well
+as dimensions of individual componen s such as ank dome and barrel sec ion heigh . In addi ion, he configura ion da a
+is hen used o calcula e he OML.
 
 
 
@@ -409,84 +409,84 @@ is then used to calculate the OML.
 
 
 E. Aerodynamics
-After calculation of the vehicle configuration the OML is used to estimate the aerodynamic properties of the vehicle.
+Af er calcula ion of he vehicle configura ion he OML is used o es ima e he aerodynamic proper ies of he vehicle.
 
 
 
-OML and atmospheric domain information is passed to aerogen which returns the data in the form of a file formatted for
+OML and a mospheric domain informa ion is passed o aerogen which re urns he da a in he form of a file forma ed for
 use by POST.
 
 
 
-F. Structures
-There are multiple avenues for evaluating the dry masses of the vehicle under consideration at different levels of
+F. S ruc ures
+There are mul iple avenues for evalua ing he dry masses of he vehicle under considera ion a differen levels of
 
 
 
-fidelity [22]. A level-0 treatment defines a vehicle stage using SMF sizing. This is appropriate for studies on vehicles
-where only a subset of the subsystems which will ultimately comprise the vehicle have definition, such as applications of
-a new engine technology. A level-1 treatment uses the configuration definition along with material properties, maximum
-allowable load selection (max dynamic pressure, acceleration, etc.), and vehicle state at specific flight conditions
-(ignition, burnout, max dynamic pressure, etc.) to calculate required thicknesses and weights of primary structural
-components. A level-2 treatment uses the same inputs as level-1, however a full Finite Element Analysis (FEA) execution
-is typically too costly time-wise to be feasible in this workflow. In the case where this level of accuracy is desired, a
-sub-study varying portions of the vehicle configuration and vehicle state at various flight conditions is executed. The
-data on structural weights of the major components of the vehicle is then captured as a surrogate model [23] which
-allows utilization of the higher-fidelity analysis in-line with the rest of the toolchain. Outputs from this stage are the
-weights of the primary structures of the vehicle along with aggregate metrics such as gross weights of each stage.
+fideli y [22]. A level-0 rea men defines a vehicle s age using SMF sizing. This is appropria e for s udies on vehicles
+where only a subse of he subsys ems which will ul ima ely comprise he vehicle have defini ion, such as applica ions of
+a new engine echnology. A level-1 rea men uses he configura ion defini ion along wi h ma erial proper ies, maximum
+allowable load selec ion (max dynamic pressure, accelera ion, e c.), and vehicle s a e a specific fligh condi ions
+(igni ion, burnou , max dynamic pressure, e c.) o calcula e required hicknesses and weigh s of primary s ruc ural
+componen s. A level-2 rea men uses he same inpu s as level-1, however a full Fini e Elemen Analysis (FEA) execu ion
+is ypically oo cos ly ime-wise o be feasible in his workflow. In he case where his level of accuracy is desired, a
+sub-s udy varying por ions of he vehicle configura ion and vehicle s a e a various fligh condi ions is execu ed. The
+da a on s ruc ural weigh s of he major componen s of he vehicle is hen cap ured as a surroga e model [23] which
+allows u iliza ion of he higher-fideli y analysis in-line wi h he res of he oolchain. Ou pu s from his s age are he
+weigh s of he primary s ruc ures of he vehicle along wi h aggrega e me rics such as gross weigh s of each s age.
 
 
 
-G. Trajectory
-The final step in a design iteration is attempting to find an optimized trajectory. The trajectory phase takes in most
+G. Trajec ory
+The final s ep in a design i era ion is a emp ing o find an op imized rajec ory. The rajec ory phase akes in mos 
 
 
 
-all the information used and/or generated by the previous phases. In the current configuration of menagerie, all the
-vehicle and mission combinations are submitted as cases to be evaluated as trajectories by zephyr. This step is typically
-the longest as many executions of POST are required to find optimized trajectories for each individual case. The time
-required for this step does reduce drastically after the first iteration however, as the optimized ascent information in
-terms of steering and payload delivered are stored with the case and utilized in the next iteration. Outputs for this step
-are typically optimized propellant loads for each stage, payload delivered, and vehicle state at specific flight conditions
-such as launch, maximum dynamic pressure and acceleration, staging, and at end of mission.
+all he informa ion used and/or genera ed by he previous phases. In he curren configura ion of menagerie, all he
+vehicle and mission combina ions are submi ed as cases o be evalua ed as rajec ories by zephyr. This s ep is ypically
+ he longes as many execu ions of POST are required o find op imized rajec ories for each individual case. The ime
+required for his s ep does reduce dras ically af er he firs i era ion however, as he op imized ascen informa ion in
+ erms of s eering and payload delivered are s ored wi h he case and u ilized in he nex i era ion. Ou pu s for his s ep
+are ypically op imized propellan loads for each s age, payload delivered, and vehicle s a e a specific fligh condi ions
+such as launch, maximum dynamic pressure and accelera ion, s aging, and a end of mission.
 
 
 
 H. Convergence
-At the end of each design iteration, each case is evaluated according to a convergence criterion to determine whether
+A he end of each design i era ion, each case is evalua ed according o a convergence cri erion o de ermine whe her
 
 
 
-the design is within some tolerance. Since menagerie operates as a fixed-point iteration scheme, proper selection of the
-output assigned to the convergence criterion is important. Gross parameters such as GLOM are better suited since they
-do not tend to change by a large percentage after the first few iterations. Other parameters such as flight loads can vary
-by a large percentage with only a small change in the ascent trajectory. The criterion value to consider a case converged
-also widens as the iteration progress, as unstable designs can exhibit a multiple fixed point behavior which falls outside
-the tolerance. Once a vehicle has been marked as converged it does not participate in further design iterations and its
-final iteration’s data is moved to a separate location for final analysis. If after twenty iterations a design still has not
-converged it is marked as complete.
+ he design is wi hin some olerance. Since menagerie opera es as a fixed-poin i era ion scheme, proper selec ion of he
+ou pu assigned o he convergence cri erion is impor an . Gross parame ers such as GLOM are be er sui ed since hey
+do no end o change by a large percen age af er he firs few i era ions. O her parame ers such as fligh loads can vary
+by a large percen age wi h only a small change in he ascen rajec ory. The cri erion value o consider a case converged
+also widens as he i era ion progress, as uns able designs can exhibi a mul iple fixed poin behavior which falls ou side
+ he olerance. Once a vehicle has been marked as converged i does no par icipa e in fur her design i era ions and i s
+final i era ion’s da a is moved o a separa e loca ion for final analysis. If af er wen y i era ions a design s ill has no 
+converged i is marked as comple e.
 
 
 
-I. Multi-Processing
-Discussion on the menagerie tool up to this point has presented the steps as serial, however the actual implementation
+I. Mul i-Processing
+Discussion on he menagerie ool up o his poin has presen ed he s eps as serial, however he ac ual implemen a ion
 
 
 
-of the code utilizes multiprocessing to the extent of the compute resources’ capability. The exception to this process is
-trajectory. The zephyr tool works best with all cases submitted simultaneously as its methods utilize nearest neighbor
-information to speed up optimization of cases. It has also been designed with parallelization in mind.
+of he code u ilizes mul iprocessing o he ex en of he compu e resources’ capabili y. The excep ion o his process is
+ rajec ory. The zephyr ool works bes wi h all cases submi ed simul aneously as i s me hods u ilize neares neighbor
+informa ion o speed up op imiza ion of cases. I has also been designed wi h paralleliza ion in mind.
 
 
 
-J. Data Products
-There are several data products which are automatically produced by the menagerie toolchain. As design iterations
+J. Da a Produc s
+There are several da a produc s which are au oma ically produced by he menagerie oolchain. As design i era ions
 
 
 
-progress, each case’s data is saved to a dedicated directory. At the case level, a JavaScript Object Notation (JSON)
-formatted file contains the latest data pertaining to the case. Additional directories are present for iteration by iteration
-data from aerogen/MDATCOM such as the raw and POST-formatted aerodynamic data. At the study level, Comma
+progress, each case’s da a is saved o a dedica ed direc ory. A he case level, a JavaScrip Objec No a ion (JSON)
+forma ed file con ains he la es da a per aining o he case. Addi ional direc ories are presen for i era ion by i era ion
+da a from aerogen/MDATCOM such as he raw and POST-forma ed aerodynamic da a. A he s udy level, Comma
 
 
 
@@ -506,40 +506,40 @@ Fig. 2 Profiler of Vehicle Performance.
 
 
 
-Separated Values (CSV) formatted data is saved iteration by iteration of the state of every case under consideration. This
-information is useful to understand convergence rates of the individual cases to detect unstable vehicle configurations.
-As cases reach convergence their final data is moved to a separate directory, and an additional CSV is kept of the final
-data. In addition, detailed logs at several levels of detail are saved as text files in the study data for the practitioner to
-debug when cases do not converge.
+Separa ed Values (CSV) forma ed da a is saved i era ion by i era ion of he s a e of every case under considera ion. This
+informa ion is useful o unders and convergence ra es of he individual cases o de ec uns able vehicle configura ions.
+As cases reach convergence heir final da a is moved o a separa e direc ory, and an addi ional CSV is kep of he final
+da a. In addi ion, de ailed logs a several levels of de ail are saved as ex files in he s udy da a for he prac i ioner o
+debug when cases do no converge.
 
 
 
-There are several additional data products which are not automatically generated, however are considered a standard
-set of outputs. First and foremost, a text document is compiled by the study lead detailing setup of the cases to include
-input factors, their ranges, the number of cases evaluated within those ranges, and any other defaults applied to the study.
-Pertinent results from the study are also presented and discussed in aggregate. These will tend to be explorations on the
-root causes of trends within the data, such as the effect of a maximum dynamic pressure constraint on payload delivered
-to a target orbit. Recommendations on specific vehicle designs which show robustness to mission profile variations
-are also presented when desired. The final data of the study is also used to create surrogate models for output metrics
-of interest such as payload delivered, GLOM, and ignition T/W. These surrogate models can then be displayed as a
-prediction profiler as shown in Figure 2. Each pane of the profiler displays a partial derivative of the integrated system
-response to each input factor and is a very useful tool for design space exploration and communication. ACO uses the
-program JMP [24] to perform surrogate modeling and create the profiler view. Customers without the JMP software
-can have the profiler delivered to them as an interactive HyperText Markup Language (HTML) document. Finally the
-surrogate model itself can be delivered to the customer as Python code for their own internal studies.
+There are several addi ional da a produc s which are no au oma ically genera ed, however are considered a s andard
+se of ou pu s. Firs and foremos , a ex documen is compiled by he s udy lead de ailing se up of he cases o include
+inpu fac ors, heir ranges, he number of cases evalua ed wi hin hose ranges, and any o her defaul s applied o he s udy.
+Per inen resul s from he s udy are also presen ed and discussed in aggrega e. These will end o be explora ions on he
+roo causes of rends wi hin he da a, such as he effec of a maximum dynamic pressure cons rain on payload delivered
+ o a arge orbi . Recommenda ions on specific vehicle designs which show robus ness o mission profile varia ions
+are also presen ed when desired. The final da a of he s udy is also used o crea e surroga e models for ou pu me rics
+of in eres such as payload delivered, GLOM, and igni ion T/W. These surroga e models can hen be displayed as a
+predic ion profiler as shown in Figure 2. Each pane of he profiler displays a par ial deriva ive of he in egra ed sys em
+response o each inpu fac or and is a very useful ool for design space explora ion and communica ion. ACO uses he
+program JMP [24] o perform surroga e modeling and crea e he profiler view. Cus omers wi hou he JMP sof ware
+can have he profiler delivered o hem as an in erac ive HyperTex Markup Language (HTML) documen . Finally he
+surroga e model i self can be delivered o he cus omer as Py hon code for heir own in ernal s udies.
 
 
 
-A semi-automated data product at the case level which is optionally available is a visual summary of the vehicle and
-its performance as an image colloquially known as a "baseball card". An example of this product is shown in Figure 3.
-The fields on either side of the vehicle depiction can be from any of the metrics collected by any step of the menagerie
-process. An additional ACO-developed tool named bambino takes in a definition of the text fields to surround the image
-and the location of target data of the concept to generate the image.
+A semi-au oma ed da a produc a he case level which is op ionally available is a visual summary of he vehicle and
+i s performance as an image colloquially known as a "baseball card". An example of his produc is shown in Figure 3.
+The fields on ei her side of he vehicle depic ion can be from any of he me rics collec ed by any s ep of he menagerie
+process. An addi ional ACO-developed ool named bambino akes in a defini ion of he ex fields o surround he image
+and he loca ion of arge da a of he concep o genera e he image.
 
 
 
-V. Future Work
-There are several research and development activities currently in work in ACO to further expand the capabilities of
+V. Fu ure Work
+There are several research and developmen ac ivi ies curren ly in work in ACO o fur her expand he capabili ies of
 
 
 
@@ -547,27 +547,27 @@ menagerie.
 
 
 
-• openMDAO Refactoring
-The current code structure of menagerie follows the functional paradigm. A next version of menagerie will refactor
+• openMDAO Refac oring
+The curren code s ruc ure of menagerie follows he func ional paradigm. A nex version of menagerie will refac or
 
 
 
-the modules into openMDAO Components to enable the capability of optimizing individual vehicle designs to targets.
-Examples of such would be maximizing performance robustness across a selection of mission profiles, minimizing
-the depth of throttle required of an engine to keep below stringent maximum acceleration constraints, and matching
-simulated performance to published values.
+ he modules in o openMDAO Componen s o enable he capabili y of op imizing individual vehicle designs o arge s.
+Examples of such would be maximizing performance robus ness across a selec ion of mission profiles, minimizing
+ he dep h of hro le required of an engine o keep below s ringen maximum accelera ion cons rain s, and ma ching
+simula ed performance o published values.
 
 
 
-• Configuration Upgrades
-The current configuration subroutine works only in two dimensions. Essential dimensions of lengths and widths are
+• Configura ion Upgrades
+The curren configura ion subrou ine works only in wo dimensions. Essen ial dimensions of leng hs and wid hs are
 
 
 
-derived individually or from their neighbors with only rarely enforced alignment. Recent work undertaken in ACO in
-automated geometry generation and meshing will enable usage of tools which require a 3D data structure. Examples
-of this include higher-fidelity Computational Fluid Dynamics (CFD) tools which would provide an avenue for more
-detailed aerodynamic analysis of the vehicle concepts, and lift our current restriction of requiring axial symmetry.
+derived individually or from heir neighbors wi h only rarely enforced alignmen . Recen work under aken in ACO in
+au oma ed geome ry genera ion and meshing will enable usage of ools which require a 3D da a s ruc ure. Examples
+of his include higher-fideli y Compu a ional Fluid Dynamics (CFD) ools which would provide an avenue for more
+de ailed aerodynamic analysis of he vehicle concep s, and lif our curren res ric ion of requiring axial symme ry.
 
 
 
@@ -583,58 +583,58 @@ detailed aerodynamic analysis of the vehicle concepts, and lift our current rest
 
 
 
-Fig. 3 Baseball Card Summary of Vehicle Concept.
+Fig. 3 Baseball Card Summary of Vehicle Concep .
 
 
 
-Another toolset enabled is FEA for determining the primary structural weights.
+Ano her oolse enabled is FEA for de ermining he primary s ruc ural weigh s.
 
 
 
 • Aerodynamics Upgrades
-With automated mesh generation in hand the aerodynamics portion of the menagerie toolchain can be upgraded.
+Wi h au oma ed mesh genera ion in hand he aerodynamics por ion of he menagerie oolchain can be upgraded.
 
 
 
-Efforts are currently underway in ACO to compare CFD tools such as CBAero, Cart3D, and Fun3D. Comparisons
-between these tools [25] show strengths and weaknesses of each, which will be further explored as applied to complex
-launch vehicle configurations.
+Effor s are curren ly underway in ACO o compare CFD ools such as CBAero, Car 3D, and Fun3D. Comparisons
+be ween hese ools [25] show s reng hs and weaknesses of each, which will be fur her explored as applied o complex
+launch vehicle configura ions.
 
 
 
-• Pre-FEA Structural Analysis
-A current capability gap for menagerie is in a level-1 structural analysis tool appropriate for generic launch vehicles,
+• Pre-FEA S ruc ural Analysis
+A curren capabili y gap for menagerie is in a level-1 s ruc ural analysis ool appropria e for generic launch vehicles,
 
 
 
-from axially symmetric to not, small to heavy lift. A multi-year effort in collaboration with the Aerospace Systems
-Design Laboratory at Georgia Tech [26] is yielding first results and undergoing verification and validation iterations
-with several organizations within MSFC. When at a stable state this capability will provide structural weight estimates
-for full vehicle stacks and individual elements for either integrated or concentrated analysis.
+from axially symme ric o no , small o heavy lif . A mul i-year effor in collabora ion wi h he Aerospace Sys ems
+Design Labora ory a Georgia Tech [26] is yielding firs resul s and undergoing verifica ion and valida ion i era ions
+wi h several organiza ions wi hin MSFC. When a a s able s a e his capabili y will provide s ruc ural weigh es ima es
+for full vehicle s acks and individual elemen s for ei her in egra ed or concen ra ed analysis.
 
 
 
-• Trajectory Tool Updates
-The developers of POST at LaRC recently completed a full refactoring of their code to ensure that it is completely
+• Trajec ory Tool Upda es
+The developers of POST a LaRC recen ly comple ed a full refac oring of heir code o ensure ha i is comple ely
 
 
 
-thread-safe [27]. While this is a monumental achievement unto itself, it is a step on their path toward a full suite of
-upgrades to the trajectory tool. In particular, an upcoming release of POST will expose a Python API. The API will
-allow users of POST to interact with trajectories at a much deeper level, enabling new methods of optimizing trajectories,
-performing trade studies, and removing the need for most file i/o. When this version is released it will be on the ACO
-short list of capabilities to integrate.
+ hread-safe [27]. While his is a monumen al achievemen un o i self, i is a s ep on heir pa h oward a full sui e of
+upgrades o he rajec ory ool. In par icular, an upcoming release of POST will expose a Py hon API. The API will
+allow users of POST o in erac wi h rajec ories a a much deeper level, enabling new me hods of op imizing rajec ories,
+performing rade s udies, and removing he need for mos file i/o. When his version is released i will be on he ACO
+shor lis of capabili ies o in egra e.
 
 
 
 VI. Conclusion
-In the past each discipline’s analysis and operation of all domain-specific tools were relegated (typically) to a
+In he pas each discipline’s analysis and opera ion of all domain-specific ools were relega ed ( ypically) o a
 
 
 
-single-point-of-failure SME. This process is best applied to evaluating a point design, or monovariate trades due to
-the human-hours involved. The menagerie toolchain represents a fundamental shift in the way ACO performs launch
-vehicle conceptual design studies. In this updated paradigm execution of the 100s to 1,000s of analyses required for a
+single-poin -of-failure SME. This process is bes applied o evalua ing a poin design, or monovaria e rades due o
+ he human-hours involved. The menagerie oolchain represen s a fundamen al shif in he way ACO performs launch
+vehicle concep ual design s udies. In his upda ed paradigm execu ion of he 100s o 1,000s of analyses required for a
 
 
 
@@ -650,104 +650,104 @@ vehicle conceptual design studies. In this updated paradigm execution of the 100
 
 
 
-full trade study are handled by automation, freeing up SMEs for higher-level work. The SME is then free to focus on
-excellence in providing a flexible solution which can handle multiple design trades simultaneously, and in upgrading
-utilization of the domain tool to evaluate novel concepts.
+full rade s udy are handled by au oma ion, freeing up SMEs for higher-level work. The SME is hen free o focus on
+excellence in providing a flexible solu ion which can handle mul iple design rades simul aneously, and in upgrading
+u iliza ion of he domain ool o evalua e novel concep s.
 
 
 
-Automation of trade studies has also allowed ACO to expand their pool of customers. To date, the menagerie
-toolchain has been utilized for several NASA-internal customers on multiple studies and several commercial partners
-through SAA contracts. Established vehicle programs such as SLS regularly pose future evolution and alternate
-utilization studies to ACO, which through usage of menagerie have become far more rapid and thorough. New
-entrants to the launch space, such as Leap Space have also executed studies through ACO via the SAA contracting
-vessel to investigate applicability of their engine design on a multitude of vehicle configurations and mission profiles.
-Finally, ACO-internal studies on the applicability of current, planned, or possible launch vehicles and technologies to
-complex architectures in cis-lunar space and beyond employ menagerie to develop general-use databases of parametric
-performance and prediction of launch states.
+Au oma ion of rade s udies has also allowed ACO o expand heir pool of cus omers. To da e, he menagerie
+ oolchain has been u ilized for several NASA-in ernal cus omers on mul iple s udies and several commercial par ners
+ hrough SAA con rac s. Es ablished vehicle programs such as SLS regularly pose fu ure evolu ion and al erna e
+u iliza ion s udies o ACO, which hrough usage of menagerie have become far more rapid and horough. New
+en ran s o he launch space, such as Leap Space have also execu ed s udies hrough ACO via he SAA con rac ing
+vessel o inves iga e applicabili y of heir engine design on a mul i ude of vehicle configura ions and mission profiles.
+Finally, ACO-in ernal s udies on he applicabili y of curren , planned, or possible launch vehicles and echnologies o
+complex archi ec ures in cis-lunar space and beyond employ menagerie o develop general-use da abases of parame ric
+performance and predic ion of launch s a es.
 
 
 
 References
-[1] Hirshorn, S. R., Voss, L. D., and Bromley, L. K., “Nasa systems engineering handbook,” Tech. rep., 2017.
+[1] Hirshorn, S. R., Voss, L. D., and Bromley, L. K., “Nasa sys ems engineering handbook,” Tech. rep., 2017.
 
 
 
-[2] Wertz, J. R., and Larson, W. J., Reducing space mission cost, Microcosm Press Torrance, CA, 1996.
+[2] Wer z, J. R., and Larson, W. J., Reducing space mission cos , Microcosm Press Torrance, CA, 1996.
 
 
 
-[3] Blair, J., Launch vehicle design process: characterization, technical integration, and lessons learned, NASA, 2001.
+[3] Blair, J., Launch vehicle design process: charac eriza ion, echnical in egra ion, and lessons learned, NASA, 2001.
 
 
 
-[4] Ullah, R., Zhou, D.-Q., Zhou, P., Hussain, M., and Sohail, M. A., “An approach for space launch vehicle conceptual design and
-multi-attribute evaluation,” Aerospace science and technology, Vol. 25, No. 1, 2013, pp. 65–74.
+[4] Ullah, R., Zhou, D.-Q., Zhou, P., Hussain, M., and Sohail, M. A., “An approach for space launch vehicle concep ual design and
+mul i-a ribu e evalua ion,” Aerospace science and echnology, Vol. 25, No. 1, 2013, pp. 65–74.
 
 
 
-[5] Mulqueen, J., Maples, C. D., and Fabisinski III, L., “1.3. 2 Tailoring Systems Engineering Processes in a Conceptual Design
-Environment: a case study at NASA Marshall Spaceflight Center’s ACO,” INCOSE International Symposium, Vol. 22, Wiley
+[5] Mulqueen, J., Maples, C. D., and Fabisinski III, L., “1.3. 2 Tailoring Sys ems Engineering Processes in a Concep ual Design
+Environmen : a case s udy a NASA Marshall Spacefligh Cen er’s ACO,” INCOSE In erna ional Symposium, Vol. 22, Wiley
 Online Library, 2012, pp. 100–114.
 
 
 
-[6] Waters, E., Garcia, J., Threet, G., and Philips, A., “NASA Advanced Concepts Office, Earth-to-Orbit Team Design Process and
-Tools,” AIAA SPACE 2013 Conference and Exposition, 2013, p. 5372.
+[6] Wa ers, E., Garcia, J., Three , G., and Philips, A., “NASA Advanced Concep s Office, Ear h- o-Orbi Team Design Process and
+Tools,” AIAA SPACE 2013 Conference and Exposi ion, 2013, p. 5372.
 
 
 
-[7] Rechtin, E., Systems architecting of organizations: Why eagles can’t swim, Routledge, 2017.
+[7] Rech in, E., Sys ems archi ec ing of organiza ions: Why eagles can’ swim, Rou ledge, 2017.
 
 
 
-[8] Wertz, J. R., Everett, D. F., and Puschell, J. J., “Space mission engineering: the new SMAD,” (No Title), 2011.
+[8] Wer z, J. R., Evere , D. F., and Puschell, J. J., “Space mission engineering: he new SMAD,” (No Ti le), 2011.
 
 
 
-[9] Larson, W. J., and Pranke, L. K., “Human spaceflight: mission analysis and design,” (No Title), 2000.
+[9] Larson, W. J., and Pranke, L. K., “Human spacefligh : mission analysis and design,” (No Ti le), 2000.
 
 
 
-[10] White, P., and Hoffman, J., “Earth Global Reference Atmospheric Model (Earth-GRAM): User Guide,” Tech. rep., 2021.
+[10] Whi e, P., and Hoffman, J., “Ear h Global Reference A mospheric Model (Ear h-GRAM): User Guide,” Tech. rep., 2021.
 
 
 
 [11] Rosema, C., Doyle, J., and Blake, W. B., “Missile DATa COMpendium. User Manual – 2014 Version,” Tech. Rep. AFRL-RQ-
-WP-TR-2014-0281, Air Force Research Laboratory, Wright-Patterson Air Force Base, OH, 45433-7541, 2014.
+WP-TR-2014-0281, Air Force Research Labora ory, Wrigh -Pa erson Air Force Base, OH, 45433-7541, 2014.
 
 
 
-[12] Lugo, R. A., Shidner, J. D., Powell, R. W., Marsh, S. M., Hoffman, J. A., Litton, D. K., and Schmitt, T. L., “Launch vehicle
-ascent trajectory simulation using the Program to Optimize Simulated Trajectories II (POST2),” AAS/AIAA Space Flight
-Mechanics Meeting, 2017.
+[12] Lugo, R. A., Shidner, J. D., Powell, R. W., Marsh, S. M., Hoffman, J. A., Li on, D. K., and Schmi , T. L., “Launch vehicle
+ascen rajec ory simula ion using he Program o Op imize Simula ed Trajec ories II (POST2),” AAS/AIAA Space Fligh 
+Mechanics Mee ing, 2017.
 
 
 
-[13] Zwack, M., Dees, P., Thomas, H., Polsgrove, T., and Holt, J., “Program to Optimize Simulated Trajectories II (POST2) Surrogate
-Models for Mars Ascent Vehicle (MAV) Performance Assessment,” Tech. rep., 2017.
+[13] Zwack, M., Dees, P., Thomas, H., Polsgrove, T., and Hol , J., “Program o Op imize Simula ed Trajec ories II (POST2) Surroga e
+Models for Mars Ascen Vehicle (MAV) Performance Assessmen ,” Tech. rep., 2017.
 
 
 
-[14] Lugo, R. A., Shidner, J. D., Powell, R. W., Marsh, S. M., Hoffman, J. A., Litton, D. K., and Schmitt, T. L., “Launch vehicle
-ascent trajectory simulation using the Program to Optimize Simulated Trajectories II (POST2),” AAS/AIAA Space Flight
-Mechanics Meeting, 2017.
+[14] Lugo, R. A., Shidner, J. D., Powell, R. W., Marsh, S. M., Hoffman, J. A., Li on, D. K., and Schmi , T. L., “Launch vehicle
+ascen rajec ory simula ion using he Program o Op imize Simula ed Trajec ories II (POST2),” AAS/AIAA Space Fligh 
+Mechanics Mee ing, 2017.
 
 
 
-[15] Edwards, S. J., Trent, D., Diaz, M. J., and Mavris, D. N., “A model-based framework for synthesis of space transportation
-architectures,” 2018 AIAA SPACE and Astronautics Forum and Exposition, 2018, p. 5133.
+[15] Edwards, S. J., Tren , D., Diaz, M. J., and Mavris, D. N., “A model-based framework for syn hesis of space ranspor a ion
+archi ec ures,” 2018 AIAA SPACE and As ronau ics Forum and Exposi ion, 2018, p. 5133.
 
 
 
-[16] Sudol, A., Edwards, S. J., and Mavris, D. N., “Technology Assessment for Launch Vehicle Concepts Using The DYnamic
-Rocket Equation Tool (DYREQT),” 2018 AIAA SPACE and Astronautics Forum and Exposition, 2018, p. 5415.
+[16] Sudol, A., Edwards, S. J., and Mavris, D. N., “Technology Assessmen for Launch Vehicle Concep s Using The DYnamic
+Rocke Equa ion Tool (DYREQT),” 2018 AIAA SPACE and As ronau ics Forum and Exposi ion, 2018, p. 5415.
 
 
 
-[17] Gray, J. S., Hwang, J. T., Martins, J. R. R. A., Moore, K. T., and Naylor, B. A., “OpenMDAO: An open-source framework for
-multidisciplinary design, analysis, and optimization,” Structural and Multidisciplinary Optimization, Vol. 59, No. 4, 2019, pp.
-1075–1104. https://doi.org/10.1007/s00158-019-02211-z.
+[17] Gray, J. S., Hwang, J. T., Mar ins, J. R. R. A., Moore, K. T., and Naylor, B. A., “OpenMDAO: An open-source framework for
+mul idisciplinary design, analysis, and op imiza ion,” S ruc ural and Mul idisciplinary Op imiza ion, Vol. 59, No. 4, 2019, pp.
+1075–1104. h ps://doi.org/10.1007/s00158-019-02211-z.
 
 
 
@@ -757,7 +757,7 @@ multidisciplinary design, analysis, and optimization,” Structural and Multidis
 
 
 
-https://doi.org/10.1007/s00158-019-02211-z
+h ps://doi.org/10.1007/s00158-019-02211-z
 
 
 
@@ -766,52 +766,52 @@ https://doi.org/10.1007/s00158-019-02211-z
 
 
 
-[18] Holt, J. B., Dees, P. D., and Diaz, M. J., “An expert system-driven method for parametric trajectory optimization during
-conceptual design,” AIAA SPACE 2015 Conference and Exposition, 2015, p. 4486.
+[18] Hol , J. B., Dees, P. D., and Diaz, M. J., “An exper sys em-driven me hod for parame ric rajec ory op imiza ion during
+concep ual design,” AIAA SPACE 2015 Conference and Exposi ion, 2015, p. 4486.
 
 
 
-[19] Dees, P. D., and Zwack, M. R., “Automation of POST Cases via External Optimizer and “Artificial p2” Calculation,” AIAA
-SPACE and Astronautics Forum and Exposition, 2017, p. 5353.
+[19] Dees, P. D., and Zwack, M. R., “Au oma ion of POST Cases via Ex ernal Op imizer and “Ar ificial p2” Calcula ion,” AIAA
+SPACE and As ronau ics Forum and Exposi ion, 2017, p. 5353.
 
 
 
-[20] Zwack, M. R., and Dees, P. D., “Improvement of automated POST case success rate using support vector machines,” AIAA
-SPACE and Astronautics Forum and Exposition, 2017, p. 5129.
+[20] Zwack, M. R., and Dees, P. D., “Improvemen of au oma ed POST case success ra e using suppor vec or machines,” AIAA
+SPACE and As ronau ics Forum and Exposi ion, 2017, p. 5129.
 
 
 
-[21] Dees, P. D., Zwack, M. R., Edwards, S., and Steffens, M. J., “Augmenting conceptual design trajectory tradespace exporation
-with graph theory,” AIAA SPACE 2016, 2016, p. 5650.
+[21] Dees, P. D., Zwack, M. R., Edwards, S., and S effens, M. J., “Augmen ing concep ual design rajec ory radespace expora ion
+wi h graph heory,” AIAA SPACE 2016, 2016, p. 5650.
 
 
 
-[22] Robinson, J., “An overview of NASA’s integrated design and engineering analysis (IDEA) environment,” 17th AIAA international
-space planes and hypersonic systems and technologies conference, 2011, p. 2392.
+[22] Robinson, J., “An overview of NASA’s in egra ed design and engineering analysis (IDEA) environmen ,” 17 h AIAA in erna ional
+space planes and hypersonic sys ems and echnologies conference, 2011, p. 2392.
 
 
 
-[23] Myers, R., Montgomery, D., and Anderson-Cook, C., “Response Surface Methodology, John Wiley&Sons,” Inc., USA, 2002.
+[23] Myers, R., Mon gomery, D., and Anderson-Cook, C., “Response Surface Me hodology, John Wiley&Sons,” Inc., USA, 2002.
 
 
 
-[24] SAS Institute Inc., N., Cary, “JMP Version 17.0.0,” http://jmp.com/, 1989–2023.
+[24] SAS Ins i u e Inc., N., Cary, “JMP Version 17.0.0,” h p://jmp.com/, 1989–2023.
 
 
 
-[25] Schwartz, H. D., Hiller, B. R., Robertson, B. E., and Mavris, D. N., “Comparison of Three Aerodynamic Analysis Software
-Packages Against the Army Navy Finner Projectile to Determine Fidelity Level,” 2018 AIAA Atmospheric Flight Mechanics
+[25] Schwar z, H. D., Hiller, B. R., Rober son, B. E., and Mavris, D. N., “Comparison of Three Aerodynamic Analysis Sof ware
+Packages Agains he Army Navy Finner Projec ile o De ermine Fideli y Level,” 2018 AIAA A mospheric Fligh Mechanics
 Conference, 2018, p. 0292.
 
 
 
-[26] Cox, A., Harris, L., Tang, J. Q., and Mavris, D. N., “Launch Vehicle Structural Analysis (LVSA): A Multifidelity, Multidisciplinary
-Environment for Design and Analysis of Rocket-Powered Vehicles,” AIAA SCITECH 2022 Forum, 2022, p. 0806.
+[26] Cox, A., Harris, L., Tang, J. Q., and Mavris, D. N., “Launch Vehicle S ruc ural Analysis (LVSA): A Mul ifideli y, Mul idisciplinary
+Environmen for Design and Analysis of Rocke -Powered Vehicles,” AIAA SCITECH 2022 Forum, 2022, p. 0806.
 
 
 
-[27] Williams, R. A., Lugo, R. A., Marsh, S. M., Hoffman, J. A., Shidner, J. D., and Aguirre, J. T., “Enabling Thread Safety and
-Parallelism in the Program to Optimize Simulated Trajectories II,” AIAA SCITECH 2023 Forum, 2023, p. 0148.
+[27] Williams, R. A., Lugo, R. A., Marsh, S. M., Hoffman, J. A., Shidner, J. D., and Aguirre, J. T., “Enabling Thread Safe y and
+Parallelism in he Program o Op imize Simula ed Trajec ories II,” AIAA SCITECH 2023 Forum, 2023, p. 0148.
 
 
 
@@ -821,85 +821,85 @@ Parallelism in the Program to Optimize Simulated Trajectories II,” AIAA SCITEC
 
 
 
-http://jmp.com/
+h p://jmp.com/
 
 
 
- 
-Nomenclature
+	
+Nomencla ure
 
- 
-Introduction
+	
+In roduc ion
 
- 
+	
 Tools
 
- 
-ACO-External
+	
+ACO-Ex ernal
 
- 
-Global Reference Atmosphere Model (GRAM)
+	
+Global Reference A mosphere Model (GRAM)
 
- 
-Missile Data Compendium (MDATCOM)
+	
+Missile Da a Compendium (MDATCOM)
 
- 
-Program to Optimize Simulated Trajectories II (POST)
+	
+Program o Op imize Simula ed Trajec ories II (POST)
 
 
- 
+	
 ACO-Developed
 
- 
-dyreqt
+	
+dyreq 
 
- 
+	
 zephyr
 
- 
+	
 airheads
 
- 
+	
 aerogen
 
 
 
- 
+	
 Toolchain
 
- 
-Ground Rules and Assumptions (GRA)
+	
+Ground Rules and Assump ions (GRA)
 
- 
-Atmosphere Modeling
+	
+A mosphere Modeling
 
- 
-Initial Sizing
+	
+Ini ial Sizing
 
- 
-Configuration
+	
+Configura ion
 
- 
+	
 Aerodynamics
 
- 
-Structures
+	
+S ruc ures
 
- 
-Trajectory
+	
+Trajec ory
 
- 
+	
 Convergence
 
- 
-Multi-Processing
+	
+Mul i-Processing
 
- 
-Data Products
+	
+Da a Produc s
 
 
- 
-Future Work
+	
+Fu ure Work
 
- 
+	
 Conclusion

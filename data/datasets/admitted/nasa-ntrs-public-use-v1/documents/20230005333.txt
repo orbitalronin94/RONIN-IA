@@ -1,59 +1,59 @@
-High Fidelity Adaptively Refined CFD and Reduced Order
-Models of a High Aspect Ratio Aeroelastic Wing Wind Tunnel
+High Fideli y Adap ively Refined CFD and Reduced Order
+Models of a High Aspec Ra io Aeroelas ic Wing Wind Tunnel
 
 
 
 Model
-Robert E. Bartels1 and Kevin Jacobson2
+Rober E. Bar els1 and Kevin Jacobson2
 
 
 
-NASA Langley Research Center, Hampton, VA, 23681
+NASA Langley Research Cen er, Hamp on, VA, 23681
 
 
 
-Robust adaptive mesh refinement for transonic conditions is one of the most difficult challenges to advancing
-CFD usage for certification by analysis. Transonic fluid-structure interaction cases represent an even more
-difficult challenge for adaptive mesh refinement. Production aircraft furthermore have structural models that
-have gaps and discontinuities that make the interdomain transfer of loads and deflections difficult. This adds
-to the challenge of adaptive mesh refinement. An initial attempt to create an adaptive mesh refinement process
-that refines regions of high flow gradient based around the HeldenMesh software is presented. The method is
-applied to the Integrated Adaptive Wing Technology Maturation (IAWTM) configuration. That has developed
-an aspect ratio 13.5 wing aeroelastic wind-tunnel model for testing in the Transonic Dynamics Tunnel (TDT).
-The high levels of deformation of this wing make the adaptation of meshes for the static shape difficult and has
-necessitated some creativity in how to efficiently adapt meshes. A time-domain identification of the unsteady
-system based on flexible modes using the adapted meshes is performed.
+Robus adap ive mesh refinemen for ransonic condi ions is one of he mos difficul challenges o advancing
+CFD usage for cer ifica ion by analysis. Transonic fluid-s ruc ure in erac ion cases represen an even more
+difficul challenge for adap ive mesh refinemen . Produc ion aircraf fur hermore have s ruc ural models ha 
+have gaps and discon inui ies ha make he in erdomain ransfer of loads and deflec ions difficul . This adds
+ o he challenge of adap ive mesh refinemen . An ini ial a emp o crea e an adap ive mesh refinemen process
+ ha refines regions of high flow gradien based around he HeldenMesh sof ware is presen ed. The me hod is
+applied o he In egra ed Adap ive Wing Technology Ma ura ion (IAWTM) configura ion. Tha has developed
+an aspec ra io 13.5 wing aeroelas ic wind- unnel model for es ing in he Transonic Dynamics Tunnel (TDT).
+The high levels of deforma ion of his wing make he adap a ion of meshes for he s a ic shape difficul and has
+necessi a ed some crea ivi y in how o efficien ly adap meshes. A ime-domain iden ifica ion of he uns eady
+sys em based on flexible modes using he adap ed meshes is performed.
 
 
 
-I. Introduction
-As pointed out by Ref. [1], solution convergence by global refinements on independently generated and proport-
+I. In roduc ion
+As poin ed ou by Ref. [1], solu ion convergence by global refinemen s on independen ly genera ed and propor -
 
 
 
-edly high quality grids has been difficult to achieve. For this and other reasons, the NASA CFD Vision 2030 study
-has identified automated mesh generation, adaptivity and error management as critical needs with the goals of im-
-proving solution efficiency, robustness and minimization of error [2]. Automated adaptive mesh refinement (AMR)
-that accounts for geometry and flow physics to reduce error is seen as a means to achieve solution grid independence
-in a systematic and painless way. It also has the added benefit of potentially enhancing efficiency if refinement is
-combined with coarsening of the grid. Some applications have complex multiscale fluid physics, as in vorticity shed-
-ding or shock structures in the case of transonic flows. While the advantages are clear, robust AMR for such flows is
-one of the most difficult challenges to advancing CFD usage for certification by analysis. Mesh anisotropy to align
-a mesh with flow features and error estimation are deemed essential for successful AMR. Combining AMR with an
-error metric is one of the current challenges [3]. Various error metrics coupled with mesh enhancement have been
-proposed, as in adjoint methods with a global objective, having been used for steady and unsteady flows [1, 4]. On the
-other hand, error estimates using local residuals have been used. A more heuristic means attempts to keep the product
-of the field gradient (pressure, vorticity, velocity) times the grid spacing uniform across the entire mesh [5]. Methods
-along a similar vane use the flow-field Hessian to formulate efficient anisotropic mesh spacing [6–8].
+edly high quali y grids has been difficul o achieve. For his and o her reasons, he NASA CFD Vision 2030 s udy
+has iden ified au oma ed mesh genera ion, adap ivi y and error managemen as cri ical needs wi h he goals of im-
+proving solu ion efficiency, robus ness and minimiza ion of error [2]. Au oma ed adap ive mesh refinemen (AMR)
+ ha accoun s for geome ry and flow physics o reduce error is seen as a means o achieve solu ion grid independence
+in a sys ema ic and painless way. I also has he added benefi of po en ially enhancing efficiency if refinemen is
+combined wi h coarsening of he grid. Some applica ions have complex mul iscale fluid physics, as in vor ici y shed-
+ding or shock s ruc ures in he case of ransonic flows. While he advan ages are clear, robus AMR for such flows is
+one of he mos difficul challenges o advancing CFD usage for cer ifica ion by analysis. Mesh aniso ropy o align
+a mesh wi h flow fea ures and error es ima ion are deemed essen ial for successful AMR. Combining AMR wi h an
+error me ric is one of he curren challenges [3]. Various error me rics coupled wi h mesh enhancemen have been
+proposed, as in adjoin me hods wi h a global objec ive, having been used for s eady and uns eady flows [1, 4]. On he
+o her hand, error es ima es using local residuals have been used. A more heuris ic means a emp s o keep he produc 
+of he field gradien (pressure, vor ici y, veloci y) imes he grid spacing uniform across he en ire mesh [5]. Me hods
+along a similar vane use he flow-field Hessian o formula e efficien aniso ropic mesh spacing [6–8].
 
 
 
-Adaptive mesh refinement has been applied to cases with deforming or merely moving boundaries, and in a
+Adap ive mesh refinemen has been applied o cases wi h deforming or merely moving boundaries, and in a
 
 
 
-1 Senior Aerospace Engineer, NASA Langley Research Center, MS 340, and AIAA Senior Member.
-2 Research Aerospace Engineer, NASA Langley Research Center, MS 340, and AIAA Member.
+1 Senior Aerospace Engineer, NASA Langley Research Cen er, MS 340, and AIAA Senior Member.
+2 Research Aerospace Engineer, NASA Langley Research Cen er, MS 340, and AIAA Member.
 
 
 
@@ -69,63 +69,63 @@ Adaptive mesh refinement has been applied to cases with deforming or merely movi
 
 
 
-few instances, fluid-structure interaction [4, 5, 9–15]. In the case of time-varying geometry, resolving the details of
-transient flows with boundary motion using adaptive mesh refinement during time integration can be prohibitively
-expensive. For this reason, fluid-structure interaction (FSI) or moving boundary flow adaptations have been done
-typically for simple geometries, or over relatively short time durations, or have resorted to mesh updates at sparse time
-intervals (e.g. Ref. [13]). One approach has been to use adaptive refinement on the steady state (rigid or flexed under
-loading) and then solve the transient fluid dynamics without further adaptation [5, 9]. If the flow transients are expected
-to be minimal, this renders significant advantages especially when a long simulation time record is required. One
-such simulation, considered here, is a time-domain system identification for a production aircraft involving complex
-geometry with high Reynolds number flow. This requires lengthy time histories over many cycles of motion to create
-repeatable data records in the presence of nonlinear flow-fields.
+few ins ances, fluid-s ruc ure in erac ion [4, 5, 9–15]. In he case of ime-varying geome ry, resolving he de ails of
+ ransien flows wi h boundary mo ion using adap ive mesh refinemen during ime in egra ion can be prohibi ively
+expensive. For his reason, fluid-s ruc ure in erac ion (FSI) or moving boundary flow adap a ions have been done
+ ypically for simple geome ries, or over rela ively shor ime dura ions, or have resor ed o mesh upda es a sparse ime
+in ervals (e.g. Ref. [13]). One approach has been o use adap ive refinemen on he s eady s a e (rigid or flexed under
+loading) and hen solve he ransien fluid dynamics wi hou fur her adap a ion [5, 9]. If he flow ransien s are expec ed
+ o be minimal, his renders significan advan ages especially when a long simula ion ime record is required. One
+such simula ion, considered here, is a ime-domain sys em iden ifica ion for a produc ion aircraf involving complex
+geome ry wi h high Reynolds number flow. This requires leng hy ime his ories over many cycles of mo ion o crea e
+repea able da a records in he presence of nonlinear flow-fields.
 
 
 
-Likewise, using anisotropic cells with unlimited aspect ratio to reduce the computational burden is acceptable for
-boundaries that at most move rigidly [14, 16, 17]. In the case of production aircraft, sizable amounts of bending and
-torsion limit the permissible aspect ratio of surface elements in order to maintain the integrity of the surface [14]. Fur-
-thermore, the deformed surface of a production aircraft with a detailed structural model may not always be smoothly
-varying. Surface pressure spikes and ridges such as shown in Figure 1 can result from a deflected flap hinge line and
-from the interpolation within the gap between two flaps. Shown in that figure are the hinge line of one flap and the
-interpolated region between it and another. The hinge lines and flap edges have already been pre-refined. Features
-such as these should not be further refined by the adaptation software. For these reasons, constraints need to be placed
-on the allowable anisotropy, and on where and on what surface adaptation takes place. Robustness of the resulting
-mesh is also critical. It certainly should be possible to put some limited constraints into existing automated AMR
-software. That capability is already available in a limited sense for the AMR software refine used with a wall-modeled
-LES (WMLES) simulation [18]. Recent computations combining refine [23] with the NASA FUN3D solver and its
-mesh deformation show it is not fully robust for production aircraft deforming surfaces [14]. Furthermore, the NASA
-Langley FUN3D CFD software, used here, requires a fixed-mesh topology and currently does not allow for adapting
+Likewise, using aniso ropic cells wi h unlimi ed aspec ra io o reduce he compu a ional burden is accep able for
+boundaries ha a mos move rigidly [14, 16, 17]. In he case of produc ion aircraf , sizable amoun s of bending and
+ orsion limi he permissible aspec ra io of surface elemen s in order o main ain he in egri y of he surface [14]. Fur-
+ hermore, he deformed surface of a produc ion aircraf wi h a de ailed s ruc ural model may no always be smoo hly
+varying. Surface pressure spikes and ridges such as shown in Figure 1 can resul from a deflec ed flap hinge line and
+from he in erpola ion wi hin he gap be ween wo flaps. Shown in ha figure are he hinge line of one flap and he
+in erpola ed region be ween i and ano her. The hinge lines and flap edges have already been pre-refined. Fea ures
+such as hese should no be fur her refined by he adap a ion sof ware. For hese reasons, cons rain s need o be placed
+on he allowable aniso ropy, and on where and on wha surface adap a ion akes place. Robus ness of he resul ing
+mesh is also cri ical. I cer ainly should be possible o pu some limi ed cons rain s in o exis ing au oma ed AMR
+sof ware. Tha capabili y is already available in a limi ed sense for he AMR sof ware refine used wi h a wall-modeled
+LES (WMLES) simula ion [18]. Recen compu a ions combining refine [23] wi h he NASA FUN3D solver and i s
+mesh deforma ion show i is no fully robus for produc ion aircraf deforming surfaces [14]. Fur hermore, he NASA
+Langley FUN3D CFD sof ware, used here, requires a fixed-mesh opology and curren ly does no allow for adap ing
 a deforming volume and surface mesh.
 
 
 
-For these reasons the present study will leverage the already advanced spacing control available in the commercial
-software HeldenMesh [19]. A certain amount of user intervention is necessary at this time to preclude the afore
-mentioned issues. It is possible to call the HeldenMesh tool within the CFD solver, and the ultimate goal is of course
-full automation. The HeldenMesh suite of tools generally produces exceptional quality meshes and seems to be rapid
-and robust. The case geometry and structure modeled here results in very high deflections. While HeldenMesh can
-parameterize a surface and deform it before remeshing, a highly deformed wing with separately deforming flaps may
-be difficult to parameterize and regrid. For this reason, the regridding will be done around the original shape. The CAD
-model of the original configuration is embedded in the HeldenMesh restart file so that all mesh changes will follow
-the CAD surface. Finally the deformed mesh solution can be interpolated to the new mesh, and static computations be
+For hese reasons he presen s udy will leverage he already advanced spacing con rol available in he commercial
+sof ware HeldenMesh [19]. A cer ain amoun of user in erven ion is necessary a his ime o preclude he afore
+men ioned issues. I is possible o call he HeldenMesh ool wi hin he CFD solver, and he ul ima e goal is of course
+full au oma ion. The HeldenMesh sui e of ools generally produces excep ional quali y meshes and seems o be rapid
+and robus . The case geome ry and s ruc ure modeled here resul s in very high deflec ions. While HeldenMesh can
+parame erize a surface and deform i before remeshing, a highly deformed wing wi h separa ely deforming flaps may
+be difficul o parame erize and regrid. For his reason, he regridding will be done around he original shape. The CAD
+model of he original configura ion is embedded in he HeldenMesh res ar file so ha all mesh changes will follow
+ he CAD surface. Finally he deformed mesh solu ion can be in erpola ed o he new mesh, and s a ic compu a ions be
 resumed.
 
 
 
-It is assumed that the geometry features such as leading edges, corners, geometric discontinuities or attached
-boundary layer flows have already been sufficiently resolved by the various automated feature resolving capability in
-HeldenMesh. Flap hinge lines and edges have also to be prerefined. The remaining flow features to be resolved are
-shock surfaces, separated boundary layers, wake or shed vorticity. At this time, there is no error criteria enforced and
-the refinement requires modest user input. It must be understood that this work is somewhat preliminary. This paper
-will discuss the process used to adapt the mesh, relative robustness compared to other mesh adaptation processes, and
-present results.
+I is assumed ha he geome ry fea ures such as leading edges, corners, geome ric discon inui ies or a ached
+boundary layer flows have already been sufficien ly resolved by he various au oma ed fea ure resolving capabili y in
+HeldenMesh. Flap hinge lines and edges have also o be prerefined. The remaining flow fea ures o be resolved are
+shock surfaces, separa ed boundary layers, wake or shed vor ici y. A his ime, here is no error cri eria enforced and
+ he refinemen requires modes user inpu . I mus be unders ood ha his work is somewha preliminary. This paper
+will discuss he process used o adap he mesh, rela ive robus ness compared o o her mesh adap a ion processes, and
+presen resul s.
 
 
 
-Results will be obtained for the Integrated Adaptive Wing Technology Maturation (IAWTM) wind-tunnel model,
-currently in preparation for testing in the NASA Langley Transonic Dynamics Tunnel (TDT). The NASA Advanced
-Air Transport Technology (AATT) program, under which this is funded, has the goal of reducing fuel burn, emissions
+Resul s will be ob ained for he In egra ed Adap ive Wing Technology Ma ura ion (IAWTM) wind- unnel model,
+curren ly in prepara ion for es ing in he NASA Langley Transonic Dynamics Tunnel (TDT). The NASA Advanced
+Air Transpor Technology (AATT) program, under which his is funded, has he goal of reducing fuel burn, emissions
 
 
 
@@ -141,47 +141,47 @@ Air Transport Technology (AATT) program, under which this is funded, has the goa
 
 
 
-Fig. 1 . Surface pressure spikes and ridges in the highly deformed static shape due to surface interpolation and hinge line.
-The hinge line of one flap can be seen and the region between it and another, which has been interpolated.
+Fig. 1 . Surface pressure spikes and ridges in he highly deformed s a ic shape due o surface in erpola ion and hinge line.
+The hinge line of one flap can be seen and he region be ween i and ano her, which has been in erpola ed.
 
 
 
-and noise for transport aircraft. This goal leads to the NASA N+3 High Aspect Ratio Wing (HARW) subproject [20].
-The HARW subproject is developing an advanced concept commercial subsonic transport aircraft that features a high
-aspect ratio wing, e.g., the transonic truss-braced wing. Such a vehicle is slated for entry into service in the 2030-35
-time frame. This aircraft requires safe lightweight structures and active flight control surfaces to achieve these metrics.
+and noise for ranspor aircraf . This goal leads o he NASA N+3 High Aspec Ra io Wing (HARW) subprojec [20].
+The HARW subprojec is developing an advanced concep commercial subsonic ranspor aircraf ha fea ures a high
+aspec ra io wing, e.g., he ransonic russ-braced wing. Such a vehicle is sla ed for en ry in o service in he 2030-35
+ ime frame. This aircraf requires safe ligh weigh s ruc ures and ac ive fligh con rol surfaces o achieve hese me rics.
 
 
 
-The joint NASA/Boeing IAWTM design effort is based on the AR 9 common research model (CRM) with an
-increased wing span to AR 13.5. The design is intended for a Mach 0.85 cruise [21]. The IAWTM project requires
-identifying, developing, and demonstrating key technologies and integrated multidisciplinary solutions to enable a
-safe, high performance aircraft. Among other objectives, this test will assess the effectiveness of trailing edge control
-surfaces for maneuver load alleviation (MLA). MLA will require maneuvering to angles of attack that may result in
-high loading and large wing deflections. To get a sense of the scale of this wing, the NASA-Boeing IAWTM project
-semispan wind-tunnel test article is shown in Figure 2. It is an aeroelastically-scaled model that includes an engine
-nacelle, half-fuselage and stand-off (or peniche) to account for the wind-tunnel boundary layer. Figure 3 illustrates the
-amount of deflection this wing can experience. What are called shim-off and shim-on structural configurations are be-
-ing utilized that either use (shim-off) or exclude (shim-on) a five-component strain gauge balance at the wing/fuselage
-wall mount. Having a shim-on protects the load balance hardware from high loads associated with model aeroelastic
-dynamic motion. The shim-off configuration will be used for maneuver load alleviation (MLA), and gust load allevia-
-tion (GLA) conditions. See Table I, which summarizes the structural dynamic properties of the shim-off configuration
-for the first eleven modes.
+The join NASA/Boeing IAWTM design effor is based on he AR 9 common research model (CRM) wi h an
+increased wing span o AR 13.5. The design is in ended for a Mach 0.85 cruise [21]. The IAWTM projec requires
+iden ifying, developing, and demons ra ing key echnologies and in egra ed mul idisciplinary solu ions o enable a
+safe, high performance aircraf . Among o her objec ives, his es will assess he effec iveness of railing edge con rol
+surfaces for maneuver load allevia ion (MLA). MLA will require maneuvering o angles of a ack ha may resul in
+high loading and large wing deflec ions. To ge a sense of he scale of his wing, he NASA-Boeing IAWTM projec 
+semispan wind- unnel es ar icle is shown in Figure 2. I is an aeroelas ically-scaled model ha includes an engine
+nacelle, half-fuselage and s and-off (or peniche) o accoun for he wind- unnel boundary layer. Figure 3 illus ra es he
+amoun of deflec ion his wing can experience. Wha are called shim-off and shim-on s ruc ural configura ions are be-
+ing u ilized ha ei her use (shim-off) or exclude (shim-on) a five-componen s rain gauge balance a he wing/fuselage
+wall moun . Having a shim-on pro ec s he load balance hardware from high loads associa ed wi h model aeroelas ic
+dynamic mo ion. The shim-off configura ion will be used for maneuver load allevia ion (MLA), and gus load allevia-
+ ion (GLA) condi ions. See Table I, which summarizes he s ruc ural dynamic proper ies of he shim-off configura ion
+for he firs eleven modes.
 
 
 
-II. Adaptation Process
-A variety of sources are available in HeldenMesh to cluster meshing. Source shapes available are hexahedral
+II. Adap a ion Process
+A varie y of sources are available in HeldenMesh o clus er meshing. Source shapes available are hexahedral
 
 
 
-blocks, cylinders, annular regions, tetrahedra, prisms, spheres and ellipses. Ellipses are appealing because of their
-directional control on spacing and source shape. The source used here will be the hexahedral block because it allows
-definition of three-direction spacing and aspect ratio at each of eight block corners. That allows tight control over
-spacing. No direct creation of HeldenMesh source input is necessary, since the user introduced and controlled adapta-
-tion is automated, but still requires some user input. The approach taken here will be to adapt the mesh at the statically
-deflected solution and vehicle shape before commensing the time-accurate simulation. The a priori mesh generation
-will necessarily need to take into account the expected motion of features such as the shock during the time-accurate
+blocks, cylinders, annular regions, e rahedra, prisms, spheres and ellipses. Ellipses are appealing because of heir
+direc ional con rol on spacing and source shape. The source used here will be he hexahedral block because i allows
+defini ion of hree-direc ion spacing and aspec ra io a each of eigh block corners. Tha allows igh con rol over
+spacing. No direc crea ion of HeldenMesh source inpu is necessary, since he user in roduced and con rolled adap a-
+ ion is au oma ed, bu s ill requires some user inpu . The approach aken here will be o adap he mesh a he s a ically
+deflec ed solu ion and vehicle shape before commensing he ime-accura e simula ion. The a priori mesh genera ion
+will necessarily need o ake in o accoun he expec ed mo ion of fea ures such as he shock during he ime-accura e
 
 
 
@@ -197,31 +197,31 @@ will necessarily need to take into account the expected motion of features such 
 
 
 
-Fig. 2 . Aeroelastic wind-tunnel model (figure courtesy of Boeing Research and Technology).
+Fig. 2 . Aeroelas ic wind- unnel model (figure cour esy of Boeing Research and Technology).
 
 
 
-Fig. 3 . CFD model of IAWTM, rigid and deflected at 2.5g.
+Fig. 3 . CFD model of IAWTM, rigid and deflec ed a 2.5g.
 
 
 
-Table 1 . Frequencies and descriptions of leading structural modes, shim off.
-mode frequency description
+Table 1 . Frequencies and descrip ions of leading s ruc ural modes, shim off.
+mode frequency descrip ion
 
 
 
 number (Hz)
-1 3.57 wing 1st vert. bend.
-2 7.31 fus. pitch, wing 1st vert. bend.
-3 7.73 wing/balance 1st fore/aft bend.
-4 10.91 wing 2nd vert. bend.
-5 11.40 fus. yaw, wing 1st fore/aft bend.
-6 14.88 wing 2nd vert. bend., fus. pitch
-7 16.23 wing 1st fore/aft bend., nacelle pitch
-8 17.10 1st nac. pitch, I.B. wing 1st tors.
-9 22.53 nac. lat.
-10 25.55 wing 3rd vert. bend.
-11 28.62 nac. lat., balance axial
+1 3.57 wing 1s ver . bend.
+2 7.31 fus. pi ch, wing 1s ver . bend.
+3 7.73 wing/balance 1s fore/af bend.
+4 10.91 wing 2nd ver . bend.
+5 11.40 fus. yaw, wing 1s fore/af bend.
+6 14.88 wing 2nd ver . bend., fus. pi ch
+7 16.23 wing 1s fore/af bend., nacelle pi ch
+8 17.10 1s nac. pi ch, I.B. wing 1s ors.
+9 22.53 nac. la .
+10 25.55 wing 3rd ver . bend.
+11 28.62 nac. la ., balance axial
 
 
 
@@ -237,36 +237,36 @@ number (Hz)
 
 
 
-Fig. 4 . Diagram of mesh adaptation process.
+Fig. 4 . Diagram of mesh adap a ion process.
 
 
 
-simulation. Tight control over surface anisotropy will also be maintained. Furthermore, since the unsteady response of
-the flow-field to surface motion may occur away from steady flow features, mesh quality away from adapted features
-is also considered important. This is addressed by extending multiple blocks ahead of and downstream of flow features
-being resolved. Currently there is no automated process to quantify flow-field gradients, assess error and modify the
-mesh. Rather, the refinement is based on surface pressure gradients, shock extent into the flow-field and velocity field
+simula ion. Tigh con rol over surface aniso ropy will also be main ained. Fur hermore, since he uns eady response of
+ he flow-field o surface mo ion may occur away from s eady flow fea ures, mesh quali y away from adap ed fea ures
+is also considered impor an . This is addressed by ex ending mul iple blocks ahead of and downs ream of flow fea ures
+being resolved. Curren ly here is no au oma ed process o quan ify flow-field gradien s, assess error and modify he
+mesh. Ra her, he refinemen is based on surface pressure gradien s, shock ex en in o he flow-field and veloci y field
 in general.
 
 
 
-The FUN3D v14 is used in this study. Reference [22] indicates the use of the Spalart-Allmaras (SA) model without
-corrections because the consistency of implementation is easier to establish than with its corrections. Current work has
-also found that the uncorrected SA model is a little more robust for unsteady problems with moving boundaries. For
-these reasons, the uncorrected SA model is used. The Roe flux-difference scheme is used with the Venkatakrishnan
-limiter with a coefficient of 0.01. Figure 4 shows the overall process. The first step, on the lower left of that figure, is to
-generate a statically deflected solution on a relatively coarse mesh. From that solution, features that require refinement
-can be identified. Surface pressures and velocities from flow cross section planes indicate where the mesh needs to
-be refined. The second step is to extract locations of surface points that frame those features. An automated process
-transfers those points back to the original shape and automatically creates assemblies of blocks, and the HeldenMesh
-source ASCII input. Once HeldenMesh has created the new mesh, the refine interpolate functionality in the refine
-software interpolates the static aeroelastic solution from the original mesh to the new mesh. The static aeroelastic
-solution can be restarted from that point.
+The FUN3D v14 is used in his s udy. Reference [22] indica es he use of he Spalar -Allmaras (SA) model wi hou 
+correc ions because he consis ency of implemen a ion is easier o es ablish han wi h i s correc ions. Curren work has
+also found ha he uncorrec ed SA model is a li le more robus for uns eady problems wi h moving boundaries. For
+ hese reasons, he uncorrec ed SA model is used. The Roe flux-difference scheme is used wi h he Venka akrishnan
+limi er wi h a coefficien of 0.01. Figure 4 shows he overall process. The firs s ep, on he lower lef of ha figure, is o
+genera e a s a ically deflec ed solu ion on a rela ively coarse mesh. From ha solu ion, fea ures ha require refinemen 
+can be iden ified. Surface pressures and veloci ies from flow cross sec ion planes indica e where he mesh needs o
+be refined. The second s ep is o ex rac loca ions of surface poin s ha frame hose fea ures. An au oma ed process
+ ransfers hose poin s back o he original shape and au oma ically crea es assemblies of blocks, and he HeldenMesh
+source ASCII inpu . Once HeldenMesh has crea ed he new mesh, he refine in erpola e func ionali y in he refine
+sof ware in erpola es he s a ic aeroelas ic solu ion from he original mesh o he new mesh. The s a ic aeroelas ic
+solu ion can be res ar ed from ha poin .
 
 
 
-Figure 5 focuses on the second step in the process, shown at the top left of Figure 4. The surface pressure and
-skin friction distributions are the starting place to identify where high gradients exist. Because of the large deflection
+Figure 5 focuses on he second s ep in he process, shown a he op lef of Figure 4. The surface pressure and
+skin fric ion dis ribu ions are he s ar ing place o iden ify where high gradien s exis . Because of he large deflec ion
 
 
 
@@ -282,49 +282,49 @@ skin friction distributions are the starting place to identify where high gradie
 
 
 
-Fig. 5 . Source block assembly surface point definition.
+Fig. 5 . Source block assembly surface poin defini ion.
 
 
 
-that involves both wing bending and twist, the shock moves quite dramatically from the rigid solution to the static
-deflected solution. This makes clear the need to define regions on the deflected wing. Picking four corner points of
-a region of interest (deflected surface points Pt1,Pt2,Pt3,Pt4 in the figure), they can be automatically transfered to the
-undeflected surface. Given a few parameters that define the way the mesh is clustered, block assemblies are created
-from the regions defined. Examples of these are shown in Figure 6, where block assemblies are automatically wrapped
-around the fuselage and nacelle. The isosurfaces of streamwise mesh spacing in Figure 7 are for 0.004 percent of the
-mean aerodynamic chord (MAC). The regularity of the refinement region is ensured by this process. Figure 8 shows
-an x-z cross-section of the flow-field over the front of the fuselage. The grid shown is the result of one of the block
-assemblies shown in Figure 6. In front of and behind the refined region, there is a smooth transition between coarse
-and fine streamwise spacing. The finest streamwise spacing results in a very sharp shock. Vertical and lateral mesh
-spacing transitions from relatively fine at the wall to much coarser at the top of the source block assembly.
+ ha involves bo h wing bending and wis , he shock moves qui e drama ically from he rigid solu ion o he s a ic
+deflec ed solu ion. This makes clear he need o define regions on he deflec ed wing. Picking four corner poin s of
+a region of in eres (deflec ed surface poin s P 1,P 2,P 3,P 4 in he figure), hey can be au oma ically ransfered o he
+undeflec ed surface. Given a few parame ers ha define he way he mesh is clus ered, block assemblies are crea ed
+from he regions defined. Examples of hese are shown in Figure 6, where block assemblies are au oma ically wrapped
+around he fuselage and nacelle. The isosurfaces of s reamwise mesh spacing in Figure 7 are for 0.004 percen of he
+mean aerodynamic chord (MAC). The regulari y of he refinemen region is ensured by his process. Figure 8 shows
+an x-z cross-sec ion of he flow-field over he fron of he fuselage. The grid shown is he resul of one of he block
+assemblies shown in Figure 6. In fron of and behind he refined region, here is a smoo h ransi ion be ween coarse
+and fine s reamwise spacing. The fines s reamwise spacing resul s in a very sharp shock. Ver ical and la eral mesh
+spacing ransi ions from rela ively fine a he wall o much coarser a he op of he source block assembly.
 
 
 
-Figure 9 shows a y-z cross section at the shock location for several lateral spacing constraints. Figure 9a shows
-a quite fine near-surface mesh spacing to coarser lateral mesh spacing farther away. Because the blocks follow the
-contour of the fuselage, the grid lines and fine spacing decay align with the curved surface shape. Figure 9b shows
-the same cross section but with higher lateral aspect ratios. The streamwise spacing for the mesh in Figure 9b has not
-changed from that in Figure 8. Note again that the grid lines around the fuselage follow the curvature, even at quite a
-distance from the surface.
+Figure 9 shows a y-z cross sec ion a he shock loca ion for several la eral spacing cons rain s. Figure 9a shows
+a qui e fine near-surface mesh spacing o coarser la eral mesh spacing far her away. Because he blocks follow he
+con our of he fuselage, he grid lines and fine spacing decay align wi h he curved surface shape. Figure 9b shows
+ he same cross sec ion bu wi h higher la eral aspec ra ios. The s reamwise spacing for he mesh in Figure 9b has no 
+changed from ha in Figure 8. No e again ha he grid lines around he fuselage follow he curva ure, even a qui e a
+dis ance from he surface.
 
 
 
-Reference [22] indicates that some solutions in the drag prediction workshop DPW-4 exhibited a large side of body
-separation bubble that was not observed in the wind-tunnel results. While there is some uncertainty whether such a
-separation bubble should be present, the present capability can handle well the clustering that would be required.
-Figure 10 illustrates the ability to create a mesh clustering in a wedge shaped region at the wing/fuselage junction.
-This is useful in refining a separation region that might occur in that area at high angle of attack. Figure 10a shows the
-isosurface of 0.01 streamwise spacing. The spacing refinement curves around the junction. As seen in Figure 10b, the
-clustering decays smoothly away from the junction.
+Reference [22] indica es ha some solu ions in he drag predic ion workshop DPW-4 exhibi ed a large side of body
+separa ion bubble ha was no observed in he wind- unnel resul s. While here is some uncer ain y whe her such a
+separa ion bubble should be presen , he presen capabili y can handle well he clus ering ha would be required.
+Figure 10 illus ra es he abili y o crea e a mesh clus ering in a wedge shaped region a he wing/fuselage junc ion.
+This is useful in refining a separa ion region ha migh occur in ha area a high angle of a ack. Figure 10a shows he
+isosurface of 0.01 s reamwise spacing. The spacing refinemen curves around he junc ion. As seen in Figure 10b, he
+clus ering decays smoo hly away from he junc ion.
 
 
 
-III. Mesh Study and System Identification
-The static aeroelastic and system identification solutions are generated for two cases. The condition is free-air
+III. Mesh S udy and Sys em Iden ifica ion
+The s a ic aeroelas ic and sys em iden ifica ion solu ions are genera ed for wo cases. The condi ion is free-air
 
 
 
-Mach 0.85 at a dynamic pressure of 230 psf for heavy gas, a condition to be tested in the Transonic Dynamics Tunnel.
+Mach 0.85 a a dynamic pressure of 230 psf for heavy gas, a condi ion o be es ed in he Transonic Dynamics Tunnel.
 
 
 
@@ -340,15 +340,15 @@ Mach 0.85 at a dynamic pressure of 230 psf for heavy gas, a condition to be test
 
 
 
-Fig. 6 . Source block assemblies auto-generated.
+Fig. 6 . Source block assemblies au o-genera ed.
 
 
 
-Fig. 7 . Assemblies of source blocks and isosurface of streamwise spacing.
+Fig. 7 . Assemblies of source blocks and isosurface of s reamwise spacing.
 
 
 
-Fig. 8 . Fuselage shock, spacing in xz-plane. Streamwise spacing is 0.004 percent MAC
+Fig. 8 . Fuselage shock, spacing in xz-plane. S reamwise spacing is 0.004 percen MAC
 
 
 
@@ -364,49 +364,49 @@ Fig. 8 . Fuselage shock, spacing in xz-plane. Streamwise spacing is 0.004 percen
 
 
 
-(a) Surface aspect ratio of 2 (b) Surface aspect ratio of 12
+(a) Surface aspec ra io of 2 (b) Surface aspec ra io of 12
 
 
 
-Fig. 9 . Fuselage shock, spacing in yz-plane. Shock front seen in red. Streamwise spacing same as in Figure 8.
+Fig. 9 . Fuselage shock, spacing in yz-plane. Shock fron seen in red. S reamwise spacing same as in Figure 8.
 
 
 
-(a) Isosurface of streamwise spacing (b) Resulting surface mesh
+(a) Isosurface of s reamwise spacing (b) Resul ing surface mesh
 
 
 
-Fig. 10 . Mesh refinement for wing/fuselage junction separation.
+Fig. 10 . Mesh refinemen for wing/fuselage junc ion separa ion.
 
 
 
-This is a condition at which MLA will be performed. The two cases, C1 and C2, are at 0 degrees and 2 degrees angle
-of attack. Two degrees represents the highest angle of attack likely to be reached during the MLA testing.
+This is a condi ion a which MLA will be performed. The wo cases, C1 and C2, are a 0 degrees and 2 degrees angle
+of a ack. Two degrees represen s he highes angle of a ack likely o be reached during he MLA es ing.
 
 
 
-As part of an assessment of the accuracy of these solutions, a mesh refinement study of the static aeroelastic
-solutions was performed. Meshes are designated by L1, L2, L3 - fine to coarse. The grids are summarized in Table III.
-The successive levels were created by reducing the surface edge spacing by
+As par of an assessmen of he accuracy of hese solu ions, a mesh refinemen s udy of he s a ic aeroelas ic
+solu ions was performed. Meshes are designa ed by L1, L2, L3 - fine o coarse. The grids are summarized in Table III.
+The successive levels were crea ed by reducing he surface edge spacing by
 
 
 
 √
-2 from one level to the next. Note
+2 from one level o he nex . No e
 
 
 
-that in this refinement study wall spacing was kept the same, averaging roughly y+ = 0.6. Each mesh pre-refines
-control hinge lines, leading and trailing edges and wakes. Refinement of additional flow features was created with
-60,000− 93,000 blocks generated automatically. In all these blocks, aspect ratio at the body surface was kept to 2
-in order to enable robust deformation of the surface. As the global spacing factor is changed, spacing in these source
-blocks is automatically refined/de-refined with the rest of the grid by HeldenMesh while keeping aspect ratios the
+ ha in his refinemen s udy wall spacing was kep he same, averaging roughly y+ = 0.6. Each mesh pre-refines
+con rol hinge lines, leading and railing edges and wakes. Refinemen of addi ional flow fea ures was crea ed wi h
+60,000− 93,000 blocks genera ed au oma ically. In all hese blocks, aspec ra io a he body surface was kep o 2
+in order o enable robus deforma ion of he surface. As he global spacing fac or is changed, spacing in hese source
+blocks is au oma ically refined/de-refined wi h he res of he grid by HeldenMesh while keeping aspec ra ios he
 same.
 
 
 
-Figure 11 for C1L3 at AoA of 0 degrees and Figure 13 for C2L3 at AoA of 2 degrees show the mesh refinement
-at the surface as well as pressure contours for each of those cases. Each of those are the coarse meshes with 13− 14
+Figure 11 for C1L3 a AoA of 0 degrees and Figure 13 for C2L3 a AoA of 2 degrees show he mesh refinemen 
+a he surface as well as pressure con ours for each of hose cases. Each of hose are he coarse meshes wi h 13− 14
 
 
 
@@ -422,12 +422,12 @@ at the surface as well as pressure contours for each of those cases. Each of tho
 
 
 
-Table 2 . Grid details.
-designation angle of number of
+Table 2 . Grid de ails.
+designa ion angle of number of
 
 
 
-attack grid points
+a ack grid poin s
 (Deg) (millions)
 
 
@@ -441,29 +441,29 @@ C2L3 2 14
 
 
 
-Fig. 11 . Detail of surface mesh refinement and pressure coefficient, based on earlier version of process. Fine streamwise
-spacing in shock regions is 0.108 percent MAC. AoA 0 deg. (Grid C1L3)
+Fig. 11 . De ail of surface mesh refinemen and pressure coefficien , based on earlier version of process. Fine s reamwise
+spacing in shock regions is 0.108 percen MAC. AoA 0 deg. (Grid C1L3)
 
 
 
-million nodes. Figures 12 and 14 show the off-body mesh and velocity contours at several locations. The mesh used
-in Figures 11 and 13 was developed with an earlier version of the process and indicates a somewhat less effective
-distribution of grid points than in Figure 14. Streamwise mesh spacing in the shock region for C1L3 is 0.108 percent
-while for C2L3 is 0.008 percent of the MAC. Larger spacing spanwise and vertically away from the surface in the
-second case allows much better streamwise refinement across the shock for roughly the same total number of nodes.
-Both of these meshes are very robust both in volume integrity and solution stability and convergence to quite large
-mesh deformation.
+million nodes. Figures 12 and 14 show he off-body mesh and veloci y con ours a several loca ions. The mesh used
+in Figures 11 and 13 was developed wi h an earlier version of he process and indica es a somewha less effec ive
+dis ribu ion of grid poin s han in Figure 14. S reamwise mesh spacing in he shock region for C1L3 is 0.108 percen 
+while for C2L3 is 0.008 percen of he MAC. Larger spacing spanwise and ver ically away from he surface in he
+second case allows much be er s reamwise refinemen across he shock for roughly he same o al number of nodes.
+Bo h of hese meshes are very robus bo h in volume in egri y and solu ion s abili y and convergence o qui e large
+mesh deforma ion.
 
 
 
-The surface pressure coefficient distributions at wing section slices are shown in Figure 15 for the three different
-mesh resolutions. Surface pressures are nearly identical at each station, except minor differences at η = 0.65 and
-η = 0.974. Since the system identification solutions are computationally intensive, only the coarse mesh is used for
-that step.
+The surface pressure coefficien dis ribu ions a wing sec ion slices are shown in Figure 15 for he hree differen 
+mesh resolu ions. Surface pressures are nearly iden ical a each s a ion, excep minor differences a η = 0.65 and
+η = 0.974. Since he sys em iden ifica ion solu ions are compu a ionally in ensive, only he coarse mesh is used for
+ ha s ep.
 
 
 
-A system identification of the aerodynamics is developed using both a multimode-multisine time-marching and a
+A sys em iden ifica ion of he aerodynamics is developed using bo h a mul imode-mul isine ime-marching and a
 
 
 
@@ -483,12 +483,12 @@ A system identification of the aerodynamics is developed using both a multimode-
 
 
 
-Fig. 12 . Cross-plane cuts and velocity contours, based on earlier version of process. AoA 0 deg. (Grid C1L3)
+Fig. 12 . Cross-plane cu s and veloci y con ours, based on earlier version of process. AoA 0 deg. (Grid C1L3)
 
 
 
-Fig. 13 . Detail of surface mesh refinement and pressure coefficient, based on latest version of process. Fine streamwise
-spacing in shock regions is 0.006 percent MAC. AoA 2 deg. (Grid C2L3)
+Fig. 13 . De ail of surface mesh refinemen and pressure coefficien , based on la es version of process. Fine s reamwise
+spacing in shock regions is 0.006 percen MAC. AoA 2 deg. (Grid C2L3)
 
 
 
@@ -512,42 +512,42 @@ spacing in shock regions is 0.006 percent MAC. AoA 2 deg. (Grid C2L3)
 
 
 
-Fig. 14 . Cross-plane cuts and velocity contours, based on latest version of process. AoA 2 deg. (Grid C2L3)
+Fig. 14 . Cross-plane cu s and veloci y con ours, based on la es version of process. AoA 2 deg. (Grid C2L3)
 
 
 
-multi-mode linearized frequency domain (LFD) method. There are 24 flexible (modes 1−24), 10 trailing edge control
-modes (modes 25−34) and pitch, plunge and fore-aft (modes 35−37) used. The use of these modes should allow the
-simulation of pitch-up, and control actuation for GLA and flutter suppression.
+mul i-mode linearized frequency domain (LFD) me hod. There are 24 flexible (modes 1−24), 10 railing edge con rol
+modes (modes 25−34) and pi ch, plunge and fore-af (modes 35−37) used. The use of hese modes should allow he
+simula ion of pi ch-up, and con rol ac ua ion for GLA and flu er suppression.
 
 
 
-Second-order time-accurate solutions are obtained with a time step size of 1.78× 10−4 second. For a structural
-mode at 90 Hz, this gives roughly 60 time steps per cycle. The mode numbers and excitation frequencies are inter-
-leaved, with solutions obtained using modes 1, 4, 7, 10, 13, 16, 19, 22 for one, modes 2, 5, 8, 11, 14, 17, 20, 23 for the
-second, modes 3, 6, 9, 12, 15, 18, 21, 24 for the third, modes 25, 27, 29, 31, 33 and modes 26, 28, 30, 32, 34 for the
-last two solutions. An example of the multisine data sequence is shown in Figure 16a. The frequency responses from
-the multimode-multisine time histories is extracted using a fast Fourier transform. For the LFD solutions, all modes
-are excited in separate solutions for each of 15 frequencies. Output of the LFD code can be compared directly to the
-multimode-multisine frequency responses.
+Second-order ime-accura e solu ions are ob ained wi h a ime s ep size of 1.78× 10−4 second. For a s ruc ural
+mode a 90 Hz, his gives roughly 60 ime s eps per cycle. The mode numbers and exci a ion frequencies are in er-
+leaved, wi h solu ions ob ained using modes 1, 4, 7, 10, 13, 16, 19, 22 for one, modes 2, 5, 8, 11, 14, 17, 20, 23 for he
+second, modes 3, 6, 9, 12, 15, 18, 21, 24 for he hird, modes 25, 27, 29, 31, 33 and modes 26, 28, 30, 32, 34 for he
+las wo solu ions. An example of he mul isine da a sequence is shown in Figure 16a. The frequency responses from
+ he mul imode-mul isine ime his ories is ex rac ed using a fas Fourier ransform. For he LFD solu ions, all modes
+are exci ed in separa e solu ions for each of 15 frequencies. Ou pu of he LFD code can be compared direc ly o he
+mul imode-mul isine frequency responses.
 
 
 
-Multiple multisine time-accurate solutions were sequentially computed until converged responses to the sinusoids
-was achieved. The modal responses were well converged for case C1 after two sequential data records were computed.
-Convergence of the response was more difficult to achieve for case C2 at AoA = 2 degrees. Figure 16b shows the
-generalized aerodynamic force of mode 1 on mode 1 for the 2nd , 3rd and 4th data sequences. The first data sequence
-is widely different than the last two. Sequences 3 and 4 are nearly identical in both the real and imaginary parts of the
-response, however, the final 4th sequence shows much better behavior near a frequency of zero. The 4th data record
-was used for data analysis.
+Mul iple mul isine ime-accura e solu ions were sequen ially compu ed un il converged responses o he sinusoids
+was achieved. The modal responses were well converged for case C1 af er wo sequen ial da a records were compu ed.
+Convergence of he response was more difficul o achieve for case C2 a AoA = 2 degrees. Figure 16b shows he
+generalized aerodynamic force of mode 1 on mode 1 for he 2nd , 3rd and 4 h da a sequences. The firs da a sequence
+is widely differen han he las wo. Sequences 3 and 4 are nearly iden ical in bo h he real and imaginary par s of he
+response, however, he final 4 h sequence shows much be er behavior near a frequency of zero. The 4 h da a record
+was used for da a analysis.
 
 
 
-Convergence of the dynamic system identification solutions has been assessed with mesh refinement. The second
-case C2 with the meshes L2 and L3 are used. Solutions use the time-accurate multimodal-multisine approach. Figure 17
-provides the results of this study. With the exception of some disagreement in the real part near-zero frequency the
-two sets of solutions agree very well. As is seen here, it is well known that low frequency behavior can be very slow
-to converge. It can be considered sufficiently converged for the present purposes. Figure 18 compares the multimodal-
+Convergence of he dynamic sys em iden ifica ion solu ions has been assessed wi h mesh refinemen . The second
+case C2 wi h he meshes L2 and L3 are used. Solu ions use he ime-accura e mul imodal-mul isine approach. Figure 17
+provides he resul s of his s udy. Wi h he excep ion of some disagreemen in he real par near-zero frequency he
+ wo se s of solu ions agree very well. As is seen here, i is well known ha low frequency behavior can be very slow
+ o converge. I can be considered sufficien ly converged for he presen purposes. Figure 18 compares he mul imodal-
 
 
 
@@ -603,7 +603,7 @@ in
 
 
 
-Fig. 15 . Section pressures for C1L1, C1L2, C1L3 meshes. AoA 0 deg.
+Fig. 15 . Sec ion pressures for C1L1, C1L2, C1L3 meshes. AoA 0 deg.
 
 
 
@@ -619,39 +619,39 @@ Fig. 15 . Section pressures for C1L1, C1L2, C1L3 meshes. AoA 0 deg.
 
 
 
-(a) Example of sinusoidal input sequence. (b) Convergence with number of sinusoid sequences.
+(a) Example of sinusoidal inpu sequence. (b) Convergence wi h number of sinusoid sequences.
 
 
 
-Fig. 16 . Multi-sine multi-modal system identification: AoA 2 deg. (Grid C2L3).
+Fig. 16 . Mul i-sine mul i-modal sys em iden ifica ion: AoA 2 deg. (Grid C2L3).
 
 
 
-multisine time-accurate generalized aerodynamic forces (GAFs) with the LFD generated GAFs. The GAFs for an
-excitation of mode 5 on modes 4, 5 and 6 are shown. The GAFs generated by the time-marching method can be seen
-to agree very well with those generated by the LFD code. The LFD and multimodal-multisine GAF of mode 5 on
-mode 7 are slightly different. This could be due to the fact that the time-accurate system identification solutions are
-somewhat sensitive to the magnitude of the excitation. While the steady mean flow of the LFD solution is nonlinear,
-the linearized nature is equivalent to an infinitesimally small perturbation.
+mul isine ime-accura e generalized aerodynamic forces (GAFs) wi h he LFD genera ed GAFs. The GAFs for an
+exci a ion of mode 5 on modes 4, 5 and 6 are shown. The GAFs genera ed by he ime-marching me hod can be seen
+ o agree very well wi h hose genera ed by he LFD code. The LFD and mul imodal-mul isine GAF of mode 5 on
+mode 7 are sligh ly differen . This could be due o he fac ha he ime-accura e sys em iden ifica ion solu ions are
+somewha sensi ive o he magni ude of he exci a ion. While he s eady mean flow of he LFD solu ion is nonlinear,
+ he linearized na ure is equivalen o an infini esimally small per urba ion.
 
 
 
 IV. Conclusions
-This paper has presented a method of selectively refining flow features using the HeldenMesh software and the
+This paper has presen ed a me hod of selec ively refining flow fea ures using he HeldenMesh sof ware and he
 
 
 
-CFD code FUN3D on a high aspect ratio aeroelastic wind-tunnel model. The difficult application of a production
-aircraft undergoing large deformation having anomalous surface features is considered. A reasonably painless method
-of mesh refinement of high flow gradients is presented. Examples of the quality of the meshes produced is shown and
-both spatial and time convergence is demonstrated for the present application. Finally, the system identification using
-multimodal multisine time-marching versus linearized frequency domain are compared.
+CFD code FUN3D on a high aspec ra io aeroelas ic wind- unnel model. The difficul applica ion of a produc ion
+aircraf undergoing large deforma ion having anomalous surface fea ures is considered. A reasonably painless me hod
+of mesh refinemen of high flow gradien s is presen ed. Examples of he quali y of he meshes produced is shown and
+bo h spa ial and ime convergence is demons ra ed for he presen applica ion. Finally, he sys em iden ifica ion using
+mul imodal mul isine ime-marching versus linearized frequency domain are compared.
 
 
 
-The current method requires some user intervention and it would appear there is some necessity to identify regions
-to exclude from further refinement. Future work would include making the method more automated, but still with user
-specified constraints applied to the mesh adaptation. These will be ongoing efforts.
+The curren me hod requires some user in erven ion and i would appear here is some necessi y o iden ify regions
+ o exclude from fur her refinemen . Fu ure work would include making he me hod more au oma ed, bu s ill wi h user
+specified cons rain s applied o he mesh adap a ion. These will be ongoing effor s.
 
 
 
@@ -667,11 +667,11 @@ specified constraints applied to the mesh adaptation. These will be ongoing effo
 
 
 
-(a) Mode 4 acting on mode 4 (b) Mode 7 acting on mode 7
+(a) Mode 4 ac ing on mode 4 (b) Mode 7 ac ing on mode 7
 
 
 
-Fig. 17 . Mesh sensitivity of generalized aerodynamic forces. AoA 2 deg. (Grids C2L2 and C2L3)
+Fig. 17 . Mesh sensi ivi y of generalized aerodynamic forces. AoA 2 deg. (Grids C2L2 and C2L3)
 
 
 
@@ -683,7 +683,7 @@ Fig. 17 . Mesh sensitivity of generalized aerodynamic forces. AoA 2 deg. (Grids 
 
 
 
-Fig. 18 . GAFs due to mode 5. AoA 0 deg. (Grid C1L3)
+Fig. 18 . GAFs due o mode 5. AoA 0 deg. (Grid C1L3)
 
 
 
@@ -703,111 +703,111 @@ References
 
 
 
-[1] Fidkowski, K. J. and Darmofal, D. L., “Review of Output-Based Error Estimation and Mesh Adaptation in Computational
+[1] Fidkowski, K. J. and Darmofal, D. L., “Review of Ou pu -Based Error Es ima ion and Mesh Adap a ion in Compu a ional
 Fluid Dynamics,” AIAA Journal, Vol. 49, No. 4, 2011, pp. 673–694.
 
 
 
-[2] Cary, A., Chawner, J., Duque, E., Gropp, W., Kleb, B., Kolonay, R., Nielsen, E., and Smith, B., “The CFD Vision 2030
-Roadmap: 2020 Status, Progress and Challenges,” Technical report, NASA, 2021.
+[2] Cary, A., Chawner, J., Duque, E., Gropp, W., Kleb, B., Kolonay, R., Nielsen, E., and Smi h, B., “The CFD Vision 2030
+Roadmap: 2020 S a us, Progress and Challenges,” Technical repor , NASA, 2021.
 
 
 
-[3] Loseille, A., Dervieux, A., Frey, P., and Alauzet, F., “Achievement of Global Second Order Mesh Convergence for Discon-
-tinuous Flows with Adapted Unstructured Meshes,” 18th AIAA Computational Fluid Dynamics Conference, No. 2007-4186,
+[3] Loseille, A., Dervieux, A., Frey, P., and Alauze , F., “Achievemen of Global Second Order Mesh Convergence for Discon-
+ inuous Flows wi h Adap ed Uns ruc ured Meshes,” 18 h AIAA Compu a ional Fluid Dynamics Conference, No. 2007-4186,
 2007.
 
 
 
-[4] Ojha, V., Fidkowski, K., and Cesnik, C., “Adaptive Mesh Refinement for Fluid-Structure Interaction Simulations,” AIAA
+[4] Ojha, V., Fidkowski, K., and Cesnik, C., “Adap ive Mesh Refinemen for Fluid-S ruc ure In erac ion Simula ions,” AIAA
 SciTech Forum, No. 2021-0731, January 19-21 2021.
 
 
 
-[5] Bathe, K. and Zhang, H., “A mesh adaptivity procedure for CFD and fluid-structure interactions,” Computers and Structures,
+[5] Ba he, K. and Zhang, H., “A mesh adap ivi y procedure for CFD and fluid-s ruc ure in erac ions,” Compu ers and S ruc ures,
 Vol. 87, 2009, pp. 604–617.
 
 
 
-[6] Vanharen, j., Loseille, A., Alauzet, F., and Park, M. A., “Near-Field Anisotropic Mesh Adaptation for the Third AIAA Sonic
-Boom Workshop,” Journal of Aircraft, Vol. 59, No. 3, 2022, pp. 683–696.
+[6] Vanharen, j., Loseille, A., Alauze , F., and Park, M. A., “Near-Field Aniso ropic Mesh Adap a ion for he Third AIAA Sonic
+Boom Workshop,” Journal of Aircraf , Vol. 59, No. 3, 2022, pp. 683–696.
 
 
 
-[7] Carter, M. and Park, M. A., “Shock-Plume Interaction Near-Field Summary for the Third AIAA Sonic Boom Prediction
-Workshop,” Journal of Aircraft, Vol. 59, No. 3, 2022, pp. 549–562.
+[7] Car er, M. and Park, M. A., “Shock-Plume In erac ion Near-Field Summary for he Third AIAA Sonic Boom Predic ion
+Workshop,” Journal of Aircraf , Vol. 59, No. 3, 2022, pp. 549–562.
 
 
 
-[8] Park, M. A. and Nemec, M., “Nearfield Summary and Statistical Analysis of the Second AIAA Sonic Boom Prediction
-Workshop,” Journal of Aircraft, Vol. 56, No. 3, 2018, pp. 851–875.
+[8] Park, M. A. and Nemec, M., “Nearfield Summary and S a is ical Analysis of he Second AIAA Sonic Boom Predic ion
+Workshop,” Journal of Aircraf , Vol. 56, No. 3, 2018, pp. 851–875.
 
 
 
-[9] Nemer, R. and Hachem, E., “Adaptive Immersed Mesh Method (AIMM) for Fluid–Structure Interaction,” preprint, 2022.
-[10] Wang, Z., Du, L., and Sun, X., “Adaptive mesh refinement for simulating fluid-structure interaction using a sharp interface
+[9] Nemer, R. and Hachem, E., “Adap ive Immersed Mesh Me hod (AIMM) for Fluid–S ruc ure In erac ion,” preprin , 2022.
+[10] Wang, Z., Du, L., and Sun, X., “Adap ive mesh refinemen for simula ing fluid-s ruc ure in erac ion using a sharp in erface
 
 
 
-immersed boundary method,” International Journal for Numerical Methods in Fluids, Vol. 92, 2020, pp. 1890–1913.
-[11] Shamanskiy, A. and Simeon, B., “Mesh moving techniques in fluid-structure interaction: robustness, accumulated distortion
+immersed boundary me hod,” In erna ional Journal for Numerical Me hods in Fluids, Vol. 92, 2020, pp. 1890–1913.
+[11] Shamanskiy, A. and Simeon, B., “Mesh moving echniques in fluid-s ruc ure in erac ion: robus ness, accumula ed dis or ion
 
 
 
-and computational efficiency,” Computational Mechanics, Vol. 67, 2021, pp. 583–600.
-[12] Alauzet, F. and Olivier, G., “Extension of Metric-Based Anisotropic Mesh Adaptation to Time-Dependent Problems Involving
+and compu a ional efficiency,” Compu a ional Mechanics, Vol. 67, 2021, pp. 583–600.
+[12] Alauze , F. and Olivier, G., “Ex ension of Me ric-Based Aniso ropic Mesh Adap a ion o Time-Dependen Problems Involving
 
 
 
-Moving Geometries,” AIAA Aerospace Sciences Meeting, No. 2011-896, January 4-7 2011.
-[13] Borker, R., Grimberg, S., Farhat, C., Avery, P., and Rabinovitch, J., “An Adaptive Mesh Refinement Approach for Viscous
+Moving Geome ries,” AIAA Aerospace Sciences Mee ing, No. 2011-896, January 4-7 2011.
+[13] Borker, R., Grimberg, S., Farha , C., Avery, P., and Rabinovi ch, J., “An Adap ive Mesh Refinemen Approach for Viscous
 
 
 
-Fluid-Structure Computations Using Eulerian Vertex-Based Finite Volume Methods,” AIAA SciTech Forum, No. 2018-1072,
+Fluid-S ruc ure Compu a ions Using Eulerian Ver ex-Based Fini e Volume Me hods,” AIAA SciTech Forum, No. 2018-1072,
 January 8-12 2018.
 
 
 
-[14] Jacobson, K., Stanford, B., Kiviaho, J., Ozoroski, T., Park, M., and Chwalowski, P., “Multiscale Mesh Adaptation for Tran-
-sonic Aeroelastic Flutter Problems,” AIAA Aviation Forum, No. 2021-2700, August 2-6 2021.
+[14] Jacobson, K., S anford, B., Kiviaho, J., Ozoroski, T., Park, M., and Chwalowski, P., “Mul iscale Mesh Adap a ion for Tran-
+sonic Aeroelas ic Flu er Problems,” AIAA Avia ion Forum, No. 2021-2700, Augus 2-6 2021.
 
 
 
-[15] Whyman, S.-H., Fellows, C. D., Fairey, R. M., Gammon, M. R., Dawes, B., Meah, N., Kudryavtsev, A., and Hunt, M.,
-“Morphing a CAD Model to Match a Level Set Optimized Shape,” AIAA Aviation Forum, No. 2018-2925, June 2018.
+[15] Whyman, S.-H., Fellows, C. D., Fairey, R. M., Gammon, M. R., Dawes, B., Meah, N., Kudryav sev, A., and Hun , M.,
+“Morphing a CAD Model o Ma ch a Level Se Op imized Shape,” AIAA Avia ion Forum, No. 2018-2925, June 2018.
 
 
 
-[16] Balan, A., Park, M. A., Anderson, W. K., Kamenetskiy, D. S., Krakos, J. A., Michal, T., and Alauzet, F., “Verification
-of Anisotropic Mesh Adaptation for Turbulent Simulations over ONERA M6 Wing,” AIAA Journal, Vol. 58, No. 4, 2020,
+[16] Balan, A., Park, M. A., Anderson, W. K., Kamene skiy, D. S., Krakos, J. A., Michal, T., and Alauze , F., “Verifica ion
+of Aniso ropic Mesh Adap a ion for Turbulen Simula ions over ONERA M6 Wing,” AIAA Journal, Vol. 58, No. 4, 2020,
 pp. 1550–1565.
 
 
 
-[17] Park, M. A., “Anisotropic Output-based Adaptation with Tetrahedral Cut Cells for Compressible Flows,” Ph.d. thesis,
-Massechusetts Institute of Technology, October 2008.
+[17] Park, M. A., “Aniso ropic Ou pu -based Adap a ion wi h Te rahedral Cu Cells for Compressible Flows,” Ph.d. hesis,
+Massechuse s Ins i u e of Technology, Oc ober 2008.
 
 
 
-[18] Park, M. A. and Wang, L., “Potential Approaches for Mesh Adaptation of Large Eddy Simulations with Near-Wall Treat-
-ments,” AIAA SciTech Forum, No. 2023-1851, January 23-27 2023.
+[18] Park, M. A. and Wang, L., “Po en ial Approaches for Mesh Adap a ion of Large Eddy Simula ions wi h Near-Wall Trea -
+men s,” AIAA SciTech Forum, No. 2023-1851, January 23-27 2023.
 
 
 
-[19] “https://heldenaero.com/heldenmesh,” 2022.
-[20] “Advanced Air Transport Technology (AATT) Project Technical Challenges,” .
-[21] Vassberg, J. C., DeHaan, M. A., Rivers, S. M., and Wahls, R. A., “Development of a Common Research Model for Applied
+[19] “h ps://heldenaero.com/heldenmesh,” 2022.
+[20] “Advanced Air Transpor Technology (AATT) Projec Technical Challenges,” .
+[21] Vassberg, J. C., DeHaan, M. A., Rivers, S. M., and Wahls, R. A., “Developmen of a Common Research Model for Applied
 
 
 
-CFD Validation Studies,” 26th AIAA Applied Aerodynamics Conference, No. 2008-6919, August 18-21 2008.
-[22] Park, M. A., Alauzet, F., and Michal, T., “HLPW-4/GMGW-3: Mesh Adaptation for RANS Technology Focus GroupWork-
+CFD Valida ion S udies,” 26 h AIAA Applied Aerodynamics Conference, No. 2008-6919, Augus 18-21 2008.
+[22] Park, M. A., Alauze , F., and Michal, T., “HLPW-4/GMGW-3: Mesh Adap a ion for RANS Technology Focus GroupWork-
 
 
 
-shop Summary,” AIAA Aviation Forum, No. 2022-3210, June 27-July 1 2022.
-[23] Available via https://github.com/NASA/refine, last accessed June, 2021.
+shop Summary,” AIAA Avia ion Forum, No. 2022-3210, June 27-July 1 2022.
+[23] Available via h ps://gi hub.com/NASA/refine, las accessed June, 2021.
 
 
 
@@ -818,17 +818,17 @@ shop Summary,” AIAA Aviation Forum, No. 2022-3210, June 27-July 1 2022.
 
 
 
- 
-Introduction
+	
+In roduc ion
 
- 
-Adaptation Process
+	
+Adap a ion Process
 
- 
-Mesh Study and System Identification
+	
+Mesh S udy and Sys em Iden ifica ion
 
- 
+	
 Conclusions
 
- 
+	
 References
