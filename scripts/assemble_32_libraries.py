@@ -95,6 +95,22 @@ def choose_domain(text: str) -> tuple[str | None, float, dict[str, float]]:
     return best, scores[best]["semantic_density"], scores[best]
 
 
+def add_unique_record(
+    buckets: dict[str, list[dict[str, Any]]],
+    seen_hashes: set[str],
+    domain: str,
+    record: dict[str, Any],
+    exclusions: Counter,
+) -> None:
+    digest = sha256(record["text"].encode("utf-8"))
+    if digest in seen_hashes:
+        exclusions["global_exact_duplicate"] += 1
+        return
+    seen_hashes.add(digest)
+    record["text_sha256"] = digest
+    buckets[domain].append(record)
+
+
 def stable_partition(document_id: str) -> str:
     bucket = int.from_bytes(hashlib.sha256(document_id.encode()).digest()[:8], "big") % 100
     if bucket < 90:
@@ -187,6 +203,7 @@ def main() -> int:
     buckets: dict[str, list[dict[str, Any]]] = {domain: [] for domain in DOMAINS}
     unassigned: list[dict[str, Any]] = []
     exclusions = Counter()
+    seen_text_hashes: set[str] = set()
     input_counts = Counter()
 
     # CoVoST: exact CC0 translation field, train-only source partition, quality-filtered.
@@ -219,7 +236,7 @@ def main() -> int:
         if domain is None:
             unassigned.append(record)
         else:
-            buckets[domain].append(record)
+            add_unique_record(buckets, seen_text_hashes, domain, record, exclusions)
 
     # Common Corpus: retain the full CC0 subset in a separate review-only payload.
     # Do not route VoxPopuli, Wikidata, code or multilingual rows into training libraries.
@@ -291,7 +308,7 @@ def main() -> int:
                 "admission_status": "candidate_level_b" if boe_official_law else "candidate",
                 "semantic_density": density_for_domain(text, "law"),
             }
-            buckets["law"].append(record)
+            add_unique_record(buckets, seen_text_hashes, "law", record, exclusions)
             input_counts["gplsi_candidate_documents"] += 1
 
     # Collabra is optional until the per-DOI candidate builder has completed.
@@ -313,7 +330,7 @@ def main() -> int:
                 "admission_status": "candidate",
                 "semantic_density": density_for_domain(text, "social_sciences"),
             }
-            buckets["social_sciences"].append(record)
+            add_unique_record(buckets, seen_text_hashes, "social_sciences", record, exclusions)
             input_counts["collabra_candidate_documents"] += 1
 
     # The existing admitted Spanish literature stays an independent admitted corpus.
