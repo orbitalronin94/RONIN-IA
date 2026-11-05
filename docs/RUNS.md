@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:31 | [Integración continua #1205 (run 42003074618)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003074618) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Record official Qwen license and pinned model provenance. Trigger: push; rama: main; intento: 1. | c54e3266 |
 | 2026-11-05 09:31 | [Integración continua #1204 (run 42003070369)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003070369) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Pin official Qwen model revision and record training provenance. Trigger: push; rama: main; intento: 1. | 8c07b5f1 |
 | 2026-11-05 09:31 | [Integración continua #1194 (run 42002757402)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002757402) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): make 64-library Level-A target canonical. Trigger: push; rama: main; intento: 1. | bb78a6cf |
 | 2026-11-05 09:31 | [Integración continua #1202 (run 42002958854)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002958854) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): correct i-Perception acquisition ledger. Trigger: push; rama: main; intento: 1. | c2ad1fa1 |
