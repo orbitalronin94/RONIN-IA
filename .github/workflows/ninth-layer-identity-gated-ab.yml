@@ -1,0 +1,205 @@
+name: RONIN — expansión identidad a 9 capas sin tutor + holdout pareado
+on:
+  push:
+    branches: [main, experiment/identity-gated-ninth-layer]
+    paths:
+      - ".github/workflows/ninth-layer-identity-gated-ab.yml"
+      - "scripts/evaluate_mmlu_pro.py"
+      - "scripts/evaluate_text.py"
+      - "scripts/evaluate_domains.py"
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: Pasos de entrenamiento desde el checkpoint propio
+        required: true
+        default: "500"
+        type: string
+permissions:
+  actions: read
+  contents: read
+concurrency:
+  group: ronin-ninth-layer-no-tutor-holdout
+  cancel-in-progress: true
+jobs:
+  native-cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      BASE_RUN_ID: "42017319862"
+      LITERATURE_RUN_ID: "41926088900"
+      MATHLIB_RUN_ID: "42026633643"
+      MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+      STEPS: ${{ inputs.steps || '500' }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate budget
+        run: |
+          [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -ge 100 ] && [ "$STEPS" -le 1000 ]
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install CPU training dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "dill==0.3.8" "multiprocess==0.70.16" "huggingface_hub==0.36.0"
+          python -m compileall -q scripts/prepare_legacy_training_split.py scripts/train_text.py scripts/evaluate_mmlu_pro.py
+      - name: Download pinned native RONIN main checkpoint
+        uses: actions/download-artifact@v6
+        with:
+          name: ronin-main-cycle2-mmlu-pro-full
+          path: incoming/main
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.BASE_RUN_ID }}
+      - name: Download admitted literature train partition
+        uses: actions/download-artifact@v6
+        with:
+          name: ronin-admitted-literature-es-v1-train
+          path: incoming/literature
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.LITERATURE_RUN_ID }}
+      - name: Download admitted Mathlib4 train partition
+        uses: actions/download-artifact@v6
+        with:
+          name: ronin-admitted-mathlib4-v1
+          path: incoming/mathlib4
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.MATHLIB_RUN_ID }}
+      - name: Verify checkpoint and every admitted training partition
+        run: |
+          python - <<'PY'
+          import hashlib, json, shutil
+          from pathlib import Path
+          import torch
+          def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+          base=Path("incoming/main/checkpoints/main.pt")
+          lit=Path("incoming/literature/train.txt")
+          lm=Path("incoming/literature/dataset-manifest.json")
+          math=Path("incoming/mathlib4/train.txt")
+          mmf=Path("incoming/mathlib4/manifest.json")
+          assert all(p.is_file() for p in (base,lit,lm,math,mmf))
+          assert sha(base)=="a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
+          assert sha(lit)=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
+          l=json.loads(lm.read_text())
+          assert l.get("dataset_id")=="ronin-spanish-public-domain-literature-v2"
+          assert l.get("status")=="admitted_scoped_training_partition" and l.get("training_eligible") is True
+          assert l.get("global_g0_pass") is False and l.get("document_count")==608
+          assert l.get("train_bytes")==140295523 and l.get("validation_test_included") is False
+          m=json.loads(mmf.read_text())
+          assert m.get("dataset_id")=="mathlib4-lean-proof-corpus-v1"
+          assert m.get("status")=="admitted_scoped_training_partition"
+          part=m["aggregate"]["partitions"]["train"]
+          assert part["training_eligible"] is True and part["documents"]==8498
+          expected="7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"
+          assert part["text_sha256"]==expected and sha(math)==expected
+          ck=torch.load(base,map_location="cpu",weights_only=False)
+          assert ck.get("step")==1000 and isinstance(ck.get("model"),dict)
+          Path("checkpoints").mkdir(exist_ok=True)
+          shutil.copy2(base,"checkpoints/main.pt")
+          print("Gates OK: 608 literature + 8498 Mathlib4 = 9106 train docs; 237924775 source bytes. No tutor data. Validation/test partitions excluded. G-0 global remains FAIL.")
+          PY
+      - name: Assemble all and only train-eligible admitted documents
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          lit=Path("incoming/literature/train.txt").read_bytes()
+          math=Path("incoming/mathlib4/train.txt").read_bytes()
+          out=Path("/tmp/ronin-native-train.txt")
+          out.write_bytes(lit+b"\n\n"+math)
+          report={
+            "experiment":"ronin-ninth-layer-identity-gated-v1",
+            "tutor_used":False,
+            "sources":[
+              {"dataset_id":"ronin-spanish-public-domain-literature-v2","documents":608,"bytes":140295523,"sha256":"9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"},
+              {"dataset_id":"mathlib4-lean-proof-corpus-v1","documents":8498,"bytes":97629252,"sha256":"7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"}
+            ],
+            "train_documents":9106,
+            "source_train_bytes":237924775,
+            "combined_bytes":out.stat().st_size,
+            "combined_sha256":hashlib.sha256(out.read_bytes()).hexdigest(),
+            "validation_test_partitions_in_training":False,
+            "excluded_not_training_eligible":["NASA NTRS (813 scoped)","ScienceVerse (7365 scoped)","owner Papers (9 Markdown)"],
+            "global_g0_pass":False
+          }
+          Path("reports").mkdir(exist_ok=True)
+          Path("reports/native-mixture.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+      - name: Create internal validation split from train only
+        run: |
+          python scripts/prepare_legacy_training_split.py --input /tmp/ronin-native-train.txt --output-dir /tmp/ronin-native-split --validation-fraction 0.05 --seed 42006
+      - name: Evaluate native main BEFORE on fixed holdouts
+        run: |
+          python scripts/evaluate_text.py --checkpoint checkpoints/main.pt --validation-text /tmp/ronin-native-split/validation-internal.txt --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu --output reports/language-before.json
+          python scripts/evaluate_domains.py --checkpoint checkpoints/main.pt --dataset benchmarks/domains_v1.jsonl --profile tiny --device cpu --output reports/domains-before.json
+          python scripts/evaluate_mmlu_pro.py --checkpoint checkpoints/main.pt --profile tiny --context-length 4096 --limit 0 --seed 2026 --revision "$MMLU_REVISION" --split test --device cpu --batch-token-budget 8192 --output reports/mmlu-holdout-before.json
+      - name: Train RONIN from its own checkpoint — NO TUTOR
+        run: |
+          python scripts/train_text.py --text /tmp/ronin-native-train.txt --profile tiny --steps "$STEPS" --seed 20261106 --init-checkpoint checkpoints/main.pt --identity-gated-ninth-layer --learning-rate 0.00001 --min-learning-rate 0.000001 --device cpu --num-threads 2 --checkpoints checkpoints/native-candidate --metrics-out reports/training-throughput.json
+          candidate="checkpoints/native-candidate/step-$(printf '%08d' "$STEPS").pt"
+          test -s "$candidate"
+          cp "$candidate" checkpoints/candidate.pt
+      - name: Evaluate native candidate AFTER on identical fixed holdouts
+        run: |
+          python scripts/evaluate_text.py --checkpoint checkpoints/candidate.pt --validation-text /tmp/ronin-native-split/validation-internal.txt --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu --identity-gated-ninth-layer --output reports/language-after.json
+          python scripts/evaluate_domains.py --checkpoint checkpoints/candidate.pt --dataset benchmarks/domains_v1.jsonl --profile tiny --device cpu --identity-gated-ninth-layer --output reports/domains-after.json
+          python scripts/evaluate_mmlu_pro.py --checkpoint checkpoints/candidate.pt --profile tiny --context-length 4096 --limit 0 --seed 2026 --revision "$MMLU_REVISION" --split test --device cpu --batch-token-budget 8192 --identity-gated-ninth-layer --output reports/mmlu-holdout-after.json
+      - name: Compare paired full holdout and publish decision — never auto-promote
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("reports")
+          def load(n):
+            f=p/n
+            return json.loads(f.read_text()) if f.is_file() else None
+          b,a=load("mmlu-holdout-before.json"),load("mmlu-holdout-after.json")
+          l0,l1=load("language-before.json"),load("language-after.json")
+          d0,d1=load("domains-before.json"),load("domains-after.json")
+          result={"experiment":"ronin-ninth-layer-identity-gated-v1","tutor_used":False,"automatic_promotion":False,"global_g0_pass":False,"decision":"INCOMPLETE","metrics":{}}
+          for n in ("native-mixture.json","domains-before.json","domains-after.json","training-throughput.json"):
+            v=load(n)
+            if v is not None: result["metrics"][n]=v
+          if b and a:
+            ids0=[x.get("id") for x in b.get("details",[])]
+            ids1=[x.get("id") for x in a.get("details",[])]
+            same=(b.get("dataset_revision")==a.get("dataset_revision")==__import__("os").environ["MMLU_REVISION"] and b.get("dataset_split")==a.get("dataset_split")=="test" and b.get("dataset_sha256")==a.get("dataset_sha256") and b.get("selected_items")==a.get("selected_items") and b.get("evaluated_items")==a.get("evaluated_items") and ids0==ids1 and b.get("coverage",0)==1.0 and a.get("coverage",0)==1.0 and b.get("complete_test_set") is True and a.get("complete_test_set") is True)
+            delta=(a["overall"]["accuracy"]-b["overall"]["accuracy"])*100
+            result["mmlu_pro_full_holdout"]={"revision":a["dataset_revision"],"dataset_sha256":a["dataset_sha256"],"selected_items":a["selected_items"],"evaluated_before":b["evaluated_items"],"evaluated_after":a["evaluated_items"],"coverage_before":b["coverage"],"coverage_after":a["coverage"],"before_correct":b["overall"]["correct"],"after_correct":a["overall"]["correct"],"before_accuracy":b["overall"]["accuracy"],"after_accuracy":a["overall"]["accuracy"],"delta_percentage_points":delta,"same_full_holdout_before_after":same,"complete_test_set_before":b.get("complete_test_set"),"complete_test_set_after":a.get("complete_test_set")}
+            if l0 and l1:
+              language_nonreg=l1["bits_per_byte"]<=l0["bits_per_byte"]
+              result["language_validation_non_regression"]=language_nonreg
+              domain_keys=set(d0.get("by_domain",{})) if d0 else set()
+              domain_same=bool(d0 and d1 and d0.get("dataset_sha256")==d1.get("dataset_sha256") and d0.get("items")==d1.get("items") and domain_keys==set(d1.get("by_domain",{})) and all(d0["by_domain"][key].get("total")==d1["by_domain"][key].get("total") for key in domain_keys))
+              domain_nonreg=domain_same and all(d1["by_domain"][key]["accuracy"]>=d0["by_domain"][key]["accuracy"] for key in domain_keys)
+              result["domain_holdout_same"]=domain_same
+              result["domain_non_regression"]=domain_nonreg
+              result["decision"]="CANDIDATE_READY_FOR_REVIEW" if same and delta>0 and language_nonreg and domain_nonreg else "DO_NOT_PROMOTE"
+          for n in ("language-before.json","language-after.json"):
+            v=load(n)
+            if v is not None: result["metrics"][n]=v
+          (p/"native-no-tutor-summary.json").write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n")
+          print(json.dumps(result,ensure_ascii=False,indent=2))
+          PY
+      - name: Upload paired benchmark, corpus manifest and candidate
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-ninth-layer-no-tutor-${{ github.run_id }}
+          path: |
+            reports/
+            checkpoints/main.pt
+            checkpoints/candidate.pt
+          if-no-files-found: warn
+          retention-days: 90
+          compression-level: 6

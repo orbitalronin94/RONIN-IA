@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import math
+from dataclasses import replace
 from pathlib import Path
 
 import torch
@@ -36,10 +37,13 @@ def evaluate_checkpoint(
     batch_size: int = 2,
     seed: int = 2026,
     device: str = "cpu",
+    identity_gated_ninth_layer: bool = False,
 ) -> dict[str, object]:
     if batches < 1 or batch_size < 1:
         raise ValueError("batches y batch_size deben ser positivos")
     model_config, _ = get_profile(profile)
+    if identity_gated_ninth_layer:
+        model_config = replace(model_config, n_layers=model_config.n_layers + 1, identity_last_layer=True)
     tokenizer = ByteTokenizer()
     if model_config.vocab_size != tokenizer.vocab_size:
         raise ValueError("el perfil seleccionado no es compatible con ByteTokenizer")
@@ -106,6 +110,7 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=2)
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--device", default="cpu")
+    parser.add_argument("--identity-gated-ninth-layer", action="store_true")
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
 
@@ -117,6 +122,7 @@ def main() -> None:
         batch_size=args.batch_size,
         seed=args.seed,
         device=args.device,
+        identity_gated_ninth_layer=args.identity_gated_ninth_layer,
     )
     rendered = json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True)
     if args.output is not None:

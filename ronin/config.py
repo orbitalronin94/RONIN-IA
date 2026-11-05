@@ -21,6 +21,7 @@ class ModelConfig:
     d_ff: int | None = None
     rope_theta: float = 10_000.0
     rms_norm_eps: float = 1e-6
+    identity_last_layer: bool = False
 
     def __post_init__(self) -> None:
         if self.n_kv_heads is None:

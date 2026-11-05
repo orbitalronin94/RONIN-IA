@@ -26,6 +26,7 @@ def main() -> None:
     parser.add_argument("--text", type=Path, required=True, help="approved UTF-8 corpus file")
     parser.add_argument("--profile", choices=["tiny"], default="tiny")
     parser.add_argument("--steps", type=int, default=None)
+    parser.add_argument("--identity-gated-ninth-layer", action="store_true", help="amplía tiny a 9 capas con una compuerta residual inicialmente neutra")
     parser.add_argument("--learning-rate", type=float, default=None, help="tasa de aprendizaje para fine-tuning")
     parser.add_argument("--min-learning-rate", type=float, default=None, help="tasa mínima del scheduler")
     parser.add_argument("--context-length", type=int, default=None, help="Contexto en bytes; permite alinear el entrenamiento con el evaluador")
@@ -53,6 +54,10 @@ def main() -> None:
         torch.set_num_interop_threads(args.interop_threads)
 
     model_config, training_config = get_profile(args.profile)
+    if args.identity_gated_ninth_layer:
+        if args.init_checkpoint is None:
+            parser.error("--identity-gated-ninth-layer requiere --init-checkpoint de 8 capas")
+        model_config = replace(model_config, n_layers=model_config.n_layers + 1, identity_last_layer=True)
     if args.context_length is not None:
         if not 128 <= args.context_length <= 8192:
             parser.error("--context-length must be between 128 and 8192")
@@ -91,7 +96,22 @@ def main() -> None:
         state_dict = payload.get("model") if isinstance(payload, dict) else None
         if not isinstance(state_dict, dict):
             raise ValueError("el checkpoint inicial debe contener un state_dict en la clave 'model'")
-        model.load_state_dict(state_dict, strict=True)
+        if args.identity_gated_ninth_layer:
+            incompatible = model.load_state_dict(state_dict, strict=False)
+            expected_missing = {
+                key for key in model.state_dict()
+                if key.startswith(f"blocks.{model_config.n_layers - 1}.")
+                or key == "extra_layer_scale"
+            }
+            if set(incompatible.missing_keys) != expected_missing or incompatible.unexpected_keys:
+                raise ValueError(
+                    "El checkpoint no es compatible con la expansión identidad: "
+                    f"missing={incompatible.missing_keys}, unexpected={incompatible.unexpected_keys}"
+                )
+            with torch.no_grad():
+                model.extra_layer_scale.zero_()
+        else:
+            model.load_state_dict(state_dict, strict=True)
         print(f"Pesos iniciales cargados desde {args.init_checkpoint}")
     batches = NextTokenBatches(
         tokens, training_config.batch_size, model_config.context_length, training_config.seed
