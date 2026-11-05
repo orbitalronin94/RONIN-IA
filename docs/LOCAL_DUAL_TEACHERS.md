@@ -70,9 +70,9 @@ Para comparar 8 bits sin sobrescribir resultados:
 python scripts/train_from_local_dual_tutors.py --count 48 --quantization 8bit --steps 250 --device cuda --output-dir artifacts/dual-distillation-8bit --checkpoints checkpoints/dual-teacher-8bit
 ```
 
-Los dos tutores se ejecutan **secuencialmente**, nunca a la vez. El proceso levanta llama.cpp en loopback para Qwen, guarda sus respuestas, apaga el servidor y después repite con DeepSeek. El puerto local se asigna dinámicamente y el servidor se cierra al terminar cada tutor.
+Los dos tutores se ejecutan **secuencialmente**, nunca a la vez. El proceso levanta llama.cpp en loopback para Qwen, guarda sus respuestas, apaga el servidor y después repite con DeepSeek. En la segunda ronda, RONIN pregunta «¿por qué?» y cada tutor recibe su respuesta inicial y la propuesta del otro; debe contrastar premisas, regla decisiva y un contraejemplo, y puede corregirse. Después se libera y vuelve a cargar cada modelo para su turno de contraste. El puerto local se asigna dinámicamente y el servidor se cierra al terminar cada turno.
 
-El generador usa únicamente MMLU-Pro `validation`. Ningún tutor ve la respuesta correcta. Un ejemplo solo se admite si **los dos tutores responden la misma opción, ambos coinciden con la etiqueta gold independiente y ambos producen una explicación no vacía**. El acuerdo entre modelos no es por sí solo un oráculo. Si no se alcanza el mínimo de ejemplos aceptados, se aborta antes de entrenar.
+El generador usa únicamente MMLU-Pro `validation`. Ningún tutor ve la respuesta correcta. Un ejemplo solo se admite si, **después del contraste socrático, los dos tutores responden la misma opción, ambos coinciden con la etiqueta gold independiente y ambos producen una explicación no vacía**. El acuerdo entre modelos no es por sí solo un oráculo. El JSONL de auditoría conserva las respuestas iniciales y finales, pero no almacena cadenas privadas de pensamiento. Si no se alcanza el mínimo de ejemplos aceptados, se aborta antes de entrenar.
 
 El JSONL de auditoría y `train.txt` permanecen locales. RONIN se inicializa desde cero y entrena con el texto admitido. El split `test` no se carga durante la generación. Completar el entrenamiento no equivale a demostrar mejora: la promoción del checkpoint queda pendiente de una evaluación holdout independiente.
 
