@@ -50,7 +50,7 @@ def crossref_check(doi):
   approved=bool(approved_urls)
   return doi,{"doi":doi,"crossref_url":url,"license_urls":urls,"confirmed_license_urls":approved_urls,"cc_by_4_0_or_cc0_confirmed":approved,"status":"confirmed" if approved else "not_confirmed"}
  except Exception as e:
-  return doi,{"doi":doi,"crossref_url":url,"license_urls":[],"cc_by_4_0_confirmed":False,"status":"lookup_error","error":type(e).__name__}
+  return doi,{"doi":doi,"crossref_url":url,"license_urls":[],"cc_by_4_0_or_cc0_confirmed":False,"status":"lookup_error","error":type(e).__name__}
 def main():
  total=0
  for name,meta in CORPORA.items():
@@ -78,7 +78,7 @@ def main():
    for doi,result in pool.map(crossref_check,dois):
     audit[doi]=result
   approved=[x for x in base if audit.get(x["doi"].strip(),{}).get("cc_by_4_0_or_cc0_confirmed")]
-  rejected=[x for x in base if not audit.get(x["doi"].strip(),{}).get("cc_by_4_0_confirmed")]
+  rejected=[x for x in base if not audit.get(x["doi"].strip(),{}).get("cc_by_4_0_or_cc0_confirmed")]
   for x in rejected:
    excluded.append({"doi":x.get("doi"),"title":x.get("title"),"reasons":["crossref_does_not_confirm_CC-BY-4.0"]})
   groups={}
@@ -93,7 +93,7 @@ def main():
    else:
     unique.append(group[0])
     for x in group[1:]:excluded.append({"doi":x.get("doi"),"title":x.get("title"),"reasons":["duplicate_manifest_row_same_doi_title"]})
-  if not unique:raise SystemExit(f"{name}: no DOI had an exact Crossref CC-BY-4.0 license confirmation")
+  if not unique:raise SystemExit(f"{name}: no DOI had an exact Crossref CC-BY-4.0 or CC0 license confirmation")
   eligible=dest/"eligible-manifest.csv"
   with eligible.open("w",encoding="utf-8",newline="") as out:
    writer=csv.DictWriter(out,fieldnames=list(unique[0].keys()));writer.writeheader();writer.writerows(unique)
