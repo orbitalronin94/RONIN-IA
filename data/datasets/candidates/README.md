@@ -18,7 +18,7 @@ Per-domain artifacts are consolidated by `.github/workflows/consolidate-pmc-cand
 ## Payloads de texto y full-text adquiridos — 5 de noviembre de 2026
 
 - **ScienceVerse:** 3.087 DOI únicos elegibles para revisión (cinco RDS; 95.948.088 bytes comprimidos). La licencia CC-BY 4.0 se filtra por registro; JDM excluye cuatro filas duplicadas/conflictivas y Journal of Cognition excluye una conversión incompleta.
-- **NASA NTRS:** 53 textos completos individuales (7.853.246 bytes UTF-8). Se exige determinación explícita PUBLIC_USE_PERMITTED/GOV_PUBLIC_USE_PERMITTED, ausencia declarada de material de terceros, estado público/diseminado, sin control EAR/ITAR y sensitiveInformation=2 (NONE); 21 textos se rechazaron por patrones de email/SSN.
-- **Total de candidatos adquiridos en estas dos líneas:** 3.140 registros documentales y 103.801.334 bytes de payload. Aún falta deduplicación entre fuentes, revisión humana de derechos/atribución y privacidad, retractaciones/correcciones, calidad y clasificación final General/HKD.
+- **NASA NTRS:** 189 textos completos individuales (15.417.212 bytes UTF-8). Se exige determinación explícita PUBLIC_USE_PERMITTED/GOV_PUBLIC_USE_PERMITTED, ausencia declarada de material de terceros, estado público/diseminado, sin control EAR/ITAR y sensitiveInformation=2 (NONE); 21 textos se rechazaron por patrones de email/SSN.
+- **Total de candidatos adquiridos en estas dos líneas:** 4.100 registros documentales y 198.955.219 bytes de payload. Aún falta deduplicación entre fuentes, revisión humana de derechos/atribución y privacidad, retractaciones/correcciones, calidad y clasificación final General/HKD.
 
 Estos valores describen material candidato descargado, no texto Level A admitido. No habilitan entrenamiento; G-0 sigue siendo un gate independiente.
