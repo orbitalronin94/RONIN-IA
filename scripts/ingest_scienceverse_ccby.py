@@ -108,7 +108,7 @@ def main():
         }
         (dest/"provenance.json").write_text(json.dumps(record,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
         total+=len(converted)
-        print(f"{name}: {len(rows)} docs; payload {payload.stat().st_size} bytes; sha256 {record['payload_sha256']}")
+        print(f"{name}: {len(converted)} eligible / {len(rows)} manifest rows; excluded={len(excluded)}; payload {payload.stat().st_size} bytes; sha256 {record['payload_sha256']}")
     # Never delete or overwrite anything in the admitted tree from a candidate workflow.
     old=pathlib.Path("data/datasets/admitted/scienceverse")
     if old.exists():
