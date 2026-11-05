@@ -23,6 +23,7 @@ NASA = ROOT / "data/datasets/candidates/nasa-ntrs-public-use"
 NASA_REVIEW = ROOT / "data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json"
 PAPERS = ROOT / "data/datasets/admitted/ronin-authored-papers-v1"
 SCIENCEVERSE = ROOT / "data/datasets/candidates/scienceverse-text-export-v1"
+SCIENCEVERSE_OUT = ROOT / "data/datasets/admitted/scienceverse-ccby-v1"
 OUT = ROOT / "data/datasets/admitted/nasa-ntrs-public-use-v1"
 REPORT = ROOT / "data/datasets/reviews/candidate-document-audit-2026-11-05.json"
 EMAIL = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
@@ -194,33 +195,155 @@ def audit_nasa() -> dict:
 
 def audit_scienceverse() -> dict:
     results={}
+    if SCIENCEVERSE_OUT.exists():
+        shutil.rmtree(SCIENCEVERSE_OUT)
+    SCIENCEVERSE_OUT.mkdir(parents=True,exist_ok=True)
+    seen_hashes=set()
+    seen_dois=set()
+    known_holds={
+        ("jdm","jdm06002"):"Author metadata contains apparent postal-address fragments; attribution/privacy repair required",
+        ("ece3","ece310954"):"Malformed author fragment in source metadata; attribution repair required",
+        ("openmind","opmia00001"):"Domain routing not supported by source title/subject; reclassify before admission",
+    }
+    total_admitted=0
+    total_admitted_bytes=0
+    total_holds=0
     for gz_path in sorted(SCIENCEVERSE.glob("*/documents.jsonl.gz")):
         name=gz_path.parent.name
         counts=Counter()
         bytes_total=0
-        with gzip.open(gz_path,"rt",encoding="utf-8") as stream:
-            for line in stream:
-                if not line.strip(): continue
-                item=json.loads(line)
-                body=str(item.get("text") or "")
-                q=quality(body)
-                counts["documents"]+=1
-                bytes_total+=len(body.encode("utf-8"))
-                if quality_pass(q): counts["machine_quality_pass"]+=1
-                else: counts["machine_quality_hold"]+=1
-                if not item.get("doi"): counts["missing_doi"]+=1
-                if not item.get("authors"): counts["missing_authors"]+=1
-                if not item.get("license_url"): counts["missing_license_url"]+=1
-                if q["email_pattern"] or q["ssn_pattern"]: counts["pii_pattern_found"]+=1
-        results[name]={"documents":counts["documents"],"text_bytes":bytes_total,
-                       "machine_quality_pass":counts["machine_quality_pass"],
-                       "machine_quality_hold":counts["machine_quality_hold"],
-                       "missing_doi":counts["missing_doi"],
-                       "missing_authors":counts["missing_authors"],
-                       "missing_license_url":counts["missing_license_url"],
-                       "pii_pattern_found":counts["pii_pattern_found"],
-                       "admitted":0,"reason":"Publisher-side rights, third-party-material and final privacy/quality audit remain unresolved; machine pass alone does not authorize admission."}
-    return results
+        admitted_bytes=0
+        output_dir=SCIENCEVERSE_OUT/name
+        output_dir.mkdir(parents=True,exist_ok=True)
+        output_path=output_dir/"documents.jsonl.gz"
+        output_hash=hashlib.sha256()
+        with gzip.open(gz_path,"rt",encoding="utf-8") as stream, output_path.open("wb") as raw_out:
+            with gzip.GzipFile(fileobj=raw_out,mode="wb",filename="",mtime=0,compresslevel=9) as compressed:
+                for line in stream:
+                    if not line.strip():
+                        continue
+                    item=json.loads(line)
+                    body=str(item.get("text") or "")
+                    body_bytes=body.encode("utf-8")
+                    q=quality(body)
+                    counts["documents"]+=1
+                    bytes_total+=len(body_bytes)
+                    if sha(body_bytes) != item.get("text_sha256") or len(body_bytes) != item.get("text_bytes"):
+                        raise ValueError(f"{name}/{item.get('paper_id')}: text SHA-256 or byte count mismatch")
+                    reasons=[]
+                    if not quality_pass(q):
+                        reasons.append("machine_quality_hold")
+                        counts["machine_quality_hold"]+=1
+                    else:
+                        counts["machine_quality_pass"]+=1
+                    doi=str(item.get("doi") or "").strip().casefold()
+                    if not doi:
+                        reasons.append("missing_doi")
+                        counts["missing_doi"]+=1
+                    if not item.get("authors"):
+                        reasons.append("missing_authors")
+                        counts["missing_authors"]+=1
+                    license_url=str(item.get("license_url") or "").rstrip("/")
+                    if license_url not in {
+                        "https://creativecommons.org/licenses/by/4.0",
+                        "https://creativecommons.org/publicdomain/zero/1.0",
+                    }:
+                        reasons.append("license_not_allowlisted")
+                        counts["license_not_allowlisted"]+=1
+                    if q["email_pattern"] or q["ssn_pattern"]:
+                        reasons.append("pii_pattern")
+                        counts["pii_pattern_found"]+=1
+                    paper_id=str(item.get("paper_id") or "")
+                    if (name,paper_id) in known_holds:
+                        reasons.append("known_metadata_or_routing_hold")
+                        counts["known_metadata_or_routing_hold"]+=1
+                    if doi and doi in seen_dois:
+                        reasons.append("duplicate_doi_across_scienceverse")
+                        counts["duplicate_doi"]+=1
+                    digest=item["text_sha256"]
+                    if digest in seen_hashes:
+                        reasons.append("duplicate_text_across_scienceverse")
+                        counts["duplicate_text"]+=1
+                    if doi:
+                        seen_dois.add(doi)
+                    seen_hashes.add(digest)
+                    if reasons:
+                        counts["held_documents"]+=1
+                        counts["hold_reason:"+reasons[0]]+=1
+                        continue
+                    admitted=dict(item)
+                    admitted["status"]="admitted_scoped_global_gates_pending"
+                    admitted["admitted"]=True
+                    admitted["training_eligible"]=False
+                    admitted["admission_basis"]={
+                        "source_rights":"Per-DOI CC-BY-4.0/CC0 allowlist in pinned upstream manifest or Crossref license audit",
+                        "owner_review_attestation":"data/datasets/reviews/human-review-attestation-2026-11-05.json",
+                        "quality":"Full-document text and basic PII screen passed",
+                        "dedup":"Unique DOI and exact text SHA-256 across all 13 ScienceVerse exports",
+                    }
+                    encoded=(json.dumps(admitted,ensure_ascii=False,sort_keys=True,separators=(",",":"))+"\n").encode("utf-8")
+                    compressed.write(encoded)
+                    output_hash.update(encoded)
+                    counts["admitted_documents"]+=1
+                    admitted_bytes+=len(body_bytes)
+        total_admitted+=counts["admitted_documents"]
+        total_admitted_bytes+=admitted_bytes
+        total_holds+=counts["held_documents"]
+        source_prov_path=gz_path.parent/"provenance.json"
+        source_prov=json.loads(source_prov_path.read_text(encoding="utf-8"))
+        dataset_manifest={
+            "schema_version":"1.0","dataset_id":f"ronin-scienceverse-{name}-admitted-v1",
+            "source_dataset_id":source_prov.get("dataset_id"),
+            "source_provenance":str(source_prov_path.relative_to(ROOT)),
+            "source_rds_sha256":source_prov.get("source_rds_sha256",source_prov.get("payload_sha256")),
+            "eligible_manifest_sha256":source_prov.get("eligible_manifest_sha256"),
+            "candidate_export":str(gz_path.relative_to(ROOT)),
+            "candidate_export_sha256":sha(gz_path.read_bytes()),
+            "admitted_payload":output_path.name,
+            "admitted_payload_sha256":output_hash.hexdigest(),
+            "target_library":source_prov.get("target_library"),
+            "aggregate":{"source_documents":counts["documents"],
+                         "admitted_documents":counts["admitted_documents"],
+                         "admitted_text_bytes":admitted_bytes,
+                         "held_documents":counts["held_documents"],
+                         "quality_pass":counts["machine_quality_pass"],
+                         "quality_hold":counts["machine_quality_hold"]},
+            "training_eligible":False,
+            "global_g0":"FAIL",
+        }
+        (output_dir/"manifest.json").write_text(json.dumps(dataset_manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+        results[name]={
+            "documents":counts["documents"],"text_bytes":bytes_total,
+            "machine_quality_pass":counts["machine_quality_pass"],
+            "machine_quality_hold":counts["machine_quality_hold"],
+            "missing_doi":counts["missing_doi"],"missing_authors":counts["missing_authors"],
+            "license_not_allowlisted":counts["license_not_allowlisted"],
+            "pii_pattern_found":counts["pii_pattern_found"],
+            "known_metadata_or_routing_hold":counts["known_metadata_or_routing_hold"],
+            "duplicate_doi":counts["duplicate_doi"],"duplicate_text":counts["duplicate_text"],
+            "admitted":counts["admitted_documents"],"admitted_text_bytes":admitted_bytes,
+            "held":counts["held_documents"],"hold_reason_counts":{k:v for k,v in counts.items() if k.startswith("hold_reason:")},
+        }
+    aggregate={
+        "source_documents":sum(x["documents"] for x in results.values()),
+        "admitted_documents":total_admitted,"admitted_text_bytes":total_admitted_bytes,
+        "held_documents":total_holds,"unique_exact_texts_across_exports":len(seen_hashes),
+        "unique_dois_across_exports":len(seen_dois),
+    }
+    summary={
+        "schema_version":"1.0","dataset_id":"ronin-scienceverse-ccby-v1",
+        "status":"admitted_scoped_owner_attested_global_gates_pending",
+        "source_corpora":len(results),"aggregate":aggregate,"corpora":results,
+        "owner_review_attestation":"data/datasets/reviews/human-review-attestation-2026-11-05.json",
+        "rights_policy":"Only document records with a per-DOI CC-BY-4.0 or CC0 license URL are admitted; owner attestation covers the mapped source-level rights, privacy, third-party and quality review.",
+        "exclusions":["full-text quality holds","records with missing DOI or author attribution","three known metadata/privacy/domain-routing anomalies","duplicate DOI or exact text across exports"],
+        "training":{"training_eligible":False,"global_g0":"FAIL",
+                    "blocking":["global exact/near-duplicate comparison against all other corpora and holdouts",
+                                "General/HKD separation and deterministic train/validation/test isolation",
+                                "final rights/attribution and privacy reconciliation"]},
+    }
+    (SCIENCEVERSE_OUT/"manifest.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    return {"aggregate":aggregate,"corpora":results}
 
 def main() -> None:
     nasa=audit_nasa()
@@ -229,11 +352,12 @@ def main() -> None:
         "schema_version":"1.0","report_date":"2026-11-05",
         "scope":"All materialized NASA NTRS text candidates (824) and all ScienceVerse text exports (13 corpora); owner-authorized Papers corpus is separately admitted and hash-verified.",
         "nasa":nasa["aggregate"],
-        "scienceverse":sv,
+        "scienceverse":sv["corpora"],
+        "scienceverse_aggregate":sv["aggregate"],
         "papers":{"dataset_id":"ronin-authored-papers-v1","documents":9,
                   "training_eligible":False,"manifest":"data/datasets/admitted/ronin-authored-papers-v1/manifest.json"},
         "global_g0":"FAIL","training_eligible_new_documents":0,
-        "notes":["NASA scoped admission is not training eligibility.","ScienceVerse files are all scanned; no ScienceVerse document is admitted because publisher-level rights and third-party clearance are not resolved by Crossref alone.","Existing NASA manual holds are never overridden by machine scores.","Exact and near duplicates across sources and holdouts remain a blocking gate."]
+        "notes":["NASA scoped admission is not training eligibility.","ScienceVerse documents with per-DOI CC-BY-4.0/CC0, attribution, full-text quality and privacy checks passing are admitted only in scoped form under the owner review attestation; all remain training-ineligible pending global G-0.","Existing NASA manual holds are never overridden by machine scores.","Exact and near duplicates across sources and holdouts remain a blocking gate."]
     }
     REPORT.parent.mkdir(parents=True,exist_ok=True)
     REPORT.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
