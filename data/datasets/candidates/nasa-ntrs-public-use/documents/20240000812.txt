@@ -1,0 +1,570 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="pdf:PDFVersion" content="1.5">
+<meta name="xmp:CreatorTool" content="LaTeX with hyperref">
+<meta name="pdf:hasXFA" content="false">
+<meta name="access_permission:modify_annotations" content="true">
+<meta name="access_permission:can_print_degraded" content="true">
+<meta name="dcterms:created" content="2024-01-12T19:22:07Z">
+<meta name="dcterms:modified" content="2024-01-12T19:22:07Z">
+<meta name="dc:format" content="application/pdf; version=1.5">
+<meta name="pdf:docinfo:creator_tool" content="LaTeX with hyperref">
+<meta name="access_permission:fill_in_form" content="true">
+<meta name="pdf:docinfo:modified" content="2024-01-12T19:22:07Z">
+<meta name="pdf:hasCollection" content="false">
+<meta name="pdf:encrypted" content="false">
+<meta name="pdf:docinfo:custom:PTEX.Fullbanner" content="This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) kpathsea version 6.3.5">
+<meta name="pdf:hasMarkedContent" content="false">
+<meta name="Content-Type-Override" content="application/pdf">
+<meta name="Content-Type" content="application/pdf">
+<meta name="PTEX.Fullbanner" content="This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) kpathsea version 6.3.5">
+<meta name="pdf:producer" content="pdfTeX-1.40.25">
+<meta name="access_permission:extract_for_accessibility" content="true">
+<meta name="access_permission:assemble_document" content="true">
+<meta name="xmpTPg:NPages" content="11">
+<meta name="pdf:hasXMP" content="false">
+<meta name="access_permission:extract_content" content="true">
+<meta name="access_permission:can_print" content="true">
+<meta name="pdf:docinfo:trapped" content="False">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.DefaultParser">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.pdf.PDFParser">
+<meta name="access_permission:can_modify" content="true">
+<meta name="pdf:docinfo:producer" content="pdfTeX-1.40.25">
+<meta name="pdf:docinfo:created" content="2024-01-12T19:22:07Z">
+<title></title>
+</head>
+<body><div class="page"><p></p>
+<p>AAS 24-063
+</p>
+<p>LEVERAGING RESONANT TERMINATOR ORBITS FOR THE
+TRAJECTORY DESIGN OF OSIRIS-APEX AT (99942) APOPHIS
+</p>
+<p>Gavin M. Brown*, Daniel R. Wibben*, Peter G. Antreasian*, and Kenneth M.
+Getzandanner†
+</p>
+<p>The OSIRIS-REx spacecraft has been approved for an extended mission (OSIRIS-
+APEX) to visit the asteroid (99942) Apophis. In this paper we outline a potential
+design for the spacecraft’s trajectory during the variable phase orbit segment of the
+APEX mission. This phase of the mission, nominally expected to begin in January
+2030, has the primary goal of collecting image and spectral data of the full asteroid
+surface at a wide variety of illumination conditions without requiring frequent firing
+of the spacecraft thrusters. This work will focus on leveraging resonant terminator
+orbits (RTOs) in order to satisfy these goals and the associated science requirements.
+Though this segment will occur after Apophis’ closest flyby of Earth in April 2029,
+the proposed design utilizes the current best estimates of the asteroid’s orbital ele-
+ments and physical properties at that time when designing the spacecraft’s orbit.
+</p>
+<p>INTRODUCTION
+</p>
+<p>The terminator orbit family is a desirable family of periodic orbits as a number of the orbits are
+stable when considering large solar radition pressure (SRP).1 In the stable region of this family, there
+are numerous period multiplying bifurcations that occur, which give rise to a set of new periodic
+orbit families whose members are referred to as resonant terminator orbits (RTOs).1, 2 The general
+structure of the RTO families have been studied previously.1 These RTOs are of practical interest
+as the extended OSIRIS-REx mission,3 which is referred to as OSIRIS-APEX, currently plans to
+use an orbit similar to a RTO during the Variable Phase Orbit segment of its mission at the asteroid
+(99942) Apophis.4
+</p>
+<p>Several important parameters needed to define the dynamical environment around Apophis are
+currently unknown. For example, the spin state of the asteroid during the VPO segment is unknown
+as the asteroid will have a close encounter with Earth in April of 2029.4–6 Several of the orbital ele-
+ments describing Apophis’ orbit about the Sun will change after the encounter as well. In addition,
+the current estimate for the gravitational parameter of Apophis ranges from 1.36 to 4.37 m3/s2.4
+</p>
+<p>With that in mind, we seek to develop a toolkit that can generate a trajectory with desirable charac-
+teristics for the VPO segment of the APEX mission considering the large range of possible model
+parameter values. We will begin by discussing the computation of RTOs in the vicinity of Apophis
+using an idealized model which approximates the asteroid as a point mass in a circular orbit around
+the Sun. We will then discuss how we correct the initial trajectory using a more realistic model that
+accounts for the eccentricity of the asteroid’s orbit and uses a higher fidelity representation of its
+gravitational attraction. Will then present the trajectories obtained from the toolkit over a range of
+possible values of the gravitational parameter of Apophis.
+</p>
+<p>*KinetX, Inc. Space Navigation and Flight Dynamics Practice, 21 W. Easy St., Ste 108, Simi Valley, CA
+93065, USA.
+</p>
+<p>†NASA/GSFC Code 595, 8800 Greenbelt Rd, Greenbelt, MD 20771, USA.</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>RESONANT TERMINATOR ORBITS
+</p>
+<p>Augmented Normalized Hill 3-Body Problem Model
+</p>
+<p>The Augmented Normalized Hill 3-Body Problem (ANH3BP) model is a dynamical model ac-
+counting for the gravitational effect of the Sun and a primitive body, as well as SRP, on a space-
+craft.1, 7 When the orbit of the primitive body and the Sun is circular, the Jacobi constant is a
+conserved quantity and the system is autonomous.7 The equations of motion for the ANH3BP will
+now be presented based on Section 2 of Ref. 7.
+</p>
+<p>Let µS represent the gravitational parameter of the Sun, and let pS , eS , and f represent the orbit
+parameter, eccentricity, and true anomaly of the primitive body’s orbit around the Sun. The position
+vector of the primitive body relative to the Sun is represented by d = dd̂ and the angular velocity
+vector of the primitive body’s orbit around the Sun is represented by Ω = ΩΩ̂ where Ω = ḟ and Ω̂
+is the fixed direction perpendicular to the plane of that orbit. In this work, ȧ will represent the time
+derivative of the quantity a and a′ will represent the derivative of the quantity a with respect to f
+(i.e., ȧ = da
+</p>
+<p>dt and a′ = da
+df ). We will define a coordinate frame A : {x̂, ŷ, ẑ} with an origin at the
+</p>
+<p>center of mass of the primitive body such that x̂ = d̂ and ẑ = Ω̂. Units of distance will be scaled
+such that 1 DU = dϵ where ϵ = (µ/µS)
+</p>
+<p>1/3 and µ is the gravitational parameter of the primitive
+body. Expressions for these quantities are provided in the following equations.7
+</p>
+<p>d =
+pS
+</p>
+<p>1 + eS cos f
+(1a)
+</p>
+<p>Ω =
+</p>
+<p>√
+µSpS
+</p>
+<p>d2
+(1b)
+</p>
+<p>d′ =
+d2
+</p>
+<p>pS
+eS sin f (1c)
+</p>
+<p>Ω̇ = −2
+</p>
+<p>√
+µS
+pS
+</p>
+<p>eS sin fΩ
+</p>
+<p>d
+(1d)
+</p>
+<p>Let r represent the position vector of a spacecraft of negligible mass in the vicinity of the primi-
+tive body whose components are represented in the A-frame in scaled units of DU. In the“pulsating
+frame”, the equations of motion are:
+</p>
+<p>r′′ = −2Ω̂× r′ − Ω̂ · r + g +
+1
+</p>
+<p>1 + eS cos f
+</p>
+<p>(
+β̃ + 3x
+</p>
+<p>)
+x̂ (2a)
+</p>
+<p>β̃ =
+G1
+</p>
+<p>BµSϵ
+(2b)
+</p>
+<p>gpm = − 1
+</p>
+<p>1 + eS cos f
+</p>
+<p>1
+</p>
+<p>r3
+r (2c)
+</p>
+<p>where g is the gravitational attraction of the primitive body, G1 = 1 × 108 kg km3/s2/m2, and B
+is the spacecraft mass to area ratio.7, 8 Note that the gravitational attraction when the primitive body
+is approximated as a point mass (i.e., g = gpm) is given in Eq. (2c). The following expressions can
+be used to convert to dimensional quantities.7
+</p>
+<p>R = ϵdr (3a)
+</p>
+<p>Ṙ = ϵΩ
+(
+d′r + dr′
+</p>
+<p>)
+(3b)</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>It is important to note that the Variable Phase Orbit (VPO) segment of the mission to Apophis is
+currently planned to start after Apophis’ flyby of Earth in 2029.4 As a result, the orbital elements
+of Apophis’ orbit around the Sun, as well as its spin state, have large uncertainties. Also, several
+important physical characteristics of the asteroid, such as the gravitational parameter, have large
+uncertainties as well. Table 1 and Table 2 contain the parameters used in this work, although it
+should be noted that many of these values could change as better estimates are obtained.
+</p>
+<p>Table 1 Estimates of the Orbit Parameters of Apophis Post-Encounter.
+</p>
+<p>Orbit Parameters4, 9
+</p>
+<p>Semi-major axis, aS (m) 1.650227501552187× 1011
+</p>
+<p>Eccentricity, eS 0.1890650444165436
+Inclination, i (deg) 2.221099203220031
+Longitude of ascending node, ΩS (deg) 203.5628891952976
+Argument of perifocus, ωS (deg) 71.43287204673284
+Time of periapsis, τS (Julian Day) 2462301.148680804763
+Epoch Jun. 1, 2029
+</p>
+<p>Table 2 Estimates of the Rotation and Physical Parameters of Apophis Post-Encounter.
+Rotation Parameters Physical and Other Parameters
+</p>
+<p>Precession angle, ϕ (deg) 0 Gravitational Parameter, µ (m3/s2)4 2.68 (1.36-4.37)
+Nutation angle, θ (deg)10 37 Mass-to-projected area, B (kg/m2) 81.119
+Rotation angle, ψ (deg) 0 Start Date4 Jan. 15, 2030
+Precession period, Tϕ (hr)10, 11 27.38 End Date4 Apr. 1, 2030
+Rotation period, Tψ (hr)10, 12 266
+βL (deg)10 250
+λL (deg)10 -75
+</p>
+<p>We will only consider variations in µ as that directly affects the scaling of the SRP as can be
+seen in Eq. (2b). We considered the minimum, best, and maximum estimates of µ in this work,
+which are µmin = 1.36, µcbe = 2.68, and µmax = 4.37 m3/s2, respectively. Note that the rotation
+parameters shown in Table 2 are not incorporated unless the polyhedron gravity model is used. An
+initial value of zero was assigned to ϕ and ψ, although this should be updated when better estimates
+are known. While θ will be time-varying, for the preliminary implementation of this model used for
+these simulations it was set to be a fixed mean value estimated in Ref. 10. The start and end dates
+were set based on the planned VPO mission segment presented in Figure 13 of Ref. 4.
+</p>
+<p>Periodic Orbit Families in the Circular ANH3BP
+</p>
+<p>When the eccentricity of a primitive body’s orbit about the Sun is zero d and Ω are constant, and
+the system described by Eq. (2) (when using g = gpm) is autonomous. In this system periodic orbits
+exist in continuous one parameter families. Equilibrium points may also be identified, including the
+“dark-side” equilibrium point which lies on the +x-axis. This point may be computed by identifying</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>the value of x &gt; 0 where r = [x 0 0]T and r′ = 0 such that r′′ = 0 in Eq. (2a). A planar family can
+be computed by analyzing the linearized system evaluated at this point. By continuing this planar
+family, a bifurcation occurs where a new periodic orbit family can be identified that rises out of the
+plane. Continuing this family produces a set of periodic orbits which are known as terminator orbits.
+In the stable region of the terminator orbit family, there are many period-multiplying bifurcations
+where additional families can be computed starting at those points. The orbits in these families are
+referred to as resonant terminator orbits. We used a variable step-size pseudo-arclength continuation
+scheme to compute these families.
+</p>
+<p>Several of these RTO families have been computed previously.1, 2 In Ref. 1, Broschart et al.
+outline the two primary types of these RTOs: Sun-side and dark-side. The Sun-side RTOs are of
+interest as they possess desirable characteristics for observations and measurement of the primitive
+body. For this reason, we computed the dark-side equilibrium point, planar family, terminator
+orbit family, and many of the Sun-side RTO families at the three different values of µ discussed
+previously. To distinguish between the different RTO families, each will be given an identifier mTn
+where m corresponds to the specific bifurcation (e.g., m = 2 and m = 3 correspond to a period-
+doubling and period-tripling bifurcation, respectively) and n corresponds to order of that particular
+bifurcation (e.g., 3T4 corresponds to the Sun-side RTO family found at the fourth period-tripling
+bifurcation point on the terminator orbit). We attempted to compute these families starting at the
+appropriate bifurcation points with values of 1 ≤ m ≤ 10. We computed the families in the
+direction such that that the initial states were of the form X0 = [x 0 z 0 ẏ 0]T where z ≥ 0. Using
+µ = µcbe, the terminator orbits corresponding to the bifurcation points are shown in Figure 1, as are
+several orbit members of the 5T6 RTO family.
+</p>
+<p>Figure 1 Circular ANH3BP Orbit Families. Left: terminator orbits corresponding
+to period-multiplying bifurcation points with m = 1 to 10 shown in red to purple.
+Right: members of the Sun-side 5T6 RTO family starting from the terminator orbit
+shown in black, where each color represents a different orbit member.
+</p>
+<p>The most important characteristics of an RTO to consider for the VPO segment are the minimum</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>phase angle ϕmin, periapsis distance Rp, and apoapsis distance Ra.4 Preliminary estimates of the
+desired values of the VPO are Rp = 1 km, Ra = 4.5 km, and ϕmin = 45 deg. The rotation of the
+orbit plane with each pass of the asteroid is related to the value of m. To convert the distances to
+dimensional units for these RTOs, we treated the initial orbit of Apophis as a circular orbit with a
+semi-major axis of aS . Plots depicting the relationship between ϕmin and rp for each of the RTO
+families identified (the 3T3, 4T3, 5T6, 6T3, 7T9, and 8T7 RTO families) are presented in Figure 2.
+As can be seen in this figure, RTOs in families with smaller values ofm have larger closest approach
+distances at the same minimum phase angle compared to RTOs in families with larger values of m.
+Similarly, an orbit with a specific minimum phase angle in a particular mTn RTO family will have
+a larger closest approach distance at larger values of µ.
+</p>
+<p>Figure 2 Circular ANH3BP RTO Characteristics for µmin (left), µcbe (middle),
+µmax (right). The 3T3, 4T3, 5T6, 6T3, 7T9, and 8T7 RTO families are represented
+by the red, yellow, green, blue, purple, and pink lines, respectively.
+</p>
+<p>CORRECTIONS PROCEDURE
+</p>
+<p>Realistic Considerations
+</p>
+<p>While the circular ANH3BP is useful for obtaining the initial representation of an RTO that can
+be used in the VPO segment, there are additional effects that must be incorporated into the model to
+obtain a more realistic orbit. The two primary adjustments we will make the model involve the non-
+zero eccentricity of Apophis’ orbit and using a higher-fidelity model to represent the gravitational
+effect of Apophis compared to the point-mass model used in the circular ANH3BP. For each RTO
+family, we selected the member with ϕmin closest to a value of 50 deg, which is close to the value
+of 45 deg specified in Ref. 4.
+</p>
+<p>Accounting for non-zero eccentricity introduces an explicit dependence on f (i.e., time) to the
+equations of motion in Eq. (2a). As a result, the initial time of the VPO segment, which was not
+necessary for the model with a circular orbit, must now be accounted for in the model. Furthermore,
+as f is used as the “time”, we integrate the equations of motion and then convert back to true time</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>using Kepler’s equation.
+</p>
+<p>E = 2arctan
+</p>
+<p>(√
+1− e√
+1 + e
+</p>
+<p>tan
+</p>
+<p>(
+f
+</p>
+<p>2
+</p>
+<p>))
+(4a)
+</p>
+<p>n =
+</p>
+<p>√
+µ
+</p>
+<p>a3S
+(4b)
+</p>
+<p>M = n (t− τ) (4c)
+</p>
+<p>Using a more realistic representation of the gravity field around Apophis introduces another time-
+dependent term in the equations. The shape model of Apophis we use in this study has 3996
+faces.4, 11 We use a constant-density polyhedron model to represent the gravity field of the asteroid.
+The form of the gravitational attraction when using this model is given in Eq. (5).8
+</p>
+<p>gph =
+1
+</p>
+<p>ϵdΩ2
+[AB]
+</p>
+<p>−Gσ
+ne∑
+e=1
+</p>
+<p>Ee • re · Le +Gσ
+</p>
+<p>nf∑
+f=1
+</p>
+<p>Ff • rf · ωf
+</p>
+<p> (5a)
+</p>
+<p>Please refer to Ref. 8 for a detailed discussion of the terms in Eq. (5a). Note that the dimensional
+position vector R should be used in the computations. Also note that the mass distribution of the
+asteroid is not constant in the A-frame, so the relevant transformation matrices must be used. Let
+the B-frame be defined as the frame with an origin at the center of the primitive body where the
+mass distribution remains constant. Then the rotation matrix [AB] can be obtained by using Eq. 20
+in the Appendix of Ref. 10 as well as an additional rotation from the ecliptic frame to the A-frame
+based on the orbital elements of the primitive body.
+</p>
+<p>Correcting the Orbit
+</p>
+<p>Before attempting to obtain a corrected orbit with these additional effects, a preliminary calcu-
+lation was performed to adjust the velocity and “period” of the initial RTO obtained in the circular
+ANH3BP. Based on the form of the equations of motion, the “period” used in our calculations is the
+change in true anomaly ∆f over the period of the orbit. In this preliminary analysis the value of ẏ
+for the initial orbit was multiplied by different scaling factors (we used 100 values normally in the
+range of 0.85-1.15). Each of these new states was integrated up to 1.5∆f where ∆f corresponds to
+the “period” of the initial orbit. The point on each of these trajectories closest to the initial state was
+identified and the distance between each of these points and the initial state was computed. The tra-
+jectory with the minimum distance was selected as the updated initial guess for use in a differential
+corrections scheme.
+</p>
+<p>The differential corrector allowed the initial velocity and ∆f to match the final position with
+the initial position. If the resulting ∆f was less than the change in true anomaly corresponding
+to the end date of the VPO segment in Table 2, this corrections process was repeated to generate
+additional orbit cycles until the final time was past Apr. 1, 2030. While position continuity was
+always enforced, an impulsive burn was allowed to occur after each completed orbit cycle.
+</p>
+<p>RESULTS
+</p>
+<p>The orbits identified using µ = µcbe were computed first. Each of the corrected trajectories
+consisted of two orbit cycles. The final trajectories are shown in Figure 3. The characteristics of</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>these orbits are presented in Table 3, including the burn magnitudes, total propagation time for the
+trajectories shown in Figure 3, as well as the time for the spacecraft to depart the vicinity of the
+asteroid starting with the initial guess and corrected initial state if no burns were allowed to occur.
+</p>
+<p>Table 3 Characteristics of the Corrected Trajectories Resulting from RTOs with µ = µcbe.
+Result from Initial RTO Family 3T3 4T3 5T6 6T3 7T9 8T7
+</p>
+<p>Closest Distance, Rmin (km) 0.71 0.48 0.61 0.41 0.64 0.26
+Farthest Distance, Rmax (km) 4.89 4.41 3.92 3.53 4.43 2.95
+Minimum Phase Angle, ϕmin (deg) 47.37 45.55 47.89 43.75 45.73 40.88
+Burn 1, ∆V1 (mm/s) 7.07 9.83 3.62 8.69 8.63 4.35
+Total Period, TF (days) 72.40 78.78 84.04 85.34 132.74 89.24
+Ejection Time - No Burns, TE (days) 99.77 132.36 181.80 &gt; 674.15 140.57 196.32
+</p>
+<p>Figure 3 Corrected Trajectories Resulting from RTOs with µ = µcbe. From left to
+right then top down: 3T3, 4T3, 5T6, 6T3, 7T9, and 8T7. The first cycle is shown in
+yellow and the second is shown in light blue.
+</p>
+<p>The current start date is set at Jan. 15, 2030, which is when Apophis is nearly at the apoapsis of
+its orbit about the Sun.4 However, in the case that the start date is delayed, it is important that the
+planned orbits can still be corrected when Apophis is closer to its periapsis. While all of these orbits
+were successfully corrected, the orbits corresponding to the 3T3 and 4T3 families demonstrate the
+most promise in this regard, as these orbits were the easiest to correct. It is also important to note that
+as the scaling of distance quantities varies with the orbit of Apophis around the Sun, the variations
+in the distance of the spacecraft from Apophis and the phase angle of the corrected orbit from the
+3T3 family are shown in Figure 4.</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Figure 4 Characteristics of the Corrected Trajectory Resulting from the 3T3 RTO
+Family with µ = µcbe. The black dashed lines represent values of R = 1 km and
+R = 4.5 km (left) and ϕ = 45 deg (right).
+</p>
+<p>The result using the orbit from the 6T3 family was also interesting. When propagating the cor-
+rected initial state for this orbit in the more realistic model, and not allowing impulsive burns, the
+spacecraft did not depart the vicinity of the asteroid for at least 674.15 days. This was the longest
+departure time of any of the orbits tested. Figure 5 shows the long duration integrated trajectories
+with no burns allowed. The trajectories were integrated until the spacecraft departed the vicinity
+of the asteroid (i.e., r ≥ 10 DU) or the specified maximum integration time of 674.15 days was
+reached.
+</p>
+<p>Figure 5 Ejection Time of Corrected Orbit from RTO 6T3 with µ = µCBE. Ini-
+tial Condition from the Initial Guess (left) and Corrected Orbit (right). Green is the
+portion of the trajectory up to the end of the first cycle, blue is the portion of the tra-
+jectory up to the duration of the VPO segment duration, and red is the portion of the
+trajectory up to the time of departure or the maximum integration time was reached.
+</p>
+<p>Corrected Orbits for Other Possible Values of µ
+</p>
+<p>Using µ = µmin, the parameters of the corrections procedure required more manual adjustment
+to achieve convergence. It was more difficult to correct the trajectories for this value of µ. For</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>this reason we only focused on corrections for the 3T3, 4T3, and 5T6 RTO families. Each of the
+corrected trajectories consisted of three orbit cycles. The characteristics of these corrected orbits
+are presented in Table 4, and the corresponding trajectories are shown in Figure 6.
+</p>
+<p>Table 4 Characteristics of the Corrected Trajectories Resulting from RTOs with µ = µmin.
+Result from Initial RTO Family 3T3 4T3 5T6
+</p>
+<p>Closest Distance, Rmin (km) 0.50 0.41 0.23
+Farthest Distance, Rmax (km) 3.57 3.08 2.98
+Minimum Phase Angle, ϕmin (deg) 44.86 43.09 34.63
+Burn 1, ∆V1 (mm/s) 1.32 4.63 3.40
+Burn 2, ∆V2 (mm/s) 1.77 6.05 8.20
+Total Period, TF (days) 88.96 96.79 101.79
+Ejection Time - No Burns, TE (days) 88.90 154.79 251.94
+</p>
+<p>Figure 6 Corrected Trajectories Resulting from RTOs with µ = µmin. From left to
+right then top down: 3T3, 4T3, and 5T6. The first cycle is shown in yellow, the second
+is shown in pink, and the third is shown in light blue.
+</p>
+<p>Using µ = µmaxit was significantly easier to correct the trajectories. With this value of µ we
+focused on the 3T3, 4T3, 5T6, and 6T3 RTO families. Each of the corrected trajectories consisted
+of two orbit cycles. The characteristics of these corrected orbits are presented in Table 5, and the
+corresponding trajectories are shown in Figure 7.
+</p>
+<p>Table 5 Characteristics of the Corrected Trajectories Resulting from RTOs with µ = µmax.
+Result from Initial RTO Family 3T3 4T3 5T6 6T3
+</p>
+<p>Closest Distance, Rmin (km) 0.91 0.59 0.54 0.66
+Farthest Distance, Rmax (km) 6.16 5.35 4.98 4.46
+Minimum Phase Angle, ϕmin (deg) 45.34 41.86 42.38 46.90
+Burn 1, ∆V1 (mm/s) 6.12 5.13 5.34 7.03
+Total Period, TF (days) 81.73 84.35 88.54 96.10
+Ejection Time - No Burns, TE (days) 116.71 155.23 180.10 201.39</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Figure 7 Corrected Trajectories Resulting from the RTOs with µ = µmax. From left
+to right then top down: 3T3, 4T3, 5T6, and 6T3. The first cycle is shown in yellow and
+the second is shown in light blue.
+</p>
+<p>CONCLUSION
+</p>
+<p>There is great potential to leverage the structures of Resonant Terminator Orbits (RTOs) for the
+Variable Phase Orbit (VPO) phase of the OSIRIS-APEX mission to the asteroid Apophis. We were
+able to identify several candidate orbits that persisted in a more realistic model of the dynamics that
+accounted for the shape and complex rotation of the asteroid, as well as the eccentricity of Apophis’
+orbit about the Sun. While further analysis and modification will be needed to consider additional
+effects, this work indicates that over the range of posible parameters associated with the orbit and
+physical properties of Apophis, these RTOs can serve as a useful reference point for generating the
+trajectory to be used during the VPO phase.
+</p>
+<p>ACKNOWLEDGMENT
+</p>
+<p>This material is based upon work supported by NASA under Contracts NNM10AA11C and
+NNG13FC02C. OSIRIS-APEX is the extended mission of OSIRIS-REx, the third mission in NASA’s
+New Frontiers Program. Daniella DellaGiustina of the University of Arizona, Tucson, is the mis-
+sion’s Principal Investigator, and the University of Arizona also leads the Science Team and the
+science observation planning and data processing. Lockheed Martin Space Systems in Denver
+built the spacecraft and is providing flight operations. Goddard Space Flight Center and KinetX
+Aerospace are responsible for navigating the OSIRIS-REx spacecraft. Contract NNM10AA11C is
+issued through the New Frontiers Program.
+</p>
+<p>REFERENCES
+[1] S. B. Broschart, G. Lantoine, and D. J. Grebow, “Quasi-terminator orbits near primitive bodies,” Celestial Mechan-
+</p>
+<p>ics and Dynamical Astronomy, Vol. 120, Aug 2014, pp. 195–215.</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>[2] S. B. Broschart, D. J. Scheeres, and B. F. Villac, “New Families of Multi-Revolution Terminator Orbits near Small
+Bodies,” AAS/AIAA Astrodynamics Specialist Conference, Aug 2009.
+</p>
+<p>[3] D. S. Lauretta, S. S. Balram-Knutson, E. Beshore, et al., “OSIRIS-REx: Sample Return from Asteroid (101955)
+Bennu,” Space Science Reviews, Vol. 212, Aug 2017, p. 925–984.
+</p>
+<p>[4] D. N. DellaGiustina, M. C. Nolan, A. T. Polit, et al., “OSIRIS-APEX: An OSIRIS-REx Extended Mission to
+Asteroid Apophis,” The Planetary Science Journal, Vol. 4, Oct 2023.
+</p>
+<p>[5] D. J. Scheeres, S. J. Ostro, R. A. Werner, E. Asphaug, and R. S. Hudson, “Effects of Gravitational Interactions on
+Asteroid Spin States,” Icarus, Vol. 147, Sep 2000, pp. 106–118.
+</p>
+<p>[6] D. C. Richardson, W. F. Bottke, and S. G. Love, “Tidal Distortion and Disruption of Earth-Crossing Asteroids,”
+Icarus, Vol. 134, Jul 1998, pp. 47–76.
+</p>
+<p>[7] D. J. Scheeres and F. Marzari, “Spacecraft Dynamics in the Vicinity of a Comet,” The Journal of the Astronautical
+Sciences, Vol. 50, Mar 2002, pp. 35–52.
+</p>
+<p>[8] R. A. Werner and D. J. Scheeres, “Exterior gravitation of a polyhedron derived and compared with harmonic and
+mascon gravitation representations of asteroid 4769 Castalia,” Celestial Mechanics and Dynamical Astronomy,
+Vol. 65, Sep 1996, pp. 313–344.
+</p>
+<p>[9] NASA Jet Propulsion Laboratory Solar System Dynamics Group, “JPL Horizons on-line ephemeris system,”
+https://ssd.jpl.nasa.gov/horizons/app.html#/, 2022. Online; accessed 02 July 2023.
+</p>
+<p>[10] P. Pravec, P. Scheirich, J. Ďurech, et al., “The tumbling spin state of (99942) Apophis,” Icarus, Vol. 233, May 2014,
+pp. 48–60.
+</p>
+<p>[11] M. Brozović, L. A. Benner, J. G. McMichael, et al., “Goldstone and Arecibo radar observations of (99942) Apophis
+in 2012–2013,” Icarus, Vol. 300, 2018, pp. 115–128.
+</p>
+<p>[12] C. J. Benson, D. J. Scheeres, M. Brozović, S. R. Chesley, P. Pravec, and P. Scheirich, “Spin state evolution of
+(99942) Apophis during its 2029 Earth encounter,” Icarus, Vol. 390, 2023, p. 115324.</p>
+<p></p>
+<div class="annotation"><a href="https://ssd.jpl.nasa.gov/horizons/app.html#/">https://ssd.jpl.nasa.gov/horizons/app.html#/</a></div>
+</div>
+<ul>	<li>Introduction</li>
+	<li>Resonant Terminator Orbits</li>
+<ul>	<li>Augmented Normalized Hill 3-Body Problem Model</li>
+	<li>Periodic Orbit Families in the Circular ANH3BP</li>
+</ul>
+	<li>Corrections Procedure</li>
+<ul>	<li>Realistic Considerations</li>
+	<li>Correcting the Orbit</li>
+</ul>
+	<li>Results</li>
+<ul>	<li>Corrected Orbits for Other Possible Values of </li>
+</ul>
+	<li>Conclusion</li>
+	<li>Acknowledgment</li>
+</ul>
+</body></html>
