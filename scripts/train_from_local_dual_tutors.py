@@ -15,19 +15,21 @@ def main() -> None:
     parser.add_argument("--quantization", choices=["4bit", "8bit"], default="4bit")
     parser.add_argument("--steps", type=int, default=250)
     parser.add_argument("--seed", type=int, default=20261105)
-    parser.add_argument("--device", choices=["cpu", "cuda"], default="cuda")
+    parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
     parser.add_argument("--output-dir", type=Path, default=Path("artifacts/dual-distillation"))
     parser.add_argument("--checkpoints", type=Path, default=Path("checkpoints/dual-teacher-candidate"))
     args = parser.parse_args()
     if not 1 <= args.steps <= 1000:
         parser.error("--steps debe estar entre 1 y 1000")
-    if args.device == "cuda":
-        try:
-            import torch
-            if not torch.cuda.is_available():
-                parser.error("--device cuda solicitado pero CUDA no está disponible")
-        except ImportError:
-            parser.error("PyTorch no está instalado")
+    try:
+        import torch
+    except ImportError:
+        parser.error("PyTorch no está instalado")
+    device = args.device
+    if device == "auto":
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    if device == "cuda" and not torch.cuda.is_available():
+        parser.error("--device cuda solicitado pero CUDA no está disponible")
 
     generation = [
         sys.executable, "scripts/distill_mmlu_pro_dual_tutor.py",
@@ -48,10 +50,11 @@ def main() -> None:
         "--profile", "tiny",
         "--steps", str(args.steps),
         "--seed", str(args.seed + 1),
-        "--device", args.device,
+        "--device", device,
         "--checkpoints", str(args.checkpoints),
         "--metrics-out", str(args.output_dir / "training-metrics.json"),
     ]
+    print(f"Dispositivo de entrenamiento del estudiante: {device}")
     subprocess.run(training, check=True)
     print(f"Entrenamiento completado. Checkpoints: {args.checkpoints}")
     print("La promoción queda pendiente de evaluación holdout independiente.")
