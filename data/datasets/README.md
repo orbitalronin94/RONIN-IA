@@ -116,3 +116,19 @@ Ejecutar \`python scripts/validate_rights_registry.py\` para validar el registro
 ## Adquisición ScienceVerse automatizada (2026-11-05)
 
 Se han añadido script y workflow para incorporar a `main` cuatro paperlists de texto completo con manifiestos por artículo: BMC Medicine (1.000), Judgment and Decision Making (855), Journal of Cognition (447) y Open Mind (293). **Objetivo: 2.595 documentos.** El proceso rechaza un corpus si alguna fila del manifiesto no declara CC-BY 4.0; conserva CSV DOI/licencia, payload RDS, procedencia y SHA-256. Solo se sumarán al recuento de admisión cuando el workflow termine correctamente y los ficheros estén verificados. Deduplicación global, retractaciones, privacidad y particiones siguen siendo gates obligatorios.
+
+## Adquisición ScienceVerse — 5 de noviembre de 2026
+
+Se han incorporado a `candidates/scienceverse-fulltext/` cuatro paquetes RDS completos, con manifiesto original, manifiesto elegible, procedencia y SHA-256:
+
+| Colección | Documentos con CC-BY 4.0 verificada | Biblioteca de destino |
+|---|---:|---|
+| BMC Medicine | 1.000 | `medicine_health_general` |
+| Judgment and Decision Making | 855 | `social_sciences_general` |
+| Journal of Cognition | 447 | `social_sciences_general` |
+| Open Mind | 293 | `philosophy_general` |
+| **Total** | **2.595** | |
+
+Los cuatro payloads ocupan **83.524.872 bytes (79,7 MiB)**. Permanecen en nivel candidato: el formato RDS aún debe inspeccionarse y exportarse a registros de texto; después se ejecutarán deduplicación global, revisión de retractaciones/correcciones, controles de privacidad y partición agrupada por DOI. **No se suman todavía al corpus admitido ni al entrenamiento.**
+
+El corpus de literatura española mantiene 608 documentos train admitidos (140.295.523 bytes en el artefacto de materialización); validation y test permanecen aislados. Las 32 bibliotecas siguen siendo unidades de clasificación: estos paquetes aún no se han repartido documentalmente entre General/HKD.
