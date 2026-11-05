@@ -10,7 +10,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-MODEL_ID = "unsloth/Qwen3.5-4B"
+MODEL_ID = "Qwen/Qwen3.5-4B"
 DATASET_REVISION = "b189ec765aa7ed75c8acfea42df31fdae71f97be"
 ANSWER_RE = re.compile(r"(?i)(?:final\s+)?answer\s*[:：]?\s*([A-J])\b")
 
@@ -158,7 +158,10 @@ def main() -> None:
 
     import torch
     from datasets import Dataset
-    from transformers import set_seed
+    from huggingface_hub import model_info
+    from transformers import __version__ as transformers_version, set_seed
+    import trl
+    import unsloth
     from trl import SFTConfig, SFTTrainer
     from unsloth import FastLanguageModel
 
@@ -177,8 +180,10 @@ def main() -> None:
     eval_rows, eval_dataset_sha = load_validation_rows(args.eval_limit, args.seed)
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
+    model_revision = model_info(MODEL_ID).sha
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=MODEL_ID,
+        revision=model_revision,
         max_seq_length=args.max_seq_length,
         dtype=dtype,
         load_in_4bit=False,
