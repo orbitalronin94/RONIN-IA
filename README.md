@@ -1,5 +1,27 @@
 # RONIN-IA
 
+## Modelo main y nuevo ciclo externo — 5 de noviembre de 2026
+
+<badge color="success">Modelo main fijado</badge> **RONIN-tiny-main-001** es el checkpoint entrenado que pasa a ser la referencia principal del proyecto. No se trata de una inicialización nueva: el siguiente ciclo parte de estos pesos.
+
+- Arquitectura propia: Transformer causal RONIN, **9.922.880 parámetros**, RoPE, RMSNorm, SwiGLU, GQA y tokenizador byte-v1.
+- Entrenamiento de origen: 1.000 pasos desde inicialización aleatoria sobre 608 documentos admitidos del corpus documental español.
+- Comparación literaria oficial: BPB de **7,8684 → 2,8219** en el mismo holdout de 18 documentos y 65.536 tokens; el test no se usó para gradientes.
+- Checkpoint SHA-256: `a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25`.
+- Run de origen: [#42014728700](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42014728700). El peso se conserva en el artefacto de esa ejecución y queda fijado en [main-model.json](data/manifests/main-model.json).
+
+### Nuevo holdout externo
+
+Se adopta **MMLU-Pro test completo** como benchmark externo principal: 12.032 preguntas, 14 dominios, licencia MIT declarada y revisión inmutable `b189ec765aa7ed75c8acfea42df31fdae71f97be`. El protocolo RONIN informa accuracy por dominio con selección zero-shot de la etiqueta A–J por siguiente byte; no es la puntuación oficial CoT del leaderboard. El test no entra en entrenamiento. Fuente y protocolo: [Holdout externo MMLU-Pro](docs/HOLDOUT_EXTERNO_MMLU_PRO.md).
+
+### Ciclo 2 desde el modelo main
+
+El workflow [main → ciclo 2 + MMLU-Pro completo](.github/workflows/main-cycle2-mmlu-pro.yml) recupera el checkpoint fijado, verifica su SHA-256, evalúa las 12.032 preguntas antes, hace fine-tuning conservador sobre el mismo train admitido (1.000 pasos, LR 3e-5 por defecto) y repite la evaluación completa con idéntica revisión. Publica el nuevo peso como **candidato separado**. No sustituye el modelo main automáticamente: la promoción exige revisar las métricas, cobertura e integridad del benchmark.
+
+**G-0 global permanece FAIL.** Este experimento aislado reutiliza el corpus legacy ya verificado y no admite ni entrena candidatos de las otras 63 bibliotecas.
+
+---
+
 
 ## Admisión legacy compatible y entrenamiento documental (5 de noviembre de 2026)
 
