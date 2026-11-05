@@ -18,7 +18,7 @@ from ronin.models.transformer import RoninLM
 from ronin.training.checkpoint import load_checkpoint
 from ronin.training.loop import train
 from ronin.utils.repro import seed_everything
-from scripts.evaluate_mmlu_pro import (
+from evaluate_mmlu_pro import (
     DATASET_REVISION,
     evaluate_rows,
     load_external_dataset,
