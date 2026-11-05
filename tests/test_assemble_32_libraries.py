@@ -69,3 +69,11 @@ def test_admitted_literature_fragments_keep_the_train_partition() -> None:
     assert rows[0]["partition"] == "train"
     assert rows[0]["admission_status"] == "admitted"
     assert rows[0]["text"] == fragment
+
+
+def test_topic_router_recognizes_castilian_and_catalan_terms() -> None:
+    domain, _, _ = choose_domain("El teorema de álgebra lineal calcula una matriz y un vector.")
+    assert domain == "mathematics"
+
+    domain, _, _ = choose_domain("La cèl·lula conté ADN, proteïnes i enzims.")
+    assert domain == "biology"
