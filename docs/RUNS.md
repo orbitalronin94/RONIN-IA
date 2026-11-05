@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 10:29 | [Integración continua #1278 (run 42010910256)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42010910256) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: feat\(data\): prepare deterministic dev split from admitted legacy train. Trigger: push; rama: main; intento: 1. | 2b66d6a0 |
 | 2026-11-05 10:28 | [Integración continua #1279 (run 42010955362)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42010955362) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(training\): run RoninLM on scoped admitted legacy corpus. Trigger: push; rama: main; intento: 1. | 7b07fcdc |
 | 2026-11-05 10:24 | [Integración continua #1277 (run 42010140760)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42010140760) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs: fix legacy corpus path formatting. Trigger: push; rama: main; intento: 1. | 5c2f1fcb |
 | 2026-11-05 10:22 | [Integración continua #1274 (run 42010044473)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42010044473) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: revert: remove premature MMLU-Pro single-tutor trainer. Trigger: push; rama: main; intento: 1. | b1e5655b |
