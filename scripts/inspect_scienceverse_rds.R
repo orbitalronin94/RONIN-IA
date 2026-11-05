@@ -146,7 +146,7 @@ for (f in files) {
   if (nrow(eligible) != as.integer(provenance$documents_converted_and_license_verified)) {
     local_errors <- c(local_errors, "eligible manifest row count differs from provenance")
   }
-  if (!"doi" %in% names(eligible) || anyDuplicated(eligible$doi)) {
+  if (!"doi" %in% names(eligible) || any(is.na(eligible$doi)) || any(!nzchar(trimws(eligible$doi))) || anyDuplicated(tolower(trimws(eligible$doi)))) {
     local_errors <- c(local_errors, "eligible manifest DOI field missing or duplicated")
   }
   if (!"license" %in% names(eligible) || any(trimws(eligible$license) != "CC-BY 4.0")) {
@@ -199,7 +199,7 @@ for (f in files) {
     validation_errors = local_errors,
     structure = structure
   )
-  errors <- c(errors, paste(report_id, local_errors, sep = ": "))
+  if (length(local_errors)) errors <- c(errors, paste(report_id, local_errors, sep = ": "))
 }
 
 report <- list(
