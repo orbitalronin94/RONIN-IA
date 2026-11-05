@@ -38,7 +38,7 @@ La auditoría por documento registra 13 colecciones y 7.365 documentos admitidos
 | Science Advances (SCAN) | 299 | 299 | 0 |
 | **Total** | **7.403** | **7.365** | **38** |
 
-Fuente de la admisión scoped: `admitted/scienceverse-ccby-v1/manifest.json`. La partición train verificada y sus hashes están en `admitted/scienceverse-ccby-v1/train-eligibility-manifest.json`; auditoría: [run 42109182914](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42109182914).
+Fuente de la admisión scoped: `admitted/scienceverse-ccby-v1/manifest.json`. La partición train verificada y sus hashes están en `admitted/scienceverse-ccby-v1/train-eligibility-manifest.json`; auditoría: [run 42110130695](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42110130695).
 
 ## Bibliotecas objetivo: 32 dominios × General/HKD
 
