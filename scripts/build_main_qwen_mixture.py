@@ -24,6 +24,7 @@ def main() -> None:
     parser.add_argument("--literature-train", type=Path, required=True)
     parser.add_argument("--literature-manifest", type=Path, required=True)
     parser.add_argument("--internal-split-manifest", type=Path, required=True)
+    parser.add_argument("--internal-train", type=Path, required=True)
     parser.add_argument("--teacher-jsonl", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--teacher-repeat", type=int, default=32)
@@ -46,7 +47,7 @@ def main() -> None:
     split = json.loads(args.internal_split_manifest.read_text(encoding="utf-8"))
     if split.get("source_sha256") != EXPECTED_CORPUS_SHA256 or split.get("legacy_validation_or_test_read") is not False:
         raise SystemExit("Internal split does not descend from the verified train-only corpus")
-    internal_train = args.literature_train.with_name("train-internal.txt")
+    internal_train = args.internal_train
     if not internal_train.is_file() or sha256(internal_train) != split.get("train_sha256"):
         raise SystemExit("Internal train split missing or hash mismatch")
 
