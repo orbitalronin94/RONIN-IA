@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 12:33 | [Integración continua #1428 (run 42027851105)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42027851105) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: record Mathlib legacy train exact-dedup evidence. Trigger: push; rama: main; intento: 1. | 757fb703 |
 | 2026-11-05 12:32 | [Integración continua #1429 (run 42027945805)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42027945805) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): report the verified legacy sidecar count. Trigger: push; rama: main; intento: 1. | 005d1bb6 |
 | 2026-11-05 12:31 | [Expand scientific datasets — PMC OA CC0/CC-BY candidates #21 (run 42021108195)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42021108195) | success | Ejecución de GitHub Actions; consultar logs y artefactos enlazados para el resultado detallado. Commit: docs\(data\): publish final NASA scoped admission counts. Trigger: push; rama: main; intento: 1. | 2b2f128a |
 | 2026-11-05 12:31 | [Integración continua #1426 (run 42027642817)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42027642817) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): correct scoped manifest record total. Trigger: push; rama: main; intento: 1. | 1263e98f |
