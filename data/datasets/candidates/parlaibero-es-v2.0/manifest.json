@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "parlaibero-es-v2.0",
+  "status": "candidate_metadata_and_audit_docs_verified_bulk_text_not_downloaded",
+  "source": {
+    "title": "ParlaIbero-ES: Parliamentary Speeches from Spain (1977-2025)",
+    "doi": "10.7910/DVN/OKHGAB",
+    "version": "2.0",
+    "publisher": "Harvard Dataverse",
+    "creator": "Rodrigo Rodrigues-Silveira, Universidad de Salamanca",
+    "license": "CC-BY-4.0",
+    "license_uri": "https://creativecommons.org/licenses/by/4.0/",
+    "retrieval": "anonymous HTTPS Dataverse API"
+  },
+  "evidence": {
+    "metadata_run_id": 41990123798,
+    "metadata_artifact_id": 13397901151,
+    "metadata_artifact_sha256": "6ff93664c065ef220f0aa8fbdc34ebdfa96c72a93d71da34221e81ece033bb3d",
+    "metadata_snapshot_sha256": "559facc0d47c60d74ae66109c95979637bc22250a0bfc832984718aa377b4f27",
+    "audit_run_id": 41990123763,
+    "audit_artifact_id": 13397840926,
+    "audit_artifact_sha256": "762069394ad00e2df0a818991459d24a5d566d66aba7d9f4615f7dab66c47bc3",
+    "dataverse_file_count": 17,
+    "restricted_file_count": 0,
+    "total_declared_bytes": 1059811627,
+    "large_file": {
+      "id": "14215089",
+      "name": "ES_interventions.csv",
+      "bytes": 1058266687,
+      "provider_md5": "264b24f08fb93cfc36a7967560d83010",
+      "downloaded": false
+    }
+  },
+  "corpus": {
+    "rows": 562514,
+    "speech_rows": 558940,
+    "sessions": 3559,
+    "coverage": "1977-07-13 to 2025-12-11",
+    "text_characters": 934962974,
+    "linked_speaker_rows": 541332,
+    "unresolved_named_speech_rows": 965,
+    "ambiguous_speech_rows": 248,
+    "undecoded_rows": 606,
+    "undecoded_characters": 19645
+  },
+  "schema": {
+    "columns": 16,
+    "text_column": "text",
+    "speech_flag": "dm_speech",
+    "speaker_fields": [
+      "speaker_raw",
+      "id_dep",
+      "speaker_name",
+      "sex",
+      "party",
+      "district"
+    ],
+    "internal_group_key": "id_session",
+    "notes": [
+      "dm_speech=1 means not demonstrated to be non-speech; it is a superset, not a verified exact speech subset",
+      "id_session and id_int are stable only within this edition"
+    ]
+  },
+  "privacy_review": {
+    "status": "pending",
+    "risks": [
+      "political opinions in parliamentary speech are sensitive-category personal data under EU data-protection analysis",
+      "speaker names and political affiliations appear in metadata columns",
+      "speech text may mention third parties and private individuals"
+    ],
+    "minimization_plan": [
+      "exclude all speaker identity, party, district, sex and stable IDs from exported training text",
+      "use id_session only internally for deterministic split grouping; do not export it",
+      "exclude PII/contact patterns and corrupted PUA/control-character rows",
+      "require human/legal privacy review of text content and processing basis before any admission"
+    ]
+  },
+  "quality_review": {
+    "status": "pending_bulk_payload",
+    "known_issues": [
+      "606 rows contain 19,645 undecoded characters",
+      "dm_speech flag is intentionally asymmetric",
+      "1,213 named speech rows are unresolved or ambiguous in speaker linkage; irrelevant if metadata is dropped but signals source extraction limits"
+    ],
+    "required_checks": [
+      "download exact pinned CSV and verify provider MD5",
+      "compute SHA-256",
+      "stream text-only export and count rows",
+      "exclude or quarantine PUA/control rows",
+      "exact and near dedup across all admitted corpora",
+      "language and OCR/encoding audit",
+      "human sample review"
+    ]
+  },
+  "decision": {
+    "library_admitted": false,
+    "training_eligible": false,
+    "admission_eligible": false,
+    "disposition": "hold_for_privacy_and_payload_quality_review",
+    "reason": "Strong Spanish parliamentary text source with CC BY 4.0 declaration and a large corpus, but the full 1.06 GB text has not been acquired or scanned. Sensitive political content and third-party mentions require a documented privacy basis and minimization before redistribution or model training."
+  },
+  "attribution": "Rodrigues-Silveira, Rodrigo (2026). ParlaIbero-ES: Parliamentary Speeches from Spain (1977-2025), version 2.0. Harvard Dataverse. https://doi.org/10.7910/DVN/OKHGAB. CC BY 4.0."
+}
