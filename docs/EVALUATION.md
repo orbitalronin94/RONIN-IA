@@ -50,3 +50,16 @@ El informe JSON registra las huellas SHA-256 del checkpoint y del archivo de val
 Para comparar dos ejecuciones, mantener idénticos el archivo reservado, su SHA-256, el perfil, el tokenizador, el número de lotes, el tamaño de lote, la longitud de secuencia, la semilla y el dispositivo/precisión. Una reducción de pérdida de entrenamiento no cuenta como mejora. No cambiar ni reutilizar el conjunto reservado para ajustar hiperparámetros.
 
 **Estado:** el evaluador y el formato del informe están implementados; todavía no hay corpus autorizado reservado ni resultados reales versionados. Por tanto, no existe aún una línea base de calidad de RONIN ni una mejora demostrada. Los informes experimentales deben publicarse como artefactos o adjuntos de ejecución, no junto con corpus, datos privados ni checkpoints en Git.
+
+
+## Rendimiento del pipeline y conservación de memoria
+
+Las optimizaciones se aceptan por tiempo total de pared de cada fase y del pipeline, manteniendo iguales los hashes de datos, el número de ejemplos, la cobertura y el protocolo de evaluación. No se considera mejora una ejecución más rápida que omita comprobaciones.
+
+- El entrenamiento permite configurar `--checkpoint-every`; el checkpoint final siempre se guarda. En el workflow oficial se usa un intervalo de 250 pasos, frente al intervalo de 50 del perfil tiny, para reducir escrituras de estados completos del optimizador. La reanudación desde el último checkpoint conserva el estado completo; el intervalo implica una ventana de recuperación mayor y debe reflejarse en las métricas.
+- El entrenamiento publica `training-metrics.json` con duración total, throughput y segundos dedicados a checkpoints.
+- El evaluador multidominio agrupa prompts por longitud y evalúa solo los logits de la última posición válida. El orden de los resultados se restaura al del dataset; la prueba de regresión compara puntuaciones individuales y agrupadas.
+- MMLU-Pro ya usa lotes por presupuesto de tokens, padding a la derecha y logits de última posición. No se reduce el test ni se truncan preguntas para acelerar.
+- Las bibliotecas marcadas como `candidate` o con `global_g0=FAIL` no se incorporan automáticamente. La admisión de una partición concreta no equivale a aprobar el corpus completo.
+
+Toda comparación de velocidad debe registrar runner, CPU visible, versión de PyTorch, hilos intra/inter-op, duración de preparación, entrenamiento, checkpoint, evaluación y publicación de artefactos. El tiempo total de GitHub Actions se compara con el mismo conjunto de jobs y dependencias.
