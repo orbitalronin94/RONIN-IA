@@ -193,6 +193,8 @@ def generate(
             "agreement": agreement,
             "qwen_rationale_present": bool(qwen["rationale"]),
             "deepseek_rationale_present": bool(deepseek["rationale"]),
+            "qwen_revised_answer": qwen_first["answer"] != qwen["answer"],
+            "deepseek_revised_answer": deepseek_first["answer"] != deepseek["answer"],
         }
         audit.append(audit_record)
         # La coincidencia entre tutores no basta: ambos deben acertar el oráculo gold.
@@ -208,7 +210,17 @@ def generate(
             "Explicación de DeepSeek-R1-Distill-Qwen-32B:\n"
             + str(deepseek["rationale"])
         )
-        training_text = f"{question}{gold}\nExplicación: {completion}\n\n"
+        training_text = (
+            f"{question}\n\n"
+            "RONIN: Contrasta las dos propuestas iniciales y explica por qué una respuesta "
+            "puede necesitar revisión.\n"
+            f"Qwen (provisional): {qwen_first['answer'] or 'UNKNOWN'}\n"
+            f"DeepSeek (provisional): {deepseek_first['answer'] or 'UNKNOWN'}\n"
+            "RONIN: ¿Por qué? Revisa premisas, regla decisiva y un contraejemplo.\n"
+            f"Respuesta final verificada: {gold}\n"
+            f"Qwen (revisión): {qwen['rationale']}\n"
+            f"DeepSeek (revisión): {deepseek['rationale']}\n\n"
+        )
         digest = hashlib.sha256(
             (question.strip() + "\n" + completion.strip()).encode("utf-8")
         ).hexdigest()
