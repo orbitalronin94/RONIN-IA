@@ -97,3 +97,11 @@ Ejecutar \`python scripts/validate_rights_registry.py\` para validar el registro
 - Expediente: `candidates/scienceverse-expanded-corpora/README.md`.
 - **No son 5.091 artículos admitidos:** falta descargar manifests/assets, verificar cada DOI y PDF/texto, hashes, privacidad, deduplicación y particiones. Los corpus con licencias mixtas o NC/ND quedan excluidos salvo filtro individual inequívoco.
 - Fuente: https://github.com/scienceverse/papers
+
+
+## Nuevo bloque revisado — repositorios técnico-científicos públicos
+
+- **NASA NTRS:** catálogo con más de 200.000 documentos completos. Solo se aceptarán documentos públicos con metadatos de copyright inequívocos como “Work of the US Gov. Public Use Permitted”; se excluye cualquier material registrado, privado, mixto o de terceros no autorizado. Expediente: `candidates/nasa-ntrs-public-use/README.md`.
+- **NIST Technical Series/PDR:** política oficial concede derechos mundiales sobre trabajos/datos propios de NIST en los términos publicados y exige atribución; los trabajos de terceros se excluyen. Cada documento/dataset requiere comprobación de autoría y titularidad. Expediente: `candidates/nist-technical-series/README.md`.
+- **Estado de ambos:** candidatos de alta prioridad; todavía sin payload, hashes, revisión de privacidad/calidad, deduplicación ni particiones. No entrenables.
+- Fuentes: https://sti.nasa.gov/disclaimers/ · https://ntrs.nasa.gov/ · https://www.nist.gov/open/copyright-fair-use-and-licensing-statements-srd-data-software-and-technical-series-publications · https://data.nist.gov/pdr/about
