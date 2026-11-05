@@ -65,7 +65,11 @@ Las ocho adicionales se construirán con `RONIN-HKD-0.1`: relevancia del dominio
 - [Programa bibliográfico y glosario técnico](docs/PROGRAMA_BIBLIOGRAFICO_Y_GLOSARIO.md).
 - [Plan de aceleración CPU](docs/PLAN_ACELERACION_ENTRENAMIENTO_CPU.md).
 
-Los tutores GPT-2, GPT-Neo y Phi-4 pueden descargarse y ejecutarse localmente con licencias verificadas, pero sus pesos no se transfieren al estudiante. El nuevo workflow oficial no depende de que un tutor genere texto.
+El carril anterior de GPT-2/GPT-Neo/Phi-4 queda como referencia histórica. La nueva tutoría principal es local y dual: Qwen3.6-27B (Apache-2.0) + DeepSeek-R1-Distill-Qwen-32B (MIT), ambos cuantizados localmente a 4 u 8 bits. Se ejecutan secuencialmente, no se usa inferencia por API y sus pesos nunca se transfieren al estudiante.
+
+### Tutoría dual local y primer entrenamiento socrático verificable
+
+La implementación está en [docs/LOCAL_DUAL_TEACHERS.md](docs/LOCAL_DUAL_TEACHERS.md). Incluye descarga con revisión y SHA-256 fijados, verificación de licencias, inferencia bitsandbytes local, comparación entre ambos tutores y filtro contra la etiqueta gold de MMLU-Pro validation. Solo se entrena con ejemplos en los que ambos coinciden entre sí y con el oráculo independiente. El estudiante se inicializa desde cero. La ejecución completa se lanza desde una máquina local con GPU CUDA mediante `scripts/train_from_local_dual_tutors.py`; no se suben prompts ni corpus a GitHub Actions ni a APIs externas.
 
 ### Workflow oficial: entrenamiento desde cero + holdout externo
 
