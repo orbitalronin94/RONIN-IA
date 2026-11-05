@@ -1,0 +1,34 @@
+name: Preflight ScienceVerse Collabra per-article rights
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/preflight_scienceverse_collabra_rights.py"
+      - ".github/workflows/preflight-scienceverse-collabra-rights.yml"
+  pull_request:
+    paths:
+      - "scripts/preflight_scienceverse_collabra_rights.py"
+      - ".github/workflows/preflight-scienceverse-collabra-rights.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rights:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Verify pinned manifest and per-DOI Crossref license evidence
+        run: python scripts/preflight_scienceverse_collabra_rights.py
+      - uses: actions/upload-artifact@v6
+        with:
+          name: ronin-scienceverse-collabra-rights-preflight
+          path: artifacts/scienceverse-collabra/
+          if-no-files-found: error
+          retention-days: 90
