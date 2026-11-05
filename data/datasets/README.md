@@ -144,7 +144,8 @@ Estos recuentos separan material descargado de material admitido:
 |---|---:|---:|
 | ScienceVerse (BMC Medicine, JDM, Journal of Cognition, Open Mind, i-Perception) | 3.087 DOI únicos en manifiestos elegibles | 95.948.088 bytes RDS |
 | NASA NTRS public-use | 189 textos completos | 15.417.212 bytes UTF-8 |
-| ScienceVerse Crossref (eLife + Frontiers) | 824 DOI únicos | 87.589.919 bytes RDS |\n| **Total candidato adquirido** | **4.100 registros** | **198.955.219 bytes** |
+| ScienceVerse Crossref (eLife + Frontiers) | 824 DOI únicos | 87.589.919 bytes RDS |
+| **Total candidato adquirido** | **4.100 registros** | **198.955.219 bytes** |
 
 ScienceVerse conserva manifiestos, procedencia y hashes por paquete; eLife y Frontiers se admiten al nivel candidato solo cuando Crossref confirma CC-BY 4.0; cuatro filas JDM con DOI duplicado/conflictivo y una fila de Journal of Cognition sin conversión se excluyen de los manifiestos elegibles. NASA exige metadatos por documento de uso público, sin material de terceros, sin control de exportación y sin indicador de información sensible. Ambos conjuntos siguen en `candidates/`: no se suman a bytes Level A ni habilitan entrenamiento. La deduplicación cruzada, revisión humana de derechos/atribución, privacidad, calidad y clasificación General/HKD siguen pendientes.
 
