@@ -153,3 +153,14 @@ Los 677 textos Collabra se reparten en 541 train, 72 validation y 64 test; valid
 **No interpretar 4.855 como documentos únicos globales ni como admitidos.** No se ha completado la deduplicación cruzada entre fuentes, la revisión humana de derechos/atribución, privacidad, calidad ni clasificación General/HKD. Ninguno de estos candidatos suma bytes Level A ni habilita entrenamiento.
 
 El único conjunto admitido bajo el manifiesto legacy sigue siendo `literature-es-v1`: 608 documentos en train y 140.295.523 bytes en su artefacto de materialización. Validation y test no se entrenan. El inventario canónico Level A de 64 bibliotecas sigue en 0 documentos y 0 bytes admitidos; G-0 permanece en FAIL.
+
+
+## Auditoría RUN 5 — resultado verificado (5 de noviembre de 2026)
+
+La ejecución [RUN 5 #41904620741](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41904620741), sobre el commit \`a5dec1e5466bef26136ebb8a34c593414ff7731b\`, **no produjo bibliotecas consolidadas**. El artefacto \`ronin-datasets-run5-master-index\` (ID \`13382512138\`) declara \`libraries_found=0\`, 16/16 con estado \`missing_or_generation_failed\`, \`training_started=false\` y \`admitted=false\`. El informe consolidado (artefacto ID \`13382377370\`) confirma que el inventario estaba incompleto y que la auditoría global de duplicados no pudo ejecutarse sobre documentos.
+
+Los logs permiten identificar un bloqueo concreto: RUN 5 exigía **2.560 MiB de train por biblioteca**. El dominio Derecho/Economía/Ciencias Sociales generó 9.019 bytes y falló el umbral; Informática generó 39.308.151 bytes y también falló. Lógica/Epistemología y Física terminaron sin generar las dos bibliotecas esperadas. Aunque Química completó su paso local de validación, el índice maestro no encontró ninguna biblioteca consolidada. No se deben tratar los pequeños artefactos de índices/diagnóstico como corpus.
+
+**Decisión:** RUN 5 suma cero documentos admitidos y cero bytes Level A. No se relaja el control legal ni se promocionan muestras automáticamente. El siguiente arreglo técnico debe separar el umbral mínimo para materializar un *candidato auditable* del umbral de escala de una biblioteca completa; conservar el umbral de admisión Level A de 1 MiB y G-0 como gates independientes; corregir la recolección de artefactos para que el índice maestro encuentre los payloads realmente publicados; y repetir deduplicación global solo cuando el inventario esté completo.
+
+Referencias de artefactos: [índice maestro](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41904620741/artifacts/13382512138), [informe de candidatos y deduplicación](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41904620741/artifacts/13382377370).
