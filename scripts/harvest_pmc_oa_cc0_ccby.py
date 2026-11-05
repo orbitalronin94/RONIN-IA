@@ -209,10 +209,14 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
     manifest = out / "manifest.jsonl"
     existing = set()
+    existing_hashes = set()
     if manifest.exists():
         for line in manifest.read_text(encoding="utf-8").splitlines():
             try:
-                existing.add(str(json.loads(line).get("pmcid")))
+                item = json.loads(line)
+                existing.add(str(item.get("pmcid")))
+                if item.get("sha256"):
+                    existing_hashes.add(str(item["sha256"]))
             except Exception:
                 continue
 
@@ -237,8 +241,10 @@ def main() -> int:
                 size = record["text_bytes"]
                 if size < args.min_text_bytes:
                     continue
+                if record["sha256"] in existing_hashes:
+                    continue
                 if total_text_bytes + size > args.max_text_bytes:
-                    break
+                    continue
                 line = (json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
                 if current_file is None or shard_raw + len(line) > 64 * 1024**2:
                     if current_file:
@@ -251,6 +257,7 @@ def main() -> int:
                 shard_raw += len(line)
                 manifest_file.write(json.dumps({k: v for k, v in record.items() if k != "text"}, ensure_ascii=False) + "\n")
                 existing.add(str(record["pmcid"]))
+                existing_hashes.add(str(record["sha256"]))
                 accepted += 1
                 total_text_bytes += size
                 if accepted % 250 == 0:
