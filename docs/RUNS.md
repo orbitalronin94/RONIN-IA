@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:04 | [Integración continua #1120 (run 41999401085)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999401085) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document local dual tutor training procedure. Trigger: push; rama: main; intento: 1. | e8ec2a18 |
 | 2026-11-05 09:04 | [Integración continua #1117 (run 41999337746)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999337746) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add end-to-end local dual tutor training runner. Trigger: push; rama: main; intento: 1. | 3e5450ae |
 | 2026-11-05 09:04 | [Integración continua #1113 (run 41999243706)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999243706) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document local dual tutor strategy. Trigger: push; rama: main; intento: 1. | 05b9eb1a |
 | 2026-11-05 09:04 | [Integración continua #1116 (run 41999322226)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999322226) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add local dual tutor MMLU-Pro distillation. Trigger: push; rama: main; intento: 1. | 7b646e0d |
