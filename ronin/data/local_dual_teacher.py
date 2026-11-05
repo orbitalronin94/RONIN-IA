@@ -9,10 +9,10 @@ import shutil
 import socket
 import subprocess
 import time
-from pathlib import Path
-from typing import Any
 import urllib.error
 import urllib.request
+from pathlib import Path
+from typing import Any
 
 
 LICENSES = {"mit", "apache-2.0"}
