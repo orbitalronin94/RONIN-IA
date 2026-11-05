@@ -7,6 +7,7 @@ on:
       - "scripts/inspect_scienceverse_rds.R"
       - ".github/workflows/inspect-scienceverse-rds.yml"
       - "data/datasets/candidates/scienceverse-fulltext/**"
+      - "data/datasets/candidates/scienceverse-crossref-verified/**"
 
 permissions:
   contents: read
@@ -18,7 +19,7 @@ concurrency:
 jobs:
   inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
         with:
@@ -28,26 +29,39 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y r-base r-cran-jsonlite
           Rscript -e 'stopifnot(requireNamespace("jsonlite", quietly=TRUE))'
-      - name: Verify payload, manifests and inspect all RDS objects
-        run: Rscript scripts/inspect_scienceverse_rds.R
+      - name: Inspect legacy ScienceVerse payloads
+        run: |
+          Rscript scripts/inspect_scienceverse_rds.R \
+            data/datasets/candidates/scienceverse-fulltext \
+            scienceverse-rds-inspection/legacy
+      - name: Inspect Crossref-verified eLife and Frontiers payloads
+        run: |
+          Rscript scripts/inspect_scienceverse_rds.R \
+            data/datasets/candidates/scienceverse-crossref-verified \
+            scienceverse-rds-inspection/crossref
       - name: Summarize verified RDS structures
         if: always()
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          report = Path("scienceverse-rds-inspection/structure-report.json")
-          if not report.exists():
+          reports = sorted(Path("scienceverse-rds-inspection").rglob("structure-report.json"))
+          if not reports:
               print("No structure report was produced.")
               raise SystemExit(0)
-          data = json.loads(report.read_text(encoding="utf-8"))
-          print(f"Status: {data['status']}")
-          for name, item in data.get("datasets", {}).items():
-              print(f"{name}: {item['eligible_rows']} eligible DOI rows; {item['payload_bytes']} bytes; SHA-256 {item['payload_sha256']}")
-          if data.get("errors"):
-              print("Errors:")
-              for error in data["errors"]:
-                  print(f"- {error}")
+          failed = False
+          for report in reports:
+              data = json.loads(report.read_text(encoding="utf-8"))
+              print(f"{report}: {data['status']}")
+              for name, item in data.get("datasets", {}).items():
+                  print(f"- {name}: {item['eligible_rows']} eligible DOI rows; {item['payload_bytes']} bytes; SHA-256 {item['payload_sha256']}")
+                  for error in item.get("validation_errors", []):
+                      print(f"  ERROR: {error}")
+              for error in data.get("errors", []):
+                  print(f"ERROR: {error}")
+              failed = failed or data.get("status") != "PASS_STRUCTURE_AND_PROVENANCE_HASHES"
+          if failed:
+              raise SystemExit("At least one ScienceVerse RDS inspection failed.")
           PY
       - uses: actions/upload-artifact@v6
         if: always()
