@@ -50,18 +50,12 @@ Se ha registrado una revisión a nivel de archivo en `data/datasets/reviews/nasa
 
 ## Ampliación de revisión de archivos NASA (2026-11-05)
 
-La auditoría por archivo se amplió de cuatro a **ocho textos**. El resultado acumulado queda así:
+La auditoría por archivo cubre ahora **10 textos**:
 
-- **6 pasan revisión manual de legibilidad como candidatos:** `19620002819`, `19630000935`, `19620004488`, `19630000937`, `19640011871` y `19630005290`. En los cuatro se contrastaron título/autoría y la determinación de distribución/copyright con sus fichas NTRS oficiales, y se inspeccionó OCR en secciones representativas.
+- **6 pasan revisión individual y se han copiado** al corpus acotado `data/datasets/admitted/nasa-ntrs-file-reviewed-v1/`: `19620002819`, `19630000935`, `19620004488`, `19630000937`, `19640011871` y `19630005290`.
 - **3 retenidos por OCR severo:** `19620000001`, `19620002834` y `19620002866`.
-- **1 retenido por derechos y OCR no resueltos a nivel de documento:** `19630000936`. Su texto parece corresponder a una sección del volumen NASA-TN-D-1510, pero no se resolvió una ficha individual con determinación de derechos propia; la ficha del volumen advierte que algunas partes pueden contener material protegido. No se hereda automáticamente el permiso del volumen.
+- **1 retenido por derechos y OCR no resueltos:** `19630000936`.
 
-Los cuatro pases siguen siendo candidatos: no se admiten todavía. Los otros cuatro permanecen en hold. El detalle de los ocho, incluidos SHA de blob, tamaños, enlaces NTRS, hallazgos y disposición, está en `data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json`.
+Los seis pases suman **701.871 bytes UTF-8**. Sus copias coinciden byte por byte con los originales (Git blob SHA-1 idéntico); el SHA-256, tamaño, título, fuente y destino constan en el manifiesto documental del corpus acotado. Los cuatro retenidos no se copiaron y los **814 textos restantes siguen sin revisión individual**.
 
-El constructor comprueba para los 824 textos NASA del paquete los SHA-256 y tamaños contra el manifiesto fuente, aplica la allowlist de derechos por documento y rechaza duplicados exactos dentro de la propia colección. Eso no sustituye la deduplicación global entre fuentes ni la revalidación de redistribución previa al snapshot de entrenamiento.
-
-
-Revisión añadida: el documento NASA-SP-7002 / NTRS 19640011871 (*High Energy Propellants: A Continuing Bibliography*) se inspeccionó en portada, introducción, entradas bibliográficas y sección posterior. Su ficha individual confirma autoría institucional NASA, distribución pública y uso público gubernamental. El OCR separa letras y contiene errores locales, pero la estructura de bibliografía anotada y las referencias siguen siendo legibles. Se clasifica como candidato con ruido OCR; no se admite hasta superar las puertas globales.
-
-
-Segunda revisión añadida: NTRS 19630005290 / NASA-SP-30 (*The Observatory Generation of Satellites*). La ficha individual confirma distribución pública y uso público gubernamental. Se inspeccionaron portada/foreword y varios tramos del cuerpo: la prosa técnica principal es coherente, aunque el OCR presenta sustituciones y daños en figuras/tablas. Se marca como candidato con ruido OCR, no como admitido.
+La colección completa de 824 sigue siendo candidata. Los seis documentos aceptados permanecen sin habilitación de entrenamiento ni cómputo Level A hasta completar deduplicación exacta/aproximada global, revalidación de restricciones y particionado. La comprobación de integridad se ejecuta en `.github/workflows/validate-nasa-file-reviewed-corpus.yml`.
