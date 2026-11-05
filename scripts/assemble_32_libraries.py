@@ -75,6 +75,10 @@ def domain_scores(text: str) -> dict[str, dict[str, float]]:
     }
 
 
+def density_for_domain(text: str, domain: str) -> float:
+    return score_record(text, domain, Counter(), 1)["semantic_density"]
+
+
 def choose_domain(text: str) -> tuple[str | None, float, dict[str, float]]:
     scores = domain_scores(text)
     ranked = sorted(
@@ -264,7 +268,7 @@ def main() -> int:
                 "source_identifier": row.get("source_url"),
                 "license": row.get("license_id_claimed_for_collection"),
                 "rights_status": "collection_cc_by_claim_item_source_rights_pending",
-                "semantic_density": choose_domain(text)[1],
+                "semantic_density": density_for_domain(text, "law"),
             }
             buckets["law"].append(record)
             input_counts["gplsi_candidate_documents"] += 1
@@ -284,7 +288,7 @@ def main() -> int:
                 "source_identifier": row.get("doi"),
                 "license": "CC-BY-4.0",
                 "rights_status": "per_doi_license_verified_candidate_privacy_quality_review_pending",
-                "semantic_density": choose_domain(text)[1],
+                "semantic_density": density_for_domain(text, "social_sciences"),
             }
             buckets["social_sciences"].append(record)
             input_counts["collabra_candidate_documents"] += 1
@@ -321,6 +325,13 @@ def main() -> int:
     report = {
         "schema_version": "1.0",
         "dataset_id": "ronin-initial-32-libraries",
+        "source_artifacts": {
+            "covost2": {"workflow_run_id": 41990563417, "artifact_id": 13398675118, "payload_sha256": "3ab1f073fdafc0a458add4102c01d114f1797ec245e0ddb47891bc3d39ed2744"},
+            "common_corpus_cc0": {"workflow_run_id": 41933372089, "artifact_id": 13371639293, "payload_sha256": "899380093e232ff266d724bd2eb44430a033930104fc859bd8d7eefb491e1bb8"},
+            "gplsi_cleartext": {"workflow_run_id": 41935114828, "artifact_id": 13373282757, "payload_sha256": {"cas": "e7cc5b66aa50dc2ba296ffeb348ea0f4e9a3c10fe22de93860bfe6fd0c1945cd", "val": "15ea1a2495f312ee95e213cc4d851f9e3dca7c7d1e5c13259f3c859479a8219d"}},
+            "literature_es_v1": {"workflow_run_id": 41926088900, "artifact_id": 13368542769, "payload_sha256": "9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"},
+            "scienceverse_collabra": {"workflow_run_id": 41992987567, "artifact_id": 13398842442, "payload_sha256": "4b7349457afd3f41cd3b05f5e72f833cd63b21362dd08a2075f52fa2a35225b9"}
+        },
         "status": "partial_candidate_library_pack_not_admitted",
         "library_count": len(library_reports),
         "domain_count": len(DOMAINS),
