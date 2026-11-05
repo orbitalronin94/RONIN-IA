@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   consolidate:
-    if: \${{ github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -26,44 +26,53 @@ jobs:
           fetch-depth: 0
 
       - name: Download completed domain shards
+        id: download
+        continue-on-error: true
         uses: actions/download-artifact@v6
         with:
           pattern: ronin-pmc-oa-*-candidates
           path: incoming
           merge-multiple: false
-          run-id: \${{ github.event.workflow_run.id }}
-          github-token: \${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Record that the source run published no candidate artifacts
+        if: ${{ steps.download.outcome != 'success' }}
+        run: |
+          echo "No PMC candidate artifacts were published by source run ${{ github.event.workflow_run.id }}; consolidation is skipped without inventing an empty corpus."
 
       - name: Aggregate, verify and count globally unique documents
+        id: aggregate
+        if: ${{ steps.download.outcome == 'success' }}
         env:
-          SOURCE_RUN_ID: \${{ github.event.workflow_run.id }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
-          mkdir -p "data/datasets/candidates/pmc-oa-expansion-\${SOURCE_RUN_ID}" consolidated
-          cp -a incoming/. consolidated/shards/ 2>/dev/null || true
           python scripts/aggregate_pmc_candidate_shards.py \
             --input-root incoming \
-            --output-root "data/datasets/candidates/pmc-oa-expansion-\${SOURCE_RUN_ID}" \
+            --output-root "data/datasets/candidates/pmc-oa-expansion-${SOURCE_RUN_ID}" \
             --run-id "$SOURCE_RUN_ID" \
             --minimum 3040
 
-      - name: Publish complete candidate package
+      - name: Publish candidate package and audit manifest
+        if: ${{ steps.aggregate.outcome == 'success' }}
         uses: actions/upload-artifact@v6
         with:
-          name: ronin-pmc-oa-multidomain-\${{ github.event.workflow_run.id }}
+          name: ronin-pmc-oa-multidomain-${{ github.event.workflow_run.id }}
           path: |
             incoming/
-            data/datasets/candidates/pmc-oa-expansion-\${{ github.event.workflow_run.id }}/manifest.json
-          if-no-files-found: warn
+            data/datasets/candidates/pmc-oa-expansion-${{ github.event.workflow_run.id }}/manifest.json
+          if-no-files-found: error
           compression-level: 1
           retention-days: 90
 
       - name: Commit dataset index to main
+        if: ${{ steps.aggregate.outcome == 'success' }}
         env:
-          SOURCE_RUN_ID: \${{ github.event.workflow_run.id }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "data/datasets/candidates/pmc-oa-expansion-\${SOURCE_RUN_ID}/manifest.json"
+          git add "data/datasets/candidates/pmc-oa-expansion-${SOURCE_RUN_ID}/manifest.json"
           if git diff --cached --quiet; then
             echo "No candidate manifest to commit."
           else
