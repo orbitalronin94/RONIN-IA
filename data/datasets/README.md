@@ -340,3 +340,23 @@ The exact workflow IDs, artifact IDs, row counts, payload byte counts, SHA-256 v
 
 
 The expanded 32-domain / 64-library catalogue now maps 21 audited candidate source IDs to their relevant domain libraries through `candidate_source_links`. The mapping is traceability only: it includes metadata-only, preflight-only and quarantined sources with explicit roles; no source link promotes a library to admitted or training-eligible. CI validates that every mapped ID exists in the source audit register.
+
+## Adjudication of all mapped sources (2026-11-05)
+
+Every one of the 64 entries in `candidates/github-source-audit.json` has an explicit, updated disposition in `candidates/library-adjudication-2026-11-05.json`. This is a source-level triage register, not a substitute for document-level rights decisions or a training admission manifest.
+
+| Disposition | Sources | Treatment |
+|---|---:|---|
+| Candidate — item-level review still required | 29 | Exact versions, licenses, payloads, privacy, quality, deduplication and splits not yet verified. |
+| CoVoST — rights sign-off/global dedup hold | 1 | Corrected train-only pipeline succeeds; 337,973 filtered rows in Catalan/English; sign-off, sample review and global dedup remain. |
+| ParlaIbero — privacy/payload-quality hold | 1 | CC BY 4.0, 558,940 speech rows and 934.9M text characters; large payload deliberately not downloaded pending privacy review. |
+| DReaM-es-open — document-level rights/quality hold | 1 | 9.1M tokens/717,854 sentences declared; 128 document records need work/edition review and OCR sampling. |
+| GPLSI ClearText CAS/VAL — embedded source-rights hold | 2 | 11 CAS + 6 VAL documents remain candidates; collection-level CC BY does not clear original source documents. One CAS source is explicitly quarantined. |
+| VoxPopuli — rights/privacy hold | 1 | 1,041 CC0-labelled records inspected; Parliament scope, attribution and privacy still unresolved. |
+| Reject under current policy | 13 | Incompatible rights or sensitive-data scope; no ingestion. |
+| Quarantine — no ingestion | 4 | Rights, privacy or provenance conflicts unresolved. |
+| Metadata only — not a training library | 12 | Discovery/provenance/retrieval/graph support only; do not count as text libraries. |
+
+**Result: 0 new text libraries admitted and 0 new payloads training-eligible.** The existing `admitted/literature-es-v1/` remains the only admitted text corpus. The corrected CoVoST candidate and ParlaIbero preflight are now backed by immutable manifests and quality/audit evidence, but neither is promoted. Metadata-only sources do not fill any of the 32 General/HKD text libraries.
+
+The next admission batches prioritize exact-scope CC BY/CC0 text with bounded payloads: document-cleared DReaM works, individual GPLSI documents with verified source licenses, the CoVoST multilingual language pool after sign-off, and scientific full text with per-article licensing. Sources with NC/ND/ShareAlike restrictions, sensitive personal data without a valid processing basis, or packaging-only license claims stay excluded. Every admitted library must be added under `data/datasets/admitted/` with its own immutable manifest, attribution bundle, train/validation/test hashes and README entry in the same change.
