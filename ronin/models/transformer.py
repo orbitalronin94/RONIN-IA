@@ -22,20 +22,29 @@ class RMSNorm(nn.Module):
         return (x * scale.to(dtype=x.dtype)) * self.weight
 
 
-def apply_rope(x: torch.Tensor, theta: float) -> torch.Tensor:
-    """Aplica RoPE a un tensor [batch, heads, sequence, head_dim]."""
-    length = x.shape[-2]
-    head_dim = x.shape[-1]
+def _rope_frequencies(length: int, head_dim: int, theta: float, device: torch.device) -> tuple[torch.Tensor, torch.Tensor]:
+    """Construye las frecuencias RoPE en FP32 para una longitud dada."""
     if head_dim % 2:
         raise ValueError("head_dim debe ser par para aplicar RoPE")
-    device = x.device
     inv_freq = 1.0 / (
         theta ** (torch.arange(0, head_dim, 2, device=device, dtype=torch.float32) / head_dim)
     )
     positions = torch.arange(length, device=device, dtype=torch.float32)
     angles = torch.outer(positions, inv_freq)
-    cos = angles.cos().to(dtype=x.dtype)[None, None, :, :]
-    sin = angles.sin().to(dtype=x.dtype)[None, None, :, :]
+    return angles.cos(), angles.sin()
+
+
+def apply_rope(
+    x: torch.Tensor,
+    theta: float,
+    frequencies: tuple[torch.Tensor, torch.Tensor] | None = None,
+) -> torch.Tensor:
+    """Aplica RoPE; permite reutilizar frecuencias precalculadas."""
+    length = x.shape[-2]
+    head_dim = x.shape[-1]
+    cos_table, sin_table = frequencies or _rope_frequencies(length, head_dim, theta, x.device)
+    cos = cos_table[:length].to(dtype=x.dtype)[None, None, :, :]
+    sin = sin_table[:length].to(dtype=x.dtype)[None, None, :, :]
     even = x[..., 0::2]
     odd = x[..., 1::2]
     rotated = torch.stack((even * cos - odd * sin, even * sin + odd * cos), dim=-1)
@@ -50,6 +59,11 @@ class CausalSelfAttention(nn.Module):
         self.head_dim = config.d_model // config.n_heads
         self.n_rep = self.n_heads // self.n_kv_heads
         self.rope_theta = config.rope_theta
+        rope_cos, rope_sin = _rope_frequencies(
+            config.context_length, self.head_dim, self.rope_theta, torch.device("cpu")
+        )
+        self.register_buffer("_rope_cos", rope_cos, persistent=False)
+        self.register_buffer("_rope_sin", rope_sin, persistent=False)
         kv_width = self.n_kv_heads * self.head_dim
         self.q_proj = nn.Linear(config.d_model, config.d_model, bias=config.bias)
         self.k_proj = nn.Linear(config.d_model, kv_width, bias=config.bias)
@@ -62,8 +76,9 @@ class CausalSelfAttention(nn.Module):
         q = self.q_proj(x).view(batch, length, self.n_heads, self.head_dim).transpose(1, 2)
         k = self.k_proj(x).view(batch, length, self.n_kv_heads, self.head_dim).transpose(1, 2)
         v = self.v_proj(x).view(batch, length, self.n_kv_heads, self.head_dim).transpose(1, 2)
-        q = apply_rope(q, self.rope_theta)
-        k = apply_rope(k, self.rope_theta)
+        rope_frequencies = (self._rope_cos, self._rope_sin)
+        q = apply_rope(q, self.rope_theta, rope_frequencies)
+        k = apply_rope(k, self.rope_theta, rope_frequencies)
         if self.n_rep > 1:
             k = k.repeat_interleave(self.n_rep, dim=1)
             v = v.repeat_interleave(self.n_rep, dim=1)
