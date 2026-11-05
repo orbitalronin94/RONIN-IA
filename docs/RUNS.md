@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 13:59 | [Integración continua #1480 (run 42040438201)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42040438201) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(data\): use real Apache license text in Mathlib fixture. Trigger: push; rama: main; intento: 1. | b4e4dd1d |
 | 2026-11-05 13:57 | [Integración continua #1479 (run 42040381503)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42040381503) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(data\): fix candidate artifact and license fixtures. Trigger: push; rama: main; intento: 1. | 438ac362 |
 | 2026-11-05 13:57 | [Integración continua #1478 (run 42040221521)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42040221521) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(eval\): allow harmless floating-point batch-order variation. Trigger: push; rama: main; intento: 1. | 3773c1f6 |
 | 2026-11-05 13:55 | [Integración continua #1477 (run 42039738941)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42039738941) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: perf\(data\): stream corpus mixture with incremental validation and hashes. Trigger: push; rama: main; intento: 1. | 3bb771c2 |
