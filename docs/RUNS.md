@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 11:22 | [Integración continua #1364 (run 42018423795)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42018423795) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(data\): validate exact copies of six reviewed NASA texts. Trigger: push; rama: main; intento: 1. | a41ce53f |
 | 2026-11-05 11:21 | [Integración continua #1358 (run 42018259822)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42018259822) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data\(dataset\): register six file-reviewed NASA texts. Trigger: push; rama: main; intento: 1. | 66c4c7a4 |
 | 2026-11-05 11:20 | [Integración continua #1356 (run 42018140742)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42018140742) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data\(dataset\): copy reviewed NASA text 19630005290 into scoped corpus. Trigger: push; rama: main; intento: 1. | dd7cb84f |
 | 2026-11-05 11:20 | [Integración continua #1353 (run 42018072058)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42018072058) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): write valid newline-terminated audit JSON. Trigger: push; rama: main; intento: 1. | c6f7affc |
