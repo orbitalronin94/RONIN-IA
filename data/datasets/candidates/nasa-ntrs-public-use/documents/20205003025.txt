@@ -1,0 +1,250 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+APPLICATION OF THE NASA MULTISCALE ANALYSIS TOOL: 
+MULTISCALE INTEGRATION AND INTEROPERABILITY 
+
+ 
+
+APPLICATION OF THE NASA MULTISCALE ANALYSIS 
+TOOL: MULTISCALE INTEGRATION AND 
+
+INTEROPERABILITY 
+
+Trenton M. Ricks1, Evan J. Pineda1,  
+Brett A. Bednarcyk2, Steven M. Arnold3 
+
+1.  Research Aerospace Engineer, 2. Research Materials 
+Engineer, 3. Technical Lead: Multiscale Modeling 
+
+Multiscale and Multiphysics Modeling Branch 
+Materials and Structures Division 
+
+NASA Glenn Research Center 
+Cleveland, OH USA 
+
+SUMMARY  
+
+The NASA Multiscale Analysis Tool (NASMAT) was developed recently 
+
+to allow a wide variety of multiscale analysis problems to be effectively 
+
+and efficiently solved. The architecture of NASMAT was established 
+
+specifically to enable parallelized, “plug-and-play” functionality to reduce 
+
+the complexity associated with adding new features to the code in the 
+
+future and to allow end users to rapidly implement and evaluate user-
+
+defined capabilities. Additionally, the tool utilizes recursive data 
+
+structures and subroutines to allow for an arbitrary number of length 
+
+scales when performing multiscale analyses of heterogeneous materials. 
+
+These features permit the rapid integration of user-defined capabilities 
+
+(e.g., a material model, micromechanics approach, or failure theory) at 
+
+all stages within a NASMAT calculation while leveraging built-in 
+
+techniques where needed. Additionally, these features allow NASMAT to 
+
+both be called from an external program as well as call an external 
+
+program. This paper specifically focuses on the multiscale integration and 
+
+interoperability of NASMAT with other analysis techniques through an 
+
+illustrative, multiscale analysis of a 3D woven polymer matrix composite 
+
+(PMC). 
+
+1:  Overview of NASMAT  
+
+The NASA Multiscale Analysis Tool (NASMAT) is a state-of-the-art, 
+parallelized, “plug-and-play”, computational platform for performing 
+multiscale analysis of heterogeneous materials. The software 
+architecture was developed while keeping the following key ideas in 
+mind: code utility, upgradability, maintainability, and interoperability. As a 
+result, recursive procedures, subroutines, and data structures were 
+
+
+
+APPLICATION OF THE NASA MULTISCALE ANALYSIS TOOL: 
+MULTISCALE INTEGRATION AND INTEROPERABILITY 
+
+ 
+
+developed that allow an arbitrary number of scales to be defined and 
+seamlessly pass data between each other. This idea forms the 
+foundation of the Multiscale Recursive Micromechanics approach 
+(MsRM) utilized in this paper. Furthermore, NASMAT was designed to be 
+modular such that a user would have the ability to integrate a 
+micromechanics, material, damage, or failure model, for example, with 
+minimal effort. In doing so, the user would retain access to all other 
+supported features. To demonstrate the functionality and capability of the 
+software, a multiscale analyses of a 3D woven PMC was performed.  
+
+2:  Multiscale Analysis of a 3D Woven PMC with Damage 
+
+In this example, a multiscale model of an AS4 carbon fiber/ RTM6 epoxy 
+matrix 3D orthogonal woven PMC was generated and compared to 
+available test data [1]. The presence of voids in the bulk matrix was also 
+included in the model. The woven architecture is shown in Figure 1a 
+where matrix subcells have been hidden for clarity. X-ray computed 
+tomography was performed to generate a set of nominal tow sizes and 
+spacings. Figure 1b contains the multiscale modelling strategy for 
+analyzing this 3D woven composite. Through a series a localization 
+operations, successively lower levels are called until ultimately the 
+individual fiber, matrix, and void constituents are reached. Once a 
+constituent material is reached at any level, no further localizations can 
+occur. Once all localizations have occurred for a given level, field values 
+and properties are then homogenized and passed up to the previous 
+level. In this multiscale approach, the textile architecture is modeled using 
+the three-dimensional Generalized Method of Cells (GMC3D) 
+micromechanics theory, the tows are modeled using the two-dimensional 
+GMC (GMC2D) micromechanics theory with a hexagonal arrangement of 
+fibers, and the bulk matrix (matrix plus voids) is modeled using the Mori-
+Tanaka mean-field micromechanics theory [2]. Level 1 and Level 2 
+represent a two-step homogenization procedure using the GMC3D 
+micromechanics theory similar to the one adopted in Ref. [1]. Maximum 
+stress and maximum strain failure criteria were specified for the fiber 
+constituent in both tension and compression, and a maximum stress 
+failure criterion was specified for the matrix (same in tension/ 
+compression) based on literature data [3-4]. The predicted warp-direction 
+(x3) stress/strain curve is compared to experimental data in Figure 2. 
+Good agreement between the simulated and experimentally observed 
+stress/strain curves were obtained with minimal analysis assumptions. 
+The predicted warp-direction tensile modulus (59.3 GPa) and tensile 
+strength (753 MPa) are both within 3% of experimental data [1]. 
+Furthermore, this NASMAT analysis performed 100 loading increments 
+in roughly 30 seconds, a significant computational cost savings over high-
+fidelity finite element analyses. The predictive capability of NASMAT 
+
+
+
+APPLICATION OF THE NASA MULTISCALE ANALYSIS TOOL: 
+MULTISCALE INTEGRATION AND INTEROPERABILITY 
+
+ 
+
+combined with its speed provides an attractive tool for performing rapid 
+engineering trade studies of complex composite systems. This example 
+also demonstrated NASMAT’s flexibility by incorporating five separate 
+levels of calculations and three distinct micromechanics theories under 
+one platform. 
+
+ 
+
+Figure 1: a) GMC3D discretization of a 3D orthogonal composite with 
+matrix subcells hidden and tow materials shown (red-warp, green-weft, 
+blue-binder) and b) multiscale scale modeling strategy 
+
+ 
+
+Figure 2: Warp-direction stress/strain response of a 3D woven composite. 
+Experimental data from Ref. [1]. 
+
+
+
+APPLICATION OF THE NASA MULTISCALE ANALYSIS TOOL: 
+MULTISCALE INTEGRATION AND INTEROPERABILITY 
+
+ 
+
+3:  Release and Upcoming Features 
+
+The first public release of NASMAT (version 2.0) is expected to be 
+October 2020. In addition to the capabilities described in the example 
+above, support will be available for the Macroscale Application 
+Programming Interface (MacroAPI - the interface used to connect 
+NASMAT with an external software), classical lamination theory, three 
+additional micromechanics techniques (High-Fidelity GMC2D 
+(HFGMC2D), Parametric HFGMC2D (PHFGMC2D), Carrera Unified 
+Formulation (CUF)), a viscoplastic material model, a progressive damage 
+model, and multiscale data output via HDF5. Furthermore, enhanced 
+tools to visualize multiscale data are expected to be separately released. 
+
+4:  Acknowledgments 
+
+Primary development was funded through the NASA Aeronautics 
+Research Mission Directorate’s (ARMD’s) Transformational Tools and 
+Technologies (TTT) Project. Additional support came from ARMD’s 
+Advanced Composites (AC) Project and the Space Technology Mission 
+Directorate’s Composite Technology for Exploration (CTE) Project. The 
+authors are also grateful to Dr. Ibrahim Kaleel, Dr. Marco Petrolo, and Dr. 
+Erasmo Carrera for help, guidance, and assisting with the integration of 
+CUF into NASMAT and similarly, Dr. Rami Haj-Ali for integrating 
+PHFGMC2D within NASMAT. 
+
+REFERENCES 
+
+1. Farrokh, B., Segal, K. N., Ricks, T. M., Miller, S. G., Rodini, B. T., and 
+
+Sleight, D. S., 2019. Uniaxial Tensile Properties of AS4 3D Woven 
+
+Composites with Four Different Resin Systems: Experimental Results 
+
+and Analysis – Property Computations. In Composites and Advanced 
+
+Materials Expo 2019. 
+
+2. Aboudi, J., Arnold, S.M. and Bednarcyk, B.A., 2012. Micromechanics 
+
+of composite materials: a generalized multiscale analysis approach. 
+
+Butterworth-Heinemann.  
+
+3. Soden, P.D., Hinton, M.J. and Kaddour, A.S., 2004. Lamina 
+
+properties, lay-up configurations and loading conditions for a range of 
+
+fibre reinforced composite laminates. In Failure Criteria in Fibre-
+
+Reinforced-Polymer Composites (pp. 30-51). Elsevier. 
+
+4. Brauner, C., Bauer, S. and Herrmann, A.S., 2015. Analysing process-
+
+induced deformation and stresses using a simulated manufacturing 
+
+process for composite multispar flaps. Journal of Composite 
+
+Materials, 49(4), pp.387-402. 
+
+

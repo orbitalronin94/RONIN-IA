@@ -1,0 +1,393 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Radio Frequency Mass Gauge Automation
+
+
+Radio Frequency Mass Gauging (RFMG) Automation
+2022 NASA Data Science Summit
+November 15-17, 2022
+
+
+
+1
+
+
+
+
+
+Acknowledgments
+MSFC CE – Kathryn Henkel
+Glenn Research Center (GRC) RFMG Team members:
+Dr. Greg Zimmerli
+Marius Asipauskas
+Nick Lantz
+Dr. David Fischer
+MSFC EV – Dr. Brian Bae and Sanjog Gururaj (Pathways Intern)
+MSFC ER – Kris Mcdougal and David Gillespie
+MSFC ES – Scott Tashakkor, Chris Whetsel, Anthony Maenza, Bill Larson, Jason Stelly
+Thank You!
+2
+
+
+GRC did this because they were interested, not because they had to
+2
+
+RFMG Overview
+
+Antennas placed in the tank measure the RF spectrum, which changes with fill level since the dielectric fluid (e) slows the speed of light
+The basis of the RFMG is that these changes can be accurately predicted via RF/fluid simulations (e.g., Comsol or CST Studio)
+NESC-RP-20-01603 page 50, the NASA Engineering and Safety Center (NESC) identified an area of complex development for RFMG to be “Generation of simulations for all fluid configurations expected during gauging operations”.
+3
+
+
+
+
+Discuss the technology
+The dips on the right graph are example of frequencies
+Highlight the simulation aspect is critical, NESC identified this as well
+3
+
+Data Analysis 
+ Data is generated through “sweeps” during which the antenna emits a range of signals, from lower to higher frequencies, then measures the response
+ Dips in response frequencies occur at resonant frequencies based on the tank dimensions and the fluid
+ By tracking the resonant frequencies (also referred to as peaks or eigenfrequencies), the entire sweep can be reduced into a few dozen datapoints
+
+
+
+
+4
+Sweep Data (representative)
+Resonant Frequencies (representative)
+
+
+
+
+
+
+4
+
+Data Analysis (Cont.)
+Structural Heat Intercept, Insulation and Vibration Evaluation Rig (SHIIVER)
+Ground data, two different fluid tests (Hydrogen and Nitrogen)
+Robotic Refueling Mission 3 (RRM3)
+Ground and Micro-gravity Data from ISS
+Fluid is CH4 (Methane)
+Multiple configurations of fluid in Micro-gravity
+Truth data considered to be simulations
+No new simulations run
+Not all information was measured during experiments
+ML models work best training on the same data set they’ll predict on
+Models will introduce some error, but if sims already have error this will be captured
+
+5
+
+
+Measured information did not always include true mass levels
+Tanks have stratification (noticeable gradient) in properties from high to low end
+This is same phenomenon that SLS Cryo Tanks have
+Given only frequency peaks measured, not amplitude
+
+5
+
+Example of Simulation vs Real
+Not all simulated peaks will be measured
+Peaks can be present but simulation and measurement error show differences
+Some drift in measured data
+Amplitudes different (not given)
+Time is not considered
+No linking from point to point only snapshots
+
+Peak Simulated but not measured
+
+Amplitude difference
+6
+
+
+Drift is noticeable at Higher frequencies (right hand side of the graph)
+Discuss challenge of varying number of peaks
+6
+
+Methodology
+Original (GRC)
+RFMG analysis software finds the peaks, compares the frequencies to a database of simulations, and returns the best match %fill-level information
+This is a “bucket” methodology while automated, looks for nearest neighbor matches
+Low computational need but large amount of data
+Deterministic
+Machine Learning (ML) technique
+Let the computer learn from the simulation results
+Simulations already being run
+Interpolation between simulations
+Higher computational load, but lower memory need
+Non-deterministic (Statistical) 
+
+7
+
+
+Original methodology
+can work but has resolution based on simulations
+Does not handle unknowns well
+ES ML
+Still verification issues
+Provides fidelity between simulation points
+Possibility of ML model (only) being model of Simulations
+
+7
+
+Machine Learning Philosophy
+Unknown which ML model will work best for this scenario
+Dense Neural Network
+Ensemble methods
+Multiple gradient boosted decision Trees
+Multiple Regressors
+Decision Tree, Kernal Ridge, k-Nearest Neighbor …
+Test Tuning of the models to see better results
+Ensure independence of model to outcome
+
+
+
+8
+
+
+DNN – each layer is connected to all previous layers
+Ensemble – multiple methods working together (ie voting)
+Gradient boosted decision trees- multiple weak decision trees that are built dotegher
+Regressors (from statistics) – estimate the relationships between variables (curve fitting)
+Discuss images on side
+8
+
+Results (SHIIVER)
+9
+
+
+#1 Trained only on full data, predicting on full data
+Sanity check
+#2 Trained with random dropped frequencies and full data, plotting predictions on data with dropped frequencies only 
+Simulation perfect but real measurements missing
+
+
+Results (SHIIVER)
+10
+
+
+
+#2 Trained with random zeros and full data
+#3 Trained with padding zeros and full data
+#4 Trained with padding zero data only
+
+
+Intended to show examples of testing/ and improvement and variations
+10
+
+Results (SHIIVER)
+11
+#7 Pre-normalized (overall mean and std) data with padding zeros 
+
+
+#5 Pre-normalized (per frequency min-max) data with padding zeros 
+#6 Pre-normalized (overall min-max) data with padding zeros 
+
+
+
+
+11
+
+Results (SHIIVER)
+12
+
+
+Model #6 trained using the overall max and min frequency of the training data and predicted the combined peaks LN2 experimental SHIIVER data by normalizing it using the overall max and min of the experimental data
+Model #7 on the right normalized the training data using the overall mean and std of all frequencies of the training data and predicted LN2 data by normalizing it using training mean and std.
+
+
+Results (SHIIVER)
+13
+
+XGBoost – Gradient Boosted Decision Trees Ensemble Method
+
+
+
+
+
+Results (SHIIVER)
+Consistent problem with data offset and understanding…
+Spent time with GRC understanding data and limitations
+Discovered that we should only consider a certain frequency response range
+
+14
+
+
+
+
+Results (SHIIVER)
+15
+
+
+
+
+
+
+Results (SHIIVER)
+16
+
+
+Best results after tuning
+
+
+Results (RRM3)
+17
+
+
+
+Microgravity was all at ~90% fill but different configurations
+
+
+Microgravity
+Ground
+
+
+Imperfect results but this is by binning and surprising due to multiple configurations, one worry is ML model is trained to always output a specific value based on configuration
+17
+
+Conclusions/Summary
+ML models are specific to the configuration
+ML model is not calculating new information
+Each Tank/antenna configuration will have different frequencies
+ML models were mostly independent of tuning parameters
+ML predictions at least as good as original GRC method
+More automated as well
+Limited Data set
+Was still able to provide results
+No time dependency in results
+Unknown, at this time, if frequencies are always unique
+Validation of results to truth data was limited
+Depended on simulations
+ML validation and explain-ability
+Research needed on this topic
+Especially in Human Rated Class A software applications
+18
+NPR 7150.2D
+NASA-STD-8739.8A
+
+
+Future Work
+GRC personnel are interested in future collaboration
+RFMG technology is still being developed
+Focus was on the hardware and simplified algorithm
+MSFC development has been complimentary and provided expertise in area not present
+New Data from RFMG experimental Dewar Test will be available soon
+More complete data set (Team had input to improve information for models)
+Simulations and compilation of data is in progress
+Continue evaluating model performance and exploring new methods
+Select the most promising algorithms to continue investigating and optimizing
+Try new approaches with strong potential for success 
+Possibly extend the technology to provide improved slosh dynamics
+Partner with other teams to continue the development for controls
+Sloshing of fluid causes change in Center of Mass of vehicle
+Measurement provides explicit GNC input for proactive control
+Opposed to current implicit measurement/reactive 
+Socialized the idea and seems possible
+Working on proposal in the background
+RFMG implicitly determines “configuration” of fluid
+Same data used for the fluid level calculation
+
+19
+
+
+
+20
+Questions?
+
+
+image1.png
+
+image2.svg
+
+image3.jpeg
+
+image4.png
+
+image5.png
+
+image6.png
+
+image7.png
+
+image8.png
+
+image9.png
+
+image10.png
+
+image11.png
+
+image12.png
+
+image13.png
+
+image14.png
+
+image15.png
+
+image16.png
+
+image17.png
+
+image18.png
+
+image19.png
+
+image20.png
+
+image21.png
+
+image22.svg
+
+image23.png
+
+image24.png
+
+image25.png
+
+image26.png
+
+image27.png
+
+image28.png
+
+image29.png
+
+image30.png
+
+image31.png
+
+image32.png
+
+image33.png
+
+image34.png
+
+image35.jpeg
+

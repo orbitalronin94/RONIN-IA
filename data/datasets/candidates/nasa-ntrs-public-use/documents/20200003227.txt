@@ -1,0 +1,1201 @@
+Welcome!
+Welcome to the Ph.D. Thesis Defense of Michelle E. Rodio
+23 March 2020
+
+Agenda
+• Presentation of dissertation work
+• Questions from general attendees
+• Questions from dissertation committee
+• Committee deliberation and decision
+
+We will be starting promptly at 1:05 PM.
+
+Investigating the Feasibility and Stability for
+Modeling Acoustic Wave Scattering Using a
+Time-Domain Boundary Integral Equation with
+Impedance Boundary Condition
+
+Michelle E. Rodio
+Dissertation Defense
+23 March 2020
+
+Dedication
+
+Dr. Shahrdad G. Sajjadi
+February 1, 1961 - January 6, 2020
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+3
+
+Outline
+• Chapter 1: Introduction and Related Work
+• Chapter 2: Stable Time-Domain Boundary Integral Equation
+• Chapter 3: Basis Functions and Spatial Resolution
+• Chapter 4: Scalability and Performance Using CPUs
+• Chapter 5: Time-Domain Liner Impedance Boundary Conditions
+• Chapter 6: Stability Analysis and Numerical Results
+• Chapter 7: Concluding Remarks
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+4
+
+Outline
+• Chapter 1: Introduction and Related Work
+• Chapter 2: Stable Time-Domain Boundary Integral Equation
+• Chapter 3: Basis Functions and Spatial Resolution
+• Chapter 4: Scalability and Performance Using CPUs
+• Chapter 5: Time-Domain Liner Impedance Boundary Conditions
+• Chapter 6: Stability Analysis and Numerical Results
+• Chapter 7: Concluding Remarks
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+5
+
+Introduction
+• Reducing aircraft noise is a major objective in field of computational aeroacoustics.
+• Acoustic scattering problems can be modeled by reformulating convective wave equation as a
+boundary integral equation (BIE).
+• BIEs reduce spatial dimension by one, from three-dimensional partial differential equation to a
+two-dimensional surface integral equation.
+
+• Numerical solutions can be obtained by discretizing surface and solving using boundary
+element methods (BEMs).
+• BEMs effectively handle singular and infinite fields, ultimately saving computing memory and
+maintaining high computational efficiency.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+6
+
+Time- vs. Frequency-Domain Solvers
+• Methods for solving BIEs have been studied extensively in both frequency- and time-domain.
+• Frequency-domain solvers are the most used and researched within literature.
+• There are several distinct advantages to using a time-domain solver, including they:
+• Allow for simulation and study of broadband sources and time-domain transient signals
+[studying broadband sources in frequency-domain carries high computational cost].
+• Allow for scattering solutions at all frequencies to be obtained within a single computation
+using sparse matrices [frequency-domain requires inverting a large dense linear system].
+• Naturally couples with nonlinear computational fluids dynamics simulations.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+7
+
+Time-Domain Numerical Instability
+• Time-domain BIEs (TD-BIEs) have been used since the 1960s to study wave propagation.
+• As computers advanced and processing power improved, researchers discovered numerical
+instabilities when solving TD-BIEs over longer run times.
+• Instability tends to occur at large time steps as a result of the existence of internal modes of
+resonance of the body corresponding to time harmonic solutions of the integral equation.
+• In frequency-domain, resonant modes near frequency of interest yield an ill-conditioned
+matrix due to the existence of non-unique solutions at resonant frequencies.
+• Resonant modes result in numerical instabilities in the time-domain solution.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+8
+
+Burton-Miller Reformulation
+• Burton-Miller method is effective for eliminating resonant frequencies.
+• Supplementary integral equation is derived, resulting in unique solution for exterior problem.
+• Results in formation of hypersingular integrals, mitigated by regularization process.
+• Application of this method increases already high computational cost associated with timedomain solvers, and is reduced using fast algorithms and high performance computing.
+Research Objective
+
+Investigate feasibility and stability for modeling acoustic wave
+scattering using a Burton-Miller-type TD-BIE with IBC.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+9
+
+Impedance Boundary Conditions
+• BCs are defined through terms involving normal derivative of pressure.
+• On rigid bodies, normal derivative of pressure is equal to zero.
+• On soft bodies, normal derivative of pressure is non-zero and defined by IBC, 𝑍 𝜔 ,
+or admittance BC (ABC), 𝑌 𝜔 = 1/𝑍 𝜔 .
+• Impedance is a complex-valued, measured quantity.
+• Re(𝑍) is acoustic resistance.
+• Im(𝑍) is acoustic reactance.
+• Soft bodies imply that an acoustic liner is installed on the surface.
+
+• Acoustic liners are typically composed of an array of Helmholtz resonators.
+• Transformed into the time-domain using Fourier transforms, an IBC or ABC
+is coupled with TD-BIE to model acoustic wave scattering by soft bodies.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+10
+
+Lined, Un-Lined Comparison
+0.030
+
+• Consider scattering of an acoustic point
+source by a sphere with rigid (un-lined)
+and soft (lined) surfaces.
+
+Point Source
+
+0.025
+
+|Sound Pressure|
+
+• Frequency-domain solution along field
+line of coordinates −2.5 ≤ 𝑥 ≤ 2.5,
+𝑦 = 0, 𝑧 = 0 converted from timedomain at frequencies 𝜔 = 4𝜋, 8𝜋.
+
+0.020
+0.015
+0.010
+0.005
+
+Field Line of Coordinates
+
+23 March 2020
+
+Un-lined
+Un-lined
+Lined
+Lined
+
+0.000
+
+𝝎 = 𝟒𝝅
+𝝎 = 𝟖𝝅
+-2
+
+DISSERTATION DEFENSE
+
+-1
+0
+1
+Field Line of Coordinates
+
+2
+
+11
+
+Application of Acoustic Liners on Aircraft
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+12
+
+Acoustic Liner Models
+• It is necessary to study TD-BIE to ensure stability of the system once coupled with IBC.
+• Extended Helmholtz Resonator Model and Three-Parameter Impedance Model each represent
+acoustic liner impedance at a single frequency.
+• Broadband Impedance Model simulates multiple frequencies simultaneously.
+• For time-domain IBC to be physical, each model is required to be causal, real, and passive.
+Research Proposal
+
+Study numerical stability of coupling a IBC with a BurtonMiller-type TD-BIE using either the Extended Helmholtz,
+Three-Parameter, or Broadband Impedance model.
+23 March 2020
+
+DISSERTATION DEFENSE
+
+13
+
+Stability Assessment
+• In literature, convolution quadrature methods have been numerically proven stable up to
+second-order but no theoretical proof has yet been provided for other methods.
+• Eigenvalue analysis is current standard for studying the stability of TD-BIEs.
+• Though eigenvalue analysis alone is not sufficient for proving stability, it is necessary that
+numerical scheme has maximum eigenvalues no greater than unity.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+14
+
+Outline
+• Chapter 1: Introduction and Related Work
+• Chapter 2: Stable Time-Domain Boundary Integral Equation
+• Chapter 3: Basis Functions and Spatial Resolution
+• Chapter 4: Scalability and Performance Using CPUs
+• Chapter 5: Time-Domain Liner Impedance Boundary Conditions
+• Chapter 6: Stability Analysis and Numerical Results
+• Chapter 7: Concluding Remarks
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+15
+
+Governing Equation
+• Acoustic waves are assumed to be disturbances of small amplitudes.
+• With a uniform mean flow, acoustic disturbances are governed by linear convective wave
+equation, with homogeneous initial conditions:
+Linear Convective Wave Equation
+
+Homogeneous Initial Conditions
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+16
+
+Green’s Function
+• Introducing free-space adjoint Green's with homogeneous initial conditions:
+Free-Space Adjoint Green’s Function
+
+Initial Conditions
+• Wave propagation problem is reformulated into TD-BIE by considering operation:
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+17
+
+Resulting TD-BIE
+TD-BIE is representative of acoustic field in
+presence of a uniform mean flow
+
+Source Contribution
+23 March 2020
+
+DISSERTATION DEFENSE
+
+Retarded Time Values
+18
+
+Eliminating Resonant Frequencies
+• TD-BIE has an intrinsic numerical instability due to resonant frequencies resulting from nontrivial solutions in interior domain.
+• Resonant frequencies eliminated and stability achieved using Burton-Miller reformulation.
+• Reformulation is applied by taking derivative in form of:
+• Constants 𝑎 and 𝑏 define stability condition:
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+19
+
+Stable Burton-Miller Reformulation
+
+The reformulation contains both
+hyper and weak singularities that
+are reduced prior to discretization.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+20
+
+Impedance Boundary Condition
+The normal derivative of pressure is
+automatically zero on rigid surfaces.
+
+• It is assumed that scattering surface 𝑆 is decomposed into rigid 𝑆0 and soft 𝑆 𝑙 surfaces.
+• On rigid surfaces, a Zero Energy Flux BC is imposed.
+• On soft surfaces, 𝜕𝑝/𝜕𝑛′ of pressure is non-zero, and assuming 𝑀 = 0: 𝜕𝑝/𝜕𝑛′ = 𝜕𝑝/𝜕𝑛.
+
+• Acoustic pressure is related to impedance by:
+23 March 2020
+
+DISSERTATION DEFENSE
+
+21
+
+Outline
+• Chapter 1: Introduction and Related Work
+• Chapter 2: Stable Time-Domain Boundary Integral Equation
+• Chapter 3: Basis Functions and Spatial Resolution
+• Chapter 4: Scalability and Performance Using CPUs
+• Chapter 5: Time-Domain Liner Impedance Boundary Conditions
+• Chapter 6: Stability Analysis and Numerical Results
+• Chapter 7: Concluding Remarks
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+22
+
+Collocation Method
+• Stable Burton-Miller reformulation discretized using collocation methods.
+
+• Surface 𝑆 is divided into 𝑁 𝑒 boundary elements 𝐸𝑗 , 𝑗 = 1, … , 𝑁 𝑒 where
+collocation point 𝒓 𝑗 is located at centroid of each element 𝐸𝑗 .
+• Time-domain is divided into 𝑁 𝑡 time steps where 𝑡 𝑘 = 𝑘Δ𝑡.
+• Solution is obtained by approximating 𝑝 and 𝜕𝑝/𝜕𝑛 terms using spatial
+basis functions 𝜙 𝑗 and temporal basis functions 𝜓 𝑘 .
+• 𝒖 𝑘 and 𝒗 𝑘 denote vector of all unknowns on 𝑆0 and 𝑆 𝑙 .
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+23
+
+Basis Functions
+• The spatial and temporal basis functions are defined as follows:
+
+Constant Spatial
+Third-Order Temporal
+• Integrations are computed by high-order Gauss quadrature on a 6 × 6 grid.
+• The solution at 𝑡 𝑛 is interpolated using time steps 𝑡 𝑛−3 , 𝑡 𝑛−2 , 𝑡 𝑛−1 , 𝑡 𝑛 .
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+24
+
+Burton-Miller System of Equations
+• Evaluating Burton-Miller-type reformulation, it is cast into the following system:
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+25
+
+Burton-Miller System of Equations
+• Evaluating Burton-Miller-type reformulation, it is cast into the following system:
+
+For rigid body scattering, 𝒗 𝑘 = 𝟎.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+26
+
+Burton-Miller System of Equations
+• Evaluating Burton-Miller-type reformulation, it is cast into the following system:
+A second system is
+needed to solve for
+both 𝒖 𝑘 and 𝒗 𝑘 .
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+27
+
+Spatial Resolution of BEM
+• The spatial resolution is studied by assessing metric points-per-wavelength-squared (PPW2).
+• Consider scattering of acoustic point source by a rigid sphere centered at 0,0,0 with radius
+of 0.5 and point source of 1 located at 𝑥, 𝑦, 𝑧 = (0, 0, 1).
+• Computations carried out by increasing number of elements used from 729 to 72,901.
+• Solution along field line of coordinates −2.5 ≤ 𝑥 ≤ 2.5, 𝑦 = 0, 𝑧 = 0 used for analysis.
+4𝜋 2 𝑝 + 1
+𝑃𝑃𝑊2 =
+𝑘2 𝑆 𝐴
+
+𝑝 :
+𝑘 :
+𝑁 :
+𝑆𝐴 :
+23 March 2020
+
+2
+
+𝑁
+
+4𝜋 2 ⋅ DOF
+≈
+𝑘2 𝑆 𝐴
+
+order of the basis function
+wavenumber, 𝑘 = 𝑤/𝑐
+surface elements
+surface area
+DISSERTATION DEFENSE
+
+28
+
+Point Source
+
+Sound Pressure
+
+|Sound Pressure|
+
+Sphere Simulation
+𝜔 = 10𝜋
+
+Field Line of
+Coordinates
+
+|Sound Pressure|
+
+Field Line of Coordinates
+
+𝜔 = 20𝜋
+
+Field Line of Coordinates
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+29
+
+Sphere PPW2
+
+4𝜋 2 𝑝 + 1
+𝑃𝑃𝑊2 =
+𝑘2 𝑆 𝐴
+
+2
+
+𝑁
+
+4𝜋 2 ⋅ DOF
+≈
+𝑘2 𝑆 𝐴
+
+• Using exact solution, the relative error in the 𝐿2 norm is graphed as a function of 𝑃𝑃𝑊2.
+• Excellent spatial resolution demonstrated with relative error in 𝐿2 norm less than 3% and 5%,
+respectively, with 25 𝑃𝑃𝑊2 (original and rotated, respectively) likely due to using high-order
+Gauss quadrature integration over a closed domain.
+
+||Relative Error|| 𝟐
+
+||Relative Error|| 𝟐
+
+• over a closed, hence periodic, domain
+
+PPW2
+
+23 March 2020
+
+PPW2
+
+DISSERTATION DEFENSE
+
+30
+
+Outline
+• Chapter 1: Introduction and Related Work
+• Chapter 2: Stable Time-Domain Boundary Integral Equation
+• Chapter 3: Basis Functions and Spatial Resolution
+• Chapter 4: Scalability and Performance Using CPUs
+• Chapter 5: Time-Domain Liner Impedance Boundary Conditions
+• Chapter 6: Stability Analysis and Numerical Results
+• Chapter 7: Concluding Remarks
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+31
+
+Scalability and Performance Using CPUs
+• The Burton-Miller reformulation of the TD-BIE has been implemented in numerical algorithm
+called TD-FAST: Time-Domain Fast Acoustic Scattering Toolkit.
+• TD-FAST has capability of performing large-scale parallel computations using either central
+processing units (CPUs) or graphics processing units (GPUs).
+• TD-FAST has significant speed-up when utilizing GPU architecture, yet maintains ability to
+exploit parallelism with CPUs for instances when GPU hardware may be unavailable.
+• It is important to study performance of TD-FAST when utilizing CPU architecture only.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+32
+
+Problem Size and Core Count
+• Consider scattering of acoustic point source by a flat plate.
+• Dimension of flat plate :
+−0.5, 0.5 × −0.5, 0.5 × −0.1,0.1
+• Point source location
+:
+𝑥, 𝑦, 𝑧 = (0, 0, 1)
+• Assessed multiple problem sizes at differing processing powers.
+• Elements Range
+:
+70 elements to 7,000 elements
+• Processing Power
+:
+1 to 4 nodes, exclusive
+Ranging 1 to 128 cores
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+33
+
+Strong Scaling
+• Indicates how solution time varies with an increasing core count for a fixed problem size.
+• IDEAL: as core count increases, speedup is linearly proportional to problem size.
+• Speedup measures how must faster an algorithm performs compared to serial processing.
+
+As core count increases for a
+fixed problem size, there is an
+increase in time associated
+with performing parallel
+communications.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+34
+
+Outline
+• Chapter 1: Introduction and Related Work
+• Chapter 2: Stable Time-Domain Boundary Integral Equation
+• Chapter 3: Basis Functions and Spatial Resolution
+• Chapter 4: Scalability and Performance Using CPUs
+• Chapter 5: Time-Domain Liner Impedance Boundary Conditions
+• Chapter 6: Stability Analysis and Numerical Results
+• Chapter 7: Concluding Remarks
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+35
+
+Acoustic Pressure
+• Consider geometric body with surface treated with acoustic liner.
+• Assume model with no mean flow, i.e., Mach number 𝑀 = 0.
+• Acoustic pressure is related to impedance by:
+• By Fourier transforms, a relation for normal derivative of acoustic pressure is obtained:
+
+IBC Relating Impedance to the
+Time-Derivative of Pressure
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+36
+
+Discretizing IBC
+• IBC is discretized using collocation methods, same as with Burton-Miller.
+• Surface 𝑆 is divided into 𝑁 𝑒 boundary elements 𝐸 𝑗 , 𝑗 = 1, … , 𝑁 𝑒 .
+• Time-domain is divided into 𝑁 𝑡 time steps where 𝑡 𝑘 = 𝑘Δ𝑡.
+• Solution is obtained by approximating terms using 𝜙 𝑗 and 𝜓 𝑘 .
+• Solution is cast into the following system of equations:
+
+• And coupled with the Burton-Miller system:
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+37
+
+Coupled Matrix System
+
+• Due to limited temporal stencil width, 𝑩, 𝑪, 𝑫, 𝑬 are sparse.
+• Matrices are diagonally dominant, each with size 𝑁 × 𝑁 for scattering body with 𝑁 elements.
+• 𝑩, 𝑪 are defined by Burton-Miller and 𝑫, 𝑬 are defined by the IBC.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+38
+
+Acoustic Liner Models
+• Various liner models are investigated for simulating sound absorption of lined bodies.
+• Extended Helmholtz Resonator Model
+• Three-Parameter Impedance Model
+• Broadband Impedance Model
+Measured Impedance Quantity
+Established by Each Liner Model
+• Extended Helmholtz and Three-Parameter specify liner impedance at a single frequency 𝜔.
+
+• Broadband Model allows for the investigation of multiple frequencies simultaneously.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+39
+
+Extended Helmholtz Resonator Model
+• Surface impedance is defined as:
+
+Damping in cavity’s fluid, 𝜖
+𝜈Δt = 2L/c for depth 𝐿, speed of sound 𝑐
+Cavity Reactance, −cot
+
+1
+2
+
+𝜔𝜈Δt −
+
+1
+i
+2
+
+𝜖
+
+Parameter used for varying cavity reactance, 𝐹 𝛽
+Face-Sheet Mass Reactance, 𝜔𝑚
+Face-Sheet Resistance, 𝐹 𝑅
+23 March 2020
+
+DISSERTATION DEFENSE
+
+40
+
+Extended Helmholtz Resonator IBC
+• For Im 𝜔 < 𝜖/(𝜈Δ𝑡):
+
+Inverse Fourier Transform
+• Substituting 𝑧 𝑡 into normal derivative of acoustic pressure, discretizing, and letting the
+solutions for 𝑝 and 𝜕𝑝/𝜕𝑛 be expanded in the same manner as with Burton-Miller BEM:
+
+Time-Domain IBC Discretization
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+41
+
+Three-Parameter Impedance Model and IBC
+• Surface impedance is defined as:
+
+Inverse Fourier Transform
+
+Time-Domain IBC Discretization
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+42
+
+Broadband Impedance Model
+• Surface impedance is defined as:
+
+• To facilitate easy conversion to time-domain, the following terms are defined:
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+43
+
+Broadband IBC
+• Simplifying and using Fourier transforms, time-domain IBC and subsequent partial differential
+equations are given to be:
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+44
+
+IBC Discretization
+• Unlike the Helmholtz and Three-Parameter models where discretized IBC is cast into a single
+equation and coupled with Burton-Miller reformulation, the Broadband model has three
+additional equations that must be included in coupled system.
+• The following vectors are additionally defined:
+
+0
+
+• 𝒑𝑗 , 𝒑𝑗
+
+1,2
+
+denote vectors that contain auxiliary variables from all points where IBC is applied.
+
+𝑘
+• Coupled system provides solutions for 𝒖 𝑘 , 𝒗 𝑘 , 𝑷(0,1,2) .
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+45
+
+Broadband System of Equations
+
+System has dimension 𝑁 2 + 𝐽1 + 2𝐽2 × 𝑁 2 + 𝐽1 + 2𝐽2 , each submatrix is banded
+𝑘
+diagonal, and when solved iteratively, provides solutions for 𝒖 𝑘 , 𝒗 𝑘 , 𝑷(0,1,2) .
+23 March 2020
+
+DISSERTATION DEFENSE
+
+46
+
+Outline
+• Chapter 1: Introduction and Related Work
+• Chapter 2: Stable Time-Domain Boundary Integral Equation
+• Chapter 3: Basis Functions and Spatial Resolution
+• Chapter 4: Scalability and Performance Using CPUs
+• Chapter 5: Time-Domain Liner Impedance Boundary Conditions
+• Chapter 6: Stability Analysis and Numerical Results
+• Chapter 7: Concluding Remarks
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+47
+
+Eigenvalue Analysis
+• Recall: direct numerical solution of TD-BIE without Burton-Miller is prone to instabilities.
+• To study stability of coupled Burton-Miller TD-BIE / IBC system, a numerical eigenvalue study is
+conducted.
+• Denote the coupled systems:
+
+• as:
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+48
+
+Generalized Eigenvalue Problem
+• Look for solutions of the form 𝒘 𝒏 = 𝜆 𝑛 𝒆 𝟎 to the corresponding homogenous system.
+• Obtain a polynomial eigenvalue problem:
+
+• Cast into a generalized eigenvalue problem, such that 𝒆 𝒋 = 𝜆 𝑗 𝒆 𝟎 :
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+49
+
+Stability Condition
+• Look for solutions of the form 𝒘 𝒏 = 𝜆 𝑛 𝒆 𝟎 to the corresponding homogenous system.
+• Obtain a polynomial eigenvalue problem:
+
+• Cast into a generalized eigenvalue problem, such that 𝒆 𝒋 = 𝜆 𝑗 𝒆 𝟎 :
+
+Stable if 𝜆 ≤ 1 for all eigenvalues.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+50
+
+Stability Problem Statement
+• Consider scattering of acoustic point source by a flat plate.
+• Dimension of flat plate :
+−0.5, 0.5 × −0.5, 0.5 × −0.1,0.1
+• Point source location
+:
+𝑥, 𝑦, 𝑧 = (0, 0, 1)
+Un-Lined
+
+Fully-Lined
+
+Partially-Lined
+
+• The values of maximum eigenvalue solved iteratively by a code written in MATLAB.
+• Liner Models
+:
+Helmholtz, Three-Parameter, Broadband
+• Surface Discretizations :
+5 × 5 × 1, 10 × 10 × 2, 20 × 20 × 4, 30 × 30 × 6
+• Time steps
+:
+Δ𝑡 = 1/12, 1/24
+23 March 2020
+
+DISSERTATION DEFENSE
+
+51
+
+Fully-Lined Eigenvalue Results
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+52
+
+Matrix Exceeds MATLAB Memory Bounds
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+53
+
+Did Not Converge
+
+23 March 2020
+
+𝜆 did not converge to a tolerance of
+𝛿 = 10−9 within 5,000 iterations.
+
+DISSERTATION DEFENSE
+
+54
+
+Largest Eigenvalue Exceeds Unity
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+55
+
+Extended Helmholtz Resonator Model
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+56
+
+Three-Parameter Impedance Model
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+57
+
+Broadband Impedance Model
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+58
+
+Numerical Example of Lined Body
+
+|Sound Pressure|
+
+• Consider scattering of acoustic point source by a flat plate.
+• Dimension of flat plate :
+−2,2 × −2,2 × −0.02,0
+• Point source location
+:
+𝑥, 𝑦, 𝑧 = (0, 0, 1)
+• Three-Parameter model applied on all elements with 𝑍 𝜔0 = 0.5 + 0.2𝑖.
+• Graph illustrates frequency-domain solution converted from time-domain at 𝜔 = 12𝜋.
+
+Un-Lined
+
+Fully-Lined
+Field Line of Coordinates
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+59
+
+Lined Body Simulation
+
+Sound Pressure
+
+Un-Lined
+
+23 March 2020
+
+Sound Pressure
+
+Fully-Lined
+
+DISSERTATION DEFENSE
+
+60
+
+Concluding Remarks
+• Proposed formulation of acoustic wave scattering of bodies treated with acoustic liners.
+• Coupled time-domain IBC with a TD-BIE, stabilized by Burton-Miller type reformulation.
+• Presented March-On-in-Time scheme for the solution of coupled system using spatial and
+temporal basis functions.
+• Excellent spatial resolution demonstrated with relative error less than 3% and 5%, respectively,
+with 25 PPW2 (original and rotated, respectively).
+• Algorithm scaled well with fewer CPUs for small problem sizes and performance suffered as
+processing power increased due to the costs associated with parallel overhead.
+
+• Three acoustic liner models and their IBCs discussed: Extended Helmholtz Resonator Model,
+Three-Parameter Impedance Model, Broadband Impedance Model.
+• Stability assessment reinforced that eigenvalue analysis is necessary to show stability.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+61
+
+Major Contributions
+• Proposed formulation of acoustic wave scattering of bodies treated with acoustic liners.
+• Coupled time-domain IBC with a TD-BIE, stabilized by Burton-Miller type reformulation.
+• Presented March-On-in-Time scheme for the solution of coupled system using spatial and
+temporal basis functions.
+• Excellent spatial resolution demonstrated with relative error less than 3% and 5%, respectively,
+with 25 PPW2 (original and rotated, respectively).
+• Algorithm scaled well with fewer CPUs for small problem sizes and performance suffered as
+processing power increased due to the costs associated with parallel overhead.
+
+• Three acoustic liner models and their IBCs discussed: Extended Helmholtz Resonator Model,
+Three-Parameter Impedance Model, Broadband Impedance Model.
+• Stability assessment reinforced that eigenvalue analysis is necessary to show stability.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+62
+
+Application of Acoustic Liners on Aircraft
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+63
+
+ACKNOWLEDGMENTS
+• Principal Advisor
+• Dr. Fang Q. Hu, Old Dominion University
+• Dissertation Committee
+• Dr. Douglas M. Nark, NASA Langley Research Center
+• Dr. Yan Peng, Old Dominion University
+• Dr. John Tweed, Old Dominion University
+• Dr. Ruhai Zhou, Old Dominion University
+
+Thank you!
+Questions?
+
+• Funding Sources
+• NASA Cooperative Agreement, NNX11AI63A
+• Old Dominion University Modeling and Simulation Fellowship
+• Old Dominion University ITS Turing Cluster and Extreme Science and Engineering Discovery
+Environment, supported by National Science Foundation Grant Number OCI-1053575
+23 March 2020
+
+DISSERTATION DEFENSE
+
+64
+
+Spatial Resolution of BEM
+• The spatial resolution of the TD-BEM with respect to the spatial basis functions is studied by
+considering PPW and PPW2.
+• Consider the scattering and shielding of an acoustic point source by a flat plate.
+• Dimension of flat plate :
+−0.5, 0.5 × −0.5, 0.5 × −0.1,0.1
+• Point source location :
+𝑥, 𝑦, 𝑧 = (0, 0, 1)
+
+Contour plots of the frequencydomain solutions converted from
+time-domain solution at 𝜔 = 5𝜋
+[left] and 𝜔 = 15𝜋 [right].
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+65 (BACKUP)
+
+Flat Plate Solution
+• The top and bottom of plate (at 𝑧 = 0.1 and 𝑧 = −0.1) are discretized by 𝑁 𝑥 𝑁 𝑦 elements
+• A series of computations are carried out by increasing the number of elements used from
+𝑁 𝑥 × 𝑁 𝑦 × 𝑁 𝑧 = 20 × 20 × 4 (1,120 elements) to 100 × 100 × 20 (28,000 elements).
+Frequency-domain
+solution along
+− 2.5 ≤ 𝑥 ≤ 2.5,
+𝑦 = 0, 𝑧 = −2.5
+converted from the
+time-domain
+solution at 𝜔 = 15𝜋.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+66 (BACKUP)
+
+Flat Plate PPW
+• PPW is a metric used to measure spatial resolution along one direction on the surface.
+• Using solution computed by 100 × 100 × 20 as the reference, the relative error in the 𝐿2
+norm is plotted as a function of PPW.
+
+2𝜋 𝑝 + 1 𝑁 𝑥
+𝑃𝑃𝑊 =
+𝑘𝐿 𝑥
+
+𝑝 :
+𝑘 :
+𝐿𝑥:
+𝑁 𝑥:
+
+order of the basis function
+wavenumber, 𝑘 = 𝑤/𝑐
+plate length in 𝑥-direction
+elements in 𝑥-direction
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+67 (BACKUP)
+
+Flat Plate PPW2
+• PPW2 is a metric used to measure spatial resolution over the entire surface.
+• Using solution computed by 100 × 100 × 20 as the reference, the relative error in the 𝐿2
+norm is plotted as a function of PPW2.
+
+𝑃𝑃𝑊2 =
+
+4𝜋 2 𝑝 + 1 2 [2𝑁 𝑥 𝑁 𝑦 + 2 𝑁 𝑥 + 𝑁 𝑦 𝑁 𝑧 ]
+
+𝑝 :
+𝑘 :
+𝐿𝑥:
+𝑁 𝑥:
+
+𝑘 2 [2𝐿 𝑥 𝐿 𝑦 + 2 𝐿 𝑥 + 𝐿 𝑦 𝐿 𝑧 ]
+
+order of the basis function
+wavenumber, 𝑘 = 𝑤/𝑐
+plate length in 𝑥-direction
+elements in 𝑥-direction
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+68 (BACKUP)
+
+Flat Plate PPW2
+• To investigate whether the location of the point source affects the accuracy of the solution, a
+shifted point source located at 𝑥, 𝑦, 𝑧 = (0.5, 0, 1) is considered.
+• Results further demonstrate that the relative error in the 𝐿2 norm becomes less than 2% for all
+discretizations with 25 PPW2.
+𝑃𝑃𝑊2 =
+
+4𝜋 2 𝑝 + 1 2 [2𝑁 𝑥 𝑁 𝑦 + 2 𝑁 𝑥 + 𝑁 𝑦 𝑁 𝑧 ]
+
+𝑝 :
+𝑘 :
+𝐿𝑥:
+𝑁 𝑥:
+
+𝑘 2 [2𝐿 𝑥 𝐿 𝑦 + 2 𝐿 𝑥 + 𝐿 𝑦 𝐿 𝑧 ]
+
+order of the basis function
+wavenumber, 𝑘 = 𝑤/𝑐
+plate length in 𝑥-direction
+elements in 𝑥-direction
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+69 (BACKUP)
+
+Speedup for 280 through 4,480 Elements
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+70 (BACKUP)
+
+Matrix Power Iteration
+• The matrix power iteration method is used for finding the largest eigenvalue of:
+
+• Given an arbitrary unit vector 𝒆(𝟎) , and
+for 𝑘 = 1,2, … compute:
+
+Iteration stops when 𝜆 𝑘 − 𝜆 𝑘−1 / 𝜆 𝑘 < 𝛿, where 𝛿 = 10−9 .
+Iteration converges to largest eigenvalue of 𝑨, i.e., 𝜆 max .
+23 March 2020
+
+DISSERTATION DEFENSE
+
+71 (BACKUP)
+
+Helmholtz, Three-Parameter IBC Data
+• IBC constants generated using
+numerical data from Rienstra 2006.
+• Rienstra proposed eighteen different
+impedance curves.
+• Model data obtained from curves at
+single frequency 𝜔Δ𝑡 = 𝜋/10.
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+72 (BACKUP)
+
+Broadband Frequency IBC Data
+• Two acoustic liners, CT157 and
+GE03, tested in the Grazing
+Flow Impedance Tube at NASA
+Langley Research Center.
+• Impedance values measured
+along a broad range of
+frequencies.
+• Using measured data, twentyfive numerical models were
+generated using least squares.
+
+23 March 2020
+
+CT157
+
+DISSERTATION DEFENSE
+
+GE03
+
+73 (BACKUP)
+
+Time Step Δ𝑡 = 1/12
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+74
+
+Time Step Δ𝑡 = 1/24
+
+23 March 2020
+
+DISSERTATION DEFENSE
+
+75
+
+Partially-Lined
+
+23 March 2020
+
+Δ𝑡 = 1/12 (left), Δ𝑡 = 1/24 (right)
+
+DISSERTATION DEFENSE
+
+76 (BACKUP)
+

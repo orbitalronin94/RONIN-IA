@@ -1,0 +1,1345 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Progress of CFM Model Development and Validation at NASA 
+Glenn Research Center
+
+Daniel Hauser
+
+NASA Glenn Research Center
+
+AIAA SciTech Forum 2023, National Harbor, Maryland, Jan 23–27, 2023
+
+
+
+2
+
+Cryogenic Modeling Overview
+
+• Brief Overview of Cryogenic Events
+
+• Self Pressurization and Mixing for Pressure Control
+
+• Helium and Autogenous Pressurization
+
+• Propellant Transfer and Hardware Chill-down
+
+• Sloshing with Phase Change
+
+• Liquefaction for ISRU applications. 
+
+• Review
+
+
+
+Acknowledgements
+
+NASA has many cryogenic predictive model development activities supported by a number of high-quality 
+people across the agency. This list only includes the most significant contributors to the development of this 
+presentation. 
+
+Ames Research Center
+
+• Ali Kashani (Thermal Desktop, SINDA/FLUINT)
+
+Glenn Research Center
+
+• Mohammad Kassemi (FLUENT CFD)
+
+• Sonya Hylton (FLUENT CFD)
+
+• Olga Kartuzova (FLUENT CFD)
+
+• Justin Pesich (STAR-CCM, CFD)
+
+• Barb Sakowski (SINDA/FLUINT)
+
+• Erin Tesny (Thermal Desktop, SINDA/FLUINT)
+
+• Bruce Wendt (Thermal Desktop, SINDA/FLUINT)
+
+• Kiyotaka Yamashita (FLUENT CFD)
+
+• Michael Baker (FLOW-3D, FLUENT CFD)
+
+3
+
+Would also like to acknowledge NASA Marshall Spaceflight Center for collaborating with the development of Cryogenic Predictive Models including the 
+following individuals in ER42 and ER43: Alok Majumdar, Andre Leclair, Michael Baldwin, Brandon Williams, Jacob Brodnick, H.Q Yang. 
+Programmatic support by the STDMD CFM portfolio project manager Jason Adam is also appreciated. 
+
+
+
+4
+
+Cryogenic Predictive Model Development and Validation
+
+• NASA has spent the past 20 years developing and validating multi-
+node and CFD modeling tools for cryogenic propellant 
+applications. 
+
+• Past CFD model development efforts at NASA have resulted with 
+validated and anchored models that are capable of predicting the 
+conditions within propellant tanks and hardware with reasonable 
+confidence.
+
+• System level multi-node models as well as CFD models of these 
+events have been developed and validated for the following 
+cryogenic events. 
+
+– Self-pressurization and pressure control-via axial jet and spray bar
+
+– Propellant transfer and chill-down of hardware including tanks, lines, 
+and pumps. 
+
+– Autogenous and helium pressurization of propellant tanks.
+
+– Sloshing with two-phase heat/mass transfer.
+
+– Liquefaction for ISRU operations including condensation of warm 
+vapor within a propellant tank.  
+
+• NASA is working with industry, academia, and international 
+partners to further improve these capabilities. 
+
+Cartoon Credit: J. Jurns
+
+
+
+CFM Predictive Modeling Purpose
+
+• In past and current public and private studies that utilize the long 
+term on-orbit storage and transfer of cryogenic propellant, several 
+mission events required the use of CFD models to better predict the 
+performance of the hardware and operations within the architecture. 
+
+• One of our goals of is to adopt the lessons learned and apply them to 
+NASA missions.  
+– For example, these CFD tools and skills developed at MSFC and GRC are being 
+
+used outside of the STMD CFM portfolio to support tipping points and Artemis 
+mission applications. 
+
+• These Mission Events that members of the NASA modeling 
+community are providing direct inline design support and 
+independent V&V to reduce mission risk include: 
+– Pressurization-Important for sizing equipment and operations for Autogenous 
+
+and GHe pressurization systems (Impact: 10 mTon’s of Propellant)
+– Self-Pressurization- Important for predicting the boil-off in propellant tanks in 
+
+various mission locations( Lunar surface, Gateway, LEO for Depot applications). 
+(Impact: mTons of Propellant)
+
+– Sloshing- Important for predicting how much residual pressurant is available 
+during and after sloshing operations. (Impact: mTons of Propellant)
+
+– Propellant Transfer (Receiver tank chill-down and fill operations, donor Tank 
+Pressurization and vapor pull-through)- Important for predicting the operations 
+and hardware used in the transfer. (Impact: 10’s mTons of Propellant)
+
+• With more confident models these CFM systems could be designed 
+with reduced margin and greater performance. 
+
+NASA HLS Starship Artemis III Concept of Operations
+
+*Source: Watson-Morgan, U.B. (2022). “NASA’s Initial Artemis Human Landing System” 73rd
+
+International Astronautical Congress(IAC) 18-22 September 2022, Paris, France, 
+
+
+
+Model Development and Validation
+
+• NASA has a modeling and simulation standard (NASA STD 7009) that standardizes 
+the reporting of a flight model credibility to managers when critical decisions are 
+made.
+
+• The standard was created as a result of the Columbia Space Shuttle Accident 
+where seven astronauts lost their lives. 
+– The Columbia Accident Investigation Board (CAIB) recommended a modeling and 
+
+simulation standard to better communicate the credibility and of the model 
+results/predictions. 
+
+• NASA STD 7009 is currently required for the HLS and Artemis program. 
+
+• Uses a Simulation Credibility Scale (SCL) that is based on several factors:
+– Are the M&S practitioners/analysts trained properly? 
+
+– Is the model anchored against experimental data and does it agree? 
+
+– Is the uncertainty of the results understood including sensitivity to parameters?
+
+– Has the model been used before for critical decisions? 
+
+– Is the input data valid? 
+
+• Credibility Assessment Scale 
+– Assesses the rigor of the processes used to produce the simulation results and 
+
+determine their favorability against key factors that affect the credibility 
+judgement.
+
+– Requires extensive documentation. 
+
+• STMD CFM modeling project focuses on ensuring the developed models capture 
+the correct two-phase physics as well as increasing the Simulation Credibility 
+Level of the models with anchoring the models to available experiments. 
+
+– Also ensures personnel are properly trained.
+
+NASA STD 7009 
+Simulation Credibility Level (SCL)
+
+Source: Mehta, U.B. (2007). “Simulation Credibility Level.” The 5th Joint Army-
+Navy-NASA-Air Force (JANNAF) Modeling and Simulation Subcommittee Meeting, 
+CDJSC 49, May, CPIAC. Columbia, MD: Johns Hopkins University
+
+
+
+CFM Modeling Overview
+
+• More work is needed to close gaps in predicting the 
+performance of cryogenic propellant in a low-
+gravity environment. 
+
+– In low-g, capillary forces dominate body forces 
+leading to non-intuitive and un-expected physics. 
+
+– Better understanding and accurate models are 
+critical for sizing hardware and operations for storage 
+and transfer of cryogenic propellant in a low-gravity 
+environment. 
+
+• Predictive Model Development work Includes:
+
+– First Principal Physics CFD model
+
+– Empirical based multi-node lumped models  
+
+• Models that are developed need to be  anchored to 
+experimental data in a relevant environment (large 
+scale cryogenic propellant in a µ-g environment) 
+
+Infusion of Tipping Point Demonstrations to Anchor 
+Cryogenic Models
+
+
+
+Predicting tank self-pressurization as well as micro-gravity techniques to control 
+tank pressure
+
+
+
+9
+
+Cryogenic Tank Self-Pressurization and Pressure Control
+
+NASA has spent significant resources on developing and benchmarking both multi-node and CFD tools 
+against experimental data. 
+
+• Cryogenic propellants are stored at very cold temperatures, due to the cold temperature, heat from the surrounding 
+environment can cause the pressure in the tank to rise requiring venting propellant to release excess pressure or 
+actively cooling the tank. 
+
+• Modeling these events present several challenges
+
+– Stratification or rising low density warm liquid to the surface occurs and causes the pressure to rise at higher rates than can be 
+predicted by homogenous models.
+
+– Stratification in the tank can cause the pressure to rise quicker and suppress boiling.
+
+– Stratification in the ullage can significantly increase the temperature making it more challenging to estimate the pressurization 
+rate. 
+
+• NASA has been developing and validating both CFD and multi-node thermo-fluid models to better predict this behavior. 
+
+– CFD (FLUENT, FLOW-3D, STAR-CCM)
+
+– Multi-node ( SINDA/FLUINT, GFSSP)
+
+• NASA has validated several cryogenic self pressurization tests against experimental data in 1g and micro-g.
+
+– Ksite, MHTB, SHIIVeR (1g)
+
+– ZBOT, TPCE, RRM3 (micro-g)
+
+
+
+CFD - Phase Change
+
+CFD - No Phase Change
+
+DataMHTB
+1G 
+LH2
+
+Large
+1.5 W/m2
+
+Saturn IVB
+0G
+LH2
+
+V. Large
+(Saturn 
+AS203)
+
+~30,000 W
+~200W/m2
+
+TCPE
+0G
+
+Freon
+Small
+
+(Shuttle)
+16 W
+900  
+
+W/m2
+
+ZBOT
+0g
+
+PnP
+Small
+(ISS)
+3-8 
+
+W/m2
+
+Tank Self-Pressurization for Various Tank Sizes CFD Predictions versus Experimental 
+
+More work is needed to better predict pressure rise for large cryogenic tanks (>1.5m)
+where internal tank flow is turbulent.
+
+
+
+Ullage
+
+ZBOT Experiment
+Lessons Learned in ZBOT-1 to enable better CFM Predictive Modeling in μg
+
+Distributed
+Heating Loads
+(MLI, Insulation)
+
+Jet Mixing for
+Tank Pressure Control
+
+Liquid
+
+Pressurization(Localized Heating)
+ZBOT Strip Heating 
+
+Pressurization(Broad area Heating, MLI)
+Vacuum Jacket Heating 
+
+Strip Heater Boiling
+(Self-Pressurization)
+
+ZBOT Mixing Simulation: LES
+
+Boiling on LAD’s 
+During Mixing
+
+Localized
+Heating Loads
+
+(Struts, Skirts)
+
+ZBOT_0g_StripHeater-Press-withoutplot.mp4
+ZBOT-MG-VJ-SelfPress-FL77.mp4
+ZBOT-208-Self-Press-0_5W-Second-Half.mp4
+ZBOT_0g_Case27-FastJetMixing.mp4
+ZBOT-11-6cm-s-T0-4-8fps-1-3-movie.mp4
+
+
+Predicting pressurization of a supply tank to be used for propellant 
+transfer
+
+
+
+EDU Autogenous Pressurization Modeling (ANSYS FLUENT)
+
+• Pressurization tests were conducted on ground test hardware in 
+
+2014/2015 to better understand the pressurization of a cryogenic tank 
+
+using both an autogenous and helium pressurant.
+
+• CFD models were created of the GN2/LN2 autogenous pressurization test 
+
+using the commercial software ANSYS FLUENT.
+
+– User Subroutines developed previously were implemented to predict the two-
+
+phase liquid/vapor mass transfer that occurs at the interface. 
+
+• Models included both VOF and Sharp interface numerical schemes.
+
+• Several CFD simulations were ran to investigate the following affects:
+
+– Grid/Mesh Independence
+
+– Laminar vs URANS turbulence model
+
+– Accommodation Coefficient (VOF)
+
+Both the FLUENT VOF and Sharp Interface CFD model predict the pressure in very good agreement with the experimental data. 
+
+This indicates that FLUENT can confidently be used to predict the thermodynamic phenomena which occur when using autogenous 
+
+pressurant to pressurize cryogenic tanks 
+
+Predicted Vs Experimental Pressure
+
+Predicted Temperature Contours of EDU GN2/LN2 Test
+
+Predicted Vs Experimental Temperatures
+
+
+
+EDU Predicted Pressure Signature Vs Experimental 
+(All CFD and Nodal Predictions)
+
+Both the FLUENT and STAR-CCM Sharp Interface CFD as well as the FLUENT VOF model predict the pressure in excellent 
+
+agreement with the experimental data. This provides confidence in the commercial tools modified with NASA developed subroutines 
+
+at predicting the thermodynamic phenomena which occur when using autogenous pressurant to pressurize cryogenic tanks (The 
+
+FLOW3D and STAR CCM VOF model’s both underpredict the pressure signature by 25% due to overprediction of ullage 
+
+condensation.)
+
+STAR-CCM & FLOW-3D 
+VOF Models
+
+Experimental
+
+
+
+DLR Autogenous Pressurization Modeling
+(ANSYS FLUENT-Sharp Interface and VOF)
+
+• An autogenous pressurization test was conducted by 
+
+DLR/University of Bremen using GN2/LN2.
+
+– Published Paper on the test results in 2013. 
+
+• Similar to the EDU test tank, an autogenous pressurization 
+
+model was built in the commercial software ANSYS 
+
+FLUENT. 
+
+Both the FLUENT VOF and Sharp Interface CFD model predict the pressure in very good agreement with the 
+
+experimental data. This indicates additional confidence that Fluent can confidently be used to predict the 
+
+thermodynamic phenomena which occur when using autogenous pressurant to pressurize cryogenic tanks 
+
+Predicted vs Experimental Pressure
+
+DLR Pressurization Tank
+
+Experimental
+
+
+
+EDU Helium Pressurization Modeling (Star-CCM-Sharp Interface)
+
+• A helium pressurization test of the CPST EDU 
+
+tank filled with LH2 was modeled using the 
+
+Sharp Interface approach that was 
+
+implemented in Star-CCM.
+
+• During the modeling, it was determined from 
+
+test records that the tank did not initially 
+
+contain pure GH2 due to an aborted helium 
+
+pressurization test that contained residual 
+
+helium, the tank was then vented to 
+
+atmospheric pressure leaving a residual 
+
+amount of helium in the ullage.
+
+– The pressure ratio’s of the vent process 
+
+were used to estimate an initial helium 
+
+concentration of 37.5% by volume. 
+
+The sharp interface model implemented in Star-CCM gives confidence in the ability to predict the helium pressurization event 
+
+well. The model shows that the initial helium concentration can drive additional evaporation at the interface. Additional 
+
+development needs to be undertaken to capture the physics for a VOF formulation. 
+
+37.5% Helium
+
+0% Helium
+
+Predicted vs Experimental Pressure Predicted Helium Mole 
+Fraction at 30 seconds
+
+(0% Initial Helium Case)
+
+
+
+EDU Submerged Pressurization with GHe
+
+• Due to the uncertainty of the ullage location in microgravity, submerged diffuser testing was 
+conducted to determine the affect of the diffuser submerged in propellant.
+
+• Submerged GHe pressurization modeled and validated using Thermal Desktop 
+(SINDA/FLUINT).
+
+• Tank wall and internal components modeled using a thermal FEA network. 
+
+• LH2 and GHe modeled as multi-node model with liquid, vapor, and interface modeled as 
+separate lumps. 
+
+– Empirical correlations used to predict heat transfer between liquid/vapor phases and 
+conjugate heat transfer to wall and GHe dissolution into LH2. 
+
+GHe submerged pressurization TD model with 
+and without GHe dissolution against Exp
+
+17
+
+Multi-node analysis tool SINDA/FLUINT was extended to predict GHe dissolution rate into LH2 and validated
+against 1g experimental data for both a bang-bang and slow pressurization cycle.
+
+FWD Diffuser  Temperature 
+Response(Model vs Exp)
+
+Liquid Level during Submerged GHe
+Pressurization 
+
+
+
+Predicting transfer operations including transfer line chill-down, tank chill-down 
+and tank filling. 
+
+
+
+19
+
+Propellant Transfer and Chill-down of Hardware
+
+• Models of cryogenic propellant transfer and hardware chill-down have 
+been developed and anchored to 1g experimental data using both multi-
+node and CFD predictive models.  
+
+• Modeling of propellant transfer process including chill-down of hardware 
+(lines and tanks) using a quick multi-node approach is advantageous for 
+multiple reasons: 
+– Models can capture the multiple phenomena with reasonable fidelity that 
+
+occurs during transfer including, pressurization with autogenous pressurant or 
+GHe in supply tank, chill-down, propellant transfer, and collapse of receiver 
+tank ullage pressure. 
+
+– Two-phase cryogenic transfer process is highly dependent on thermal 
+conditions in the hardware the cryogenic propellant contacts. Pressure in 
+receiver tank is a direct function of the saturation temperature of the fluid. 
+
+– Models can capture minimum supply tank pressures and maximum 
+temperatures to ensure enough differential pressure between tanks is available 
+to prevent lockup. 
+
+– Can direct where higher fidelity (validated and anchored) predictive CFD tools 
+could be applied. 
+
+• Higher fidelity CFD models of tank chill-down and propellant transfer 
+operation have also been developed to more accurately capture the two-
+phase fluid and thermodynamics of the events that occur.
+– Spray droplet evaporation and spray boiling at the wall.
+
+– Natural convection after droplet evaporation both in 1g and reduced gravity 
+environments. 
+
+– Condensation within the ullage during the fill process. 
+
+– Pressurization of the supply (source) tank as the tank drains propellant. 
+
+Receiver Tank 
+Model
+
+Source Tank
+Model
+
+Transfer Line Model
+
+Thermal Desktop Model 
+of RRM3 Transfer Test
+
+Ksite FLUENT CFD Vapor and Droplet Temperatures 
+
+
+
+RRM3 Propellant Transfer Modeling
+
+• A Thermal Desktop model was built to model tank 
+thermodynamic, 2-phase fluid dynamics and
+
+heat transfer in both tanks and transfer lines for on-orbit 
+performance with cryogenic methane.
+
+• The Thermal Desktop model was updated to account for 
+the environmental and operating
+
+conditions experienced during ground testing at KSC 
+including natural convection.
+
+• The model was used to predict transfer success prior to 
+transfers and used to guide operating conditions within 
+both the supply and receiver tanks.
+
+20
+
+Predicted vs Exp Pressure and Temperature during
+Autogenous Pressurization 
+
+Predicted vs Exp Pressure During Successful Transfer
+
+RRM3 Thermal Desktop LCH4 Transfer Model
+
+
+
+Ksite LH2-Tank Chill-down
+
+• Thermal Desktop model of Ksite tank chill-down test with LH2 
+created in Thermal Desktop to model tank chill down and 
+subsequent tank fill. 
+
+– Tank chill-down was performed via a “charge-hold-vent” 
+process until tank was chilled down to sufficient temperature. 
+
+– LH2 was injected with spray nozzles at the bottom and top of 
+tank. 
+
+• Previous modeling attempts of this event were performed with 
+Eulerian-Lagrangian CFD analysis. 
+
+– Model predicted pressure and temperature predictions were 
+significantly different from experimental.
+
+– Poor results from CFD analysis were likely because of 
+inaccurate flow rate measurements from turbine flow meter. 
+
+• Thermal Desktop analysis using a hybrid of measured flow rate 
+and ideal gas assumptions to determine injected mass showed 
+very good agreement with experimental pressure and 
+temperature measurements. 
+
+– Model accurately captures the various modes of heat transfer 
+during the tank chill down and fill process with reasonable 
+fidelity.
+
+– Model predicts the tank wall temperature during entire chill 
+down and fill process with an average temperature 
+discrepancy of 5 K. 
+
+21
+
+Film Boiling
+
+Transition Boiling
+
+Nucleate(Saturated)
+
+Nucleate(Subcooled)
+
+Condensation
+(Superheated)
+
+Condensation
+(Saturated)
+
+Natural Convection
+
+Tank Pressure(exp vs Predicted) Tank Wall Temp(exp vs Predicted)
+
+Heat Transfer Regimes During Tank Chill and Fill (TD Default)
+
+
+
+LH2 Tank No-Vent Chill and Fill Test
+
+• A LH2 propellant tank chill and fill experiment was modeled using ANSYS FLUENT VOF with phase 
+change included.
+
+– Significant gaps in documentation of several key geometric and operational parameters. 
+
+• The model predicted the three different tank filling regimes: 
+
+– 1) Flashing and chill-down of tank 2) Ullage vapor condensation
+
+3) Ullage Compression.
+
+• The CFD model predicted the sudden (<2 sec) drop in tank wall temperature observed experimentally. 
+
+• The CFD model predicted the pressure rise up until the 90% fill level within 10% of the experimental 
+pressure. 
+
+• The CFD model did not predict the sudden pressure rise that occurred after achieving a 90% fill level. 
+
+– Possible presence of a non-condensable GHe left over from the tank purging process that affects the 
+pressure rise during the compression process.
+
+FLUENT Predicted vs Exp Pressure (Regimes 1-3)
+
+Despite the significant gaps in the documentation of key geometric and operational test parameters, the FLUENT VOF 
+
+CFD model was still able to capture many of the behaviors involved with cryogenic tank chill and fill operations. 
+
+FLUENT Predicted Flow Regimes During Tank Chill and Fill 
+
+0
+
+10
+
+20
+
+30
+
+40
+
+50
+
+60
+
+0 20 40 60 80
+
+Te
+m
+
+p
+er
+
+at
+u
+
+re
+ [
+
+K
+]
+
+Time [sec]
+
+20" Wall Temperatures
+
+Experiment
+
+Simulation
+
++-45% from experiment
+
+FLUENT Predicted vs Exp Top Wall Temperature
+
+1) Flashing at 
+Inlet/Tank 
+Chilling
+
+2) Ullage Vapor 
+Condensation
+
+3) Ullage 
+Compression
+
+Tank Filling Regimes
+
+
+
+LN2 Turbo Pump Chill-down
+
+• JAXA conducted ground and suborbital flight 
+experiments to investigate chill-down of a test 
+article representative of a cryogenic fluid 
+turbopump bearing cavity in 1G and microG 
+environments.
+
+• LN2 injected at relatively low flow rates (0.5 & 
+1.0 g/s).
+
+• Modeled experiments with multiple CFD 
+numerical schemes using commercial code 
+STAR-CCM. 
+– Model predictions for surface wetting profile and 
+
+temperatures matched experimental data for both 1g 
+and micro-g. 
+
+23
+
+
+
+Flow Evolution 1G vs micro-g (Predicted vs Experimental)
+
+24
+
+1-g micro-g
+
+Model predicts surface 
+wetting of the back 
+chamber which occurred in 
+the experiment in the 
+micro-g test
+
+
+
+Predicting ullage collapse in a cryogenic tank (slosh)
+
+
+
+26
+
+Cryogenic Sloshing with Phase Change
+
+NASA has validated multiple cryogenic sloshing models with 2 phase heat/mass transfer. 
+
+1
+0
+
+• Validation of multiple cryogenic slosh CFD models using a 
+VOF numerical framework within ANSYS FLUENT.
+
+– Sloshing models include heat/mass transfer within the 
+liquid/vapor. 
+
+• Experimental data obtained through international 
+partnerships with CNES and JAXA. 
+
+Pressure (Predicted vs Exp)
+
+Temperature (Predicted vs Exp)
+
+LN2 Cryogenic Slosh CFD Simulation
+
+
+
+Predicting the condensation within a propellant tank for In-situ-
+resource application 
+
+
+
+28
+
+Liquefaction for ISRU Applications
+
+• Liquefaction of cryogenic propellant was modeled 
+within Thermal Desktop (SINDA/FLUINT).
+
+– Model included Neon Broad Area Cooling(BAC) 
+loop.
+
+– Liquid/vapor propellant inside tank modeled as 
+three lumps.
+
+• Model was validated against experimental data from 
+Brassboard testing where warm GN2 was introduced 
+into tank.
+
+– Constant liquefaction
+
+– Non-Constant liquefaction 
+
+• Model predicts temperature and pressure within 
+tank with reasonable fidelity. 
+
+• CFD modeling of liquefaction phenomena is 
+currently being pursued to capture this phenomena 
+with better fidelity. 
+
+– Includes subgrid film condensation layer at wall 
+coupled with a VOF model of bulk liquid/ullage.
+
+0
+
+50000
+
+100000
+
+150000
+
+200000
+
+250000
+
+0 50 100 150 200 250
+
+Ta
+n
+
+k 
+Fl
+
+u
+id
+
+ P
+re
+
+ss
+u
+
+re
+ (
+
+P
+a)
+
+Time (hour)
+
+Model Test
+
+80000
+
+85000
+
+90000
+
+95000
+
+100000
+
+105000
+
+110000
+
+115000
+
+120000
+
+125000
+
+0 50 100 150
+
+Ta
+n
+
+k 
+P
+
+re
+ss
+
+u
+re
+
+ (
+P
+
+a)
+
+Time (hour)
+
+Model
+
+Predicted Pressure vs Exp: Constant Liquefaction
+
+Predicted Pressure vs Exp: Non-constant Liquefaction
+
+
+
+29
+
+Identified Gaps & Modeling Challenges
+
+• Predicting the effects of non-condensable gases such as Helium pressurant on condensation within a 
+propellant tank. 
+– Important for tank pressurization, pressure control, tank fill operations and liquefaction operations. 
+
+• Predicting the performance of GHe pressurization using a diffuser submerged in cryogenic propellant in 
+a propellant tank.
+
+• Predicting the chill-down of transfer lines & engine feedlines using a 3D Navier Stokes CFD code coupled 
+with a sub-grid boiling model.
+– NASA is currently funding an SBIR with CRAFT-TECH and MIT to extend a sub-grid boiling model developed for 
+
+the Nuclear industry to cryogenic propellants. 
+
+• Predicting secondary bubble initiation and growth within a propellant tank due to vapor bubble 
+initiation (boiling) caused by hot spots.
+– Two recent microgravity experiments (ZBOT and RRM3) saw evidence of the ullage/bubble relocating to regions 
+
+of high heat flux. 
+
+• Predicting turbulence at the liquid/vapor Interface and its affect on two-phase heat/mass transfer.
+
+• Predicting condensation within a propellant tank.
+– This has implications for liquefaction for ISRU operations but can also be important for tank filling in micro-g. 
+
+
+
+Conclusions
+
+• In the past two decades NASA has made good progress on developing and anchoring both CFD and multi-node 
+predictive tools related to CFM events.
+
+• In the past ten years with the help of microgravity data from NASA and international partners, NASA has 
+extended and anchored these tools to predict the performance in reduced gravity environments.
+
+• Several gaps still exist within the current predictive models to predict the  phenomena within two phase 
+cryogenic systems with a high degree of confidence. 
+
+• These gaps present challenges that need to be addressed by developing capability within the CFD and multi-
+node codes to predict performance and by performing tests in microgravity to anchor and validate such models. 
+
+30
+
+
+
+Acknowledgement 
+
+• Funding and programmatic support from the NASA Space Technology Mission Directorate (STMD)/ led by the 
+
+Cryogenic Portfolio Project through the CFM Modeling Project as well as the Microgravity Biological and 
+
+Physical Sciences (BPS) Division at NASA Headquarters through the ZBOT Experiment science investigations, 
+
+funding of the Ksite analysis was provided through the Reduced Gravity Cryogenic Transfer Project within the 
+
+STMD Cryogenic Portfolio Project. 
+
+
+
+CFM Modeling Status (Commercial CFD Tools) 
+
+Propellant 
+Storage
+
+Operation Important Process/Mechanism
+
+Numerical Implementation
+1G Sim Fluid
+
+Scaled
+
+0G Sim
+
+Fluid Scaled
+1G Cryo
+
+0G Cryo
+
+Small –Scale
+
+0G Cryo
+
+Large-Scale1g
+
+(Settled)
+
+0g
+
+(Unsettled)
+
+Self-Pressurization
+Evaporation/Condensation   ZBOT-1 ZBOT-1
+
+K-site
+
+RRM3 Future Demo
+MHTB
+
+SHIIVER
+
+Boiling   ZBOT-1 ? Future Demo
+
+Pressure Control
+
+Axial Jet Mixing   ZBOT-1
+ZBOT-1
+
+K-Site TP’s Future Demo
+TPCE
+
+Droplet Spray-bar 
+Wall film 
+
+formation
+ZBOT-DP ZBOT-DP MHTB TP’s Future Demo
+
+Broad Area Cooling   ZBOT-DP ZBOT-DP LOX ZBO RRM3 TP’s
+Future Demo
+
+Non-Condensable 
+
+Effects
+
+Pressurization   ZBOT-NC ZBOT-NC Olsen TP’s
+Future Demo
+
+Axial Jet Condensation   ZBOT-NC ZBOT-NC Bullard LH2 TP’s
+Future Demo
+
+Droplet Phase Change   ZBOT-DP ZBOT-DP MHTB TP’s
+Future Demo
+
+Slosh
+Like Pressurant   DLR/JAXA TP’s
+
+Future Demo
+
+Unlike Pressurant   TP’s
+Future Demo
+
+Low-g Tank Vent 
+
+Operations
+boiling/evaporation   N/A
+
+Saturn AS-
+
+203
+
+Liquefaction
+Partial–g hot vapor condensation  Partial - G CryoFILL
+
+Future Demo
+
+Transient Behavior  Partial- G CryoFILL
+Future Demo
+
+MODEL V&V
+Understanding, Theory, & 
+
+Implementation:  (NASA 7009 V&V)
+
+Well Understood (Level 3)
+
+Sufficient Eng. know how (Level 2) 
+
+Difficulties to overcome (Level 1)
+
+Large knowledge gap (Level 0) 
+
+Data Pedigree of Benchmark Tests:
+(NASA 7009 Data Pedigree)
+
+Level 3 Test Anchored
+
+Level 2 Test Anchored
+
+Level 1 Test Anchored
+
+No V&V target 
+
+Future V&V Target
+
+
+
+CFM Modeling Status-Continued (Commercial CFD Tools) 
+
+MODEL V&V
+Understanding, Theory, & 
+
+Implementation:  (NASA 7009 V&V)
+
+Well Understood (Level 3)
+
+Sufficient Eng. know how (Level 2) 
+
+Difficulties to overcome (Level 1)
+
+Large knowledge gap (Level 0) 
+
+Data Pedigree of Benchmark Tests:
+(NASA 7009 Data Pedigree)
+
+Level 3 Test Anchored
+
+Level 2 Test Anchored
+
+Level 1 Test Anchored
+
+No V&V target 
+
+Future V&V Target
+
+Propellant 
+Transfer
+
+Operation Important Process/Mechanism
+
+Numerical Implementation
+1G Sim Fluid
+
+Scaled
+
+0G Sim
+
+Fluid Scaled
+1G Cryo
+
+0G Cryo
+
+Small –Scale
+
+0G Cryo
+
+Large-Scale1g
+
+(Settled)
+
+0g
+
+(Unsettled)
+
+Autogenous 
+
+Pressurization
+
+Unsubmerged   EDU TP’s TP
+
+Submerged   EDU TP’s
+Future Demo
+
+Tank Chill-down Inject-Hold-Vent Cycles 
+
+Droplet-liquid 
+
+coalescence – wall 
+
+effects
+
+ZBOT FT 
+
+Tank 
+
+Filling(DLR)
+
+ZBOT FT 
+
+Tank 
+
+Filling(DLR
+
+K-site TP’s Future Demo
+
+Transfer Line Chill-
+
+Down 
+
+Chill-down  
+FBCE-Line 
+
+Chill-down
+
+FBCE-Line 
+
+Chill-down
+Future Demo
+
+GRC-LH2 TP’s
+
+Heating/Boiling  during steady state 
+
+transfer 
+  FBCE FBCE
+
+GRC-LH2 
+
+Hendricks
+TP’s Future Demo
+
+Tank Filling
+Ullage Condensation during Fill 
+
+Operation 
+ 
+
+ZBOT FT 
+
+Tank 
+
+Filling(DLR
+
+ZBOT FT 
+
+Tank 
+
+Filling(DLR
+
+LH2/Moran TP’s TP
+
+Non-Condensable 
+
+Effects
+
+Pressurization   ZBOT-NC ZBOT-NC Olsen TP’s TP
+
+Axial Jet Condensation During Filling   ZBOT-NC ZBOT-NC Bullard LH2 TP’s
+Future Demo
+
+Droplet Phase Change   ZBOT-DP ZBOT-DP MHTB TP’s
+Future Demo
+
+Slosh
+Like Pressurant   DLR/JAXA TP’s TP
+
+Unlike Pressurant   TP’s
+Future Demo
+
+Donor Tank Vapor Pull 
+
+Through
+Low bond # tank drainage  
+
+Abdalla/  
+
+Berenyi
+
+Abdalla/  
+
+Berenyi
+N/A TP’s
+
+

@@ -1,0 +1,1471 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="pdf:PDFVersion" content="1.4">
+<meta name="pdf:hasXFA" content="false">
+<meta name="access_permission:modify_annotations" content="true">
+<meta name="access_permission:can_print_degraded" content="true">
+<meta name="dcterms:created" content="2023-02-10T15:04:11Z">
+<meta name="dcterms:modified" content="2023-02-10T18:28:43Z">
+<meta name="dc:format" content="application/pdf; version=1.4">
+<meta name="xmpMM:DocumentID" content="uuid:cbec9527-0e99-4e14-96e2-0e767af402ab">
+<meta name="access_permission:fill_in_form" content="true">
+<meta name="pdf:docinfo:modified" content="2023-02-10T18:28:43Z">
+<meta name="pdf:hasCollection" content="false">
+<meta name="pdf:encrypted" content="false">
+<meta name="xmp:CreateDate" content="2023-02-10T15:04:11Z">
+<meta name="pdf:hasMarkedContent" content="false">
+<meta name="Content-Type-Override" content="application/pdf">
+<meta name="Content-Type" content="application/pdf">
+<meta name="xmp:ModifyDate" content="2023-02-10T13:28:43Z">
+<meta name="xmp:MetadataDate" content="2023-02-10T13:28:43Z">
+<meta name="pdf:producer" content="macOS Version 12.6.2 (Build 21G320) Quartz PDFContext">
+<meta name="access_permission:extract_for_accessibility" content="true">
+<meta name="access_permission:assemble_document" content="true">
+<meta name="xmpTPg:NPages" content="29">
+<meta name="pdf:hasXMP" content="true">
+<meta name="access_permission:extract_content" content="true">
+<meta name="access_permission:can_print" content="true">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.DefaultParser">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.pdf.PDFParser">
+<meta name="access_permission:can_modify" content="true">
+<meta name="pdf:docinfo:producer" content="macOS Version 12.6.2 (Build 21G320) Quartz PDFContext">
+<meta name="pdf:docinfo:created" content="2023-02-10T15:04:11Z">
+<title></title>
+</head>
+<body><div class="page"><p></p>
+<p>Numerical Methods for Jet Noise Predictions Using the 
+Generalized Acoustic Analogy
+</p>
+<p>Stewart J. Leib
+HX5, LLC 
+</p>
+<p>NASA Glenn Research Center
+Cleveland, Ohio USA 
+</p>
+<p>1
+</p>
+<p>Topics in CFD
+Queen Mary University of London
+</p>
+<p>March 2023</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Outline
+• Application: Jet noise prediction
+• Acoustic Analogy approach
+• Simplification of the problem for numerical solution
+• Numerical methods for two classes of jet flows
+• Sample results</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Jet Noise Predictions
+• Jet noise is the sound produced by aircraft engine exhaust 
+• Can be the dominate source of sound produced by aircraft 
+• Prediction methods are needed to understand and develop noise-reduction technologies 
+• Options for Jet Noise Prediction
+</p>
+<p>1. Direct Simulation 
+a) Not practical over all scales
+</p>
+<p>2. Large-Eddy Simulation/Sound Propagation 
+a) Increasingly used
+b) Still expensive (high-end computing systems and long run time)
+</p>
+<p>3. Reduced-order models
+a) Lower computation requirements and faster run time while retaining main physics
+b) Based on Acoustic Analogy 
+</p>
+<p>4. Empirical Methods
+1. Very fast, can be implemented into optimization tools for design trades
+2. Limited to cases ‘close’ to those for which the models are developed
+</p>
+<p>3</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Acoustic Analogy
+• Acoustic analogies are often used to develop physics-based reduced-
+</p>
+<p>order noise prediction methods
+• An acoustic analogy is a rearrangement of the Navier-Stokes equations 
+</p>
+<p>to obtain a linear wave operator acting on a set of fluctuating 
+quantities with all non-linearities treated as ’source terms’
+</p>
+<p>• Example:  Lighthill (1954, 1955)
+</p>
+<p>4
+</p>
+<p>𝜕𝜌
+𝜕𝑡 +
+</p>
+<p>𝜕
+𝜕𝑦!
+</p>
+<p>𝜌𝑣! = 0
+</p>
+<p>𝜌
+𝜕𝑣!
+𝜕𝑡
+</p>
+<p>+ 𝑣"
+𝜕
+𝜕𝑦"
+</p>
+<p>𝑣! = −
+𝜕𝑝
+𝜕𝑦!
+</p>
+<p>+
+𝜕𝑒!"
+𝜕𝑦"
+</p>
+<p>𝜕!𝜌"
+</p>
+<p>𝜕𝑡!
+− 𝑐#
+</p>
+<p>𝜕!𝜌"
+</p>
+<p>𝜕𝑦$𝜕𝑦$
+=
+</p>
+<p>𝜕!𝑇$%
+𝜕𝑦$𝜕𝑦%
+</p>
+<p>Continuity and Momentum Equations Wave equation operator with 
+non-linear ‘sources’
+</p>
+<p>Model Sources -- 𝑇$%
+Compute solution of linear wave equation </p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Generalized Acoustic Analogy  -- Goldstein (2003)
+• Include more physical effects in operator 
+</p>
+<p>--&gt; Propagation through a non-uniform mean flow
+– Reduce burden on source model
+– More complication equation for propagation –&gt; Numerical solution required
+</p>
+<p>• Third-order ‘wave’ equation with variable coefficients
+</p>
+<p>5
+</p>
+<p>𝐷
+𝐷𝜏
+</p>
+<p>𝐷!𝑝"
+</p>
+<p>𝐷𝜏!
+−
+</p>
+<p>𝜕
+𝜕𝑦#
+</p>
+<p>𝑐! 𝒚𝑻
+𝜕𝑝"
+</p>
+<p>𝜕𝑦#
++ 2𝑐! 𝒚𝑻
+</p>
+<p>𝑑𝑈 𝒚𝑻
+𝑑𝑦#
+</p>
+<p>𝜕!𝑝"
+</p>
+<p>𝜕𝑦%𝜕𝑦#
+= 𝑆 ; i = 1,2,3
+</p>
+<p>&amp;
+&amp;'
+</p>
+<p>= (
+('
++ 𝑈 𝒚𝑻
+</p>
+<p>(
+(*!
+</p>
+<p>𝑦+ -- Streamwise direction
+𝒚𝑻 = 𝑦!, 𝑦, - Cross Stream vector
+𝑈 𝒚𝑻 =Mean Streamwise velocity
+𝑐! 𝒚𝑻 = Mean speed of sound (squared)</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Solution for Inhomogeneous Partial Differential Equation 
+Green’s Function
+</p>
+<p>• The Green’s function is the solution due to a point source 
+– Know Green’s function à Obtain solution for any source 
+</p>
+<p>6
+</p>
+<p>𝐷,𝐺-
+</p>
+<p>𝐷𝜏,
+−
+</p>
+<p>𝜕
+𝜕𝑦.
+</p>
+<p>𝑐/ 𝑦0
+𝜕
+𝜕𝑦.
+</p>
+<p>𝐷𝐺-
+</p>
+<p>𝐷𝜏
+− 2
+</p>
+<p>𝜕
+𝜕𝑦.
+</p>
+<p>𝑐/ 𝑦0
+𝑑𝑈 𝑦0
+𝑑𝑦.
+</p>
+<p>𝜕𝐺-
+</p>
+<p>𝜕𝑦1
+= −𝛿 𝑥 − 𝑦 𝛿 𝑡 − 𝜏
+</p>
+<p>• In this equation, coefficients do not depend on:
+1. Time, τ (by construction)
+2. Streamwise coordinate, 𝑦! (Approximation, parallel mean flow)
+</p>
+<p>Ø Modal (Fourier Transform) solution in these independent variables
+v Trade independent variables (𝜏, 𝑦!) for parameters (𝜔, 𝑘!)</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Governing Equation for ‘reduced’ Green’s Function
+</p>
+<p>7
+</p>
+<p>𝜕
+𝜕𝑦$
+</p>
+<p>𝑐! 𝒚-
+𝜔 − 𝑘𝑈 𝒚-
+</p>
+<p>!
+𝜕
+𝜕𝑦$
+</p>
+<p>+ 1 −
+𝑘!𝑐! 𝒚-
+</p>
+<p>𝜔 − 𝑘𝑈 𝒚-
+!
+0𝐺# 𝒚-|𝒙-; 𝑘, 𝜔 =
+</p>
+<p>𝛿 𝒚- − 𝒙-
+2𝜋 !
+</p>
+<p>Boundary Conditions:
+Bounded at 𝑦- = 0
+Outgoing as 𝑦- → ∞
+</p>
+<p>Two-dimensional problem 𝑦!, 𝑦,
+</p>
+<p>To be solved for given frequency 𝜔 and streamwise wavenumber 𝑘 (= ⁄./012 /" , far-field)
+</p>
+<p>Mean streamwise velocity, 𝑈 𝒚- , and sound speed, 𝑐! 𝒚- , given from Reynolds-averaged 
+Navier-Stokes solution </p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Numerical methods for two classes of problems
+</p>
+<p>8
+</p>
+<p>1. Axisymmetric Jets: 𝑈 = 𝑈 𝑦- , 𝑐! = 𝑐! 𝑦-
+• Depends only on 𝑟, independent of 𝜑
+• 𝑈 = 𝑈 𝑟 , 𝑐! = 𝑐! 𝑟
+</p>
+<p>2. Non-axisymmetric jets 𝑈 = 𝑈 𝒚𝑻 , 𝑐! = 𝑐! 𝒚𝑻
+• Depends on both 𝑟 and 𝜑
+• 𝑈 = 𝑈 𝑟, 𝜑 , 𝑐! = 𝑐! 𝑟, 𝜑
+</p>
+<p>𝑦- = 𝑟 = 𝑦!! + 𝑦,! 𝜑= 𝑡𝑎𝑛3+ ⁄*# *$
+</p>
+<p>Polar coordinates 𝑟, 𝜑</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Governing Equation for ‘Reduced’ Green’s Function
+Axisymmetric Jet
+</p>
+<p>• Polar coordinates 𝑟, 𝜑
+• Mean flow (equation coefficients) depends only on 𝑟
+• Fourier series in 𝜑 - Trade 𝜑 for 𝑛
+</p>
+<p>9
+</p>
+<p>1
+𝑟
+𝑑
+𝑑𝑟
+</p>
+<p>𝑟 𝑐! 𝑟
+</p>
+<p>𝜔 − 𝑘𝑈 𝑟 !
+𝑑
+𝑑𝑟
++ 1 −
+</p>
+<p>𝑘!𝑐! 𝑟
+</p>
+<p>𝜔 − 𝑘𝑈 𝑟 ! 𝑘! +
+𝑛!
+</p>
+<p>𝑟!
+𝐺4 𝑟|𝑟"; 𝑘, 𝜔, 𝑛 =
+</p>
+<p>𝛿 𝑟 − 𝑟"
+</p>
+<p>2𝜋 ,𝑟
+</p>
+<p>Second-order ordinary differential equation with  variable coefficients
+</p>
+<p>Solve in terms of two independent homogeneous solutions </p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Numerical Solution of ‘Reduced’ Green’s Function
+Axisymmetric Jet 
+</p>
+<p>10
+</p>
+<p>𝑤4"" 𝑟 + 𝑝 𝑟 𝑤4"" 𝑟 + 𝑞 𝑟 𝑤4 𝑟 = 0 ; 𝑛 = 0,1, … ,𝑁
+</p>
+<p>Numerical problem reduces to solving a second-order ordinary differential equation
+Regular singular point at 𝑟 = 0
+</p>
+<p>Express as system of two first-order equations
+</p>
+<p>𝑣4= 𝑤4"
+</p>
+<p>𝑤4" = 𝑣4 ; 𝑣4" = − 𝑝𝑣4 + 𝑞𝑤4 = 𝑓 𝑟, 𝑣4, 𝑤4
+</p>
+<p>Solve first-order system 
+𝑣4
+𝑤4 by ‘marching’ from ‘initial’ condition at 𝑟 = 𝑟#
+</p>
+<p>Put:
+</p>
+<p>Then:
+</p>
+<p>General Form:</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Numerical Solution of ‘Reduced’ Green’s Function
+Axisymmetric Jet 
+</p>
+<p>11
+</p>
+<p>‘March’ solution from ‘initial’ condition at 𝑟 = 𝑟#, with 
+𝑣4 𝑟#
+𝑤4 𝑟#
+</p>
+<p>known, to 𝑟5
+</p>
+<p>Method: ‘Classical’ Fourth-order Runge-Kutta for system of first-order equations
+</p>
+<p>But need ‘initial’ condition 
+𝑣4 𝑟#
+𝑤4 𝑟#
+</p>
+<p>à How to get this ?
+</p>
+<p>First-order system:
+</p>
+<p>𝑣4 𝑟$6+
+𝑤4 𝑟$6+
+</p>
+<p>= 𝑣4 𝑟$
+𝑤4 𝑟$
+</p>
+<p>+
+</p>
+<p>1
+6
+𝑘+ + 2𝑘! + 2𝑘, + 𝑘7
+</p>
+<p>∆𝑣4 𝑟$ +
+∆
+6
+𝑘+ + 𝑘! + 𝑘,
+</p>
+<p>For 𝑖 = 0,𝑀 − 1
+</p>
+<p>𝑣4" = 𝑓 𝑟, 𝑣4, 𝑤4 ; 𝑤4" = 𝑣4
+</p>
+<p>𝑘!, 𝑘", 𝑘#, 𝑘$ are known at 𝑟%</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Numerical Solution of ‘Reduced’ Green’s Function
+Axisymmetric Jet 
+</p>
+<p>12
+</p>
+<p>𝑤4"" 𝑟 + 𝑝 𝑟 𝑤4"" 𝑟 + 𝑞 𝑟 𝑤4 𝑟 = 0
+</p>
+<p>‘Initial’ condition for marching solution 
+</p>
+<p>Method of Frobenius:  𝑤4 = 𝑟4∑;&lt;#= 𝑎;𝑟;
+</p>
+<p>Expand coefficients in Taylor series around 𝑟 = 0
+</p>
+<p>𝑟𝑝 = @
+&amp;'(
+</p>
+<p>)
+</p>
+<p>𝑝&amp; 𝑟&amp; 𝑟"𝑞 = @
+&amp;'(
+</p>
+<p>)
+</p>
+<p>𝑞&amp; 𝑟&amp;
+</p>
+<p>Substitute series’ into differential equation, equate powers of 𝑟 to determine 𝑎;
+</p>
+<p>𝑟𝑝 ≈ 𝑝# + 𝑝+𝑟 + 𝑝!𝑟! + 𝑝,𝑟, + 𝑝7𝑟7
+𝑟!𝑞 ≈ 𝑞# + 𝑞+𝑟 + 𝑞!𝑟! + 𝑞,𝑟, + 𝑞7𝑟7
+</p>
+<p>Second-order ordinary differential equation with Regular Singular point at 𝑟 = 0
+</p>
+<p>Series solution around 𝑟 = 0
+</p>
+<p>𝑤* 𝑟( = 𝑟(* 𝑎( + 𝑎!𝑟( + 𝑎"𝑟(" + 𝑎#𝑟(# 𝑣* 𝑟( = 𝑛𝑟(*+! 𝑎! + 2𝑎"𝑟( + 3𝑎#𝑟("</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Numerical Solution of ‘Reduced’ Green’s Function
+Axisymmetric Jet 
+</p>
+<p>13
+</p>
+<p>Solution Procedure Summary:
+</p>
+<p>Numerical solution for Green’s function:
+</p>
+<p>• Fourier-decompose in the streamwise and azimuthal directions and in time
+• Solve numerically for the independent azimuthal modes at given frequency and 
+</p>
+<p>observer angle
+• Sum azimuthal modes to obtain ‘reduced’ Green’s function
+</p>
+<p>Prediction of far-field acoustic spectrum:
+</p>
+<p>• Insert ‘reduced’ Green’s function into formula for acoustic spectrum
+• Integrate over source volume</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Example Results: Axisymmetric (Round) Jet 
+</p>
+<p>14
+</p>
+<p>Predictions of Noise from Round, unheated turbulent compared with 
+experimental data (NASA GRC SHJAR)</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Governing Equation for ‘Reduced’ Green’s Function
+Non-Axisymmetric Jet 
+</p>
+<p>15
+</p>
+<p>𝜕
+𝜕𝑦$
+</p>
+<p>𝑐! 𝒚-
+𝜔 − 𝑘𝑈 𝒚-
+</p>
+<p>!
+𝜕
+𝜕𝑦$
+</p>
+<p>+ 1 −
+𝑘!𝑐! 𝒚-
+</p>
+<p>𝜔 − 𝑘𝑈 𝒚-
+!
+0𝐺# 𝒚-|𝒙-; 𝑘, 𝜔 =
+</p>
+<p>𝛿 𝒚- − 𝒙-
+2𝜋 !
+</p>
+<p>• Coefficients (mean flow) depends on 𝑦!, 𝑦, ( ie. both 𝑟, 𝜑 )
+</p>
+<p>• Azimuthal Fourier modes of Green’s function are coupled with those of the mean flow
+o System of simultaneous linear algebraic equations for azimuthal Fourier modes
+o Feasible for certain classes of mean flows 
+</p>
+<p>• More general method based on finite volume technique</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Governing Equation for ‘Reduced’ Green’s Function
+Non-Axisymmetric Jet
+</p>
+<p>16
+</p>
+<p>∞( )
+( )
+</p>
+<p>( )
+∞( )( )
+</p>
+<p>( )
+( )
+</p>
+<p>2 2 22
+2
+</p>
+<p>2 2
+</p>
+<p>/ cos; , :
+1 ; , : 0   ;     2,3
+</p>
+<p>1 cos 1 cos
+</p>
+<p>                                  
+</p>
+<p>i i
+</p>
+<p>c cc g
+g i
+</p>
+<p>y yM M
+</p>
+<p>^ ¥^ ^
+^
+</p>
+<p>^ ^
+</p>
+<p>ì üq¶ j q w¶ ï ï+w - j q w = =í ý¶ ¶- q - qé ù é ùï ïë û ë ûî þ
+</p>
+<p>yy y
+y
+</p>
+<p>y y
+</p>
+<p>( ) ( ) ( ) ( )
+</p>
+<p>( )
+</p>
+<p>2
+</p>
+<p>2
+</p>
+<p>0 /4sin cos
+</p>
+<p>       
+2 2 sin /
+</p>
+<p>                                                                                                                          as 
+</p>
+<p>/
+; , : outgoing waves
+</p>
+<p>2
+</p>
+<p>ii c y
+</p>
+<p>c
+</p>
+<p>c
+g
+</p>
+<p>ee
+¥
+</p>
+<p>¥
+^
+</p>
+<p>¥ ^ p- w q j-j
+</p>
+<p>p qw
+</p>
+<p>w
+j q w ® +
+</p>
+<p>p
+y
+</p>
+<p>                                                                                                        
+</p>
+<p>y^ ®¥
+</p>
+<p>Far-field solution, specified incoming wave
+</p>
+<p>Boundary Conditions:
+</p>
+<p>( ); , :      Bounded at 0g y^ ^j q w =y
+</p>
+<p>{ }2 3,y y^ =y
+</p>
+<p>𝑐! 𝒚𝑻 𝑐# 𝒚𝑻</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Numerical Solution of Green’s Function: 
+Finite Volume Method
+</p>
+<p>17
+</p>
+<p>∞( )
+( )
+</p>
+<p>( )
+∞( )( )
+</p>
+<p>( )
+( )
+</p>
+<p>2 2 22
+2
+</p>
+<p>2 2
+</p>
+<p>/ cos; , :
+1 ; , : 0   ;   2,3
+</p>
+<p>1 cos 1 cosR R
+i i
+</p>
+<p>c cc g
+dR g dR i
+</p>
+<p>y yM M
+</p>
+<p>^ ¥^ ^
+^
+</p>
+<p>^ ^
+</p>
+<p>ì üq¶ j q w¶ ï ï+w - j q w = =í ý¶ ¶- q - qé ù é ùï ïë û ë ûî þ
+òò òò
+</p>
+<p>yy y
+y
+</p>
+<p>y y
+</p>
+<p>∞( )
+( )
+</p>
+<p>! ( )
+∞( )( )
+</p>
+<p>( )
+( )
+</p>
+<p>2 2 22
+2
+</p>
+<p>2 2
+</p>
+<p>/ cos; , :
+1 ; , : 0   ;   2,3
+</p>
+<p>1 cos 1 cos
+iS R
+</p>
+<p>i
+</p>
+<p>c cc g
+n dS g dR i
+</p>
+<p>yM M
+</p>
+<p>^ ¥^ ^
+^
+</p>
+<p>^ ^
+</p>
+<p>ì üq¶ j q w ï ï+w - j q w = =í ý¶- q - qé ù é ùï ïë û ë ûî þ
+ò òò
+</p>
+<p>yy y
+y
+</p>
+<p>y y
+</p>
+<p>Divergence Theorem:
+</p>
+<p>No Mean Flow Derivatives  !
+</p>
+<p>( )! ( ) ( ) ( )2; , :
+; , : 0   ;   2,3iS R
+</p>
+<p>i
+</p>
+<p>g
+F n dS H g dR i
+</p>
+<p>y
+^
+</p>
+<p>^ ^ ^
+¶ j q w
+</p>
+<p>+w j q w = =
+¶ò òò
+y
+</p>
+<p>y y y
+</p>
+<p>𝑐! 𝒚𝑻 𝑐# 𝒚𝑻
+</p>
+<p>𝑐! 𝒚𝑻 𝑐# 𝒚𝑻</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>P
+</p>
+<p>N
+</p>
+<p>S
+E
+</p>
+<p>W nw
+</p>
+<p>esÄ
+Ä
+</p>
+<p>Ä
+Ä
+</p>
+<p>Ä
+</p>
+<p>( )! ( ) ( )
+</p>
+<p>[ ] ( )
+</p>
+<p>0
+</p>
+<p>0 0
+</p>
+<p>; , : 1
+</p>
+<p>1 1
+2
+</p>
+<p>e
+i e ne seS
+</p>
+<p>i e e
+</p>
+<p>P E
+E P ne seP E
+</p>
+<p>e
+</p>
+<p>g gF n dS F r r
+y r
+</p>
+<p>g gF F r r
+r
+</p>
+<p>^
+^
+</p>
+<p>¶ j q w ¶
+» - -
+</p>
+<p>¶ ¶j
+</p>
+<p>-
+» - + -
+</p>
+<p>j -j
+</p>
+<p>ò
+y
+</p>
+<p>y
+</p>
+<p>Numerical Solution of Green’s Function: 
+Finite Volume Method  -- General Control Volume
+</p>
+<p>18
+</p>
+<p>Approximation of Surface (line) Integrals:
+</p>
+<p>‘e’ Face:
+</p>
+<p>Approximation of Volume (area) integrals:
+</p>
+<p>( ) ( ); , : P P PR
+H g dR H g R^ ^ j q w »òò y y 0
+</p>
+<p>w n
+</p>
+<p>e s
+</p>
+<p>r
+</p>
+<p>P
+r
+</p>
+<p>R rdrd
+j
+</p>
+<p>j
+</p>
+<p>= jò ò
+</p>
+<p>‘n’ Face: ( )! ( ) ( )
+</p>
+<p>[ ] ( )
+</p>
+<p>0 0
+</p>
+<p>0 0
+</p>
+<p>; , :
+</p>
+<p>1
+2
+</p>
+<p>n
+</p>
+<p>nw ne
+i n nS
+</p>
+<p>i n
+</p>
+<p>nw neN P
+N P n
+</p>
+<p>N P
+</p>
+<p>g gF n dS F r
+y r
+</p>
+<p>g gF F r
+r r
+</p>
+<p>^
+^
+</p>
+<p>¶ j q w ¶
+» j -j
+</p>
+<p>¶ ¶
+</p>
+<p>-
+» + j -j
+</p>
+<p>-
+</p>
+<p>ò
+y
+</p>
+<p>y
+</p>
+<p>r
+</p>
+<p>0j</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>k =1
+</p>
+<p>k =
+2
+</p>
+<p>k = Kmax
+</p>
+<p>j = 1
+</p>
+<p>j = Jmax
+</p>
+<p>Ä
+CL
+</p>
+<p>k
+=
+Km
+ax-1
+</p>
+<p>j = Jmax -1
+</p>
+<p>Numerical Solution of Green’s Function:
+Finite Volume Method  -- Boundary Conditions
+</p>
+<p>• Far-Field: Sommerfeld radiation for scattered solution
+</p>
+<p>– Second-order central difference at j = Jmax – 1/2
+</p>
+<p>• Centerline: (Giuliani, Chen, Beach and Bakhle; AIAA 2014-3731)
+</p>
+<p>19
+</p>
+<p>Kmax
+</p>
+<p>,1
+1
+</p>
+<p>1
+KmaxCL k
+</p>
+<p>k
+g g
+</p>
+<p>=
+</p>
+<p>= å
+</p>
+<p>( ) ( )
+</p>
+<p>( ) ( )
+</p>
+<p>, , 1 , 1 , , 1 ,
+</p>
+<p>, , 1 1, 2
+</p>
+<p>1 11 1
+2 2
+</p>
+<p>                     ; , :
+</p>
+<p>k J k J k J k J k J k J
+</p>
+<p>k J k J k J
+</p>
+<p>r r g r r g
+</p>
+<p>r r
+</p>
+<p>- - -
+</p>
+<p>- ^-
+</p>
+<p>é ù é ù- + - k + + - k »ê ú ê úë û ë û
+</p>
+<p>- L j q wy
+</p>
+<p>( ) ( ) ( )
+; , : sin; , : ; , :    ;   =
+</p>
+<p>g ig
+r c
+</p>
+<p>^
+^ ^
+</p>
+<p>¥
+</p>
+<p>¶ j q w w q
++ k j q w ® L j q w k
+</p>
+<p>¶
+y
+</p>
+<p>y y</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Numerical Solution of Green’s Function:
+Finite Volume Method  -- Algebraic Equations
+</p>
+<p>• Sum contributions from all Control Volumes
+• Special CVs for periodicity, centerline, outer boundary
+• Banded system of equations -- solve directly using a 
+</p>
+<p>sparse system algorithm
+</p>
+<p>( ) ( ) ( ) ( ) ( ), , , , ,
+, 1 1, , 1, , 1 0   ;   1,Kmax,   1, Jmaxk j k j k j k j k j
+k j k j k j k j k jA g B g C g D g E g k j- - + ++ + + + = = =
+</p>
+<p>20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Sample Solutions
+• Two analytical test cases
+• Compare with hybrid spectral/finite-difference method, Leib(2013)
+</p>
+<p>( ) ( ) ( )
+42 12, c rar
+</p>
+<p>CM r M e br e h- --é ù= +ê úë û
+j j( ) ( ) 21 2 cos, r
+</p>
+<p>CM r M e- + -= a a jj
+</p>
+<p>Offset Stream                                                              Fluid Shield                           
+</p>
+<p>21</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Sample Solutions
+• Two analytical test cases
+• Compare with hybrid spectral/finite-difference method Leib (2013)
+</p>
+<p>( ) ( ) ( )
+42 12, c rar
+</p>
+<p>CM r M e br e h- --é ù= +ê úë û
+j j( ) ( ) 21 2 cos, r
+</p>
+<p>CM r M e- + -= a a jj
+</p>
+<p>Offset Stream                                                              Fluid Shield
+</p>
+<p>22</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>j0
+</p>
+<p>R
+ea
+l(g
+)
+</p>
+<p>-.003
+</p>
+<p>-.002
+</p>
+<p>-.001
+</p>
+<p>0
+</p>
+<p>.001
+</p>
+<p>.002
+</p>
+<p>.003
+</p>
+<p>.004
+</p>
+<p>.005
+</p>
+<p>Finite Volume
+Spectral/Finite Difference
+</p>
+<p>p/2 3p/2p 2p
+j0
+</p>
+<p>R
+ea
+l(g
+)
+</p>
+<p>-.006
+-.005
+-.004
+-.003
+-.002
+-.001
+</p>
+<p>0
+.001
+.002
+.003
+.004
+.005
+.006
+.007
+</p>
+<p>p/2 3p/2p 2pj0
+</p>
+<p>R
+ea
+l(g
+)
+</p>
+<p>-.002
+</p>
+<p>-.001
+</p>
+<p>0
+</p>
+<p>.001
+</p>
+<p>.002
+</p>
+<p>.003
+</p>
+<p>.004
+</p>
+<p>.005
+</p>
+<p>p/2 3p/2p 2p
+</p>
+<p>Results: Offset Jet
+</p>
+<p>23
+</p>
+<p>r = 0.5r = 0.25 r = 1.0
+</p>
+<p>𝜃 = 30° ; 𝜑 = 0°
+</p>
+<p>( )Real g
+</p>
+<p>( )Imag g
+</p>
+<p>j0
+</p>
+<p>Im
+ag
+(g
+)
+</p>
+<p>-.003
+</p>
+<p>-.0025
+</p>
+<p>-.002
+</p>
+<p>-.0015
+</p>
+<p>-.001
+</p>
+<p>-.0005
+</p>
+<p>0
+</p>
+<p>.0005
+</p>
+<p>.001
+</p>
+<p>.0015
+</p>
+<p>p/2 3p/2p 2p
+j0
+</p>
+<p>Im
+ag
+(g
+)
+</p>
+<p>-.007
+-.006
+-.005
+-.004
+-.003
+-.002
+-.001
+</p>
+<p>0
+.001
+.002
+.003
+.004
+.005
+</p>
+<p>p/2 3p/2p 2p
+j0
+</p>
+<p>Im
+ag
+(g
+)
+</p>
+<p>-.004
+-.0035
+-.003
+-.0025
+-.002
+-.0015
+-.001
+-.0005
+</p>
+<p>0
+.0005
+.001
+.0015
+.002
+</p>
+<p>St = 0.2
+St = 0.4
+St = 0.6
+St = 0.8
+St = 1.0
+</p>
+<p>p/2 3p/2p 2p</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Sample Solutions
+• Two analytical test cases
+• Compare with hybrid spectral/finite-difference method, Leib(2013)
+</p>
+<p>( ) ( ) ( )
+42 12, c rar
+</p>
+<p>CM r M e br e h- --é ù= +ê úë û
+j j( ) ( ) 21 2 cos, r
+</p>
+<p>CM r M e- + -= a a jj
+</p>
+<p>Offset Stream                                                              Fluid Shield                                                                                 
+</p>
+<p>24</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>j0
+</p>
+<p>R
+ea
+l(g
+)
+</p>
+<p>0
+</p>
+<p>0.002
+</p>
+<p>0.004
+</p>
+<p>0.006
+</p>
+<p>0.008
+</p>
+<p>0.01
+</p>
+<p>p/2 p 2p3p/2
+j0
+</p>
+<p>R
+ea
+l(g
+)
+</p>
+<p>-0.002
+</p>
+<p>0
+</p>
+<p>0.002
+</p>
+<p>0.004
+</p>
+<p>0.006
+</p>
+<p>0.008
+</p>
+<p>0.01
+</p>
+<p>0.012
+</p>
+<p>0.014
+St = 0.2
+St = 0.4
+St = 0.6
+St = 0.8
+St = 1.0
+</p>
+<p>p/2 p 2p3p/2
+j0
+</p>
+<p>R
+ea
+l(g
+)
+</p>
+<p>-0.01
+</p>
+<p>-0.005
+</p>
+<p>0
+</p>
+<p>0.005
+</p>
+<p>0.01
+</p>
+<p>0.015
+</p>
+<p>0.02
+</p>
+<p>0.025
+</p>
+<p>0.03
+</p>
+<p>0.035
+</p>
+<p>0.04
+</p>
+<p>p/2 p 2p3p/2
+</p>
+<p>Results: Fluid Shield
+</p>
+<p>25
+</p>
+<p>r = 0.25 r = 0.5 r = 1.0
+</p>
+<p>𝜃 = 30° ; 𝜑 = 0°
+</p>
+<p>j0
+</p>
+<p>Im
+ag
+(g
+)
+</p>
+<p>-0.014
+</p>
+<p>-0.012
+</p>
+<p>-0.01
+</p>
+<p>-0.008
+</p>
+<p>-0.006
+</p>
+<p>-0.004
+</p>
+<p>-0.002
+</p>
+<p>0
+</p>
+<p>0.002
+</p>
+<p>0.004
+</p>
+<p>p/2 p 2p3p/2
+j0
+</p>
+<p>Im
+ag
+(g
+)
+</p>
+<p>-0.025
+</p>
+<p>-0.02
+</p>
+<p>-0.015
+</p>
+<p>-0.01
+</p>
+<p>-0.005
+</p>
+<p>0
+</p>
+<p>0.005
+</p>
+<p>Finite Volume
+Spectral/Finite Difference
+</p>
+<p>p/2 p 2p3p/2
+j0
+</p>
+<p>Im
+ag
+(g
+)
+</p>
+<p>-0.06
+</p>
+<p>-0.05
+</p>
+<p>-0.04
+</p>
+<p>-0.03
+</p>
+<p>-0.02
+</p>
+<p>-0.01
+</p>
+<p>0
+</p>
+<p>0.01
+</p>
+<p>0.02
+</p>
+<p>p/2 p 2p3p/2
+</p>
+<p>( )Real g
+</p>
+<p>( )Imag g</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Example Results: Chevon (Non-Axisymmetric) Jet 
+</p>
+<p>26
+</p>
+<p>Predictions of Noise from unheated turbulent jets 
+from a chevon nozzle compared with 
+experimental data (NASA GRC SHJAR)
+</p>
+<p>Thick
+Thin</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Summary
+• Combined analytical analysis and approximations to allow use of 
+</p>
+<p>simple numerical methods to obtain noise prediction results for 
+turbulent jets
+</p>
+<p>• Reduced-order model requiring ‘moderate’ computational resources 
+while retaining the most significant physical effects
+</p>
+<p>• Numerical implementations resulted in several ‘production’ codes 
+currently in use at NASA 
+</p>
+<p>27</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>References
+• Goldstein, M.E., A generalized acoustic analogy, Journal of Fluid Mechanics, Vol. 488, 2003, pp. 315-333. 
+• Goldstein, M.E. and Leib, S. J., “The Aeroacoustics of Slowing Diverging Supersonic Jets,” Journal of Fluid Mechanics, Vol. 
+</p>
+<p>600, pp. 291-337, 2008.
+• Leib, S. J. and Goldstein, M. E., “Hybrid Source Model for Predicting High-Speed Jet Noise,” AIAA Journal, Vol. 49, No. 7, 
+</p>
+<p>2011. 
+• Leib, S. J., “Noise Predictions for Rectangular Jets Using a Conformal Mapping Method,” AIAA Journal, Vol. 51, No. 3, 2013
+• Leib, S. J. and Bridges, J. E., “Predictions of the Azimuthal Variation of the Noise from Chevron Jets using an Acoustic 
+</p>
+<p>Analogy,” AIAA 2022-2912, 2022. 
+</p>
+<p>28
+</p>
+<p>Acoustic Analogy and jet noise
+</p>
+<p>Numerical Methods
+• James, M. L., Smith, G. M and Wolford, J. C., “Applied Numerical Methods for Digital Computation,” Harper &amp; Row, New 
+</p>
+<p>York, 1977.
+• Ferziger, J, H. and Peric, M., “Computational Methods for Fluid Dynamics,” Springer Berlin, Heidelberg, 2002.
+</p>
+<p>Differential equations and Green’s functions
+• Boyce, W. E. and DiPrima, R. C., “Elementary Differential Equations and Boundary Value Problems,” John Wiley 
+</p>
+<p>and Sons, New York, 1977.
+• Morse, P. M. and Feshbach, H, “ Methods of Theoretical Physics,” McGraw Hill, New York, 1953.</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Acknowledgements
+</p>
+<p>29
+</p>
+<p>This work is based on the theoretical ideas of Dr. Marvin Goldstein. It has been supported over many years 
+by the NASA Glenn Independent Research and Development (IR&amp;D) program and (more recently) the NASA 
+Advanced Air Vehicles Program under the Commercial Supersonic Technology Project. Many thanks to Dr. 
+James E. Bridges of NASA GRC for his support and collaboration. 
+</p>
+<p>S.J.L. </p>
+<p></p>
+</div>
+</body></html>

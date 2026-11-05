@@ -1,0 +1,422 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Informing the Space Launch System Booster Separation Initial
+CFD Run Matrix with Observed Parametric Sensitivity
+
+Michael W. Lee∗,
+NASA Langley Research Center, Hampton, VA 23681
+
+Aaron C. Burkhead†, Derek J. Dalle‡,
+NASA Ames Research Center, Moffett Field, CA 94035
+
+Heather P. Houlden§
+ViGYAN Inc., Hampton, VA 23666
+
+It currently requires significant computational cost to simulate the flow physics of the booster
+separation event on the Space Launch System. This comes from the large parametric space in
+which the event occurs, as preseparation flight conditions and separated booster core-relative
+trajectories can vary. Functionally removing the risk of core-booster collision mandates careful
+assessment of the fluid dynamics in terms of several trajectory parameters. However, simulating
+the entire trajectory envelope is computationally intractable given the high parametric dimension.
+In order to reduce the uncertainty in the resulting low-parametric-resolution aerodynamic
+booster separation database, a data-driven approach was developed to select which breakpoints
+should be studied by simulations and experiments and which should be relegated to a regression-
+based interpolation procedure. This technique works by simulating cases where the flow physics
+are most sensitive to changes in the parameters and leaving the less parametrically sensitive
+regions for interpolation. The result is a booster separation run matrix whose computational
+cost is comparable to that of previous database generations but has lower interpolation errors.
+
+Nomenclature
+
+𝐶𝐵𝑆𝑀
+𝑇
+
+= thrust coefficient of booster separation motor, normalized with dynamic pressure 𝑞
+𝐶𝐴 = axial force coefficient (x-direction in vertical-plane axis system)
+𝐶𝐿𝐿 = roll moment coefficient (z-direction in vertical-plane axis system)
+𝐶𝐿𝑀 = pitch moment coefficient (z-direction in vertical-plane axis system)
+𝐶𝐿𝑁 = yawing moment coefficient (z-direction in vertical-plane axis system)
+𝐶𝑁 = normal force coefficient (z-direction in vertical-plane axis system)
+𝐶𝑌 = side force coefficient (y-direction in vertical-plane axis system)
+𝑀∞ = freestream Mach number
+𝑞 = dynamic pressure, computed with reference velocity, psf
+𝛼𝑐 = core stage angle of attack in the vertical-plane axis system, deg
+𝛽𝑐 = core stage angle of sideslip in the vertical-plane axis system, deg
+Δ𝑥 = booster-core relative x-position in vertical-plane axis system, ft
+Δ𝑦 = booster-core relative y-position in vertical-plane axis system, ft
+Δ𝑧 = booster-core relative z-position in vertical-plane axis system, ft
+Δ𝜓 = booster-core relative yaw angle, deg
+Δ\ = booster-core relative pitch angle, deg
+Δ𝜙 = booster-core relative roll angle, deg
+
+∗Fluid Mechanics AST, Configuration Aerodynamics Branch, NASA Langley Research Center, Hampton, VA 23681, AIAA Member
+†Student Trainee, Computational Aerosciences Branch, NASA Ames Research Center, Moffett Field, CA 94035
+‡Fluid Mechanics AST, Computational Aerosciences Branch, NASA Ames Research Center, Moffett Field, CA 94035
+§Senior Research Engineer, ViGYAN Inc., Hampton, VA 23666, AIAA Senior Member
+
+1 of 11
+
+
+
+I. Introduction
+The solid rocket booster (SRB) separation event (Figure 1) is a common and complicated necessity in space launch
+system (SLS) missions. Solid rocket boosters employed in the liftoff and transition flight stages are jettisoned as the core
+stage proceeds through its ascent into orbit. However, on a given trajectory, the boosters are not guaranteed to always
+separate at the same airspeed, altitude, or rocket inclination. The duration of the booster separation motor firing, and the
+resulting unpowered departure from the core stage, can likewise vary significantly due to the nuanced aerodynamics of
+the flow regime [1]. Many of these booster trajectories lead them to impinge on the core engine plume, which is itself
+highly variable in shape. This plume impingement can lead to several modes, in one of which, the boosters are entrained
+in the core exhaust in such a way that they collide. Such an occurrence, naturally, must be avoided as much as possible.
+
+Fig. 1 Illustration of the SLS booster separation event. Core-relative booster coordinates are noted, as is the
+assumption that booster separation is symmetric in this paper.
+
+A Monte Carlo approach is used to simulate the high-dimensional booster separation trajectory window. For a new SLS
+configuration, it is conventional to begin with a high-uncertainty trajectory window based on an existing, similar SLS
+configuration’s aerodynamic forcing database and the new configuration’s flight conditions [2]. An initial computational
+fluid dynamics (CFD) run matrix is then constructed to fill, relatively sparsely, the convex parameter space defined
+by this trajectory window. The resulting force and moment (F&M) database is then used to create a new trajectory
+ensemble, from which additional run points are identified iteratively until there is adequate confidence that the final
+database yields an accurate trajectory window [3].
+
+In the case of symmetric booster separation, the parameters of interest are the boosters’ core-relative position
+(Δ𝑥, Δ𝑦, Δ𝑧), the boosters’ core-relative rotation (Δ𝜓, Δ\),∗ the booster separation thrust coefficient 𝐶𝐵𝑆𝑀
+
+𝑇
+, and the
+
+core-stage parameters 𝛼𝑐, 𝛽𝑐, and 𝑞 [3]. Each of these parameters is treated independently in the database, meaning the
+trajectory parameter space is eight-dimensional and populating the entire space is computationally intractable. In this
+work, all parameters are tracked on the right SRB (RSRB).
+
+Existing database construction methods ensure that the nominal trajectory and the trajectory bounds are included in the
+CFD run matrix, but beyond that, the database’s breakpoints are at least initially linearly distributed. The important
+exception is with Δ𝑥, which is used for organizing the other parameters; the result is a run matrix organized into several
+Δ𝑥 slices with a relatively uniform distribution of breakpoints in the other parameters in each of these slices.
+
+A limitation of this technique is that there is no guarantee that the flow physics behave predictably between these
+∗The third core-relative angle, Δ𝜙, is not aerodynamically significant due to the near-axisymmetric nature of the boosters.
+
+2 of 11
+
+
+
+breakpoints. The regression model employed by the trajectory simulator does not ensure its F&M interpolations are
+physically accurate. Therefore, if the breakpoints miss local extrema in the F&M values, these are smeared over in the
+trajectory simulations. This causes higher-than-desired uncertainty in the resulting trajectory simulations, which then
+requires more costs to account for in the rest of the system design cycle.
+
+This paper outlines a data-driven approach by which parameter breakpoints can be identified to reduce the F&M database
+uncertainty. By selecting breakpoints based on the observed F&M sensitivity to each parameter, the resulting database
+will be less likely to have missed important flow physics within the parameter space. The regression model, which uses
+the database, then is less likely to interpolate incorrect flow physics amidst the breakpoints. This will be demonstrated
+for a booster separation run matrix slice that was constructed using both the old and the new methods.
+
+II. Methodology and Results
+In particular, it is known that the booster side force coefficient 𝐶𝑌 and the booster yawing moment 𝐶𝐿𝑁 are centrally
+influential in bringing the boosters to problematic points in the parameter space, e.g., core recontact. A reasonable first
+step, then, is to study this force and moment in terms of each parameter of interest. The top half of Figure 2 shows the
+individual values of CY and CLN plotted versus Δ𝜓, for all the trajectories, plotted in black. The thick red line in each
+plot represents the nominal trajectory, and the thinner red line represents a random dispersed trajectory. The lower
+half of Figure 2 shows the range, or absolute value of the difference between the maximum and minimum CY or CLN
+value, at each booster yaw angle. While individual trajectories do not yield much insight, the trajectory collection as a
+whole presents a clear trend: there is a larger variation in the side force and yawing moment in the region of Δ𝜓 closer
+to the middle angles on the trajectory plots, apparent visually by the larger spread of coefficients at those values. For
+roughly the middle third of the Δ𝜓 range, these F&M coefficients tend to be less sensitive to Δ𝜓 and therefore, fewer
+breakpoints in these ranges will be necessary.
+
+3 of 11
+
+
+
+Fig. 2 Side force (left) and yawing moment (right) coefficients as functions of Δ𝜓 for all trajectories (top) and
+the histograms of the variations (bottom). The nominal trajectory is in thick-red and one dispersed trajectory is
+in thin-red.
+
+While the variation in aero coefficients at a given Δ𝜓 is informative of the coefficients’ sensitivity to that parameter,
+further insight into breakpoint selection can be elucidated from the coefficient gradients in terms of the parameter.
+Figure 3 presents such gradients and their ranges of variation. If a coefficient’s parametric gradient is larger, it means
+that a small change in the parameter correlates to a more significant change in the coefficient. A higher variation within
+the coefficient gradient cloud indicates that at that parameter value, there is less certainty as to how the coefficient will
+change with small parameter changes, thereby likely yielding higher interpolation error within the regression model.
+
+4 of 11
+
+
+
+Fig. 3 Side force (left) and yawing moment (right) coefficient gradients (units of 𝑙𝑏 𝑓 [∗ 𝑓 𝑡]/𝑑𝑒𝑔) as functions of
+Δ𝜓 for all trajectories (top) and histograms of the variations (bottom). The nominal trajectory is in thick-red.
+
+A shortcoming of these variation distributions is that they indicate trends only over the entire trajectory range. Current
+run matrix generation procedures, for good reason, parameterize the other parameters in terms of Δ𝑥 such that different
+breakpoints are selected in, e.g., Δ𝜓, at different Δ𝑥 breakpoints. From these variation histograms, it is not clear if
+a particular Δ𝜓 is an important breakpoint at all Δ𝑥 breakpoints: just that within the entire trajectory window, it is
+important.
+
+Figure 4 presents a contour of gradient variations for several values of Δ𝑥. Each column equates to a histogram like
+those in the bottom of Figure 2 but over only that small slice of Δ𝑥. To allow all columns to present trends within a
+single color scale, each Δ𝑥 slice was normalized by its maximum value and that value was plotted on a second y-axis.
+For example, the maximum variation in the CY gradient based on Δ𝜓 in the blue-shaded band is orders of magnitude
+larger than its nearby Δ𝑥 bands; it is apparent from this column presenting the highest blue dot in the dataset.
+
+5 of 11
+
+
+
+Fig. 4 Variation contours in the 𝜕𝐶𝑌/𝜕Δ𝜓 gradient as a function of Δ𝑥, contoured on a log scale. Each column
+of distributions is independently normalized, with the column maximum variation noted on the second y-axis.
+
+This contour plot presents trends similar to that of the trajectory distributions (Figure 5) but with additional insight into
+the statistics within the trajectory cloud. Breakpoints can be determined at a given Δ𝑥 from the gradient variation trend.
+For example, the white band in Figure 4 indicates that the highest variation in the side force coefficient gradient does not
+stay centered in the trajectory data for all Δ𝑥 but is also not in-line with either the nominal or the median trajectory in
+Figure 4.
+
+Fig. 5 Trajectories plotted as Δ𝜓 and its Δ𝑥 derivative as functions of Δ𝑥.
+
+Thus, at chosen Δ𝑥 breakpoints, these contours present clear but qualitative recommendations for breakpoints in other
+
+6 of 11
+
+
+
+parameters like Δ𝜓. Exact breakpoints can be selected procedurally by minimizing a subsampling residual function of
+the histogram that comprises a particular Δ𝑥 contour slice. Mathematically, one seeks a set of discrete points {Δ𝜓𝑑}
+such that a residual function of the gradient variation R(𝑔) is minimized, possibly with a constraint that the bounds in
+Δ𝜓 are included in the point set:
+
+{Δ𝜓𝑑} | min(R(𝑔)) , {min(Δ𝜓) , max(Δ𝜓)} ∈ {Δ𝜓𝑑} . (1)
+
+One such residual function can be the absolute difference between the integrated gradient variation at all points and the
+integrated gradient variation at the few breakpoints. Because the trends in gradients span several orders of magnitude,
+the log of the variation is taken within the integrand.
+
+R ≡
+����∫ log10 𝑔(Δ𝜓) 𝑑Δ𝜓 − ∫ log10 𝑔({Δ𝜓𝑑}) 𝑑Δ𝜓���� (2)
+
+To avoid −∞ values where the gradient variation is zero (viz., where there was only one trajectory with information in a
+particular Δ𝜓 bin) the log10 function was defined to return a minimum of unity; for reference, the smallest substantial
+gradients observed were orders of magnitude larger than unity.
+
+Thus, these objective and residual functions seek a subset of points in the parameter of interest, here Δ𝜓, which best
+capture the area under the gradient variation curve, on a log scale. A brute-force algorithm was used to test the utility of
+this approach on a small slice of Δ𝑥. Plots in Figure 6 show the resulting breakpoints if six total are sought including the
+bounds. It is clear that optimizing around the log integral, rather than the linear integral, better captures the variation
+distribution. Points seeming to float near the bottom of the y-axis are in fact at −∞ on the log scale and are artificially
+brought up for plotting convenience.
+
+Fig. 6 Algorithm-selected breakpoints in Δ𝜓 in a small range of Δ𝑥 given gradient variations in side force (left)
+and yawing moment (right) coefficients.
+
+It is clear that the selected breakpoints differ notably based on which F&M coefficient is studied. As such, a reconciled
+residual function
+
+R1 ≡
+����∫ �̄�(Δ𝜓) 𝑑Δ𝜓 − ∫ �̄�({Δ𝜓𝑑}) 𝑑Δ𝜓���� (3)
+�̄� ≡
+
+1
+𝑁𝐹&𝑀
+
+𝑁𝐹&𝑀∑︁
+𝑛=1
+
+𝑔𝑛
+
+max(𝑔𝑛)
+(4)
+
+7 of 11
+
+
+
+was introduced to yield a single breakpoint set given a relevant sequence of F&M coefficients. The gradient set may
+include just variations in CY and CLN, as is the case in these sample analyses. The variation magnitude in forces versus
+moments was significant; normalizing the force and moment variations by the max per-coefficient variations enables
+each to equally contribute to the resulting integrand. This normalization also removed the need to take the logarithm of
+the gradient variations before optimizing the integrals. A sample result is shown in Figure 7 where seven breakpoints
+were identified including the minimum and maximum values of ΔΨ. Thus, a run matrix can be constructed at a given
+Δ𝑥 range for all parameters of interest and any F&M coefficient(s).
+
+Fig. 7 Algorithm-selected breakpoints in Δ𝜓 in the same small range of Δ𝑥 given gradient variations in side
+force and yawing moment coefficients. Left and right plots generated from two different trajectory sets.
+
+Studying the plots of some parameters indicates that more or fewer points are necessary, e.g., the plots of 𝐶𝐵𝑆𝑀
+𝑇
+
+in Figure
+8 demonstrate that fewer than seven breakpoints are likely adequate in that parameter. Regardless of final parametric
+resolution, this set of 77 = 823543 run points can be downselected using a covariance analysis discussed below.
+
+8 of 11
+
+
+
+Fig. 8 Algorithm-selected breakpoints in 𝐶𝐵𝑆𝑀
+𝑇
+
+in a small range of Δ𝑥 given gradient variations in side force
+and yawing moment coefficients. Left and right plots generated from two different trajectory sets.
+
+A. Downselection of Breakpoints via Covariance Decomposition
+A covariance-based run matrix attempts to take into account the covariance of booster position variables in order to
+more effectively allocate computational resources. It does this by restricting the run matrix points for highly correlated
+variables to remove points that are nonphysical. Specifically, it eliminates points where the combination of position
+variables cannot be reached even when the individual values are all reachable. The most important example of this is
+that the boosters cannot simultaneously have the minimum lateral translation (Δ𝑦) and maximum yaw (Δ𝜓).
+
+The position variables of particular interest are Δ𝑦, Δ𝑧, Δ\, and Δ𝜓 for the left and right boosters. The covariance
+matrices for these variables are first calculated from Monte Carlo booster trajectory data sets. To be precise, a 4×4
+covariance matrix is calculated at each value of Δ𝑥 (which for this limited study is fixed at one constant value).
+
+Next, a matrix of points is found via Latin hypercube sampling (LHS). The 𝑀×𝑁 LHS matrix has 𝑀 points valued
+between zero and one for each of the 𝑁 variables of interest. The columns of the LHS matrix are then centered to have a
+mean of zero. This centered LHS matrix is multiplied by the lower triangular result of the Cholesky Decomposition of
+the covariance matrix. The resulting matrix is discretized to a fixed number of breakpoints and mapped to the desired
+value for each position variable. The process yields a matrix that has covariances similar to that of the covariance matrix
+used to generate it. A matrix of breakpoints can be generated in this way for each Δ𝑥.
+
+III. Results at one Δ𝑥
+Breakpoints were constructed via both the traditional and this new method to quantify how the new method can reduce
+the interpolation error in the usage of the resulting database. This was done only for one symmetric booster x-distance
+to save on the computational cost of the verification.
+
+For the sake of comparing fairly the breakpoints of the two methods, the minima and maxima in each other parameter
+were set manually, consistent with the old method. Thus, the only differences between the two breakpoint sets were
+interior to the parametric convex space. A third breakpoint set was also created for validation, which included mostly
+points not in the other two sets. These were used to compare the interpolated sets to high-fidelity values.
+
+For brevity, not all breakpoints from the three sets are listed here. Representative differences are visualized in Figure 9.
+It is clear that the difference in breakpoints affects the resulting force and moment coefficient values in interpolated
+
+9 of 11
+
+
+
+regions.
+
+Fig. 9 Breakpoints in the three sets visualized as functions of only Δ𝑦 and ΔΨ. The contours present the
+difference in interpolated CY (left) and CN (right) values between the new and old methods.
+
+The two interpolated datasets were then compared to 82 validation points to quantify the quality of the new method.
+Error in the two methods is measured based on differences between the interpolated aerodynamic coefficients and these
+82 validation CFD runs. Figure 10 presents histograms of these interpolation errors. A zero-error comparison would
+yield a histogram with zero mean and zero standard deviation. From these plots it is clear that the new method reduces
+both the standard deviation and the number of outliers in the coefficients for which it selected optimized breakpoints.
+In the other coefficients, the new breakpoints yield comparable or improved interpolation errors compared to the old
+method.
+
+Fig. 10 Histograms of interpolation error in aerodynamic coefficients for the two methods. The new method
+was instructed to only optimize for CY (top center) and CLN (bottom right).
+
+10 of 11
+
+
+
+IV. Conclusions and Future Work
+A new, more data-driven method of selecting breakpoints for aerodynamic databases was developed, which has been
+shown to reduce the resulting interpolation errors during database use. For complicated systems with a high number of
+independent parameters, like the booster separation phase of the Space Launch System’s ascent trajectory, the necessarily
+parametrically coarse nature of these databases mandates both a reduction and understanding of this interpolation error.
+By ensuring that the trends in forces and moments are as smooth as can be expected between high-fidelity data points,
+database users can apply interpolation schemes with confidence that dangerous excursions in the aerodynamic forcing
+are not likely missed.
+
+In addition to the reduction in interpolated database error, this data-driven method enables the number of breakpoints
+in a given parameter to be informed by anticipated trends in that parameter’s particular sensitivity. Traditionally, all
+independent parameters were treated equally – with the highest affordable level of resolution – because there was not
+a reliable a priori metric to justify a coarsening of one parameter’s breakpoints over another. With this method, the
+resolution of each parameter can be determined independently and the number of breakpoints can be selected by more
+than just engineering judgment. For example, with the arbitrary data used to test the method in this paper, it was clear
+that fewer than seven breakpoints would be necessary in 𝐶𝐵𝑆𝑀
+
+𝑇
+within the particular Δ𝑥 range observed. This can both
+
+reduce the computational cost of database development and ensure that, for a given development cost, the parametric
+resolution is prioritized where it is most needed.
+
+While this method is promising enough that it has been implemented by NASA in ongoing database development efforts,
+it does not rigorously address any possible coupling of the parameters, which are currently being treated as independent.
+The covariance analysis ensures that physically reasonable breakpoints are those actually studied in the resulting
+simulations and experiments, but whether the parameters identified as independent are both necessary and sufficient
+still remains an engineering challenge. Increasing this method into higher dimensions - creating high-dimensional
+histograms instead of those plotted here - is one possible way to further refine the breakpoint selection process while
+simultaneously quantifying the quality of the independent parameters selected for observation.
+
+References
+[1] Rogers, S. E., Dalle, D. J., and Chan, W. M., “CFD simulations of the space launch system ascent aerodynamics and booster
+
+separation,” 53rd AIAA Aerospace Sciences Meeting, 2015, p. 0778.
+
+[2] Pamadi, B. N., Pei, J., Gumbert, C. R., Green, L. L., Housman, J., Onufer, J., and Kiris, C. C., “Aerodynamic Modeling and
+Database Development of the Space Launch System Booster Separation,” 53rd AIAA Aerospace Sciences Meeting, 2015, p. 0779.
+
+[3] Dalle, D. J., Rogers, S. E., Lee, H. C., and Chan, W. M., “Inviscid and Viscous CFD Analysis of Booster Separation for the
+Space Launch System Vehicle,” 54th AIAA Aerospace Sciences Meeting, 2016, p. 0797.
+
+11 of 11
+
+
+	Introduction
+	Methodology and Results
+	Downselection of Breakpoints via Covariance Decomposition
+
+	Results at one x
+	Conclusions and Future Work
+

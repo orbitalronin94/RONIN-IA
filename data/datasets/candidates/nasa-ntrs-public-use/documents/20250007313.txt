@@ -1,0 +1,672 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="pdf:PDFVersion" content="1.5">
+<meta name="xmp:CreatorTool" content="TeX">
+<meta name="pdf:hasXFA" content="false">
+<meta name="access_permission:modify_annotations" content="true">
+<meta name="access_permission:can_print_degraded" content="true">
+<meta name="dcterms:created" content="2025-08-11T17:20:46Z">
+<meta name="dcterms:modified" content="2025-08-11T17:30:54Z">
+<meta name="dc:format" content="application/pdf; version=1.5">
+<meta name="xmpMM:DocumentID" content="uuid:36a446a8-2f2a-46f3-926e-2ebee52a3cfd">
+<meta name="pdf:docinfo:creator_tool" content="TeX">
+<meta name="access_permission:fill_in_form" content="true">
+<meta name="pdf:docinfo:modified" content="2025-08-11T17:30:54Z">
+<meta name="pdf:hasCollection" content="false">
+<meta name="pdf:encrypted" content="false">
+<meta name="pdf:docinfo:custom:PTEX.Fullbanner" content="This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) kpathsea version 6.4.0">
+<meta name="xmp:CreateDate" content="2025-08-11T17:20:46Z">
+<meta name="pdf:hasMarkedContent" content="false">
+<meta name="Content-Type-Override" content="application/pdf">
+<meta name="Content-Type" content="application/pdf">
+<meta name="xmp:ModifyDate" content="2025-08-11T12:30:54Z">
+<meta name="PTEX.Fullbanner" content="This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) kpathsea version 6.4.0">
+<meta name="xmp:MetadataDate" content="2025-08-11T12:30:54Z">
+<meta name="pdf:producer" content="pdfTeX-1.40.26">
+<meta name="access_permission:extract_for_accessibility" content="true">
+<meta name="access_permission:assemble_document" content="true">
+<meta name="xmpTPg:NPages" content="7">
+<meta name="pdf:hasXMP" content="true">
+<meta name="access_permission:extract_content" content="true">
+<meta name="access_permission:can_print" content="true">
+<meta name="pdf:docinfo:trapped" content="False">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.DefaultParser">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.pdf.PDFParser">
+<meta name="access_permission:can_modify" content="true">
+<meta name="pdf:docinfo:producer" content="pdfTeX-1.40.26">
+<meta name="pdf:docinfo:created" content="2025-08-11T17:20:46Z">
+<title></title>
+</head>
+<body><div class="page"><p></p>
+<p>Artificial Neural Networks for Solving Forward and
+Inverse Kinematics on a 7 Degree-of-Freedom
+</p>
+<p>Robotic Manipulator
+Aanchal L. Save
+</p>
+<p>Amentum Space Exploration Division, Huntsville, Alabama
+Prepared for George C. Marshall Space Flight Center, National Aeronautics and Space Administration
+</p>
+<p>Under Contract 80MSFC18C0011 Task EC-EV43-10-01-MTID-AIG-01.
+</p>
+<p>Abstract—Traditionally, forward or direct kinematics refers
+to computing the end-effector pose of a robotic arm given its
+joint angles, while conversely, inverse kinematics is used to find
+the joint angles needed to reach a desired end-effector pose.
+Unlike forward kinematics, inverse kinematics lacks a general
+deterministic solution and becomes increasingly complex as the
+number of degrees of freedom (DoF) grows. While Artificial
+Neural Networks (ANNs) have shown promise in solving inverse
+kinematics for low-DoF systems, their accuracy diminishes in
+higher-DoF configurations. This study presents a neural network-
+based approach for both forward and inverse kinematics on a
+7-DoF robotic arm, detailing the data generation process, model
+architecture, and training methodology. The forward kinematics
+model is used to iteratively validate the inverse kinematics model,
+a unique solution that allows the model to achieve a median
+accuracy of 9.95 centimeters.
+</p>
+<p>I. INTRODUCTION
+</p>
+<p>Solving forward and inverse kinematics for robotics systems
+is integral for spacial recognition for a robotic manipulator.
+Forward kinematics refers to computing the pose of the end-
+effector of the arm given its joint angles, and is always
+deterministic, though increasing the number of joints can make
+it more complex [1]. Conversely, inverse kinematics is a fun-
+damental problem in robotics, involving the determination of
+joint angles required to achieve a desired end-effector pose [2].
+While traditional methods for solving inverse kinematics are
+well-established [3], they become increasingly complex and
+computationally intensive as the number of degrees of freedom
+(DoF) increases. High-DoF manipulators, such as those with
+7 DoF, present significant challenges due to their redundancy
+and the non-linear nature of their kinematics. With 7 degrees
+of freedom, there are an infinite number of ways to achieve
+a desired pose, which relates to position and orientation. This
+causes the inverse kinematics problem to become increasingly
+complex [4]. The existing inverse kinematics solutions for
+these advanced manipulators are computationally intense and
+require complex calculations for real-time use [5].
+</p>
+<p>Artificial Neural Networks (ANNs) have been explored as a
+potential solution for inverse kinematics, particularly for low-
+DoF systems, [6] [7] and are proving to have strong ability to
+approximate the solution in systems with six DoF and lower.
+However, there are few solutions noting the application of
+ANNs to high-DoF manipulators and these solutions can be
+improved upon for real-time use.
+</p>
+<p>This study aims to address these challenges by develop-
+ing a neural network-based approach for both forward and
+inverse kinematics on a 7-DoF robotic arm. The proposed
+method includes a data generation process, model architecture
+design, and a training methodology. By leveraging the forward
+kinematics model to iteratively validate the inverse kinematics
+model, this unique approach has achieved a median accuracy
+of 9.95 centimeters.
+</p>
+<p>II. METHODS
+</p>
+<p>A. KINOVA® Gen3 Ultra lightweight robot- 7-DoF
+</p>
+<p>The Kinova Gen 3 robotic arm used for this analysis is a
+7 degree-of-freedom manipulator, with a 902 mm maximum
+reach. The repeatability for the robot is 1 millimeter with
+an uncertainty of 2 standard deviations [8]. The actuators
+each possess an 360 degree range of rotation, allowing the
+manipulator to reach a wide variety of positions. The seven
+DoF provide redundancy in the case of a kinematic singularity,
+which is a specific configuration of the manipulator, where due
+to the alignment of its joints, the robot loses a DoF [9].
+</p>
+<p>B. MATLAB Setup
+</p>
+<p>To collect data from a simulated model of the manipulator,
+the MATLAB robotics system toolbox was utilized, loading
+the Version 12 model of the Kinova Gen3 robotic arm and the
+corresponding URDF file, as shown in Fig. 1. The gravitational
+constant for the simulation was set to -9.81m/s2.
+</p>
+<p>Fig. 1: Kinova Gen3 Manipulator in MATLAB using Robotics
+System Toolbox</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>C. Neural Network Outline
+</p>
+<p>Artificial neural networks are used to learn underlying non-
+linear patterns between data inputs and outputs. They are
+universal approximators and can approximate virtually any
+function of interest. ANNs consist of multiple interconnected
+neurons (nodes) organized in layers [10].
+</p>
+<p>In this study, multilayer-feedforward regression neural net-
+works were developed and used in PyTorch using supervised
+learning to gain approximations of our desired outputs.
+</p>
+<p>Backpropagation is a training algorithm for ANNs that
+calculates the gradient of the loss function with respect to
+each weight by propagating the error backward through the
+network. This information is then used to update the weights,
+reducing the overall error over time. Because the solution
+targeted in this study is for a regression problem, the error
+function used in backpropagation was the Mean Squared Error
+(MSE) loss function. The MSE Formula is:
+</p>
+<p>MSE =
+1
+</p>
+<p>n
+</p>
+<p>n∑
+i=1
+</p>
+<p>(yi − ŷi)
+2 (1)
+</p>
+<p>Where yi is the actual value and ŷi is the predicted value.
+To update the weights in the network, the Adam Opti-
+</p>
+<p>mization function (short for Adaptive Moment Estimation)
+was used to dynamically reduce overall error. It builds off
+the commonly used gradient descent function, which is used
+to minimize the error in the network, iteratively updating
+the weights in the network by moving towards the steepest
+decrease in error gradient based on a preset learning rate.
+Adam however, adjusts the learning rate for each parameter in
+the model while training, updating the weights based on the
+history of the gradients, allowing it to converge more quickly.
+The Adam functions are:
+</p>
+<p>mt = β1mt−1 + (1− β1)gt (2)
+</p>
+<p>vt = β2vt−1 + (1− β2)g
+2
+t (3)
+</p>
+<p>m̂t =
+mt
+</p>
+<p>1− βt
+1
+</p>
+<p>(4)
+</p>
+<p>v̂t =
+vt
+</p>
+<p>1− βt
+2
+</p>
+<p>(5)
+</p>
+<p>θt = θt−1 − α
+m̂t√
+v̂t + ϵ
+</p>
+<p>(6)
+</p>
+<p>where mt and vt are the first and second moment estimates,
+β1 and β2 are the decay rates, gt is the gradient, α is the
+learning rate, θt are the parameters at time step t, and ϵ is a
+small constant to prevent division by zero [11].
+</p>
+<p>III. APPROACH
+</p>
+<p>A. Forward Kinematics
+</p>
+<p>1) Data Collection: The data collection for forward kine-
+matics, entailed generating seven pseudo-random numbers in
+the range of [0, 360] degrees using the rand() funtion in MAT-
+LAB. This emulated the current joint angles of the robotic arm.
+Then, using the robotics system toolbox in MATLAB to obtain
+the transformation matrix between the base of the manipulator
+and the end-effector. This matrix was then converted into a
+pose (x, y, z, θx, θy, θz), with the last three angles representing
+</p>
+<p>the orientation of the end effector. The seven joint angle values
+were the inputs to the model, and the pose was the output.
+In order to train the model to the desired accuracy, 500,000
+datapoints were collected. Fig. 2 shows the data collection
+pipeline and how it will interface with the neural network.
+</p>
+<p>Fig. 2: Forward Kinematics Data Collection and Neural Net-
+work Architecture
+</p>
+<p>2) Data Processing: Because the data was scaled differ-
+ently: input angular data ranged from 0 to 360 degrees, output
+position data ranged from about -2 to 2 meters, and output
+angular data ranged from -180 to 180, the model would place
+higher emphasis on errors in the larger scaled features, and the
+training would be imbalanced. To counteract this, a min-max
+scaler was used to scale the inputs to [0, 1] and the outputs to
+[-1,1]. These were scaled differently because the inputs were
+solely positive values, while the negative values in the output
+denoted direction and were important. The following is the
+equation used to scale the inputs to [0,1].
+</p>
+<p>X ′ =
+X −Xmin
+</p>
+<p>Xmax −Xmin
+(7)
+</p>
+<p>The following is the equation used to scale the outputs to [-1,
+1].
+</p>
+<p>X ′ = 2 ∗ X −Xmin
+</p>
+<p>Xmax −Xmin
+− 1 (8)
+</p>
+<p>Where X is the original value, Xmin and Xmax are the
+minimum and maximum values of the feature, and X ′ is the
+scaled value.
+</p>
+<p>3) Model Architecture: The architecture when the forward
+kinematics model training began was a network with 2 fully
+connected hidden layers, with 16 and 12 neurons respectively.
+It was soon discovered that the data was extremely complex,
+and the number of inputs and outputs were extremely large, so
+more neurons and layers were needed to effectively learn the
+relationships between all of the features. After iteration, the
+network consisted of 1 input layer with 7 neurons, 4 hidden
+layers with 2048, 1024, 512, and 256 neurons, and 1 output
+layer with 6 neurons.
+</p>
+<p>Initially, the hyperbolic tangent, or Tanh, activation func-
+tion was implemented between the layers, which is used to
+introduce non-linearity into the network and allows it to learn
+relationships between data that are not strictly linear. The Tanh
+formula is:
+</p>
+<p>Tanh(x) =
+ex − e−x
+</p>
+<p>ex + e−x
+(9)
+</p>
+<p>This is better for this application than the commonly used
+logistic activation function because it allows for both negative
+and positive inputs. As training began, the MSE value would
+plateau at around 0.119. This issue was because of vanishing</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>gradients, a common occurrence with the Tanh function due
+to its asymptotic behavior, which can be seen in Fig. 3. The
+activation function was then switched to the Leaky Rectified
+Linear Unit function, or LeakyReLU, which doesn’t have the
+same asymptotic behavior, and still allows for the propagation
+of negative values from one layer to another [12], as seen in
+Fig. 3.
+</p>
+<p>(a) Tanh (b) LeakyReLU
+</p>
+<p>Fig. 3: Comparison between tanh and LeakyReLU
+</p>
+<p>4) Model Training: Once the architecture was finalized, the
+model was trained using batch, or offline learning, for 2000
+epochs. The train-validate-test structure at 90% -8.3% - 1.7%
+was used to split the data, and the model was trained on a
+Nvidia RTX A4000 Graphics Processing Unit (GPU). During
+training, the training MSE converged to 0.008, while the test
+MSE was 0.019. The graph of validation MSE vs Epoch is
+seen in Fig. 4.
+</p>
+<p>Fig. 4: Forward kinematics model training graph
+</p>
+<p>5) Results and Accuracy: When testing, the forward kine-
+matics neural network that was developed proved to correctly
+predict the end-effector position based on the joint angles with
+an median error of 2.68 centimeters when run in MATLAB,
+proving to be a computationally effective way to produce the
+transformation matrices and for localizing the end-effector.
+Fig. 5 shows an example of the results in simulation. The
+joint angles shown for the arm in that configuration were
+inputted into the model, and the point in the figure is what
+the model predicted as the location of the end effector. The
+orientation predictions are also accurate, as the model can
+</p>
+<p>correctly predict the orientation of the end-effector given the
+current joint angles.
+</p>
+<p>Fig. 5: Forward kinematics results in simulation
+</p>
+<p>Fig. 6 shows the positional error in centimeters of the
+predicted end-effector pose from the actual position of the
+end-effector in that configuration. The median error is 2.68
+cm after 600 trials.
+</p>
+<p>Fig. 6: Forward kinematics error scatter plot
+</p>
+<p>B. Inverse Kinematics
+</p>
+<p>1) Original Trial: To solve the inverse kinematics problem
+using artificial neural networks, it was initially attempted to
+simply reverse the data collected earlier, using the six outputs
+for position as the model’s inputs, and using the seven inputs
+for joint angles as the model’s outputs. However, because there
+are a greater number of outputs to the model than inputs, there
+are an infinite number of solutions for joint angles to achieve
+each goal position. This caused the model to repeatedly</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>predict extremely close to the mean, so the resulting values
+were all close to 180 degrees, resulting in almost identical
+inaccurate solutions for various desired output positions. Given
+the outcome of this methodology, an alternative approach was
+needed to achieve the desired results.
+</p>
+<p>2) Data Collection: Rather than the inputs to the model
+simply being the six measurements for the goal position,
+the inputs were expanded to include the current joint angle
+configuration of the robot as well. This mitigated the greater
+number of outputs than inputs that occurred in the previous
+method, and allows for the most optimal joint angles based on
+the current configuration of the manipulator.
+</p>
+<p>To collect data, the seven measurements for current joint
+angles were pseudo-randomly generated to be in the range
+of [0, 360] degrees, as they were for the forward-kinematics
+solution. The goal positions for the model were all positions
+that were found to be within the reach of the robot from the
+data that was used for the previous forward kinematics model.
+</p>
+<p>Given this starting configuration and the goal pose inputs,
+the MATLAB Robotics System Toolbox Inverse Kinematics
+solver was used generate data for the angle measurements
+required to reach the target pose. This solver used the Broyden-
+Fletcher-Goldfarb-Shanno (BFGS) Gradient Projection for-
+mula, which is the default Inverse Kinematics solver in
+MATLAB. The initial standard weights for the solver were
+[1 1 1 0.8 0.8 0.8], and the initial guess was the random
+current joint angles. The BFGS Optimization Algorithm is a
+Quasi-Newtonian method, approximating the inverse of the
+Hessian matrix using second derivative information, such as
+the gradients of the cost function from past iterations [13].
+The Gradient Projection method is used to deal with limits on
+joint angle limits and so that the direction of search is valid
+[14].
+</p>
+<p>For accurate training, 100,000 data points were collected,
+with the inputs being seven current joint angle measurements,
+six measurements for the target pose of the arm, and the
+outputs being the seven joint angles that would allow the
+robot to reach the target position and orientation. Fig. 7 shows
+the data collection pipeline and how it will interface with the
+neural network.
+</p>
+<p>Fig. 7: Forward Kinematics Data Collection and Neural Net-
+work Architecture
+</p>
+<p>3) Data Processing: The data was scaled in a similar
+fashion as it was for the forward kinematics problem. The min-
+max scaler was utilized with the positive data being scaled to
+the range of [0, 1] and the negative data being scaled to [-1,
+1].
+</p>
+<p>4) Model Architecture: The architecture that was used for
+the forward kinematics problem was found to be greatly
+overfitting the data, learning the training data extremely well,
+but performing poorly on the test data. The number of hidden
+layers and neurons were decreased until overfitting stopped,
+resulting in a network with an input layer of 13 neurons, 3
+hidden layers with 512, 1024, and 256 neurons respectively,
+and an output layer of 7 neurons.
+</p>
+<p>Another method to decrease overfitting was one dimensional
+batch normalization, forcing the model to normalize the out-
+puts of each activation before the next layer, allowing for better
+convergence while training [15].
+</p>
+<p>Dropout layers were added with a dropout parameter of 0.5
+to further decrease overfitting. This randomly deactivates 50%
+of neurons each pass, reducing the dependence of the model
+on specific neurons in training, and distributing the weights
+more evenly [16].
+</p>
+<p>5) Model Training: The inverse kinematics model was
+trained on the same GPU and with the same offline learning
+structure as the forward kinematics solution, as well as the
+same train-validate-test split. This model was trained for 1000
+epochs, and the MSE converged to 0.12, which is not as
+low as would be ideal, however the accuracy is improved in
+comparison to other studies which converged to 0.32 [17]. The
+graph of validation MSE vs Epoch is seen in Fig. 8.
+</p>
+<p>Fig. 8: Inverse kinematics model training graph
+</p>
+<p>6) Results and Accuracy: When tested in simulation, the
+inverse kinematics solution did not perform well enough on
+the test inputs to be used in a real world setting. Fig. 9 shows
+an example of the results in simulation. The point shown in
+the figure is the target position for the end-effector, and the
+configuration of the arm shown in the figure set to is the angles
+that the model outputted. In some cases, the model predicts a
+close solution, or else one joint is inaccurate while the others
+are able to give the correct solution.</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Fig. 9: Inverse kinematics results in simulation
+</p>
+<p>Fig. 10 shows the positional error in centimeters of the end-
+effector at the predicted joint angles from the goal position of
+the end-effector. The median error is 71.68 cm after 400 trials.
+This error isn’t at all low enough for this solution to be used
+in a production setting.
+</p>
+<p>Fig. 10: Inverse kinematics error scatter plot
+</p>
+<p>C. Combination for Iterative Validation
+</p>
+<p>1) Architecture: To improve the accuracy of the ANN-
+based inverse-kinematics solution, it is combined with the ac-
+curate forward-kinematics neural network that was developed
+for iterative validation of its output.
+</p>
+<p>Fig. 11: Architecture for combining forward and inverse
+kinematics for iterative validation
+</p>
+<p>As shown in Fig. 11, the goal pose and the starting position
+are inputted into the inverse kinematics model, and the output
+is validated against the goal using the forward kinematics
+model. If it is under a five centimeter error tolerance, that
+solution is valid and returned, else those joint angles are fed
+back in as the starting position for the inverse-kinematics
+model, and this is iterated. Inputting different starting angles
+each iteration allows for the inverse kinematics model to give
+different outputs and converge towards the closest solution by
+outputting increasingly accurate starting joint angle values for
+its next iteration. If the model is unable to find a solution
+within ten seconds, which was an arbitrary amount of time
+for this test, the closest solution to the goal pose is returned.
+</p>
+<p>D. Results and Accuracy
+</p>
+<p>In simulation, this was found to be extremely accurate. The
+validation from the forward kinematics model allowed the
+inverse kinematics to predict the joint angles needed to reach
+the desired pose with an median error of 9.95 centimeters. Fig.
+12 shows an example of the results in simulation. The point
+shown in the figure is the target position for the end-effector,
+and the configuration of the arm shown in the figure is set to
+the angles that the model outputted.</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Fig. 12: Combination results in simulation
+</p>
+<p>Fig. 13 shows the positional error in centimeters of the end-
+effector at the predicted joint angles from the goal position of
+the end-effector. The median error is 9.95 centimeters after
+600 trials.
+</p>
+<p>Fig. 13: Inverse kinematics error scatter plot with forward
+kinematics validation
+</p>
+<p>IV. RESULTS
+</p>
+<p>The developed neural networks to solve forward and in-
+verse kinematics problems, and then the combination of the
+two models for validation of the control allows for accurate
+solutions to these problems. The forward kinematics network
+had a median positional error of 2.68 centimeters, and when
+combined with the inverse kinematics model, it was able to
+solve complex inverse kinematics problems with a median
+error of 9.95 centimeters. This solution allows for more
+computationally efficient inverse kinematics solutions, without
+the need for real-time error and gradient calculations, as the
+model is already trained on specific architecture and data from
+</p>
+<p>the arm, and therefore simply needs to iterate to validate
+its calculations. This decreases the number of computations
+that would be needed in a real-world application of inverse
+kinematics.
+</p>
+<p>V. CONCLUSION
+</p>
+<p>The complex problem of solving inverse kinematics for a
+high DoF manipulator, in this case seven DoF, was addressed.
+The approach used deep neural networks to solve both the
+forward and inverse kinematics problem, and combined the
+two models for iterative validation, achieving an accuracy of
+9.95 centimeters. This significantly reduces the computations
+needed to solve inverse kinematics problems, allowing it
+to be suitable for applications with limited computational
+allocations.
+</p>
+<p>The results demonstrate that the neural network-based ap-
+proach provides a viable solution for high-DoF manipula-
+tors, offering improved accuracy and efficiency. However, the
+model’s performance could be further enhanced by increasing
+the dataset size and exploring alternative neural network
+architectures.
+</p>
+<p>Future work could involve exploring various other network
+architectures, improving simulation data collection methods,
+and focusing on model efficiency. Overall, this study con-
+tributes to the advancement of neural network applications
+in robotics, paving the way for more efficient and accurate
+kinematic solutions.
+</p>
+<p>ACKNOWLEDGMENT
+</p>
+<p>The author would like to thank their mentors Jonathan
+Breckenridge, Benjamin Stolz, Mark Wallace, Tristan Lane,
+and Peter Berg for their assistance in this project, as well
+as Amentum Space Exploration Division and the NASA
+Marshall Space Flight Center System Health, Autonomy, and
+Redundancy Control (SHARC) Lab.
+</p>
+<p>REFERENCES
+</p>
+<p>[1] Jesus A Medrano-Hermosillo et al. “Forward Kine-
+matics Analysis of 6-DoF Articulated Robot using
+Screw Theory and Geometric Algebra”. In: 2022 XXIV
+Robotics Mexican Congress (COMRob) (Nov. 2022).
+DOI: 10.1109/comrob57154.2022.9962312. URL: https:
+/ / ieeexplore . ieee . org / document / 9962312 (visited on
+09/01/2024).
+</p>
+<p>[2] J Nielsen and Bernard Roth. “On the Kinematic Anal-
+ysis of Robotic Mechanisms”. In: The International
+Journal of Robotics Research 18 (Dec. 1999), pp. 1147–
+1160. DOI: 10.1177/02783649922067771.
+</p>
+<p>[3] S. Kucuk and Z. Bingul. The inverse kinematics so-
+lutions of industrial robot manipulators. IEEE Xplore,
+June 2004. DOI: 10 . 1109 / ICMECH . 2004 . 1364451.
+URL: https://ieeexplore.ieee.org/document/1364451.
+</p>
+<p>[4] Xiaohua Shi et al. “Kinematics and Singularity Analysis
+of a 7-DOF Redundant Manipulator”. In: Sensors 21
+(Oct. 2021), pp. 7257–7257. DOI: 10.3390/s21217257.
+(Visited on 06/10/2024).</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>[5] Arabinda Ghosh, Omkar Singh, and Anjan Kumar Ray.
+“Inverse Kinematic Solution of a 7 DOF Robotic Ma-
+nipulator using Boundary Restricted Particle Swarm
+Optimization”. In: IFAC-PapersOnLine 55 (2022),
+pp. 101–105. DOI: 10 . 1016 / j . ifacol . 2022 . 04 . 017.
+(Visited on 12/20/2022).
+</p>
+<p>[6] C Kozakiewicz, T. Ogiso, and N Miyake. “Partitioned
+neural network architecture for inverse kinematic calcu-
+lation of a 6 DOF robot manipulator”. In: [Proceedings]
+1991 IEEE International Joint Conference on Neural
+Networks (Jan. 1991). DOI: 10.1109/ijcnn.1991.170679.
+(Visited on 02/03/2024).
+</p>
+<p>[7] Raşit Köker et al. “A study of neural network based
+inverse kinematics solution for a three-joint robot”.
+In: Robotics and Autonomous Systems 49 (Dec. 2004),
+pp. 227–234. DOI: 10 . 1016 / j . robot . 2004 . 09 . 010.
+(Visited on 04/23/2020).
+</p>
+<p>[8] Discover our Gen3 robots. Kinova. URL: https://www.
+kinovarobotics.com/product/gen3-robots.
+</p>
+<p>[9] None Jinhyun Kim et al. “A general singularity avoid-
+ance framework for robot manipulators: task recon-
+struction method”. In: IEEE International Conference
+on Robotics and Automation, 2004. Proceedings. ICRA
+’04. 2004 (Jan. 2004), 4809–4814 Vol.5. DOI: 10.1109/
+robot.2004.1302479. (Visited on 07/03/2025).
+</p>
+<p>[10] I.A Basheer and M Hajmeer. “Artificial neural networks:
+fundamentals, computing, design, and application”. In:
+Journal of Microbiological Methods 43 (Dec. 2000),
+pp. 3–31. DOI: 10 . 1016 / s0167 - 7012(00 ) 00201 - 3.
+URL: https : / /www.sciencedirect . com/science /article /
+pii/S0167701200002013.
+</p>
+<p>[11] D. Kingma and J. Ba. “Adam: A Method for Stochastic
+Optimization”. In: Computer Science (2014). DOI: 10.
+48550/arXiv.1412.6980.
+</p>
+<p>[12] Bing Xu et al. Empirical Evaluation of Rectified Activa-
+tions in Convolutional Network. arXiv.org, Nov. 2015.
+DOI: 10.48550/arXiv.1505.00853. URL: https://arxiv.
+org/abs/1505.00853v2.
+</p>
+<p>[13] Nazri Mohd Nawi, Meghana R. Ransing, and Rajesh
+S. Ransing. An Improved Learning Algorithm Based
+on The Broyden-Fletcher-Goldfarb-Shanno (BFGS)
+Method For Back Propagation Neural Networks. IEEE
+Xplore, Oct. 2006. DOI: 10.1109/ISDA.2006.95. URL:
+https://ieeexplore.ieee.org/abstract/document/4021427
+(visited on 03/07/2024).
+</p>
+<p>[14] Inverse Kinematics Algorithms - MATLAB &amp; Simulink.
+www.mathworks.com. URL: https : / /www.mathworks .
+com/help/robotics /ug/ inverse- kinematics- algorithms.
+html.
+</p>
+<p>[15] Sergey Ioffe and Christian Szegedy. “Batch Normal-
+ization: Accelerating Deep Network Training by Re-
+ducing Internal Covariate Shift”. In: JMLR.org (2015).
+DOI: 10 . 48550 / arXiv . 1502 . 03167. URL: https : / /
+xueshu . baidu . com / usercenter / paper / show ? paperid =
+4634f864791a3f3a0817edabeacf4c49&amp;site=xueshu se.
+</p>
+<p>[16] Geoffrey E. Hinton et al. Improving neural networks by
+preventing co-adaptation of feature detectors. arXiv.org,
+</p>
+<p>July 2012. DOI: 10.48550/arXiv.1207.0580. URL: https:
+//arxiv.org/abs/1207.0580.
+</p>
+<p>[17] Morteza Alebooyeh and R. Jill Urbanic. “Neural Net-
+work Model for Identifying Workspace, Forward and In-
+verse Kinematics of the 7-DOF YuMi 14000 ABB Col-
+laborative Robot”. In: IFAC-PapersOnLine 52 (2019),
+pp. 176–181. DOI: 10 . 1016 / j . ifacol . 2019 . 10 . 019.
+(Visited on 01/13/2020).</p>
+<p></p>
+</div>
+</body></html>

@@ -1,0 +1,934 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Towards the True Hybrid - Physics-informed Trainable Models for Prognostics and Health Management
+
+
+1/33
+
+Towards the True Hybrid
+Physics-informed Trainable Models for Prognostics and
+
+Health Management
+
+Matteo Corbetta
+
+KBR Inc., NASA Ames Research Center
+
+RISE Seminar, Virtual, August 2022
+
+
+
+2/33
+
+Diagnostics & Prognostics Group
+Where we are within NASA Ames Research Center
+
+NASA Ames Research Center, Mountain View, CA
+↓
+
+Intelligent Systems Division (TI)
+↓
+
+Autonomous
+Systems & Robotics
+
+▶ Advanced Control &
+Evolvable Systems
+
+▶ Deployable Automation
+Technologies
+
+▶ Intelligent Robotics
+
+▶ Planning & Scheduling
+
+Collaborative &
+Assistant Systems
+
+▶ Data Repository Systems
+
+▶ Decision Support Systems
+
+▶ Enterprise Information
+Management
+
+▶ Ground & Flight Data
+Systems
+
+▶ Information Integration
+
+Discovery and
+Systems & Health
+
+▶ Data Sciences
+
+▶ Diagnostics & Prognostics
+
+▶ ISHM Technology Insertion
+
+▶ Applied Physics
+
+▶ Quantum Computing
+
+▶ Computational Materials
+
+Robust Software
+Engineering
+
+▶ Core Avionics & Software
+Technologies
+
+▶ System Thinking,
+Architecture & Collaboration
+
+▶ Models & Algorithms for
+Reliable Software
+
+▶ Assured Autonomy
+
+
+
+3/33
+
+Diagnostics & Prognostics Group
+
+▶ Group Leadership: Chris Teubert (Lead), Wendy Okolo (Deputy)
+
+▶ SHARP Lab Manager: George Gorospe
+
+▶ Researchers: Edward Balaban, Portia Banerjee, Matteo Corbetta, Rajeev
+Ghimire, Katelyn Jarvis, Chetan Kulkarni, Molly O’Connor, David Nishikawa,
+Adam Sweet, Jason Watkins
+
+Group’s Areas of Contribution
+
+NASA Space Missions &
+Ground Support
+
+NASA Aeronautics & Air
+Traffic Management
+
+Growing a robust PHM
+Community: join PCoE!
+
+
+
+4/33
+
+Diagnostics & Prognostics Group
+Research Areas
+
+▶ Diagnostics & prognostics: physics-based and data-driven models and algorithms
+
+▶ Safety metrics for low-altitude airspace quantification
+
+▶ Uncertainty quantification and propagation
+
+▶ Resource-constrained prognostics
+
+▶ Test-bed development and automated testing for prognostics
+
+▶ Software architecture for prognostics
+
+
+
+5/33
+
+Diagnostics & Prognostics Group
+Current Works
+
+▶ System-Wide Safety Project
+
+▶ Data-Reasoning Fabric
+
+▶ Distributed Spacecraft Autonomy
+
+▶ Autonomous Spacecraft Operations
+
+▶ Software for Prognostic Models and
+Algorithms: Python’s Package
+ProgPy
+
+▶ Physics-Informed Machine Learning
+for Next-Gen Electric Aircraft
+Powertrain
+
+
+
+6/33
+
+Acknowledgements
+
+Thank to all people who contributed (more or less heavily) to the physics-informed
+machine learning material in here. In particular:
+
+▶ NASA Ames: Stefan Schuet, Michael Khasin, Chetan Kulkarni, and all colleagues
+who contributed with great insights, questions, and comments,
+
+▶ University of Central Florida: Renato G. Do Nascimento, Felipe Viana
+
+▶ University of Granada (Spain): Manuel Chiachio, Juan Chiachio, Juan Fernandez
+
+▶ All the authors of the papers we’ll discuss here.
+
+
+
+7/33
+
+Agenda
+
+Recent Increase in Machine Learning Papers for PHM
+
+Why to Leverage Physics-Informed Learning in PHM
+
+Overview of Promising Research in Physics-Informed Machine Learning
+Physics-Constrained Gaussian Processes
+Physics-Informed Neural Networks
+
+Network-Embedded Models
+
+Concluding Remarks
+
+
+
+8/33
+
+Recent Increase in Machine Learning Papers for PHM
+
+2015 2016 2017 2018 2019 2020
+
+0
+
+10
+
+20
+
+30
+
+Tensorflow 1.0
+
+Year
+
+p
+er
+ce
+n
+ta
+g
+e
+o
+f
+p
+ap
+
+er
+s,
+
+%
+
+PHM Conference Papers on ML and Hybrid
+US Only, Fraction of Total, by Title
+
+ML
+
+Hybrid
+
+
+
+9/33
+
+Why to Leverage Physics-Informed Learning in PHM
+Why Machine Learning in the First Place
+
+Great achievements of ML in many scientific areas
+
+Noteworthy, not-so-new papers:
+
+▶ AI system for breast cancer screening, Nature, Jan 2020
+
+▶ Generating ”Art” by Learning About Styles and Deviating from Style Norms. ICCC, June 2017
+
+▶ DeepFace: Closing the Gap to Human-Level Performance in Face Verification, CCVPR, June 2014
+
+Specificity of Existing Models
+
+▶ Text-book-like models often applies to simple cases; real systems are a different story
+
+▶ Flexibility of machine learning and its “black-box” behavior is very appealing. Learn the tool and
+not the field (Generalist better than specialist, ... is it?)
+
+▶ Nowadays, collecting data is cheaper than developing a model
+
+https://www.nature.com/articles/s41586-019-1799-6
+https://arxiv.org/abs/1706.07068
+https://research.fb.com/publications/deepface-closing-the-gap-to-human-level-performance-in-face-verification/
+
+
+9/33
+
+Why to Leverage Physics-Informed Learning in PHM
+Why Machine Learning in the First Place
+
+Great achievements of ML in many scientific areas
+
+Noteworthy, not-so-new papers:
+
+▶ AI system for breast cancer screening, Nature, Jan 2020
+
+▶ Generating ”Art” by Learning About Styles and Deviating from Style Norms. ICCC, June 2017
+
+▶ DeepFace: Closing the Gap to Human-Level Performance in Face Verification, CCVPR, June 2014
+
+Specificity of Existing Models
+
+▶ Text-book-like models often applies to simple cases; real systems are a different story
+
+▶ Flexibility of machine learning and its “black-box” behavior is very appealing. Learn the tool and
+not the field (Generalist better than specialist, ... is it?)
+
+▶ Nowadays, collecting data is cheaper than developing a model
+
+https://www.nature.com/articles/s41586-019-1799-6
+https://arxiv.org/abs/1706.07068
+https://research.fb.com/publications/deepface-closing-the-gap-to-human-level-performance-in-face-verification/
+
+
+10/33
+
+Why to Leverage Physics-Informed Learning in PHM
+Potential Advantages of Physics-Informed ML
+
+”Data is the new oil”
+The Economist, cover story, May 6th, 2017.
+
+”Data is the new snake-oil; because when we’ll have better models, we’ll need
+less data.”
+
+Stuart Russel, UAI Conference, Monterey, CA, August 2018
+
+
+
+10/33
+
+Why to Leverage Physics-Informed Learning in PHM
+Potential Advantages of Physics-Informed ML
+
+”Data is the new oil”
+The Economist, cover story, May 6th, 2017.
+
+”Data is the new snake-oil; because when we’ll have better models, we’ll need
+less data.”
+
+Stuart Russel, UAI Conference, Monterey, CA, August 2018
+
+
+
+11/33
+
+Why to Leverage Physics-Informed Learning in PHM
+Potential Advantages of Physics-Informed ML
+
+Why can be worth it
+
+▶ Ignore the (partial) knowledge we have doesn’t seem very clever
+
+▶ Restrict the search in the parameter space can save data and time
+
+▶ Improve generalization and extrapolation to unseen input
+
+▶ Improve interpretability
+
+Well-Known Drawbacks of Pure Data-Driven Methods
+
+▶ Need of data we (typically) do not have in PHM; either data is scarce or we don’t have
+the right data (infrequent failures that have serious consequences)
+
+▶ Poor interpretability due to: large number of parameters, lack of physical meaning
+
+▶ Validation and Generalization are hard when: cannot record or don’t know we need to
+record external forcing and other confounding influences, and model needs to extrapolate
+outside the training domain (i.e., every failure prognosis case!)
+
+
+
+12/33
+
+Why to Leverage Physics-Informed Learning in PHM
+
+Questions?
+
+
+
+13/33
+
+Overview of Promising Research in Physics-Informed Machine
+Learning
+
+
+
+14/33
+
+Physics-Constrained Gaussian Processes
+Thanks to Stefan Schuet (NASA Ames) for most of the work here.
+
+
+
+15/33
+
+Physics-Constrained Gaussian Processes
+
+Gaussian Processes (from Rasmussen & Williams, 2006)
+
+A Gaussian Process (GP) is a collection of random variables, any finite number of
+which has a joint Gaussian distribution.
+
+Think of sampling functions from a function space instead of sampling variables:
+(image from Wikipedia: wiki/Gaussian process)
+
+
+
+16/33
+
+Physics-Constrained Gaussian Processes
+
+y ∼ GP
+(
+m(x),Σθ(x , x ′)
+
+)
+[
+
+y
+y∗
+
+]
+∼ N
+
+([
+m(x)
+m(x∗)
+
+]
+,
+
+[
+kθ,xx + σ2
+
+nI kθ,xx∗
+
+k⊤θ,xx∗
+kθ,x∗x∗
+
+])
+
+y∗|x , y ,θ ∼ GP
+(
+µ̃, Σ̃
+
+)
+
+
+
+17/33
+
+Physics-Constrained Gaussian Processes
+Use of Physics-Informed GPs
+
+Surrogate models of complex physical phenomena
+
+▶ Trainable with few data-points
+
+▶ Fast to run w.r.t. FEM, CFD,
+
+▶ Improve extrapolation
+
+
+
+18/33
+
+Physics-Constrained Gaussian Processes
+From GPs to Physics-Informed GPs
+
+Function we want to approximate (unknown) f (x) , x ∈ IRn×1
+
+We also know from the physics that Lx f (x) = 0
+
+We want to approximate f with a GP f (x) ≈ f̂ (x) ∼ GP
+
+Vector [f̂ (x), Lx f (x)]⊤ is also a GP
+
+▶ f̂ is a GP (holds linear properties)
+
+▶ Derivatives are linear operations
+
+▶ The problem is to find the derivative of the GP mean function and covariance matrix
+
+
+
+18/33
+
+Physics-Constrained Gaussian Processes
+From GPs to Physics-Informed GPs
+
+Function we want to approximate (unknown) f (x) , x ∈ IRn×1
+
+We also know from the physics that Lx f (x) = 0
+
+We want to approximate f with a GP f (x) ≈ f̂ (x) ∼ GP
+
+Vector [f̂ (x), Lx f (x)]⊤ is also a GP
+
+▶ f̂ is a GP (holds linear properties)
+
+▶ Derivatives are linear operations
+
+▶ The problem is to find the derivative of the GP mean function and covariance matrix
+
+
+
+18/33
+
+Physics-Constrained Gaussian Processes
+From GPs to Physics-Informed GPs
+
+Function we want to approximate (unknown) f (x) , x ∈ IRn×1
+
+We also know from the physics that Lx f (x) = 0
+
+We want to approximate f with a GP f (x) ≈ f̂ (x) ∼ GP
+
+Vector [f̂ (x), Lx f (x)]⊤ is also a GP
+
+▶ f̂ is a GP (holds linear properties)
+
+▶ Derivatives are linear operations
+
+▶ The problem is to find the derivative of the GP mean function and covariance matrix
+
+
+
+19/33
+
+Physics-Constrained Gaussian Processes
+Example: Heat Equation
+
+Additive manufacturing: learn a surrogate model of the manufacturing process to map
+material properties as function of process parameters, constraining the surrogate model
+
+with known physics
+
+
+
+20/33
+
+Physics-Constrained Gaussian Processes
+Example: Heat Equation (simplest case)
+
+f (x , 0) = δx ,0
+
+Lx f (x) =
+∂f (x , t)
+
+∂t
+− α
+
+∂2f (x , t)
+
+∂x2
+= 0[
+
+f̂ (x , t)
+
+f̂t − αf̂x x
+
+]
+∼ GP(m̃, Σ̃)
+
+Simulated with Matlab (analytical solution)
+
+t
+
+0.0
+0.1
+
+0.2
+0.3
+
+0.4
+0.5
+
+x
+
+1.00
+0.75
+
+0.50
+0.25
+
+0.00
+0.25
+
+0.50
+0.75
+
+1.00
+
+u
+
+0.0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1.0
+
+
+
+21/33
+
+Physics-Constrained Gaussian Processes
+Heat Equation
+
+x, -
+
+u(
+x,
+
+t),
+
+u(x, t) @ t = 0.1s
+
+sim
+meas
+GP
+±2
+
+x, -
+
+u(
+x,
+
+t),
+
+u(x, t) @ t = 0.2s
+
+sim
+meas
+GP
+±2
+
+x, -
+
+u(
+x,
+
+t),
+
+u(x, t) @ t = 0.3s
+
+sim
+meas
+GP
+±2
+
+x, -
+
+u(
+x,
+
+t),
+
+u(x, t) @ t = 0.5s
+
+sim
+meas
+GP
+±2
+
+
+
+22/33
+
+Physics-Constrained Gaussian Processes
+Problems
+
+t
+
+0.0
+0.1
+
+0.2
+0.3
+
+0.4
+0.5
+
+x
+
+1.00
+0.75
+
+0.50
+0.25
+
+0.00
+0.25
+
+0.50
+0.75
+
+1.00
+
+u
+
+0.0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1.0
+
+1. Covariance matrices are big and built upon symbolic
+calculus. It’s time consuming and creates hyper-parameter
+optimization issues.
+
+2. Physical processes are characterized by varying lengthscales
+in time, space, or both (that’s why we didn’t fit the
+beginning!). In this example, a kernel function with a single
+lengthscale parameter cannot fit well the very sharp heat
+drop (start) and the slow heat diffusion (later) in the
+process. Need of a non-stationary covariance function for
+that.
+
+3. Solution to problem #2 makes the solution to problem #1
+more challenging
+
+
+
+23/33
+
+Physics-Constrained Gaussian Processes
+References and Q&A
+
+1. http://www.gaussianprocess.org/gpml/ (Rasmussen & Williams)
+
+2. Rasmussen et al. Gaussian processes in machine learning, 2003
+
+3. Constantinescu et al. Physics-based covariance models for Gaussian processes with multiple
+outputs. International Journal for Uncertainty Quantification 3;1, 2013
+
+4. Jidling et al., Linearly constrained Gaussian processes, 2017
+
+5. Lange et al. Algorithmic linearly constrained Gaussian processes, 2018.
+
+
+
+24/33
+
+Physics-Informed Neural Networks
+
+(a) Zaheer et al. Deep Sets, 2017; Viana,
+Nascimento, 2021
+
+(b) Prof. Paris Perdikaris, AAAI-MLPS 2020
+
+Figure: Implicit (a) and Explicit (b) constraints in neural networks.
+
+
+
+25/33
+
+Physics-Informed Neural Networks
+
+Implicit Constraints:
+▶ Constrained-Connection Networks: Build a trainable model with ad-hoc connections
+
+and equations, so that parameters are driven by physics.
+
+▶ Hybrid – Network-Embedded Models: insert neural networks (e.g., MLPs) within a
+bigger model to learn unknown relationships, uncertainty parameters, etc.
+
+Explicit Constraints:
+▶ Physics-driven loss function: physics is explicity imposed in the output by adds-on to
+
+the loss function; if the solution does not satisfy physical constraints, the loss goes up
+
+
+
+26/33
+
+Network-Embedded Models
+
+Battery Discharge and Aging Prediction with Implicit PINN –
+Tensorflow & PyTorch
+
+Thanks to:
+Felipe Viana (UCF),
+Renato Giorgiani Do Nascimento (UCF),
+Stefan Schuet (NASA Ames),
+Chetan Kulkarni (KBR, NASA Ames)
+
+
+
+27/33
+
+Network-Embedded Models
+Battery Discharge and Aging Prediction with Implicit PINN – Tensorflow
+
+Predict voltage curve
+during operation and
+battery aging
+
+▶ Parameters R0 and
+qmax estimated after
+each discharge
+
+▶ Interval voltages
+VINT ,· approximated
+using MLPs
+
+
+
+28/33
+
+Network-Embedded Models
+Battery Discharge and Aging Prediction with Implicit PINN – Tensorflow
+
+
+
+29/33
+
+Network-Embedded Models
+Problems
+
+▶ Careful tuning of initial values is still a thing
+
+▶ Optimizers don’t know physical limits of parameters → huge or small numbers trying to
+compensate for model errors. When you limit them, the optimization can get stuck in local
+minima.
+
+▶ Uncertainty estimate possible with Variational layers, but deep learning frameworks are still not
+perfect at handling those.
+
+
+
+30/33
+
+Physics-Informed Neural Networks
+References and Q&A
+
+1. Dourado et al. Physics-informed neural networks for missing physics estimation in cumulative
+damage models: a case study in corrosion fatigue.Journal of Computing and Information Science
+in Engineering, 2020
+
+2. Nascimento et al. Fleet prognosis with physics-informed recurrent neural networks, 2019
+
+3. Fricke et al. Quadcopter Soft Vertical Landing Control with Hybrid Physics-informed Machine
+Learning, AIAA SCITech Forum, 2021
+
+4. Zaheer et al., Deep Sets, 2017
+
+5. Gens et al, Deep symmetry networks, 2014
+
+
+
+31/33
+
+Other Works
+
+There’s been MUCH MORE on these topics that I haven’t covered:
+
+1. Kaiser et al., Data-driven discovery of Koopman eigenfunctions for control. Proceedings of the
+Royal Society A, 2018
+
+2. Lu et al. Learning nonlinear operators via DeepONet based on the universal approximation
+theorem of operators. Nature Machine Intelligence, 2021
+
+3. Chen et al. Neural Ordinary Differential Equations. NIPS, 2018.
+
+4. Cranmer et al. Lagrangian Neural Networks. NIPS, 2020.
+
+5. ...
+
+
+
+32/33
+
+Concluding Remarks
+Remembering the Why
+
+▶ Learning degradation leveraging data-driven tools when amount of data is scarce,
+and/or when there’s not enough information to build a model, but, having ‘some’
+knowledge is common.
+
+▶ System identification and system-level prognostics: learning complex system
+dynamics as faults / degradation evolve in individual components or sub-systems.
+This requires powerful learning algorithms, but we need to understand how to
+systematically limit over-fitting (and under-fitting) to make them work properly.
+
+
+
+33/33
+
+Thank you
+
+Matteo Corbetta
+KBR Inc., NASA Ames Research Center
+
+
+	Diagnostics & Prognostics Group
+	Acknowledgements
+	Agenda
+	Recent Increase in Machine Learning Papers for PHM
+	Why to Leverage Physics-Informed Learning in PHM
+	Overview of Promising Research in Physics-Informed Machine Learning
+	Physics-Constrained Gaussian Processes
+	Physics-Informed Neural Networks
+
+	Concluding Remarks
+

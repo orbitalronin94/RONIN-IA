@@ -1,0 +1,731 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1
+
+Numerical Modelling of Sublimation Losses During Sample Handling Within the 
+Light WAVE Lunar Water Prospecting Instrument
+Light Water Analysis & Volatile Extraction (Light WAVE) |     4.11.2022 Jeffrey Michel – NASA JSC Propulsion & Power Division
+
+
+
+Outline
+
+• Sublimation Impacts on Lunar Water Prospecting
+
+• Light WAVE Instrument Overview
+
+• Light WAVE Crucible Sublimation Model Detail
+
+• High-Level Overview
+
+• Setup in COMSOL
+
+• Governing Equations
+
+• Material Properties
+
+• Boundary and Initial Conditions
+
+• Sublimation Rate Calculation in Excel using Darcy’s Law
+
+• Results and Validation with 2017 Sublimation Test Data
+
+• Model Assumptions, Limitations, and Suggested Forward Work
+
+2
+
+
+
+Sublimation Problem Background
+
+• Reserve characterization requires follow-
+on prospecting rovers after VIPER
+
+• Volatile quantification instruments will be 
+housed in rover body – radiative heat 
+sources
+
+• Narrow ice-stable temperature band in 
+lunar permanently-shadowed regions 
+(PSRs) 
+
+3
+
+[1] [2]
+
+From 2022 NASA Moon-to-Mars Objectives Applied Science (AS) Goal:
+
+~30x sublimation rate 
+
+increase at -75C vs -100C
+
+Water desorption 
+
+peak at -103C
+
+
+
+Light WAVE Instrument Overview
+
+4
+
+4
+
+Sample Return 
+Station (SRS)
+
+Crucible Lift 
+Assembly (CLA)
+
+Arm (Z, Rotation, and 
+Radial Mechanism)
+
+Crucible Storage 
+Station
+
+Light WAVE 
+CAD Assembly
+
+1. Received regolith sample from TRIDENT drill.
+
+2. Weigh and heat sample to sublimate volatiles.
+
+3. Capture gaseous volatiles in known volume.
+
+4. Quantify concentration using mass spectrometer 
+and ideal gas law.
+
+Unsealed sample exposed to radiative heating inside rover  
+
+
+
+Modelling Objectives
+
+1. Determine need for chilled crucible by quantifying water loss in crucibles between drill transfer 
+and sample sealing at lunar PSR conditions.
+
+2. Use lessons learned for larger-scale sublimation modelling (ex. inlet hoppers for Moon and Mars 
+water processing plants).
+
+5
+
+TRIDENT Drill Testing at NASA GRC VF-13 Chamber[3] and OVEN Sublimation Test Configuration[4]
+
+
+
+Model Overview
+
+6
+
+𝑇(𝑥, 𝑡) from 
+
+domain used to 
+
+compute 
+
+sublimation rate 
+
+at each node
+
+COMSOL Thermal Model COMSOL Sublimation Model
+
+Outputs:
+
+• ሶ𝑚𝑠 𝑥, 𝑡
+sublimation 
+
+rate time 
+
+history [g/s]
+
+• Total 
+
+sublimated 
+
+water mass 
+
+[g]
+
+• ሶ𝑚𝑠(𝑡) mean 
+
+sublimation 
+
+rate [g/s] –
+
+validated 
+
+against 2017 
+
+test data
+
+Axisymmetric cylindrical sample (12 cc):
+
+𝑇𝑤
+
+Water vapor 
+
+flow path
+
+Exposed 
+
+sample 
+
+surface area 
+
+with radius r
+
+𝑇 𝑥 computed at each time step:
+
+𝑡1 𝑡2 𝑡3 𝑡𝑛
+
+n time 
+
+steps
+
+Icy regolith 
+
+physical 
+
+properties 
+
+from Erickson 
+
+(JSC) & 
+
+Reiss (ESA)
+
+Input 
+
+Parameters:
+
+• 𝑇𝑖 initial 
+
+sample 
+
+temperature 
+
+[K]
+
+• 𝑇𝑤 crucible 
+
+wall 
+
+temperature 
+
+[K]
+
+• Ambient 
+
+pressure (Pa)
+
+• Water wt% in 
+
+regolith
+
+• Gravitational 
+
+acceleration 
+
+(m/s2)
+
+Conduction 
+
+heat equation 
+
+modified with 
+
+sublimation 
+
+latent heat 
+
+term[3]
+
+2) Assuming local thermodynamic 
+
+equilibrium, 𝑃𝑠𝑎𝑡(𝑥, 𝑡) computed from 
+
+𝑇(𝑥, 𝑡)[4]:  
+
+3) 𝑃𝑠𝑎𝑡(𝑥, 𝑡), node depth, and water vapor 
+
+properties used to compute ሶ𝑚𝑠(𝑥, 𝑡) using 
+
+Darcy’s Law[5]:  
+
+4) Darcy’s permeability constant 𝐵0 tuned 
+
+to match sublimation data for each test.
+
+ሶ𝑚𝑠(𝑥, 𝑡) =
+𝐵0𝐴𝑀
+
+𝜇𝑅𝑇𝐿𝑛𝑜𝑑𝑒
+
+𝑃𝑠𝑎𝑡(𝑥, 𝑡)
+2 − 𝑃𝑎𝑚𝑏
+
+2
+
+2
+
+ሶ𝑚𝑠 𝑥 computed at each time step:
+
+𝑡1 𝑡2 𝑡3 𝑡𝑛
+
+n time 
+
+steps
+
+
+
+COMSOL Setup: Governing Heat Equation
+
+• Standard conduction heat equation, 
+modified with sublimation latent heat sink
+
+• Based on modified heat equation used in 
+Formisano et al. (2019)[5]
+
+• Sublimation energy term implemented as 
+heat source term in COMSOL
+
+7
+
+Final Modified Heat Equation 
+
+Assuming Local Saturation Conditions[3]
+
+where,
+
+Conduction Heat Equation with Sublimation Energy Term[3]
+
+COMSOL Heat Transfer in Solids Physics Module with 
+
+Sublimation Latent Heat Source Term
+
+Heat Source Term
+
+
+
+COMSOL Setup: Material Properties
+
+• Icy lunar regolith thermal properties from JSC Crew and Thermal Systems Division model (Lisa 
+Erickson)[7]
+
+• Bulk conductivity 𝒌𝒕(𝑻), specific heat 𝒄𝒑(𝑻), and constant density 𝝆
+
+• MATLAB script inputs: ambient pressure, water ice wt%, ambient gravitational acceleration
+
+8
+
+𝑘𝑡 𝑇 and 𝑐𝑝 𝑇 for 173 Pa and 3.56 wt% Water
+
+Sublimation Point
+
+Sublimation Point
+
+
+
+COMSOL Setup: Boundary and Initial Conditions
+
+9
+
+Crucible Geometry, Sample Domain Mesh, Mesh Statistics, Initial Condition, and Boundary Conditions Definitions
+
+Uniform Initial 
+
+Temperature 
+
+𝑇𝑖
+
+Fixed Wall 
+
+Temperature 
+
+𝑇𝑤
+
+r = 0.35 in (0.889 cm) 
+
+L = 
+
+1.9 in 
+
+(4.8 
+
+cm) 
+
+
+
+Darcy’s Law Sublimation Rate Calculation
+
+10
+
+ሶ𝑚𝑠 𝑡 = −
+𝐵0𝐴𝑃𝑀
+
+𝜇𝑅𝑇
+
+𝜕𝑃
+
+𝜕𝑥
+
+ሶ𝑚𝑠 𝑡 = −
+𝐵0𝐴𝑃𝑀
+
+𝜇𝑅𝑇
+
+𝑃2
+2 − 𝑃1
+
+2
+
+𝐿
+
+ሶ𝑚𝑠(𝑡) =
+𝐵0𝐴𝑀
+
+𝜇𝑅𝑇𝑛𝑜𝑑𝑒𝐿𝑛𝑜𝑑𝑒
+
+(𝑃𝑠𝑎𝑡(𝑇𝑛𝑜𝑑𝑒))
+2−𝑃𝑎𝑚𝑏
+
+2
+
+2
+
+W
+a
+
+te
+r v
+
+a
+p
+
+o
+r flo
+
+w
+
+Where,
+
+• ሶ𝑚𝑠: sublimation rate [kg/s]
+
+• 𝐵0: Darcy’s permeability constant [m2]
+
+• 𝐴: cross-sectional area [m2]
+
+• 𝑃: pressure [Pa]
+
+• 𝑀: gas molecular weight [kg/mol]
+
+• 𝜇: gas dynamic viscosity [Pa*s]
+
+• 𝑇: temperature [K]
+
+• 𝑅: ideal gas constant [N*m/mol*K]
+
+• 𝐿: depth from sample surface [m]
+
+1D Darcy’s Law Differential Form:
+
+Nodal Darcy’s Law Calculation:
+
+1D Darcy’s Law Integrated Form:
+
+At each node / time step:
+
+𝑃𝑛𝑜𝑑𝑒 = 𝑃𝑎𝑚𝑏 + 𝜌𝑔𝑧𝑛𝑜𝑑𝑒
+
+if (𝑃𝑛𝑜𝑑𝑒 > 𝑃𝑠𝑎𝑡(𝑇𝑛𝑜𝑑𝑒))
+{
+
+ሶ𝑚𝑠 𝑡 = 0
+else
+
+ሶ𝑚𝑠 𝑡 =
+
+𝐵0𝐴𝑀
+
+𝜇𝑅𝑇𝑛𝑜𝑑𝑒𝑧𝑛𝑜𝑑𝑒
+
+𝑃𝑠𝑎𝑡
+2 − 𝑃𝑎𝑚𝑏
+
+2
+
+2
+
+}
+
+z = 0
+
+z = L
+
+𝑷𝒂𝒎𝒃
+
+ሶ𝒎𝒔(𝒕)
+
+• Regolith head pressure at node 
+
+checked before sublimation 
+
+computation
+
+• Sublimation inhibited deeper in 
+
+sample:
+
+• Regolith head pressure
+
+• Decreased pressure gradient
+
+
+
+Model Validation – 2017 OVEN Sublimation Test Data
+
+• Conducted with -60C icy simulant samples at ~1 torr vacuum
+
+• PSR conditions: -196C to -97C initial sample temperature, 2e-12 torr vacuum
+
+• Water sublimation losses between crucible fill and seal (delta of bracketed points)
+
+11
+
+*
+*
+
+*
+
+*
+*
+
+*
+
+2017 OVEN Sublimation Testing Key Results[4]OVEN Sublimation Test Setup[4]
+
+
+
+Example Model Results – JSC 7.1.3 Test
+
+12
+
+Temperature vs. Time Sublimation Rate vs. Time
+
+
+
+Model Validation – 2017 OVEN Sublimation Test Data
+
+13
+
+𝝁𝑩𝟎: 7.76
+
+𝝈𝑩𝟎: 0.378
+
+Relative 𝝈𝑩𝟎: 4.9%
+
+Test Number 7.1.1 7.1.3 7.1.5
+
+𝑻𝒘 [K] 295 291 288
+
+𝑻𝒊 [K] 245 207 207
+
+𝑷𝒂𝒎𝒃 [Pa] 133 173 105
+
+ሶ𝒎𝒔(𝐭) [g/s] 1.15e-5 7.03e-6 1.146e-5
+
+Tuned Darcy’s 
+Constant - 𝑩𝟎
+
+[log(cm2)]
+-8.06 -7.89 -7.34
+
+-8.1
+
+-7.6
+
+-7.1
+
+-6.6
+
+-6.1
+
+0 20000 40000 60000 80000 100000 120000 140000 160000
+
+D
+ar
+
+cy
+'s
+
+ C
+o
+
+n
+st
+
+an
+t 
+
+(l
+o
+
+g 
+cm
+
+2 )
+
+Mean Pressure (Pa)
+
+Darcy's Constant Comparision - Toutanji et al. 
+vs. 2017 JSC Light WAVE Sublimation Test Models
+
+Toutanji (He) Toutanji (N2) Toutanji (N2O) JSC 2017 (H2O)
+
+Follows Toutanji et al. exponential trend[8], however:
+
+• Only 3 datapoints
+
+• Different gas species and simulant
+
+• No data <1000 Pa for water vapor flow 
+
+through simulants
+
+
+
+Conclusions and Forward Work
+
+• Sublimation losses at PSR conditions within 
+0.25 wt% requirement:
+
+• 𝑇𝑖 reduced to 77 K 
+
+• 𝑃𝑎𝑚𝑏 reduced to 2.67E-10 Pa
+
+• Forward work:
+
+• Losses at 𝑇𝑖 = 176 K (worst-case regolith 
+warming from TRIDENT drill)
+
+• Input sensitivity study
+
+• Collect additional data for model validation
+
+• LN2-chilled sublimation testing
+
+• Darcy’s Constant test stand at high-
+vacuum pressures
+
+• MATLAB integration
+
+• Link regolith thermal properties script with 
+COMSOL model directly
+
+• Update material properties as water 
+sublimates out
+
+• Inlet hoppers for water processing plants
+
+14
+
+Test Number 7.1.1 7.1.3 7.1.5
+
+Initial Water Mass [g] 0.535 0.524 0.478
+
+Unchilled Crucible Wt% Error -0.0097 -0.0087 -0.015
+
+Chilled Crucible (𝑻𝒘 =
+𝟏𝟑𝟎 𝑲) Wt% Error
+
+0.0000 0.0000 0.0000
+
+Light WAVE Sublimation Rate vs. Time 
+
+at PSR-Modified JSC 7.1.1 Test Conditions
+
+Light WAVE:
+
+• 12 cc
+
+• 1.07 mg 
+
+loss
+
+• 0.0001 
+
+wt% loss
+
+
+
+References
+
+[1] Hibbitts, C. A., Grieves, G. A., Poston, M. J., Dyar, M. D., Alexandrov, A. B., Johnson, M. A., & Orlando, T. M. (2011). Thermal 
+stability of water and hydroxyl on the surface of the Moon from temperature-programmed desorption measurements of lunar analog 
+materials. Icarus, 213(1), 64-72.
+
+[2] Mortimer, J., Lécuyer, C., Fourel, F., & Carpenter, J. (2018). D/H fractionation during sublimation of water ice at low temperatures 
+into a vacuum. Planetary and Space Science, 158, 25-33.
+
+[3] Kleinhenz, J., Smith, J., Roush, T., Colaprete, A., Zacny, K., Paulsen, G., ... & Paz, A. (2018). Volatiles Loss from water bearing 
+regolith simulant at Lunar Environments. In Earth and Space 2018: Engineering for Extreme Environments (pp. 454-466). Reston, 
+VA: American Society of Civil Engineers.
+
+[4] Paz, A. (2019). Percentage Of Water Retained In Icy Lunar Regolith Simulant During Transfer Into A Sample Container. 
+Engineering Mechanics Institute Conference. Pasadena, CA.
+
+[5] Formisano, M. et al., 2019. PROSPECTING the Moon: Numerical simulations of temperature and sublimation rate of a cylindrical 
+sample. Planetary and Space Science 169, 8–14. https://doi.org/10.1016/j.pss.2019.03.002
+
+[6] Murphy, D.M., Koop, T., 2005. Review of the vapour pressures of ice and supercooled
+water for atmospheric applications. Q. J. R. Meteorol. Soc. 131 (608), 1539–1565.
+https://doi.org/10.1256/qj.04.94
+
+[7] Hamill, B., Schunk, R., Erickson, L.R., 2021. Human Landing System Lunar Thermal Analysis Guidebook – HLS-UG-001.
+
+[8] Toutanji, H. et al., 2012. Gas permeability and flow characterization of simulated lunar regolith. Advances in Space Research 49, 
+1271–1276. https://doi.org/10.1016/j.asr.2012.02.002
+
+15
+
+https://doi.org/10.1016/j.pss.2019.03.002
+https://doi.org/10.1256/qj.04.94
+https://doi.org/10.1016/j.asr.2012.02.002
+
+
+16
+
+Questions?
+
+

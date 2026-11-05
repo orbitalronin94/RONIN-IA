@@ -1,0 +1,372 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="cp:revision" content="2">
+<meta name="extended-properties:AppVersion" content="16.0000">
+<meta name="meta:paragraph-count" content="39">
+<meta name="meta:word-count" content="2974">
+<meta name="extended-properties:Application" content="Microsoft Office Word">
+<meta name="meta:last-author" content="Buswell, Maryann (GRC-LSS0)[Alcyon Technical Services (JV), LLC]">
+<meta name="dc:creator" content="Mercado, Mariano (GRC-LTF0)">
+<meta name="extended-properties:Company" content="">
+<meta name="xmpTPg:NPages" content="8">
+<meta name="dcterms:created" content="2023-06-30T19:55:00Z">
+<meta name="meta:line-count" content="141">
+<meta name="dcterms:modified" content="2023-06-30T19:55:00Z">
+<meta name="meta:character-count" content="16957">
+<meta name="extended-properties:Template" content="Normal">
+<meta name="meta:character-count-with-spaces" content="19892">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.DefaultParser">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.microsoft.ooxml.OOXMLParser">
+<meta name="extended-properties:DocSecurityString" content="None">
+<meta name="meta:page-count" content="8">
+<meta name="Content-Type-Override" content="application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+<meta name="Content-Type" content="application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+<meta name="dc:publisher" content="">
+<title></title>
+</head>
+<body><h1 class="title">Parametric Analysis of the Charge-Hold-Vent Method for Cryogenic Propellant Tank Chilldown </h1>
+<p></p>
+<h2 class="subtitle">M. Mercado1 and J. Hartwig1</h2>
+<h2 class="subtitle">1NASA Glenn Research Center, Cleveland, OH 44135 USA</h2>
+<p></p>
+<p><b>Abstract.</b> In the absence of external heat exchangers, the on-orbit transfer of cryogenic propellants requires the receiver tank to first be quenched to a sufficiently low energy state to allow for a continuous no-vent fill to avoid unnecessary venting of liquid. One proposed method for tank chilldown that minimizes the potential for venting liquid is the charge hold vent (CHV) method. CHV follows a cyclic process that gradually removes thermal energy from the receiver tank by injecting liquid with the vent valve closed and allowing the fluid and wall to reach near-thermal equilibrium before venting the superheated vapor. However, the CHV method must be optimized to minimize complexity, mass, and time. This paper presents a modular CHV analytical model used to quantify the number of cycles and propellant mass consumed based on first principles. The model is used to examine the effect of eight parameters: receiver tank material, volume, mass, maximum expected operating pressure, and initial pressure, liquid injection pressure and temperature, and the target temperature. The model is validated against the only two available CHV datasets. Based on results, the tank mass-to-volume ratio is the most important factor in determining the number of CHV cycles and thus degree of difficulty in tank chilldown. The model can easily be used for early-stage design, sizing, and analysis of cryogenic propellant transfer systems. <b>Keywords:</b> tank chilldown, charge-hold-vent, no-vent fill</p>
+<p></p>
+<p></p>
+<h1>Introduction</h1>
+<p>The transfer of cryogenic propellants from a supply tank to a receiver tank in the microgravity of space can be broken down into five stages: (1) pressurization of the supply tank, (2) acquisition of single-phase liquid via propellant management devices, (3) transfer line chilldown, (4) chilldown of the receiver tank, and (5) fill of the receiver tank. The goal of in-space transfer is to fill the receiver tank to a high final fill fraction (typically &gt;95%) operating below the maximum expected operating pressure (MEOP) while minimizing consumed propellant mass and/or minimizing transfer time. This paper focuses on step 4, chilldown of the receiver tank. </p>
+<p>	Regardless of the architecture, in the absence of internal or external heat exchangers, if the receiver tank is warm at the start of propellant transfer, some pre-cooling and thus venting will need to occur to ensure the high final fill fraction. In other words, the cold propellant itself can be used to remove the thermal energy from the tank walls. In 1g, the cryogenic transfer process is trivial because the receiver tank is vented throughout the transfer. Boil-off gas is simply displaced by liquid until the desired fill level is achieved. In the unsettled configuration in microgravity however, the propellant transfer process is complicated by the unknown location of the liquid/vapor interface and thus higher probability to vent liquid. The latter is to be avoided due to the high cost to launch and store propellant in orbit.</p>
+<p>	Several methods have been proposed to chill down and fill a receiver tank, most recently summarized in [1, 2]. These include using cryocoolers, a vented chill/no-vent fill (NVF), a charge-hold-vent (CHV)/NVF, and even using a thermodynamic vent system-augmented chilldown and fill method. This paper focuses on the CHV/NVF transfer method. </p>
+<p>First proposed by [3], for the CHV method, a charge of liquid is injected into the tank with the vent valve closed. The liquid is held sufficiently long to allow complete boiling such that the superheated vapor and tank walls reach near-equilibrium. The vapor is then vented to space and the process is repeated cyclically. With each CHV cycle, the tank wall ramps down in temperature. After a sufficient number of cycles, the tank wall reaches the “target temperature” [4], the temperature that is cold enough to allow a continuous NVF to the desired final fill level. If designed properly, CHV eliminates the propensity for venting liquid. Furthermore, if parasitic heat leak can be kept low, CHV has the potential for saving propellant mass usage. However, the CHV method must be optimized to minimize complexity, mass, and time.</p>
+<p>The purpose of this paper is to study the parameters that affect the CHV method used to chill down cryogenic propellant tanks, and to determine how the CHV method scales across multiple tank sizes and shapes. The outline of the paper is as follows: First, a general overview of the CHV model is given along with the corresponding numerical implementation. Next, the model is used to parametrically examine the effect of receiver tank material, volume, mass, MEOP, and initial pressure, liquid injection pressure and temperature, and the target temperature. The model is then validated against the only two known publicly available CHV datasets. Finally, key points are summarized.</p>
+<p></p>
+<h1>Charge Hold Vent Model Description</h1>
+<p>The Reduced Gravity Cryogenic Transfer project at NASA is developing and validating multiple levels of cryogenic propellant transfer models towards the design, sizing, and analysis of ground and in-space cryogenic propellant transfer systems recently summarized in [5]. This includes fundamental model subroutine and correlation development, transient and thermodynamic equilibrium models of various chilldown methods, a method for predicting the maximum allowable target temperature, lumped capacitance models for several different tank chilldown and fill methods, CFD of spray injection and resultant interaction with the ullage and tank wall, CFD of the fluid motion inside the supply tank during outflow, injector design tools, and scaling models. Work presented here focuses on thermodynamic models and scaling models.</p>
+<p>A time independent analytical CHV model was developed from first principles to quantify the number of cycles and propellant mass consumed, briefly described below. The thermodynamic equilibrium model used here is adopted and updated from [6]. The model uses conservation of mass and energy on the control volume shown in Figure 1. During the charge and hold phase, the model assumes that the entirety of the charge liquid evaporates and boils until the fluid reaches 95% of the wall temperature. During this phase, the mass and energy balances are:</p>
+<p></p>
+<p><div class="embedded" id="rId9"></div>
+										(1)</p>
+<p><div class="embedded" id="rId11"></div>
+					(2)</p>
+<p><div class="embedded" id="rId13"></div>
+<div class="embedded" id="rId15"></div>
+<div class="embedded" id="rId17"></div>
+<div class="embedded" id="rId19"></div>
+<div class="embedded" id="rId21"></div>
+<div class="embedded" id="rId23"></div>
+<div class="embedded" id="rId25"></div>
+<div class="embedded" id="rId27"></div>
+<div class="embedded" id="rId29"></div>
+<div class="embedded" id="rId31"></div>
+<div class="embedded" id="rId33"></div>
+where  is the allowable mass of the charge, is the enthalpy based on the charge inlet conditions,  and are the masses and internal energy of the initial and final vapor states in the tank, and and are the mass and the specific heat capacity of the tank. and are the initial and final temperature of the tank. is a lumped total energy term of the expected parasitics that can be turned on or off.</p>
+<p>To calculate the maximum allowable mass of each charge, the final pressure after each hold is equated to the MEOP and Equation 1 becomes:</p>
+<p></p>
+<p><div class="embedded" id="rId35"></div>
+							(3)</p>
+<p></p>
+<p><div class="embedded" id="rId37"></div>
+<div class="embedded" id="rId39"></div>
+<div class="embedded" id="rId41"></div>
+Where  is the internal volume of the tank, and  and  are the density and pressure of the vapor inside of the tank. If the chilldown cycles happen over small temperature ranges, the tank energy integral in Equation 2 becomes:</p>
+<p></p>
+<p><div class="embedded" id="rId43"></div>
+										(4)</p>
+<p></p>
+<p><div class="embedded" id="rId45"></div>
+where  is taken at the average value of the two temperatures. Equation 2 can be re-written to solve for the tank wall temperature at the end of the hold phase:</p>
+<p></p>
+<p><div class="embedded" id="rId47"></div>
+				(5)</p>
+<p></p>
+<p><img src="embedded:image21.png" alt=""></p>
+<p class="caption"><a name="_Ref101867013"></a><b>Figure 1</b>. CHV Control Volume</p>
+<p></p>
+<p>The fluid temperature at the end of the charge is solved for numerically. Once the final state is known, the mass of the charge is known from the conservation of mass equation. A modification to the original model from [6] is made: If the last charge would lower the tank temperature below the target temperature, then the final state temperature is set to the target temperature and equation 2 is solved for the final pressure, which will be below the MEOP. This means that the final charge will nearly always be smaller than the others to conserve propellant.</p>
+<p><div class="embedded" id="rId50"></div>
+For the vent phase of CHV, each vent cycle is modeled by two processes which are repeated until the tank is evacuated to the desired pressure and ready for the next chilldown cycle to begin. The first process is venting the vapor. This is modeled as an adiabatic, reversible expansion of the remaining vapor to an intermediate lower pressure. This means that the pressure is reduced isentropically which enables the evaluation of the fluid properties at a fully defined intermediate step based on the previous entropy and the new intermediate vent pressure. The second process is the energy balance between the tank and this now colder vapor mass at :</p>
+<p></p>
+<p><div class="embedded" id="rId52"></div>
+									(6)</p>
+<p></p>
+<p><div class="embedded" id="rId54"></div>
+The solution to this new intermediate energy balance is also solved numerically. After convergence, the wall temperature is reset , and more vapor is vented. This is repeated until the tank is fully evacuated to the desired evacuation pressure. At the end of the venting cycles, a new chilldown cycle is initiated with the next liquid charge and the process is repeated.</p>
+<p></p>
+<p>User-defined inputs include receiver tank material, volume, mass, and MEOP, charge pressure and temperature, intermediate pressure drop, initial receiver tank pressure and temperature, the target temperature, and the fluid. Model outputs include total number of cycles to reach the target temperature, total mass injected, and a summary of the state of the tank after each charge and intermediate step. REFPROP [7] is used as the equation of state relating all fluid thermodynamic variables. Temperature dependent properties for all tank metals is taken from [8].</p>
+<p>	</p>
+<h1>Parametric Analysis</h1>
+<p>To evaluate the effect of each input on the overall number of cycles (N) and propellant mass consumed (m), a parametric study was conducted. The base case inputs are shown in Table 1. Each property was then varied while holding all the other properties constant. The results of the parametric study are summarized in Table 2. </p>
+<p></p>
+<p class="caption"><b>Table 1.</b> CHV Base Case Inputs</p>
+<table><tbody><tr>	<td><p><b>Property</b></p>
+</td>	<td><p><b>Value</b></p>
+</td></tr>
+<tr>	<td><p>Tank Material</p>
+</td>	<td><p>5086 Aluminum</p>
+</td></tr>
+<tr>	<td><p>Tank Volume (m3)</p>
+</td>	<td><p>0.424</p>
+</td></tr>
+<tr>	<td><p>Tank Mass (kg)</p>
+</td>	<td><p>183.2</p>
+</td></tr>
+<tr>	<td><p>Tank MEOP (kPa)</p>
+</td>	<td><p>689.5</p>
+</td></tr>
+<tr>	<td><p>Charge Pressure (kPa)</p>
+</td>	<td><p>13.8</p>
+</td></tr>
+<tr>	<td><p>Charge Temperature (K)</p>
+</td>	<td><p>78</p>
+</td></tr>
+<tr>	<td><p>Intermediate Pressure Drop (kPa)</p>
+</td>	<td><p>34.5</p>
+</td></tr>
+<tr>	<td><p>Tank Initial/Evacuated Pressure (kPa)</p>
+</td>	<td><p>13.8</p>
+</td></tr>
+<tr>	<td><p>Initial Tank Temperature (K)</p>
+</td>	<td><p>305</p>
+</td></tr>
+<tr>	<td><p>Target Tank Temperature (K)</p>
+</td>	<td><p>120</p>
+</td></tr>
+<tr>	<td><p>Fluid</p>
+</td>	<td><p>Nitrogen</p>
+</td></tr>
+</tbody></table>
+<p></p>
+<p>Results in Table 2 indicate that tank MEOP, tank volume, tank mass, and target temperature are the primary parameters that impact N and m and will be explored subsequently. The tank material does impact propellant consumed, but it is accounted for in the tank mass and MEOP. In general, lighter weight and higher-pressure capable metals will always lead to reduced number of cycles and consumed mass. The initial/evacuated receiver tank pressure can reduce the number of cycles but its effect on the mass consumed is more pronounced.  Lower evacuation pressures reduce the mass consumed during the chilldown and NVF testing has shown that the initial tank pressure at the start of fill significantly impacts the probability of successful fill as well as the total allowable final fill fraction [2]. The inlet liquid temperature has a secondary impact on N and m; colder injected fluid per charge equates to more tank wall cooling potential per charge. Meanwhile, the inlet liquid pressure has little-to-no impact on N or m, but the subcooled margin of the charge does impact results.</p>
+<p>Figure 2a plots the number of CHV cycles and propellant mass consumed as a function of the MEOP for all other parameters fixed. As shown, increasing MEOP decreases the required number of charges but has a negligible impact on propellant mass consumed. This indicates that a higher MEOP allows more propellant mass per charge, but the overall propellant mass required to reach the target temperature does not change. A higher MEOP thus leads to less complexity in transfer.</p>
+<p></p>
+<p class="caption"><b>Table 2.</b> CHV Parametric Variation Results</p>
+<table><tbody><tr>	<td><p> </p>
+</td>	<td><p><b>N Cycles</b></p>
+</td>	<td><p><b>Mass Consumed [kg]</b></p>
+</td></tr>
+<tr>	<td><p><b>Base Case</b></p>
+</td>	<td><p>18</p>
+</td>	<td><p>92.5</p>
+</td></tr>
+<tr>	<td><p><b>Receiver Tank Volume Variation [0.424 m3 Base]</b></p>
+</td></tr>
+<tr>	<td><p>0.212 m3</p>
+</td>	<td><p>36</p>
+</td>	<td><p>91.1</p>
+</td></tr>
+<tr>	<td><p>0.848 m3</p>
+</td>	<td><p>9</p>
+</td>	<td><p>94.7</p>
+</td></tr>
+<tr>	<td><p>1.696 m3</p>
+</td>	<td><p>5</p>
+</td>	<td><p>96.5</p>
+</td></tr>
+<tr>	<td><p><b>Receiver Tank Mass Variation [183.5 kg Base]</b></p>
+</td></tr>
+<tr>	<td><p>91.5 kg</p>
+</td>	<td><p>9</p>
+</td>	<td><p>47.3</p>
+</td></tr>
+<tr>	<td><p>366 kg</p>
+</td>	<td><p>36</p>
+</td>	<td><p>182.1</p>
+</td></tr>
+<tr>	<td><p><b>Receiver Tank Material Variation [5086 Al Base]</b></p>
+</td></tr>
+<tr>	<td><p>316 SS</p>
+</td>	<td><p>22</p>
+</td>	<td><p>109.2</p>
+</td></tr>
+<tr>	<td><p>6A1-4V Ti</p>
+</td>	<td><p>12</p>
+</td>	<td><p>59.8</p>
+</td></tr>
+<tr>	<td><p><b>Tank MEOP Variation [689.5 kPa Base]</b></p>
+</td></tr>
+<tr>	<td><p>344.7 kPa</p>
+</td>	<td><p>38</p>
+</td>	<td><p>91.3</p>
+</td></tr>
+<tr>	<td><p>1034.2 kPa</p>
+</td>	<td><p>12</p>
+</td>	<td><p>93.5</p>
+</td></tr>
+<tr>	<td><p><b>Receiver Tank Initial Pressure Variation [13.8 kPa Base]</b></p>
+</td></tr>
+<tr>	<td><p>48.3 kPa</p>
+</td>	<td><p>19</p>
+</td>	<td><p>92.9</p>
+</td></tr>
+<tr>	<td><p>103.4 kPa</p>
+</td>	<td><p>21</p>
+</td>	<td><p>91.8</p>
+</td></tr>
+<tr>	<td><p><b>Inlet Liquid Pressure Variation [275.8 kPa Base]</b></p>
+</td></tr>
+<tr>	<td><p>413.7 kPa</p>
+</td>	<td><p>18</p>
+</td>	<td><p>91.4</p>
+</td></tr>
+<tr>	<td><p>689.5 kPa</p>
+</td>	<td><p>18</p>
+</td>	<td><p>91.4</p>
+</td></tr>
+<tr>	<td><p><b>Inlet Liquid Temperature Variation [78K Base]</b></p>
+</td></tr>
+<tr>	<td><p>86K</p>
+</td>	<td><p>19</p>
+</td>	<td><p>97.4</p>
+</td></tr>
+<tr>	<td><p>73K</p>
+</td>	<td><p>118</p>
+</td>	<td><p>88.7</p>
+</td></tr>
+<tr>	<td><p><b>Target Temperature Variation [120 K Base]</b></p>
+</td></tr>
+<tr>	<td><p>110 K</p>
+</td>	<td><p>19</p>
+</td>	<td><p>96.8</p>
+</td></tr>
+<tr>	<td><p>160 K</p>
+</td>	<td><p>16</p>
+</td>	<td><p>70.5</p>
+</td></tr>
+</tbody></table>
+<p></p>
+<p>	Figure 2b plots the effect of varying tank volume, for all other parameters fixed. Increasing the tank volume for the same tank mass has a net positive impact on the number of required CHV cycles. The # of cycles decreases exponentially with decreasing tank volume. Meanwhile, there is no apparent effect on total required propellant mass consumption.</p>
+<p>	Figure 2c plots the effect of varying tank mass for all other parameters fixed. As shown, tank mass arguably has the highest impact on CHV performance. Both the number of CHV cycles and the required propellant decay increase nearly-perfectly linearly with increasing tank mass.</p>
+<p>	Figure 2d plots the effect of target temperature for all other parameters fixed, which has a noticeable impact on results. Increasing the target temperature at which to initiate a NVF decreases both the number of CHV cycles and the required propellant consumption. An increase in the target temperature can be achieved by using high performing injectors as outlined previously in [1, 2, 4].   </p>
+<p><img src="embedded:image25.png" alt=""></p>
+<p class="caption"><b>Figure 2. </b>Effect of Receiver Tank a) MEOP, b) Volume, c) Mass, and d) Target Temperature on Charge-Hold-Vent Performance</p>
+<p></p>
+<h1>Model Validation</h1>
+<p>The CHV model is now validated against the only publicly available datasets in the literature. Case 1 is from Chato and Sanabria [3] for a single CHV test using LH2 on a 116 kg, 4.94 m3 inner volume, 2219 Aluminum tank. The tank chilled down to the target temperature in 6 CHV cycles, consuming 14.5 kg of LH2. Meanwhile, Case 2 is from Hartwig et al. [2] for a single CHV test using LN2 on a 12.3 kg, 0.22 m3 inner volume, Titanium tank. The tank reached the target temperature in 2 cycles, consuming 6.4 kg of LN2. Figure 3 plots the number of CHV cycles as a function of the receiver tank mass-to-volume ratio. As shown, the model has perfect agreement on the number of CHV cycles for both Case 1 and Case 2, predicting 6 and 2 cycles respectively.  While it correctly predicts the number of cycles, the model underpredicts the amount of mass consumed, predicting 13.2 kgs for Case 1 and 4.3 kgs for Case 2.  The reason for the discrepancy is because the model is a thermodynamic equilibrium model that does not factor in time. In other words, the hold phase runs to near-perfect equilibrium. In the experiments, the hold phase lasted for a shorter, finite time, and not to full thermal equilibrium. The easiest way to address this in the model is to simply change the assumed final temperature difference between the fluid and wall from 95% to some lower number. </p>
+<p>Figure 3 also plots smooth lines for each cryogen (hydrogen, nitrogen, oxygen, and methane) for all parameters fixed except the mass-to-volume-ratio. Figure 3 also plots the number of cycles for the base case. As shown, for all parameters fixed, there is a perfect linear correlation between the number of CHV cycles and the mass-to-volume ratio. While not immediately apparent, each fluid seems to have a corresponding x -ntercept, or a mass-to-volume ratio minimum for which more than 1 cycle is required.</p>
+<p> <img src="embedded:image26.emf" alt=""></p>
+<p class="caption"><b>Figure 3.</b> Number of Charge-Hold-Vent Cycles as a Function of the Tank Mass-to-Volume Ratio</p>
+<p></p>
+<p></p>
+<h1>Conclusion</h1>
+<p>An analytical model was developed, validated, and examined for the parameters that impact performance of the charge-hold-vent tank chilldown method. Key takeaway points are summarized as follows:</p>
+<p class="list_Paragraph">· The required number of CHV cycles is linearly proportional to the mass-to-volume ratio of the tank and is the primary parameter that impacts performance.</p>
+<p class="list_Paragraph">· Tank mass is the main driver of propellant mass consumed. Mass consumed scales linearly with tank mass.</p>
+<p class="list_Paragraph">· Increasing the tank volume without changing the tank mass exponentially decreases the number of cycles without changing the amount of propellant mass consumed.</p>
+<p class="list_Paragraph">· Maintaining the mass-to-volume ratio keeps the number of cycles constant but the propellant mass consumed is still directly proportional to the tank mass.</p>
+<p class="list_Paragraph">· Increasing the tank MEOP also decreases the number of cycles without changing the amount of propellant mass consumed but it is capped by the tank maximum allowable working pressure.</p>
+<p class="list_Paragraph">· The tank material has a noticeable impact on performance, but is primarily captured in the tank mass and MEOP.</p>
+<p class="list_Paragraph">· Increasing the target temperature decreases the required number of CHV cycles and the propellant mass.</p>
+<p class="list_Paragraph">· Inlet liquid temperature and pressure have a minor impact on number of cycles and mass.</p>
+<p class="list_Paragraph">· The model agrees well with historical CHV data, and to make the model more conservative, a lower equilibrium temperature difference between the fluid and wall at the end of the hold phase can be chosen.</p>
+<p></p>
+<p>Based on results, the tank mass-to-volume ratio appears to be the most important factor in determining the number of CHV cycles and thus degree of difficulty in tank chilldown. The model presented here runs quickly and can easily be used for early-stage design, sizing, and analysis of current and future cryogenic propellant transfer systems. </p>
+<p></p>
+<p><b>References</b></p>
+<p>[1] Hartwig, J.W., Rhys, N., Clark, J., Mercado, M., LeClair, A., and Majumdar, A.  “Test Data Analysis of the Vented Chill, No-Vent Fill Liquid Nitrogen CRYOTE-2 Experiments” <i>International Journal of Heat and Mass Transfer </i>167, 120781. 2021.</p>
+<p>[2] Hartwig, J.W., Stevens, J., Rhys, N. Clark, J., LeClair, A., and Majumdar, A.  “Test Data Analysis of the CRYOTE-2 TVS Augmented Top Spray Injector Liquid Nitrogen Transfer Experiments” <i>International Journal of Heat and Mass Transfer</i> 194, 122986. 2022.</p>
+<p>[3] Chato, D.J., and Sanabria, R. “Review and Test of Chilldown Methods for Space-Based Cryogenic Tanks” NASA-TM-104458 June, 1991.</p>
+<p>[4] Clark, J. and Hartwig, J.W. “Assessment of Prediction and Efficiency Parameters for Cryogenic No-Vent Fill” <i>Cryogenics </i>117, 103309. 2021.</p>
+<p>[5] Hartwig, J.W., Esser, N., Jain, S., Souders, D., Tafuni, A., and Prasad-Varghese, A. “CFD Modeling of a Bi-Directional Propellant Management Device inside a Cryogenic Propellant Tank Onboard a Parabolic Flight” <i>Journal of Spacecraft and Rockets</i> 2023b.</p>
+<p>[6] DeFelice, D.M. and Aydelott, A.C. “Thermodynamic Analysis and Subscale Modeling of Space-Based Orbit Transfer Vehicle Cryogenic Propellant Resupply” NASA-TM-87-1764, July, 1987.</p>
+<p>[7] Lemmon, E.W., Bell, I.H., Huber, M.L., McLinden, M.O. “NIST Standard Reference Database 23: Reference Fluid Thermodynamic and Transport Properties-REFPROP, Version 9.0” National Institute of Standards and Technology, Standard Reference Data Program, Gaithersburg, 2010.</p>
+<p>[8] Marquardt, E.D., Le, J.P., and Radebaugh, R. “Cryogenic Material Properties Database” 11th International Cryocooler Conference, Keystone, CO, June 20 – 22, 2000.</p>
+<p>2</p>
+<p class="footer"></p>
+<div class="package-entry"><h1>image2.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject2.bin</h1>
+</div>
+<div class="package-entry"><h1>image3.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject3.bin</h1>
+</div>
+<div class="package-entry"><h1>image4.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject4.bin</h1>
+</div>
+<div class="package-entry"><h1>image5.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject5.bin</h1>
+</div>
+<div class="package-entry"><h1>image6.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject6.bin</h1>
+</div>
+<div class="package-entry"><h1>image7.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject7.bin</h1>
+</div>
+<div class="package-entry"><h1>image8.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject8.bin</h1>
+</div>
+<div class="package-entry"><h1>image9.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject9.bin</h1>
+</div>
+<div class="package-entry"><h1>image10.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject10.bin</h1>
+</div>
+<div class="package-entry"><h1>image11.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject11.bin</h1>
+</div>
+<div class="package-entry"><h1>image12.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject12.bin</h1>
+</div>
+<div class="package-entry"><h1>image13.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject13.bin</h1>
+</div>
+<div class="package-entry"><h1>image14.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject14.bin</h1>
+</div>
+<div class="package-entry"><h1>image15.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject15.bin</h1>
+</div>
+<div class="package-entry"><h1>image16.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject16.bin</h1>
+</div>
+<div class="package-entry"><h1>image17.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject17.bin</h1>
+</div>
+<div class="package-entry"><h1>image18.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject18.bin</h1>
+</div>
+<div class="package-entry"><h1>image19.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject19.bin</h1>
+</div>
+<div class="package-entry"><h1>image20.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject20.bin</h1>
+</div>
+<div class="package-entry"><h1>image21.png</h1>
+</div>
+<div class="package-entry"><h1>image22.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject21.bin</h1>
+</div>
+<div class="package-entry"><h1>image23.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject22.bin</h1>
+</div>
+<div class="package-entry"><h1>image24.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject23.bin</h1>
+</div>
+<div class="package-entry"><h1>image25.png</h1>
+</div>
+<div class="package-entry"><h1>image26.emf</h1>
+</div>
+<div class="package-entry"><h1>image1.wmf</h1>
+</div>
+<div class="package-entry"><h1>oleObject1.bin</h1>
+</div>
+</body></html>

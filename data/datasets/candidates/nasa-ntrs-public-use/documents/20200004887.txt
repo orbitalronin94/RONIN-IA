@@ -1,0 +1,331 @@
+FUN3D Overview Part IV:
+Turbulence Model Discretization
+
+Eric J. Nielsen and James L. Thomas
+FUN3D Development Team
+NASA Langley Research Center
+Technical Interchange with Sandia National Labs
+March 8-9, 2011
+http://fun3d.larc.nasa.gov
+
+General Background
+•
+•
+
+The models considered here take the form of convection-diffusion
+equation(s) with source terms
+The equations are discretized in a manner similar to the mean flow in
+both space and time, except:
+– First-order convective terms (therefore nearest neighbor stencil)
+– Source terms use Green-Gauss gradients
+
+•
+
+Solved in a loosely-coupled fashion with the mean flow equations at
+each time step
+– Tend to use CFL numbers roughly one order of magnitude smaller than
+mean flow
+
+•
+
+Primary difference from the mean flow implementation is the special
+care taken to ensure positive eddy viscosity during the solution
+process
+– Follows directly from the approach outlined in Spalart and Allmaras (1992)
+and Baldwin and Barth (1991)
+
+•
+
+The outline shown here is the current approach; this is a very active
+area of research
+
+2
+
+Positive Operators and M-Type Matrices
+A positive operator is one that when applied to a vector of non-negative
+elements produces a vector whose elements remain non-negative:
+
+I.e., if
+
+ v1 
+v 
+ 
+v =  2
+ 
+vn 
+ 
+
+then if A is a positive operator, then
+
+where vi ≥ 0
+
+ s1 
+s 
+ 
+s =  2  = Av
+ 
+ sn 
+ 
+
+where si ≥ 0
+
+An M-type matrix is a matrix that is diagonally-dominant with positive
+diagonal elements and negative off-diagonal elements. The primary
+property of an M-type matrix is that its inverse contains only non-negative
+elements and is therefore a positive operator.
+3
+
+Form of Implicit Equations
+Consider the one equation Spalart-Allmaras model
+written in the following general form:
+∂υ
+= M (υ )υ + P(υ )υ − D(υ )υ
+∂t
+Convection/
+Diffusion
+
+Production
+
+Destruction
+
+With Jacobian matrices denoted by an overbar,
+our implicit scheme can then be written as
+
+A
+
+I − (M + P − D)  ∆υ n = [ M + P − D]υ n
+ ∆t
+
+
+or
+A
+
+A
+
+I − (M + P − D)  υ n+1 =  I + ( M − M ) + ( P − P ) − ( D − D ) υ n
+ ∆t
+
+
+ ∆t
+
+Require this to be
+an M-type matrix
+
+Require this to be
+a positive operator
+
+4
+
+Requirements for Positivity
+A
+
+A
+
+I − (M + P − D)  υ n+1 =  I + ( M − M ) + ( P − P ) − ( D − D ) υ n
+ ∆t
+
+
+ ∆t
+
+Require this to be
+an M-type matrix
+
+Require this to be
+a positive operator
+
+In order to achieve this, it is sufficient to require the following:
+
+−M , − P, + D are M-type
+
+ M − M υ ≥ 0
+
+
+ P − P υ ≥ 0
+
+
+
+for all υ ≥ 0
+
+ D − Dυ ≤ 0
+
+
+
+5
+
+Positivity for Convective Terms
+Assuming a constant velocity within the control volume, the convective
+terms can be converted from area integrals to line integrals as:
+
+∫∫
+
+ ∂υ
+∂υ 
+ˆ
+ˆ
+u
++v
+ ∂x
+∂A = u υ nx ∂Γ + v υ n y ∂Γ
+∂y 
+
+First-order upwind scheme:
+
+∫
+
+∫
+
+If U i > 0, υ face = υi
+
+j
+
+If U i < 0, υ face = υ j
+So the convective flux on the face can be written as:
+face
+
+(
+
+)
+
+Fconv = U i+υi + U i−υ j l
+
+i
+where
+
+U i±
+
+=
+
+Ui ± Ui
+2
+
+and l is the length of the face
+
+6
+
+Positivity for Convective Terms
+Recalling that
+
+∂υ
+= M (υ )υ + P(υ )υ − D(υ )υ , the convective terms become
+∂t
+Mυ = − U i+υi + U i−υ j l
+
+(
+
+)
+
+Note M is independent of υ , and since the residual contribution is
+defined as Mυ , then the Jacobian M = M , and we have satisfied
+the condition that  M − M  υ ≥ 0.
+
+
+
+(
+
+)
+
+Now recall our condition that −M = −M = U i+υi + U i−υ j l be an M-type matrix.
+2
+
+6
+
+6
+
+The diagonal when updating node 0 is
+
+∑
+
+U i+ li
+
+i =1
+5
+
+1
+0
+
+4
+
+Note that all contributions will either be positive or
+zero. A similar situation exists for the off-diagonals,
+which will all be either negative or zero.
+
+3
+7
+
+Positivity for Convective Terms
+To see whether the matrix is diagonally dominant,
+it is easiest to consider a 1-D example.
+U
+
+nL
+
+i-1
+
+nR
+i
+
+i+1
+
++
+UL = 0
+
++
+U R = Ui
+
+−
+U L = −U i
+
+−
+UR = 0
+
+Consider the residual at node i:
+
+(
+
+Ri = FR + FL = U i+υi + U i−υi +1
+
+) (
+R
+
++ U i+υi + U i−υi −1
+
+)
+
+L
+
+= U iυi − U iυi −1
+The linearization will not have off-diagonals larger than the diagonal,
+so we have satisfied the requirements for positivity of the convective terms.
+The diffusion and source terms are a bit more involved,
+but the approach is the same and is covered in the notes.
+
+8
+
+Other Items of Interest
+•
+•
+•
+
+Coupling: Loose or tight?
+Enforce positivity or “take what you get”?
+Full linearization or approximate?
+
+9
+
+Some Relevant Publications
+Rumsey, C.L., Smith, B.R., and Huang, G.P., “Description of a Website
+Resource for Turbulence Modeling Verification and Validation,” AIAA2010-4742, 2010.
+Rumsey, C.L., “Consistency, Verification, and Validation of Turbulence
+Models for Reynolds-Averaged Navier-Stokes Applications,” EUCASS
+2009-7, Presented at the 3rd European Conference for Aerospace
+Sciences, 2009.
+Lynch, C.E. and Smith, M.J., “Hybrid RANS-LES Turbulence Models on
+Unstructured Grids,” AIAA-2008-3854, 2008.
+Rumsey, C.L. and Thomas, J.L., “Application of FUN3D and CFL3D to
+the Third Workshop on CFD Uncertainty Analysis,” NASA TM-2008215537, 2008.
+Turbulence Modeling Resource Website, sponsored by the AIAA Fluid
+Dynamics TC and maintained by Chris Rumsey at NASA LaRC:
+http://turbmodels.larc.nasa.gov
+
+10
+

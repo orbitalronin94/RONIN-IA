@@ -1,0 +1,537 @@
+The SAGE III/ISS Lunar Algorithm
+Robbie Manion
+October 2018
+
+The SAGE III/ISS Lunar Algorithm
+
+2
+
+Robbie Manion | October 2018
+
+Data
+• Using the moon as a target
+• Packet rate for lunar science data is 1/16 s
+• More geographical coverage
+compared to 1/64 s for solar data
+• Monitor nighttime species
+• Fewer temporal data points
+• Illuminated portion of the moon varies
+• More spectral data points
+in shape and brightness
+• Moon is not very bright overall
+• This presentation will focus on the
+• Instrumental field of view is increased for
+progression of data through a single
+lunar events
+moonset event.
+• More “counts” on the CCD, increased
+Date: 2018.07.23 | Time: 0234 UTC
+signal-to-noise
+Lat: 28.0N | Lon: 12.7W
+• Coarser resolution (altitude)
+Data
+
+Dark Current
+Correction
+
+The SAGE III/ISS Lunar Algorithm
+
+Wavelength
+Calibration
+
+Altitude
+Registration
+3
+
+Inversion
+
+Altitude
+Adjustment
+
+Filtering and
+Binning
+
+Robbie Manion | October 2018
+
+Dark Current Correction
+• The CCD begins collecting data
+packets prior to target
+acquisition.
+• The counts measured in these
+space-looking packets are used
+to correct all counts measured
+through the event.
+
+Data
+
+Dark Current
+Correction
+
+The SAGE III/ISS Lunar Algorithm
+
+Wavelength
+Calibration
+
+Altitude
+Registration
+4
+
+Inversion
+
+Altitude
+Adjustment
+
+Filtering and
+Binning
+
+Robbie Manion | October 2018
+
+Wavelength Calibration
+• Start with a nominal pixel-towavelength map.
+• Consider the brightest
+exoatmospheric packet(s).
+• Shift the counts spectrum to best
+echo the features of a reference
+solar spectrum.
+• So far, we see shifting from
+nominal of less than +/- 0.05 nm.
+
+Data
+
+Dark Current
+Correction
+
+The SAGE III/ISS Lunar Algorithm
+
+Wavelength
+Calibration
+
+Altitude
+Registration
+5
+
+Inversion
+
+Altitude
+Adjustment
+
+Filtering and
+Binning
+
+Robbie Manion | October 2018
+
+Altitude Registration
+• The instrument scans through the
+brightness centroid of the target.
+• Given the geometry of the occultation
+and the fullness of the moon, we can
+reference a lunar model to predict this
+centroid and the chord along which the
+instrument scans.
+• Comparing the observed edges of the
+target to the model edges helps register
+the relative location of each packet on
+the target.
+• Refraction is also considered when
+determining the tangent altitude of the
+optical path.
+
+Data
+
+Dark Current
+Correction
+
+The SAGE III/ISS Lunar Algorithm
+
+Wavelength
+Calibration
+
+Altitude
+Registration
+6
+
+Inversion
+
+Altitude
+Adjustment
+
+Filtering and
+Binning
+
+Robbie Manion | October 2018
+
+Exoatmospheric Scans
+
+Dark Current
+Correction
+
+Wavelength
+Calibration
+
+The SAGE III/ISS Lunar Algorithm
+
+Altitude
+Registration
+
+Inversion
+7
+
+Altitude
+Adjustment
+
+Filtering and
+Binning
+
+Peeling
+
+Robbie Manion | October 2018
+
+Attenuated Scans
+
+Dark Current
+Correction
+
+Wavelength
+Calibration
+
+The SAGE III/ISS Lunar Algorithm
+
+Altitude
+Registration
+
+Inversion
+8
+
+Altitude
+Adjustment
+
+Filtering and
+Binning
+
+Peeling
+
+Robbie Manion | October 2018
+
+MLR Retrieval
+• We want to perform a packet-by-packet retrieval through the use of a Multiple Linear
+Regression (MLR) which attempts to simultaneously solve for slant-path concentrations of
+all the absorbing gas species.
+• The MLR is constructed such that the optical depth is explained by the sum of the optical
+depth contribution from each absorbing gas species. This can be presented as the
+equation
+Slant-Path
+Optical Depth
+
+𝜏𝜏 𝜆𝜆 = � 𝑁𝑁𝑖𝑖 𝜎𝜎𝑖𝑖 𝜆𝜆
+𝑖𝑖
+
+Species Cross
+Section
+
+Species Column
+Density
+Dark Current
+Correction
+
+Wavelength
+Calibration
+
+The SAGE III/ISS Lunar Algorithm
+
+Altitude
+Registration
+
+Inversion
+9
+
+Altitude
+Adjustment
+
+Filtering and
+Binning
+
+Peeling
+
+Robbie Manion | October 2018
+
+Slant Path Optical Depth
+
+𝜏𝜏( 𝜆𝜆) = � 𝑁𝑁𝑖𝑖 𝜎𝜎𝑖𝑖 ( 𝜆𝜆)
+
+• For each counts spectrum sample, or “packet”, we
+calculate the atmospheric transmission, 𝑡𝑡, as
+
+𝑖𝑖
+
+𝑡𝑡 =
+
+packet counts
+average exoatmospheric counts
+
+and the optical depth, 𝜏𝜏, as
+𝜏𝜏 = −ln 𝑡𝑡
+
+• Because the lunar surface is characterized by
+gradients in albedo, the reference average intensity
+is insufficient for obtaining a true optical depth
+value for every packet. Therefore, the algorithm
+must correct for albedo as necessary.
+
+Dark Current
+Correction
+
+Wavelength
+Calibration
+
+The SAGE III/ISS Lunar Algorithm
+
+Altitude
+Registration
+
+Inversion
+10
+
+Altitude
+Adjustment
+
+Filtering and
+Binning
+
+Peeling
+
+Robbie Manion | October 2018
+
+𝜏𝜏( 𝜆𝜆) = � 𝑁𝑁𝑖𝑖 𝜎𝜎𝑖𝑖 ( 𝜆𝜆)
+
+Cross Sections
+
+𝑖𝑖
+
+• Cross section spectra for O3, NO2,
+NO3, OClO, and O4.
+• Four filters (plus a constant) are
+added in with the cross sections
+to account for the optical depth
+contribution from Rayleigh
+scattering, aerosols, and
+differences in lunar albedo.
+Dark Current
+Correction
+
+Wavelength
+Calibration
+
+The SAGE III/ISS Lunar Algorithm
+
+Altitude
+Registration
+
+Inversion
+11
+
+Altitude
+Adjustment
+
+Filtering and
+Binning
+
+Peeling
+
+Robbie Manion | October 2018
+
+Inversion
+𝜏𝜏( 𝜆𝜆) = � 𝑁𝑁𝑖𝑖 𝜎𝜎𝑖𝑖 ( 𝜆𝜆)
+
++symbols+
+
+Dark Current
+Correction
+
+Wavelength
+Calibration
+
+The SAGE III/ISS Lunar Algorithm
+
+Altitude
+Registration
+
+Inversion
+12
+
+Altitude
+Adjustment
+
+𝑖𝑖
+
+Filtering and
+Binning
+
+-lines-
+
+Peeling
+
+Robbie Manion | October 2018
+
+Altitude Adjustment
+• The retrieved Ozone in each scan is
+compared to overlapping scans to line
+up the scan altitudes. A-band O2 optical
+depth is also used in this comparison.
+• Additional adjustment is made on a
+packet-by-packet basis by comparing Aband O2 signal to a forward model.
+
+Wavelength
+Calibration
+
+Altitude
+Registration
+
+The SAGE III/ISS Lunar Algorithm
+
+Inversion
+
+Altitude
+Adjustment
+13
+
+Filtering and
+Binning
+
+Peeling
+
+Products
+
+Robbie Manion | October 2018
+
+Filtering, Binning, and Peeling
+
+Wavelength
+Calibration
+
+Altitude
+Registration
+
+The SAGE III/ISS Lunar Algorithm
+
+Inversion
+
+Altitude
+Adjustment
+14
+
+Filtering and
+Binning
+
+Peeling
+
+Products
+
+Robbie Manion | October 2018
+
+Filtering, Binning, and Peeling
+
+Wavelength
+Calibration
+
+Altitude
+Registration
+
+The SAGE III/ISS Lunar Algorithm
+
+Inversion
+
+Altitude
+Adjustment
+15
+
+Filtering and
+Binning
+
+Peeling
+
+Products
+
+Robbie Manion | October 2018
+
+Filtering, Binning, and Peeling
+
+Wavelength
+Calibration
+
+Altitude
+Registration
+
+The SAGE III/ISS Lunar Algorithm
+
+Inversion
+
+Altitude
+Adjustment
+16
+
+Filtering and
+Binning
+
+Peeling
+
+Products
+
+Robbie Manion | October 2018
+
+Filtering, Binning, and Peeling
+
+Wavelength
+Calibration
+
+Altitude
+Registration
+
+The SAGE III/ISS Lunar Algorithm
+
+Inversion
+
+Altitude
+Adjustment
+17
+
+Filtering and
+Binning
+
+Peeling
+
+Products
+
+Robbie Manion | October 2018
+
+Products
+• In V5.1 we have released Ozone as a
+provisional product and NO3 as a
+research product.
+• NO2 is being worked on.
+• OClO retrieval is challenged by the lower
+counts on the ISS instrument compared
+to Meteor.
+
+Wavelength
+Calibration
+
+Altitude
+Registration
+
+The SAGE III/ISS Lunar Algorithm
+
+Inversion
+
+Altitude
+Adjustment
+18
+
+Filtering and
+Binning
+
+Peeling
+
+Products
+
+Robbie Manion | October 2018
+

@@ -1,0 +1,1282 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Validation of Cryogenic Propellant Tank Self-Pressurization
+
+Hong. Q. Yang ∗
+
+CFD Research Corporation (Jacobs Space Exploration Group), NASA Marshall Space Flight Center, Huntsville, AL
+
+Chintan S. Patel †
+
+Qualis Corp (Jacobs Space Exploration Group), NASA Marshall Space Flight Center, Huntsville, AL
+
+Brandon R. Williams ‡
+
+NASA Marshall Space Flight Center, Huntsville, AL
+
+NASA’s near-future long-term space missions necessitate advancements in cryogenic fluid
+management (CFM), which includes safe and reliable long-term propellant storage. Con-
+sequently, NASA STMD (Space Technology Mission Directorate) has established the CFM
+Portfolio Project to improve CFM technologies for upcoming missions. As a part of CFM
+Modeling Portfolio, NASA Marshall Space Flight Center’s (MSFC) Fluid Dynamics branch
+within the Propulsion Systems Department is tasked with assessing and improving computational
+tools used to support flight projects such as Human Lander System and Commercial Lunar
+Payload Services. One of the challenging modeling problems is that of self-pressurization of
+propellant tank due to heat leakage over long time periods. Reduced order and nodal tools find it
+extremely difficult to accurately predict self-pressurization under transient conditions or where
+complex flow patterns or thermal gradients exist, and application of 3-D CFD (computational
+fluid dynamics) simulations is necessary to characterize these problems. Until recently, CFD
+simulations for these long-term processes (order of hours or days) have been too impractical to
+conduct due to prohibitive wall time and computational resource requirements. The requisite
+CFD tool need to be efficient, computationally scalable, modular with ability to incorporate
+various physics models, and robust enough to not accumulate conservation errors over several
+hours of simulated time. NASA MSFC’s Loci-Stream CFD tool along with the VOF module
+is a great candidate to fit this mold. In this paper, we validate Loci-Stream for predicting
+self-pressurization of a flight scale propellant tank so it can serve as a reliable design and
+analysis tool for NASA’s CFM application needs. Liquid hydrogen tank pressurization tests
+carried out at the K-site testing facility provide a reliable data set for this purpose. These tests
+were simulated using Loci-Stream solver with VOF module as well as a hybrid approach which
+uses a lumped model for the ullage gas domain and CFD simulation of the liquid propellant.
+Both are shown to have very good predictive capabilities over multiple K-site experiments.
+
+I. Nomenclature
+
+𝐴𝑖𝑛 = Gas-liquid interface area
+𝛼 = Thermal expansion coefficient
+𝐶𝑚 = mass transfer coefficient (accommodation factor)
+𝑐𝑜𝑛𝑑 = Subscript denotes condensation
+d𝑡 = time step
+𝑒 = Internal energy
+𝑒𝑣𝑎𝑝 = Subscript denotes evaporation
+𝐹 = Volume of fluid (liquid volume fraction in a control volume cell)
+G = gravitational force term in the momentum equation
+g = gravitational acceleration
+
+∗Chief Scientist, Fluid Dynamics Branch (ER42), NASA Marshall Space Flight Center (MSFC); AIAA Associate Fellow
+†Computational Fluid Dynamicist, Fluid Dynamics Branch (ER42), NASA MSFC
+‡Lead Aerospace Engineer - Fluid Mechanics, Fluid Dynamics Branch (ER42), NASA MSFC
+
+1
+
+
+
+𝑔 = Subscript denotes gas
+ℎ = Enthalpy
+𝑖𝑛 = Subscript denotes gas-liquid interface
+𝑖 , 𝑗 ,𝑘 = Subscripts denote spatial co-ordinates in Einstein notation
+𝑘 = Thermal conductivity
+^ = Iso-thermal compressibility
+𝑙 = Subscript denotes liquid
+¤𝑚 = Phase change mass transfer (evaporation/condensation) rate
+𝑝 = fluid pressure
+Φ = Heat dissipation through shear stress in total energy equation
+𝑅𝑔 = Specific gas constant
+𝜌 = density of fluid
+𝑠𝑎𝑡 = Subscript denotes saturation condition
+𝑇 = Static temperature
+𝑡 = Time
+u = fluid velocity
+𝑉 = Volume
+
+Note: All vectors/tensors, except when using Einstein notation, are represented with bold font.
+
+II. Introduction
+
+Cryogenic propellants promise higher specific impulses than storable hypergolic fuels, but storage for long-duration
+missions must be demonstrated. Long-term in-space storage of cryogenic propellants including upper stages and
+
+potentially propellant depots is very important to meet the technological challenges of NASA’s future exploration
+missions. One of the challenges in cryogenic fluid management (CFM) is that cryogenic propellant tanks in space are
+exposed to incident solar radiation, which heats the liquid in the tank over time. The increase in temperature results in
+an increase in pressure as the liquid cryogen vaporizes, i.e., self-pressurization.
+
+During the time interval when the tank is ’locked up’, heat transfer through the tank walls results in an energy
+increase in both the liquid and the ullage space vapor. Experience has shown that this energy increase is not uniformly
+distributed in either the liquid or vapor, but rather higher temperatures occur in the topmost layers of both the liquid
+and vapor regions due to natural convection in both 1-g and low-g conditions. This phenomenon is described as
+thermal stratification and has been reported by numerous observers [1–4] in early space programs. Associated with this
+temperature stratification is a rise in tank pressure due to a combination of heat transferred to the ullage vapor plus
+possible vaporization of a portion of the liquid. A means for predicting the amount of pressure rise as it varies with time
+and tank wall heat flux is needed in order to properly plan for propellant fluid management, to determine tank structural
+stresses, to determine tank venting requirements, and possibly to foresee the need for additional pressurant gas. The
+extent of liquid temperature rise, separate from its effect on the tank pressure, is also needed in order to determine the
+impact on pump performance. In addition, excessive temperatures can result in cavitation due to a reduction in Net
+Positive Suction Head (NPSH), thus either damaging the pump or adversely affecting the pump performance.
+
+Numerous recent studies have focused on predicting the pressurization process in cryogenic propellant tanks [5–15]
+and have produced analytical, experimental, and numerical results. These studies play a critical role in the design of
+cryogenic storage systems since tank pressure must be controlled for long-duration space missions.
+
+Due to the low boiling point of hydrogen and the low thermal conductivity of both the gas and liquid phase, it is
+possible for solar heating to result in the coexistence of subcooled liquid and superheated vapor within the same tank.
+When such a situation occurs, simple thermodynamic analysis cannot accurately predict the rate of pressure rise within
+the system. High-fidelity computational fluid dynamics (CFD) simulations will play an essential role in predicting the
+actual thermodynamics of pressurization. The objective of this study is to develop and validate a finite-volume-based
+CFD model to predict the thermal stratification and self-pressurization in a liquid hydrogen tank. The final goal is the
+development of technology required for the design of CFM systems to accomplish tasks such as liquid acquisition,
+thermal control of the cryogenic tank, and fluid transfer.
+
+Unlike a typical CFD code, the computational tool for the CFM application requires multi-phase and multi-physics
+capability as tank pressurization involves both liquid and gas phases and their mutual interaction. At the same time,
+numerical modeling tools need to have sufficient fidelity to answer critical design and operational issues and must
+
+2
+
+
+
+be verified by comparing them with test data. Several well-established methods exist for dealing with interfaces in
+fluid flow. These methods include the front tracking [16], the level set method [17, 18], and the volume of fluid (VOF)
+methods [19, 20]. For CFM applications, ensuring mass conservation and energy conservation for both phases is critical.
+In these situations, VOF methods are found to be superior.
+
+As part of NASA’s CFM Modeling Portfolio goal of model validation, the Loci-Stream computational fluid dynamics
+(CFD) tool used by NASA MSFC is being validated for predictive accuracy in the relevant physics of cryogenic
+propellants during storage and mission operations. The principal aim of the work documented in this report is to
+validate the Loci-Stream CFD code and implemented physics models used for CFM and propellant tank dynamics
+applications. The physics under consideration is the self-pressurization of a tank containing cryogenic liquid and a single
+species ullage gas (i.e., does not contain non-condensable vapor). In the following sections, the experimental set-up, the
+Loci-Stream-VOF CFD code, a lumped gas CFD model and the essential features needed to deal with the heat and mass
+transfer are be described, and finally a comparison of the simulation results and experimental data are presented.
+
+III. Test Description
+
+A. K-site Testing Facilities
+The experiments used for this validation study were performed in the K-site facility at NASA Glenn Research
+
+Center [21, 22]. The tank, in this case, was a flight-weight aluminum ellipsoidal enclosure with an internal volume
+of 4.95 m3. It was insulated with two multi-layer insulation (MLI) blankets. Figure 1 [21] shows the tank and its
+schematic. The facility consisted of a vacuum chamber enclosing a cylindrical cryo shroud whose temperatures can be
+maintained with electrical resistance heaters. Within the shroud, a liquid hydrogen (LH2) tank was suspended by twelve
+fiberglass composite struts. The tank was constructed from 2219 aluminum, with a wall thickness varying between
+1.9558 × 10−3 m and 2.2098 × 10−3 m. The tank was fabricated by joining two halves of a 1.2/1.0 oblate spheroid to a
+0.0381 m cylindrical section.
+
+(a) Tank without MLI insulation (b) Tank schematic
+
+Fig. 1 Liquid hydrogen tank tested at K-site
+
+The experiments were conducted for the ellipsoidal LH2 tank at fill levels of 29%, 49%, and 83%, and wall heating
+levels of 2.0 W/m2 and 3.5 W/m2. The duration of the experiments was between 12 and 18 h. The tank had a volume
+of 4.89 m3 and was representative of a system that could be used in future vehicles. Pressure measurement devices and
+thermocouples were positioned at several vertical locations inside the tank and on the wall.
+
+Before the self-pressurization experiments began, boil-off tests were performed to estimate the net heat leak into the
+LH2 tank. During these tests, the tank was 95% full of LH2, and the operating pressure was approximately 117 kPa.
+Heat leaking into the tank caused the liquid to evaporate, and the resulting boil-off was directed through volume flow
+meters. After the boil-off tests were performed, the tank was drained to the desired fill level, the operating pressure was
+reduced to 103 kPa, and venting occurred for another 4 h before tank lock-up. Finally, when lock-up occurred, the tank
+was allowed to self-pressurize for approximately 20 h.
+
+3
+
+
+
+B. Experimental Results
+Figure 2 [22] shows the typical pressurization (2a), temperature histories at selected vertical locations (2b), and the
+
+vertical temperature profile (2c).
+
+(a) Ullage pressure vs time history for
+3.5 W/m2 heat flux
+
+(b) Temperature at select vertical loca-
+tions vs time
+
+(c) Temperature profile across tank
+height at select times
+
+Fig. 2 K-site experiment results for 29%, 49%, and 83% fill level
+
+We observe that:
+
+1) An initial transient took place over nearly 5 h before the linear increase in pressure (Figure 2a)
+2) The role of the initial transient is to build up a stratified temperature field in the ullage (Figure 2b)
+3) After the initial transient, pressurization is linear (Figure 2a)
+4) After the initial transient, the contribution of mass transfer to pressurization is more than the contribution from
+
+sensible heating (Figure 2c)
+5) Stratification of the temperature field in the ullage indicates that heat convection dominated heat conduction
+
+(Figure 2c)
+6) The temperature in the liquid is almost uniform in the vertical direction with visible stratification near the
+
+gas-liquid interface (Figure 2c)
+
+IV. Computational Model
+The VOF method is a powerful and robust technique for simulating free-surface and gas-liquid interfacial flows
+
+such as those encountered in CFM. The geometric algorithms tracking the interface are more accurate than other
+methods at simulating free-surface flows and allow simulations with excellent conservation properties when adequately
+implemented. The Fluid Dynamics Branch (ER42) at Marshall Space Flight Center (MSFC) has been active in applying
+CFD methods to CFM analyses and tank dynamics applications, such as propellant slosh, to extract engineering metrics,
+like slosh damping, that can be used for system-level design and analysis.
+
+In response to the limitations of commercial VOF tools and other multiphase methods at the time, NASA/MSFC
+established a path [23] to fulfill its simulation needs by developing a VOF module to augment the general-purpose
+CFD program Loci-Stream. Loci [24] is a novel software framework that has been applied to the simulations of
+non-equilibrium flows. The Loci system uses a rule-based approach to automatically assemble the numerical simulation
+components into a working solver. This technique enhances the flexibility of simulation tools, reducing the complexity
+of CFD software induced by various boundary conditions, complex geometries, and different physical models. Loci
+plays a central role in building flexible goal-adaptive algorithms that can quickly match numerical techniques with
+various physical modeling requirements. Loci-Stream [25][26] is a pressure-based, all-speed CFD code for generalized
+meshes in the Loci framework that has been applied and validated over a wide range of problems. Loci-Stream uses
+SIMPLE, SIMPLEC, and PISO algorithms for pressure-momentum coupling and provides various turbulence models
+which can be executed in Reynolds-Averaged Navier-Stokes (RANS) or Large Eddy Simulation (LES) mode. The
+coupled simulations between the flow solver and VOF transport are carried out using the Loci-Stream flow solver and an
+external VOF module [27]. The final product, Loci-Stream-VOF, has been applied to practical rocket propulsion-related
+
+4
+
+
+
+VOF applications and has shown significant parallel scalability, up to thousands of CPU cores [23–27].
+While VOF is a high-fidelity model for capturing the evolution of a gas-liquid interface, the accuracy and generality
+
+come with a higher computational cost compared with other methods. For the long duration self-pressurization scenarios
+described above, that computational cost may become a significant disadvantage. Because the interface is essentially
+static, other methods where the gas and liquid domains are simulated in a segregated but coupled fashion are also
+possible. As part of this analysis, a model which treats the ullage as a single lumped gas node coupled to a CFD
+simulation of the liquid propellant is described and compared to the full fidelity VOF model.
+
+A. Governing Equations
+The governing equations for mass, momentum, and energy are given in the Equation 1, 2 and 3. These equations
+
+are for single-phase fluids and implemented in the Loci-Stream code [25, 26]. We will discuss the incorporation of
+two-phase fluids in the VOF Module section below, where these equations are accompanied by an additional transport
+equation for the volume of fluid.
+
+𝜕𝜌
+
+𝜕𝑡
++
+𝜕𝜌𝑢 𝑗
+
+𝜕𝑥 𝑗
+
+= 0 (1)
+
+𝜕𝜌𝑢𝑖
+
+𝜕𝑡
++
+𝜕𝜌𝑢 𝑗𝑢𝑖
+
+𝜕𝑥 𝑗
+
+=
+𝜕𝑝
+
+𝜕𝑥𝑖
++
+𝜕𝜏𝑖 𝑗
+
+𝜕𝑥 𝑗
+
++ G (2)
+
+𝜌𝑐𝑝
+𝐷𝑇
+
+𝐷𝑡
+= 𝛼𝑙𝑇
+
+𝐷𝑝
+
+𝐷𝑡
++ 𝜕
+
+𝜕𝑥𝑖
+(𝑘 𝜕𝑇
+
+𝜕𝑥𝑖
+) +Φ (3)
+
+Since the self-pressurization physics is buoyancy driven in the liquid phase in the presence of gravity, a Boussinesq
+approximation is invoked in the momentum equation for the buoyancy source term. The liquid density is assumed
+to be constant except for calculating the buoyancy force, where the liquid density is considered a linear function of
+temperature in the gravity term. Equation 4 defines the contribution to the body force in momentum equation, where
+𝜌𝑟𝑒 𝑓 is liquid density at the reference temperature 𝑇𝑟𝑒 𝑓 .
+
+G = −𝛼𝑙 𝜌𝑟𝑒 𝑓 (𝑇 − 𝑇𝑟𝑒 𝑓 ) g (4)
+
+B. Energy Conservation
+The energy equation conserves total energy of the system as described in Equation 5. In a previous study of constant
+
+density problems, the internal energy form, was used [5, 6]. Barsi and Kassemi [5, 6] presented a comprehensive review
+of the various constant density models, among which the CFD models were able to provide detailed simulations of
+tank pressure evolution for the current K-site experiments, together with two dimensional (2-D) and or 3-D depictions
+of the temperature and velocity fields. Using the internal energy form, Barsi and Kassemi [5] showed favorable
+agreements with the experimentally measured pressure histories. In this study, however, the conservation is imposed by
+an enthalpy-based formulation (Equation 3).
+
+𝜌
+𝐷𝑒
+
+𝐷𝑡
+= ∇(𝑘∇𝑇) − 𝑝 ∇ · u +Φ (5)
+
+𝑑𝑒 =
+
+( 𝜕𝑒
+𝜕𝑇
+
+)
+𝜌
+𝑑𝑇 +
+
+( 𝜕𝑒
+𝜕𝜌
+
+)
+𝑇
+𝑑𝜌 = 𝑐𝑣𝑑𝑇 + 1
+
+𝜌2
+
+(
+𝑝 − 𝛼𝑇
+
+^
+
+)
+𝑑𝜌 (6)
+
+The change in internal energy is defined by the thermodynamic relation in Equation 6. For liquid hydrogen, the
+density variation term in Equation 6 has significant contribution, so this term needs to be included in the Equation 5 for
+accurate modeling. However, the geometrical reconstruction and backward projection of the VOF formulation are purely
+based on the assumption of conservation of liquid volume. In order to conserve total liquid mass, one must assume
+the liquid density to be constant. Thus, a physics-accurate internal energy formulation cannot be easily implemented
+alongside the VOF formulation.
+
+The aforementioned problem is solved by representing the total energy conservation in a different thermodynamic
+state variable, enthalpy. Internal energy and enthalpy are related in Equation 7. Unlike the internal energy variation
+(Equation 6), the enthalpy variation (Equation 8) does not depend on density, and therefore this formulation is consistent
+with the VOF method. Substitution of Equation 7 in Equation 5 leads to the enthalpy-based total energy conservation
+
+5
+
+
+
+(Equation 9). Finally, Equation 8 is used to obtain the conservation equation for the primitive solved variable, i.e.,
+temperature (Equation 3). Note that regardless of the representative form, the property being conserved is total energy,
+which for our purpose is summation of internal energy and kinetic energy.
+
+𝑒 = ℎ − 𝑝
+
+𝜌
+(7)
+
+𝑑ℎ =
+
+( 𝜕ℎ
+𝜕𝑇
+
+)
+𝑝
+𝑑𝑇 +
+
+( 𝜕ℎ
+𝜕𝑝
+
+)
+𝑇
+𝑑𝑝 = 𝑐𝑝𝑑𝑇 + 1
+
+𝜌
+(1 − 𝛼𝑇)𝑑𝑝 (8)
+
+𝜌
+𝐷ℎ
+
+𝐷𝑡
+=
+
+𝐷𝑝
+
+𝐷𝑡
++ ∇(𝑘∇𝑇) +Φ (9)
+
+C. Phase Change Mass Transfer
+The mass transfer rate due to phase change between the gas and liquid phases ( ¤𝑚) is based on the model described
+
+by Hertz-Knudsen-Schrage (HKS) (Equation 10) [28], where all quantities are represented in SI units. HKS equation is
+based on statistical mechanics and thermodynamics states of the phases, and heat transfer is not considered. The HKS
+equation works well near-equilibrium condition. Note: The superscripts denote the variables that the root variable is the
+function of, i.e., 𝑝𝑇𝑙𝑠𝑎𝑡 means the saturation pressure is function of liquid temperature. Temperature and pressures are
+continuous at the interface, i.e., 𝑇𝑠𝑎𝑡 = 𝑇𝑙 = 𝑇𝑔.
+
+Mathematically at saturation condition and at equilibrium, 𝐶𝑒𝑣𝑎𝑝 = 𝐶𝑐𝑜𝑛𝑑 must be true. For self-pressurization
+problems, since the heat leakages are low compared to the internal energy of the system, gas is always near saturation
+condition, and since mass transfers would be very low, near-equilibrium condition is also always satisfied. With these
+assumptions, we write simplified HKS equation (Equation 11), which is from here referred to as HKS equation for
+brevity. Note that the accommodation factor (0 < 𝐶𝑚 ≤ 1) must be supplied, and its choice is discussed in Effect of
+Accommodation Factor section below.
+
+¤𝑚 =
+
+√︄
+1
+
+2𝜋𝑅𝑔
+
+(
+𝐶𝑒𝑣𝑎𝑝
+
+𝑝
+𝑇𝑙
+𝑠𝑎𝑡√
+𝑇𝑙
+
+− 𝐶𝑐𝑜𝑛𝑑
+
+𝑝𝑔√︁
+𝑇𝑔
+
+)
+𝐴𝑖𝑛 (10)
+
+¤𝑚 = 𝐶𝑚
+
+√︄
+1
+
+2𝜋𝑅𝑔𝑇𝑖𝑛
+(𝑝𝑠𝑎𝑡 − 𝑝𝑔) 𝐴𝑖𝑛 (11)
+
+Saturation pressure is obtained using Antoine equation (Equation 12), where the constants for a given fluid are
+sourced from NIST thermodynamic data set.
+
+𝑙𝑜𝑔10 𝑝𝑠𝑎𝑡 = 𝑎 − 𝑏
+
+𝑐 + 𝑇𝑠𝑎𝑡
+(12)
+
+D. VOF Transport
+To consider the liquid phase, an additional equation for liquid volume fraction, F, to track the location of liquid
+
+phases is solved in CFDRC’s VOF module. The volume fraction represents the local fraction of the cell volume occupied
+by the liquid of interest. All cells where the volume fraction is between 0.0 and 1.0 are interface cells in which both
+fluids and the interface between them exist. The spatial and temporal evaluations of the liquid volume fraction are given
+by the following Equation:
+
+𝜕𝐹
+
+𝜕𝑡
++ 𝑢𝑖
+
+𝜕𝐹
+
+𝜕𝑥𝑖
+= 0 (13)
+
+The above Equation is nothing but a scalar transport equation. However, the advection of the above VOF field using
+conventional finite-volume discretization techniques is highly diffusive and leads to "smoothing" and destruction of the
+sharp interface between gas and liquid. To keep the sharp interface for a very long simulated periods, the initialization
+and transport are carried out using purely geometric constructions.
+
+The simulation of two-phase flows with VOF methods consists of three main aspects:
+
+1) VOF initialization, interface construction, and advection of liquid phase
+
+6
+
+
+
+2) Evaluation of body forces due to gravity and surface tension
+3) Coupling of body forces and density changes to the solved pressure, momentum, and energy equations
+
+The essential formulations of each of these aspects are provided in the following sections.
+
+1. VOF Initialization
+The VOF in each cell that contains the interface is given by the ratio of the liquid volume inside the cell to the
+
+cell volume (Equation 14). An example of a VOF initialization on a simple grid is shown in Figure 3. Interface cell
+properties are density averaged.
+
+𝐹𝑐𝑒𝑙𝑙 =
+𝑉𝑙
+
+𝑉𝑐𝑒𝑙𝑙
+
+(14)
+
+Fig. 3 True interface location (left) and corresponding volume fraction (right) in cells
+
+2. Interface Reconstruction
+In the VOF approach, the fluid interface needs to be "constructed" in each cell based on the knowledge of the
+
+VOF distribution in the neighboring cells [29]. Estimation of the interface location based on a known distribution of
+VOF on the grid has been tackled in multiple ways over the last few decades. Starting with a simple line interface
+calculation (SLIC) [30] method, the interface can be one or, in some cases, two lines aligned with the cell faces. In
+the SLIC approach the interface in each cell is linear i.e., a line (𝑎1𝑥 + 𝑎2𝑦 + 𝐶 = 0) in pure 2-D cells and a plane in
+(𝑎1𝑥 + 𝑎2𝑦 + 𝑎3𝑧 + 𝐶 = 0) 3-D cells.
+
+The gas-liquid interface in each cell then becomes a polygon (line-segment in 2-D) obtained by the intersection
+of the plane defining the interface and the cell faces. A schematic for such an interface is shown (in 2-D for a better
+understanding) in Figure 4. The SLIC method is, at best, a first-order reconstruction as the interface always returns a
+line. The piece-wise linear interface calculation (PLIC) method is obtained mainly from the approach of Parker and
+Youngs [31].
+
+Fig. 4 2-D quad cell with interface between liquid phase (blue) and gas phase
+
+7
+
+
+
+Following Youngs’ work, the interface in each cell is represented by a plane. The plane can be defined by Equation
+15, where �̂� is the unit normal to the plane and is also the normal to the VOF function F, x is any point on the plane, and
+C is a constant. Note the form of Equation 15 can be obtained from any generic plane equation (𝑎1𝑥 + 𝑎2𝑦 + 𝑎3𝑧 +𝐶 = 0)
+by normalizing 𝑎𝑖 to corresponding components of the unit normal vector.
+
+n̂ · x + 𝐶 = 0 (15)
+
+For constructing an interface in the cell, two main quantities are required:
+
+1) An estimate of the interface normal �̂�
+2) The value of the VOF (𝐹𝑐𝑒𝑙𝑙)
+
+𝐹𝑐𝑒𝑙𝑙 is known at initialization. It is also known at every advection time step. The interface normal is generally
+obtained by using the gradient of the VOF function 𝐹𝑐𝑒𝑙𝑙 as in Equation 16.
+
+n̂ =
+∇F
+|𝐹 | (16)
+
+This normal points towards the liquid phase as required for the interface reconstruction algorithm discussed later.
+The accuracy of the unit normal evaluated by Equation 16 is dictated by the accuracy of the gradient evaluation technique.
+This unit normal also determines the orientation and the area of the interface. Significant physical quantities - the
+surface-tension source terms and phase change mass transfer - depend on the accuracy of evaluation of the surface
+normal in each cell that contains the interface.
+
+Once the unit normal to the interface is known in a cell, the constant C in Equation 15 is evaluated using very
+specific techniques [29]. The problem consists of determining the constant C of the plane P (Equation 15) with a
+given normal n̂, which truncates the cell polyhedron Ω producing a polyhedron Ω𝑇 whose volume matches the volume
+of liquid in the cell. The actual method involves bracketing the solution for 𝐶 using the vertices of the original cell
+polyhedron. This is followed by a process similar to the bisection algorithm until the cut polyhedron volume matches
+the liquid volume. The implementation provided by [29] is used with the VOF module to create the liquid polyhedron in
+all the cells containing the gas-liquid interfaces.
+
+3. Interface Advection
+The amount of liquid volume fraction advected through a cell face is computed by the backward projection of the
+
+upwind cell face. At every cell face, we first calculate uface · n̂face. Each face of the cell is then projected backward,
+as shown in Figure 5, into the upwind direction, i.e., into the leftward cell to the face if uface · n̂face > 0 and into the
+rightward cell to the face if uface · n̂face < 0. The left and right cells with respect to a given face are indicated by
+the direction of the face normal vector, i.e., the face normal vector points from the left cell into the right cell. The
+face is then projected backward by a distance (uface · n̂face)Δ𝑡, where the time step Δ𝑡 is set to satisfy a maximum
+Courant-Fredericks-Lewy (CFL) criterion.
+
+(a) 3D Rendering (b) 2-D Rendering
+
+Fig. 5 Illustrations of VOF Advection using Back-Projection
+
+8
+
+
+
+The convex liquid polyhedron in the upwind (or donor) cells is truncated by the plane containing the back-projected
+face. The volume of the cut liquid polyhedron is added to the face flux from the upwind to the downwind cell. The net
+change in VOF in each cell then becomes the net summation of liquid volume fluxes in and out of the cell. As a result,
+the Equation solved during VOF advection (Equation 17) is the integrated version of Equation 13 on a control volume,
+V and control surface, S.
+
+𝜕
+
+𝜕𝑡
+
+∭
+𝑉
+
+𝜌𝐹 𝑑𝑉 +
+∬
+
+𝑆
+
+𝜌u · n̂𝐹 𝑑𝑆 = 0 (17)
+
+The implementation requires the development and use of algorithms to intersect convex liquid polyhedrons with
+planes defined by the back-projected cell face [29].
+
+4. Surface Tension
+The forces due to liquid surface tension are estimated using work similar to that done by Yang et al. [32]. Yang et al
+
+discovered several deficiencies in the continuum surface force (CSF) model of Kothe and Rider [20]. These include
+convergence difficulties in capillary flows, problems due to a non-smooth unit normal vector, and problems recovering
+correct physics when the grid size is reduced. To remedy this, a conservative formulation for the calculation of surface
+tension force was implemented. The formulation is based on equilibrium of a curved surface under surface tension as
+shown in Figure 6.
+
+Fig. 6 Equilibrium of a Free Surface under Surface Tension
+
+The net normal force acting on the surface is equal to the summation of all the tangential forces due to surface
+tension. Thus, the pressure rise across an interface can be deduced as in Equation 18.∬
+
+𝑠𝑢𝑟 𝑓 𝑎𝑐𝑒
+
+Δ𝑝 dS =
+
+∫
+𝑏𝑜𝑢𝑛𝑑𝑎𝑟𝑦
+
+𝜎n̂𝑥 𝑑𝑥 (18)
+
+Here the integral along the common edge of adjacent interfaces cancels out due to the opposite traversal of the
+line integrals. The liquid-gas interface for surface tension force calculation is assumed to be at the 𝐹 = 0.5 location
+deduced from the nodal values of F. The unit normal for Equation 6 is obtained based on Equation 16. This approach
+has been implemented within the VOF module for evaluating the surface tension forces. This formulation was seen to
+work very well with validation problems, including droplets under surface tension. The surface tension force normal to
+the interface is applied as a source term in the momentum equation and acts only in the interfacial cells.
+
+E. Coupling between VOF Module and Flow Solver
+For two-phase flow with gas-liquid interfaces, the density is not constant in space, and therefore the full continuity
+
+equation must be solved (Equation 19).
+
+𝜕𝜌
+
+𝜕𝑡
++ ∇ · (𝜌𝑢) = 𝜕𝜌
+
+𝜕𝑡
++
+∬
+
+𝑠𝑢𝑟 𝑓 𝑎𝑐𝑒
+
+(𝜌 𝑓 𝑢 𝑓 ) · 𝑛 𝑓 (19)
+
+In order to maintain consistency between the VOF module and Loci-Stream flow solver, appropriate face density
+values are required. The face densities cannot be modeled as the current Stream implementation uses inverse distance
+weighted values from the cell centers. Instead, a new implementation of the face densities was carried out as in Equation
+20.
+
+𝜌 𝑓 =
+𝜌𝑔 ¤𝑉𝑔 + 𝜌𝑙 ¤𝑉𝑙
+
+¤𝑉𝑔 + ¤𝑉𝑙
+(20)
+
+9
+
+
+
+where, ¤𝑉𝑔 and ¤𝑉𝑙 denote the gas-volume and liquid-volume fluxes across the face at a given time step. This approach
+is expected to provide a consistent formulation between the explicit VOF advection and the implicit Stream time-step
+advances.
+
+Stream utilizes the cell densities based on advected VOF and the new face densities. This provides it with the
+information of how much mass is to be "fluxed" into each cell to solve the pressure correction and then the momentum
+equations.
+
+Based on the previous work by Lowry and Yang [33], the formulation for the pressure correction equation was
+modified so that it uses 𝑙𝑛(𝜌) for the source term of the 𝑝′ equation as recommended by Pericleous et al. [34] using a
+total derivative form of 𝑙𝑛(𝜌) to represent mass conversation (Equation 21).
+
+𝐷 (𝑙𝑛 𝜌)
+𝐷𝑡
+
++ ∇𝑢 = 0 (21)
+
+F. Lumped Gas CFD Model
+Since the wall heat fluxes are low in the self-pressurization problems, the ullage is always near equilibrium condition,
+
+i.e., the ullage pressure and gas-liquid interface saturation pressure are similar and do not deviate far from each other.
+With that assumption, the self-pressurization problem can be simplified by recognizing that (i) the gas-liquid interface is
+quiescent and does not move throughout the experiment because the phase change rate is very small; (ii) the gas phase
+holds a very small (about two orders of magnitude smaller) fraction of internal energy than the liquid propellant; and (iii)
+liquid side interfacial thermal stratification dominates the dynamics of the problem. With these observations, we can
+disjoint the liquid and gas phase CFD and do away with employing the computationally expensive VOF module. Instead,
+we model the gas phase as a lumped node and communicate fluid-thermal information from the ullage as a uniform
+boundary condition to the time-accurate liquid CFD (Figure 7). A similar approach has been promulgated by Barsi and
+Kassemi [35], with somewhat different implementation treatment. This type of approach provides two advantages. First,
+the simulation is much more computationally efficient because it avoids the geometric reconstruction and advection
+steps of the VOF method. Second, the allowable time step size is an order of magnitude larger than with VOF, which has
+stringent maximum Courant number restrictions for stability. This effect is exacerbated by mesh refinement and very
+small spurious velocities at the interface that can force the time step to drop further. The lumped gas model alleviates
+this requirement and higher mesh resolutions can be easily used to capture the thermal gradient layer near the interface.
+
+Fig. 7 Schematic of lumped gas liquid CFD model
+
+The interfacial heat balance (Equation 22) thermally couples the liquid and gas in this model. The gas thermal
+diffusion term is related to Equation 22 by internal energy balance in the ullage via Equation 23. Combining these two
+
+10
+
+
+
+equations yields Equation 24, which describes the liquid interface boundary condition, where the time rate of change of
+ullage temperature and phase change mass transfer is obtained by the lumped ullage gas model.∬
+
+𝑖𝑛
+
+𝑘𝑔∇𝑇𝑔 𝑑𝐴𝑖𝑛 =
+
+∬
+𝑙
+
+𝑘𝑙∇𝑇𝑙 𝑑𝐴𝑖𝑛 + ¤𝑚𝐿 (22)∭
+𝑉𝑔
+
+𝜌𝑔𝑐𝑣𝑔
+𝜕𝑇𝑔
+
+𝜕𝑡
+𝑑𝑉𝑔 = −
+
+∬
+𝑖𝑛
+
+𝑘𝑔∇𝑇𝑔 𝑑𝐴𝑖𝑛 +
+∬
+
+𝑔𝑤𝑎𝑙𝑙
+
+¤𝑞𝑔𝑤𝑎𝑙𝑙
+𝑑𝐴𝑔𝑤𝑎𝑙𝑙
+
+(23)∬
+𝑖𝑛
+
+𝑘𝑙∇𝑇𝑙 𝑑𝐴𝑖𝑛 = ¤𝑄𝑔𝑤𝑎𝑙𝑙
+− 𝑚𝑔𝑐𝑣𝑔
+
+𝜕𝑇𝑔
+
+𝜕𝑡
+− ¤𝑚𝐿 (24)
+
+For the lumped gas model, first we mathematically decompose the ullage temperature by summation of two parts:
+liquid interface temperature, 𝑇𝑖 , and the difference between the ullage and liquid interface temperature (Δ𝑇). The former
+is obtained from the liquid side of the interface and is therefore only a function of time and spatial coordinates in the
+liquid domain, i.e., independent of ullage spatial coordinates. The latter is a function of both time and coordinates in the
+ullage domain (Equation 25). Note again that the superscripts denote the variables that the root variable is the function
+of, i.e., 𝑇 𝑡 ,𝑥𝑔𝑖
+
+𝑔 means the gas temperature is function of time and ullage spatial coordinates.
+
+𝑇 𝑡
+𝑔 = 𝑇
+
+𝑡 ,xl
+𝑖𝑛
+
++ Δ𝑇
+𝑡 ,xg
+𝑔 (25)
+
+The reduced order model (ROM) for the ullage seeks to best estimate the Δ𝑇
+𝑡 ,xg
+𝑔 term as function of time only -
+
+independent of ullage spatial coordinates, so that the gas can be represented as a node in the CFD simulation of the
+liquid. We achieve this by conducting an ullage-only CFD analysis. A fixed temperature no-slip wall boundary condition
+at the gas-liquid interface is imposed, so the ullage CFD is fully decoupled from the liquid side. Later, when running
+liquid CFD, coupling is achieved by calculating gas temperature as described in Equation 25. This approximation is
+valid due to the reasons discussed above. In the Results section, the accuracy of the approach is demonstrated.
+
+The ullage temperature difference term (Δ𝑇 𝑡 ,xg
+𝑔 may be deduced in two ways with varying complexity. In the
+
+simpler approach, a steady state ullage CFD solution provides this term independent of time (Equation 26). In the
+second approach, unsteady ullage CFD is used to obtain a time-accurate representation of the temperature difference
+(Equation 27. In fact, our testing showed that the time-dependent and time-independent solutions only differ slightly in
+capturing the initial pressurization transient and are equally good at prediction of long-term pressurization rates. The
+primary difference lies in time-accurate prediction of ullage temperature only. Both approaches are very economic
+when compared to the VOF module.
+
+𝑇 𝑡
+𝑔 = 𝑇
+
+𝑡 ,xl
+𝑖𝑛
+
++
+
+∭
+𝑉𝑔
+
+𝑇 𝑡=∞
+𝑔 𝑑𝑉𝑔∭
+
+𝑉𝑔
+𝑑𝑉𝑔
+
+(26)
+
+𝑇 𝑡
+𝑔 = 𝑇
+
+𝑡 ,xl
+𝑖𝑛
+
++
+
+∭
+𝑉𝑔
+
+𝑇 𝑡
+𝑔 𝑑𝑉𝑔∭
+
+𝑉𝑔
+𝑑𝑉𝑔
+
+(27)
+
+The phase change mass transfer in Equation 24 is obtained by considering that the ullage is always near saturation
+condition. The Antoine relation (Equation 12) is used to calculate gas pressure (Equation 28) as a function of gas-liquid
+interface temperature 𝑇𝑖𝑛. Subsequently, ullage mass and rate of change of mass are calculated as per Equation 29 and
+30. Incorporating, Equation 27 and 30 in 24 closes the liquid CFD boundary condition. Results are compared with the
+experiment and the VOF module approach in the Results section.
+
+𝑃𝑡
+𝑔 = 𝑃
+
+𝑇 𝑡
+𝑖𝑛
+
+𝑠𝑎𝑡 = 10
+
+(
+𝑎− 𝑏
+
+𝑐+𝑇𝑖𝑛
+
+)
+(28)
+
+𝑚𝑡
+𝑔 =
+
+𝑃𝑡
+𝑠𝑎𝑡𝑉𝑔
+
+𝑅𝑔𝑇
+𝑡
+𝑔
+
+(29)
+
+¤𝑚𝑡 =
+𝑚𝑡
+
+𝑔 − 𝑚
+(𝑡−𝑑𝑡 )
+𝑔
+
+Δ𝑡
+(30)
+
+11
+
+
+
+V. Validation of K-site Problem
+
+A. Geometry
+The full 3-D geometrical model of the K-site experiment tank is shown in Figure 8. As axisymmetric flow with
+
+respect to the tank axis is expected, a 11.25◦ sector model is used to save simulation time. Tank internals are not
+considered as they insignificant for the problem dynamics but removing them simplifies the mesh and makes CFD
+simulation more robust.
+
+(a) Tank schematic (b) Simplified domain (c) 11.25 deg sector
+
+Fig. 8 K-site LH2 tank and simplified sector for CFD simulation
+
+B. Mesh
+
+(a) Coarse (b) Baseline (c) Refined
+
+Fig. 9 Mesh resolutions used for validation and verification
+
+The initial mesh for the sector is shown in Figure 9a. This mesh has a resolution equivalent to 4 million cells for the
+full 3-D model, a typical size used for propellant slosh applications. The experimental pressurization time is around 20 h.
+A variable stable time step size is picked by the VOF module based on a set maximum CFL number. To complete one
+simulation with the VOF module for the baseline mesh (Figure 9b), approximately one month of clock time is required
+on NASA’s advanced super-computing system (NAS). As shown in Figure 9, three different mesh resolutions were tested.
+Later it is shown that the refined mesh (Figure 9c) is necessary for accurate fluid and thermal dynamics resolution.
+
+C. Initial and Boundary Conditions
+Both gas and liquid are at saturation conditions at the beginning of the simulation (𝑇 = 20.35 K and 𝑝 =
+
+1.036 × 105 N/m2). On the tank wall, the no-slip condition is applied for the momentum equation, and a uniformly
+distributed constant heat flux is used for the energy equation. Two heat flux values from the experiment, 2.0 W/m2 and
+3.5 W/m2, are simulated for each of the 29% and 49% fill level cases. On the sector planes, a symmetry condition is
+applied.
+
+12
+
+
+
+D. Fluid Properties
+Fluid and material properties were evaluated from the current National Institute of Standards and Technology (NIST)
+
+databases [36]. The liquid properties are listed in Table 1. The gas is assumed to be an ideal gas and the properties are
+taken from the existing thermodynamic table in Loci-Stream and NIST [36].
+
+Parameters Description Value
+𝜌𝑙 Liquid density 70.734 kg/m3
+
+𝑐𝑣𝑙 Liquid specific heat at constant volume 5678.2 J/Kg/K
+𝑐𝑝𝑙 Liquid specific heat at constant pressure 9516.0 J/Kg/K
+𝑘𝑙 Liquid thermal conductivity 0.1034 W/m/K
+`𝑙 Liquid dynamic viscosity 1.324 × 10−5 kg/m/s
+𝛼𝑙 Liquid volume expansion coefficient 0.0168 K
+^ Liquid iso-thermal compressibility 1.8662 × 10−8 K
+𝐿 Latent heat 4.451 × 105 J/kg
+𝜎 Surface tension 0.002 005 1 N/m
+
+Table 1 Liquid Hydrogen Thermodynamic Properties
+
+E. Flow Regime and Simulation Options
+Both laminar and turbulent flow regimes are evaluated. Two turbulence models are considered: the RANS k-𝜔 shear
+
+stress transport model (k-𝜔-SST), and the k-𝜔 SST Delayed Detached Eddy Simulation (DDES), which is a hybrid
+RANS-LES model. Time integration is computed implicitly with first-order backward Euler method. Time step size
+for the gas phase was set to 𝑑𝑡 = 1 × 10−2 s for all cases. The VOF module is able to reduce the time step for stability
+requirements as necessary. For this purpose, a maximum CFL number of 0.2 was chosen. Based on experience with
+slosh dynamics with the VOF module, a first-order accurate spatial stencil was employed.
+
+The Antoine equation is used for the calculation of the saturation condition. The accommodation factor coefficient
+in the phase change model is set to 1.0 × 10−3. The sensitivity of this parameter is reported in Effect of Accommodation
+Factor section.
+
+VI. Results
+As the changes in mass and energy during self-pressurization are relatively small compared to typical CFD
+
+applications, iterative solution convergence for all governing equations was closely monitored. Further, for this large
+time scale simulation, total mass and energy conservation were also verified explicitly to ensure there was no significant
+accumulation of error. Since the total energy conservation is enforced using temperature as a primary solved variable,
+special care has been taken to maintain total energy conservation. Solution verification via mesh refinement was also
+performed to achieve a mesh independent solution and is presented in a subsequent section. Further, sensitivity to the
+flow regime (laminar vs. turbulent) and accommodation factor (AF) is evaluated.
+
+First, simulations of the K-site self-pressurization experiments at multiple fill levels and heat loads were conducted
+using a relatively coarse mesh. The coarse mesh enables a simulation of a rather long pressurization duration (20 hours)
+to be finished in a reasonable time (typically a few days) to allow for a quicker evaluation.
+
+Typical velocity and temperature fields are shown in Figure 10. Due to the buoyancy effect, a large recirculation is
+formed in the liquid phase, and the warmer and lighter liquid from the tank wall boundary is carried upwards towards
+the gas-liquid interface, where it evaporates if the interfacial temperature is higher than the saturation pressure set by the
+gas phase. The typical thermal boundary layer and temperature stratification in the gas phase is also observed. These
+observations provide qualitative validation that, even with a coarse mesh, the CFD model is capturing the proper physics.
+
+For quantitative validation, pressure history comparisons between the experiment and CFD predictions (using the
+finest resolution mesh (Figure 9c)) at both 2.0 W/m2 and 3.5 W/m2 heat load, and both 29% and 49% fill conditions, are
+presented in Figure 11 (i), (ii), (iii), and (iv). Both VOF CFD and lumped gas CFD models show good agreement with
+the experimental data, and clearly demonstrate the ability of the tools to accurately predict self-pressurization. Initially,
+
+13
+
+
+
+(a) Initial Liquid-Gas Distribution (b) Velocity Field (c) Temperature Field
+
+Fig. 10 K-site VOF, Velocity and Temperature Field with Coarse Mesh for 3.5 W/m2 Heat Load
+
+Fig. 11 Comparison of pressurization for K-site LH2 tank at 29% and 49% fill with 2.0 W/m2 and 3.5 W/m2
+
+heat load
+
+the evaporation rate is higher as warm buoyancy-driven liquid advects to the gas-liquid interface and evaporative mass
+transfer takes place. Later, the increasing ullage pressure dampens the evaporation rate and a quasi-steady state with
+constant pressurization rate is achieved. The VOF CFD shows a slight overshoot in pressure in the initial transient,
+which may be due to small interfacial instabilities encountered in the VOF module. But the overall trend is captured
+well by both CFD models.
+
+Temperature probes were also compared, showing excellent time-accurate agreement with the K-site experiments
+
+14
+
+
+
+(a) Probe temperatures at 1.61 m, 1.38 m, and 0.24 m (b) All temperature probes at 4 h and 12 h
+
+Fig. 12 Probe temperatures for K-site LH2 tank at 49% fill with 3.5 W/m2 heat load
+
+for both ullage (Figure 12a (i) and (ii)) and liquid (Figure 12a (iii)). Figure 12b shows a comparison of all probes
+at (i) 4 hours, and (ii) 12 hours elapsed time. The agreement with experimental data for both VOF and lumped gas
+models emphasizes how well the flow field is resolved and energy conservation is maintained, both of which must be
+simultaneously achieved for an accurate solution. Note that the turbulent flow model fails at capturing the temperature
+trends in the ullage (Figure 12a (i) and (ii)), which is be discussed in the Flow Regime Sensitivity section below.
+
+A. Verification: Sensitivity to Mesh Resolution
+Mesh independence was ensured by simulating three different mesh resolutions. It is observed that while the coarsest
+
+mesh (Figure 13(i)) produces good qualitative predictions, the pressurization rate is under-predicted when compared to
+the experimental data. Further mesh refinement to the baseline mesh improves the prediction by better capturing the
+convective currents and thermal stratification in the liquid phase. Finally, the finest mesh produces the best match with
+the experiment by further improving the accuracy of the interfacial liquid thermal layer resolution. Note that further
+mesh refinement may produce slight improvements in the predicted pressurization rate, though the prohibitively high
+cost of such CFD simulations is not justified by small improvements in predictive capability.
+
+15
+
+
+
+Fig. 13 Mesh sensitivity for K-site LH2 tank at 49% fill with 3.5 W/m2 heat load with VOF CFD
+
+Fig. 14 Flow regime sensitivity for K-site LH2 tank at 49% fill with 3.5 W/m2 heat load with coarse and refined
+mesh resolution
+
+B. Flow Regime Sensitivity
+Models for both laminar and turbulent flow regimes were tested and compared with the experimental results (Figure
+
+14). The 𝑘 − 𝜔 SST RANS model under-pressurizes. This is due to high turbulent viscosity in the interfacial region.
+The resulting high momentum and thermal diffusivity smears out the liquid side thermal stratification, which plays
+a very important role in the dynamics of the problem. Note that bulk liquid away from the interface is not adversely
+affected (12a (iii)). But capturing the liquid side interfacial temperature is extremely important because it dictates
+the computation of the saturation pressure and the mass transfer rate in the phase change model and thus dictates the
+pressurization rate. The observation of high momentum and thermal diffusivity produced by the RANS model is further
+reinforce by examining the effect of mesh resolution on the turbulent flow simulations (Figure 13(ii)). Coarse meshes
+are numerically diffusive and artificially increases the viscosity, but mesh refinement reduces this effect. Figure 13
+shows no change in pressurization rate with the refined mesh - in contrast with the laminar flow regime behavior -
+demonstrating the high diffusivity generated by the turbulence model.
+
+The root cause of the 𝑘 − 𝜔 SST model’s failure to capture the thermal stratification in the gas-liquid interface
+region seems to lie in the origin of the turbulence modeling. The model was developed for single phase applications
+
+16
+
+
+
+and employing the same model simultaneously for liquid and gas species with a continuous turbulent kinetic energy
+and turbulent dissipation field, which is unlikely to be accurate description of the underlying physics encountered at a
+gas-liquid interface. A more sophisticated RANS turbulence model is necessary for two phase VOF class of applications.
+The 𝑘 − 𝜔 DDES (hybrid RANS-LES) model implemented in Loci-Stream slightly improves the prediction of the SST
+model because it is less diffusive than the RANS model but is still inferior to the laminar model in predictive capacity.
+More studies are underway to improve the understanding of turbulence modeling, meanwhile laminar modeling is
+recommended for this class of problem.
+
+C. Effect of Accommodation Factor
+Since the HKS model (Equation 11) for phase change mass transfer has an accommodation factor (AF) that drives
+
+the evaporation/condensation rates but does not have an empirically-derived value, it is necessary to demonstrate the
+impact of AF on the validation. Higher AF results in higher mass transfer rate in the model, but it does not necessarily
+linearly impact the observed phase change rate because higher mass transfer rate also increases the ullage pressure in a
+closed system, which in turn lowers the mass transfer rate. Moreover, the self-pressurization process is driven by a small
+heat leakage in a closed system where the interface is always near equilibrium. In this case, the pressurization rate is
+expected to be insensitive to AF in a reasonably large range and converge logarithmically as the value approaches unity.
+
+For choosing an AF value, the available literature suggests that AF is dependent upon substance and operating
+conditions, though experimentally tested values are difficult to characterize and obtain. Our literature review did not
+find a definitive AF value for hydrogen at the given operating condition. Previously, for a different simulation, we had
+found that 1 × 10−5 is too low to produce sufficient pressurization. Therefore, we assessed the model sensitivity for
+the K-site simulations by using AF values of 1 × 10−4, 1 × 10−3 and 1 × 10−2. We found that the AF of 1 × 10−2 and
+higher was difficult to simulate due to extremely low time-step required for numerical stability. Figure 15 shows that
+the AF of 1 × 10−4 has a reasonably insignificant impact on the K-site pressurization rate. Although there is a small
+difference in the transient behavior in the early part of the simulations, there is little difference between the near-constant
+pressurization rates predicted when the simulation has reached a quasi-steady state. These observations indicate that an
+AF above a minimum threshold (approximately 1 × 10−4) does not yield any significant change in self-pressurization
+rates for a closed quiescent system.
+
+Fig. 15 Accommodation factor sensitivity for K-site LH2 tank at 49% fill with 3.5 W/m2 heat load
+
+VII. Conclusion
+The Loci-Stream CFD tool has been shown to be validated against the K-site LH2 tank self-pressurization
+
+experiments. For four different test configurations, both the VOF method and the lumped gas ROM method demonstrate
+accurate predictive capability. Loci-Stream is able to predict both time varying ullage pressure as well as liquid
+and gas temperatures at various spatial locations for all simulated experiments with acceptable accuracy. While
+the Loci-Stream-VOF model is capable of simulating the heat and mass transfer physics of self-pressurization, the
+
+17
+
+
+
+computational expense required to resolve the important thermal gradients near the interface over such large time scales
+may be too prohibitive to be useful to support a flight project schedule. It was demonstrated that the reduced order
+model provides an order of magnitude (or more) speed up without degradation of the solution, and a more general
+segregated gas/liquid domain approach is being pursued to augment the capabilities of Loci-Stream-VOF. We conclude
+that Loci-Stream-VOF and the reduced order lumped gas model are both well-equipped to simulate fluid and thermal
+dynamics of cryogenic tank self-pressurization to support NASA’s future missions, and future work will assess and
+validate these tools for in-space (microgravity) conditions.
+
+Acknowledgments
+The NASA High-End Computing (HEC) Program, through the NASA Advanced Supercomputing (NAS) Division
+
+at Ames Research Center, provided the computational resources for these simulations.
+
+References
+[1] Huntley, S. C., “Temperature-pressure-time relationships in a cryogenic container,” Adv Cryog Eng, Vol. 3, 1960, pp. 342–352.
+
+[2] Neff, R., “A survey of stratification in a cryogenic liquid,” Adv Cryog Eng, Vol. 5, 1960, pp. 460–466.
+
+[3] Scott, L. E., Robbins, R. F., Mann, D. B., and Birmingham, B. W., “Temperature stratification in a nonventing liquid helium
+dewar,” J Res Nat. Bur. Stand. (U.S.), 64C (Eng. and Inst.), 1960.
+
+[4] Swim, R. T., “The temperature distribution in liquid and vapor phases of helium in cylindrical dewars,” Adv Cryog Eng, Vol. 5,
+1960, pp. 498–504.
+
+[5] Barsi, S., and Kassemi, M., “Investigation of tank pressurization and pressure control part ii: numerical modelling,” ASME J
+Therm Sci Eng Appl, Vol. 5, No. 2 [041006], 2013, pp. 1–9.
+
+[6] Barsi, S., and M., K., “Numerical and experimental comparisons of the self-pressurization behavior of an LH2 tank in normal
+gravity,” Cryogenics, Vol. 48, No. 3-4, 2008, pp. 122–129.
+
+[7] Grayson, G., Lopez, A., Chandler, F., Hastings, L., and Tucker, S., “Cryogenic tank modeling for the Saturn AS-203 experiment,”
+AIAA 2006–5258, 2006.
+
+[8] Panzarella, C. H., and Kassemi, M., “On the validity of purely thermodynamic description of two-phase cryogenic storage tank,”
+J Fluid Mech, Vol. 484, 2003, pp. 136–48.
+
+[9] Kassemi, M., and Chato, D., “The zero boil-off tank experiment, Cold Facts,” Cryogenic Society of America, Vol. 33, 2017, p. 3.
+
+[10] Kartuzova, O., and Kassemi, M., “Modeling ullage dynamics of tank pressure control experiment during jet mixing in
+microgravity,” AIAA 52nd joint propulsion conference. Salt Lake City, UT, 2016.
+
+[11] Kassemi, M., and Olga, K., “Effect of interfacial turbulence and accommodation coefficient on CFD predictions of pressurization
+and pressure control in cryogenic storage tank,” J Cryogenics, Vol. 74, 2016, pp. 138–53.
+
+[12] Doherty, M., Gaby, J., Salerno, L., and Sutherlin, S., “Cryogenic Fluid Management Technology for Moon and Mars Missions,”
+AIAA 2009-6532, 2009.
+
+[13] Kassemi, M., Kartuzova, O., and Hylton, S., “Validation of two-phase CFD models for propellant tank self-pressurization:
+Crossing fluid types, scales, and gravity levels,” Cryogenics, Vol. 89, No. 2018, 2018, pp. 1–15.
+
+[14] Moran, M. E., “Cryogenic Fluid Storage Technology Development: Recent and Planned Efforts at NASA,” NASA TM
+2009-215514, 2009.
+
+[15] Ferrín, J. L., and Pérez-Pérez, L. J., “Numerical simulation of natural convection and boil-off in a small size pressurized LNG
+storage tank,” Comput. Chem. Res., Vol. 138, 2020, p. 10684.
+
+[16] Unverdi, S. O., and Tryggvason, G., “A front-tracking method for viscous, incompressible, multi-fluid flows,” Journal of
+computational physics;, Vol. 100, No. 1, 1992, pp. 25–37.
+
+[17] Sussman, M., Fatemi, E., Smereka, P., and Osher, S., “An improved level set method for incompressible two-phase flows,”
+Computers & Fluids, Vol. 27, No. 5, 1998, pp. 663–80.
+
+18
+
+
+
+[18] Osher, S., and Fedkiw, R. P., “Level set methods: an overview and some recent results,” Journal of Computational physics;, Vol.
+169, No. 2, 2001, pp. 463–502.
+
+[19] Benson, D. J., “Volume of fluid interface reconstruction methods for multi-material problems,” Applied Mechanics Reviews,
+Vol. 55, No. 2, 2002, pp. 151–65.
+
+[20] Rider, W. J., and Kothe, D. B., “Reconstructing volume tracking,” Journal of computational physics, Vol. 141, No. 2, 1998, pp.
+112–52.
+
+[21] Hasan, M., Lin, C., and Van Dresar, N. T., “Self-pressurization of a flightweight liquid hydrogen storage tank subjected to low
+heat flux,” NASA TM 103804, 1991.
+
+[22] Van Dresar, N. T., Lin, C., and Hasan, M., “Self-pressurization of a flightweight liquid hydrogen tank: Effects of fill level at low
+wall heat flux,” NASA TM 105411, 1992.
+
+[23] West, J., Yang, H. Q., and Liever, P. A., Development, Verification, and Validation of Parallel, Scalable Volume of Fluid CFD
+program for Propulsion Applications, JANNAF Conference paper, 2014.
+
+[24] Luke, E., and George, T., “Loci: A Rule-Based Framework for Parallel Multidisciplinary Simulation Synthesis,” , 2005.
+
+[25] Thakur, S., Wright, J., and Shyy, J. W., “An Algorithm for Chemically Reacting Flows on Generalized Grids Using a Rule-Based
+Framework,” 43rd AIAA Conference, 2005, p. 0875.
+
+[26] Kamakoti, R., Thakur, S., Wright, J., and Shyy, W., “Validation of a new parallel all-speed CFD code in a rule-based framework
+for multidisciplinary applications,” 36th AIAA Fluid Dynamics Conference and Exhibit, AIAA 2006–3063, San Francisco, CA,
+2006.
+
+[27] Mehta, R. S., Venugopalan, V., H. Q. Yang, J. W., and Thakur, S., Development of a Highly Scalable Volume of Fluid Solver for
+Arbitrary Polyhedral Grids, JANNAF Conference paper, 2015.
+
+[28] Schrage, R. W., Columbia University Press, 1953, p. 27.
+
+[29] Hernández, J. L., “Analytical and geometrical tools for 3D volume of fluid methods in general grids,” Journal of Computational
+Physics, Vol. 227, 2008, pp. 5939–48.
+
+[30] Hirt, C., and Nichols, B. D., “Volume of Fluid (VOF Method) For Dynamics of Free Boundaries,” Journal of computational
+physics, Vol. 39, 1981, pp. 201–225.
+
+[31] Parker, B., and Youngs, D. T. a., and three-dimensional Eulerian simulation of fluid flow with material interfaces, UK Atomic
+Weapons Establishment, 1992.
+
+[32] Yang, H. Q., and Przekwas, A. J., “Computational Modeling of Microfluid Devices with Free Surface Liquid Handling,”
+Proceedings of the 1998 International Conference on Modeling and Simulation of Microsystems, 1998, pp. 498–505.
+
+[33] Lowry, S., and Yang, H. Q., Numerical Model of the Fluid-Structure Interaction in the Space Shuttle External LOX Tank for
+Modified Baffle Configurations, CFD Research Corporation, 1996.
+
+[34] Pericleous, K., Cross, M., Moran, G., Chow, P., and Chan, K., “Free surface Navier-Stokes flows with simultaneous heat transfer
+and solidification/melting,” Advances in Computational Mathematics, Vol. 6, No. 1, 1996, pp. 295–308.
+
+[35] Barsi, S., and Kassemi, M., Validation of Tank Self-Pressurization Models in Normal Gravity, 2007. https://doi.org/10.2514/6.
+2007-952, URL https://arc.aiaa.org/doi/abs/10.2514/6.2007-952.
+
+[36] Linstrom, P., and Mallard, W., “Editors,” NIST Chemistry WebBook, NIST Std. Ref. Database Number 69, NIST, 2005. URL
+http://webbook.nist.gov.
+
+19
+
+https://doi.org/10.2514/6.2007-952
+https://doi.org/10.2514/6.2007-952
+https://arc.aiaa.org/doi/abs/10.2514/6.2007-952
+http://webbook.nist.gov
+
+	Nomenclature
+	Introduction
+	Test Description
+	K-site Testing Facilities
+	Experimental Results
+
+	Computational Model
+	Governing Equations
+	Energy Conservation
+	Phase Change Mass Transfer
+	VOF Transport
+	VOF Initialization
+	Interface Reconstruction
+	Interface Advection
+	Surface Tension
+
+	Coupling between VOF Module and Flow Solver
+	Lumped Gas CFD Model
+
+	Validation of K-site Problem
+	Geometry
+	Mesh
+	Initial and Boundary Conditions
+	Fluid Properties
+	Flow Regime and Simulation Options
+
+	Results
+	Verification: Sensitivity to Mesh Resolution
+	Flow Regime Sensitivity
+	Effect of Accommodation Factor
+
+	Conclusion
+

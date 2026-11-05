@@ -1,0 +1,4289 @@
+1
+
+EFFICIENT ENTROPY STABLE GAUSS COLLOCATION METHODS
+
+2
+
+JESSE CHAN, DAVID C. DEL REY FERNANDEZ, MARK H. CARPENTER
+
+3
+4
+5
+6
+7
+8
+
+Abstract. The construction of high-order entropy stable collocation schemes on quadrilateral
+and hexahedral elements has relied on the use of Gauss-Legendre-Lobatto collocation points [1, 2, 3]
+and their equivalence with summation-by-parts (SBP) ﬁnite diﬀerence operators [4]. In this work, we
+show how to eﬃciently generalize the construction of semidiscrete, entropy stable schemes on tensor
+product elements to Gauss points and generalized SBP operators. Numerical experiments suggest
+that the use of Gauss points signiﬁcantly improves accuracy on curved meshes.
+
+9
+10
+11
+12
+
+1. Introduction. Time dependent nonlinear conservation laws are ubiquitous in
+computational ﬂuid dynamics, for which high-order methods are increasingly of interest. Such methods are more accurate per degree of freedom than low-order methods,
+while also possessing much smaller numerical dispersion and dissipation errors. This
+makes high-order methods especially well suited to time-dependent simulations. In
+this work, we focus speciﬁcally on discontinuous Galerkin methods on unstructured
+quadrilateral and hexahedral meshes. These methods combine properties of high-order
+approximations with the geometric ﬂexibility of unstructured meshing.
+However, high-order methods are notorious for being more prone to instability
+compared to low-order methods [5]. This instability is addressed through various
+stabilization techniques (e.g. artiﬁcial viscosity, ﬁltering, slope limiting). However,
+these techniques often reduce accuracy to ﬁrst or second order, and can prevent solvers
+from realizing the advantages of high-order approximations. Moreover, it is often not
+possible to prove that a high-order scheme does not blow up even in the presence of
+stabilization. This ambiguity can necessitate the retuning of stabilization parameters,
+as parameters which are both stable and accurate for one problem or discretization
+setting may provide either too little or too much numerical dissipation for another.
+The instability of high-order methods is rooted in the fact that discretizations
+of nonlinear conservation laws do not typically satisfy a discrete analogue of the
+conservation or dissipation of energy (entropy). For low-order methods, the lack of
+discrete stability can be oﬀset by the presence of numerical dissipation, which serves
+as a stabilization mechanism. Because high-order methods possess low numerical
+dissipation, the absence of a discrete stability property becomes more noticeable,
+manifesting itself through increased sensitivity and instability.
+The dissipation of entropy serves as an energetic principle for nonlinear conservation laws [6], and requires the use of the chain rule in its proof. Discrete instability is
+typically tied to the fact that, when discretizing systems of nonlinear PDEs, the chain
+rule does not typically hold at the discrete level. The lack of a chain rule was circumvented by using a nonstandard “ﬂux diﬀerencing” formulation [1, 2, 3, 7], which is
+key to constructing semidiscrete, entropy stable, high-order schemes on unstructured
+quadrilateral and hexahedral meshes. Flux diﬀerencing replaces the derivative of the
+nonlinear ﬂux with the discrete diﬀerentiation of an auxiliary quantity. This auxiliary
+quantity is computed through the evaluation of a two-point entropy conservative ﬂux
+[8] using pairs of solution values at quadrature points. These entropy-stable schemes
+were later extended to nontensor product elements using GLL-like quadrature points
+on triangles and tetrahedra [9, 10]. More recently, the construction of eﬃcient entropy stable schemes was extended to more arbitrary choices of basis and quadrature
+[11, 12].
+While entropy-stable collocation schemes have been constructed on Gauss-like
+
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+
+1
+
+This manuscript is for review purposes only.
+
+74
+75
+76
+
+quadrature points without boundary nodes [13], the interelement coupling terms for
+such schemes introduce an “all-to-all” coupling between degrees of freedom on two
+neighboring elements in one dimension (on tensor product elements in higher dimensions, these coupling terms couple together lines of nodes). These coupling terms
+require evaluating two-point ﬂuxes between solution states at all collocation nodes
+on two neighboring elements, resulting in signiﬁcantly more communication and computation compared to collocation schemes based on point sets containing boundary
+nodes. This work introduces eﬃcient and entropy stable interelement coupling terms
+for Gauss collocation schemes, which require only communication of face values between neighboring elements. The construction of these terms follows the framework
+introduced in [11, 12] for triangles and tetrahedra.
+The main motivation for exploring tensor product (quadrilateral and hexahedral)
+elements is the signiﬁcant reduction in the number of operations required compared
+to high-order entropy stable schemes on simplicial meshes [11, 12]. Entropy stability
+schemes on simplicial elements require evaluating two-point ﬂuxes between solution
+states at all quadrature points on an element. For a degree N approximation, the
+number of quadrature points on a simplex scales as O(N d ) in d dimensions, and results
+in O(N 2d ) two-point ﬂux evaluations per element. In contrast, entropy stable schemes
+on quadrilateral and hexahedral elements require only the evaluation of two-point
+ﬂuxes along lines of nodes due to a tensor product structure, resulting in O(N d+1 )
+evaluations in d dimensions.
+In Section 2, we brieﬂy review the derivation of continuous entropy inequalities
+for systems of nonlinear conservation laws. In Section 3, we describe how to construct entropy stable discretizations of nonlinear conservation laws using diﬀerent
+quadrature points on aﬃne tensor product elements. In Section 4, we describe how to
+extend this construction to curvilinear elements, and Section 5 presents numerical results which conﬁrm the high-order accuracy and stability of the proposed method for
+smooth, discontinuous, and underresolved (turbulent) solutions of the compressible
+Euler equations in two and three dimensions.
+
+77
+78
+
+2. A brief review of entropy stability theory. We are interested in methods
+for the numerical solution of systems of conservation laws in d dimensions
+
+79
+
+(2.1)
+
+80
+81
+82
+83
+
+where u denotes the conservative variables, fi (u) are nonlinear ﬂuxes, and xi denotes
+the ith coordinate. Many physically motivated conservation laws admit a statement of
+stability involving a convex scalar entropy S(u). We ﬁrst deﬁne the entropy variables
+v(u) to be the gradient of the entropy S(u) with respect to the conservative variables
+
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+
+d
+
+∂fi (u)
+∂u
++
+= 0,
+∂t
+∂xi
+i=1
+
+85
+86
+87
+88
+89
+
+∂S(u)
+.
+∂u
+For a convex entropy, v(u) deﬁnes an invertible mapping from conservative to entropy variables. We denote the inverse of this mapping (from entropy to conservative
+variables) by u(v).
+At the continuous level, it can be shown (for example, in [6]) that vanishing
+viscosity solutions to (2.1) satisfy the strong form of an entropy inequality
+
+90
+
+(2.2)
+
+84
+
+def
+
+v=
+
+d
+
+91
+
+∂S(u)
+∂Fi (u)
++
+≤ 0,
+∂t
+∂xi
+i=1
+
+Fi (u) = v T
+
+∂fi
+,
+∂u
+
+2
+
+This manuscript is for review purposes only.
+
+92
+93
+
+where Fi denotes the ith scalar entropy ﬂux function. Integrating (2.2) over a domain
+Ω and applying the divergence theorem yields an integrated entropy inequality
+
+94
+
+(2.3)
+Ω
+
+∂S(u)
++
+∂t
+
+d
+
+ni v T fi (u) − ψi (u) ≤ 0,
+∂Ω i=1
+
+95
+96
+97
+98
+
+where ψi (u) = v T fi (u) − Fi (u) denotes the ith entropy potential, ∂Ω denotes the
+boundary of Ω and ni denotes the ith component of the outward normal on ∂Ω.
+Roughly speaking, this implies that the time rate of change of entropy is less than or
+equal to the ﬂux of entropy through the boundary.
+
+99
+100
+101
+102
+
+3. Entropy stable Gauss and Gauss-Legendre-Lobatto collocation methods. The focus of this paper is on entropy stable high-order collocation methods that
+satisfy a semidiscrete version of the entropy inequality (2.3). These methods collocate
+the solution at some choice of collocation nodes, and are applicable to tensor product
+meshes consisting of quadrilateral and hexahedral elements.
+Entropy stable collocation methods have largely utilized Gauss-Legendre-Lobatto
+(GLL) nodes [1, 2, 3, 7], which contain points on the boundary. The popularity of
+GLL nodes can be attributed in part to a connection made in [4], where it was
+shown by Gassner that collocation DG discretizations based on GLL nodes could
+be recast in terms of summation-by-parts (SBP) operators. This equivalence allowed
+Gassner to leverage existing ﬁnite diﬀerence formulations to produce stable high-order
+discretizations of the nonlinear Burgers’ equation.
+GLL quadratures contain boundary points, which greatly simpliﬁes the construction of interelement coupling terms for entropy stable collocation schemes. However,
+it is also known that the use of GLL quadrature within DG methods underintegrates
+the mass matrix, which can lead to solution “aliasing” and lower accuracy [14]. In
+this work, we explore entropy stable collocation schemes based on Gauss quadrature
+points instead of GLL points.
+This comparison is motivated by the accuracy of each respective quadrature rule.
+While (N + 1)-point GLL quadrature rules are exact for polynomial integrands of
+degree (2N − 1), (N + 1)-point Gauss quadrature rules are exact for polynomials
+of degree (2N + 1). This higher accuracy of Gauss quadrature has been shown to
+translate to lower errors and slightly improved rates of convergence in simulations of
+wave propagation and ﬂuid ﬂow [15, 16, 17]. However, Gauss points have not been
+widely used to construct entropy stable discretizations due to the lack of eﬃcient,
+stable, and high-order accurate interelement coupling terms, known as simultaneous
+approximation terms (SAT) in the ﬁnite diﬀerence literature [18, 13, 19]. SATs for
+Gauss points are noncompact, in the sense that they introduce all-to-all coupling
+between degrees of freedom on neighboring elements in one dimension. This results
+in greater communication between elements, as well as a signiﬁcantly larger number
+of two-point ﬂux evaluations and ﬂoating point operations.
+It is possible to realize the improved accuracy of Gauss points while avoiding
+noncompact SATs through a staggered grid formulation, where the solution is stored
+at Gauss nodes but interpolated to a set of higher degree (N +2) GLL “ﬂux” points for
+computation [14]. Because GLL nodes include boundary points, compact and highorder accurate SAT terms can be constructed for the ﬂux points. After performing
+computations on the ﬂux points, the results are interpolated back to Gauss points
+and used to evolve the solution forward in time. Figure 1 shows an illustration of
+GLL, staggered grid, and Gauss point sets for a 2D quadrilateral element.
+
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+
+3
+
+This manuscript is for review purposes only.
+
+(a) GLL nodes
+
+(b) Staggered grid nodes
+
+(c) Gauss nodes
+
+Fig. 1: Examples of nodal sets under which eﬃcient entropy stable schemes can be
+constructed. This work focuses on the construction of eﬃcient and accurate SAT
+terms for Gauss nodal sets.
+
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+
+The following sections will describe how to construct eﬃcient high-order entropy
+stable schemes using Gauss points. These schemes are based on “decoupled” SBP
+operators introduced in [11, 12], which are applicable to general choices of basis and
+quadrature. By choosing a tensor product Lagrange polynomial basis and (N + 1)
+point Gauss quadrature rules, we recover a Gauss collocation scheme. The high-order
+accuracy and entropy stability of this scheme are direct results of theorems presented
+in [11, 12]. However, we will also present a diﬀerent proof of entropy stability in one
+dimension for completeness.
+3.1. Gauss nodes and generalized summation by parts operators. We
+assume the solution is collocated at (N + 1) quadrature points xi with associated
+quadrature weights wi . We do not make any assumptions on the points, in order
+to accommodate both GLL and Gauss nodes using this notation. The collocation
+assumption is equivalent to approximating the solution using a degree N Lagrange
+basis j (x) deﬁned over the (N + 1) quadrature points.
+Let D denote the nodal diﬀerentiation matrix, and let Vf denote the 2 × (N + 1)
+matrix which interpolates polynomials at Gauss nodes to values at endpoints. These
+two matrices are deﬁned entrywise as
+Dij =
+
+∂ j
+∂x
+
+,
+
+(Vf )1i =
+
+i (1).
+
+N +1
+i (x) j (x) ≈
+
+Mij =
+−1
+
+162
+163
+164
+
+(Vf )2i =
+
+We also introduce the diagonal matrix of quadrature weights Wij = δij wi , as well
+as the one-dimensional mass matrix M whose entries are L2 inner products of basis
+functions. We assume that these inner products are computed using the quadrature
+rule (xi , wi ) at which the solution is collocated. Under such an assumption, the mass
+matrix is diagonal with entries equal to the quadrature weights
+1
+
+161
+
+i (−1),
+
+x=xi
+
+i (xk ) j (xk )wk
+
+= δij wi = Wij .
+
+k=1
+
+Since M = W under a collocation assumption, we utilize W for the remainder of this
+work to emphasize that the mass matrix is diagonal and related to the quadrature
+weights wi . The treatment of nondiagonal mass matrices is covered in [11, 12].
+4
+
+This manuscript is for review purposes only.
+
+165
+166
+
+It can be shown that the mass and diﬀerentiation matrices for Gauss nodes fall
+under the class of generalized SBP (GSBP) operators [20].
+
+167
+
+Lemma 3.1. Q = W D satisﬁes the generalized summation by parts property
+Q = VfT BVf − QT ,
+
+168
+
+B=
+
+−1
+1
+
+.
+
+The proof is a direct restatement of integration by parts, and can be found in [20, 21,
+22, 23]. Lemma 3.1 holds for both GLL and Gauss nodes, and switching between these
+two nodal sets simply results in a redeﬁnition of the matrices D, Vf . For example,
+because GLL nodes include boundary points, the interpolation matrix Vf reduces to
+a generalized permutation matrix which extracts the nodal values associated with the
+174 left and right endpoints.
+169
+170
+171
+172
+173
+
+176
+177
+178
+179
+180
+
+3.2. Existing entropy stable SATs for generalized SBP operators. In
+this section, we will review the construction of semi-discrete entropy stable discretizations. Entropy stable discretizations can be constructed by ﬁrst introducing an entropy conservative scheme, then adding appropriate interface dissipation to produce
+an entropy inequality. The construction of entropy conservative schemes relies on the
+existence of an two-point (dyadic) entropy conservative ﬂux [8].
+
+181
+182
+
+Definition 3.2. Let fS (uL , uR ) be a bivariate function that is symmetric and
+consistent with the ﬂux function f (u)
+
+175
+
+fS (uL , uR ) = fS (uR , uL ),
+
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+
+fS (u, u) = f (u)
+
+The numerical ﬂux fS (uL , uR ) is entropy conservative if, for entropy variables vL =
+v(uL ), vR = v(uR ), the Tadmor “shuﬄe” condition is satisﬁed
+T
+
+(vL − vR ) fS (uL , uR ) = (ψL − ψR ),
+
+ψL = ψ(v(uL )),
+
+ψR = ψ(v(uR )).
+
+For illustrative purposes, we will prove a semidiscrete entropy inequality on a onedimensional mesh consisting of two elements of degree N . We assume both meshes
+are translations of a reference element [−1, 1], such that derivatives with respect to
+physical coordinates are identical to derivatives with respect to reference coordinates.
+The extension to multiple elements and variable mesh sizes is straightforward.
+The construction of entropy conservative schemes relies on appropriate SATs for
+Gauss collocation schemes [18, 13, 19]. Let the rows of Vf be denoted by column
+vectors tL , tR
+Vf =
+
+197
+
+(tL )1 ,
+(tR )1 ,
+
+. . . , (tL )N +1
+,
+. . . , (tR )N +1
+
+(tL )j =
+
+j (−1),
+
+(tR )j =
+
+j (1).
+
+199
+
+The interelement coupling terms in [18, 13, 19] utilize a decomposition of the surface
+matrix VfT BVf as
+
+200
+
+(3.1)
+
+201
+202
+203
+204
+
+The construction of entropy conservative schemes on multiple elements requires appropriate interelement coupling terms (SATs) involving tL , tR . We consider a two
+element mesh, and show how when coupled with SATs, the resulting discretization
+matrices can be interpreted as constructing a global SBP operator.
+
+198
+
+VfT BVf = tR tT − tL tT .
+R
+L
+
+5
+
+This manuscript is for review purposes only.
+
+Let u1 , u2 denote nodal degrees of freedom of the vector valued solution u(x)
+N
+N
+on the ﬁrst and second element, respectively. To simplify notation, we assume that
+all following operators are deﬁned in terms of Kronecker products [9], such that they
+208 are applied to each component of u1 , u2 . We ﬁrst deﬁne the matrix
+N
+N
+205
+206
+207
+
+1
+def
+S = Q − VfT BVf .
+2
+
+209
+
+(3.2)
+
+210
+211
+
+It is straightforward to show (using Lemma 3.1) that S is skew-symmetric. We can
+−1
+now deﬁne an SBP operator Dh = Wh Qh over two elements
+
+212
+
+(3.3)
+
+def
+
+Qh =
+
+S
+− 1 tL tT
+R
+2
+
+1
+T
+2 tR tL
+
+S
+
++
+
+− 1 tL tT
+L
+2
+
+1
+T
+2 tR tR
+
+,
+
+def
+
+Wh =
+
+W
+W
+
+.
+
+1
+2 Bh
+
+Sh
+
+It can be shown that Dh is high-order accurate such that, if uh is a polynomial of
+degree N , it is diﬀerentiated exactly. Straightforward computations show that Qh
+215 also satisﬁes an SBP property Qh + QT = Bh .
+h
+216
+Ignoring boundary conditions, an entropy conservative scheme for (2.1) on two
+217 elements can then be given as
+213
+214
+
+218
+
+(3.4)
+
+d
+Wh uh + 2 (Qh ◦ FS ) 1 = 0,
+dt
+(FS )ij = fS (uh )i , (uh )j ,
+
+219
+220
+
+uh =
+
+u1
+N
+u2
+N
+
+1 ≤ i, j ≤ 2(N + 1),
+
+225
+226
+
+where ◦ denotes the Hadamard product [24]. It should be emphasized that here,
+(uh )i , (uh )j denote vectors containing solution components at nodes i, j, and that
+(because fS is a vector-valued ﬂux) the term (FS )ij should be interpreted as a diagonal
+matrix whose diagonal entries consist of the components of fS ((uh )i , (uh )j ).
+T
+T
+Multiplying (3.4) by vh = v (uh ) will yield a semidiscrete version of the conservation of entropy (mimicking (2.3) with the inequality replaced by an equality)
+
+227
+
+(3.5)
+
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+
+We refer to [13, 10] for the proof of (3.5).
+The drawback of the SATs introduced in this section lies in the nature of the oﬀdiagonal matrices tR tL and −tL tR . For Gauss nodes, these blocks are dense, which
+implies that interelement coupling terms produce a noncompact stencil. Evaluating
+(3.4) requires computing two-point ﬂuxes fS between all nodes on two neighboring
+elements, which signiﬁcantly increases both the computational work, as well as communication between neighboring elements. This leads to all-to-all coupling between
+degrees of freedom in 1D, and to coupling along one-dimensional lines of nodes in
+higher dimensions due to the tensor product structure.
+The main goal of this work is to circumvent this tighter coupling of degrees of
+freedom introduced by the SATs described in this section, which can be done through
+the use of “decoupled” SBP operators.
+
+240
+241
+242
+
+3.3. Decoupled SBP operators. Decoupled SBP operators were ﬁrst introduced in [11] and used to construct entropy stable schemes on simplicial elements.
+These operators (and simpliﬁcations under a collocation assumption) are presented
+
+221
+222
+223
+224
+
+d
+T
+Wh S(uh ) + vh (Bh ◦ FS ) 1 − 1T Bh ψ (uh ) = 0.
+dt
+
+6
+
+This manuscript is for review purposes only.
+
+in a more general setting in [11, 12] and in Appendix A. In this section, decoupled
+SBP operators are introduced in one dimension for GLL and Gauss nodal sets.
+Decoupled SBP operators build upon the GSBP matrices W , Q, interpolation
+246 matrix Vf , and boundary matrix B introduced in Section 3.1. The decoupled SBP
+247 operator QN is deﬁned as the block matrix
+243
+244
+245
+
+def
+
+1
+T
+2 Vf B
+1
+2B
+
+.
+
+(3.6)
+
+249
+250
+
+Lemma 3.1 and straightforward computations show that QN also satisﬁes the following SBP property
+
+251
+
+QN =
+
+Q − 1 VfT BVf
+2
+− 1 BVf
+2
+
+248
+
+Lemma 3.3. Let QN be deﬁned through (3.6). Then,
+QN + QT =
+N
+
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+
+267
+
+0
+B
+
+.
+
+We note that the matrix QN acts not only on volume nodes, but on both volume
+and surface nodes. Thus, it is not immediately clear how to apply this operator to
+GSBP discretizations of nonlinear conservation laws. It is straightforward to evaluate
+the nonlinear ﬂux at volume nodes since the solution is collocated at these points;
+however, evaluating the nonlinear ﬂux at surface nodes is less straightforward. Moreover, QN does not directly deﬁne a diﬀerence operator, and must be combined with
+another operation to produce an approximation to the derivative. We will discuss
+how to apply QN in two steps. First, we will show how to approximate the derivative
+of an arbitrary function using QN given function values at both volume and surface
+nodes. Then, we will describe how to apply this approximation to compute derivatives
+of nonlinear ﬂux functions given collocated solution values at volume nodes.
+Let f (x), g(x) denote two functions, and let f , g denote the values of f, g at
+interior nodal points. We also deﬁne vectors fN , gN denoting the values of f, g at
+both interior and boundary points
+
+
+
+
+f (x1 )
+g (x1 )
+
+
+
+
+.
+.
+.
+.
+
+
+
+
+.
+.
+g
+f
+
+
+
+
+.
+(3.7)
+fN = f (xN +1 ) =
+,
+gN = g (xN +1 ) =
+gf
+ff
+
+
+
+
+ f (−1) 
+ g(−1) 
+f (1)
+g(1)
+
+∂g
+Then, a polynomial approximation to f ∂x can be computed using QN . Let u denote
+∂g
+269 the nodal values of the polynomial u(x) ≈ f ∂x . These coeﬃcients are computed via
+
+268
+
+T
+
+(3.8)
+
+271
+
+The approximation (3.8) can be rewritten in “strong” form as follows
+
+272
+273
+274
+275
+
+Wu =
+
+I
+Vf
+
+270
+
+u = W −1
+
+I
+Vf
+
+diag (fN ) QN gN .
+
+T
+
+diag (fN ) QN gN
+
+1
+= diag (f ) Dg + diag (f ) W −1 VfT B (gf − Vf g)
+2
+1
++ W −1 VfT Bdiag (ff ) (gf − Vf g) ,
+2
+7
+
+This manuscript is for review purposes only.
+
+where we have used the fact that diagonal matrices commute to simplify expressions.
+The decoupled SBP operator QN can thus be interpreted as adding boundary corrections to the GSBP operator D in a skew-symmetric fashion. More speciﬁcally, the
+279 expression (3.8) corresponds to a quadrature approximation of the following varia280 tional approximation of the derivative [11]: ﬁnd u ∈ P N ([−1, 1]) such that,
+276
+277
+278
+
+1
+
+1
+
+u(x)v(x) =
+
+281
+−1
+
+IN f
+−1
+
+∂IN g
+(f v + IN (f v))
+v + (g − IN g)
+∂x
+2
+
+1
+
+∀v ∈ P N ([−1, 1]),
+
+,
+−1
+
+282
+283
+284
+285
+
+where IN denotes the degree N polynomial approximation at the (N +1) Gauss points.
+
+289
+
+It was shown in [11] that u is a high-order accurate approximation to the quantity
+∂g
+f ∂x . Both the generalized SBP operator D and the expression in (3.8) involving the
+decoupled SBP operator recover exact derivatives of high-order polynomials. However, when applied to non-polynomial functions, the decoupled SBP operator QN
+improves accuracy near the boundaries. Figure 2 illustrates this by using both oper2
+ators to approximate the derivative of a Gaussian e−4x on [−1, 1]. The decoupled
+SBP operator results in an improved approximation at all orders of approximation.
+
+The approximation (3.8) can also be applied to Gauss collocation schemes for
+nonlinear conservation laws. Let u ∈ P N be represented by the vector u of values at
+286 Gauss points, and let f (x), g(x) denote two nonlinear functions. The operator QN
+∂g(u)
+287 can be used to approximate the quantity f (u) ∂x using (3.8) if f , g are deﬁned as
+
+
+
+
+g (u1 )
+f (u1 )
+
+
+
+
+.
+.
+.
+.
+
+
+
+
+.
+.
+g(u)
+f (u)
+
+
+
+
+288
+,
+uf = Vf u.
+,
+gN = g (uN +1 ) =
+fN = f (uN +1 ) =
+g(uf )
+f (uf )
+
+
+
+
+ g tT u 
+ f tT u 
+L
+L
+g tT u
+f tT u
+R
+R
+290
+291
+292
+293
+294
+295
+
+3.4. An entropy stable Gauss collocation scheme based on decoupled
+SBP operators. We can now construct an entropy conservative Gauss collocation
+scheme with compact SATs using decoupled SBP operators. As in Section 3.2, we
+will construct a Gauss collocation scheme and provide a proof of semi-discrete entropy
+conservation for a two-element mesh.
+We ﬁrst note that B can be trivially decomposed into the sum of two outer
+302 products as in (3.1)
+296
+297
+298
+299
+300
+301
+
+B=
+
+−1
+0
+
+0
+= eR eT − eL eT ,
+R
+L
+1
+
+eL =
+
+1
+,
+0
+
+eR =
+
+0
+.
+1
+
+303
+
+(3.9)
+
+304
+305
+
+The vectors eL , eR are related to tL , tR through the interpolation matrix Vf . Because
+tL , tR are rows of Vf , tL 1 = tR 1 = 1. This can be used to show, for example, that
+
+306
+
+(3.10)
+
+BVf 1 = eR eT − eL eT 1 = eR − eL .
+R
+L
+
+We can deﬁne a decoupled SBP matrix Qh over two
+
+1
+T
+S
+2 Vf B
+1
+1
+ − BVf − eL eT
+def 
+L
+2
+308 (3.11)
+Qh =  2
+
+S
+1
+1
+T
+− 2 eL eR − 2 BVf
+309
+
+307
+
+elements as follows
+
+1
+T
+2 eR eL
+1
+T
+2 Vf B
+1
+T
+2 eR eR
+
+8
+
+This manuscript is for review purposes only.
+
+
+
+,
+
+
+GSBP
+
+GSBP
+
+2
+
+100
+
+Decoupled
+
+Decoupled SBP
+
+L2 errors
+
+Exact
+
+0
+
+10−1
+10−2
+10−3
+
+−2
+
+10−4
+−1
+
+−0.5
+
+0
+
+0.5
+
+0
+
+1
+
+5
+
+x coordinate
+
+10
+Degree N
+
+15
+
+(b) L2 errors
+
+(a) N = 5 approximation
+
+2
+
+Fig. 2: Approximations of derivatives of a Gaussian e−4x using the generalized SBP
+operator D and the decoupled SBP operator QN via (3.8). In Figure 2a, the colored
+circles and squares denote values at Gauss points for a degree N = 5 approximation.
+Figure 2b shows the convergence of L2 errors as N increases.
+
+310
+311
+
+where we have abused notation and redeﬁned Qh . We can also show that Qh 1 = 0.
+Using (3.10), we have that
+(3.12)
+
+
+312
+
+313
+
+ 
+
+S + 1 VfT B 1
+Q − 1 VfT BVf + 1 VfT BVf 1
+2
+2
+2
+ 1
+ 
+
+1
+− BVf 1 + 1 (eR − eL ) 
+
+B (−1 + 1)
+2
+2
+=
+ = 0.
+Qh 1 =  2
+
+ 
+
+1
+S + 1 VfT B 1
+
+  Q − 2 VfT BVf + 1 VfT BVf 1
+2
+2
+1
+1
+− 1 BVf 1 + 2 (eR − eL )
+2
+2 B (−1 + 1)
+
+Here, we have used the deﬁnition of B in (3.9), the fact that Vf 1 = 1 and Q1 = 0
+[20], and the deﬁnition of S in (3.2). This property (3.12) will be used in the proof
+of entropy conservation.
+It can be helpful to split up Qh into two matrices
+
+
+1
+T
+S
+2 Vf B
+1
+T 
+ − 1 BVf
+1
+def 
+2 eR eL 
+318
+Qh = Sh + Bh ,
+Sh =  2
+
+1
+T
+2
+
+
+S
+2 Vf B
+1
+1
+− 2 eL eT − 2 BVf
+R
+
+
+314
+315
+316
+317
+
+319
+
+
+def
+Bh = 
+
+
+−eL eT
+L
+eR eT
+R
+
+320
+321
+322
+323
+324
+
+
+.
+
+
+The matrix Sh is skew-symmetric, while the matrix Bh functions as a boundary operator which extracts boundary values over the two-element domain (i.e. Bh extracts
+a left boundary value from element 1 and a right boundary value from element 2).
+Note that here, Bh is diagonal, unlike the boundary operator deﬁned in Section 3.2.
+9
+
+This manuscript is for review purposes only.
+
+It should also be noted that the two-element decoupled SBP operator Qh in (3.11) is
+related to the GSBP operator in (3.3) through a block interpolation matrix
+
+
+I
+1
+1
+T
+T
+V
+
+S
+def
+T
+2 tR tL + − 2 tL tL
+,
+Ih Q h Ih =
+Ih =  f
+327
+1
+1
+T
+T .
+
+
+I
+S
+− 2 tL tR
+2 tR tR
+Vf
+325
+326
+
+328
+329
+330
+331
+332
+333
+334
+335
+336
+
+We will now utilize the two-element operators described in this section to construct an entropy stable Gauss collocation scheme on two elements. This scheme will
+diﬀer from that of Section 3.2 in that neighboring elements will only be coupled together through face values. Let u1 , u2 denote the values of the conservative variables
+N
+N
+at Gauss points on elements 1 and 2, respectively, and let uh denote their concatenation as deﬁned in (3.4). Let v(ui ) denote the evaluation of entropy variables at
+N
+Gauss points on element i, and deﬁne the “entropy-projected conservative variables”
+u1 , u2 by evaluating the conservative variables in terms of the interpolated values of
+f
+f
+the entropy variables at element boundaries
+def
+
+def
+
+i
+ui = u(vf ),
+f
+
+337
+
+i
+vf = Vf v(ui ),
+N
+
+i = 1, 2.
+
+T
+
+We now introduce uh = u1 u2
+as the concatenated vector of solution values at
+N
+N
+Gauss points, and deﬁne vh , v, and u as follows:
+ 1
+uN
+ u1 
+u1
+def
+def
+def
+f
+N
+340
+vh = v (uh ) = v
+,
+v = Ih vh ,
+u = u (v) =  2  .
+uN 
+u2
+N
+u2
+f
+
+338
+339
+
+341
+342
+343
+344
+345
+346
+
+The term vh corresponds to the vector of entropy variables at uh , while v corresponds
+to the concatenated vector of Gauss point values and interpolated boundary values
+i
+vf of the entropy variables. The term u denotes the evaluation of the conservative
+variables in terms of v.
+Finally, we deﬁne FS as the matrix of evaluations of the two-point ﬂux fS at
+combinations of values of u
+def
+
+(FS )ij = fS (ui , uj ) ,
+
+347
+
+1 ≤ i, j ≤ 2(N + 3).
+
+348
+
+Note that, due to the consistency of fS , the diagonal of FS reduces to ﬂux evaluations
+
+349
+
+(3.13)
+
+350
+351
+
+We can now construct a semidiscrete entropy conservative formulation based on decoupled SBP operators:
+
+352
+353
+
+Theorem 3.4. Let Qh be deﬁned by (3.11), and let uh denote the two-element
+solution of the following formulation:
+
+354
+355
+
+(3.14)
+
+356
+
+Then, uh satisﬁes a semidiscrete conservation of entropy
+
+357
+358
+359
+
+(FS )ii = fS (ui , ui ) = f (ui ) .
+
+Wh
+
+d
+T
+uh + 2Ih (Qh ◦ FS ) 1 = 0.
+dt
+
+dS(uh )
+T
++ 1T B vf f (uf ) − ψ (uf ) = 0
+dt
+tT v u1
+def
+def
+L
+N
+vf = T
+,
+uf = u(vf ).
+tR v u2
+N
+
+1T Wh
+
+10
+
+This manuscript is for review purposes only.
+
+360
+361
+
+362
+
+363
+
+364
+
+T
+Proof. The proof results from testing with vh . Since v(u) =
+diagonal, the time term yields
+
+T
+vh
+
+∂S(u)
+∂u
+
+and Wh is
+
+d
+d
+d
+Wh uh = 1T Wh diag (vh ) uh = 1T Wh S(uh ).
+dt
+dt
+dt
+
+The spatial term can be manipulated as follows
+T T
+2vh Ih (Qh ◦ FS ) 1 = 2 (Ih vh )
+
+T
+
+(Sh ◦ FS ) 1 +
+
+1
+(Bh ◦ FS ) 1
+2
+
+= v T (Bh ◦ FS ) 1 + v T (Sh ◦ FS ) 1 − 1T (Sh ◦ FS ) v,
+
+365
+366
+
+368
+
+where we have used the skew-symmetry of Sh in the last step. The boundary term
+reduces to
+
+369
+
+T
+v T (Bh ◦ FS ) 1 = 1T Bh v T f (u) = 1T B vf f (uf ) ,
+
+370
+
+T
+where we have used (3.13) and the fact that Bh is diagonal. Here, v T f (u), vf f (uf )
+denote vectors whose entries are the vector inner products of components of v and
+f (u) at volume and face points, respectively.
+The volume terms can be manipulated using the deﬁnition of FS and the Tadmor
+shuﬄe condition in Deﬁnition 3.2
+
+367
+
+371
+372
+373
+374
+
+375
+
+T
+
+v T (Sh ◦ FS ) 1 − 1T (Sh ◦ FS ) v =
+
+(Sh )ij (vi − vj ) fS (ui , uj )
+ij
+
+(Sh )ij (ψ (ui ) − ψ (uj ))
+
+=
+
+376
+
+ij
+T
+
+379
+380
+
+381
+382
+383
+
+T
+
+= ψ (u) Sh 1 − 1T Sh ψ (u) = 2 ψ (u) Sh 1 ,
+
+377
+378
+
+where we have again used the skew-symmetry of Sh in the last step. Substituting
+1
+Sh = Qh − 2 Bh and using (3.12) yields
+T
+
+T
+
+2 ψ (u) Sh 1 = ψ (u) (2Qh − Bh ) 1
+T
+
+= −ψ (u) Bh 1 = −1T Bh ψ (u) = −1T Bψ (uf ) ,
+
+384
+
+where we have used the symmetry of Bh in the second to last step.
+
+385
+386
+387
+388
+
+Remark. The proof of Theorem 3.4 follows directly from choosing either GLL
+or Gauss quadratures in Theorem 4 of [11]. The proof is reproduced here for clarity,
+as the two-element case illuminates the skew-symmetric nature and structure of the
+interelement coupling more explicitly.
+
+389
+390
+
+Extending the two-element case to multiple elements can be done by deﬁning analogous “global” diﬀerentiation matrices. Suppose that there are now three elements.
+11
+
+This manuscript is for review purposes only.
+
+Then, the matrices Sh , Bh can be deﬁned as
+
+1
+T
+S
+2 Vf B
+1
+ − BVf
+ 2
+
+def 
+S
+392
+Sh = 
+
+− 1 eL eT − 1 BVf
+R
+2
+2
+
+
+391
+
+
+1
+T
+2 eR eL
+1
+T
+2 Vf B
+
+S
+− 1 BVf
+ 2
+I
+Vf
+
+
+I
+Ih = 
+
+Vf
+
+
+
+− 1 eL eT
+R
+2
+
+393
+
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+
+407
+
+
+
+Bh = 
+
+
+def
+
+
+−eL eT
+L
+0
+eR eT
+R
+
+
+
+,
+
+
+
+
+
+
+
+
+1
+eR eT 
+L 
+2
+1
+T
+
+2 Vf B
+
+
+
+
+.
+
+
+I
+Vf
+
+These global operators again satisfy Qh 1 = 0 and the SBP property Qh + QT = Bh ,
+h
+1
+where Qh = Sh + 2 Bh . Moreover, Qh can be used to produce high-order accurate
+approximations of derivatives, and can be used to construct entropy conservative
+schemes as in Theorem 3.4. The extension to a general number of elements is done
+in a similar fashion.
+It is possible to convert the semidiscrete entropy equality in Theorem 3.4 to a
+semidiscrete entropy inequality by adding appropriate interface dissipation terms,
+such as Lax-Friedrichs or matrix dissipation [25]. We note that these terms must be
+computed in terms of uf in order to ensure a discrete dissipation of entropy [9, 11].
+Boundary conditions can also be incorporated into the formulation (3.14) in a weak
+fashion. Let uL , uR denote the values of the solution at the left and right domain
+boundaries of a 1D domain. Using the SBP property, we can modify (3.14) to
+
+
+0
+f (uL )
+
+
+duh
+ . 
+T
+T
+Wh
++ 2Ih (Sh ◦ FS ) 1 + Ih Bh  .  = 0,
+. 
+
+dt
+ 0 
+f (uR )
+
+where we have used the fact that Bh is diagonal and the consistency of fS (implying that the diagonal of FS reduces to the evaluation of the ﬂux f (u)) to simplify
+the boundary term (Bh ◦ FS ) 1. Boundary conditions are incorporated by replacing
+∗
+∗
+f (uL ), f (uR ) with numerical ﬂuxes fL , fR as follows:
+ 
+0
+∗
+fL 
+ 
+duh
+ . 
+T
+T
+Wh
++ 2Ih (Sh ◦ FS ) 1 + Ih Bh  .  = 0.
+412 (3.15)
+ . 
+dt
+0
+∗
+fR
+408
+409
+410
+411
+
+413
+414
+415
+
+If the boundary numerical ﬂux satisﬁes the entropy stability conditions
+T ∗
+ψL − vL fL ≤ 0,
+
+T ∗
+ψR − vR fR ≤ 0
+
+then the resulting scheme satisﬁes a global entropy inequality [9].
+12
+
+This manuscript is for review purposes only.
+
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+
+Assuming that the ODE system (3.14) exactly integrated in time and that entropy
+dissipative numerical ﬂuxes and boundary conditions are used, the solution will satisfy
+a discrete entropy inequality (2.3). In practice, the system (3.14) is solved using an
+ODE time-stepper. For an explicit time-stepper, then all that is necessary is to invert
+the diagonal matrix Wh and evaluate the spatial terms in (3.15).
+We note that the conservation or dissipation of entropy is guaranteed up to timestepper accuracy. In practice, we observe that entropy is dissipated for all problems
+considered, despite the fact that the proof does not hold at the fully discrete level.
+A fully discrete entropy inequality can be guaranteed using implicit or space-time
+discretizations [26, 27].
+4. Extension to higher dimensions and nonaﬃne meshes. The formulation in Theorem 3.4 can be naturally extended to Cartesian meshes in higher dimensions through a tensor product construction. We ﬁrst consider the construction of
+higher dimensional diﬀerentiation matrices on a two-dimensional reference element Ω,
+assuming a two dimensional tensor product grid of quadrature nodes (the construction of decoupled SBP operators in three dimensions is straightforward and similar
+to the two-dimensional case). We then construct physical diﬀerentiation matrices on
+mapped elements Ωk , through which we construct an entropy conservative scheme.
+Let D1D , W1D denote the 1D diﬀerentiation and mass matrices, respectively, on
+the reference interval [−1, 1]. Let W denote the 2D reference mass matrix, and let
+D i denote the diﬀerentiation matrices with respect to the ith reference coordinate.
+These matrices can be expressed in terms of Kronecker products
+def
+
+D 1 = D1D ⊗ IN +1 ,
+
+438
+439
+440
+441
+442
+443
+444
+
+def
+
+W = W1D ⊗ W1D ,
+
+where IN +1 denotes the (N + 1) × (N + 1) identity matrix.
+We also construct higher dimensional face interpolation matrices. Let Vf,1D denote the one-dimensional interpolation matrix, and let B1D denote the boundary
+matrix deﬁned in Lemma 3.1. For an appropriate ordering of face quadrature points,
+the two-dimensional face interpolation matrix Vf and reference boundary matrices
+B 1 , B 2 can be expressed as the concatenation of Kronecker product matrices
+def
+
+Vf =
+
+445
+446
+447
+448
+449
+450
+
+def
+
+D 2 = IN +1 ⊗ D1D ,
+
+Vf,1D ⊗ I2
+,
+I2 ⊗ Vf,1D
+
+def
+
+B1 =
+
+B1D ⊗ I2
+0
+
+,
+
+def
+
+B2 =
+
+0
+I2 ⊗ B1D
+
+.
+
+In three dimensions, the face interpolation matrix would be expressed as the concatenation of three Kronecker products involving Vf,1D . The higher dimensional differentiation and interpolation matrices D i , Vf can now be used to construct higher
+dimensional decoupled SBP operators. Let Qi denote the decoupled SBP operator
+N
+for the ith coordinate on the reference element, where Qi is deﬁned as
+N
+def
+
+Qi =
+N
+
+451
+
+1
+Qi − 2 VfT B i Vf
+1 i
+− 2 B Vf
+
+1
+T
+i
+2 Vf B
+1 i
+2B
+
+,
+
+def
+
+Qi = W D i .
+
+Let the domain now be decomposed into nonoverlapping elements Ωk , such that
+Ω is the image of Ω under a degree N polynomial mapping Φk . We deﬁne geometric
+∂xj
+454 terms Gk = J k ∂x as scaled derivatives of reference coordinates x with respect to
+ij
+i
+k
+455 physical coordinates x. We also introduce the scaled normals ni Jf , which can be
+456 computed on quadrilateral and tensor product elements via
+452
+453
+
+k
+
+d
+
+457
+
+k
+ni Jf = ±
+
+d
+
+Gk = ±
+ij
+j=1
+
+Jk
+j=1
+
+∂xj
+,
+∂xi
+
+13
+
+This manuscript is for review purposes only.
+
+458
+459
+460
+461
+462
+
+k
+where the sign of ni Jf is negative for a “left” face and positive for a “right” face.
+k
+These geometric terms introduce scalings J k , Jf , where J k is the determinant of the
+k
+k
+Jacobian of Φ and Jf denotes the determinant of the Jacobian of the mapping from
+k
+a physical face to a reference face. The quantities Gk , ni Jf can now be used to deﬁne
+ij
+matrices over each physical element Ωk
+def
+
+464
+
+def
+
+Qi =
+k
+
+(4.1)
+
+465
+466
+467
+468
+469
+470
+471
+
+def
+
+Wk = W diag J k ,
+
+463
+
+1
+2
+
+i
+Bk = B i diag nk ,
+i
+
+d
+
+diag Gk Qi + Qi diag Gk
+ij
+N
+N
+ij
+
+,
+
+j=1
+
+where we have discretized the curved diﬀerentiation matrix in split form [28, 29].
+Here, J k denotes the vector of values of J k at volume quadrature points, Gk denotes
+ij
+the vector of values of Gk at volume and face quadrature points, and nk denotes the
+i
+ij
+k
+ith scaled outward normal ni Jf at face quadrature points.
+i
+A 2D Gauss collocation scheme can now be given in terms of Wk , Qi , Bk . Let
+k
+k
+k
+uN denote the vector of solution values on Ω , and deﬁne the quantities
+i
+FS
+
+472
+
+def
+
+mn
+
+i
+= fS (um , un ) ,
+
+uk
+N
+,
+uk
+f
+
+def
+
+u=
+
+473
+474
+
+1 ≤ m, n ≤ (N + 1)2 + 4(N + 1)
+def
+
+def
+
+k
+u k = u vf ,
+f
+
+k
+vf = Vf v uk ,
+N
+
+where (N + 1)2 + 4(N + 1) is the total number of volume and face points. We then
+476 have the following theorem on the semidiscrete conservation of entropy:
+475
+
+477
+478
+
+Theorem 4.1. Assume that Qk 1 = 0, and that Ωk are mapped curvilinear elements. Let uk satisfy the local formulation on Ωk
+N
+
+479
+
+(4.2)
+
+480
+481
+
+where u+ denotes boundary values of the entropy-projected conservative variables on
+neighboring elements. Then, uk satisﬁes the discrete conservation of entropy
+N
+
+d
+
+Wk
+
+duk
+i
+i
+i
+N
++
+2 Qi ◦ FS 1 + VfT Bk fS u+ , uk − f i (uf )
+k
+f
+f
+dt
+i=1
+
+d
+
+1T Wk
+
+482
+k
+
+dS uk
+N
+i
++
+1T Bk
+dt
+i=1
+
+k
+vf
+
+T
+
+f i (uk ) − ψ uk
+f
+f
+
+= 0,
+
+= 0.
+
+The proof is a special case of the proof of Theorem 1 in [12], with the quadrature
+rule taken to be a tensor product rule with (N + 1) Gauss (or GLL) points in each
+485 coordinate direction.
+483
+484
+
+Remark. The operator Qi in (4.1) can be applied without needing to explicitly
+k
+487 store geometric terms Gk at face quadrature points. By using the structure of the
+ij
+488 boundary matrix B i , expressions involving geometric terms on faces can be replaced
+k
+489 by expressions involving components of scaled outward normals ni Jf on Ωk .
+486
+
+490
+491
+492
+493
+
+4.1. Discrete geometric conservation law. We note that Theorem 4.1 relies
+on the assumption that Qk 1 = 0. This condition is equivalent to ensuring that
+the scaled geometric terms Gk satisfy a discrete geometric conservation law (GCL)
+ij
+[2, 7, 10, 12]. For two-dimensional degree N (isoparametric) mappings, the GCL is
+14
+
+This manuscript is for review purposes only.
+
+494
+495
+496
+497
+498
+499
+500
+501
+502
+503
+504
+505
+506
+507
+508
+509
+
+510
+
+automatically satisﬁed. However, in three dimensions, the GCL is not guaranteed to
+be satisﬁed at the discrete level, due to the fact that geometric terms for isoparametric
+mappings are polynomials of degree higher than N .
+It is possible to ensure the satisfaction of a discrete GCL by using a subparametric
+polynomial geometric mapping. Let Ngeo denote the degree of a polynomial geometric
+mapping. In three dimensions, the exact geometric terms for a degree Ngeo polynomial
+mapping are polynomials of degree 2Ngeo [30, 16, 10]. If 2Ngeo ≤ N , or if Ngeo ≤ N ,
+2
+then the discrete GCL is automatically satisﬁed.1
+For Ngeo ≥ N , modiﬁcations to the computation of geometric terms are required
+2
+to ensure that the GCL is satisﬁed at the discrete level. For general SBP operators, the
+discrete GCL can be enforced through the solution of a local least squares problem [10].
+We take an alternative approach and construct geometric terms using the approach
+of Kopriva [30]. This construction takes advantage of the fact that GLL and Gauss
+collocation methods correspond to polynomial discretizations. Kopriva’s construction
+is based on rewriting the geometric terms as the reference curl of an interpolated
+auxiliary quantity
+
+(4.3)
+
+
+− × IN z y
+ k
+
+G1j
+
+Gk  = 
+× IN z x
+2j
+
+
+Gk
+3j
+× IN x y
+
+
+j
+j
+
+
+,
+
+
+
+j = 1, 2, 3.
+
+j
+
+524
+525
+526
+
+Here, IN denotes the polynomial interpolation operator using GLL nodes. By interpolating the auxiliary quantity in (4.3) using polynomial interpolation prior to applying
+the curl, the geometric terms are approximated by degree N polynomials which satisfy
+the discrete GCL by construction. These GCL-satisfying geometric terms can then
+be used to compute normal vectors. For a watertight mesh, the constructed normal
+vectors are guaranteed to be continuous across faces [12].
+To summarize, extending higher dimensional entropy stable Gauss collocation
+schemes to curved meshes requires the following steps:
+1. Construct polynomial approximations of the geometric terms using equation
+(4.3) and interpolation at GLL nodes [30].
+2. Evaluate approximate geometric terms at volume and surface points, and
+compute normal vectors in terms of the approximate geometric terms.
+3. Compute physical derivatives using the split form (4.1).
+Apart from evaluating the GCL-satisfying geometric terms at separate volume and
+surface points, entropy stable Gauss collocation schemes are extended to curved
+meshes in the same manner as GLL and staggered-grid collocation schemes [2, 14, 12].
+
+527
+
+5. Numerical results. In this section, we present numerical examples for the
+
+511
+512
+513
+514
+515
+516
+517
+518
+519
+520
+521
+522
+523
+
+1 We note that this condition is speciﬁc to three-dimensional hexahedral elements, and does not
+necessarily hold for other element types. For example, the discrete GCL is satisﬁed if 2Ngeo − 2 ≤ N
+for isoparametric tetrahedral elements [12].
+
+15
+
+This manuscript is for review purposes only.
+
+528
+
+compressible Euler equations, which are given in d dimensions as follows:
+d
+
+∂ρ
+∂ (ρuj )
++
+= 0,
+∂t j=1 ∂xj
+
+529
+
+d
+
+530
+
+∂ρui
+∂ (ρui uj + pδij )
++
+= 0,
+∂t
+∂xj
+j=1
+
+531
+
+∂E
+∂ (uj (E + p))
++
+= 0.
+∂t
+∂xj
+j=1
+
+i = 1, . . . , d
+
+d
+
+532
+
+Here, ρ is density, ui denotes the ith component of velocity, and E is the total energy.
+The pressure p and speciﬁc internal energy ρe are given by
+
+
+
+
+
+d
+d
+1 
+1 
+u2 ,
+u2 .
+535
+p = (γ − 1) E − ρ
+ρe = E − ρ
+j
+j
+2
+2
+j=1
+j=1
+
+533
+
+534
+
+536
+537
+538
+539
+
+There exists an inﬁnite family of suitable convex entropies for the compressible
+Euler equations [31]. However, there is only a single unique entropy which appropriately treats the viscous heat conduction term in the compressible Navier-Stokes
+equations [32]. This entropy S(u) is given by
+S(u) = −
+
+540
+
+ρs
+,
+γ−1
+
+where s = log ρp is the physical speciﬁc entropy, and the dimension d = 1, 2, 3.
+γ
+542 The entropy variables in d dimensions are given by
+541
+
+544
+
+v1+i
+
+545
+546
+
+vd+2
+
+547
+
+ρe(γ + 1 − s) − E
+,
+ρe
+ρui
+=
+,
+i = 1, . . . , d,
+ρe
+ρ
+=− ,
+ρe
+
+v1 =
+
+543
+
+while the conservation variables in terms of the entropy variables are given by
+ρ = −(ρe)vd+2 ,
+
+548
+
+ρui = (ρe)v1+i ,
+
+549
+
+E = (ρe) 1 −
+
+550
+551
+552
+
+553
+
+i = 1, . . . , d
+d
+j=1
+
+2
+v1+j
+
+2vd+2
+
+,
+
+where the quantities ρe and s in terms of the entropy variables are
+ρe =
+
+(γ − 1)
+γ
+(−vd+2 )
+
+1/(γ−1)
+
+−s
+
+e γ−1 ,
+
+s = γ − v1 +
+
+d
+j=1
+
+2
+v1+j
+
+2vd+2
+
+.
+
+Let f denote some piecewise polynomial function, and let f + denote the exterior
+value of f across an element face. We deﬁne the average and logarithmic averages as
+follows:
+f+ − f
+f+ + f
+log
+557
+,
+{{f }} =
+.
+{{f }} =
+2
+log (f + ) − log (f )
+
+554
+555
+556
+
+16
+
+This manuscript is for review purposes only.
+
+The average and logarithmic average are assumed to act component-wise on vectorvalued functions. We evaluate the logarithmic average using the numerically stable
+algorithm of [33]. Explicit expressions for entropy conservative numerical ﬂuxes in
+561 two dimensions are given by Chandrashekar [34]
+558
+559
+560
+
+562
+
+1
+f1,S (uL , uR ) = {{ρ}}
+
+563
+564
+
+2
+f1,S (uL , uR )
+3
+f1,S (uL , uR )
+
+565
+566
+
+4
+f1,S (uL , uR )
+
+=
+=
+
+log
+
+1
+f2,S (uL , uR ) = {{ρ}}
+
+{{u1 }} ,
+
+1
+f1,S {{u1 }}
+2
+f2,S ,
+
+{{u2 }} ,
+
+2
+f2,S (uL , uR )
+3
+f2,S (uL , uR )
+
++ pavg ,
+
+= (Eavg + pavg ) {{u1 }} ,
+
+=
+
+4
+f2,S (uL , uR )
+
+= (Eavg + pavg ) {{u2 }} ,
+
+567
+
+(5.1)
+
+{{u1 }} ,
+{{u2 }} + pavg ,
+
+where we have introduced the auxiliary quantities
+
+568
+
+=
+
+1
+f2,S
+1
+f2,S
+
+log
+
+β=
+
+ρ
+,
+2p
+
+pavg =
+u2
+avg
+
+569
+570
+
+{{ρ}}
+,
+2 {{β}}
+
+{{ρ}}
+
+Eavg =
+
+2
+
+2
+
+= 2({{u1 }} + {{u1 }} ) −
+
+2 {{β}}
+
+{u2 }
+1
+
++
+
+log
+
+log
+
+(γ − 1)
+
+{u2 }
+2
+
++
+
+u2
+avg
+,
+2
+
+.
+
+Expressions for entropy conservative numerical ﬂuxes for the three-dimensional compressible Euler equations can also be explicitly written as
+
+
+
+
+log
+log
+{{ρ}} {{u1 }}
+{{ρ}} {{u2 }}
+
+
+
+
+log
+2
+log
+ {{ρ}} {{u1 }} {{u2 }} 
+ {{ρ}} {{u1 }} + pavg 
+
+
+
+
+f2,S =  {{ρ}}log {{u2 }}2 + pavg  ,
+573
+f1,S =  {{ρ}}log {{u1 }} {{u2 }}  ,
+
+
+
+
+ {{ρ}}log {{u2 }} {{u3 }} 
+ {{ρ}}log {{u1 }} {{u3 }} 
+(Eavg + pavg ) {{u1 }}
+(Eavg + pavg ) {{u2 }}
+
+
+log
+{{ρ}} {{u3 }}
+
+
+log
+ {{ρ}} {{u1 }} {{u3 }} 
+
+
+log
+574
+f3,S =  {{ρ}} {{u2 }} {{u3 }}  ,
+
+
+log
+2
+ {{ρ}} {{u3 }} + pavg 
+(Eavg + pavg ) {{u3 }}
+575
+
+571
+572
+
+576
+577
+578
+579
+580
+581
+582
+
+where the auxiliary quantities are deﬁned as
+β=
+
+ρ
+,
+2p
+
+u2
+avg
+
+pavg =
+
+{{ρ}}
+,
+2 {{β}}
+
+2
+
+Eavg =
+2
+
+2
+
+{{ρ}}
+
+log
+
+2(γ − 1) {{β}}
+
+= 2({{u1 }} + {{u2 }} + {{u3 }} ) −
+
+log
+
++
+
+1
+log
+{{ρ}} u2 ,
+avg
+2
+
+{u2 } + {u2 } + {u2 }
+1
+2
+3
+
+.
+
+In all problems, we use an explicit low storage RK-45 time-stepper [35] and estik
+mate the timestep size dt using J, Jf , and degree-dependent L2 trace constants CN
+dt = CCFL
+
+h
+,
+aCN
+
+1
+
+h=
+J −1
+
+L∞
+
+,
+k
+Jf
+
+L∞
+
+where a is an estimate of the maximum wave speed, h estimates the mesh size, and
+k
+CCFL is some user-deﬁned CFL constant. For isotropic elements, the ratio of J k to Jf
+585 scales as the mesh size h, while CN captures the dependence of the maximum stable
+586 timestep on the polynomial degree N . For hexahedral elements, CN varies depending
+587 on the choice of quadrature. It was shown in [17] that
+
+583
+584
+
+588
+
+CN =
+
+d N (N +1)
+2
+d (N +1)(N +2)
+2
+
+for GLL nodes
+.
+for Gauss nodes
+
+17
+
+This manuscript is for review purposes only.
+
+(a) Lightly warped mesh
+
+(b) Moderately warped mesh
+
+(c) Heavily warped mesh
+
+Fig. 3: Lightly, moderately, and heavily warped meshes for N = 4, K = 16.
+
+589
+590
+591
+592
+593
+594
+595
+596
+597
+598
+599
+
+600
+
+601
+602
+603
+604
+605
+606
+607
+608
+609
+610
+
+Thus, based on this rough estimate of the maximum stable timestep, GLL collocation
+schemes should be able to take a timestep which is roughly (1+2/N ) times larger than
+the maximum stable timestep for Gauss collocation schemes. We do not account for
+this discrepancy in this work, and instead set the timestep for both GLL and Gauss
+collocation schemes based on the more conservative Gauss collocation estimate of dt.
+Numerical results in 1D are similar to those presented in [11]. Thus, we focus on
+two- and three- dimensional problems and comparisons of entropy stable GLL and
+Gauss collocation schemes.
+5.1. 2D isentropic vortex problem. We begin by examining high-order convergence of the proposed methods in two dimensions using the isentropic vortex problem [36, 13]. The analytical solution is
+
+(5.2)
+
+ρ(x, t) =
+
+1−
+
+u1 (x, t) = 1 −
+
+1
+2 (γ
+
+2
+
+− 1)(βe1−r(x,t) )2
+8γπ 2
+
+β 1−r(x,t)2
+e
+(y − y0 ),
+2π
+
+1
+γ−1
+
+,
+
+p = ργ ,
+
+u2 (x, t) =
+
+β 1−r(x,t)2
+e
+(x − x0 − t),
+2π
+
+where u1 , u2 are the x and y velocity and r(x, t) = (x − x0 − t)2 + (y − y0 )2 . Here,
+we take x0 = 5, y0 = 0 and β = 5.
+We solve on a periodic rectangular domain [0, 20] × [−5, 5] until ﬁnal time T =
+5, and compute errors over all all solution ﬁelds. For a degree N approximation,
+we approximate the L2 error using an (N + 2) point Gauss quadrature rule. We
+also examine the inﬂuence of element curvature for both GLL and Gauss collocation
+schemes by examining L2 errors on a sequence of moderately and heavily warped
+curvilinear meshes (see Figure 3). These warpings are constructed by modifying
+18
+
+This manuscript is for review purposes only.
+
+L2 errors
+
+10−1
+
+10−1
+
+10−4
+
+10−4
+
+10−7
+
+10−7
+GLL
+
+10
+
+GLL
+
+Gauss
+
+−10
+
+10−1.5
+Mesh size h
+
+10
+
+10−1
+
+10−1.5
+Mesh size h
+
+(a) Aﬃne mesh
+
+10−1
+
+(b) Lightly warped mesh
+
+10−1
+L2 errors
+
+Gauss
+
+−10
+
+10−1
+
+10−4
+
+10−4
+
+10−7
+
+10−7
+GLL
+
+10
+
+GLL
+
+Gauss
+
+−10
+
+10−1.5
+Mesh size h
+
+10
+
+Gauss
+
+−10
+
+10−1
+
+10−1.5
+Mesh size h
+
+(c) Moderately warped mesh
+
+10−1
+
+(d) Heavily warped mesh
+
+Fig. 4: L2 errors for the 2D isentropic vortex at time T = 5 for degree N = 2, . . . , 7
+GLL and Gauss collocation schemes.
+
+611
+
+nodal positions according to the following mapping
+
+612
+
+x = x + Lx α cos
+
+613
+614
+
+y = y + Ly α sin
+
+615
+616
+617
+618
+619
+620
+621
+622
+623
+624
+
+π
+Lx
+x−
+Lx
+2
+Lx
+4π
+x−
+Lx
+2
+
+cos
+cos
+
+3π
+y ,
+Ly
+π
+y ,
+Ly
+
+where Lx = 20, Ly = 10 denote the lengths of the domain in the x and y directions,
+respectively. The lightly warped mesh corresponds to α = 1/64, the moderately
+warped mesh corresponds to α = 1/16, and the heavily warped mesh corresponds to
+α = 1/8. All results are computed using CCFL = 1/2 and Lax-Friedrichs interface
+dissipation.
+Figure 4 shows the L2 errors for aﬃne, moderately warped, and heavily warped
+meshes. For aﬃne meshes, Gauss collocation results in a lower errors than GLL
+collocation at all orders. However, the diﬀerence between both schemes decreases as
+N increases. This is not too surprising: on a Cartesian domain, the discrete L2 inner
+product resulting from GLL quadrature converges to exact L2 inner product over
+19
+
+This manuscript is for review purposes only.
+
+625
+626
+627
+628
+629
+630
+631
+632
+633
+634
+635
+636
+637
+638
+
+the space of polynomials as N increases [37]. However, GLL and Gauss collocation
+diﬀer more signiﬁcantly on curved meshes. For both moderately and heavily warped
+meshes, the errors for a degree N Gauss collocation scheme are nearly identical to
+errors for a higher-order GLL collocation scheme of degree (N + 1). These results are
+in line with numerical experiments in [14], which show that GLL collocation schemes
+lose one order of convergence in the L2 norm on unstructured nonuniform meshes.
+Both results show that increasing quadrature accuracy signiﬁcantly reduces the eﬀect
+of polynomial aliasing due to curved meshes and spatially varying geometric terms.
+We note that L2 approximation estimates on curved meshes [38, 39] assume that
+the mesh size is small enough to be in the asymptotic regime (such that asymptotic
+error estimates hold). On curved meshes, this requires that the mesh is suﬃciently
+ﬁne to resolve both the solution and geometric mapping. The results in Figure 4 suggest that, compared to Gauss collocation schemes, underintegrated GLL collocation
+schemes require a ﬁner mesh resolution to reach the asymptotic regime.
+
+5.2. 3D isentropic vortex problem. As in two dimensions, we test the accuracy of the proposed scheme using an isentropic vortex solution adapted to three
+641 dimensions. The solution is the extruded 2D vortex propagating in the y direction,
+642 with an analytic expression given in [40]
+639
+640
+
+643
+
+ρ(x, t) =
+
+1−
+
+644
+645
+
+1
+γ−1
+
+ui (x, t) = Πri ,
+p0
+E(x, t) =
+γ−1
+
+(γ − 1) 2
+Π
+2
+
+646
+
+γ−1 2
+1−
+Π
+2
+
+γ
+γ−1
+
++
+
+ρ
+2
+
+d
+
+u2 .
+i
+i=1
+
+where (u1 , u2 , u3 )T is the three-dimensional velocity vector and
+
+  
+r1
+−(x2 − c2 − t)
+2
+1− d
+i=1 ri
+.
+r2  = 
+2
+x1 − c1
+648
+Π = Πmax e
+,
+r3
+0
+
+647
+
+649
+650
+651
+652
+653
+654
+
+We take c1 = c2 = 7.5, p0 = 1/γ, and Πmax = 0.4, and solve on the domain
+[0, 15] × [0, 20] × [0, 5] until ﬁnal time T = 5. We decompose the domain into uniform hexahedral elements with edge length h. As in the 2D case, we also examine
+the eﬀect of curvilinear mesh warping. We construct a curved warping of the initial
+Cartesian mesh by mapping nodes on each hexahedron to warped nodal positions
+(x, y, z) through the transformation
+
+657
+658
+
+(x − 7.5)
+(y − 10)
+(z − 2.5)
+1
+y = y + Ly cos 3π
+cos π
+cos π
+8
+15
+20
+5
+1
+(x − 7.5)
+(y − 10)
+(z − 2.5)
+x = x + Lx cos π
+sin 4π
+cos π
+8
+15
+20
+5
+1
+(x − 7.5)
+(y − 10)
+(z − 2.5)
+z = z + Lz cos π
+cos 2π
+cos π
+.
+8
+15
+20
+5
+
+659
+660
+661
+
+where Lx = 15, Ly = 20, Lz = 5. On curved meshes, the geometric terms are constructed using the approach of Kopriva described in Section 4. A CCFL = .75 is used
+for all experiments.
+
+655
+
+656
+
+20
+
+This manuscript is for review purposes only.
+
+100
+
+10−2
+
+10−2
+
+L2 errors
+
+L2 errors
+
+100
+
+10−4
+GLL
+
+10−6
+
+GLL
+
+10−6
+
+Gauss
+
+10−0.5
+
+10−4
+
+Gauss
+
+10−0.5
+
+100
+Mesh size h
+
+(a) Aﬃne mesh
+
+100
+Mesh size h
+
+(b) Curved mesh
+
+Fig. 5: L2 errors for the 3D isentropic vortex for N = 2, . . . , 5 on sequences of Cartesian and curved meshes.
+
+662
+663
+664
+665
+666
+667
+668
+669
+670
+671
+672
+673
+674
+675
+676
+677
+678
+679
+680
+681
+682
+683
+684
+685
+686
+687
+688
+
+Figure 5 shows the L2 errors for degrees N = 2, . . . , 5.2 As in the 2D case, Gauss
+collocation schemes produce smaller errors than GLL collocation. The diﬀerence
+between the two schemes on aﬃne meshes is slightly more pronounced than in 2D,
+while the diﬀerence between the two schemes on curved meshes is less signiﬁcant than
+observed in 2D experiments. We expect that this diﬀerence is due to the speciﬁc
+curved mapping. The warped 2D mesh used in Figure 4 was generated to mimic a
+severe “vorticular” warping. The 3D mapping is less severely warped, due to diﬀerent
+domain dimensions and diﬃculties ensuring invertibility of the map from the reference
+to physical element.
+We also compared L2 errors for both isoparametric and subparametric geometric
+mappings. In both cases, the discrete GCL is satisﬁed. For subparametric mappings,
+we chose the degree of approximation of geometry Ngeo = N + 1, such that the
+2
+geometric terms are computed exactly and the GCL is satisﬁed by default. This test
+is intended to address the fact that the GCL-preserving interpolation of Kopriva introduces a small approximation error, as the geometric terms are no longer exact. For
+these subparametric mappings, the gap between GLL and Gauss collocation widens
+slightly at N = 2. However, the results for subparametric mappings are nearly identical to the results in the isoparametric case for higher polynomial degrees.
+5.3. Shock-vortex interaction. The next problem considered is the shockvortex interaction described in [36]. The domain is taken to be [0, 2] × [0, 1], and
+is triangulated with uniform quadrilateral elements. Wall boundary conditions are
+imposed on the top and bottom boundaries, and inﬂow boundary conditions are typically imposed on the left and right boundaries. We modify the problem setup such
+that periodic boundary conditions are imposed at the left and right boundaries. Wall
+boundary conditions are imposed using a mirror state for the normal velocity, which
+was shown to be entropy stable in [41, 9].
+The initial condition is taken to be the superposition of a stationary shock and a
+2 For
+
+the N = 2 GLL collocation scheme on the coarsest 3D mesh, the error is not shown because
+the solution diverged.
+21
+
+This manuscript is for review purposes only.
+
+vortex propagating towards the right. The stationary Mach Ms = 1.1 shock is posi√
+tioned at x = .5 normal to the x axis, with left state (ρL , uL , vL , pL ) = 1, γ, 0, 1 ,
+where uL , vL denote x, y components of the left-state velocity. The right state is a
+692 scaling of the left state computed using the Rankine-Hugoniot conditions, such that
+693 the ratio of upstream and downstream states is
+
+689
+690
+691
+
+694
+695
+696
+697
+
+2
+ρL
+uL
+2 + (γ − 1)Ms
+,
+=
+=
+2
+ρR
+uR
+(γ + 1)Ms
+
+pL
+2γ
+2
+=1+
+Ms − 1 ,
+pR
+γ+1
+
+vR = 0.
+
+The isentropic vortex is centered at (xc , yc ) = (.25, .5) and given in terms of velocity
+ﬂuctuations δu and δv, which are functions of the tangential velocity vθ
+2
+
+vθ = τ eα(1−τ ) ,
+
+δv = −vθ cos(θ),
+
+δu = vθ sin(θ),
+
+698
+
+(x − xc )2 + (y − yc )2 is the radius from the vortex center, τ = r/rc , and
+
+699
+
+where r =
+
+700
+
+θ = tan−1
+
+701
+
+temperature is computed as a ﬂuctuation δT of the upstream state TL = pL /ρL
+
+y−yc
+x−xc
+
+. We follow [36] and take = .3, α = .204, and rc = .05. The vortex
+
+2
+
+702
+
+(γ − 1) 2 e2α(1−τ )
+δT = −
+.
+4αγ
+
+703
+704
+
+The vortex density and pressure are computed using an isentropic assumption. To
+summarize, the initial condition for the shock-vortex interaction problem is
+
+705
+706
+707
+708
+709
+710
+711
+712
+713
+714
+715
+716
+
+717
+
+ρ = ρs
+
+Tvor
+TL
+
+1
+γ−1
+
+,
+
+u1 = us + δu,
+
+u2 = vs + δv,
+
+p = ps
+
+1
+γ−1
+
+Tvor
+TL
+
+,
+
+where (ρs , us , vs , ps ) denote the discontinuous stationary shock solution given by the
+left and right states (ρL , uL , vL , pL ) , (ρR , uR , vR , pR ).
+We compare three diﬀerent entropy stable Gauss collocation schemes. All three
+utilize the entropy conservative ﬂux of Chandrashekar [34]. For the ﬁrst scheme,
+we do not introduce any additional interface dissipation, which produces an entropy
+conservative scheme. The second scheme introduces an entropy-dissipative interface
+term using Lax-Friedrichs penalization, while the third scheme utilizes the matrix disk
+sipation ﬂux introduced in [25]. This ﬂux adds a dissipation of the form RDRT vf ,
+k
+where vf denotes the jump in the entropy variables. In two dimensions, the matrices
+R, D are
+
+
+1
+1
+0
+1
+{{u }} − anx {{u1 }}
+¯
+ny
+{{u1 }} + anx 
+¯ 
+R= 1
+{{u2 }} − any {{u2 }}
+¯
+−nx
+{{u2 }} + any 
+¯
+1 2
+h − aun
+¯¯
+uavg un ny − {{u2 }} nx
+¯
+h + aun
+¯¯
+2
+log
+
+718
+719
+
+D = diag |¯n − a| {{ρ}}
+u
+2γ
+
+720
+
+un = {{u1 }} nx + {{u2 }} ny ,
+¯
+
+log
+
+where a, un are deﬁned in 2D as
+¯ ¯
+
+721
+
+log
+
+, |¯n | {{ρ}}
+u
+
+a=
+¯
+
+722
+723
+
+(γ−1)
+
+γ
+
+γpavg
+{{ρ}}
+
+log
+
+, |¯n | pavg , |¯n + a| {{ρ}}
+u
+u
+2γ
+
+,
+
+h=
+
+γ
+2(γ − 1) {{β}}
+
+and pavg , u2 are deﬁned as in (5.1).
+avg
+22
+
+This manuscript is for review purposes only.
+
+log
+
+,
+
+1
++ u,
+¯
+2
+
+(a) Entropy conservative ﬂux, T = .3
+
+(b) Entropy conservative ﬂux, T = .7
+
+(c) Lax-Friedrichs ﬂux, T = .3
+
+(d) Lax-Friedrichs ﬂux, T = .7
+
+(e) Matrix dissipation ﬂux, T = .3
+
+(f) Matrix dissipation ﬂux, T = .7
+
+Fig. 6: Shock vortex solution at time T = .7 using entropy stable Gauss collocation
+schemes with N = 4, h = 1/100.
+
+737
+
+Figure 6 shows density solutions for N = 4 and h = 1/100 Gauss collocation
+schemes using a nondissipative entropy conservative ﬂux, a dissipative Lax-Friedrichs
+ﬂux, and a matrix dissipation ﬂux. In all cases, the vortex passes through the shock
+stably without the use of additional slope limiting, ﬁltering, or artiﬁcial viscosity.
+However, the entropy conservative scheme produces a large number of spurious oscillations in the solution. These are reduced away from the shock under Lax-Friedrichs
+dissipation, though oscillations still persist around a large neighborhood of the discontinuity. The Gibbs-type oscillations are most localized under the matrix dissipation
+ﬂux.
+We note that this experiment also veriﬁes that entropy stable decoupled SBP
+schemes (including the overintegrated case [11]) are compatible with entropy stable
+wall boundary conditions. As far as the authors know, the stable and high-order accurate imposition of such boundary conditions for existing GSBP couplings described
+in [13] and Section 3.2 remains an open problem.
+
+738
+739
+
+5.4. Inviscid Taylor-Green vortex. We conclude by investigating the behavior of entropy stable Gauss collocation schemes for the inviscid Taylor–Green vortex
+
+724
+725
+726
+727
+728
+729
+730
+731
+732
+733
+734
+735
+736
+
+23
+
+This manuscript is for review purposes only.
+
+·10−2
+
+·10−2
+
+1.5
+
+1.5
+
+Affine
+
+Affine
+
+Curved
+
+Curved
+
+1
+
+0.5
+
+0.5
+
+0
+
+0
+
+− ∂κ
+∂t
+
+1
+
+0
+
+5
+
+10
+Time t
+
+15
+
+20
+
+0
+
+(a) GLL collocation
+
+5
+
+10
+Time t
+
+15
+
+20
+
+(b) Gauss collocation
+
+Fig. 7: Kinetic energy dissipation rate for entropy stable GLL and Gauss collocation
+schemes with N = 7 and h = π/8.
+
+740
+741
+742
+743
+
+[42, 3, 10]. This problem is posed on the periodic box [−π, π]3 , with initial conditions
+100
+1
++
+(cos(2x1 ) + cos(2x2 )) (2 + cos(2x3 )) ,
+γ
+16
+u1 = sin(x1 ) cos(x2 ) cos(x3 ),
+u2 = − cos(x1 ) sin(x2 ) cos(x3 ),
+u3 = 0.
+ρ = 1,
+
+p=
+
+The Taylor–Green vortex is used to study the transition and decay of turbulence. In
+the absence of viscosity, the Taylor–Green vortex develops successively smaller scales
+746 as time increases. As a result, the solution is guaranteed to contain underresolved
+747 features after a suﬃciently large time. We study the evolution of kinetic energy κ(t)
+744
+745
+
+748
+
+κ(t) =
+
+1
+|Ω|
+
+d
+
+u2
+i
+
+ρ
+Ω
+
+dx,
+
+i=1
+
+as well as the kinetic energy dissipation rate − ∂κ , which is approximated by diﬀer∂t
+encing κ(t). For both GLL and Gauss collocation schemes, integrals in the kinetic
+energy formula are evaluated using an (N + 1)-point Gauss quadrature rule.
+Figure 7 shows the evolution of the kinetic energy dissipation rate from t ∈ [0, 20]
+753 for Gauss and GLL collocation schemes on aﬃne and curved meshes. The curved
+754 meshes used here are constructed by modifying nodal positions through the mapping
+
+749
+750
+751
+752
+
+755
+756
+757
+758
+759
+760
+761
+
+x=x+
+
+1
+sin(x) sin(y) sin(z).
+2
+
+All cases utilize N = 7 and h = π/8 (corresponding to 8 elements per side), as well
+as a CFL of .25. Lax-Friedrichs dissipation is used for all simulations. For both aﬃne
+and curved meshes, the presented Gauss collocation schemes remain stable in the
+presence of highly underresolved solution features. Kinetic energy dissipation rates
+for both GLL and Gauss collocation are qualitatively similar and are consistent with
+existing results in the literature for the inviscid Taylor-Green vortex [3, 12].
+24
+
+This manuscript is for review purposes only.
+
+762
+763
+764
+765
+766
+767
+768
+769
+770
+771
+772
+773
+774
+775
+776
+777
+778
+779
+780
+781
+782
+783
+784
+785
+786
+787
+788
+789
+790
+791
+792
+793
+794
+795
+796
+797
+798
+799
+800
+801
+802
+803
+804
+805
+806
+807
+808
+809
+810
+
+6. A theoretical cost comparison. While the numerical experiments presented in previous sections demonstrate several advantages of Gauss collocation methods over GLL collocation schemes, these do not account for additional costs associated
+with Gauss collocation schemes. While a detailed time-to-solution comparison is outside of the scope of this work, we can compare computational costs associated with
+Gauss, staggered-grid, and GLL collocation schemes.
+The main computational costs associated with entropy stable schemes are volume operations, which include evaluations of two-point ﬂuxes and applications of
+one-dimensional diﬀerentiation and interpolation matrices. We do not count interelement communication or ﬂux computations, as these are typically less expensive than
+volume operations (especially for higher polynomial degrees). The total number of ﬂux
+computations for each scheme can also be reduced using the symmetry of fS ; however,
+this does not aﬀect relative diﬀerences in the number of two-point ﬂux evaluations
+between GLL, Gauss, and staggered grid schemes. However, exploiting symmetry in
+the Gauss scheme is slightly more straightforward (compared to GLL and staggered
+grid schemes) due to the block structure of the decoupled SBP operator.
+In 3D, a degree N GLL collocation scheme contains (N + 1)3 nodes. Two-point
+ﬂuxes are computed between states at one node and states at (N + 1) additional
+nodes, resulting in a total of 3(N + 1)4 two-point ﬂux evaluations. For a staggered
+grid scheme, two-point ﬂuxes are computed on a degree (N + 1) GLL grid consisting
+of (N + 2)3 nodes, resulting in 3(N + 2)4 evaluations.
+Gauss collocation schemes compute two-point ﬂuxes on a grid of Gauss nodes,
+resulting in 3(N + 1)4 ﬂux evaluations in 3D. One must also evaluate two-point ﬂuxes
+between face nodes and volume nodes, and vice versa. As a result, Gauss schemes
+evaluate two-point ﬂuxes twice between each face node and the line of (N + 1) volume
+nodes normal to that face, resulting in an extra 12(N + 1)3 ﬂux evaluations in 3D.
+We also consider costs associated with applying operator matrices. GLL and
+Gauss collocation schemes require applying a one-dimensional diﬀerentiation matrix
+to each line of nodes, resulting in O 3(N + 1)4 operations in 3D. Staggered-grid
+schemes require O 3(N + 2)4 operations (corresponding to diﬀerentiation in each
+coordinate on a degree (N + 1) GLL grid) as well as O 6(N + 2)(N + 1)3 operations
+required for interpolation to and from a (N + 1) point Gauss grid to a (N + 2) point
+GLL grid in three dimensions. Gauss collocation schemes require only interpolation
+to and from points on 6 faces, resulting in an additional O 12(N + 1)3 operations
+per dimension per element.
+Figure 8 shows the estimated number of two-point ﬂux evaluations and matrix
+operations for GLL, staggered grid, and Gauss collocation schemes in three dimensions. We observe that a straightforward implementation of Gauss collocation does
+not signiﬁcantly reduce the number of ﬂux evaluations compared to staggered grid
+schemes, though Gauss collocation schemes result in a signiﬁcantly smaller number
+of operations from matrix computations.
+We note that the number of two-point ﬂux evaluations and matrix operations
+will impact runtime diﬀerently depending on the implementation and computational
+architecture. For example, while ﬂux evaluations typically dominate runtimes for
+serial CPU implementations at all orders of approximation, they do not contribute
+signiﬁcantly to runtimes at polynomial degrees N = 1, . . . , 8 for implementations on
+Graphics Processing Units (GPUs) [43].
+7. Conclusion. This work shows how to construct eﬃcient entropy stable highorder Gauss collocation DG schemes on quadrilateral and hexahedral meshes. Key
+25
+
+This manuscript is for review purposes only.
+
+·104
+
+·104
+2
+
+GLL
+Staggered
+Gauss
+
+GLL
+Staggered
+Gauss
+
+4
+
+1
+2
+
+0
+
+0
+1
+
+2
+
+3
+4
+5
+Degree N
+
+6
+
+7
+
+1
+
+(a) Two-point ﬂux evaluations per dimension
+
+2
+
+3
+4
+5
+Degree N
+
+6
+
+7
+
+(b) Est. matrix computation operations
+
+Fig. 8: Comparison of GLL, staggered grid, and Gauss collocation schemes in terms
+of number of two-point ﬂux evaluations and operations associated with matrix computations in three dimensions.
+
+811
+812
+813
+814
+815
+816
+817
+818
+819
+820
+821
+822
+823
+824
+825
+826
+827
+828
+829
+830
+
+to the construction of eﬃcient methods are decoupled SBP operators, which deliver
+entropy stability and high-order accuracy while maintaining compact interelement
+coupling terms. These operators are also compatible with existing entropy stable
+methods for applying interface dissipation [25] or imposing boundary conditions. Numerical experiments demonstrate both the stability and high-order accuracy of the
+proposed Gauss collocation schemes on both aﬃne and curvilinear meshes. We note
+that, while the numerical experiments presented here consider only mapped Cartesian
+domains, the method is also applicable to complex geometries, and future work will
+focus on studying the performance of such methods on curvilinear quadrilateral and
+hexahedral unstructured meshes.
+We note that results for Gauss collocation are similar to those attained by entropy stable staggered-grid schemes [14], and require a similar number of two-point
+ﬂux evaluations. However, Gauss collocation schemes result in a lower number ﬂoating point operations from matrix computations compared to staggered-grid methods.
+Finally, while a rigorous computational comparison between GLL and Gauss collocation schemes remains to be done, Gauss collocation schemes show signiﬁcant improvements in accuracy compared to GLL collocation schemes on non-Cartesian meshes. In
+particular, for suﬃciently warped curvilinear mappings, degree N Gauss collocation
+schemes achieve an accuracy comparable to degree (N + 1) GLL collocation schemes
+in two and three dimensions.
+
+8. Acknowledgments. Jesse Chan is supported by NSF DMS-1719818 and
+DMS-1712639. The authors thank Florian Hindenlang and Jeremy Kozdon for helpful
+833 discussions and suggestions.
+831
+832
+
+834
+835
+836
+837
+
+Appendix A. Decoupled SBP operators for general choices of quadrature and basis.
+For general choices of quadrature and basis, decoupled projection operators involve a volume quadrature interpolation matrix Vq , a face quadrature interpolation
+26
+
+This manuscript is for review purposes only.
+
+N
+
+838
+
+p
+matrix Vf , and a quadrature-based L2 projection matrix Pq . Let {φj }j=1 denote
+
+839
+840
+
+q
+a set of Np basis functions, and let {xi , wi }i=1 denote a set of Nq volume quadraf
+ture points and weights in d dimensions. We also introduce the set of Nq surface
+
+841
+
+quadrature points and weights
+
+N
+
+f
+xf , wi
+i
+
+842
+
+(Vq )ij = φj (xi ),
+
+843
+844
+
+i=1
+
+. Then, Vq , Vf are given as
+
+1 ≤ i ≤ Nq ,
+
+(Vf )ij = φj xf ,
+i
+
+845
+846
+847
+
+f
+Nq
+
+1 ≤ j ≤ Np ,
+
+f
+1 ≤ i ≤ Nq ,
+
+1 ≤ j ≤ Np .
+
+These matrices can be used to deﬁne the quadrature-based L2 projection matrix Pq .
+Let W , Wf denote the diagonal matrix of volume and surface quadrature weights,
+respectively. Then,
+Pq = M −1 VqT W .
+
+M = VqT W Vq ,
+
+848
+
+Let D i now denote a modal diﬀerentiation matrix with respect to the ith coordinate,
+which maps coeﬃcients in the basis φj to coeﬃcients of the ith derivative. By composing this matrix with interpolation and projection matrices, one can deﬁne diﬀerencing
+i
+operators Dq = Vq D i Pq which map values at quadrature points to values of approxi
+853 imate derivatives at quadrature points. Moreover, Qi = W Dq satisﬁes a generalized
+854 SBP property involving the face interpolation and projection matrices Vf , Pq [11].
+855
+The decoupled SBP operator Qi is then given as
+N
+
+849
+850
+851
+852
+
+Qi =
+N
+
+Qi −
+
+1
+2
+
+T
+
+(Vf Pq ) Wf diag (ni ) Vf Pq
+1
+− 2 Wf diag (ni ) Vf Pq
+
+1
+2
+
+T
+
+(Vf Pq ) Wf diag (ni )
+.
+1
+2 Wf diag (ni )
+
+856
+
+(A.1)
+
+857
+858
+859
+
+A straightforward computation shows that Qi satisﬁes an SBP property [11]. It is
+N
+worth noting that the form of Qi does not depend on the choice of basis. So long as
+N
+the approximation space spanned by the basis φj does not change, the domain and
+range of Qi depend solely on the choice of volume and surface quadrature points.
+N
+A collocation scheme assumes that the number of quadrature points is identical to
+the number of basis functions. If the solution is represented using degree N Lagrange
+polynomials at quadrature points, the matrices Vq , Pq simplify to
+
+860
+861
+862
+863
+864
+
+(Vq )ij = δij ,
+
+M = W,
+
+Pq = M −1 VqT W = I.
+
+865
+866
+
+Plugging these simpliﬁcations into (A.1) and restricting to one spatial dimension
+recovers the decoupled SBP operator (3.6).
+
+867
+
+REFERENCES
+
+868
+869
+870
+871
+872
+873
+874
+875
+876
+877
+878
+879
+
+[1] Travis C Fisher and Mark H Carpenter. High-order entropy stable ﬁnite diﬀerence schemes for
+nonlinear conservation laws: Finite domains. Journal of Computational Physics, 252:518–
+557, 2013.
+[2] Mark H Carpenter, Travis C Fisher, Eric J Nielsen, and Steven H Frankel. Entropy Stable
+Spectral Collocation Schemes for the Navier–Stokes Equations: Discontinuous Interfaces.
+SIAM Journal on Scientiﬁc Computing, 36(5):B835–B867, 2014.
+[3] Gregor J Gassner, Andrew R Winters, and David A Kopriva. Split form nodal discontinuous
+Galerkin schemes with summation-by-parts property for the compressible Euler equations.
+Journal of Computational Physics, 327:39–66, 2016.
+[4] Gregor J Gassner. A skew-symmetric discontinuous Galerkin spectral element discretization and
+its relation to SBP-SAT ﬁnite diﬀerence methods. SIAM Journal on Scientiﬁc Computing,
+35(3):A1233–A1253, 2013.
+27
+
+This manuscript is for review purposes only.
+
+880
+881
+882
+883
+884
+885
+886
+887
+888
+889
+890
+891
+892
+893
+894
+895
+896
+897
+898
+899
+900
+901
+902
+903
+904
+905
+906
+907
+908
+909
+910
+911
+912
+913
+914
+915
+916
+917
+918
+919
+920
+921
+922
+923
+924
+925
+926
+927
+928
+929
+930
+931
+932
+933
+934
+935
+936
+937
+938
+939
+940
+941
+
+[5] Zhijian J Wang, Krzysztof Fidkowski, R´mi Abgrall, Francesco Bassi, Doru Caraeni, Andrew
+e
+Cary, Herman Deconinck, Ralf Hartmann, Koen Hillewaert, Hung T Huynh, et al. Highorder CFD methods: current status and perspective. International Journal for Numerical
+Methods in Fluids, 72(8):811–845, 2013.
+[6] Constantine M Dafermos. Hyperbolic conservation laws in continuum physics. Springer, 2005.
+[7] Gregor J Gassner, Andrew R Winters, Florian J Hindenlang, and David A Kopriva. The
+BR1 scheme is stable for the compressible Navier–Stokes equations. Journal of Scientiﬁc
+Computing, pages 1–47, 2017.
+[8] Eitan Tadmor. The numerical viscosity of entropy stable schemes for systems of conservation
+laws. I. Mathematics of Computation, 49(179):91–103, 1987.
+[9] Tianheng Chen and Chi-Wang Shu. Entropy stable high order discontinuous Galerkin methods
+with suitable quadrature rules for hyperbolic conservation laws. Journal of Computational
+Physics, 345:427–461, 2017.
+[10] Jared Crean, Jason E Hicken, David C Del Rey Fern´ndez, David W Zingg, and Mark H
+a
+Carpenter. Entropy-stable summation-by-parts discretization of the Euler equations on
+general curved elements. Journal of Computational Physics, 356:410–438, 2018.
+[11] Jesse Chan. On discretely entropy conservative and entropy stable discontinuous Galerkin
+methods. Journal of Computational Physics, 362:346 – 374, 2018.
+[12] Jesse Chan and Lucas C Wilcox. Discretely entropy stable weight-adjusted discontinuous
+Galerkin methods on curvilinear meshes. Journal of Computational Physics, 378:366 –
+393, 2019.
+[13] Jared Crean, Jason E Hicken, David C Del Rey Fern´ndez, David W Zingg, and Mark H
+a
+Carpenter. High-Order, Entropy-Stable Discretizations of the Euler Equations for Complex
+Geometries. In 23rd AIAA Computational Fluid Dynamics Conference. American Institute
+of Aeronautics and Astronautics, 2017.
+[14] Matteo Parsani, Mark H Carpenter, Travis C Fisher, and Eric J Nielsen. Entropy Stable Staggered Grid Discontinuous Spectral Collocation Methods of any Order for the Compressible
+Navier–Stokes Equations. SIAM Journal on Scientiﬁc Computing, 38(5):A3129–A3162,
+2016.
+[15] David A Kopriva and Gregor Gassner. On the quadrature and weak form choices in collocation
+type discontinuous Galerkin spectral element methods. Journal of Scientiﬁc Computing,
+44(2):136–155, 2010.
+[16] Florian Hindenlang, Gregor J Gassner, Christoph Altmann, Andrea Beck, Marc Staudenmaier,
+and Claus-Dieter Munz. Explicit discontinuous Galerkin methods for unsteady problems.
+Computers & Fluids, 61:86–93, 2012.
+[17] Jesse Chan, Zheng Wang, Axel Modave, Jean-Francois Remacle, and T Warburton. GPUaccelerated discontinuous Galerkin methods on hybrid meshes. Journal of Computational
+Physics, 318:142–168, 2016.
+[18] David C Del Rey Fern´ndez, Jason E Hicken, and David W Zingg. Review of summationa
+by-parts operators with simultaneous approximation terms for the numerical solution of
+partial diﬀerential equations. Computers & Fluids, 95:171–196, 2014.
+[19] David C Del Rey Fern´ndez, Jason E Hicken, and David W Zingg. Simultaneous approxia
+mation terms for multi-dimensional summation-by-parts operators. Journal of Scientiﬁc
+Computing, 75(1):83–110, 2018.
+[20] David C Del Rey Fern´ndez, Pieter D Boom, and David W Zingg. A generalized framework for
+a
+nodal ﬁrst derivative summation-by-parts operators. Journal of Computational Physics,
+266:214–239, 2014.
+[21] Sigrun Ortleb. Kinetic energy preserving DG schemes based on summation-by-parts operators
+on interior node distributions. PAMM, 16(1):857–858, 2016.
+[22] Sigrun Ortleb. A Kinetic Energy Preserving DG Scheme Based on Gauss–Legendre Points.
+Journal of Scientiﬁc Computing, 71(3):1135–1168, 2017.
+[23] Hendrik Ranocha. Generalised summation-by-parts operators and variable coeﬃcients. Journal
+of Computational Physics, 362:20 – 48, 2018.
+[24] Roger A Horn and Charles R Johnson. Matrix analysis. Cambridge university press, 2012.
+[25] Andrew R Winters, Dominik Derigs, Gregor J Gassner, and Stefanie Walch. A uniquely deﬁned entropy stable matrix dissipation operator for high Mach number ideal MHD and
+compressible Euler simulations. Journal of Computational Physics, 332:274–289, 2017.
+[26] Eitan Tadmor. Entropy stability theory for diﬀerence approximations of nonlinear conservation
+laws and related time-dependent problems. Acta Numerica, 12:451–512, 2003.
+[27] Lucas Friedrich, Gero Schn¨ cke, Andrew R Winters, David C Fern´ndez, Gregor J Gassner,
+u
+a
+and Mark H Carpenter. Entropy Stable Space-Time Discontinuous Galerkin Schemes
+with Summation-by-Parts Property for Hyperbolic Conservation Laws. arXiv preprint
+28
+
+This manuscript is for review purposes only.
+
+942
+943
+944
+945
+946
+947
+948
+949
+950
+951
+952
+953
+954
+955
+956
+957
+958
+959
+960
+961
+962
+963
+964
+965
+966
+967
+968
+969
+970
+971
+972
+973
+974
+975
+976
+977
+978
+979
+980
+981
+982
+983
+984
+985
+
+arXiv:1808.08218, 2018.
+[28] Jan Nordstr¨m. Conservative ﬁnite diﬀerence formulations, variable coeﬃcients, energy estio
+mates and artiﬁcial dissipation. Journal of Scientiﬁc Computing, 29(3):375–404, 2006.
+[29] David A Kopriva and Gregor J Gassner. Geometry eﬀects in nodal discontinuous Galerkin
+methods on curved elements that are provably stable. Applied Mathematics and Computation, 272:274–290, 2016.
+[30] David A Kopriva. Metric identities and the discontinuous spectral element method on curvilinear meshes. Journal of Scientiﬁc Computing, 26(3):301–327, 2006.
+[31] Amiram Harten. On the symmetric form of systems of conservation laws with entropy. Journal
+of computational physics, 49(1):151–164, 1983.
+[32] Thomas JR Hughes, LP Franca, and M Mallet. A new ﬁnite element formulation for computational ﬂuid dynamics: I. Symmetric forms of the compressible Euler and Navier-Stokes
+equations and the second law of thermodynamics. Computer Methods in Applied Mechanics
+and Engineering, 54(2):223–234, 1986.
+[33] Farzad Ismail and Philip L Roe. Aﬀordable, entropy-consistent Euler ﬂux functions II: Entropy
+production at shocks. Journal of Computational Physics, 228(15):5410–5436, 2009.
+[34] Praveen Chandrashekar. Kinetic energy preserving and entropy stable ﬁnite volume schemes
+for compressible Euler and Navier-Stokes equations. Communications in Computational
+Physics, 14(5):1252–1286, 2013.
+[35] Mark H Carpenter and Christopher A Kennedy. Fourth-order 2n-storage Runge-Kutta schemes.
+Technical Report NASA-TM-109112, NAS 1.15:109112, NASA Langley Research Center,
+1994.
+[36] Chi-Wang Shu. Essentially non-oscillatory and weighted essentially non-oscillatory schemes for
+hyperbolic conservation laws. In Advanced numerical approximation of nonlinear hyperbolic
+equations, pages 325–432. Springer, 1998.
+[37] Alﬁo Quarteroni and Alberto Valli. Numerical Approximation of Partial Diﬀerential Equations.
+Springer, 1994.
+[38] Mo Lenoir. Optimal isoparametric ﬁnite elements and error estimates for domains involving
+curved boundaries. SIAM Journal on Numerical Analysis, 23(3):562–580, 1986.
+[39] T Warburton. A low-storage curvilinear discontinuous Galerkin method for wave problems.
+SIAM Journal on Scientiﬁc Computing, 35(4):A1987–A2012, 2013.
+[40] David M Williams and Antony Jameson. Nodal points and the nonlinear stability of high-order
+methods for unsteady ﬂow problems on tetrahedral meshes. In 21st AIAA Computational
+Fluid Dynamics Conference. American Institute of Aeronautics and Astronautics, June
+2013.
+¨
+[41] Magnus Sv¨rd and Hatice Ozcan. Entropy-stable schemes for the Euler equations with far-ﬁeld
+a
+and wall boundary conditions. Journal of Scientiﬁc Computing, 58(1):61–89, 2014.
+[42] Geoﬀrey I Taylor and Albert E Green. Mechanism of the production of small eddies from
+large ones. Proceedings of the Royal Society A: Mathematical, Physical and Engineering
+Sciences, 158(895):499–521, February 1937.
+[43] Niklas Wintermeyer, Andrew R Winters, Gregor J Gassner, and Timothy Warburton. An
+entropy stable discontinuous Galerkin method for the shallow water equations on curvilinear meshes with wet/dry fronts accelerated by GPUs. Journal of Computational Physics,
+375:447–480, 2018.
+
+29
+
+This manuscript is for review purposes only.
+
