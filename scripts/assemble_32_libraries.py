@@ -8,7 +8,6 @@ item-level rights clearance.
 from __future__ import annotations
 
 import argparse
-import csv
 import hashlib
 import json
 import re
@@ -17,7 +16,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from scripts.select_knowledge_density_corpus import DOMAIN_TERMS, score_record
+from scripts.select_knowledge_density_corpus import score_record
 
 DOMAINS = (
     "mathematics",
@@ -92,6 +91,8 @@ def stable_partition(document_id: str) -> str:
 
 def balance_general_hkd(records: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Assign the highest-density half by UTF-8 text bytes to HKD, without duplication."""
+    if len(records) < 2:
+        return records, []
     ordered = sorted(records, key=lambda row: (-row["semantic_density"], row["document_id"]))
     total_bytes = sum(len(row["text"].encode("utf-8")) for row in ordered)
     hkd: list[dict[str, Any]] = []
