@@ -125,10 +125,12 @@ Los números siguientes son **inventarios de candidatos**, no admisiones. Hay sn
 
 ### Fuentes adicionales de alta prioridad
 
+La auditoría de huecos del 5 de noviembre está documentada en [`acquisition/source-gap-review-2026-11-05.md`](acquisition/source-gap-review-2026-11-05.md). Ordena las fuentes sin representación en el train actual por volumen potencial, evidencia de derechos y trabajo pendiente. No convierte ningún candidato en entrenable.
+
 - **NIST Technical Series / Public Data Repository:** línea favorable para informes y datos creados por NIST cuando el registro identifica autoría/titularidad NIST y se conserva la atribución. NIST advierte de material de terceros; no se admite el catálogo completo. Preflight por registro y payload pendiente.
 - **USGS Publications Warehouse:** fuente de alto valor para geología, geografía, agua, riesgos naturales y ciencias de la Tierra. USGS confirma que sus informes publicados son generalmente de dominio público, pero advierte que algunas imágenes, ilustraciones y fotografías son de terceros. Seleccionar solo publicaciones USGS propias y excluir material mixto no aclarado.
 - **NOAA Institutional Repository:** repositorio científico con texto completo; su política distingue obras gubernamentales CC0 de artículos y proceedings cuyos titulares conservan derechos. No usar el repositorio entero como corpus libre: selección por documento y revisión de copyright obligatorias.
-- **BNE/BDH — Documentos en dominio público:** fuente oficial con distribuciones TXT y JSON; BNE describe el conjunto como obras en dominio público reutilizables bajo sus condiciones CC BY 4.0. El catálogo declara última actualización de distribución 2024-12-04. Nuevo workflow `ingest-bne-bdh-public-domain.yml` descarga ambos ZIP, fija SHA-256, extrae el TXT y ejecuta filtros de calidad/PII; hasta completar el enlace registro-texto, revisión de contenido/terceros, deduplicación global y splits, todo sigue como candidato y suma **0 entrenables**. No confundir licencia del catálogo con permiso de obras ajenas a este conjunto.
+- **BNE/BDH — Documentos en dominio público:** fuente oficial con distribuciones TXT, XML y metadatos; la ficha describe las obras incluidas como dominio público y declara reutilización CC BY 4.0. La distribución del catálogo se actualizó por última vez el 2024-12-04. **Estado en `main`: metadata/candidate, 0 entrenables; no existe todavía el workflow `ingest-bne-bdh-public-domain.yml`** (la mención anterior a ese workflow era prematura). La adquisición debe descargar el ZIP, fijar SHA-256, resolver cada enlace registro-texto, comprobar OCR/terceros y deduplicar antes de generar splits. No confundir la licencia de los registros con la de obras fuera del conjunto explícito de dominio público.
 - **Project Gutenberg:** fuente de descubrimiento; verificar estado de dominio público aplicable en España/UE y derechos de traducción/edición concretos.
 - **ParlaIbero-ES, DReaM-es-open, VoxPopuli y otras colecciones lingüísticas:** mantener en preflight hasta resolver licencia de cada documento/segmento, derechos de voz, privacidad y condiciones de redistribución.
 
@@ -170,6 +172,7 @@ Una licencia CC0/CC BY de metadatos no convierte automáticamente en reutilizabl
 Los payloads grandes pueden publicarse como artefactos versionados de GitHub Actions. Cada artefacto debe acompañarse de hashes, manifiesto, revisión de fuente y decisión.
 
 ## Referencias canónicas
+- [Auditoría de fuentes sin representación entrenable — 2026-11-05](acquisition/source-gap-review-2026-11-05.md)
 
 - [Inventario 32 dominios / 64 bibliotecas](libraries/manifest-64.json)
 - [Auditoría de documentos candidatos — 2026-11-05](reviews/candidate-document-audit-2026-11-05.json)
