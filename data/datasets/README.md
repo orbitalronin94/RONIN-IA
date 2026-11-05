@@ -2,15 +2,19 @@
 
 Este directorio es el espacio canónico para adquirir, revisar, clasificar y versionar los textos de entrenamiento de RONIN.
 
-## Objetivo operativo
+## Objetivo operativo actual
 
-La primera arquitectura de corpus se compone de **32 bibliotecas: 16 dominios × General/HKD**. HKD significa *alta densidad de conocimiento*. General y HKD son particiones disjuntas: el material de mayor densidad semántica se asigna a HKD y el resto a General. El reparto se equilibra por bytes de texto UTF-8, no solo por número de documentos.
+El objetivo canónico es **64 bibliotecas: 32 dominios × General/HKD**. El inventario de referencia es libraries/manifest-64.json; libraries/manifest-32.json conserva el estado parcial del pipeline legado RUN5 de 16 dominios y no representa el objetivo final.
 
-El catálogo ampliado de 32 dominios y 64 particiones es una hoja de ruta posterior. No sustituye este objetivo operativo de 32 bibliotecas.
+General y HKD deben ser disjuntas globalmente, sin duplicados exactos ni near-duplicates compartidos. HKD se selecciona por densidad semántica RONIN, con desempate estable por identificador documental, y el reparto se equilibra por bytes de texto UTF-8.
+
+Cada biblioteca necesita al menos **1 MiB de texto admitido Level A**; el objetivo posterior es **10 GiB por biblioteca**. Por tanto, el mínimo total es 64 MiB y el objetivo de escala es 640 GiB. Solo cuentan bytes de texto admitido con evidencia Level A; no cuentan metadatos, candidatos, RDS comprimidos ni corpus legacy sin reconciliación territorial.
+
+G-0 es independiente: mientras permanezca en FAIL, ninguna biblioteca puede ser training-eligible aunque su fuente tenga una licencia compatible.
 
 ## Estado real del corpus
 
-**Estado:** 1 corpus admitido; 32 bibliotecas en implementación parcial.
+**Estado:** 32 dominios y 64 bibliotecas catalogados; **0/64** alcanzan el mínimo Level A; **0 bytes** de texto Level A admitido en el inventario; G-0 sigue en FAIL.
 
 - **Único corpus admitido:** \`admitted/literature-es-v1/\`, con 608 documentos de entrenamiento en español. Sus particiones de validación y prueba permanecen fuera del entrenamiento.
 - **CoVoST 2:** la exportación exacta contiene solo el campo \`translation\` de tres archivos fijados, bajo la declaración CC0 del conjunto. El control de calidad retuvo 337.973 traducciones únicas; la partición train contiene 270.244 filas, validation 34.051 y test 33.678. Tres filas con patrón telefónico se revisaron: dos eran rangos de curso académico y una era una cantidad en euros por hora; se conservan como falsos positivos. Sigue pendiente la revisión humana final de muestras. Es un candidato con registro de derechos de alcance exacto, no un corpus admitido.
@@ -48,7 +52,7 @@ Los payloads grandes se publican como artefactos versionados de GitHub Actions, 
 2. Revisión de licencia y derechos del documento/versión exactos; no basta una etiqueta global del repositorio.
 3. Conservación de atribución, autoría, fuente, URL y revisión inmutable.
 4. SHA-256 de payload, texto normalizado y particiones.
-5. Detección de duplicados exactos y aproximados entre las 32 bibliotecas y los corpus de evaluación.
+5. Detección de duplicados exactos y aproximados entre las 64 bibliotecas y los corpus de evaluación.
 6. Revisión de PII, secretos y contenido sensible.
 7. Control de idioma, codificación, OCR, ruido y relevancia temática.
 8. Separación determinista de documentos entre train, validation y test.
@@ -57,9 +61,9 @@ Los payloads grandes se publican como artefactos versionados de GitHub Actions, 
 
 Una licencia CC0/CC BY en un catálogo no convierte automáticamente en reutilizable el contenido de terceros que ese catálogo describe. Los datos estructurados, metadatos bibliográficos, código, voz, transcripciones y prosa se mantienen separados cuando sus derechos o naturaleza son distintos.
 
-## Ensamblado parcial de las 32 bibliotecas
+## Ensamblado parcial del pipeline legado de 32 bibliotecas
 
-El workflow \`.github/workflows/assemble-32-libraries.yml\` descarga artefactos fijados de CoVoST, Common Corpus, GPLSI y literatura, verifica sus hashes y genera un paquete candidato con 32 directorios General/HKD.
+El workflow \`.github/workflows/assemble-32-libraries.yml\` descarga artefactos fijados de CoVoST, Common Corpus, GPLSI y literatura, verifica sus hashes y genera un paquete candidato con 32 directorios para los 16 dominios originales. Este paquete legado no sustituye el inventario canónico de 64 bibliotecas.
 
 - Los textos CoVoST con señal temática suficiente se asignan a un único dominio; no se fuerzan textos ambiguos a una temática incorrecta.
 - Las traducciones sin señal temática suficiente se conservan en un pool transversal no asignado.
@@ -77,7 +81,7 @@ Ejecutar \`python scripts/validate_rights_registry.py\` para validar el registro
 
 ## Decisión actual
 
-**No se inicia entrenamiento.** El gate global G-0 sigue en FAIL y la única biblioteca/corpus admitido continúa siendo la literatura española de 608 documentos. El objetivo inmediato es convertir candidatos verificables en contenido admitido y completar, de forma equilibrada y trazable, las 32 bibliotecas.
+**No se inicia entrenamiento.** El gate global G-0 sigue en FAIL y la única biblioteca/corpus admitido continúa siendo la literatura española de 608 documentos. El objetivo inmediato es convertir candidatos verificables en contenido admitido y reconciliar derechos y completar, de forma equilibrada y trazable, las 64 bibliotecas.
 
 
 ## Nuevo bloque revisado — Corpus paralelo de Naciones Unidas v1.0 (2026-11-05)
@@ -113,22 +117,21 @@ Ejecutar \`python scripts/validate_rights_registry.py\` para validar el registro
 - **Project Gutenberg:** fuente de descubrimiento, no licencia global. El proveedor advierte que dominio público en EE. UU. no equivale a dominio público en España/UE y que permisos individuales no se transfieren. Expediente: `candidates/project-gutenberg/README.md`.
 - Ambas quedan en implementación parcial; sin texto admitido adicional hasta superar la revisión por obra/edición.
 
-## Adquisición ScienceVerse automatizada (2026-11-05)
+## ScienceVerse — adquisición candidata verificada (5 de noviembre de 2026)
 
-Se han añadido script y workflow para incorporar a `main` cuatro paperlists de texto completo con manifiestos por artículo: BMC Medicine (1.000), Judgment and Decision Making (855), Journal of Cognition (447) y Open Mind (293). **Objetivo: 2.595 documentos.** El proceso rechaza un corpus si alguna fila del manifiesto no declara CC-BY 4.0; conserva CSV DOI/licencia, payload RDS, procedencia y SHA-256. Solo se sumarán al recuento de admisión cuando el workflow termine correctamente y los ficheros estén verificados. Deduplicación global, retractaciones, privacidad y particiones siguen siendo gates obligatorios.
+Se descargaron cuatro de los siete corpus prioritarios desde la revisión upstream 3a6ac0125e576423300a8996e9ad4c5d65ef9fe2. Son 2.595 filas DOI elegibles y 83.524.872 bytes de assets RDS comprimidos, no texto extraído:
 
-## Adquisición ScienceVerse — 5 de noviembre de 2026
+| Corpus | Filas elegibles | Bytes RDS | SHA-256 |
+|---|---:|---:|---|
+| BMC Medicine | 1.000 | 30.450.200 | fe81c3c6688cb007ccdbbd082b22e74bdaa17ce2e9735ddc276e083108d8d000 |
+| Judgment and Decision Making | 855 | 24.875.707 | 3381725686b9b1bae2a2c764ea87fdf52b8575cf8d87902388abd333319d3aa6 |
+| Journal of Cognition | 447 | 15.559.915 | 12766fe41d80dcffc1da26056c929c7e39fb56be772809fa1620887df8838ae5 |
+| Open Mind | 293 | 12.639.050 | c27fd53e8e640f7ac4cb3cfe43d04bfdc8a80c050956df3ec8abc6931d796feb |
 
-Se han incorporado a `candidates/scienceverse-fulltext/` cuatro paquetes RDS completos, con manifiesto original, manifiesto elegible, procedencia y SHA-256:
+JOC tiene 448 filas de manifiesto; se excluyó el DOI 10.5334/joc.316 porque xml_exists=FALSE e in_rds=FALSE. La fila declara CC BY 4.0, pero no está convertida ni en el RDS. Los tres corpus restantes del bloque prioritario (eLife, Frontiers in Psychology e i-Perception) siguen sin payload.
 
-| Colección | Documentos con CC-BY 4.0 verificada | Biblioteca de destino |
-|---|---:|---|
-| BMC Medicine | 1.000 | `medicine_health_general` |
-| Judgment and Decision Making | 855 | `social_sciences_general` |
-| Journal of Cognition | 447 | `social_sciences_general` |
-| Open Mind | 293 | `philosophy_general` |
-| **Total** | **2.595** | |
+Los manifiestos, hashes completos y exclusión exacta están en candidates/scienceverse-expanded-corpora/README.md y en cada provenance.json. La adquisición se incorporó en el commit 68497f153e06c18cd693c3ef77e229bfd3defbb8.
 
-Los cuatro payloads ocupan **83.524.872 bytes (79,7 MiB)**. Permanecen en nivel candidato: el formato RDS aún debe inspeccionarse y exportarse a registros de texto; después se ejecutarán deduplicación global, revisión de retractaciones/correcciones, controles de privacidad y partición agrupada por DOI. **No se suman todavía al corpus admitido ni al entrenamiento.**
+La inspección RDS está pendiente de una ejecución verde. Los runs 42001889049 y 42001946701 fallaron por un límite de recorrido estructural y por instalación de jsonlite en una biblioteca R no escribible. Los commits 1df303a y fd61d25 acotan el muestreo y usan el paquete de sistema r-cran-jsonlite; la siguiente ejecución debe confirmar el arreglo.
 
-El corpus de literatura española mantiene 608 documentos train admitidos (140.295.523 bytes en el artefacto de materialización); validation y test permanecen aislados. Las 32 bibliotecas siguen siendo unidades de clasificación: estos paquetes aún no se han repartido documentalmente entre General/HKD.
+**No son Level A ni entrenables:** faltan inspección estructural, exportación a texto, verificación de licencia del editor por artículo/versión, titularidad y terceros, retractaciones, privacidad, calidad, deduplicación global y splits por DOI. Los 83.524.872 bytes RDS no se suman al contador de texto admitido.
