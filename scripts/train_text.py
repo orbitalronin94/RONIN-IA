@@ -17,6 +17,7 @@ from ronin.config import get_profile
 from ronin.data.batches import NextTokenBatches, encode_text_file
 from ronin.models.transformer import RoninLM
 from ronin.tokenizer.byte import ByteTokenizer
+from ronin.training.checkpoint import load_checkpoint
 from ronin.training.loop import train
 from ronin.utils.repro import seed_everything
 
@@ -92,11 +93,12 @@ def main() -> None:
     if args.init_checkpoint is not None:
         if not args.init_checkpoint.is_file():
             parser.error(f"no existe el checkpoint inicial: {args.init_checkpoint}")
-        payload = torch.load(args.init_checkpoint, map_location="cpu", weights_only=False)
-        state_dict = payload.get("model") if isinstance(payload, dict) else None
-        if not isinstance(state_dict, dict):
-            raise ValueError("el checkpoint inicial debe contener un state_dict en la clave 'model'")
-        model.load_state_dict(state_dict, strict=True)
+        load_checkpoint(
+            args.init_checkpoint,
+            model,
+            map_location="cpu",
+            restore_rng=False,
+        )
         print(f"Pesos iniciales cargados desde {args.init_checkpoint}")
     batches = NextTokenBatches(
         tokens, training_config.batch_size, model_config.context_length, training_config.seed
