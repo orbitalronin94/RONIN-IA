@@ -1,4 +1,4 @@
-name: RONIN — entrenamiento legacy 2000 + holdout intacto antes/después
+name: RONIN — entrenamiento legacy 1000 + holdout intacto antes/después
 
 on:
   push:
@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       steps:
-        description: Pasos de entrenamiento (1-3000)
+        description: Pasos de entrenamiento (1-1000)
         required: true
-        default: "2000"
+        default: "1000"
         type: string
 
 permissions:
@@ -39,7 +39,7 @@ jobs:
 
       - name: Validar presupuesto
         run: |
-          if ! [[ "$STEPS" =~ ^[0-9]+$ ]] || [ "$STEPS" -lt 1 ] || [ "$STEPS" -gt 3000 ]; then
+          if ! [[ "$STEPS" =~ ^[0-9]+$ ]] || [ "$STEPS" -lt 1 ] || [ "$STEPS" -gt 1000 ]; then
             echo "::error::STEPS debe estar entre 1 y 3000."
             exit 1
           fi
@@ -129,7 +129,7 @@ jobs:
             --dataset benchmarks/domains_v1.jsonl --profile tiny --device cpu \
             --output reports/domains-before.json
 
-      - name: Entrenar 2000 pasos solo con los 608 documentos train
+      - name: Entrenar hasta 1000 pasos solo con los 608 documentos train
         run: |
           python scripts/train_text.py \
             --text incoming/train/train.txt \
