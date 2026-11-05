@@ -1,5 +1,7 @@
 name: RONIN — torneo conservador de checkpoints 6/50
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
       base_run_id:
@@ -30,6 +32,8 @@ jobs:
       MATHLIB_RUN_ID: "42026633643"
       NASA_RUN_ID: "42028138060"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+      BASE_RUN_ID: ${{ inputs.base_run_id || '42078016306' }}
+      SECOND_RUN_ID: ${{ inputs.second_run_id || '42079641128' }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -45,19 +49,19 @@ jobs:
       - name: Download winner checkpoint artifact
         uses: actions/download-artifact@v7
         with:
-          name: ronin-corpus-seed-202-500steps-${{ inputs.base_run_id }}
+          name: ronin-corpus-seed-202-500steps-${{ env.BASE_RUN_ID }}
           path: incoming/winner
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
-          run-id: ${{ inputs.base_run_id }}
+          run-id: ${{ env.BASE_RUN_ID }}
       - name: Download second-cycle checkpoint artifact
         uses: actions/download-artifact@v7
         with:
-          name: ronin-corpus-seed-202-500steps-${{ inputs.second_run_id }}
+          name: ronin-corpus-seed-202-500steps-${{ env.SECOND_RUN_ID }}
           path: incoming/second
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
-          run-id: ${{ inputs.second_run_id }}
+          run-id: ${{ env.SECOND_RUN_ID }}
       - name: Download admitted literature train partition
         uses: actions/download-artifact@v7
         with:
