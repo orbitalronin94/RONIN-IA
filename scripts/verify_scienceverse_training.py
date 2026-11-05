@@ -186,6 +186,9 @@ def main() -> None:
                 "text_bytes": len(raw_text),
                 "normalization": {"replacement_characters_replaced": replacement_count},
                 "partition": "train",
+                "training_eligible": True,
+                "eligibility_scope": "source_scoped_internal_train_only",
+                "global_g0": "FAIL",
                 "text": normalized_text,
             })
 
