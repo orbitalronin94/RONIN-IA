@@ -54,6 +54,8 @@ jobs:
             ronin
             scripts
             data/datasets/admitted/ronin-authored-papers-v1
+            data/datasets/admitted/scienceverse-ccby-v1
+            scripts/verify_scienceverse_training.py
       - name: Validate budget
         run: |
           [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -eq 500 ]
@@ -112,6 +114,24 @@ jobs:
             --mathlib-jsonl-gz incoming/mathlib4/documents.train.jsonl.gz \
             --nasa-jsonl incoming/nasa-file-reviewed/documents.train.jsonl \
             --report reports/papers-train-audit.json
+      - name: Verify ScienceVerse scoped train documents
+        run: |
+          python scripts/verify_scienceverse_training.py \
+            --root data/datasets/admitted/scienceverse-ccby-v1 \
+            --literature-jsonl incoming/literature/documents.train.jsonl \
+            --mathlib-jsonl-gz incoming/mathlib4/documents.train.jsonl.gz \
+            --nasa-jsonl incoming/nasa-file-reviewed/documents.train.jsonl \
+            --papers-manifest data/datasets/admitted/ronin-authored-papers-v1/manifest.json \
+            --output-dir incoming/scienceverse
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path("incoming/scienceverse/audit.json").read_text(encoding="utf-8"))
+          assert report["training_eligible"] is True
+          assert report["documents"] > 0
+          assert report["exact_cross_source_dedup"] == "PASS"
+          print("ScienceVerse train scoped:", report["documents"], "docs /", report["text_bytes"], "UTF-8 bytes")
+          PY
       - name: Verify checkpoint and every admitted training partition
         run: |
           python - <<'PY'
@@ -181,6 +201,8 @@ jobs:
           lit=Path("incoming/literature/train.txt").read_bytes()
           math=Path("incoming/mathlib4/train.txt").read_bytes()
           nasa=Path("incoming/nasa-file-reviewed/train.txt").read_bytes()
+          scienceverse=Path("incoming/scienceverse/train.txt").read_bytes()
+          sv_report=json.loads(Path("incoming/scienceverse/audit.json").read_text(encoding="utf-8"))
           papers_dir=Path("data/datasets/admitted/ronin-authored-papers-v1/documents")
           papers_manifest=json.loads(Path("data/datasets/admitted/ronin-authored-papers-v1/manifest.json").read_text(encoding="utf-8"))
           papers=[]
@@ -193,7 +215,7 @@ jobs:
           assert len(papers)==9
           papers_blob=b"\n\n".join(papers)
           out=Path("/tmp/ronin-native-train.txt")
-          out.write_bytes(lit+b"\n\n"+math+b"\n\n"+nasa+b"\n\n"+papers_blob)
+          out.write_bytes(lit+b"\n\n"+math+b"\n\n"+nasa+b"\n\n"+papers_blob+b"\n\n"+scienceverse)
           report={
             "experiment":"ronin-native-no-tutor-v1",
             "tutor_used":False,
@@ -201,15 +223,16 @@ jobs:
               {"dataset_id":"ronin-spanish-public-domain-literature-v2","documents":608,"bytes":140295523,"sha256":"9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"},
               {"dataset_id":"mathlib4-lean-proof-corpus-v1","documents":8498,"bytes":97629252,"sha256":"7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"},
               {"dataset_id":"nasa-ntrs-file-reviewed-v1","documents":2,"bytes":32409,"sha256":"874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"},
-              {"dataset_id":"ronin-authored-papers-v1","documents":9,"bytes":750857,"sha256":"source-payloads-verified-individually"}
+              {"dataset_id":"ronin-authored-papers-v1","documents":9,"bytes":750857,"sha256":"source-payloads-verified-individually"},
+              {"dataset_id":"ronin-scienceverse-ccby-v1","documents":sv_report["documents"],"bytes":sv_report["text_bytes"],"sha256":sv_report["train_text_sha256"]}
             ],
-            "train_documents":9117,
-            "source_train_bytes":238708041,
+            "train_documents":9117+sv_report["documents"],
+            "source_train_bytes":238708041+sv_report["text_bytes"],
             "combined_bytes":out.stat().st_size,
             "combined_sha256":hashlib.sha256(out.read_bytes()).hexdigest(),
             "validation_test_partitions_in_training":False,
             "scope_limit":"Papers is source-scoped train only; global G-0 and near-duplicate/benchmark-holdout checks remain pending.",
-            "excluded_not_training_eligible":["NASA NTRS public-use unreviewed remainder (811 scoped records)","ScienceVerse (7365 scoped)"]
+            "excluded_not_training_eligible":["NASA NTRS public-use unreviewed remainder (811 scoped records)","ScienceVerse held records listed in incoming/scienceverse/held.json"]
           }
           Path("reports").mkdir(exist_ok=True)
           Path("reports/native-mixture.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
