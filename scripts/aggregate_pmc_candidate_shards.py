@@ -148,9 +148,14 @@ def aggregate(
     for manifest_path in manifests:
         data = json.loads(manifest_path.read_text(encoding="utf-8"))
         # download-artifact@v6 nests each shard under its artifact name
-        # (ronin-pmc-oa-<domain>-candidates), not the original domain name.
-        # The manifest is the authoritative source for the domain identity.
-        domain = str(data.get("domain", "")).strip()
+        # (ronin-pmc-oa-<domain>-candidates). The source manifest predates
+        # an explicit top-level domain field, so derive it from this exact
+        # artifact contract and cross-check every library ID below.
+        artifact_dir = manifest_path.parent.name
+        prefix, suffix = "ronin-pmc-oa-", "-candidates"
+        if not (artifact_dir.startswith(prefix) and artifact_dir.endswith(suffix)):
+            raise SystemExit(f"Unexpected PMC artifact directory: {artifact_dir}")
+        domain = artifact_dir[len(prefix):-len(suffix)]
         if domain not in expected:
             raise SystemExit(f"Unexpected PMC domain in {manifest_path}: {domain!r}")
         if domain in seen_domains:
