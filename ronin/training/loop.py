@@ -50,7 +50,7 @@ def save_checkpoint(
     path: str | Path,
     model: nn.Module,
     optimizer: torch.optim.Optimizer,
-    scaler: torch.cuda.amp.GradScaler,
+    scaler: torch.amp.GradScaler,
     step: int,
     config: TrainingConfig,
     batch_generator: torch.Generator | None = None,
@@ -100,7 +100,7 @@ def train(
     )
     dtype = resolve_precision(config.precision, device)
     use_scaler = dtype == torch.float16 and device.type == "cuda"
-    scaler = torch.cuda.amp.GradScaler(enabled=use_scaler)
+    scaler = torch.amp.GradScaler("cuda", enabled=use_scaler)
     batch_generator = getattr(batches, "generator", None)
     start_step = 0
     if resume_from is not None:
