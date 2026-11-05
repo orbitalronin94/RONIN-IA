@@ -121,7 +121,7 @@ for routing_domain, routing_terms in ROUTING_TERMS.items():
 
 
 def density_for_domain(text: str, domain: str) -> float:
-    return score_record(text, domain, Counter(), 1)
+    return score_record(text, domain, Counter(), 1)["semantic_density"]
 
 
 def choose_domain(text: str) -> tuple[str | None, float, dict[str, Any]]:
@@ -147,78 +147,6 @@ def choose_domain(text: str) -> tuple[str | None, float, dict[str, Any]]:
         "routing_hit_count": len(matches[best]),
         "routing_hits": sorted(matches[best]),
     }
-
-
-def density_for_domain(text: str, domain: str) -> float:
-    return score_record(text, domain, Counter(), 1)["semantic_density"]
-
-
-def choose_domain(text: str) -> tuple[str | None, float, dict[str, Any]]:
-    normalized = " ".join(tokens(text))
-    if not normalized:
-        return None, 0.0, {}
-    unique_words = set(normalized.split())
-    matches = {}
-    for domain in DOMAINS:
-        single_hits = unique_words & ROUTING_SINGLE_TERMS[domain]
-        phrase_hits = [phrase for phrase in ROUTING_PHRASES[domain] if phrase in normalized]
-        matches[domain] = sorted(single_hits) + phrase_hits
-    ranked = sorted(
-        DOMAINS,
-        key=lambda domain: (len(matches[domain]), domain),
-        reverse=True,
-    )
-    best = ranked[0]
-    # Two independent, distinctive terms are required; a single generic hit
-    # (for example "system", "law" or "society") must not assign a topic.
-    if len(matches[best]) < 2:
-        return None, 0.0, {}
-    details = score_record(text, best, Counter(), 1)
-    return best, details["semantic_density"], {
-        **details,
-        "routing_hit_count": len(matches[best]),
-        "routing_hits": matches[best],
-    }
-
-
-def literature_records(metadata_payload: bytes, text_payload: bytes) -> list[dict[str, Any]]:
-    """Rebuild the 608 admitted Spanish literature fragments without changing their train split."""
-    metadata = read_jsonl(metadata_payload)
-    text = text_payload.decode("utf-8")
-    offset = 0
-    records: list[dict[str, Any]] = []
-    for row in metadata:
-        size = int(row["character_count"])
-        fragment = text[offset : offset + size]
-        if len(fragment) != size or not fragment.startswith(str(row["source_fragment_title"])):
-            raise ValueError(f"literature fragment boundary mismatch: {row.get('record_id')}")
-        digest = sha256(fragment.encode("utf-8"))
-        if digest != row["text_sha256"]:
-            raise ValueError(f"literature fragment hash mismatch: {row.get('record_id')}")
-        offset += size
-        if text[offset : offset + 2] == "\n\n":
-            offset += 2
-        scores = score_record(fragment, "humanities", Counter(), 1)
-        records.append({
-            "document_id": f"literature-es-v1:{row['record_id']}",
-            "text": fragment,
-            "language": "es",
-            "source_id": row["source_id"],
-            "source_revision": row["source_revision"],
-            "source_identifier": row["source_path"],
-            "source_url": row["source_url"],
-            "license": "public-domain",
-            "rights_status": "admitted_pinned_public_domain_train_partition",
-            "rights_level": "A",
-            "admission_status": "admitted",
-            "partition": "train",
-            "semantic_density": scores["semantic_density"],
-            "domain_scores": scores,
-            "text_sha256": digest,
-        })
-    if text[offset:] not in {"", "\n"}:
-        raise ValueError("unexpected trailing bytes in admitted literature train payload")
-    return records
 
 
 def add_unique_record(
