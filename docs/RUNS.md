@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 12:25 | [Integración continua #1415 (run 42026633784)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42026633784) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(data\): admit verified pinned Mathlib4 corpus. Trigger: push; rama: main; intento: 1. | 4681dd44 |
 | 2026-11-05 12:23 | [Integración continua #1412 (run 42026474496)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42026474496) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Vectorize scoped corpus near-duplicate signatures. Trigger: push; rama: main; intento: 1. | b907dad4 |
 | 2026-11-05 12:22 | [Integración continua #1413 (run 42026485794)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42026485794) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Install NumPy for fast scoped near-duplicate audit. Trigger: push; rama: main; intento: 1. | dfc139da |
 | 2026-11-05 12:21 | [Integración continua #1411 (run 42026056063)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42026056063) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Parse legacy train documents by verified sidecar character counts. Trigger: push; rama: main; intento: 1. | fbbaeb6e |
