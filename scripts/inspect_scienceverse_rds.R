@@ -23,6 +23,17 @@ read_json_file <- function(path) {
   )
 }
 
+expected_count <- function(provenance, fields) {
+  for (field in fields) {
+    value <- provenance[[field]]
+    if (!is.null(value) && length(value) == 1L) {
+      number <- suppressWarnings(as.integer(value))
+      if (!is.na(number)) return(number)
+    }
+  }
+  NA_integer_
+}
+
 describe <- function(x, depth = 0L, max_depth = 5L) {
   cls <- paste(class(x), collapse = "/")
   dims <- dim(x)
@@ -45,7 +56,7 @@ describe <- function(x, depth = 0L, max_depth = 5L) {
         length = length(value)
       )
       if (is.character(value)) {
-        nonempty <- nchar(value, type = "chars") > 0L & !is.na(value)
+        nonempty <- !is.na(value) & nchar(value, type = "chars") > 0L
         lengths <- nchar(value[nonempty], type = "chars")
         item$nonempty_values <- sum(nonempty)
         item$median_character_length <- if (length(lengths)) unname(stats::median(lengths)) else 0L
@@ -55,7 +66,7 @@ describe <- function(x, depth = 0L, max_depth = 5L) {
     })
   }
   if (depth < max_depth && is.list(x) && !is.data.frame(x) && length(x) > 0L) {
-    idx <- unique(c(seq_len(min(length(x), 4L)), if (length(x) > 4L) length(x)))
+    idx <- unique(c(seq_len(min(length(x), 5L)), if (length(x) > 5L) length(x)))
     result$elements <- lapply(idx, function(i) {
       child <- describe(x[[i]], depth + 1L, max_depth)
       child$index <- i
@@ -66,7 +77,7 @@ describe <- function(x, depth = 0L, max_depth = 5L) {
   result
 }
 
-collect_data_frames <- function(x, path = "root", depth = 0L, max_depth = 6L, budget = 250L) {
+collect_data_frames <- function(x, path = "root", depth = 0L, max_depth = 7L, budget = 500L) {
   if (is.data.frame(x)) {
     columns <- names(x)
     return(list(list(
@@ -81,7 +92,7 @@ collect_data_frames <- function(x, path = "root", depth = 0L, max_depth = 6L, bu
     return(list())
   }
   nms <- names(x)
-  indices <- unique(c(seq_len(min(length(x), 5L)), if (length(x) > 5L) length(x)))
+  indices <- unique(c(seq_len(min(length(x), 8L)), if (length(x) > 8L) length(x)))
   result <- list()
   for (i in indices) {
     if (length(result) >= budget) break
@@ -112,6 +123,7 @@ for (f in files) {
   provenance_path <- file.path(base, "provenance.json")
   manifest_path <- file.path(base, "manifest.csv")
   eligible_path <- file.path(base, "eligible-manifest.csv")
+  audit_path <- file.path(base, "crossref-license-audit.json")
   required_paths <- c(provenance_path, manifest_path, eligible_path)
   if (!all(file.exists(required_paths))) {
     errors <- c(errors, paste("Missing provenance/manifest file beside", f))
@@ -140,29 +152,67 @@ for (f in files) {
   if (!identical(eligible_sha256, provenance$eligible_manifest_sha256)) {
     local_errors <- c(local_errors, "eligible manifest SHA-256 differs from provenance")
   }
-  if (nrow(manifest) != as.integer(provenance$documents_in_manifest)) {
+
+  expected_manifest <- expected_count(provenance, c("manifest_rows", "documents_in_manifest"))
+  expected_eligible <- expected_count(provenance, c("unique_doi_documents", "documents_converted_and_license_verified"))
+  if (!is.na(expected_manifest) && nrow(manifest) != expected_manifest) {
     local_errors <- c(local_errors, "source manifest row count differs from provenance")
   }
-  if (nrow(eligible) != as.integer(provenance$documents_converted_and_license_verified)) {
+  if (!is.na(expected_eligible) && nrow(eligible) != expected_eligible) {
     local_errors <- c(local_errors, "eligible manifest row count differs from provenance")
   }
-  if (!"doi" %in% names(eligible) || any(is.na(eligible$doi)) || any(!nzchar(trimws(eligible$doi))) || anyDuplicated(tolower(trimws(eligible$doi)))) {
-    local_errors <- c(local_errors, "eligible manifest DOI field missing or duplicated")
+
+  if (!"doi" %in% names(manifest) || !"doi" %in% names(eligible)) {
+    local_errors <- c(local_errors, "source and eligible manifests must both contain DOI")
+  } else {
+    manifest_dois <- tolower(trimws(as.character(manifest$doi)))
+    eligible_dois <- tolower(trimws(as.character(eligible$doi)))
+    if (any(is.na(eligible_dois)) || any(!nzchar(eligible_dois)) || anyDuplicated(eligible_dois)) {
+      local_errors <- c(local_errors, "eligible manifest DOI field missing, empty or duplicated")
+    }
+    if (any(!eligible_dois %in% manifest_dois)) {
+      local_errors <- c(local_errors, "eligible DOI is absent from source manifest")
+    }
+
+    if (file.exists(audit_path)) {
+      audit <- read_json_file(audit_path)
+      for (doi in eligible_dois) {
+        record <- audit[[doi]]
+        if (is.null(record) || !identical(as.character(record$status), "confirmed")) {
+          local_errors <- c(local_errors, paste("Crossref audit missing/uncertain for DOI", doi))
+          next
+        }
+        urls <- unlist(record$license_urls, use.names = FALSE)
+        ccby4 <- any(grepl("creativecommons\\.org/licenses/by/4\\.0/?$", urls, ignore.case = TRUE))
+        if (!ccby4) {
+          local_errors <- c(local_errors, paste("Crossref does not explicitly confirm CC BY 4.0 for DOI", doi))
+        }
+      }
+    } else {
+      normalized_license <- tolower(gsub("[^a-z0-9]", "", trimws(as.character(eligible$license))))
+      if (any(normalized_license != "ccby40")) {
+        local_errors <- c(local_errors, "eligible manifest contains a license other than exact CC BY 4.0")
+      }
+    }
   }
-  if (!"license" %in% names(eligible) || any(trimws(eligible$license) != "CC-BY 4.0")) {
-    local_errors <- c(local_errors, "eligible manifest contains a non-CC-BY-4.0 row")
-  }
+
   for (field in c("pdf_exists", "xml_exists", "in_rds")) {
     if (field %in% names(eligible) && !all(truthy(eligible[[field]]))) {
       local_errors <- c(local_errors, paste("eligible manifest has a false", field, "flag"))
     }
   }
 
-  excluded <- manifest[!manifest$doi %in% eligible$doi, , drop = FALSE]
+  excluded <- if ("doi" %in% names(manifest) && "doi" %in% names(eligible)) {
+    manifest[!tolower(trimws(as.character(manifest$doi))) %in% tolower(trimws(as.character(eligible$doi))), , drop = FALSE]
+  } else {
+    manifest[FALSE, , drop = FALSE]
+  }
   excluded_rows <- lapply(seq_len(nrow(excluded)), function(i) {
     row <- excluded[i, , drop = FALSE]
     reasons <- character()
-    if ("license" %in% names(row) && trimws(row$license[[1]]) != "CC-BY 4.0") reasons <- c(reasons, "license_not_CC-BY_4.0")
+    if ("license" %in% names(row) && !tolower(trimws(as.character(row$license[[1]]))) %in% c("cc-by 4.0", "cc-by-4.0", "cc-by")) {
+      reasons <- c(reasons, "upstream_license_not_exact_cc_by")
+    }
     if ("pdf_exists" %in% names(row) && !truthy(row$pdf_exists[[1]])) reasons <- c(reasons, "pdf_missing")
     if ("xml_exists" %in% names(row) && !truthy(row$xml_exists[[1]])) reasons <- c(reasons, "xml_missing")
     if ("in_rds" %in% names(row) && !truthy(row$in_rds[[1]])) reasons <- c(reasons, "not_in_RDS")
@@ -183,7 +233,7 @@ for (f in files) {
       NULL
     }
   )
-  report_id <- basename(base)
+  report_id <- paste0(basename(base), "-", substr(payload_sha256, 1L, 8L))
   reports[[report_id]] <- list(
     dataset_id = provenance$dataset_id,
     payload_file = basename(f),
@@ -191,11 +241,12 @@ for (f in files) {
     payload_sha256 = payload_sha256,
     manifest_sha256 = manifest_sha256,
     eligible_manifest_sha256 = eligible_sha256,
+    crossref_audit_sha256 = if (file.exists(audit_path)) sha256_file(audit_path) else NULL,
     manifest_rows = nrow(manifest),
     eligible_rows = nrow(eligible),
     excluded_rows = excluded_rows,
     license_values = if ("license" %in% names(eligible)) unique(eligible$license) else character(),
-    doi_unique = "doi" %in% names(eligible) && !anyDuplicated(eligible$doi),
+    doi_unique = "doi" %in% names(eligible) && !anyDuplicated(tolower(trimws(eligible$doi))),
     validation_errors = local_errors,
     structure = structure
   )
@@ -203,11 +254,13 @@ for (f in files) {
 }
 
 report <- list(
-  schema_version = 2L,
+  schema_version = 3L,
   status = if (length(errors)) "FAIL" else "PASS_STRUCTURE_AND_PROVENANCE_HASHES",
   source_root = root,
   datasets = reports,
-  errors = errors
+  errors = errors,
+  training_eligible = FALSE,
+  note = "This inspection verifies RDS readability, source/eligible manifest hashes and declared CC BY 4.0 evidence only. It does not verify publisher ownership, third-party rights, privacy, text quality, deduplication, splits or admission."
 )
 writeLines(
   as.character(jsonlite::toJSON(report, auto_unbox = TRUE, pretty = TRUE, null = "null")),
