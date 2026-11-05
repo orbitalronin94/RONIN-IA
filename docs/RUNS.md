@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 12:14 | [Integración continua #1408 (run 42025157145)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42025157145) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): keep PMC General and HKD partitions disjoint on score ties. Trigger: push; rama: main; intento: 1. | 173e6f92 |
 | 2026-11-05 12:12 | [Integración continua #1406 (run 42024881429)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42024881429) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): derive PMC domain from artifact directory. Trigger: push; rama: main; intento: 1. | 64989ced |
 | 2026-11-05 12:12 | [Integración continua #1407 (run 42025072994)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42025072994) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: retain per-record mathlib license and notice hashes. Trigger: push; rama: main; intento: 1. | 3e05eaa4 |
 | 2026-11-05 12:10 | [Integración continua #1405 (run 42024737563)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42024737563) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): read PMC domain from shard manifest. Trigger: push; rama: main; intento: 1. | 1f29197f |
