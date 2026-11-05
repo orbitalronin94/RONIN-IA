@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 13:50 | [Integración continua #1472 (run 42038929733)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42038929733) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(model\): verify cached RoPE parity and checkpoint compatibility. Trigger: push; rama: main; intento: 1. | 005e80d9 |
 | 2026-11-05 13:50 | [Integración continua #1473 (run 42039291797)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42039291797) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: perf\(eval\): batch domain benchmark inference by prompt length. Trigger: push; rama: main; intento: 1. | f29ef4cb |
 | 2026-11-05 13:49 | [Integración continua #1471 (run 42038925697)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42038925697) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: perf\(model\): cache RoPE frequencies per attention layer. Trigger: push; rama: main; intento: 1. | a43db2bb |
 | 2026-11-05 13:18 | [Integración continua #1470 (run 42034315522)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42034315522) | success | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Merge latest main documentation ledger into experiment. Trigger: pull_request; rama: experiment/identity-gated-ninth-layer; intento: 1. | caea7ec2 |
