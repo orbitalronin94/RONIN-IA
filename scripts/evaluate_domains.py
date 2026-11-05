@@ -56,8 +56,11 @@ def evaluate(
     dataset: Path,
     profile: str = "tiny",
     device: str = "cpu",
+    batch_token_budget: int = 8192,
 ) -> dict[str, Any]:
     items = load_items(dataset)
+    if batch_token_budget < 1:
+        raise ValueError("batch_token_budget debe ser positivo")
     config, _ = get_profile(profile)
     target_device = torch.device(device)
     model = RoninLM(config)
@@ -65,12 +68,10 @@ def evaluate(
     model.to(target_device)
     model.eval()
 
-    details = []
-    for item in items:
-        # El espacio final forma parte del formato «Respuesta: A»; el candidato
-        # se puntúa como el siguiente byte después de ese espacio.
+    encoded = []
+    for index, item in enumerate(items):
+        # El espacio final forma parte del formato «Respuesta: A».
         prompt_ids = list((item["prompt"] + " ").encode("utf-8"))
-        # No truncar silenciosamente: podría eliminar el enunciado y falsear la medida.
         if not prompt_ids:
             raise ValueError(f"Prompt vacío: {item['id']}")
         if len(prompt_ids) > config.context_length:
@@ -78,20 +79,58 @@ def evaluate(
                 f"Prompt {item['id']} ocupa {len(prompt_ids)} bytes; "
                 f"el contexto máximo es {config.context_length}"
             )
-        input_ids = torch.tensor([prompt_ids], dtype=torch.long, device=target_device)
-        logits, _ = model(input_ids)
-        log_probs = F.log_softmax(logits[0, -1].float(), dim=-1)
-        candidate_scores = [float(log_probs[ord(letter)]) for letter in item["options"]]
-        predicted = max(range(4), key=lambda index: candidate_scores[index])
-        details.append({
-            "id": item["id"],
-            "domain": item["domain"],
-            "capability": item["capability"],
-            "correct_index": item["correct_index"],
-            "predicted_index": predicted,
-            "correct": predicted == item["correct_index"],
-            "candidate_log_probabilities": candidate_scores,
-        })
+        encoded.append((index, item, prompt_ids))
+
+    # Bucketing estable por longitud: minimiza padding sin cambiar el corpus,
+    # la puntuación ni el orden final de los detalles.
+    ordered = sorted(encoded, key=lambda row: (-len(row[2]), row[0]))
+    batches = []
+    current = []
+    current_max = 0
+    for row in ordered:
+        proposed_max = max(current_max, len(row[2]))
+        if current and (len(current) + 1) * proposed_max > batch_token_budget:
+            batches.append(current)
+            current = []
+            current_max = 0
+        current.append(row)
+        current_max = max(current_max, len(row[2]))
+    if current:
+        batches.append(current)
+
+    details_by_index = {}
+    for batch in batches:
+        max_length = max(len(row[2]) for row in batch)
+        input_ids = torch.zeros(
+            (len(batch), max_length), dtype=torch.long, device=target_device
+        )
+        last_positions = []
+        for batch_index, (_, _, prompt_ids) in enumerate(batch):
+            length = len(prompt_ids)
+            input_ids[batch_index, :length] = torch.tensor(
+                prompt_ids, dtype=torch.long, device=target_device
+            )
+            last_positions.append(length - 1)
+        logits = model.forward_last_logits(
+            input_ids,
+            torch.tensor(last_positions, dtype=torch.long, device=target_device),
+        )
+        log_probs = F.log_softmax(logits.float(), dim=-1)
+        for batch_index, (original_index, item, _) in enumerate(batch):
+            candidate_scores = [
+                float(log_probs[batch_index, ord(letter)]) for letter in item["options"]
+            ]
+            predicted = max(range(4), key=lambda index: candidate_scores[index])
+            details_by_index[original_index] = {
+                "id": item["id"],
+                "domain": item["domain"],
+                "capability": item["capability"],
+                "correct_index": item["correct_index"],
+                "predicted_index": predicted,
+                "correct": predicted == item["correct_index"],
+                "candidate_log_probabilities": candidate_scores,
+            }
+    details = [details_by_index[index] for index in range(len(items))]
 
     def aggregate(key: str) -> dict[str, Any]:
         groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -118,6 +157,8 @@ def evaluate(
         "dataset": str(dataset),
         "dataset_sha256": sha256_file(dataset),
         "items": len(items),
+        "batching": {"token_budget": batch_token_budget, "batches": len(batches)},
+        "inference_path": "batched_last_position_logits",
         "overall": {"correct": correct, "total": len(items), "accuracy": correct / len(items)},
         "by_domain": aggregate("domain"),
         "by_capability": aggregate("capability"),
@@ -137,9 +178,10 @@ def main() -> None:
     parser.add_argument("--dataset", type=Path, default=Path("benchmarks/domains_v1.jsonl"))
     parser.add_argument("--profile", choices=["tiny"], default="tiny")
     parser.add_argument("--device", default="cpu")
+    parser.add_argument("--batch-token-budget", type=int, default=8192)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    report = evaluate(args.checkpoint, args.dataset, args.profile, args.device)
+    report = evaluate(args.checkpoint, args.dataset, args.profile, args.device, args.batch_token_budget)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
