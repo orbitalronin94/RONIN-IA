@@ -4,7 +4,7 @@ import json
 import pytest
 
 from ronin.data.local_dual_teacher import verify_manifest
-from scripts.distill_mmlu_pro_dual_tutor import parse_response, tutor_prompt
+from scripts.distill_mmlu_pro_dual_tutor import challenge_prompt, parse_response, tutor_prompt
 from scripts.download_dual_teachers import MODELS
 
 
@@ -34,6 +34,24 @@ def test_dual_tutor_prompt_does_not_leak_gold_answer():
     assert "RATIONALE:" in prompt
     assert "correct_index" not in prompt
     assert "no deliberación privada" in prompt
+
+
+def test_socratic_challenge_compares_both_answers_without_gold_leakage():
+    row = {
+        "question": "¿Cuánto es 2+2?",
+        "options": ["3", "4", "5"],
+        "correct_index": 1,
+    }
+    prompt = challenge_prompt(
+        row,
+        {"answer": "B", "rationale": "La suma de dos y dos es cuatro."},
+        {"answer": "A", "rationale": "Una explicación alternativa que debe contrastarse."},
+    )
+    assert "¿por qué es correcta tu respuesta?" in prompt
+    assert "Tu respuesta provisional: B" in prompt
+    assert "Respuesta independiente del otro tutor: A" in prompt
+    assert "correct_index" not in prompt
+    assert "No muestres deliberación privada" in prompt
 
 
 def test_parser_extracts_answer_and_explanation():
