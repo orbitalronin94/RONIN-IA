@@ -27,3 +27,10 @@ El ensamblador asigna únicamente documentos con señal temática suficiente. Lo
 - Superar el gate global G-0.
 
 **Estado de entrenamiento: bloqueado.** La presencia de un texto en un artefacto candidato no lo convierte en material admitido. Los recuentos y hashes de cada ejecución se conservan en `library-pack-manifest.json`.
+
+
+## Candidatos científicos ScienceVerse
+
+- eLife (1.000): corpus ScienceVerse declarado CC BY 4.0 en el catálogo upstream; falta auditoría DOI/artículo y extracción.
+- El catálogo declara 15.179 artículos en 18 corpus y conserva manifiestos por DOI y procedencia. Estos documentos aún no están admitidos ni son entrenables.
+- Expediente: `data/datasets/candidates/scienceverse-expanded-corpora/README.md`.
