@@ -5,15 +5,12 @@ This deliberately does not claim global G-0, near-duplicate clearance, or benchm
 holdout clearance. It checks exact payload integrity and exact overlap against the
 three currently consumed train partitions before the papers enter a training mix.
 """
-from __future__ import annotations
-
 import argparse
 import gzip
 import hashlib
 import json
 import re
 from pathlib import Path
-from typing import Any
 
 
 EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
@@ -23,7 +20,7 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def read_jsonl(path: Path) -> list[dict[str, Any]]:
+def read_jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
