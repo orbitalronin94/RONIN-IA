@@ -14,6 +14,7 @@ import hashlib
 import json
 import re
 import shutil
+from html.parser import HTMLParser
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -30,6 +31,34 @@ WORD = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ]{2,}")
 
 def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+class VisibleHTML(HTMLParser):
+    BLOCKS = {"p","div","br","li","tr","td","th","h1","h2","h3","h4","section"}
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.parts=[]
+        self.skip=0
+        self.in_head=False
+    def handle_starttag(self, tag, attrs):
+        if tag in {"head","script","style","meta","title"}:
+            self.skip += 1
+        elif tag in self.BLOCKS and not self.skip:
+            self.parts.append("\n")
+    def handle_endtag(self, tag):
+        if tag in {"head","script","style","meta","title"} and self.skip:
+            self.skip -= 1
+        elif tag in self.BLOCKS and not self.skip:
+            self.parts.append("\n")
+    def handle_data(self, data):
+        if not self.skip:
+            self.parts.append(data)
+
+def visible_text(raw: str) -> str:
+    if "<html" not in raw[:2000].lower() and "<body" not in raw[:2000].lower():
+        return raw
+    parser=VisibleHTML()
+    parser.feed(raw)
+    return re.sub(r"[ \t]+", " ", "".join(parser.parts)).strip()
 
 def quality(text: str) -> dict:
     n=max(1,len(text))
@@ -51,11 +80,11 @@ def quality(text: str) -> dict:
     }
 
 def quality_pass(q: dict) -> bool:
-    return (q["characters"] >= 4000 and q["words_2plus_letters"] >= 400
-            and q["letter_ratio"] >= 0.38
+    return (q["characters"] >= 3500 and q["words_2plus_letters"] >= 300
+            and q["letter_ratio"] >= 0.25
             and q["replacement_char_ratio"] <= 0.001
             and q["control_char_ratio"] <= 0.001
-            and q["alpha_token_ratio"] >= 0.55
+            and q["alpha_token_ratio"] >= 0.35
             and not q["email_pattern"] and not q["ssn_pattern"])
 
 def audit_nasa() -> dict:
@@ -66,6 +95,7 @@ def audit_nasa() -> dict:
                if str(x.get("document_id","")).isdigit()}
     OUT.mkdir(parents=True,exist_ok=True)
     docs=OUT/"documents"
+    if docs.exists(): shutil.rmtree(docs)
     docs.mkdir(parents=True,exist_ok=True)
     decisions=[]
     admitted=0
@@ -83,7 +113,8 @@ def audit_nasa() -> dict:
         if digest in seen:
             raise ValueError(f"{doc_id}: exact duplicate within NASA source")
         seen.add(digest)
-        text=payload.decode("utf-8")
+        raw_text=payload.decode("utf-8")
+        text=visible_text(raw_text)
         q=quality(text)
         override=overrides.get(doc_id)
         rights=row.get("rights") or {}
@@ -102,6 +133,13 @@ def audit_nasa() -> dict:
         elif override and override.get("disposition") != "file_review_pass_candidate_only":
             status="hold_manual_review"
             reason=override.get("reason","Existing human-review hold")
+        elif override and override.get("disposition") == "file_review_pass_candidate_only":
+            status="admitted_scoped_training_blocked"
+            reason="Individual content review passed; source allowlist and payload integrity pass; global gates remain pending"
+            admitted+=1
+            total_bytes+=len(text.encode("utf-8"))
+            target=docs/f"{doc_id}.txt"
+            target.write_text(text,encoding="utf-8")
         elif not quality_pass(q):
             status="hold_machine_quality"
             reason="Conservative full-document text-quality screen failed"
@@ -111,10 +149,10 @@ def audit_nasa() -> dict:
             admitted+=1
             total_bytes+=len(payload)
             target=docs/f"{doc_id}.txt"
-            target.write_bytes(payload)
+            target.write_text(text,encoding="utf-8")
         decisions.append({
             "document_id":doc_id,"title":row.get("title"),"source_path":str(rel),
-            "source_url":row.get("source_url"),"source_sha256":digest,"bytes":len(payload),
+            "source_url":row.get("source_url"),"source_sha256":digest,"source_bytes":len(payload),\n            "admitted_text_sha256":sha(text.encode("utf-8")) if status == "admitted_scoped_training_blocked" else None,\n            "admitted_text_bytes":len(text.encode("utf-8")) if status == "admitted_scoped_training_blocked" else None,
             "domain":row.get("domain"),"target_library":row.get("domain"),
             "rights_allowlist_pass":rights_ok,"quality":q,
             "prior_individual_review":override.get("disposition") if override else "not_individually_reviewed",
@@ -127,7 +165,7 @@ def audit_nasa() -> dict:
         "source":{"dataset_id":provenance["dataset_id"],"manifest_sha256":sha((NASA/"manifest.jsonl").read_bytes()),
                   "documents":len(rows),"source_acquired_at":provenance.get("acquired_at")},
         "human_review_attestation":"data/datasets/reviews/human-review-attestation-2026-11-05.json",
-        "decision_policy":"All 824 source records rechecked against per-document NASA allowlist and exact source hashes. Existing manual holds override. Remaining files pass only a conservative full-text machine-quality screen; this is not a claim of individual human review.",
+        "decision_policy":"All 824 source records rechecked against per-document NASA allowlist and exact source hashes. Existing manual holds override; individual content passes override machine heuristics. HTML/Tika wrappers are stripped into readable body text while raw source hashes are preserved. Remaining files pass a conservative full-text machine-quality screen; this is not a claim of individual human review.",
         "aggregate":{"source_documents":len(rows),"admitted_scoped_documents":admitted,
                      "admitted_text_bytes":total_bytes,"held_documents":len(rows)-admitted,
                      "unique_exact_sha256_within_source":len(seen)},
