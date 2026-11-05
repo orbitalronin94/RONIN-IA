@@ -76,6 +76,7 @@ def main() -> None:
     email_hits: list[str] = []
     ssn_hits: list[str] = []
     held: list[str] = []
+    held_counts: dict[str, int] = {}
 
     for folder in sorted(path for path in args.root.iterdir() if path.is_dir()):
         corpus = folder.name
@@ -104,51 +105,67 @@ def main() -> None:
             text = row.get("text")
             if not doi or not isinstance(text, str):
                 held.append(f"{corpus}:missing_doi_or_text")
+                held_counts["missing_doi_or_text"] = held_counts.get("missing_doi_or_text", 0) + 1
                 continue
-            raw_text = text.encode("utf-8")
+            source_raw_text = text.encode("utf-8")
+            source_text_hash = sha256(source_raw_text)
+            replacement_count = text.count("\ufffd")
+            replacement_ratio = replacement_count / max(1, len(text))
+            if replacement_count and (replacement_count > 5 or replacement_ratio > 0.0001):
+                held.append(f"{doc_id}:replacement_character_excessive")
+                held_counts["replacement_character_excessive"] = held_counts.get("replacement_character_excessive", 0) + 1
+                continue
+            normalized_text = text.replace("\ufffd", " ")
+            raw_text = normalized_text.encode("utf-8")
             text_hash = sha256(raw_text)
             doc_id = f"{corpus}:{doi}"
             license_url = str(row.get("license_url", "")).strip().rstrip("/") + "/"
             authors = row.get("authors")
             if row.get("admitted") is not True:
                 held.append(f"{doc_id}:not_admitted")
+                held_counts["not_admitted"] = held_counts.get("not_admitted", 0) + 1
                 continue
             if license_url not in ALLOWED_LICENSE_URLS:
                 held.append(f"{doc_id}:license_not_allowlisted")
+                held_counts["license_not_allowlisted"] = held_counts.get("license_not_allowlisted", 0) + 1
                 continue
             if not authors:
                 held.append(f"{doc_id}:missing_authors")
+                held_counts["missing_authors"] = held_counts.get("missing_authors", 0) + 1
                 continue
-            if row.get("text_sha256") != text_hash or int(row.get("text_bytes", -1)) != len(raw_text):
+            if row.get("text_sha256") != source_text_hash or int(row.get("text_bytes", -1)) != len(source_raw_text):
                 held.append(f"{doc_id}:text_hash_or_byte_mismatch")
+                held_counts["text_hash_or_byte_mismatch"] = held_counts.get("text_hash_or_byte_mismatch", 0) + 1
                 continue
             if len(text) < 1000 or len(text.split()) < 150:
                 held.append(f"{doc_id}:short_or_low_density")
+                held_counts["short_or_low_density"] = held_counts.get("short_or_low_density", 0) + 1
                 continue
             if EMAIL_RE.search(text):
                 email_hits.append(doc_id)
                 held.append(f"{doc_id}:email_pattern")
+                held_counts["email_pattern"] = held_counts.get("email_pattern", 0) + 1
                 continue
             if SSN_RE.search(text):
                 ssn_hits.append(doc_id)
                 held.append(f"{doc_id}:ssn_pattern")
-                continue
-            if "\ufffd" in text:
-                held.append(f"{doc_id}:replacement_character")
+                held_counts["ssn_pattern"] = held_counts.get("ssn_pattern", 0) + 1
                 continue
             if doi in seen_dois or text_hash in seen_hashes:
                 held.append(f"{doc_id}:internal_exact_duplicate")
+                held_counts["internal_exact_duplicate"] = held_counts.get("internal_exact_duplicate", 0) + 1
                 continue
             if text_hash in existing_hashes:
                 duplicate_external.append(doc_id)
                 held.append(f"{doc_id}:exact_duplicate_against_current_train")
+                held_counts["exact_duplicate_against_current_train"] = held_counts.get("exact_duplicate_against_current_train", 0) + 1
                 continue
 
             seen_dois.add(doi)
             seen_hashes.add(text_hash)
             total_text_bytes += len(raw_text)
             corpus_counts[corpus]["text_bytes"] += len(raw_text)
-            corpus_texts.append(text)
+            corpus_texts.append(normalized_text)
             records.append({
                 "schema_version": "ronin.document.v1",
                 "document_id": f"scienceverse-{corpus}-{hashlib.sha256(doi.encode()).hexdigest()[:16]}",
@@ -161,8 +178,11 @@ def main() -> None:
                 "source_dataset": "scienceverse",
                 "source_corpus": corpus,
                 "target_library": row.get("target_library"),
+                "source_text_sha256": source_text_hash,
+                "source_text_bytes": len(source_raw_text),
                 "text_sha256": text_hash,
                 "text_bytes": len(raw_text),
+                "normalization": {"replacement_characters_replaced": replacement_count},
                 "partition": "train",
                 "text": text,
             })
@@ -191,7 +211,11 @@ def main() -> None:
     report = {
         "schema": "ronin-scienceverse-train-audit-v1",
         "dataset_id": "ronin-scienceverse-ccby-v1",
+        "source_documents": expected_docs,
         "documents": len(records),
+        "held_documents": len(held),
+        "held_reason_counts": held_counts,
+        "held_examples": held[:100],
         "held_documents": len(held),
         "held_examples": held[:100],
         "manifest_documents": expected_docs,
@@ -216,12 +240,13 @@ def main() -> None:
         "manifest_aggregate_consistency": "REVIEW_REQUIRED_IF_DELTA_NONZERO",
         "per_document_license_and_attribution": "PASS",
         "text_hash_and_byte_integrity": "PASS",
-        "email_and_ssn_pattern_scan": "PASS",
+        "email_and_ssn_pattern_scan": "PASS_FOR_ELIGIBLE_RECORDS",
+        "minor_replacement_char_normalization": "REPLACED_WITH_SPACE_WHEN_<=5_AND_RATIO_<=0.0001",
         "quality_minimums": "PASS",
         "near_duplicate_global": "PENDING",
         "benchmark_holdout_contamination": "PENDING",
         "global_g0": "FAIL",
-        "training_eligible": True,
+        "training_eligible": bool(records),
         "eligible_partition": "train",
         "scope_limit": "Source-scoped train only; no global G-0, near-duplicate, benchmark-holdout, or General/HKD clearance is claimed.",
     }
