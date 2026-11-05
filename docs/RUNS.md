@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:08 | [Integración continua #1145 (run 41999932311)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999932311) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): rebase ScienceVerse corpus commit before pushing main. Trigger: push; rama: main; intento: 1. | 6172917a |
 | 2026-11-05 09:08 | [Integración continua #1137 (run 41999722524)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999722524) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): update gdown invocation for UN corpus download. Trigger: push; rama: main; intento: 1. | a47abe35 |
 | 2026-11-05 09:07 | [Integración continua #1141 (run 41999841687)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999841687) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): keep acquired ScienceVerse texts in candidate tier. Trigger: push; rama: main; intento: 1. | 0d8cc7d8 |
 | 2026-11-05 09:07 | [Integración continua #1140 (run 41999835312)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999835312) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): keep acquired ScienceVerse texts in candidate tier. Trigger: push; rama: main; intento: 1. | 82720d0d |
