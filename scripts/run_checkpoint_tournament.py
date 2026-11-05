@@ -7,7 +7,7 @@ from pathlib import Path
 from dataclasses import replace
 import torch
 from ronin.config import get_profile
-from ronin.data.batches import NextTokenBatches, encode_text_file
+from ronin.data.batches import encode_text_file
 from ronin.data.source_batches import SourceBalancedBatches
 from ronin.models.transformer import RoninLM
 from ronin.training.loop import train
@@ -91,7 +91,6 @@ def main():
     write(args.output_dir/"baseline-mmlu.json",base_mmlu); write(args.output_dir/"baseline-language.json",base_language)
     source_tensors=[encode_text_file(path) for path in (args.literature_text,args.mathlib_text,args.nasa_text)]
     cfg,_=get_profile("tiny")
-    natural=NextTokenBatches(encode_text_file(args.combined_text),2,cfg.context_length,seed=2026)
     balanced=lambda seed: SourceBalancedBatches([("literature",source_tensors[0],0.50),("mathlib4",source_tensors[1],0.495),("nasa-reviewed",source_tensors[2],0.005)],2,cfg.context_length,seed=seed)
     candidates=[]
     for name,batches,lam in (("B-balanced-replay",balanced(2026),0.0),("C-balanced-anchor",balanced(2026),1e-3)):
