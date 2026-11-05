@@ -118,7 +118,7 @@ def eligible_license(value: str) -> bool:
 
 def has_payment_card(raw: bytes) -> bool:
     for match in CARD_RE.finditer(raw):
-        digits = re.sub(rb"\\D", b"", match.group(0))
+        digits = re.sub(rb"\D", b"", match.group(0))
         if not 13 <= len(digits) <= 19:
             continue
         total = 0
