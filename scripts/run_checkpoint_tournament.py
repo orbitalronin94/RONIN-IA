@@ -34,7 +34,7 @@ def assert_gate(before, after):
     before_ids=[x["id"] for x in before["details"]]; after_ids=[x["id"] for x in after["details"]]
     for label,report in (("before",before),("after",after)):
         if report["selected_items"] != 50 or report["evaluated_items"] != 50 or report["coverage"] != 1.0 or report.get("skipped_context_items",0) != 0:
-            raise RuntimeError(f"paired holdout gate failed for {label}: selected={report.get("selected_items")} evaluated={report.get("evaluated_items")} coverage={report.get("coverage")}")
+            raise RuntimeError("paired holdout gate failed for " + label + ": selected=" + str(report.get("selected_items")) + " evaluated=" + str(report.get("evaluated_items")) + " coverage=" + str(report.get("coverage")))
     if before_ids != after_ids or before["dataset_sha256"] != after["dataset_sha256"] or before["dataset_revision"] != after["dataset_revision"] or before["dataset_split"] != after["dataset_split"]:
         raise RuntimeError("paired holdout identity mismatch")
 
@@ -85,7 +85,7 @@ def main():
     if base_sha != "7cda8dacb0b61d7278ba9990285a6a7e47403de8a00d201da06f5f002224c1cf": raise RuntimeError(f"unexpected winner checkpoint SHA: {base_sha}")
     rows_all=load_external_dataset(args.revision,split="validation"); rows=select_stratified(rows_all,50,seed=2026); all_hash=rows_sha256(rows_all); args.dataset_size=len(rows_all)
     base_mmlu=evaluate(args.base_checkpoint,rows,all_hash,args)
-    if base_mmlu["selected_items"]!=50 or base_mmlu["evaluated_items"]!=50 or base_mmlu["coverage"]!=1.0 or base_mmlu.get("skipped_items",0)!=0: raise RuntimeError("ABORT BEFORE TRAINING: base holdout did not achieve 50/50 coverage")
+    if base_mmlu["selected_items"]!=50 or base_mmlu["evaluated_items"]!=50 or base_mmlu["coverage"]!=1.0 or base_mmlu.get("skipped_context_items",0)!=0: raise RuntimeError("ABORT BEFORE TRAINING: base holdout did not achieve 50/50 coverage")
     base_language=evaluate_checkpoint(args.base_checkpoint,args.validation_text,"tiny",batches=128,batch_size=2,seed=2026,device="cpu")
     write(args.output_dir/"baseline-mmlu.json",base_mmlu); write(args.output_dir/"baseline-language.json",base_language)
     source_tensors=[encode_text_file(path) for path in (args.literature_text,args.mathlib_text,args.nasa_text)]
