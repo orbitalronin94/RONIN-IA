@@ -65,7 +65,7 @@ El workflow \`.github/workflows/assemble-32-libraries.yml\` descarga artefactos 
 - Las traducciones sin señal temática suficiente se conservan en un pool transversal no asignado.
 - Los textos de Common Corpus con derechos, privacidad, idioma o tipo de contenido pendientes se conservan en un fichero de revisión, fuera de las bibliotecas entrenables.
 - GPLSI se conserva como candidato jurídico hasta resolver los derechos de cada fuente original.
-- La literatura española sigue siendo el corpus admitido independiente. Su manifiesto y su partición train no se alteran ni se relabelan silenciosamente.
+- Los 608 documentos admitidos de literatura española se incorporan ahora a Humanidades, repartidos entre General/HKD por densidad y bytes. Se reconstruyen desde el manifiesto documental, se verifica el SHA-256 de cada fragmento y se conserva estrictamente su partición original train: no se generan validation/test a partir de esos textos.
 
 El paquete resultante se llama \`ronin-32-libraries-partial-candidates\`. Su manifiesto registra el número de documentos, bytes y SHA-256 por biblioteca y partición. **El paquete es candidato: no habilita entrenamiento.**
 
