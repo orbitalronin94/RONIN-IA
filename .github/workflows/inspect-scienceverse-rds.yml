@@ -1,4 +1,5 @@
 name: Inspect ScienceVerse RDS structure
+
 on:
   workflow_dispatch:
   push:
@@ -6,23 +7,55 @@ on:
       - "scripts/inspect_scienceverse_rds.R"
       - ".github/workflows/inspect-scienceverse-rds.yml"
       - "data/datasets/candidates/scienceverse-fulltext/**"
+
 permissions:
   contents: read
+
+concurrency:
+  group: ronin-scienceverse-rds-inspection
+  cancel-in-progress: false
+
 jobs:
   inspect:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: r-lib/actions/setup-r@v2
+      - uses: actions/checkout@v5
         with:
-          r-version: "4.4"
+          ref: main
+      - name: Install R runtime if needed
+        run: |
+          if ! command -v Rscript >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y r-base
+          fi
       - name: Install inspection dependency
-        run: Rscript -e 'install.packages("jsonlite", repos="https://cloud.r-project.org")'
-      - name: Inspect all four full-text objects
+        run: Rscript -e 'if (!requireNamespace("jsonlite", quietly=TRUE)) install.packages("jsonlite", repos="https://cloud.r-project.org")'
+      - name: Verify payload, manifests and inspect all RDS objects
         run: Rscript scripts/inspect_scienceverse_rds.R
-      - uses: actions/upload-artifact@v4
+      - name: Summarize verified RDS structures
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = Path("scienceverse-rds-inspection/structure-report.json")
+          if not report.exists():
+              print("No structure report was produced.")
+              raise SystemExit(0)
+          data = json.loads(report.read_text(encoding="utf-8"))
+          print(f"Status: {data['status']}")
+          for name, item in data.get("datasets", {}).items():
+              print(f"{name}: {item['eligible_rows']} eligible DOI rows; {item['payload_bytes']} bytes; SHA-256 {item['payload_sha256']}")
+          if data.get("errors"):
+              print("Errors:")
+              for error in data["errors"]:
+                  print(f"- {error}")
+          PY
+      - uses: actions/upload-artifact@v6
+        if: always()
         with:
           name: scienceverse-rds-structure
           path: scienceverse-rds-inspection/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
