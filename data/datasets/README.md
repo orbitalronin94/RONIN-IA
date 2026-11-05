@@ -13,13 +13,13 @@ Este directorio es el registro operativo de adquisición, revisión, admisión y
 | NASA NTRS public-use | 813 de 824 | Admisión scoped con revisión del propietario; 11 retenidos; 32.313.859 bytes | No: recheck de redistribución, deduplicación cruzada y controles globales pendientes |
 | Papers propios | 9 Markdown (README excluido) | 750.857 bytes; hashes/bytes verificados; dedup exacta contra 9.108 documentos train existentes; auditoría de estructura y privacidad PASS | Sí, train scoped interno; near-duplicate global y holdout siguen pendientes |
 | NASA file-reviewed | 2 train + 4 retenidos (subconjunto de NASA NTRS) | 32.410 bytes promovidos; 4 hashes/bytes no coinciden con sus atestaciones | Sí, solo los 2 documentos con revisión exacta y recheck NASA superados |
-| ScienceVerse | 7.403 textos en 13 colecciones; 7.365 admitidos scoped, 38 retenidos | Derechos por DOI y atribución auditados; 446.092.799 bytes admitidos | No: particiones y controles globales pendientes |
+| ScienceVerse | 7.403 registros fuente; 7.365 admitidos scoped; 6.641 train; 724 retenidos | 399.591.813 bytes train; CC BY/CC0 por DOI; hashes y dedup exacta cruzada PASS | Sí, train scoped en 4 bibliotecas General; near-duplicate global y holdout pendientes |
 
-**Cómo leer los totales:** hay **10.163 registros en los cuatro manifiestos principales** (644 literatura, incluidos 36 documentos de validation/test aislados + 8.697 mathlib4 + 813 NASA + 9 Papers). La cifra **entrenable por partición** pasa a **9.117 documentos**: 608 literatura + 8.498 mathlib4 + 2 NASA file-reviewed + 9 Papers propios; validation/test permanecen aislados. No es un recuento global de documentos únicos ni un validación global completada. Los seis NASA file-reviewed se muestran aparte y no se suman al total documental porque son un subconjunto de NASA NTRS; dos sí cuentan en la cifra entrenable scoped. ScienceVerse registra 7.365 admitidos scoped, pero aún no entrenables; no se suman al total principal de entrenamiento.
+**Cómo leer los totales:** los cuatro manifiestos base registran 10.163 entradas (literatura, Mathlib4, NASA y Papers), más 7.403 registros fuente de ScienceVerse. La cifra **entrenable por partición** pasa a **15.758 documentos y 638.299.854 bytes UTF-8**: 608 literatura + 8.498 Mathlib4 + 2 NASA file-reviewed + 9 Papers propios + 6.641 ScienceVerse. Validation/test permanecen aislados. No es una afirmación de G-0 global ni de ausencia de near-duplicates; el estado train scoped se limita a cada manifiesto y sus controles.
 
-### ScienceVerse: calidad automática no equivale a permiso
+### ScienceVerse: 6.641 documentos train scoped; 724 retenidos
 
-La auditoría consolidada registra 13 colecciones y 7.403 documentos; 7.365 pasan la admisión scoped por DOI/licencia/atribución y 38 quedan retenidos. Estos documentos todavía no son entrenables: faltan deduplicación near-duplicate global, particionado y validaciones globales. La admisión scoped no autoriza redistribución irrestricta.
+La auditoría por documento registra 13 colecciones y 7.365 documentos admitidos scoped. De ellos, 6.641 documentos (399.591.813 bytes UTF-8) pasan integridad de payload, SHA-256/bytes, CC BY/CC0 por DOI, atribución, mínimos de calidad, filtros de email/SSN y deduplicación exacta interna y contra el train actual. Se retienen 724: 697 por exceso de caracteres de reemplazo y 27 por títulos no sustantivos (correcciones, editoriales, erratas, etc.). La promoción es train scoped; near-duplicates globales, contaminación de benchmarks/holdouts y G-0 siguen pendientes.
 
 | Colección | Textos examinados | Admitidos scoped | Retenidos |
 |---|---:|---:|---:|
@@ -46,11 +46,11 @@ El objetivo canónico es **64 bibliotecas**. General y HKD deben ser disjuntas g
 
 - Mínimo Level A: **1 MiB de texto admitido por biblioteca** (64 MiB en total).
 - Objetivo de escala: 10 GiB por biblioteca (640 GiB en total).
-- Estado del inventario Level A: **608 documentos / 140.295.523 bytes**, todos contabilizados en `humanities_general`; **1/64** bibliotecas alcanza el mínimo, 63 están por debajo.
-- Bibliotecas training-eligible en el manifiesto de 64: **0/64**.
+- Estado del inventario Level A scoped: **7.249 documentos / 539.887.336 bytes**; **5/64** bibliotecas alcanzan el mínimo de 1 MiB, 59 están por debajo. Cuatro bibliotecas nuevas proceden de ScienceVerse: `social_sciences_general`, `biology_general`, `medicine_health_general` y `philosophy_general`.
+- Bibliotecas globalmente training-eligible en el manifiesto de 64: **0/64** por G-0; bibliotecas con train scoped habilitado: **4/64** (ScienceVerse).
 - validación global validación global: **FAIL**.
 
-El manifiesto `libraries/manifest-64.json` cuenta únicamente el corpus legacy Level A incorporado al inventario de bibliotecas. Los corpus NASA y Papers tienen admisión documental scoped en manifiestos separados, pero **no se han incorporado al contador Level A de 64 bibliotecas**. Esta distinción es intencional, no una omisión.
+El manifiesto `libraries/manifest-64.json` cuenta el corpus legacy y ScienceVerse en sus cuatro bibliotecas General. NASA y Papers conservan admisión train scoped en manifiestos propios, pero no se suman a los contadores Level A de esas bibliotecas.
 
 ## Qué significa cada estado
 
@@ -183,19 +183,19 @@ Los payloads grandes pueden publicarse como artefactos versionados de GitHub Act
 El corpus legacy de **608 documentos** continúa siendo la única fuente contabilizada en los mínimos Level A del inventario de 64 bibliotecas; Mathlib4 tiene una partición train scoped separada, pero no se ha incorporado al inventario Level A de 64 bibliotecas. Los corpus siguientes están admitidos en alcance documental propio, pero **no se suman a esos mínimos**:
 
 - **NASA NTRS:** 813/824 admitidos; 32.313.859 bytes normalizados; 11 retenidos.
-- **ScienceVerse:** 7.365/7.403 admitidos en 13 colecciones; 446.092.799 bytes de texto; 38 retenidos.
+- **ScienceVerse:** 7.365/7.403 admitidos scoped; 6.641 train y 399.591.813 bytes; 724 retenidos por calidad/OCR y títulos no sustantivos.
 - **Papers propio:** 9/9 Markdown admitidos con autorización del propietario; README excluido; 750.857 bytes.
 
 Los 7.365 ScienceVerse tienen DOI único, SHA-256 de texto único dentro de las 13 exportaciones, licencia por documento CC-BY-4.0 o CC0, atribución presente, filtro básico de PII superado y calidad textual suficiente. Se retienen 15 por autoría ausente, tres por anomalías de metadatos/privacidad/ruta temática y 20 por calidad. La attestation del propietario cubre la revisión humana de las fuentes mapeadas; el manifiesto mantiene trazabilidad por documento.
 
-**Entrenamiento scoped:** los 9 Papers propios ya están habilitados en la partición train y el workflow de mezcla los incorpora junto a literatura, Mathlib4 y los 2 NASA file-reviewed. NASA restante (811), ScienceVerse (7.365) y otros corpus scoped siguen excluidos hasta superar sus comprobaciones específicas. La comparación near-duplicate global, contaminación de holdouts, separación General/HKD global y G-0 siguen pendientes.
+**Entrenamiento scoped:** el mix incorpora 608 literatura, 8.498 Mathlib4, 2 NASA file-reviewed, 9 Papers propios y 6.641 ScienceVerse. NASA restante (811), los 724 ScienceVerse retenidos y otros candidatos siguen fuera. Near-duplicates globales, contaminación de benchmarks/holdouts, emparejamiento General/HKD global y G-0 siguen pendientes.
 
 ## Auditoría integral de candidatos (2026-11-05)
 
 El workflow \`Audit and admit scoped candidate documents\` ejecutó correctamente la auditoría y materialización:
 
 - NASA: [813 documentos admitidos en alcance acotado](admitted/nasa-ntrs-public-use-v1/manifest.json), 11 retenidos.
-- ScienceVerse: [7.365 documentos admitidos en alcance acotado](admitted/scienceverse-ccby-v1/manifest.json), 38 retenidos.
+- ScienceVerse: [7.365 documentos admitidos scoped](admitted/scienceverse-ccby-v1/manifest.json); [6.641 train scoped](admitted/scienceverse-ccby-v1/train-eligibility-manifest.json), 724 retenidos.
 - Papers: [9 documentos propios admitidos](admitted/ronin-authored-papers-v1/manifest.json), README excluido.
 - Informe global por fuente y documento: [candidate-document-audit-2026-11-05.json](reviews/candidate-document-audit-2026-11-05.json).
 
