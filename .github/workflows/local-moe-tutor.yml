@@ -1,0 +1,127 @@
+name: RONIN — tutor MoE local Qwen3 30B-A3B
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompts_jsonl:
+        description: "JSONL versionado con objetos {id,prompt}; vacío = solo smoke test"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-local-moe-tutor
+  cancel-in-progress: false
+
+jobs:
+  tutor-cpu:
+    # Runner propio: 30.5B pesos totales deben residir en RAM aunque solo 3.3B se activen/token.
+    runs-on: [self-hosted, linux, x64, ronin-32gb-cpu]
+    timeout-minutes: 720
+    env:
+      TUTOR_REPO: Qwen/Qwen3-30B-A3B-GGUF
+      TUTOR_FILE: Qwen3-30B-A3B-Q4_K_M.gguf
+      MAX_TUTOR_STEPS: "100"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set persistent runner cache paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${RUNNER_TOOL_CACHE:?Self-hosted runner must expose RUNNER_TOOL_CACHE}"
+          echo "TUTOR_DIR=$RUNNER_TOOL_CACHE/ronin-checkpoints/qwen3-30b-a3b-q4km" >> "$GITHUB_ENV"
+          echo "LLAMA_CPP_DIR=$RUNNER_TOOL_CACHE/llama.cpp" >> "$GITHUB_ENV"
+      - name: Check CPU runner memory and disk budget
+        shell: bash
+        run: |
+          set -euo pipefail
+          mem_kib=$(awk '/MemAvailable:/ {print $2}' /proc/meminfo)
+          mem_gib=$((mem_kib / 1024 / 1024))
+          disk_gib=$(df -BG "${{ runner.tool_cache }}" | awk 'NR==2 {gsub("G","",$4); print $4}')
+          echo "Available RAM: ${mem_gib} GiB; available disk: ${disk_gib} GiB"
+          test "$mem_gib" -ge 28 || { echo "::error::Need at least 28 GiB available RAM for all Q4 MoE weights."; exit 1; }
+          test "$disk_gib" -ge 55 || { echo "::error::Need at least 55 GiB free disk for checkpoint, llama.cpp build and scratch."; exit 1; }
+          mkdir -p "$TUTOR_DIR"
+      - name: Download GGUF checkpoint once and verify it
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -s "$TUTOR_DIR/$TUTOR_FILE" ]; then
+            python -m pip install --user -U "huggingface_hub[cli]"
+            export PATH="$HOME/.local/bin:$PATH"
+            hf download "$TUTOR_REPO" "$TUTOR_FILE" --local-dir "$TUTOR_DIR"
+          fi
+          test -s "$TUTOR_DIR/$TUTOR_FILE"
+          sha256sum "$TUTOR_DIR/$TUTOR_FILE" | tee "$TUTOR_DIR/SHA256SUMS"
+          stat --printf='Checkpoint bytes: %s\n' "$TUTOR_DIR/$TUTOR_FILE"
+      - name: Build llama.cpp CPU binary (no Ollama)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -x "$LLAMA_CPP_DIR/build/bin/llama-cli" ]; then
+            rm -rf "$LLAMA_CPP_DIR"
+            git clone --depth 1 https://github.com/ggml-org/llama.cpp "$LLAMA_CPP_DIR"
+            cmake -S "$LLAMA_CPP_DIR" -B "$LLAMA_CPP_DIR/build" -DGGML_NATIVE=OFF -DGGML_OPENMP=ON -DCMAKE_BUILD_TYPE=Release
+            cmake --build "$LLAMA_CPP_DIR/build" --config Release -j2 --target llama-cli
+          fi
+          "$LLAMA_CPP_DIR/build/bin/llama-cli" --version
+      - name: CPU inference smoke test from saved checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$LLAMA_CPP_DIR/build/bin/llama-cli" \
+            --model "$TUTOR_DIR/$TUTOR_FILE" \
+            --threads 8 --ctx-size 2048 --n-predict 48 --temp 0.2 \
+            --prompt "Responde en español en una frase: ¿qué es una prueba de regresión?" \
+            --no-display-prompt
+      - name: Generate at most 100 teacher traces directly with llama.cpp
+        if: ${{ inputs.prompts_jsonl != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/run_local_moe_tutor.py \
+            --llama-cli "$LLAMA_CPP_DIR/build/bin/llama-cli" \
+            --model "$TUTOR_DIR/$TUTOR_FILE" \
+            --prompts "${{ inputs.prompts_jsonl }}" \
+            --output reports/tutor-traces.jsonl \
+            --max-steps "$MAX_TUTOR_STEPS" --threads 8
+      - name: Record checkpoint provenance
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p reports
+          python - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          p=pathlib.Path(os.environ["TUTOR_DIR"])/os.environ["TUTOR_FILE"]
+          manifest={
+            "model_repo": os.environ["TUTOR_REPO"],
+            "checkpoint_file": os.environ["TUTOR_FILE"],
+            "checkpoint_path": str(p),
+            "checkpoint_present": p.is_file(),
+            "checkpoint_bytes": p.stat().st_size if p.is_file() else None,
+            "sha256": hashlib.sha256(p.read_bytes()).hexdigest() if p.is_file() else None,
+            "quantization": "Q4_K_M",
+            "parameters_total": 30_500_000_000,
+            "parameters_active_per_token": 3_300_000_000,
+            "runtime": "llama.cpp CLI, CPU only; no Ollama",
+            "max_teacher_steps": int(os.environ["MAX_TUTOR_STEPS"]),
+            "teacher_outputs_training_eligible": False,
+            "admission": "Candidate traces require independent review and explicit promotion; never auto-ingest."
+          }
+          pathlib.Path("reports/tutor-manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          if p.is_file():
+            subprocess.run(["sha256sum",str(p)],check=True,stdout=open("reports/checkpoint-sha256.txt","w"))
+          PY
+      - name: Upload trace and checkpoint provenance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-qwen3-moe-tutor-100steps-${{ github.run_id }}
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 90

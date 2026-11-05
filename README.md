@@ -8,8 +8,8 @@ RONIN es un modelo causal Transformer implementado en PyTorch. El modelo operati
 
 - Base: checkpoint anterior de `main`, SHA-256 de pesos `5aa7cd5a8188784b9fbf2e0c0454b6504d32e2188e3ac0291a0a255d88bce49e`.
 - Entrenamiento: 500 pasos adicionales de next-token prediction, semilla 202, 128.000 tokens, CPU con 2 hilos.
-- Corpus: 9.108 documentos admitidos (literatura española, Mathlib4 y 2 documentos NASA revisados individualmente); sin preguntas, QA sintético ni tutor.
-- Corpus train scoped disponible para los siguientes ciclos: **286.468 documentos y 684.738.932 bytes UTF-8**; incluye 270.244 traducciones CoVoST 2 en inglés/catalán. Sus validation/test permanecen excluidos. Este inventario ampliado no se atribuye retroactivamente al checkpoint actual, que sigue entrenado con el corpus indicado arriba.
+- Corpus usado para crear este checkpoint: 9.108 documentos admitidos (literatura española, Mathlib4 y NASA revisado); no se le atribuye el corpus ampliado posterior.
+- Inventario train-scoped disponible para los siguientes ciclos: **286.468 unidades y 684.738.932 bytes UTF-8**; incluye 270.244 segmentos de traducción CoVoST 2 en inglés/catalán. Sus particiones validation/test permanecen excluidas.
 - Checkpoint de origen: SHA-256 `86d7d97360f1eb0ac35e9dc12f69c366101629641115ba1c2a1341b2b7d257ae`.
 - Run: [GitHub Actions #42071401130](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42071401130).
 - Artefacto de origen: `ronin-corpus-seed-202-500steps-42071401130`. El workflow de fijación extrae y valida el state_dict y lo versiona como `weights/ronin-main.pt`; el manifiesto `weights/main-model.json` conserva hashes y procedencia.
@@ -25,6 +25,16 @@ RONIN es un modelo causal Transformer implementado en PyTorch. El modelo operati
 El screening MMLU-Pro usó los mismos 50 IDs, revisión `b189ec765aa7ed75c8acfea42df31fdae71f97be`, selección estratificada determinista y cobertura del 100 %. La muestra es pequeña (cada acierto equivale a 2 puntos porcentuales), pertenece al split `validation` y **no es el protocolo oficial ni una certificación de razonamiento**. El candidato no mejoró los aciertos MMLU-Pro; la mejora observada corresponde a predicción de texto en la validación interna.
 
 Por decisión del proyecto, este checkpoint queda fijado como **base operativa de los próximos experimentos**, no como una afirmación de superioridad general. Los ciclos siguientes medirán el mismo holdout antes y después, conservarán el checkpoint de partida y no promocionarán automáticamente candidatos.
+
+## Tutor local MoE
+
+El workflow está preparado para descargar **Qwen3-30B-A3B Q4_K_M** en el almacenamiento persistente `tool_cache` de un runner propio y ejecutar inferencia local con `llama.cpp` CPU, sin Ollama. El GGUF **todavía no está verificado como descargado**: hace falta un runner Linux x64 con etiqueta `ronin-32gb-cpu`, 28 GiB de RAM disponible y 55 GiB libres. El pipeline permite hasta 100 trazas; son generaciones del tutor, no pasos de optimizador del estudiante. Las trazas quedan sin admitir y nunca se ingieren automáticamente. Consulta [docs/TUTOR_MOE_LOCAL.md](docs/TUTOR_MOE_LOCAL.md).
+
+## Experimento de 100 corridas sobre el corpus actual
+
+La PR ejecuta **100 candidatos independientes**, semillas 1–100, con **100 pasos de optimizador cada uno** (10.000 actualizaciones agregadas). Todos parten del checkpoint operativo de `main` (**9.922.880 parámetros**, no el experimento de 95,5 M) y se comparan con los mismos 50 IDs de MMLU-Pro `validation`, además de la validación interna de texto. Se usan particiones train admitidas de literatura, Mathlib4, NASA revisado, Papers propios, ScienceVerse CC-BY y CoVoST 2 CC0. No se usa tutor. Se conservan los informes completos y los tres mejores checkpoints; no hay promoción automática.
+
+**Referencia previa, no equivalente al experimento 100×100:** la run [#42120055946](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42120055946) ejecutó la semilla 202 durante 500 pasos. En su muestra fija de 50 preguntas validation pasó de 5/50 a 7/50 (+4 puntos porcentuales); BPB interno pasó de 4,5654 a 4,0541 y la loss final fue 2,77316. Es un screening pequeño, no el benchmark oficial ni una prueba de mejora general. La nueva run [#42121731925](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42121731925) es la ejecución 100×100 y sus resultados solo se publicarán cuando termine.
 
 ## Estructura del repositorio
 
