@@ -24,8 +24,8 @@ PAPERS = ROOT / "data/datasets/admitted/ronin-authored-papers-v1"
 SCIENCEVERSE = ROOT / "data/datasets/candidates/scienceverse-text-export-v1"
 OUT = ROOT / "data/datasets/admitted/nasa-ntrs-public-use-v1"
 REPORT = ROOT / "data/datasets/reviews/candidate-document-audit-2026-11-05.json"
-EMAIL = re.compile(r"(?i)\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b")
-SSN = re.compile(r"\\b\\d{3}-\\d{2}-\\d{4}\\b")
+EMAIL = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
+SSN = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
 WORD = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ]{2,}")
 
 def sha(data: bytes) -> str:
@@ -34,10 +34,10 @@ def sha(data: bytes) -> str:
 def quality(text: str) -> dict:
     n=max(1,len(text))
     letters=sum(ch.isalpha() for ch in text)
-    replacement=text.count("\\ufffd")
-    controls=sum(ord(ch)<32 and ch not in "\\n\\r\\t\\f" for ch in text)
+    replacement=text.count("\ufffd")
+    controls=sum(ord(ch)<32 and ch not in "\n\r\t\f" for ch in text)
     words=WORD.findall(text)
-    tokens=re.findall(r"\\S+",text)
+    tokens=re.findall(r"\S+",text)
     alpha_tokens=sum(bool(WORD.search(token)) for token in tokens)
     return {
         "characters":len(text),
