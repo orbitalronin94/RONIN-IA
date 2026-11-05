@@ -13,3 +13,7 @@ El estado de cada biblioteca se actualiza en su README y en `manifest-32.json`. 
 - **ScienceVerse / papers:** siete corpus científicos declarados CC BY 4.0 por el catálogo upstream, 5.091 artículos de catálogo en total; falta auditoría DOI/artículo y descarga de payload. Expediente: `../candidates/scienceverse-expanded-corpora/README.md`.
 
 Estos bloques amplían las fuentes localizadas, no el contador de bibliotecas admitidas. Las 32 siguen en implementación parcial y G-0 continúa bloqueado hasta completar los controles y la distribución equilibrada.
+
+
+- **NASA NTRS:** candidato técnico-científico con más de 200.000 documentos completos en catálogo; solo pasan registros con copyright público explícito y sin partes de terceros no autorizadas. Expediente: `../candidates/nasa-ntrs-public-use/README.md`.
+- **NIST Technical Series/PDR:** candidato para informes y datos propios de NIST con política oficial de reutilización y atribución; se excluyen trabajos de terceros y se exige revisión por registro. Expediente: `../candidates/nist-technical-series/README.md`.
