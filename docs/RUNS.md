@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:28 | [Integración continua #1186 (run 42002314082)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002314082) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(ci\): install R inspection dependencies from Ubuntu packages. Trigger: push; rama: main; intento: 1. | fd61d259 |
 | 2026-11-05 09:27 | [Integración continua #1185 (run 42002286102)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002286102) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): bound ScienceVerse RDS structure sampling. Trigger: push; rama: main; intento: 1. | 1df303a5 |
 | 2026-11-05 09:26 | [Inspect ScienceVerse RDS structure #4 (run 42002286128)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002286128) | failure | Ejecución de GitHub Actions; consultar logs y artefactos enlazados para el resultado detallado. Commit: fix\(data\): bound ScienceVerse RDS structure sampling. Trigger: push; rama: main; intento: 1. | 1df303a5 |
 | 2026-11-05 09:25 | [Integración continua #1184 (run 42002112586)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002112586) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(data\): move ScienceVerse acquisition workflow to Node 24. Trigger: push; rama: main; intento: 1. | 4c0521a4 |
