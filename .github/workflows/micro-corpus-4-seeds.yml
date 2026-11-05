@@ -102,15 +102,23 @@ jobs:
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ env.NASA_FILE_REVIEWED_RUN_ID }}
-      - name: Verify checkpoint and every admitted training partition
+      - name: Download previous winning candidate checkpoint
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-corpus-seed-202-500steps-42078016306
+          path: incoming/winner
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: "42078016306"
+      - name: Verify winning checkpoint and every admitted training partition
         run: |
           python - <<'PY'
           import hashlib, json, shutil
           from pathlib import Path
           import torch
           def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
-          base=Path("weights/ronin-main.pt")
-          model_manifest=json.loads(Path("weights/main-model.json").read_text(encoding="utf-8"))
+          base=Path("incoming/winner/checkpoints/seed-202/step-00000500.pt")
+          expected_winner="7cda8dacb0b61d7278ba9990285a6a7e47403de8a00d201da06f5f002224c1cf"
           lit=Path("incoming/literature/train.txt")
           lm=Path("incoming/literature/dataset-manifest.json")
           math=Path("incoming/mathlib4/train.txt")
@@ -119,21 +127,20 @@ jobs:
           nmf=Path("incoming/nasa-file-reviewed/manifest.json")
           ndocs=Path("incoming/nasa-file-reviewed/documents.train.jsonl")
           assert all(p.is_file() for p in (base,lit,lm,math,mmf,nasa,nmf,ndocs))
-          assert sha(base)==model_manifest["weights_sha256"]
-          assert model_manifest["checkpoint_sha256"]=="a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
-          assert sha(lit)=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
+          assert sha(base)==expected_winner, f"Winner SHA mismatch: {sha(base)}"
           l=json.loads(lm.read_text())
           assert l.get("dataset_id")=="ronin-spanish-public-domain-literature-v2"
           assert l.get("status")=="admitted_scoped_training_partition" and l.get("training_eligible") is True
           assert l.get("document_count")==608
           assert l.get("train_bytes")==140295523 and l.get("validation_test_included") is False
+          assert sha(lit)=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
           m=json.loads(mmf.read_text())
           assert m.get("dataset_id")=="mathlib4-lean-proof-corpus-v1"
           assert m.get("status")=="admitted_scoped_training_partition"
           part=m["aggregate"]["partitions"]["train"]
+          expected_math="7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"
           assert part["training_eligible"] is True and part["documents"]==8498
-          expected="7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"
-          assert part["text_sha256"]==expected and sha(math)==expected
+          assert part["text_sha256"]==expected_math and sha(math)==expected_math
           n=json.loads(nmf.read_text())
           npart=n["partitions"]["train"]
           assert n.get("dataset_id")=="nasa-ntrs-file-reviewed-v1"
@@ -156,12 +163,12 @@ jobs:
           model=RoninLM(model_config)
           model.load_state_dict(state_dict,strict=True)
           parameter_count=sum(p.numel() for p in model.parameters())
-          assert ck.get("step",model_manifest["checkpoint_step"])==model_manifest["checkpoint_step"]==1000
-          assert parameter_count==model_manifest["parameters"]==9922880
-          print("Modelo verificado:", model_manifest["model_name"], "| parámetros=", parameter_count, "| pesos_sha256=", model_manifest["weights_sha256"])
+          assert ck.get("step")==500, f"Expected winner step 500, got {ck.get('step')}"
+          assert parameter_count==9922880
+          print("Winner verified: run 42078016306 | SHA256=", expected_winner, "| parameters=", parameter_count)
           Path("checkpoints").mkdir(exist_ok=True)
           shutil.copy2(base,"checkpoints/main.pt")
-          print("Integrity checks OK: 608 literature + 8498 Mathlib4 + 2 NASA file-reviewed = 9108 scoped train docs; 237957184 source bytes. No tutor data. Validation/test partitions excluded.")
+          print("Integrity checks OK: winner checkpoint + 608 literature + 8498 Mathlib4 + 2 NASA file-reviewed = 9108 train docs; 237957184 source bytes. No tutor data. Validation/test partitions excluded.")
           PY
       - name: Assemble all and only train-eligible admitted documents
         run: |
@@ -205,6 +212,7 @@ jobs:
             --steps "$STEPS" \
             --eval-limit "$EVAL_LIMIT" \
             --eval-split validation \
+            --require-paired-holdout \
             --revision "$MMLU_REVISION" \
             --context-length 4096 \
             --batch-token-budget 8192 \

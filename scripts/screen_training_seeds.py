@@ -40,6 +40,7 @@ def main() -> None:
     parser.add_argument("--base-checkpoint", type=Path, required=True)
     parser.add_argument("--seeds", required=True, help="Semillas separadas por comas")
     parser.add_argument("--steps", type=int, default=500)
+    parser.add_argument("--require-paired-holdout", action="store_true", help="Exige al menos 50 preguntas y cobertura completa antes y después")
     parser.add_argument("--eval-limit", type=int, default=64, help="0 evalúa el split completo; en screening usar validation")
     parser.add_argument("--eval-split", choices=["validation", "test"], default="test", help="validation para selección; test solo para auditoría final")
     parser.add_argument("--revision", default=DATASET_REVISION)
@@ -95,6 +96,13 @@ def main() -> None:
         "total_available": len(all_rows),
     }
     write_json(reports / "mmlu-holdout-before.json", base_mmlu)
+    if args.require_paired_holdout:
+        if args.steps != 500:
+            raise ValueError("--require-paired-holdout solo admite ciclos de exactamente 500 pasos")
+        if base_mmlu["selected_items"] < 50:
+            raise RuntimeError(f"Holdout insuficiente antes del entrenamiento: {base_mmlu['selected_items']} < 50")
+        if base_mmlu["coverage"] != 1.0 or base_mmlu["skipped_context_items"] != 0:
+            raise RuntimeError("Holdout previo incompleto; se cancela antes de entrenar")
 
     base_language = evaluate_checkpoint(
         base_checkpoint,
@@ -166,6 +174,33 @@ def main() -> None:
             and base_mmlu["coverage"] >= 0.95
             and mmlu_after["coverage"] >= 0.95
         )
+        if args.require_paired_holdout:
+            same_holdout = same_holdout and (
+                base_mmlu["selected_items"] >= 50
+                and base_mmlu["coverage"] == 1.0
+                and mmlu_after["coverage"] == 1.0
+                and base_mmlu["skipped_context_items"] == 0
+                and mmlu_after["skipped_context_items"] == 0
+            )
+            if not same_holdout:
+                raise RuntimeError(f"Holdout pareado inválido para seed={seed}; candidato rechazado")
+        before_by_id = {item["id"]: item for item in base_mmlu["details"]}
+        after_by_id = {item["id"]: item for item in mmlu_after["details"]}
+        changed = [qid for qid in before_by_id if before_by_id[qid]["predicted_index"] != after_by_id[qid]["predicted_index"]]
+        gained = [qid for qid in before_by_id if not before_by_id[qid]["correct"] and after_by_id[qid]["correct"]]
+        lost = [qid for qid in before_by_id if before_by_id[qid]["correct"] and not after_by_id[qid]["correct"]]
+        domain_deltas = {}
+        for domain, after_metrics in mmlu_after["by_domain"].items():
+            before_metrics = base_mmlu["by_domain"].get(domain)
+            if before_metrics is not None:
+                domain_deltas[domain] = {
+                    "correct_before": before_metrics["correct"],
+                    "correct_after": after_metrics["correct"],
+                    "total": after_metrics["total"],
+                    "accuracy_before": before_metrics["accuracy"],
+                    "accuracy_after": after_metrics["accuracy"],
+                    "delta_percentage_points": (after_metrics["accuracy"] - before_metrics["accuracy"]) * 100,
+                }
         delta_pp = (
             mmlu_after["overall"]["accuracy"] - base_mmlu["overall"]["accuracy"]
         ) * 100
@@ -190,6 +225,21 @@ def main() -> None:
             "mmlu_after_accuracy": mmlu_after["overall"]["accuracy"],
             "mmlu_delta_percentage_points": delta_pp,
             "same_holdout_before_after": same_holdout,
+            "paired_holdout_valid": same_holdout,
+            "changed_predictions": len(changed),
+            "changed_prediction_ids": changed,
+            "new_correct_ids": gained,
+            "regressed_correct_ids": lost,
+            "by_domain_delta": domain_deltas,
+            "holdout_config": {
+                "dataset_revision": args.revision,
+                "split": args.eval_split,
+                "selection_seed": 2026,
+                "requested_limit": args.eval_limit,
+                "context_length": args.context_length,
+                "batch_token_budget": args.batch_token_budget,
+                "device": args.device,
+            },
             "evaluated_items": mmlu_after["evaluated_items"],
             "coverage": mmlu_after["coverage"],
             "language_before_bits_per_byte": base_language["bits_per_byte"],
@@ -214,6 +264,9 @@ def main() -> None:
         "evaluation_split": args.eval_split,
         "tutor_used": False,
         "automatic_promotion": False,
+        "paired_holdout_mandatory": args.require_paired_holdout,
+        "paired_holdout_minimum_questions": 50 if args.require_paired_holdout else None,
+        "paired_holdout_full_coverage_required": args.require_paired_holdout,
         "training_seeds": seeds,
         "holdout_selection_seed": 2026,
         "holdout_limit": args.eval_limit,
