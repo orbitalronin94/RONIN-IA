@@ -7,6 +7,17 @@
 - Fuente de verdad: este repositorio. El código, las pruebas, las configuraciones y la documentación operativa viven aquí.
 - Estado: ya existe un modelo estudiante propio, implementado en PyTorch, y se ha completado un primer ciclo de entrenamiento experimental. El proyecto sigue en fase de investigación; no se afirma todavía competencia general.
 
+## Pipeline único de fine-tuning GPU (5 de noviembre de 2026)
+
+La nueva línea de entrenamiento selecciona **un único modelo: Qwen3.5-4B**, con Unsloth y adaptadores LoRA en BF16/FP16. Se evita QLoRA de 4 bits porque la guía actual de Unsloth desaconseja esa cuantización para Qwen3.5. El perfil inicial usa contexto 2.048, microbatch 1, acumulación 8 y 1.000 pasos.
+
+- Preparación de corpus: [workflow Qwen3.5](.github/workflows/qwen35-prepare-corpus.yml).
+- Entrenamiento GPU: [notebook Colab](https://colab.research.google.com/github/orbitalronin94/RONIN-IA/blob/main/notebooks/ronin_qwen35_4b_training.ipynb).
+- Implementación: [scripts/train_qwen35_unsloth.py](scripts/train_qwen35_unsloth.py).
+- Diseño y protocolo: [docs/QWEN35_TRAINING_PIPELINE.md](docs/QWEN35_TRAINING_PIPELINE.md).
+
+El workflow recupera el artefacto del único corpus documental admitido actualmente (literatura española, 608 documentos), verifica UTF-8 y SHA-256 y publica un paquete listo para Colab. El notebook ejecuta el entrenamiento en GPU cuando Colab concede una; el runner estándar de GitHub no se presenta como GPU. La evaluación iterativa utiliza MMLU-Pro validation; el test queda reservado para una comprobación final independiente. Los adaptadores son candidatos y no se promocionan sin evidencia de mejora.
+
 ## Estado actual del modelo
 
 **RONIN ya tiene modelo propio.** No es únicamente una hoja de ruta ni una colección de especificaciones: el repositorio contiene un Transformer causal decoder-only implementado en PyTorch, con inicialización propia y **9.922.880 parámetros en el perfil `tiny`**. Su arquitectura actual combina RoPE, RMSNorm, SwiGLU y GQA configurable.
