@@ -132,7 +132,7 @@ jobs:
           python scripts/prepare_legacy_training_split.py --input incoming/literature/train.txt --output-dir /tmp/ronin-lit-split --validation-fraction 0.05 --seed 42006
           python scripts/prepare_legacy_training_split.py --input incoming/mathlib4/train.txt --output-dir /tmp/ronin-math-split --validation-fraction 0.05 --seed 42006
           python scripts/prepare_legacy_training_split.py --input incoming/nasa/train.txt --output-dir /tmp/ronin-nasa-split --validation-fraction 0.05 --seed 42006
-      - name: Repeat the 100-step B/C cycle from both 7/50 checkpoints
+      - name: Repeat the 10,000-step B/C cycle from both 7/50 checkpoints
         run: |
           for candidate in B C; do
             python scripts/run_checkpoint_tournament.py \
@@ -147,7 +147,7 @@ jobs:
             --context-length 4096 \
             --batch-token-budget 8192 \
             --num-threads 2 \
-            --training-steps 100 \
+            --training-steps 10000 \
             --output-dir "tournament-results/from-${candidate}-7of50"
           done
       - name: Upload complete tournament results
