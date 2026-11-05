@@ -30,7 +30,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   native-cycle:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 360
     env:
       PYTHONUNBUFFERED: "1"
@@ -44,7 +44,7 @@ jobs:
       EVAL_LIMIT: ${{ inputs.eval_limit || '1024' }}
       TRAIN_SEEDS: ${{ inputs.seeds || '20261108' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           sparse-checkout: |
             .github
@@ -62,7 +62,7 @@ jobs:
           [ "${#SEED_LIST[@]}" -ge 1 ] && [ "${#SEED_LIST[@]}" -le 8 ]
           for seed in "${SEED_LIST[@]}"; do [[ "$seed" =~ ^[0-9]+$ ]] && [ "$seed" -le 2147483647 ]; done
           if [ "$EVAL_LIMIT" = "0" ]; then [ "${#SEED_LIST[@]}" -eq 1 ]; fi
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
@@ -74,7 +74,7 @@ jobs:
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "dill==0.3.8" "multiprocess==0.70.16" "huggingface_hub==0.36.0"
           python -m compileall -q scripts/prepare_legacy_training_split.py scripts/train_text.py scripts/evaluate_mmlu_pro.py scripts/evaluate_text.py scripts/screen_training_seeds.py
       - name: Download admitted literature train partition
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: ronin-admitted-literature-es-v1-train
           path: incoming/literature
@@ -82,7 +82,7 @@ jobs:
           repository: ${{ github.repository }}
           run-id: ${{ env.LITERATURE_RUN_ID }}
       - name: Download admitted Mathlib4 train partition
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: ronin-admitted-mathlib4-v1
           path: incoming/mathlib4
@@ -90,7 +90,7 @@ jobs:
           repository: ${{ github.repository }}
           run-id: ${{ env.MATHLIB_RUN_ID }}
       - name: Download individually reviewed NASA train partition
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: ronin-nasa-ntrs-file-reviewed-train
           path: incoming/nasa-file-reviewed
@@ -207,7 +207,7 @@ jobs:
             --output-dir reports/seed-screen
       - name: Upload paired benchmark, corpus manifest and candidate
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ronin-native-no-tutor-${{ github.run_id }}
           path: |
