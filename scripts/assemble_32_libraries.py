@@ -137,6 +137,7 @@ def write_library(out: Path, domain: str, kind: str, records: list[dict[str, Any
     counts = Counter()
     sizes = Counter()
     sources = Counter()
+    rights_states = Counter()
     try:
         for row in sorted(records, key=lambda item: item["document_id"]):
             split = stable_partition(row["document_id"])
@@ -146,6 +147,7 @@ def write_library(out: Path, domain: str, kind: str, records: list[dict[str, Any
             counts[split] += 1
             sizes[split] += len(payload)
             sources[row["source_id"]] += 1
+            rights_states[row.get("rights_status", "unspecified")] += 1
     finally:
         for handle in handles.values():
             handle.close()
@@ -160,6 +162,7 @@ def write_library(out: Path, domain: str, kind: str, records: list[dict[str, Any
         "bytes_by_split": dict(sizes),
         "sha256_by_split": {name: digest.hexdigest() for name, digest in hashes.items()},
         "source_counts": dict(sorted(sources.items())),
+        "rights_status_counts": dict(sorted(rights_states.items())),
         "train_bytes": sizes["train"],
         "content_weight_policy": "General/HKD disjoint split balanced by UTF-8 text bytes; highest semantic-density items go to HKD",
     }
@@ -260,15 +263,24 @@ def main() -> int:
     ):
         for row in read_jsonl(verify_payload(member, artifact_member(args.gplsi_zip, member), expected)):
             text = " ".join(str(row.get("text") or "").split())
+            source_url = str(row.get("source_url") or "")
+            source_path = str(row.get("source_path") or "")
+            boe_official_law = source_url.startswith("https://www.boe.es/buscar/pdf/") and source_path.startswith("data/original/")
             record = {
-                "document_id": f"gplsi:{row.get('source_repo')}:{row.get('source_path')}",
+                "document_id": f"gplsi:{row.get('source_repo')}:{source_path}",
                 "text": text,
                 "language": row.get("language"),
                 "source_id": row.get("source_repo"),
                 "source_revision": row.get("source_commit"),
-                "source_identifier": row.get("source_url"),
-                "license": row.get("license_id_claimed_for_collection"),
-                "rights_status": "collection_cc_by_claim_item_source_rights_pending",
+                "source_identifier": source_url,
+                "license": "PUBLIC-DOMAIN-ES-ART13" if boe_official_law else row.get("license_id_claimed_for_collection"),
+                "rights_status": "level_b_public_domain_article13_human_legal_signoff_pending" if boe_official_law else "collection_cc_by_claim_item_source_rights_pending",
+                "rights_level": "B" if boe_official_law else "C",
+                "rights_record_id": (
+                    "boe-public-domain-es-art13-" + source_url.rsplit("/", 1)[-1].replace("-consolidado.pdf", "").lower()
+                    if boe_official_law else None
+                ),
+                "admission_status": "candidate_level_b" if boe_official_law else "candidate",
                 "semantic_density": density_for_domain(text, "law"),
             }
             buckets["law"].append(record)
