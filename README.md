@@ -18,13 +18,13 @@ La política de las 64 bibliotecas sigue exigiendo verificación de derechos por
 
 Este corte corrige y amplía los resúmenes históricos que aparecen más abajo. El inventario canónico vigente es de **32 dominios × General/HKD = 64 bibliotecas** (\`data/datasets/libraries/manifest-64.json\`):
 
-- **608 documentos** de train en el corpus legacy `literature-es-v1`, admitidos bajo su manifiesto legacy separado. Sus 18 validation y 18 test permanecen excluidos del entrenamiento.
+- **608 documentos / 140.295.523 bytes** de train en `literature-es-v1`, ahora contados como Level A scoped-equivalent en Humanidades — General. Sus 18 validation y 18 test permanecen excluidos del entrenamiento.
 - **4.855 registros candidatos adquiridos por fuente**: 3.087 ScienceVerse, 824 DOI de ScienceVerse/Crossref, 267 textos NASA NTRS y 677 textos ScienceVerse Collabra. Es una suma por fuente, no un total global deduplicado ni documentos Level A admitidos.
-- **0 documentos y 0 bytes Level A** dentro del inventario canónico de 64 bibliotecas; **0/64** alcanzan el mínimo. G-0 continúa en FAIL y no se autoriza entrenamiento documental con estos candidatos.
+- **608 documentos y 140.295.523 bytes Level A** dentro del inventario canónico; **1/64** alcanza el mínimo (Humanidades — General). G-0 sigue FAIL y bloquea el entrenamiento global. G-0 continúa en FAIL y no se autoriza entrenamiento documental con estos candidatos.
 
 La ejecución [RUN 5 #41904620741](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41904620741) terminó sin consolidar bibliotecas: su índice maestro declara 0/16 encontradas, 0 documentos y 0 bytes. Los diagnósticos muestran que el umbral heredado de 2.560 MiB por biblioteca bloqueó, entre otros, una salida de 9.019 bytes y otra de 39.308.151 bytes. Los artefactos de índice no son payloads documentales. Esta ejecución no incrementa el contador de admitidos ni el de bibliotecas Level A.
 
-**Regla de lectura:** “adquirido”, “candidato”, “admitido legacy” y “Level A” son estados diferentes. Solo se incrementará el contador Level A tras verificar derechos del documento exacto, payload y SHA-256, calidad, privacidad, deduplicación global, particiones y revisión humana; cada promoción actualizará esta sección y el inventario de datos.
+**Regla de lectura:** “adquirido”, “candidato”, “admitido legacy” y “Level A” son estados diferentes. Level A aplica el estándar scoped que admitió `literature-es-v1`: fuente pública fijada, derechos/procedencia por documento, payload y SHA-256, particiones disjuntas, cero duplicados exactos en train y auditorías previas de calidad/privacidad. No se exige una nueva reconciliación territorial general; se mantienen exclusiones de terceros y controles de integridad.
 
 **RONIN** es un proyecto de investigación e ingeniería de modelos de lenguaje. Su propósito es comprobar hasta dónde puede llegar una arquitectura propia entrenada desde una inicialización aleatoria, con un proceso reproducible de datos, entrenamiento, evaluación y despliegue.
 
