@@ -46,8 +46,16 @@ def validate(path: Path = DEFAULT_PATH) -> list[str]:
             errors.append(f"{library.get('id')}: invalid kind {kind!r}")
         if library.get("training_eligible") is not False:
             errors.append(f"{library.get('id')}: catalogue-only inventory must not enable training")
-        if library.get("status") != "catalogued_candidate_not_admitted":
-            errors.append(f"{library.get('id')}: unexpected status {library.get('status')!r}")
+        admitted_docs = library.get("level_a_admitted_documents", 0)
+        expected_status = (
+            "admitted_scoped_legacy_equivalent"
+            if admitted_docs > 0
+            else "catalogued_candidate_not_admitted"
+        )
+        if library.get("status") != expected_status:
+            errors.append(f"{library.get('id')}: expected status {expected_status!r}, found {library.get('status')!r}")
+        if admitted_docs > 0 and library.get("id") != "humanities_general":
+            errors.append(f"{library.get('id')}: unexpected scoped legacy admission location")
         if library.get("global_g0") != "FAIL":
             errors.append(f"{library.get('id')}: expected independent global G-0 FAIL")
 
@@ -114,8 +122,18 @@ def validate(path: Path = DEFAULT_PATH) -> list[str]:
         errors.append("G-0 safety invariant violated")
 
     legacy = data.get("legacy_scoped_corpus", {})
-    if legacy.get("counted_toward_level_a_library_minimum") is not False:
-        errors.append("legacy scoped corpus must not be counted as new Level-A library bytes")
+    legacy_library = next(
+        (item for item in libraries if item.get("id") == "humanities_general"),
+        {},
+    )
+    if legacy.get("counted_toward_level_a_library_minimum") is not True:
+        errors.append("legacy scoped corpus must be reflected in humanities_general Level-A totals")
+    if legacy_library.get("level_a_admitted_documents") != legacy.get("train_documents"):
+        errors.append("legacy train document count does not match humanities_general")
+    if legacy_library.get("level_a_admitted_text_bytes") != legacy.get("train_text_bytes"):
+        errors.append("legacy train text bytes do not match humanities_general")
+    if legacy_library.get("training_eligible") is not False:
+        errors.append("scoped legacy admission must not bypass the 64-library training gate")
     if legacy.get("train_sha256") != "9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78":
         errors.append("legacy literature train SHA-256 does not match its admitted manifest")
 
