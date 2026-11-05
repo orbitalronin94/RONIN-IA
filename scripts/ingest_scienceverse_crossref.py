@@ -17,6 +17,11 @@ BASE=f"https://raw.githubusercontent.com/scienceverse/papers/{REV}"
 CORPORA={
  "elife":{"tag":"elife-2026-06-21","expected_catalog":1000,"target":"biology_general","release":"https://github.com/scienceverse/papers/releases/download/elife-2026-06-21/elife.rds"},
  "frontiers":{"tag":"frontiers-2026-06-21","expected_catalog":1000,"target":"social_sciences_general","release":"https://github.com/scienceverse/papers/releases/download/frontiers-2026-06-21/frontiers.rds"},
+ "plosbio":{"tag":"plosbio-2026-06-19","expected_catalog":1000,"target":"biology_general","release":"https://github.com/scienceverse/papers/releases/download/plosbio-2026-06-19/plosbio.rds"},
+ "plosmed":{"tag":"plosmed-2026-06-19","expected_catalog":1000,"target":"medicine_health_general","release":"https://github.com/scienceverse/papers/releases/download/plosmed-2026-06-19/plosmed.rds"},
+ "plosone":{"tag":"plosone-2026-06-20","expected_catalog":1000,"target":"biology_general","release":"https://github.com/scienceverse/papers/releases/download/plosone-2026-06-20/plosone.rds"},
+ "scan":{"tag":"scan-2026-06-21","expected_catalog":803,"target":"social_sciences_general","release":"https://github.com/scienceverse/papers/releases/download/scan-2026-06-21/scan.rds"},
+ "ece3":{"tag":"ece3-2026-06-21","expected_catalog":1543,"target":"biology_general","release":"https://github.com/scienceverse/papers/releases/download/ece3-2026-06-21/ece3.rds"},
 }
 UA="RONIN-IA/1.0 dataset-rights-preflight (+https://github.com/orbitalronin94/RONIN-IA)"
 def fetch(url, attempts=6):
@@ -41,8 +46,9 @@ def crossref_check(doi):
   data=json.loads(fetch(url).decode("utf-8"))
   licenses=(data.get("message") or {}).get("license") or []
   urls=[str(x.get("URL") or x.get("url") or "") for x in licenses]
-  approved=any(u.rstrip("/").lower().endswith("/licenses/by/4.0") for u in urls)
-  return doi,{"doi":doi,"crossref_url":url,"license_urls":urls,"cc_by_4_0_confirmed":approved,"status":"confirmed" if approved else "not_confirmed"}
+  approved_urls=[u for u in urls if u.rstrip("/").lower().endswith("/licenses/by/4.0") or "/publicdomain/zero/1.0" in u.rstrip("/").lower()]
+  approved=bool(approved_urls)
+  return doi,{"doi":doi,"crossref_url":url,"license_urls":urls,"confirmed_license_urls":approved_urls,"cc_by_4_0_or_cc0_confirmed":approved,"status":"confirmed" if approved else "not_confirmed"}
  except Exception as e:
   return doi,{"doi":doi,"crossref_url":url,"license_urls":[],"cc_by_4_0_confirmed":False,"status":"lookup_error","error":type(e).__name__}
 def main():
@@ -57,7 +63,11 @@ def main():
    doi=(row.get("doi") or "").strip()
    reasons=[]
    if not doi:reasons.append("missing_doi")
-   if (row.get("license") or "").strip().casefold()!="cc-by":reasons.append("upstream_license_not_cc-by")
+   source_license=(row.get("license") or "").strip().casefold()
+   if name in {"elife","frontiers","scan","ece3"} and source_license!="cc-by":
+    reasons.append("upstream_license_not_cc-by")
+   if name.startswith("plos") and source_license!="cc-by 4.0 or cc0":
+    reasons.append("upstream_license_scope_not_expected")
    for field in ("pdf_exists","xml_exists","in_rds"):
     if field in row and row[field].strip().upper()!="TRUE":reasons.append(field+"_false")
    if reasons:excluded.append({"doi":doi or None,"title":row.get("title"),"reasons":reasons})
@@ -67,12 +77,14 @@ def main():
   with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
    for doi,result in pool.map(crossref_check,dois):
     audit[doi]=result
-  approved=[x for x in base if audit.get(x["doi"].strip(),{}).get("cc_by_4_0_confirmed")]
+  approved=[x for x in base if audit.get(x["doi"].strip(),{}).get("cc_by_4_0_or_cc0_confirmed")]
   rejected=[x for x in base if not audit.get(x["doi"].strip(),{}).get("cc_by_4_0_confirmed")]
   for x in rejected:
    excluded.append({"doi":x.get("doi"),"title":x.get("title"),"reasons":["crossref_does_not_confirm_CC-BY-4.0"]})
   groups={}
-  for x in approved:groups.setdefault(x["doi"].strip().casefold(),[]).append(x)
+  for x in approved:
+   x["crossref_verified_license"]=";".join(audit.get(x["doi"].strip(),{}).get("confirmed_license_urls",[]))
+   groups.setdefault(x["doi"].strip().casefold(),[]).append(x)
   unique=[]
   for doi,group in groups.items():
    titles={str(x.get("title") or "").strip().casefold() for x in group}
@@ -97,7 +109,7 @@ def main():
    "crossref_audit_file":"crossref-license-audit.json","eligible_manifest_file":"eligible-manifest.csv",
    "payload_file":payload.name,"payload_bytes":payload.stat().st_size,"payload_sha256":sha(payload),
    "manifest_sha256":sha(manifest),"eligible_manifest_sha256":sha(eligible),
-   "rights_scope":"Crossref deposit explicitly names CC BY 4.0; still verify publisher page, attribution and third-party material before Level A",
+   "rights_scope":"Crossref deposit explicitly names CC BY 4.0 or CC0; still verify publisher page, attribution and third-party material before Level A",
    "status":"candidate_fulltext_acquired_pending_publisher_rights_privacy_quality_dedup",
    "training_eligible":False,
   }
