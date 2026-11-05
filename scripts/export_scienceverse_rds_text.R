@@ -167,11 +167,24 @@ for (rds in files) {
     } else if ("license" %in% names(eligible)) {
       as.character(eligible$license[[row_index]])
     } else NA_character_
+    authors <- character()
+    author_df <- paper$author
+    if (is.data.frame(author_df) && all(c("given", "family") %in% names(author_df))) {
+      authors <- unique(trimws(paste(as.character(author_df$given), as.character(author_df$family))))
+      authors <- authors[!is.na(authors) & nzchar(authors)]
+    }
+    license_url <- if (grepl("/publicdomain/zero/1.0", license_value, ignore.case = TRUE)) {
+      "https://creativecommons.org/publicdomain/zero/1.0/"
+    } else if (grepl("/licenses/by/4.0", license_value, ignore.case = TRUE) ||
+               identical(trimws(license_value), "CC-BY 4.0")) {
+      "https://creativecommons.org/licenses/by/4.0/"
+    } else NA_character_
     record <- list(schema_version = "ronin.document.v1", dataset = dataset,
-                   paper_id = paper_id, doi = doi, title = title,
+                   paper_id = paper_id, doi = doi, source_url = paste0("https://doi.org/", doi),
+                   title = title, authors = authors,
                    target_library = provenance$target_library,
-                   license = license_value,
-                   source = "ScienceVerse papers / pinned RDS full-text",
+                   license = license_value, license_url = license_url,
+                   source = "ScienceVerse papers / pinned RDS full-text", attribution = list(authors = authors, title = title, doi = doi, license_url = license_url),
                    text = body, text_sha256 = text_sha, text_bytes = body_bytes,
                    status = "candidate_pending_global_validation", training_eligible = FALSE)
     write_jsonl(list(record), gz)
@@ -195,7 +208,7 @@ for (rds in files) {
                  source_rds = rds, source_rds_sha256 = provenance$payload_sha256,
                  eligible_manifest_sha256 = provenance$eligible_manifest_sha256,
                  target_library = provenance$target_library,
-                 extraction = "paper$text$text rows ordered by text_id; section headers restored from paper$section; author/email metadata omitted",
+                 extraction = "paper$text$text rows ordered by text_id; section headers restored from paper$section; author names retained for CC-BY attribution; emails, affiliations and ORCIDs omitted",
                  privacy_filter = "reject body containing email or SSN patterns; human privacy review remains pending",
                  duplicate_policy = "global exact text SHA-256 across the five ScienceVerse packages; later exact duplicates excluded",
                  stats = stats, status = "candidate_text_export_pending_human_rights_privacy_quality_and_near_duplicate_review",
