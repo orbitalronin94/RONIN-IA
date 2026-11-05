@@ -90,11 +90,11 @@ def verify_library(
         actual_hash = digest_bytes(payload)
         if declared_hashes.get(split) != actual_hash:
             raise SystemExit(f"{split} payload SHA-256 mismatch: {payload_path}")
-        if int(declared_bytes.get(split, -1)) != len(payload):
+        if int(declared_bytes.get(split, 0)) != len(payload):
             raise SystemExit(f"{split} payload byte-count mismatch: {payload_path}")
         chunks = [chunk for chunk in payload.split(b"\n\n") if chunk]
         rows = rows_by_split[split]
-        if int(declared_counts.get(split, -1)) != len(rows) or len(chunks) != len(rows):
+        if int(declared_counts.get(split, 0)) != len(rows) or len(chunks) != len(rows):
             raise SystemExit(f"{split} document-count mismatch: {library_id}")
         for chunk, row in zip(chunks, rows, strict=True):
             if digest_bytes(chunk) != row["text_sha256"]:
