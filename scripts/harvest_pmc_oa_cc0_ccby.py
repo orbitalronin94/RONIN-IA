@@ -60,7 +60,12 @@ def esearch_ids(term: str, limit: int) -> list[str]:
             "retmax": min(10000, limit - len(ids)), "retstart": retstart,
             "sort": "pub date", "tool": "ronin_ia_corpus_harvester",
         })
-        payload = json.loads(request_bytes(EUTILS + "?" + params))
+        raw = request_bytes(EUTILS + "?" + params)
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError:
+            print("NCBI ESearch non-JSON response: " + raw[:500].decode("utf-8", "replace"), file=sys.stderr)
+            raise
         result = payload["esearchresult"]
         batch = result.get("idlist", [])
         ids.extend(batch)
