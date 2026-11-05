@@ -99,7 +99,7 @@ El manifiesto `libraries/manifest-64.json` cuenta el corpus legacy y ScienceVers
 
 ### NASA file-reviewed — `admitted/nasa-ntrs-file-reviewed-v1/`
 
-- Seis documentos revisados individualmente; **dos** (32.410 bytes) promovidos a train tras coincidencia exacta de hash/bytes con la atestación, deduplicación frente a los 608 documentos legacy y recheck live de derechos/redistribución NASA.
+- Seis documentos revisados individualmente; **dos** (32.409 bytes) ya estaban en train y **cuatro adicionales** (669.461 bytes) se promovieron tras verificar Git blob SHA-1, payload del candidate pack, derechos public-use, privacidad y deduplicación exacta cruzada. Total NASA file-reviewed train: **6 documentos / 701.870 bytes**.
 - **Cuatro retenidos**: las atestaciones de revisión no coinciden con el payload exacto; no se han corregido hashes a ciegas ni se han admitido.
 - Los seis NASA file-reviewed son un subconjunto revisado de los 813 NASA NTRS, no una nueva adquisición. No sumarlos de nuevo al total documental ni al mínimo Level A.
 - Ejecución de promoción y recheck NASA: [run 42028138060](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028138060). Validador del manifiesto actualizado: [run 42028588708](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028588708).
@@ -138,8 +138,8 @@ Los números siguientes son **inventarios de candidatos**, no admisiones. Hay sn
 
 No se considerará progreso el crecimiento de `candidates/`, el número de filas con licencia aparente ni los pases de filtros automáticos. El contador que importa es el de documentos con `training_eligible=true` en una partición `train` reproducible y con hashes comprobados.
 
-- **Corpus con partición train actualmente habilitada:** literatura (608 / 140.295.523 bytes), Mathlib4 (8.498 / 97.629.252 bytes), NASA file-reviewed (2 / 32.409 bytes), Papers propios (9 / 750.857 bytes) y ScienceVerse (6.641 / 399.591.813 bytes): **15.758 documentos y 638.299.854 bytes UTF-8**. Sus particiones validation/test permanecen excluidas.
-- **NASA NTRS restante (811 scoped) y NASA file-reviewed retenidos (4):** siguen excluidos de entrenamiento hasta superar sus comprobaciones específicas. ScienceVerse (6.641 train scoped de 7.365 admitidos) y Papers propios (9) ya están habilitados en train.
+- **Corpus con partición train actualmente habilitada:** literatura (608 / 140.295.523 bytes), Mathlib4 (8.498 / 97.629.252 bytes), NASA file-reviewed (6 / 701.870 bytes), Papers propios (9 / 750.857 bytes) y ScienceVerse (6.641 / 399.591.813 bytes): **15.762 documentos y 638.969.315 bytes UTF-8**. Sus particiones validation/test permanecen excluidas.
+- **NASA NTRS restante (807 scoped) y NASA file-reviewed retenidos por OCR/derechos (4):** siguen excluidos de entrenamiento hasta superar sus comprobaciones específicas. ScienceVerse (6.641 train scoped de 7.365 admitidos) y Papers propios (9) ya están habilitados en train.
 - **Siguiente fuente prioritaria:** conjunto oficial BNE *Biblioteca Digital. Documentos en dominio público*, que ofrece distribución TXT/XML de obras declaradas en dominio público y reutilización CC BY 4.0. Se debe adquirir el snapshot, fijar hashes, comprobar cada obra/edición y OCR, retirar aparato editorial/terceros dudosos, deduplicar globalmente y generar splits antes de promover. No se contará ni entrenará hasta superar esos controles.
 - La política de adquisición queda así: primero fuentes con texto completo y permiso explícito sobre la obra, luego calidad verificable, y solo entonces admisión y entrenamiento. Los candidatos que no puedan cerrar los validaciones no desplazan este objetivo.
 
@@ -202,7 +202,7 @@ El workflow \`Audit and admit scoped candidate documents\` ejecutó correctament
 - Papers: [9 documentos propios admitidos](admitted/ronin-authored-papers-v1/manifest.json), README excluido.
 - Informe global por fuente y documento: [candidate-document-audit-2026-11-05.json](reviews/candidate-document-audit-2026-11-05.json).
 
-Los payloads NASA y ScienceVerse preservan hashes del origen y del contenido admitido. El manifiesto de admisión global de ScienceVerse mantiene `training_eligible:false`; el manifiesto separado `train-eligibility-manifest.json` habilita solo la partición train scoped de 6.641 documentos. NASA restante sigue pendiente. Esta promoción no equivale a G-0 global ni altera los mínimos Level A fuera de las cuatro bibliotecas General indicadas.
+Los payloads NASA y ScienceVerse preservan hashes del origen y del contenido admitido. El manifiesto de ScienceVerse habilita `training_eligible:true` solo para la partición train scoped de 6.641 documentos; el G-0 global permanece FAIL. NASA restante sigue pendiente. Esta promoción no equivale a G-0 global ni altera los mínimos Level A fuera de las cuatro bibliotecas General indicadas.
 
 
 ## Expansión a 200 GB
