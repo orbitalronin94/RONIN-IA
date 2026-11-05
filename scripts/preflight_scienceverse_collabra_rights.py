@@ -16,11 +16,24 @@ MANIFEST_URL = f"https://raw.githubusercontent.com/scienceverse/papers/{REPO_COM
 CROSSREF_URL = "https://api.crossref.org/works"
 ISSN = "2474-7394"
 USER_AGENT = "RONIN-IA-Collabra-rights-audit/1.1"
-CC_BY_4 = {
-    "https://creativecommons.org/licenses/by/4.0/",
-    "http://creativecommons.org/licenses/by/4.0",
-    "https://creativecommons.org/licenses/by/4.0",
-}
+def normalize_license_url(url: str) -> str:
+    return url.strip().lower().replace("http://", "https://").rstrip("/")
+
+
+CC_BY_4 = {normalize_license_url("https://creativecommons.org/licenses/by/4.0/")}
+
+
+def classify_license_urls(urls: list[str], item_found: bool = True) -> str:
+    normalized = {normalize_license_url(url) for url in urls if url}
+    if not item_found:
+        return "hold_not_found_in_crossref_issn_query"
+    if not normalized:
+        return "hold_no_item_level_license_in_crossref"
+    if normalized == CC_BY_4:
+        return "cc_by_4_verified_in_crossref"
+    if any("by-nc" in url or "by-nd" in url or "by-sa" in url for url in normalized):
+        return "reject_or_quarantine_restrictive_license"
+    return "hold_mixed_or_unrecognized_license"
 
 
 def fetch(url: str, limit: int = 32 * 1024 * 1024) -> bytes:
@@ -67,18 +80,8 @@ def main() -> int:
         doi = row["doi"].strip().lower()
         item = by_doi.get(doi)
         licenses = item.get("license", []) if item else []
-        urls = sorted({str(x.get("URL", "")).rstrip("/") for x in licenses if x.get("URL")})
-        normalized = {u.lower() for u in urls}
-        if not item:
-            status = "hold_not_found_in_crossref_issn_query"
-        elif not urls:
-            status = "hold_no_item_level_license_in_crossref"
-        elif normalized == {u.rstrip("/").lower() for u in CC_BY_4}:
-            status = "cc_by_4_verified_in_crossref"
-        elif any("by-nc" in u or "by-nd" in u or "by-sa" in u for u in normalized):
-            status = "reject_or_quarantine_restrictive_license"
-        else:
-            status = "hold_mixed_or_unrecognized_license"
+        urls = sorted({str(x.get("URL", "")) for x in licenses if x.get("URL")})
+        status = classify_license_urls(urls, item_found=item is not None)
         decisions.append({
             "doi": row["doi"],
             "title": row["title"],
