@@ -1,13 +1,13 @@
 # ScienceVerse / papers — expansión de candidatos de texto científico
 
-**Estado a 5 de noviembre de 2026:** cinco de los siete corpus prioritarios ya tienen su asset RDS completo en candidates/scienceverse-fulltext/. Son **3.091 filas DOI elegibles** y **95.948.088 bytes de RDS**. Continúan como candidatos: el RDS no es texto plano, no se ha ejecutado todavía una exportación textual ni se ha completado el gate jurídico Level A, calidad, privacidad, deduplicación o particionado. No son bytes de texto admitido.
+**Estado a 5 de noviembre de 2026:** cinco de los siete corpus prioritarios tienen su asset RDS completo en candidates/scienceverse-fulltext/. Son **3.091 filas DOI elegibles** y **95.948.088 bytes de RDS**. Continúan como candidatos: el RDS no es texto plano, no se ha completado la exportación textual ni el gate jurídico Level A, calidad, privacidad, deduplicación o particionado. No son bytes de texto admitido.
 
 ## Fuente y revisión fijada
 
 - Repositorio: https://github.com/scienceverse/papers
 - Revisión exacta del manifiesto upstream: 3a6ac0125e576423300a8996e9ad4c5d65ef9fe2.
 - Cada carpeta descargada conserva manifest.csv, eligible-manifest.csv, provenance.json y el asset RDS.
-- El manifiesto upstream declara CC BY 4.0 por artículo en los corpus que incluyen licencia explícita CC-BY 4.0. Esa declaración por DOI es evidencia de candidato; no demuestra por sí sola titularidad, derechos sobre elementos de terceros ni el cumplimiento completo de Level A.
+- El manifiesto upstream declara CC BY 4.0 por artículo en estos cinco corpus. Esa declaración por DOI es evidencia de candidato; no demuestra por sí sola titularidad, derechos sobre elementos de terceros ni el cumplimiento completo de Level A.
 
 ## Cobertura del catálogo prioritario
 
@@ -22,7 +22,7 @@
 | Open Mind (openmind) | 293 | Descargado: 293 elegibles | philosophy_general |
 | **Total** | **5.091** | **3.091 elegibles descargados; 2.000 aún sin payload** | |
 
-## Assets adquiridos y hashes verificados en el expediente
+## Assets adquiridos y hashes SHA-256
 
 Los siguientes tamaños son del RDS comprimido, no del texto extraído.
 
@@ -32,9 +32,10 @@ Los siguientes tamaños son del RDS comprimido, no del texto extraído.
 | jdm-2026-06-21 | 855 | 855 | 0 | 24.875.707 | 3381725686b9b1bae2a2c764ea87fdf52b8575cf8d87902388abd333319d3aa6 |
 | joc-2026-06-20 | 448 | 447 | 1 | 15.559.915 | 12766fe41d80dcffc1da26056c929c7e39fb56be772809fa1620887df8838ae5 |
 | openmind-2026-06-21 | 293 | 293 | 0 | 12.639.050 | c27fd53e8e640f7ac4cb3cfe43d04bfdc8a80c050956df3ec8abc6931d796feb |
-| i-Perception (iperc-2026-06-21) | 496 | 496 | 0 | 12.423.216 | SHA-256 en provenance.json |\n| **Total** | **3.092** | **3.091** | **1** | **95.948.088** | — |
+| iperc-2026-06-21 | 496 | 496 | 0 | 12.423.216 | bf444b56b364d4f6697ce28f4f67d507b4bf57409ebefda0fa4a6ea960f45ed0 |
+| **Total** | **3.092** | **3.091** | **1** | **95.948.088** | — |
 
-Hashes SHA-256 de los manifiestos y manifiestos elegibles, junto con el tamaño y hash de cada RDS, están en el provenance.json de cada corpus. El commit de adquisición es https://github.com/orbitalronin94/RONIN-IA/commit/68497f153e06c18cd693c3ef77e229bfd3defbb8.
+Hashes SHA-256 de los manifiestos originales y elegibles, junto con revisión, tag, tamaño y hash de cada RDS, están en el provenance.json de cada corpus. Los cuatro primeros paquetes se incorporaron en el commit 68497f153e06c18cd693c3ef77e229bfd3defbb8; i-Perception se incorporó en el commit 3eef3ce (resultado de la ejecución [42002756026](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002756026), que terminó SUCCESS).
 
 ### Exclusión exacta de Journal of Cognition
 
@@ -52,9 +53,9 @@ El manifiesto contiene 448 filas; la fila 10.5334/joc.316 declara CC BY 4.0, per
 ## Inspección RDS y siguientes gates
 
 - Adquisición: .github/workflows/ingest-scienceverse-ccby.yml y scripts/ingest_scienceverse_ccby.py.
-- Inspección: .github/workflows/inspect-scienceverse-rds.yml y scripts/inspect_scienceverse_rds.R. El inspector verifica los hashes y recuentos de los cuatro manifiestos y examina la estructura sin imprimir contenido textual.
-- Runs de inspección fallidos: https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001889049 (el recorrido recursivo excedió el límite de 5.000 nodos) y https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001946701 (el paquete CRAN no pudo instalarse en la biblioteca R de solo lectura). Se acotó el muestreo estructural y se cambió a r-cran-jsonlite del sistema en los commits 1df303a y fd61d25; la nueva ejecución debe confirmar el arreglo.
+- Inspección: .github/workflows/inspect-scienceverse-rds.yml y scripts/inspect_scienceverse_rds.R. El inspector verifica los hashes y recuentos de los cinco manifiestos y examina la estructura sin imprimir contenido textual.
+- Runs fallidos: [42001889049](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001889049) (el recorrido recursivo excedió el límite de 5.000 nodos), [42001946701](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001946701) y [42002286128](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002286128) (intentos de instalar jsonlite en una biblioteca R no escribible). Se acotó el muestreo estructural en 1df303a y se cambió a r-cran-jsonlite del sistema en fd61d25; falta un run verde que confirme el arreglo.
 - Después de inspeccionar la estructura: exportar texto y metadatos por DOI, validar hashes de texto, comparar DOI contra retractaciones/correcciones, hacer deduplicación exacta y near-duplicate global, revisar PII/secrets/malware, idioma/calidad, atribución y asignar splits agrupados por DOI.
 - Solo entonces se podrá clasificar cada documento entre General/HKD mediante ranking RONIN reproducible. Los dominios de destino de la tabla son provisionales, no una asignación ya realizada.
 
-**Estado final:** 2.595 documentos candidatos en cuatro assets RDS; 83.524.872 bytes comprimidos; 0 bytes de texto admitido Level A; 0 bibliotecas completadas por esta fuente; G-0 global continúa FAIL; training_eligible=false.
+**Estado final:** 3.091 documentos candidatos en cinco assets RDS; 95.948.088 bytes comprimidos; 0 bytes de texto admitido Level A; 0 bibliotecas completadas por esta fuente; G-0 global continúa FAIL; training_eligible=false.
