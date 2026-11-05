@@ -104,6 +104,8 @@ def verify(manifest_path: Path, output_text: Path | None = None) -> dict:
     return {
         "dataset_id": manifest["dataset_id"],
         "documents": len(texts),
+        "segments": len(texts),
+        "count_unit": "translation_segment",
         "text_utf8_bytes": text_bytes,
         "materialized_text_bytes": len(train_text),
         "languages": dict(sorted(languages.items())),
