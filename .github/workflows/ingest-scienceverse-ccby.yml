@@ -20,11 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: main
           persist-credentials: true
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
       - name: Descargar paperlists completos y auditar licencias de cada DOI
@@ -36,7 +36,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A data/datasets/candidates/scienceverse-fulltext
-          git commit -m "data: add ScienceVerse CC-BY full-text candidates"
+          if git diff --cached --quiet; then
+            echo "No candidate payload or provenance changes to commit."
+            exit 0
+          fi
+          git commit -m "data: refresh ScienceVerse CC-BY candidate provenance"
           # The repository's run-ledger workflow writes commits to main after
           # other workflows finish. Wait for those writes to settle before pushing.
           for attempt in $(seq 1 20); do
