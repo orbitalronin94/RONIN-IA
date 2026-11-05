@@ -47,5 +47,5 @@ El ensamblador asigna únicamente documentos con señal temática suficiente. Lo
 
 - Judgment and Decision Making: **855 artículos esperados**.
 - Journal of Cognition: **447 artículos esperados**.
-- Cada DOI debe declarar CC-BY 4.0; se conservan los manifiestos individuales, payload RDS y SHA-256 en `data/datasets/admitted/scienceverse/`.
+- Cada DOI debe declarar CC-BY 4.0; se conservan los manifiestos individuales, payload RDS y SHA-256 en `data/datasets/candidates/scienceverse-fulltext/`.
 - Estado: adquisición automatizada añadida; no contabilizar hasta workflow correcto. Pendientes privacidad, retractaciones/correcciones, deduplicación y particionado por DOI.
