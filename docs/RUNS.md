@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:09 | [Integración continua #1146 (run 41999945550)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999945550) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Fix local llama runtime lint. Trigger: push; rama: main; intento: 1. | 93d0a2e1 |
 | 2026-11-05 09:09 | [Integración continua #1151 (run 42000033961)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000033961) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): stage candidate corpus path without absent admitted tree. Trigger: push; rama: main; intento: 1. | b3081806 |
 | 2026-11-05 09:09 | [Integración continua #1147 (run 41999978332)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999978332) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Test Socratic cross-examination prompt. Trigger: push; rama: main; intento: 1. | 6c0fe9b9 |
 | 2026-11-05 09:08 | [Integración continua #1142 (run 41999848083)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999848083) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): keep acquired ScienceVerse texts in candidate tier. Trigger: push; rama: main; intento: 1. | ecbfe5f3 |
