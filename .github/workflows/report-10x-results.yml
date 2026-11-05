@@ -1,0 +1,69 @@
+name: RONIN — publicar métricas del experimento 10x
+
+on:
+  pull_request:
+    types: [synchronize, reopened]
+    branches: [main, experiment/checkpoint-strategy-tournament-6of50]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  report:
+    if: github.event.pull_request.head.ref == 'experiment/scale-10x-100steps'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download completed 10x experiment artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-scale-10x-100steps-42097104799
+          path: incoming
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 42097104799
+
+      - name: Extract and print metrics only
+        run: |
+          python - <<'PY'
+          import json, zipfile
+          from pathlib import Path
+          root = Path("incoming")
+          zips = list(root.rglob("*.zip"))
+          if zips:
+              with zipfile.ZipFile(zips[0]) as z:
+                  z.extractall(root / "unzipped")
+          files = list(root.rglob("*.json"))
+          required = [
+              "experiment-summary.json",
+              "baseline-mmlu.json",
+              "expanded-before-mmlu.json",
+              "expanded-after-mmlu.json",
+              "baseline-language.json",
+              "expanded-before-language.json",
+              "expanded-after-language.json",
+              "training-loss.json",
+          ]
+          found = {p.name: p for p in files}
+          missing = [name for name in required if name not in found]
+          if missing:
+              raise SystemExit(f"Missing result JSON files: {missing}; found={list(found)}")
+          report = {}
+          for name in required:
+              data = json.loads(found[name].read_text())
+              report[name] = data
+          print("=== RONIN 10x EXPERIMENT RESULTS ===")
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          out = Path("report")
+          out.mkdir(exist_ok=True)
+          for name in required:
+              (out / name).write_text(json.dumps(report[name], ensure_ascii=False, indent=2) + "\n")
+          PY
+
+      - name: Upload compact JSON report
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-scale-10x-results-json
+          path: report/*.json
+          if-no-files-found: error
+          retention-days: 90
