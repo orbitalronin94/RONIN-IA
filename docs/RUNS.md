@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 12:35 | [Integración continua #1436 (run 42028445739)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028445739) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: keep Mathlib manifest reproducible from admission workflow. Trigger: push; rama: main; intento: 1. | c743ca72 |
 | 2026-11-05 12:35 | [Integración continua #1435 (run 42028416218)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028416218) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): update training-eligible count with two verified NASA texts. Trigger: push; rama: main; intento: 1. | 7425e099 |
 | 2026-11-05 12:35 | [Integración continua #1434 (run 42028378037)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028378037) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): clarify two NASA file-reviewed promotions and four holds. Trigger: push; rama: main; intento: 1. | 1e3f8029 |
 | 2026-11-05 12:34 | [Integración continua #1431 (run 42028079100)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028079100) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(training\): correct no-tutor corpus separators and holdout comparison. Trigger: push; rama: main; intento: 1. | 06675ea5 |
