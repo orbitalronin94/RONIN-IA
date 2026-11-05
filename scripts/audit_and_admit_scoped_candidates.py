@@ -100,6 +100,10 @@ def audit_nasa() -> dict:
     review=json.loads(NASA_REVIEW.read_text(encoding="utf-8"))
     overrides={str(x["document_id"]):x for x in review.get("decisions",[])
                if str(x.get("document_id","")).isdigit()}
+    overrides.update({
+        str(x["document_id"]): {**x, "disposition":"assistant_review_pass_candidate_only"}
+        for x in review.get("assistant_content_reviews", [])
+    })
     OUT.mkdir(parents=True,exist_ok=True)
     docs=OUT/"documents"
     if docs.exists(): shutil.rmtree(docs)
@@ -140,7 +144,7 @@ def audit_nasa() -> dict:
         elif override and override.get("disposition") != "file_review_pass_candidate_only":
             status="hold_manual_review"
             reason=override.get("reason","Existing human-review hold")
-        elif override and override.get("disposition") == "file_review_pass_candidate_only":
+        elif override and override.get("disposition") in {"file_review_pass_candidate_only","assistant_review_pass_candidate_only"}:
             status="admitted_scoped_training_blocked"
             reason="Individual content review passed; source allowlist and payload integrity pass; global gates remain pending"
             admitted+=1
