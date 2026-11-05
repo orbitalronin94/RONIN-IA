@@ -48,7 +48,7 @@ python -m pip install -e '.[dev]'
 pytest -q
 ```
 
-El ciclo oficial sin tutor está en [main-native-no-tutor-holdout.yml](.github/workflows/main-native-no-tutor-holdout.yml). Recupera los pesos fijados en `main`, verifica los corpus admitidos, mide el modelo antes, ejecuta fine-tuning nativo sin tutores y vuelve a medir exactamente los mismos holdouts. Cada ejecución produce un candidato; la promoción requiere revisión explícita.
+El ciclo oficial sin tutor está en [main-native-no-tutor-holdout.yml](.github/workflows/main-native-no-tutor-holdout.yml) (ejecución manual). Recupera los pesos fijados en `main`, verifica los corpus admitidos y añade CoVoST 2 cuando su payload scoped ya está materializado; mide el modelo antes, ejecuta fine-tuning nativo sin tutores y vuelve a medir exactamente los mismos holdouts. El checkpoint actual no incorpora retroactivamente este corpus ampliado. Cada ejecución produce un candidato; la promoción requiere revisión explícita.
 
 El benchmark de desarrollo MMLU-Pro puede ejecutarse con muestras de screening o con el split completo. Una muestra pequeña sirve para cribar, no para declarar capacidad general. El test oficial se mantiene separado de entrenamiento y selección.
 
