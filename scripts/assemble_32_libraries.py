@@ -132,7 +132,7 @@ def literature_records(metadata_payload: bytes, text_payload: bytes) -> list[dic
         if digest != row["text_sha256"]:
             raise ValueError(f"literature fragment hash mismatch: {row.get('record_id')}")
         offset += size
-        if text[offset : offset + 2] == "\\n\\n":
+        if text[offset : offset + 2] == "\n\n":
             offset += 2
         scores = score_record(fragment, "humanities", Counter(), 1)
         records.append({
@@ -152,7 +152,7 @@ def literature_records(metadata_payload: bytes, text_payload: bytes) -> list[dic
             "domain_scores": scores,
             "text_sha256": digest,
         })
-    if text[offset:] not in {"", "\\n"}:
+    if text[offset:] not in {"", "\n"}:
         raise ValueError("unexpected trailing bytes in admitted literature train payload")
     return records
 
