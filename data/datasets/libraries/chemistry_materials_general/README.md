@@ -1,6 +1,6 @@
 # Química y materiales — General
 
-<badge color="warning">Implementado parcialmente</badge>
+**Estado: IMPLEMENTADO PARCIALMENTE.**
 
 Esta biblioteca forma parte del inventario operativo de **32 bibliotecas (16 dominios × General/HKD)**.
 
