@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:29 | [Integración continua #1187 (run 42002576564)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002576564) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): record verified ScienceVerse candidate payloads and exclusion. Trigger: push; rama: main; intento: 1. | d0baeed5 |
 | 2026-11-05 09:29 | [Incorporar corpus científicos CC-BY verificados #16 (run 42002756026)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002756026) | success | Ejecución de GitHub Actions; consultar logs y artefactos enlazados para el resultado detallado. Commit: fix\(data\): use exact i-Perception manifest count. Trigger: push; rama: main; intento: 1. | 3ea900ec |
 | 2026-11-05 09:29 | [Integración continua #1193 (run 42002755894)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002755894) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): use exact i-Perception manifest count. Trigger: push; rama: main; intento: 1. | 3ea900ec |
 | 2026-11-05 09:29 | [Integración continua #1192 (run 42002747042)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002747042) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add Colab notebook for Qwen3.5-4B training. Trigger: push; rama: main; intento: 1. | ad529a1a |
