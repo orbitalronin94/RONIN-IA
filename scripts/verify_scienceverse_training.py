@@ -250,8 +250,14 @@ def main() -> None:
         "eligible_partition": "train",
         "scope_limit": "Source-scoped train only; no global G-0, near-duplicate, benchmark-holdout, or General/HKD clearance is claimed.",
     }
+    held_report = {
+        "held": held,
+        "external_exact_duplicates": duplicate_external,
+        "email_hits": email_hits,
+        "ssn_hits": ssn_hits,
+    }
     (args.output_dir / "held.json").write_text(
-        json.dumps({"held": held, "external_exact_duplicates": duplicate_external, "email_hits": email_hits, "ssn_hits": ssn_hits}, ensure_ascii=False, indent=2) + "\n",
+        json.dumps(held_report, ensure_ascii=False, indent=2) + "\\n",
         encoding="utf-8",
     )
     (args.output_dir / "audit.json").write_text(
