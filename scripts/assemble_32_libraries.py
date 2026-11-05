@@ -246,12 +246,11 @@ def main() -> int:
     input_counts["common_corpus_cc0_input"] = len(common)
 
     # GPLSI: useful Spanish/Catalan legal text, but source-document rights remain pending.
-    with zipfile.ZipFile(args.gplsi_zip) as archive:
-        for member, expected in (
-            ("gplsi-cleartext-cas.jsonl", "e7cc5b66aa50dc2ba296ffeb348ea0f4e9a3c10fe22de93860bfe6fd0c1945cd"),
-            ("gplsi-cleartext-val.jsonl", "15ea1a2495f312ee95e213cc4d851f9e3dca7c7d1e5c13259f3c859479a8219d"),
-        ):
-            for row in read_jsonl(verify_payload(member, artifact_member(args.gplsi_zip, member), expected)):
+    for member, expected in (
+        ("gplsi-cleartext-cas.jsonl", "e7cc5b66aa50dc2ba296ffeb348ea0f4e9a3c10fe22de93860bfe6fd0c1945cd"),
+        ("gplsi-cleartext-val.jsonl", "15ea1a2495f312ee95e213cc4d851f9e3dca7c7d1e5c13259f3c859479a8219d"),
+    ):
+        for row in read_jsonl(verify_payload(member, artifact_member(args.gplsi_zip, member), expected)):
                 text = " ".join(str(row.get("text") or "").split())
                 record = {
                     "document_id": f"gplsi:{row.get('source_repo')}:{row.get('source_path')}",
