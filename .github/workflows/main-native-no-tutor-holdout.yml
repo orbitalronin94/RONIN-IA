@@ -131,8 +131,14 @@ jobs:
           assert all(row.get("content_review")=="PASS_WITH_OCR_NOISE" and row.get("rights")=="NASA NTRS record-level Public Use Permitted" for row in nasa_rows)
           assert {row.get("text_sha256") for row in nasa_rows}=={"039f1edab34becc04e9a367814acc3a5ec08ba510d7913813468ca2d9598aebe","d3177bef2b74f196f125e55bb928f751e41d1e16e7063805c502aa96d380cc24"}
           ck=torch.load(base,map_location="cpu",weights_only=False)
-          assert ck.get("step")==1000 and isinstance(ck.get("model"),dict)
-          parameter_count=sum(t.numel() for t in ck["model"].values())
+          assert isinstance(ck,dict) and ck and all(isinstance(t,torch.Tensor) for t in ck.values())
+          from ronin.config import get_profile
+          from ronin.models.transformer import RoninLM
+          model_config,_=get_profile("tiny")
+          model=RoninLM(model_config)
+          model.load_state_dict(ck,strict=True)
+          parameter_count=model.parameter_count
+          assert model_manifest["checkpoint_step"]==1000
           assert parameter_count==model_manifest["parameters"]==9922880
           print("Modelo verificado:", model_manifest["model_name"], "| parámetros=", parameter_count, "| pesos_sha256=", model_manifest["weights_sha256"])
           Path("checkpoints").mkdir(exist_ok=True)
@@ -194,6 +200,7 @@ jobs:
           import json
           from pathlib import Path
           p=Path("reports")
+          p.mkdir(parents=True,exist_ok=True)
           def load(n):
             f=p/n
             return json.loads(f.read_text()) if f.is_file() else None
