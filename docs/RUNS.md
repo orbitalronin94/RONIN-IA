@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 08:55 | [Integración continua #1112 (run 41997881747)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997881747) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): document UN en-es payload ingestion. Trigger: push; rama: main; intento: 1. | d56f77bc |
 | 2026-11-05 08:54 | [Integración continua #1100 (run 41997417723)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997417723) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): track NASA and NIST candidates in chemistry_materials_hkd. Trigger: push; rama: main; intento: 1. | 7ca94725 |
 | 2026-11-05 08:52 | [Integración continua #1111 (run 41997868895)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997868895) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: add UN en-es corpus acquisition workflow. Trigger: push; rama: main; intento: 1. | d6b9150b |
 | 2026-11-05 08:52 | [Integración continua #1109 (run 41997527483)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997527483) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): index BNE and Gutenberg rights decisions. Trigger: push; rama: main; intento: 1. | 039969af |
