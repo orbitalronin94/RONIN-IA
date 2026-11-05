@@ -13,13 +13,13 @@ if (anyDuplicated(allowed)) stop("duplicate DOI in rights allowlist")
 
 records <- vector("list", length(papers))
 n <- 0L
-excluded <- list()
+excluded <- character()
 for (i in seq_along(papers)) {
   p <- papers[[i]]
   info <- p$info
   doi <- tolower(trimws(as.character(info$doi[[1]])))
   if (is.na(doi) || !doi %in% allowed) {
-    excluded[[length(excluded) + 1L]] <- doi
+    next
     next
   }
   if (is.null(p$text) || !is.data.frame(p$text) || !"text" %in% names(p$text)) {
@@ -37,7 +37,7 @@ for (i in seq_along(papers)) {
   body <- body[nzchar(body)]
   full_text <- paste(body, collapse = "\n")
   if (nchar(full_text, type = "chars") < 1000L) {
-    excluded[[length(excluded) + 1L]] <- paste0(doi, ":short_or_empty")
+    excluded <- c(excluded, paste(doi, "short_or_empty", nchar(full_text, type = "chars"), sep = "\t"))
     next
   }
   title <- as.character(info$title[[1]])
@@ -47,10 +47,14 @@ for (i in seq_along(papers)) {
                              stringsAsFactors = FALSE)
 }
 records <- records[seq_len(n)]
-if (n != 748L) stop(sprintf("expected 748 extracted CC BY papers, got %d", n))
+if (n + length(excluded) != length(allowed)) {
+  stop(sprintf("eligible DOI accounting mismatch: extracted=%d quality_excluded=%d allowlist=%d",
+               n, length(excluded), length(allowed)))
+}
 result <- do.call(rbind, records)
 if (anyDuplicated(result$doi)) stop("duplicate DOI after extraction")
 dir.create(dirname(out_path), recursive = TRUE, showWarnings = FALSE)
 write.csv(result, out_path, row.names = FALSE, fileEncoding = "UTF-8", na = "")
-cat(sprintf("extracted_papers=%d\nexcluded=%d\ncsv_bytes=%d\n",
+writeLines(excluded, file.path(dirname(out_path), "quality-exclusions.tsv"), useBytes = TRUE)
+cat(sprintf("extracted_papers=%d\nquality_excluded=%d\ncsv_bytes=%d\n",
             nrow(result), length(excluded), file.info(out_path)$size))
