@@ -1,0 +1,1660 @@
+National Aeronautics and Space Administration
+
+
+
+www.nasa.gov 
+
+
+
+Validation of the HyperSolve CFD Solver 
+for Entry Descent and Landing 
+
+
+
+Applications
+
+
+
+Kyle Thompson, Matthew O’Connell, Andrew Hinkle, and Clark Pederson
+NASA Langley Research Center
+
+
+
+AIAA SciTech January 8-12, 2024
+Orlando, FL
+
+
+
+
+
+
+
+
+
+
+
+• HyperSolve is a three-dimensional finite-volume solver being used to investigate 
+the efficacy of hyperbolic methods on unstructured meshes
+
+
+
+• HyperSolve CFD Solver Capabilities
+• 2nd/3rd-order edge-based, finite-volume discretizations
+• In-core mesh adaptation for multiblock structured grids and unstructured meshes
+• Thermally perfect gas and reacting flow in thermal nonequilibrium
+• Spalart-Allmaras RANS turbulence model variants
+• Jacobian-Free Newton-Krylov nonlinear solver2 with nonlinear preconditioning3
+
+
+
+• Adjoint solver capability
+
+
+
+• Core mission of HyperSolve to is to provide accurate surface heat transfer 
+predictions for NASA Entry vehicles, with a focus on unstructured mesh 
+adaptation
+
+
+
+HyperSolve CFD Solver
+
+
+
+2
+
+
+
+HyperSolve is a plugin in the 
+T-infinity eco-system1
+
+
+
+1 O’Connell et al., “T-Infinity: The Dependency Inversion Principle For Rapid And Sustainable Multidisciplinary Software Development”, AIAA Paper 2018-3856, 2018
+2 Thompson, K. B. and O’Connell, M. D., “Streamlined Convergence Acceleration for CFD Codes,”, AIAA Paper 2019-3709, 2019
+3 Thompson, K. B., O’Connell, M. D. and Druyor Jr, C., “Accelerating Steady-State Convergence of Compressible Flow Simulations via Nonlinear Elimination”, TFAWS22-AE-12, 2022
+
+
+
+
+
+
+Presenter
+
+
+Presentation Notes
+
+
+EDL -> Entry, Descent and Landingor consider just saying "Entry" insteadfix et. al.fix text color for citations
+
+
+
+
+https://ntrs.nasa.gov/citations/20200002535
+
+
+https://doi.org/10.2514/6.2019-3709
+
+
+https://tfaws.nasa.gov/index.php?gf-download=2022%2F08%2Ftfaws_2022_thompson_nonlinear_elimination.pptx&form-id=20&field-id=42&hash=19d5e44a88221ecf8917534b16cad1665ba5d0ea58995d6d101b304c3cb0c097
+
+
+
+
+
+
+
+
+LAURA CFD Solver 
+
+
+
+• Langley Aerothermodynamic Upwind Relaxation Algorithm
+• Structured multiblock 2nd-order finite-volume solver
+• Reacting flow solver, with ablation and radiation modeling
+• Aerothermal analysis workhorse tool for NASA missions involving Entry, 
+
+
+
+Descent, and Landing (EDL) applications
+
+
+
+3
+
+
+
+1986 
+AIAA-86-0565
+
+
+
+1995 
+Pathfinder Static 
+
+
+
+Instability
+
+
+
+2005 
+Shuttle Return to 
+
+
+
+Flight
+
+
+
+2020 
+LAURA-5.6
+
+
+
+Release
+Image credit: NASA
+
+
+
+
+
+
+Presenter
+
+
+Presentation Notes
+
+
+Look up LAURA journal AIAA publication (change 1990)Shorten time on this slideTreating LAURA as validation data (truth source)is flight-validated source
+
+
+
+
+
+
+
+
+
+
+Improved Surface Heat Flux Predictions
+
+
+
+Surface Heat Flux Fully-Tetrahedral Mesh 
+(Adapted via Sketch-to-Solution1)
+
+
+
+4
+
+
+
+Reference 
+2nd-order FVLAURA LAURA HyperSolve
+
+
+
+1 Kleb, W., Park, M., Wood, W., Bibb, K., Thompson, K., and Gomez, R., “Sketch-to-Solution: An Exploration of Viscous CFD with Automatic Grids,” AIAA Paper 2019–2948, 2019.
+2Thompson, K. B., Nishikawa, H., and Padway, E., “Economical Third-Order Methods for Accurate Surface Heating Predictions on Simplex Element Meshes,” AIAA Paper 2023-2629, 2023.
+
+
+
+Previous work2 showcased that hyperbolic methods implemented in HyperSolve provide 
+significantly more accurate surface heat transfer predictions on fully-tetrahedral element adapted 
+
+
+
+meshes, but no validation on fixed structured meshes was reported
+
+
+
+
+
+
+Presenter
+
+
+Presentation Notes
+
+
+Remove temperature scale
+
+
+
+
+https://arc.aiaa.org/doi/abs/10.2514/6.2019-2948
+
+
+
+
+
+
+
+
+HyperSolve-LAURA Functional Equivalence
+
+
+
+• Reacting flow capability in HyperSolve ported from LAURA
+• Chemical kinetic models, transport property models, and gas thermodynamic models implemented in 
+
+
+
+HyperSolve have been verified to match models in the LAURA code
+
+
+
+• Functional Equivalence Tests (FETs) provide assessment on spatial accuracy
+• LAURA results used as reference (truth) solutions
+• HyperSolve should match LAURA solution heat flux and pressure within 4% tolerance, when both 
+
+
+
+solvers are run on the same structured mesh
+
+
+
+Functional Equivalence: To be useful as an aerothermal 
+analysis tool, HyperSolve should have similar accuracy to 
+LAURA on an identical structured mesh
+
+
+
+5
+
+
+
+
+
+
+Presenter
+
+
+Presentation Notes
+
+
+4% is acceptable for NASA project applications
+
+
+
+
+
+
+
+
+
+
+Functional Equivalence Tests
+
+
+
+Ideal Gas 
+
+
+
+Axisymmetric 
+Sphere-Cone
+
+
+
+Chemical 
+Nonequilibrium
+
+
+
+RANS 
+Turbulence 
+
+
+
+Models
+
+
+
+6
+
+
+
+
+
+
+
+
+
+
+
+Validation Case: Axisymmetric Sphere-Cone
+
+
+
+Freestream Conditions
+
+
+
+Density 0.0522 kg/m3
+
+
+
+Velocity 1058 m/s
+
+
+
+Temperature 116 K
+
+
+
+Exercised Capabilities
+• Ideal gas model
+• Axisymmetric “wedge” mesh – typical for AoA = 0o
+
+
+
+• Isothermal Wall – T = 285 K
+
+
+
+Differences in the heat flux 
+near stagnation region due 
+to axisymmetric treatment
+
+
+
+7
+
+
+
+
+
+
+Presenter
+
+
+Presentation Notes
+
+
+Make the temperature legend larger on the left plotMirror the solution from [-1,1] for right plotShift the y-axis to be from -0.1 not -2
+
+
+
+
+
+
+
+
+
+
+HyperSolve Capability Validation Cases
+
+
+
+Ideal Gas Chemical 
+Nonequilibrium
+
+
+
+2D Cylinder
+
+
+
+AGARD W18 
+Wind Tunnel 
+
+
+
+Model
+
+
+
+CEV
+
+
+
+Mars 2020
+
+
+
+RANS 
+Turbulence 
+
+
+
+Models
+
+
+
+8
+
+
+
+
+
+
+Presenter
+
+
+Presentation Notes
+
+
+change Thermochemical -> Chemical 
+
+
+
+
+
+
+
+
+
+
+Case: 2D Cylinder
+
+
+
+9
+
+
+
+LAURA
+
+
+
+HyperSolve
+
+
+
+Shock capturing is 
+comparable to LAURA
+
+
+
+Temperature Contours
+
+
+
+Freestream Conditions
+
+
+
+Density 0.001 kg/m3
+
+
+
+Velocity 5000 m/s
+
+
+
+Temperature 200.0 K
+
+
+
+Exercised Capabilities
+• 5-Species Air Model
+• Wall Conditions
+
+
+
+• Isothermal T = 500 K
+• Noncatalytic surface
+
+
+
+Species Freestream 
+Mass Fraction
+
+
+
+N2 0.76
+
+
+
+O2 0.24
+
+
+
+N 1E-20
+
+
+
+O 1E-20
+
+
+
+NO 1E-20
+
+
+
+
+
+
+
+
+
+
+
+Case: AGARD W18 WT Model
+Freestream Conditions
+
+
+
+Density 0.01608 kg/m3
+
+
+
+Velocity 929 m/s
+
+
+
+Temperature 61.2 K
+
+
+
+Exercised Capabilities
+• 5-Species Air Model
+• Wall Conditions
+
+
+
+• Isothermal T = 300 K
+• Noncatalytic surface
+
+
+
+Y=0 Heat Flux and Pressure
+
+
+
+Model 
+Forebody
+
+
+
+10
+
+
+
+Species Freestream 
+Mass Fraction
+
+
+
+N2 0.76
+
+
+
+O2 0.24
+
+
+
+N 1E-20
+
+
+
+O 1E-20
+
+
+
+NO 1E-20
+
+
+
+LAURA HyperSolve LAURA
+
+
+
+Pressure Heat Flux
+
+
+
+HyperSolve
+
+
+
+
+
+
+Presenter
+
+
+Presentation Notes
+
+
+Draw line b/w LAURA and HyperSolve sides
+
+
+
+
+
+
+
+
+
+
+Case: Crew Exploration Vehicle
+
+
+
+Freestream Conditions
+Angle of Attack 28.0o
+
+
+
+Density 4.35E-3 kg/m3
+
+
+
+Velocity 6350 m/s
+
+
+
+Temperature 244.97 K
+
+
+
+Exercised Capabilities
+• 5-Species Air Model
+• Wall Conditions
+
+
+
+• Isothermal T = 750 K
+• Fully-catalytic surface
+
+
+
+LAURA HyperSolve LAURA
+
+
+
+Y=0 Surface Heat Flux and PressurePressure Heat Flux
+
+
+
+HyperSolve
+
+
+
+Species Freestream 
+Mass Fraction
+
+
+
+N2 0.76
+
+
+
+O2 0.24
+
+
+
+N 1E-20
+
+
+
+O 1E-20
+
+
+
+NO 1E-20
+
+
+
+11
+
+
+
+CEV 
+Forebody
+
+
+
+
+
+
+
+
+
+
+
+Case: Mars 2020 Aeroshell
+
+
+
+Freestream Conditions
+Angle of Attack 17.178o
+
+
+
+Density 0.00364 kg/m3
+
+
+
+Velocity 2000 m/s
+
+
+
+Temperature 203.0 K
+
+
+
+Exercised Capabilities
+• 8-Species Martian Atmosphere
+• Wall Conditions
+
+
+
+• Isothermal T = 1000 K
+• Supercatalytic surface
+
+
+
+LAURA HyperSolve LAURA
+
+
+
+Pressure Heat Flux
+
+
+
+HyperSolve
+
+
+
+Species Freestream 
+Mass Fraction
+
+
+
+CO2 0.97
+
+
+
+N2 0.03
+
+
+
+CO 1E-20
+
+
+
+NO 1E-20
+
+
+
+O2 1E-20
+
+
+
+C 1E-20
+
+
+
+N 1E-20
+
+
+
+O 1E-20
+
+
+
+Y=0 Surface Heat Flux and Pressure
+
+
+
+Investigating
+
+
+
+12
+
+
+
+Mars 2020 
+Forebody
+
+
+
+
+
+
+Presenter
+
+
+Presentation Notes
+
+
+Fix text overlap in upper right
+
+
+
+
+
+
+
+
+
+
+HyperSolve Capability Validation Cases
+
+
+
+Ideal Gas Chemical 
+Nonequilibrium
+
+
+
+RANS 
+Turbulence 
+
+
+
+Models
+
+
+
+Method of 
+Manufactured 
+
+
+
+Solutions
+
+
+
+MSL
+
+
+
+CEV
+
+
+
+13
+
+
+
+
+
+
+
+
+
+
+
+Verification through MMS
+
+
+
+• The Method of Manufactured Solutions (MMS) was used to verify the Spalart-
+Allmaras model.
+
+
+
+• These tests are generally sensitive enough to pick up on small model differences 
+or coding bugs.
+
+
+
+• For example, omitting a term 1
+𝜎𝜎
+
+
+
+(𝜈𝜈 + �̃�𝜈) 𝜕𝜕𝜕𝜕
+𝜕𝜕𝑥𝑥𝑗𝑗
+
+
+
+𝜕𝜕�𝜈𝜈
+𝜕𝜕𝑥𝑥𝑗𝑗
+
+
+
+in the SA model.
+
+
+
+• In addition to the internal HyperSolve MMS implementation, HyperSolve was 
+extended to also use the MASA1 library.
+
+
+
+• MASA provides both the solution and the matching source terms.
+• Using MASA provides an independent check on the solution accuracy.
+
+
+
+14
+
+
+
+1Malaya, N., Estacio-Hiroms, K. C., Stogner, R. H., Schulz, K. W., Bauman, P. T., and Carey, G. F., “MASA : A Library for Verification Using Manufactured and Analytical Solutions,” Engineering with Computers, Vol. 29, No. 4, 2013, pp. 487–496.
+
+
+
+
+
+mailto:https://github.com/manufactured-solutions/MASA
+
+
+
+
+
+
+
+
+Wall-Bounded Manufactured Solutions
+
+
+
+L1 error under grid refinement. Both the L1 error and the grid 
+scale are normalized by the values on the coarsest grid.
+
+
+
+15
+
+
+
+Profiles of density, streamwise velocity, temperature, and the 
+turbulent variable in the wall-normal direction (y)
+
+
+
+Second order accuracy was verified with “physical” or “wall-bounded” 
+manufactured solutions1, which use an idealized boundary layer.
+
+
+
+1Oliver, T., Estacio-Hiroms, K., Malaya, N., and Carey, G., “Manufactured Solutions for the Favre-Averaged Navier-Stokes Equations with Eddy-Viscosity Turbulence Models,” AIAA Paper 2009-1575, 2012.
+
+
+
+
+
+
+
+
+
+
+
+Case: MSL AEDC WT Model
+Freestream Conditions
+Angle of Attack 16o
+
+
+
+Density 3742 kg/m3
+
+
+
+Velocity 1356.6 m/s
+
+
+
+Temperature 73.8 K
+
+
+
+Exercised Capabilities
+• SA-noft2-CatrisCons RANS model (Ideal gas)
+• Wall Conditions
+
+
+
+• Isothermal T = 389.6 K
+• Noncatalytic surface
+
+
+
+LAURA HyperSolve LAURA
+
+
+
+Pressure Heat Flux
+
+
+
+HyperSolve
+
+
+
+Y=0 Surface Heat Flux and Pressure
+
+
+
+16B. R. Hollis and A. S. Collier, “Experimental Investigation of Mars Science Laboratory Entry Vehicle Aeroheating in AEDC,” Langley Research Center, Hampton, VA, NASA TP 2017–219658, Sep. 2017.
+
+
+
+Model 
+Forebody
+
+
+
+
+
+
+
+
+
+
+
+Case: CEV AEDC WT Model
+Freestream Conditions
+Angle of Attack 24o
+
+
+
+Density 0.382 kg/m3
+
+
+
+Velocity 1347 m/s
+
+
+
+Temperature 72 K
+
+
+
+Exercised Capabilities
+• SA-noft2-CatrisCons RANS model (Ideal gas)
+• Wall Conditions
+
+
+
+• Isothermal T = 369 K
+• Noncatalytic surface
+
+
+
+LAURA HyperSolve LAURA
+
+
+
+Pressure Heat Flux
+
+
+
+HyperSolve
+
+
+
+Y=0 Surface Heat Flux and Pressure
+
+
+
+17Hollis, B. R., Berger, K. T., Horvath, T. J., Coblish, J. J., Norris, J. D., Lillard, R. P., & Kirk, B. S. (2009). Aeroheating Testing and Predictions for Project Orion Crew Exploration Vehicle. Journal of Spacecraft and Rockets, 46(4), 766–780.
+
+
+
+CEV 
+Forebody
+
+
+
+
+
+
+
+
+
+
+
+Summary & Future Work
+
+
+
+• Using an identical structured mesh, HyperSolve surface heat flux 
+and pressure predictions match LAURA to within a 4% difference
+
+
+
+• HyperSolve reacting flow gas capabilities demonstrate comparable 
+shock capturing and stagnation line species composition to LAURA
+
+
+
+• Mars 2020 validation: further investigation needed to understand differences.
+
+
+
+• Future work will include extending the Functional Equivalence 
+Tests to include cases with significant thermal nonequilibrium and 
+ionization reactions
+
+
+
+• Verification and validation of the vibrational energy relaxation capability in 
+HyperSolve is needed
+
+
+
+18
+
+
+
+
+
+
+Presenter
+
+
+Presentation Notes
+
+
+Remove the bold textremove future work
+
+
+
+
+
+
+
+
+
+
+Acknowledgements
+
+
+
+• This work was funded by the Entry Systems Modeling Project within the 
+NASA Game Changing Development Program, Space Technology 
+Mission Directorate. 
+
+
+
+• The authors would like to thank Bil Kleb, Jeff White, and Hiro Nishikawa 
+for their feedback on this work.
+
+
+
+19
+
+
+
+
+
+
+Presenter
+
+
+Presentation Notes
+
+
+Remove Drs.
+
+
+
+
+
+
+
+
+
+
+QUESTIONS?
+
+
+
+20
+
+
+
+
+
+
+
+
+
+
+
+HyperSolve Spalart-Allmaras RANS Models
+
+
+
+SA-neg
+• This model does use a laminar-to-turbulent trip term.
+
+
+
+SA-noft2-CatrisCons1:
+• We use the conservative form of the convective operator
+𝜕𝜕𝜕𝜕�𝜈𝜈
+𝜕𝜕𝑡𝑡
+
+
+
++ 𝜕𝜕𝜕𝜕𝑢𝑢𝑗𝑗�𝜈𝜈
+𝜕𝜕𝑥𝑥𝑗𝑗
+
+
+
+instead of original published version: 𝐷𝐷𝜕𝜕�𝜈𝜈
+𝐷𝐷𝑡𝑡
+
+
+
+= 𝜕𝜕�𝜕𝜕𝜈𝜈
+𝜕𝜕𝑡𝑡
+
+
+
++ 𝑢𝑢𝑗𝑗
+𝜕𝜕𝜕𝜕�𝜈𝜈
+𝜕𝜕𝑥𝑥𝑗𝑗
+
+
+
+• No laminar-to-turbulent boundary layer trip term.
+• All comparisons to LAURA use this model.
+
+
+
+21
+1Catris, S., and Aupoix, B., “Density Corrections for Turbulence Models,” Aerospace Science and Technology, Vol. 4, No. 1, 2000, pp. 1–11.
+
+
+
+
+
+
+Presenter
+
+
+Presentation Notes
+
+
+Move to backup. Can cover this in questions.
+
+
+
+
+https://turbmodels.larc.nasa.gov/spalart.html#saneg
+
+
+https://turbmodels.larc.nasa.gov/spalart.html#saCatris
+
+
+
+
+
+
+
+
+Economical 3rd-order Finite Volume Methods
+
+
+
+3rd-order convective fluxes
+
+
+
+3rd-order-preserving boundary quadrature
+
+
+
+3rd-order source term quadrature
+
+
+
+22
+
+
+
+Evaluated 
+using QLSQ
+
+
+
+Boundary Quadrature at Node j
+
+
+
+Katz and Sankaran 
+JCP 2011
+
+
+
+Nishikawa, 
+JCP 2014
+
+
+
+Nishikawa and Liu, 
+JCP 2017
+
+
+
+
+
+https://doi.org/10.1016/j.jcp.2011.06.023
+
+
+https://doi.org/10.1016/j.jcp.2017.04.075
+
+
+
+
+
+
+
+
+[Nishikawa, 2011] “Robust and Accurate Viscous Discretization via Upwind Scheme - I: Basic Principle” 
+
+
+
+• An extension of hyperbolic diffusion scheme is a related, flexible, formula for diffusion problems
+
+
+
+• This formula leads to improved accuracy when a quadratic least-squares technique is used to 
+
+
+
+compute nodal gradient values with linear flux extrapolation on simplex meshes
+
+
+
+• Cubic LSQ required for 3rd-order accuracy, which is not pursued in this work
+
+
+
+Treatment of Remaining Viscous Terms
+
+
+
+Interface Gradient Consistent Term Dissipation Term
+
+
+
+Alpha-Damping Formula
+
+
+
+23
+
+
+
+
+
+https://doi.org/10.1016/j.compfluid.2011.04.014
+
+
+
+
+
+
+
+
+Challenge: Aeroheating on Complex Geometry
+
+
+
+24
+
+
+
+Unstructured CFD
+• Simplifies mesh generation
+• Sensitivity to the mesh topology
+
+
+
+Multiblock Structured CFD
+• More consistent accuracy
+• ”Artisan grids”: novel block topologies 
+
+
+
+enable meshing nonsimple geometry
+• Labor-intensive mesh generation
+
+
+
+CEV surface heat flux contours on mixed-element meshes
+
+
+
+“Stacked Block” Structured Mesh Example
+
+
+
+
+
+
+Presenter
+
+
+Presentation Notes
+
+
+Adjust the layout of the slide to be clear Split this into two slidesMention that the bottom right image is "good heating"Make sure to emphasize that we eventually want to do complex geometry, but this work is just an incremental step toward that goal
+
+
+
+
+
+
+
+
+
+
+Unstructured Mesh Adaptation
+
+
+
+• Active research in unstructured mesh adaptation
+• Sketch-to-Solution1: Hessian-based adaptation 
+
+
+
+controlling solution interpolation error
+• Increasingly used for aerodynamic analysis
+
+
+
+• Noise in surface heat transfer predictions
+
+
+
+25
+
+
+
+Sketch-to-Solution
+Adapted Meshes
+
+
+
+PressureHeat Flux
+
+
+
+Heat flux accuracy 
+degrades on 
+
+
+
+simplex meshes
+
+
+
+1 Kleb, W., Park, M., Wood, W., Bibb, K., Thompson, K., and Gomez, R., “Sketch-to-Solution: An Exploration of Viscous CFD with Automatic Grids,” AIAA Paper 2019–2948, 2019.
+
+
+
+
+
+https://arc.aiaa.org/doi/abs/10.2514/6.2019-2948
+
+
+
+
+
+
+
+
+Economical Unstructured CFD Methods
+
+
+
+26
+
+
+
+Goal: Improve surface heat flux accuracy on 
+simplex meshes without greatly increasing 
+the degrees of freedom compared to 
+traditional 2nd-order finite-volume schemes
+
+
+
+
+
+
+
+
+
+
+
+AIAA SciTech FD-76: Compressible and High Speed Flow Applications I
+
+
+
+Session FD-76 1-3pm, January 12th (last day of conference… again 😤😤)
+
+
+
+1:00pm-1:20pm: Communication blackout predictions of re-entry vehicles with improved fidelity for practical 
+
+
+
+application (John R Murdock)
+
+
+
+1:20pm-1:40pm: A Diffuse Interface Model for Viscous Compressible Flow in Eroding Porous Media (Emma M 
+
+
+
+Schmidt)
+
+
+
+1:40pm-2:00pm: Validation of the HyperSolve CFD Solver for Entry Descent and Landing Applications (Kyle B 
+
+
+
+Thompson)
+
+
+
+2:00pm-2:20pm: Comparison of DSMC and multi-temperature simulations of thermal nonequilibrium in a 
+
+
+
+supersonic Kelvin-Helmholtz shear layer (Shrey Trivedi)
+
+
+
+2:20pm-2:40pm: CFD study of the effect of distributed wall roughness as a Passive Transonic Shock Control 
+
+
+
+technique on Bump Flow for Wing Buffet Alleviation (Davide Di Pasquale)
+
+
+
+2:40pm-3:00pm: Simulation of Hypervelocity Water Entry by Spherical Projectiles (Joshua Smith)
+
+
+
+27
+
+
+
+
+
+
+ 
+Validation of the HyperSolve CFD Solver for Entry Descent and Landing Applications
+
+ 
+HyperSolve CFD Solver
+
+ 
+LAURA CFD Solver 
+
+ 
+Improved Surface Heat Flux Predictions
+
+ 
+HyperSolve-LAURA Functional Equivalence
+
+ 
+Functional Equivalence Tests
+
+ 
+Validation Case: Axisymmetric Sphere-Cone
+
+ 
+HyperSolve Capability Validation Cases
+
+ 
+Case: 2D Cylinder
+
+ 
+Case: AGARD W18 WT Model
+
+ 
+Case: Crew Exploration Vehicle
+
+ 
+Case: Mars 2020 Aeroshell
+
+ 
+HyperSolve Capability Validation Cases
+
+ 
+Verification through MMS
+
+ 
+Wall-Bounded Manufactured Solutions
+
+ 
+Case: MSL AEDC WT Model
+
+ 
+Case: CEV AEDC WT Model
+
+ 
+Summary & Future Work
+
+ 
+Acknowledgements
+
+ 
+Questions?
+
+ 
+HyperSolve Spalart-Allmaras RANS Models
+
+ 
+Economical 3rd-order Finite Volume Methods
+
+ 
+Treatment of Remaining Viscous Terms
+
+ 
+Challenge: Aeroheating on Complex Geometry
+
+ 
+Unstructured Mesh Adaptation
+
+ 
+Economical Unstructured CFD Methods
+
+ 
+AIAA SciTech FD-76: Compressible and High Speed Flow Applications I

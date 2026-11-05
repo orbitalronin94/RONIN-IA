@@ -1,0 +1,371 @@
+National Aeronautics and Space Administration
+
+
+
+www.nasa.gov 
+
+
+
+Predicting the Appearance of 
+Sunspots on the Solar Surface 
+
+
+
+Using Machine Learning
+Spiridon Kasapis & Irina Kitiashvili
+
+
+
+NASA Ames Research Center
+
+
+
+
+
+
+
+
+
+
+
+What are Solar Active Regions?
+
+
+
+Predicting the Appearance of Sunspots on the Solar Surface Using Machine Learning 2
+
+
+
+• Areas on the Sun's surface 
+(sunspots) with intense magnetic 
+activity.
+
+
+
+• Primary sites for the emergence of 
+solar flares and coronal mass 
+ejections (CMEs).
+
+
+
+• The number and location is 
+dependent on the solar cycle.
+
+
+
+
+
+
+
+
+
+
+
+3Predicting the Appearance of Sunspots on the Solar Surface Using Machine Learning
+
+
+
+Project Data Pipeline
+
+
+
+Presentation Content
+
+
+
+
+
+
+
+
+
+
+
+4Predicting the Appearance of Sunspots on the Solar Surface Using Machine Learning
+Image Credit: Nina McCurdy, Timothy 
+Sandstrom, Spiridon Kasapis
+
+
+
+
+
+
+
+
+
+
+
+5Predicting the Appearance of Sunspots on the Solar Surface Using Machine Learning
+Image Credit: Nina McCurdy, Timothy 
+Sandstrom, Spiridon Kasapis
+
+
+
+
+
+
+
+
+
+
+
+6Predicting the Appearance of Sunspots on the Solar Surface Using Machine Learning
+
+
+
+
+
+
+
+
+
+
+
+Machine Learning
+
+
+
+7Predicting the Appearance of Sunspots on the Solar Surface Using Machine Learning
+
+
+
+
+
+
+
+
+
+
+
+Data Split
+
+
+
+8Predicting the Appearance of Sunspots on the Solar Surface Using Machine Learning
+
+
+
+Training:
+• Active Regions: 58 Active Regions (November 2010 to December 2022)
+• Physical Parameters: 4 Frequency Range Acoustic Power Maps
+• Map Split: 63 Tiles Each Power Map (Omitting Top and Bottom Rows)
+• Sliding Windows: 140 Different Intervals
+• Points in Each Window: 80 Points (1 hour cadence)
+• Total Parameters: 58x4x63x140x80 = 164 Million Data Points
+Testing:
+• Active Regions: 3 Active Regions (December 2022 to April 2023)
+
+
+
+GPU Acceleration: CPU takes 9 Days to process all data, GPU takes 30 Hours (x7.1 Speed-Up)
+
+
+
+February 11, 2010
+SDO Launch
+
+
+
+November 28, 2010
+AR 11130
+
+
+
+February 11, 2011
+AR 11158
+
+
+
+April 19, 2013
+AR 11726
+
+
+
+June 6, 2014
+AR 12085
+
+
+
+September 9, 2022
+AR 13098
+
+
+
+July 15, 2016
+AR 12567
+
+
+
+December 30, 2022
+AR 13179
+
+
+
+SDO HMI 
+Magnetogram
+
+
+
+PAST FUTURE
+
+
+
+
+
+
+
+
+
+
+
+9Predicting the Appearance of Sunspots on the Solar Surface Using Machine Learning
+
+
+
+Time Window 1Time Window 2Time Window 3Time Window 4
+
+
+
+𝑡 ∈ 0 80 ℎ 𝑡 ∈ 81, 90 ℎ
+
+
+
+Input 1 Input 2
+
+
+
+Input 4Input 3
+
+
+
+Target
+
+
+
+𝑡 ∈ 82, 91 ℎ𝑡 ∈ 83, 92 ℎ𝑡 ∈ 84, 93 ℎ𝑡 ∈ 1, 81 ℎ𝑡 ∈ 2, 82 ℎ𝑡 ∈ 3, 83 ℎ
+
+
+
+
+
+
+
+
+
+
+
+10Predicting the Appearance of Sunspots on the Solar Surface Using Machine Learning
+
+
+
+
+
+
+
+
+
+
+
+Challenges Addressed Using HECC Systems
+
+
+
+11Predicting the Appearance of Sunspots on the Solar Surface Using Machine Learning
+
+
+
+• Data Transfer
+• The HMI instrument takes 2TB of data per day/ 10 PB raw data since SDO launch in 2010. 
+• The data for every AR analyzed in this project takes up 150GB of space.
+• A total of 9.15 TB worth of data (150GB x 61ARs) was transferred from Stanford/JSOC and save on Lou 
+
+
+
+Front End (lfe) using the NASA Secure Unattended Proxy (sup shiftc command). 
+• Data Preprocessing
+
+
+
+• The 9.15TB AR data was processed on Pleiades Front End (pfe) and was reduced down to 350GB creating 
+our ML ready datasets.
+
+
+
+• Such a process could not be carried out on a personal computer due to storage and computational limits.
+• Machine Learning (full scale ML model run time):
+
+
+
+• Personal Computer: Apple M1 Pro CPU (up to 10 cores) would take >2 Weeks.
+• Aitken CPU node: Intel Xeon Gold 6248 (40 cores) takes 9 Days.
+• Sky Electra GPU node: NVIDIA Volta V100 take 30 Hours (x7.1 Speed-Up).
+• Further optimization by utilizing all GPUs in a node (4 or 8 in total) is possible. Code needs to be optimized 
+
+
+
+for parallel processing. For a shallow network like ours might not be worth it.
+
+
+
+
+
+
+
+
+
+
+
+Conclusions
+
+
+
+12Predicting the Appearance of Sunspots on the Solar Surface Using Machine Learning
+
+
+
+• We create a machine learning ready dataset of emerging solar active regions aiming to:
+• Understand the physical processes on the surface of the sun
+• Predict emergence of active regions: A drop in intensity can be predicted in a tile 18 hours 
+
+
+
+in advance without false positives. 
+• Calculated acoustic power maps carry precursor information associated with the decrease in 
+
+
+
+continuum intensity on the solar surface
+• Machine learning models (LSTM/Transformers) can capture this information creating early 
+
+
+
+warning systems for the emergence of solar active regions
+
+
+
+Acknowledgements
+
+
+
+NAS Visualization Team: Nina McCurdy, Timothy Sandstrom, Christopher Henze
+New Jersey Institute of Technology: Alexander Kosovichev, John Stephan, Apte Bhairavi
+
+
+
+HECC AI Expansion Grant
+
+
+
+
+
+
+
+
+
+
+
+Thank you for your attention!
+
+
+
+13Predicting the Appearance of Sunspots on the Solar Surface Using Machine Learning

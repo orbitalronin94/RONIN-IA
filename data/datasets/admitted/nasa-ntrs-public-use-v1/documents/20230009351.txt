@@ -1,0 +1,643 @@
+National Aeronautics and
+Space Administration
+
+
+
+Low-Earth Orbit Flight Test
+of an Inflatable Decelerator
+
+
+
+~@ Ulf@uUTITI@J CnJ ©® 
+
+
+
+~@WD@@~D®mJ ~YI© ~~~ 
+
+
+
+
+
+
+
+
+
+
+
+2
+
+
+
+Low Earth Orbit Flight Test of an Inflatable Decelerator 
+(LOFTID)
+
+
+
+!Hypersonic lnflatablle Aerodynamic 
+ID,ec,elerator (HIAID) is a d,eplloyablle aeroshelll 
+which can b,e stow,ed for llaunch and cruis,e, 
+then deploy,ed to decell,erate payloads at 
+destinations with atmosp,h,er,es. 
+
+
+
+ILOFTIIID Objectiv,e: Orbital ,entry (7-llkm/s) 
+of IHIAD based re,entry vehiclle (IRV) to 
+demonstrate inflatable aeroshelll for NASA 
+heavy down-mass missions, and commercia l 
+applications. 
+
+
+
+The IHIAD IRV is designed to be flown as a 
+secondary payload on an Atllas V launch 
+vehicle d ,eliv,ering its primary paylload to low 
+Earth orbit. 
+
+
+
+The flight wi lll test IHIAD technology at a scale 
+and ,entry conditions r,el,evant to Earth and 
+IMars mission infusion opportuniti,es. 
+
+
+
+
+
+
+
+
+
+
+
+3
+
+
+
+Concept of Operation
+
+
+
+An.ASV 
+LAUNCH 
+
+
+
+BOOSTER 
+J.ETTISON 
+
+
+
+PRIIMARY PAYLOAD APL 
+
+
+
+PAYLOAD FAIRING 
+JETTISON 
+
+
+
+-
+
+
+
+SEPAR.ATl:ON EJECTIONS CENTAUR MES2 
+TiRANSfER ORBIT 
+
+
+
+CENTAUR MES3 
+DEORBIT 
+
+
+
+' ' . 
+' 
+
+
+
+PAYLOAD ~ • 
+ADAPJE1R ♦ 
+JETTISON 
+
+
+
+S.ATEilllTE COMM 
+(FOR MINIMAL DATA) 
+
+
+
+HIAD INFLATION, 
+ORIENTATION, 
+AND SPilN-UP 
+
+
+
+CENTAUR 
+DIVERT 
+
+
+
+AND VENT 
+
+
+
+RV SEPARATION, 
+~ BEGIN TRANSM. IITTING 
+~ (MINIMALDATA) 
+~ 
+
+
+
+\ "··. l ,. R.EENTRY 
+/ ·•,, . (SPIN,STA!BIUZED ' '•·-1,. BALLISTIC) 
+
+
+
+', ', ', 
+' ' ' 
+
+
+
+' , /-- ..... 
+DATA 
+
+
+
+MODULE 
+EJECTION 
+
+
+
+~ ' I \ 
+
+
+
+PARACHU17E 
+DEPLOYMENT ~ 
+
+
+
+1 
+
+
+
+l 
+
+
+
+DATA 
+RV MODULE 
+
+
+
+RECOVERY RECOVERY 
+~ 
+
+
+
+
+
+
+
+
+
+
+
+ The LOFTID re-entry vehicle is an uncontrolled payload
+• No in-flight guidance or control system
+
+
+
+Objectives of Navigation System
+• Estimate in real time the attitude, rotation rate, position, and velocity of the RV
+• Provide data that will be sent back via the real time beacon for real-time monitoring
+• Enable post-flight analysis if the real time beacon and on board storage are not recovered
+
+
+
+ Design Goal
+• Re-use analysis, algorithms, and code from other projects to minimize the development time
+• Provide flight testing of common navigation library
+
+
+
+ Intention to maximize use of available facilities to minimize the integration and testing time
+
+
+
+4
+
+
+
+Navigation System Overview and Objectives
+
+
+
+
+
+
+
+
+
+
+
+ LOFTID RV is not powered on until all the other payloads have been released
+ Unable to accept commands or state updates from the launch vehicle upper stage
+ These constrains make the navigation system unable to initialize prior to the flight or receive an 
+
+
+
+updated navigation state before being released by the upper stage
+ Shape of the vehicle is also limited due to being a secondary payload; this shape minimizes the 
+
+
+
+surface area exposed
+• This limits the ability to use a second GPS antenna for attitude
+
+
+
+ Spin stabilization prevents the use of most star trackers
+ Aeroshell material prevents the use of magnetometers
+
+
+
+MM/DD/YYYY Document Title 5
+
+
+
+Design Constraints
+
+
+
+
+
+
+
+
+
+
+
+ Due to the design constrains, the hardware of the navigation system only includes an 
+Inertial Measurement Unit (IMU) and a GPS receiver
+
+
+
+ The hardware was selected to maximize flight heritage and to limit the required 
+environmental testing 
+
+
+
+ Inertial Measurement Unit: Northrop Grumman LN200
+• Three fiber optic gyroscopes
+• Three accelerometers
+• Space flight heritage on similar vehicles
+
+
+
+GPS Receiver
+• JAVAD TR-G2T
+• Space flight heritage on similar vehicles
+
+
+
+MM/DD/YYYY Document Title 6
+
+
+
+Navigation Hardware Overview
+
+
+
+
+
+
+
+
+
+
+
+ The LOFTID flight software utilizes the Core Flight System (cFS) architecture
+ The navigation system is implemented as a relatively standalone application to simplify 
+
+
+
+integration and testing
+ Three main applications: IMU, GPS, and Navigation
+ IMU app receives data from the IMU, buffers the data, and outputs the 400 Hz data at 10 Hz
+GPS app receives data from the GPS receiver and outputs at 10 Hz
+ Navigation app runs at 10 Hz, processes any measurement available from the IMU or GPS 
+
+
+
+apps, and sends out the navigated state
+
+
+
+MM/DD/YYYY Document Title 7
+
+
+
+Software Design
+
+
+
+
+
+
+
+
+
+
+
+ Navigation app runs at 10 Hz, and receives 40 
+IMU measurements, and any GPS 
+measurements
+
+
+
+On each IMU sample, the navigation app 
+performs attitude integration, then 
+position/velocity integration
+
+
+
+ A first order geopotential is used to minimize 
+computation time
+
+
+
+ If there is a GPS measurement, the Extended 
+Kalman Filter (EKF) runs to process the GPS 
+measurement once all IMU measurements are 
+processed 
+
+
+
+ The output from the 10 Hz navigation app is 
+stored in on-board memory
+
+
+
+ The telemetry downlink sends the latest 
+navigated state each time it runs
+
+
+
+MM/DD/YYYY Document Title 8
+
+
+
+Inertial Navigation and Kalman Filter
+
+
+
+Gravity Model 
+
+
+
+GPS Receiver 
+
+
+
+b fb wib, 400Hz 
+
+
+
+Inertial 
+Measurement Unit 
+
+
+
+40 Samples at 10 Hz 
+
+
+
+I wrb, f b 400Hz 
+♦ 40 Samples at 10 Hz 
+
+
+
+Attitude Integration 
+
+
+
+! q~ 
+
+
+
+Position/Velocity q~, fe, Ve 10 Hz 
+
+
+
+Integration 
+
+
+
+! fe, Ve 10 Hz 
+
+
+
+Te l0Hz Extended ij~,fe, Ve 10 Hz 
+
+
+
+Kalman Filter 
+
+
+
+10 Hz 
+
+
+
+<1 Hz 
+
+
+
+l 
+On-Board 
+Storage 
+
+
+
+Telemetry 
+Downlink 
+
+
+
+
+
+
+
+
+
+
+
+ Accurate navigation state initialization is one of the main challenges of the LFOTID navigation
+ Currently, the plan is to use the estimated pre-flight initial state
+ This initial state is loaded in the software on the order of weeks before the flight, and is not 
+
+
+
+expected to be accurate
+Once the GPS records the first measurement, the navigation system will re-initialize the 
+
+
+
+position and velocity states using the first measurement
+Options are being considered to update the attitude:
+
+
+
+• Having a high covariance on the attitude, which will cause the attitude to update faster once the RV reaches 
+the upper atmosphere and drag is higher than the IMU accelerometer error
+
+
+
+• Could re-initialize the attitude by assuming that the deceleration is opposite to the velocity, average over a set 
+time
+
+
+
+MM/DD/YYYY Document Title 9
+
+
+
+Initialization
+
+
+
+
+
+
+
+
+
+
+
+ Preliminary software testing occurred with a 
+standalone cFS model which simulated the 
+output of the IMU and GPS apps
+
+
+
+ Further testing was conducted at the MSFC
+GN&C hardware laboratory
+
+
+
+ This testing included mounting the LN200 to the 
+three-axis rate table and simulating an expected 
+flight rotation profile
+
+
+
+ The flight computer was connected to the LN200
+through slip rings to record and process the data 
+in real time
+
+
+
+ This allowed for efficient changes to the flight 
+software as the need for changes appeared
+
+
+
+10
+
+
+
+Preliminary Testing
+
+
+
+
+
+
+
+
+
+
+
+ A preliminary overview of the LOFTID navigation system is presented
+ Demonstrated tailoring standard navigation algorithms to this specific mission
+ Navigation hardware is mature 
+ Forward work
+
+
+
+• Continued refinement as the vehicle progresses
+• Additional ground testing
+• Integration into the complete FSW stack
+• Post-flight reconstruction algorithm development
+
+
+
+ The design of the navigation system is expected to complete all requirements and operate 
+successfully during the mission
+
+
+
+11
+
+
+
+Conclusions and Forward Work
+
+
+
+
+
+
+
+
+
+
+
+Questions?
+
+
+
+Document Title 12MM/DD/YYYY
+
+
+
+
+
+
+ 
+Preliminary Design, Testing, and Performance of the LOFTID Navigation System
+
+ 
+Low Earth Orbit Flight Test of an Inflatable Decelerator (LOFTID)
+
+ 
+Concept of Operation
+
+ 
+Navigation System Overview and Objectives
+
+ 
+Design Constraints
+
+ 
+Navigation Hardware Overview
+
+ 
+Software Design
+
+ 
+Inertial Navigation and Kalman Filter
+
+ 
+Initialization
+
+ 
+Preliminary Testing
+
+ 
+Conclusions and Forward Work
+
+ 
+Questions?�

@@ -1,0 +1,2569 @@
+1 
+ 
+
+
+
+AIAA SciTech Forum, 8-12 Jan. 2024, Orlando, FL 
+
+
+
+Velocity and Temperature Measurements in High-speed Flows with Naturally 
+
+
+
+Present Dust Particles Using Rayleigh and Mie Scattering 
+ 
+
+
+
+J. Panda 
+
+
+
+NASA Ames Research Center, Moffett Field, CA 
+
+
+
+ 
+
+
+
+E.D. Crowe 
+
+
+
+Metis Technology Solutions, Inc., Moffett Field, CA 
+ 
+
+
+
+Abstract 
+
+
+
+Dust particles and occasional moisture condensations are unavoidable reality of all wind tunnels. On the 
+
+
+
+path to pursue a goal of velocity and temperature measurements in high-speed wind tunnels we have 
+
+
+
+created a tabletop, spectrally resolved, Rayleigh-Mie scattering setup around a small jet fed by ambient 
+
+
+
+and air with different particle concentration to determine the accuracy of the technique. The other reality 
+
+
+
+of a wind tunnel setup is the spurious reflection and scattering of the incident laser beam by solid surfaces 
+
+
+
+(flare light), which contaminates the Rayleigh-Mie scattered light. This is simulated by backgrounds with 
+
+
+
+different reflectivity towards the collection optics. Light from a CW laser is delivered via an optical fiber 
+
+
+
+and the scattered light from a point on the laser path is spectrally resolved using a stabilized Fabry-Perot 
+
+
+
+interferometer, followed by imaging on an EMCCD camera. A model of the combined background glare, 
+
+
+
+Mie scattering, and the Rayleigh spectrum was fitted to the camera image using maximum likelihood 
+
+
+
+estimation. It was observed that the present modeling approach can extract velocity and temperature with 
+
+
+
+reasonable accuracy when the intensity of the Mie scattered light is less than or comparable to that of the 
+
+
+
+Rayleigh scattered light; beyond that error in velocity measurement remains reasonable ±12m/s but the 
+
+
+
+temperature measurement becomes progressively more inaccurate. Increasingly the flare light is found to 
+
+
+
+cause a bias error in velocity. Similar trend is observed in the presence of both the flare light and the Mie 
+
+
+
+scattered light. The setup has provided a set of data for the future improvement of the modeling procedure, 
+
+
+
+and demonstrated that even in the case of large amount of dust particles and large flare light the present 
+
+
+
+technique can provide measurement of velocity with reasonable accuracy. 
+
+
+
+ 
+
+
+
+I. INTRODUCTION 
+
+
+
+Transonic and supersonic wind tunnels lack viable tools to measure basic quantities such as velocity, temperature, 
+
+
+
+and density, particularly when local shock waves are present. The lack of experimental data makes computational 
+
+
+
+fluid dynamics (CFD) simulations as the sole provider of many aerodynamic information. However, CFD cannot 
+
+
+
+fill the gap alone as the computational codes require experimental data for validation. Out of the many emerging 
+
+
+
+optical techniques that are attempting to provide these information, molecular Rayleigh scattering is a promising 
+
+
+
+candidate due to the relatively large signal levels, the appeal of a complete measurement of kinematic (velocity u) 
+
+
+
+and thermodynamic properties (temperature T, and density ϱ) , and the affordability of the opto-electronics. 
+
+
+
+Commercially available, particle-based PIV have found applications in large wind tunnels [1] , still contamination 
+
+
+
+by the seed particles is an issue for test facilities. Additionally, particle-based techniques are unreliable in shock 
+
+
+
+containing flows. Various molecular tagging velocimetry (MTV) techniques such as FLEET [2], use specialized 
+
+
+
+and expensive pulsed lasers to ionize some gas molecules and follow emissions from these molecules to measure 
+
+
+
+flow velocity. Coherent Anti-Stokes Raman Spectroscopy (CARS) based technique have been used to measure 
+
+
+
+temperature and standard deviation of temperature fluctuations [3]. The Rayleigh-scattering based technique is 
+
+
+
+non-intrusive and does not require injection of seed particles. Among the Rayleigh based techniques there exist 
+
+
+
+variations, which can be broadly divided into two categories based on the means of resolving the Rayleigh 
+
+
+
+spectrum [4]. For the spectrally resolved technique an interferometer, such as a Fabry-Perot [5-10] is used to 
+
+
+
+completely resolve the Rayleigh spectrum. For the filtered Rayleigh scattering technique a molecular aborption 
+
+
+
+
+
+
+
+
+
+
+
+2 
+ 
+
+
+
+filter, such as the hyperfine absorption lines of iodine vapors [11, 12] is used to convert the spectrum into light 
+
+
+
+intensity. The spectrally resolved path requires an extensive modeling of the measured spectra to extract the 
+
+
+
+velocity and temperature information. There exist multiple challenges for wind tunnel implementation of the 
+
+
+
+Rayleigh technique: contamination by the naturally present dust particles, scattering of incidence beam by 
+
+
+
+windows and beam dump (flare light), vibration of the test facilities, and limitations imposed on the velocity 
+
+
+
+component that can be measured via the available optical access ports in the facility. The motivation of the 
+
+
+
+present study is to find means to overcome the first two difficulties. The flare light and the Mie scattered light 
+
+
+
+adds to the burden of correct modeling. The goals of this work are to collect a set of data with different levels of 
+
+
+
+Mie and flare light, evaluate the accuracy of the present model to extract the underlying Rayleigh-Brillouin 
+
+
+
+spectrum and to help with the further development of the model. 
+
+
+
+ 
+
+
+
+Note that despite the above challenges the spectrally resolved Rayleigh has a proven record of measuring 
+
+
+
+spectrum of u/, T/, ϱ/, shear stresses such as ϱ/u/u/, and correlations such as < ϱ/- u/> , < u/- T/>, and more 
+
+
+
+importantly two-point statistics in relatively clean flows [13, 14,15]. The present work only attempts to evaluate 
+
+
+
+uncertainties with the time-averaged measurement of velocity and temperature, which by themselves can become 
+
+
+
+valuable tools in high-speed wind tunnel applications. 
+
+
+
+ 
+Fig 1. Principle of Rayleigh scattering (a) in pure air flow; (b) in the presence of background glare from stray 
+
+
+
+laser light; (c) in the presence of background glare and dust particles/condensates in the flow. 
+
+
+
+ 
+
+
+
+A simplistic description of the Rayleigh spectrum in the presence of the background flare and particle (Mie) 
+
+
+
+scattering, are schematically shown in Fig. 1. Fig 1(a) helps to recapitulate the basics of the Rayleigh spectrum: 
+
+
+
+The electric field of the incident laser light polarizes individual gas molecules, which in turn scatter a very small 
+
+
+
+part of that light. The moving gas molecules create a Doppler shift in the scattered light. Airflow, such as that in a 
+
+
+
+wind tunnel, can be thought of as a combination of a bulk motion at the measured Mach number plus a 
+
+
+
+superimposed random velocity of the individual molecules. Therefore, the Doppler-shifted scattered-light is 
+
+
+
+spectrally broadened with a distinct peak. The separation between the peak of the incident laser line and the peak 
+
+
+
+of the Rayleigh spectrum provides a measure of the bulk velocity. The full width at half maximum (FWHM) 
+
+
+
+depends on the spread of molecular motion and therefore is a measure of gas temperature, and the area under the 
+
+
+
+Rayleigh spectrum, i.e., the intensity of the scattered light is proportional to the gas density. In the presence of 
+
+
+
+background glare from the laser beam, the Rayleigh scattered light is mixed with light at the laser frequency (Fig. 
+
+
+
+1b) and can be easily identified once the laser frequency is known. Most of the naturally born particles and the 
+
+
+
+condensates are small are expected to follow the bulk motion of the flow. In fact, Mie scattering from the dust 
+
+
+
+particles clearly marks the central peak of a Rayleigh spectrum. Fig 1(c) shows the spectrum in presence of both 
+
+
+
+background glare and particles in the air flow. 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+3 
+ 
+
+
+
+ 
+Fig 2. Fabry-Perot fringes from (a) the reference and (b) the Rayleigh scattered light. 
+
+
+
+ 
+
+
+
+ Fig 2 shows fringes produced by the Fabry-Perot in the present setup, and further illustrates the basics and the 
+
+
+
+advantages of the spectrally resolved technique, where the entire Rayleigh-Mie spectrum is resolved and 
+
+
+
+compared with the frequency of the incident laser. The present setup uses a Fabry-Perot interferometer (FPI), 
+
+
+
+which creates angular dispersion of light based on the frequency and creates fringes in the form of Airy rings. The 
+
+
+
+narrow linewidth of the incident beam created the bright Airy ring - seen as a white circle in Fig 2(a). A change in 
+
+
+
+frequency manifests as a change in the fringe diameter. The present setup created a negative Doppler shift with an 
+
+
+
+increase in velocity; thereby making the rings to shrink in diameter with increasing velocity. When the Rayleigh 
+
+
+
+scattered light is passed through the interferometer the thermal broadening manifests as radial smearing of the 
+
+
+
+Airy ring, and the Doppler shift from the bulk velocity manifests as shrinking of the ring diameter (Fig 2b). If the 
+
+
+
+Rayleigh scattered light contains some amount of background glare (flare light), then one can make out the 
+
+
+
+superposition of the original ring of same diameter as of the reference image of Fig 2(a). In the presence of 
+
+
+
+particles causing Mie scattering a smaller diameter ring appears at the Doppler shifted frequency. The goals of the 
+
+
+
+present work are to create a setup to collect such images, followed by an analysis to determine local velocity and 
+
+
+
+temperature inside a jet, and a parametric study using progressively increasing background glare and particle 
+
+
+
+contents to determine the accuracy of velocity and temperature measurements. 
+
+
+
+ 
+
+
+
+Ia. Rayleigh-Brillouin Spectrum and Fabry-Perot interferometer 
+
+
+
+When light is passed through a gas media, the frequencies of the light scattered elastically by the very large 
+
+
+
+number of molecules, which are moving over a wide range of velocities, are described by the Rayleigh-Brillouin 
+
+
+
+spectrum. To scatter incident photons of wavenumber ki towards the direction of the collection lens, oriented at 
+
+
+
+the scattering angle s, a momentum transfer needs to occur. If the scattered vector pointing towards the collection 
+
+
+
+optics is ks, then k = ks – ki, is the interaction (also called scattering) vector, indicating the direction of the 
+
+
+
+momentum transfer. Because the wave number change is miniscule for elastic scattering |ks| |ki|, the magnitude 
+
+
+
+of the scattering vector becomes the following: 
+
+
+
+|𝐤| = k = 2 k𝑖 sin (
+𝑠
+
+
+
+2
+) (𝟏) 
+
+
+
+and the associated wavelength Λ= 2π/k is longer than that of the incident light. Even at ambient conditions, gas 
+
+
+
+molecules that make up air move with a wide range of velocity, some higher than the local sound speed cs. In gas 
+
+
+
+kinetic theories the commonly used term is the “most probable sound speed”: 
+
+
+
+𝑎 = √(
+2𝑘𝐵𝑇
+
+
+
+𝑚
+) (𝟐) 
+
+
+
+Note that ɑ is related to the local sound speed cs via the ratio of specific heats: ɑ =cs√(γ/2). For a moving stream of 
+
+
+
+air, the random fluctuations are superimposed on the “bulk velocity” U. The combined velocity is V. Due to the 
+
+
+
+
+
+
+
+
+
+
+
+4 
+ 
+
+
+
+motions of the molecules the scattered light is Doppler shifted to a frequency ω from that of the incident 
+
+
+
+frequency of ω0, and can be expressed by the following: 
+
+
+
+𝜔 − 𝜔0 = 𝒌 . 𝑽 (𝟑) 
+In typical scattering problems, the Doppler shifted frequency is normalized by a frequency associated with the 
+
+
+
+scattering by the most-probable sound speed ɑ: kɑ, leading to the parameter x: 
+
+
+
+𝑥 =
+𝜔
+
+
+
+𝑘𝑎
+ (𝟒) 
+
+
+
+Like many other works before, the present paper uses Tenti’s S6 model [16, 17], which describes the Rayleigh-
+
+
+
+Brillouin spectra SR of light scattered by the gas molecules. The claim of the Tenti’s model is that the Rayleigh-
+
+
+
+Brillouin spectra can be completely expressed by the non-dimensional frequency, x, and the y-parameter, SR(x, y). 
+
+
+
+The y-parameter is related to the ratio of the scattering wavelength Λ to the molecular mean-free-path ℓ: 
+
+
+
+𝑦 ∝ 
+Λ
+
+
+
+ℓ
+ (𝟓) 
+
+
+
+ 
+
+
+
+ 
+Fig 3. Schematic of imaging through a Fabry-Perot interferometer. 
+
+
+
+ 
+
+
+
+In this experiment, the fine resolution needed to resolve the Doppler-broadened Rayleigh spectrum necessitated 
+
+
+
+the use of a Fabry-Perot interferometer (FPI). There are many textbooks which describe the principle of operation 
+
+
+
+[18]. Fundamentally, an FPI acts as a light filter whose transmittance is dependent on the frequency f of the 
+
+
+
+incident light, the angle θ of the incident light with respect to the optical axis, the refractive index  in the 
+
+
+
+medium between the two reflective surfaces, and the separation d between the surfaces (Fig. 3). The latter two are 
+
+
+
+fixed for the imaging mode of operation used in this work, leaving angle θ and frequency f as the dependent 
+
+
+
+variables. Because frequency is defined via the x parameter (eq. 7), the following discussion is to establish the 
+
+
+
+light intensity distribution (the instrument function) as functions of θ and x: IFP(θ, x). Like many other optical 
+
+
+
+calculations, the clue needed to model the instrument function is to follow the phase of the light waves. For a 
+
+
+
+fixed frequency light arriving at an incident angle of θ (Fig. 4), the successive reflection in the two mirrored 
+
+
+
+surfaces creates a phase difference , which, using the small angle approximation, can be expressed as the 
+
+
+
+following: 
+
+
+
+𝜓 =
+4𝜋𝜇𝑑
+
+
+
+𝜆
+𝑐𝑜𝑠𝜃 ≈
+
+
+
+4𝜋𝜇𝑑
+
+
+
+𝜆
+(1 −
+
+
+
+𝜃2
+
+
+
+2
+) (𝟔) 
+
+
+
+The transmitted lights of all different phase angles are summed via the fringe-forming lens, the intensity pattern of 
+
+
+
+the camera image is the Airy function: 
+
+
+
+𝐼𝐹𝑃(𝜓) = [1 + (
+2Ν
+
+
+
+𝜋
+)
+
+
+
+2
+
+
+
+sin2
+𝜓
+
+
+
+2
+]
+
+
+
+−1
+
+
+
+ (𝟕) 
+
+
+
+where, N is the interferometer finesse that determines the sharpness of the filter roll-off (a higher finesse translates 
+
+
+
+into a sharper roll-off). An incorrect finesse value affects the measurement accuracy; therefore, finesse needs to be 
+
+
+
+continuously monitored during the course of an experiment. 
+
+
+
+
+
+
+
+
+
+
+
+5 
+ 
+
+
+
+ An examination of equation 6 above shows that for a fixed setup, and a fixed optical frequency (wavelength) 
+
+
+
+the optical phase  varies with the angle θ of the incident light. Because light from different parts of the imaging 
+
+
+
+area make different  angle with the optical axis, the variation in  occurs concentrically from the optical axis. 
+
+
+
+Therefore, by equation 7 a single frequency light is imaged as concentric rings at the image plane. Consecutive 
+
+
+
+bright rings represent a phase change of 2π. Also note that the non-linear: θ2 dependence of the optical phase. This 
+
+
+
+makes fringes of higher order to form at closer spacing. 
+
+
+
+ The first step in modelling the measured image is to identify the phase ψ distribution. The absolute value 
+
+
+
+of phase change ψ through successive reflections in the FPI cavity is very large, which necessitates a description 
+
+
+
+based on a relative phase change. Note that the peak locations of the interference patterns correspond to a phase 
+
+
+
+change of 2π. If the phase of the innermost ring corresponds to an incidence angle of θp, then the relative phase 
+
+
+
+variation over the image can be written as the following: 
+
+
+
+𝜓 =
+4𝜋𝜇𝑑
+
+
+
+𝜆
+𝑐𝑜𝑠𝜃 ≈
+
+
+
+4𝜋𝜇𝑑
+
+
+
+𝜆
+(
+
+
+
+𝜃𝑝
+2 − 𝜃2
+
+
+
+2
+) (𝟖) 
+
+
+
+The incidence angle θ for parts of the image at a radial distance of r from the center of the image can be 
+
+
+
+determined by an accurate knowledge of the focal length ff of the fringe forming lens and the refractive index of 
+
+
+
+the etalon or the gas medium in between the reflecting surfaces: 
+
+
+
+𝜃 ≈
+𝑟
+
+
+
+𝑓𝑓𝜇
+ (𝟗) 
+
+
+
+The discussion so far described the filtering characteristics based on the angularity of a fixed-frequency, incident 
+
+
+
+light. Light waves with frequencies different from the incident beam introduce additional phase change. This 
+
+
+
+change is measured as a relative change from that of the incident light and is expressed through the x parameter 
+
+
+
+described earlier (equation 4). The phase change due to the combined angularity and frequency difference is 
+
+
+
+ultimately the relationship of interest: 
+
+
+
+𝜓(𝑥, 𝜃) =
+4𝜋𝜇𝑑
+
+
+
+𝜆
+(
+
+
+
+𝜃𝑝
+2 − 𝜃2
+
+
+
+2
++
+
+
+
+𝜆𝑎𝑥
+
+
+
+𝑐Λ
+) (𝟏𝟎) 
+
+
+
+The resulting intensity distribution used for modelling the Fabry-Perot images is stated earlier in equation (7). 
+
+
+
+Further modeling details will be discussed in section IIa below. 
+
+
+
+ 
+
+
+
+ 
+Fig 4. Optical setup 
+
+
+
+
+
+
+
+
+
+
+
+6 
+ 
+
+
+
+II. EXPERIMENTAL SETUP 
+
+
+
+IIa. Optical setup 
+
+
+
+Because the Doppler shift is of the order of 109 Hz (2.66MHz per m/s of flow velocity for 90˚ scattering using 
+
+
+
+532nm light), which is far smaller than the optical frequency (5.6x1014 Hz for 532nm light in air), there is a need 
+
+
+
+to use a narrow linewidth laser source and a hyperfine spectroscope, such as a Fabry-Perot interferometer (FPI). 
+
+
+
+Fig 4 shows the optical arrangement around a small free jet. There are two aspects of this setup that needs to be 
+
+
+
+mentioned at the outset. In a wind tunnel application, an important question is how to deliver the laser. Passing 
+
+
+
+the beam through any window, even when coated to reduce reflection, produces excessive background flare that 
+
+
+
+may swamp the Rayleigh-Mie signal. Unlike many other optical techniques, we use a CW laser, which allows for 
+
+
+
+transmission through optical fibers. Delivery of laser light through an optical fiber will reduce the glare. So, we 
+
+
+
+decided to test such a delivery system for the present setup. The downside of using fibers is transmission loss 
+
+
+
+(~40%), and a scrambling of the polarization axis, which effectively reduces the Rayleigh scattered light towards 
+
+
+
+the collection direction by half. The second aspect is the choice between direct imaging of the probe volume 
+
+
+
+versus the use of an optical fiber for passing the collected scattered light. Our previous work [6] used direct 
+
+
+
+imaging of the probe volume through FPI on a camera. In the presence of dust particles, it becomes difficult to 
+
+
+
+separate the Rayleigh and Mie scattered signal in the direct imaging technique. Therefore, the other option of 
+
+
+
+imaging the probe volume on an optical fiber was used. The optical fiber scrambled the scattered light from 
+
+
+
+different parts of the probe volume, and presented a uniformly illuminated circular face for imaging through FPI. 
+
+
+
+Such images provided radial segregation between the Rayleigh scattered, Mie scattered, and the background flare 
+
+
+
+light (Fig 2). The downside of using an optical fiber for the transmission of the scattered light is a further loss of 
+
+
+
+photons. 
+
+
+
+ 
+
+
+
+ The optical layout can be divided into five groups: (a) The laser source and the delivery of light to the flow, (b) 
+
+
+
+optics to collect Rayleigh-Mie scattered light, (c) the spectroscopic arrangement, (d) optics to deliver a small part 
+
+
+
+of the incident laser light also called as the reference light, and (e) stabilization arrangement. The 532 nm, single-
+
+
+
+mode, incident beam of the first group was produced from a frequency-doubled, Nd:YVO4 solid state, Coherent 
+
+
+
+Verdi laser that emitted a maximum of 10.5W power. The vendor provided a specification of 5MHz for the 
+
+
+
+linewidth. The light was coupled to a 50micron core diameter fiber. At the output end the light was collimated by 
+
+
+
+a 10.9mm focal length aspheric lens and passed through the air stream from a small jet. To reduce the flare light 
+
+
+
+off the aspheric lens a hollow conical baffle was used to house the fiber end and the lens. This baffle was removed 
+
+
+
+to increase the flare light content in the Rayleigh-Mie scattered light. 
+
+
+
+ 
+
+
+
+In the second group scattered light from 1.35mm long probe volume was collected by a pair of 75mm diameter 
+
+
+
+achromats with f/# 4 and 2.67, and focused on a 900micron core diameter fiber, which in turn, delivered light to 
+
+
+
+the spectroscopic arrangement - the third group. The spectroscopic arrangement first collimated the light delivered 
+
+
+
+by the fiber by a 50mm f/#2 achromatic lens. The collimated light was passed through air-spaced, planar, 30mm 
+
+
+
+diameter, 90 % reflectivity FPI mirrors with a free-spectral range of 8GHz. The optical cavity of the stabilized 
+
+
+
+Fabry-Perot, supplied by Lightmachinery, was actively controlled by three piezo-scanned support points and three 
+
+
+
+strain gauges that provided position sensing. Once aligned, the closed-loop control maintained the parallelism of 
+
+
+
+the two mirrors through extraneous environmental factors such as thermal drift, vibration, and noise. This was 
+
+
+
+particularly beneficial for long-duration data collection and eliminated the need for any manual adjustment. The 
+
+
+
+actively controlled interferometer simplified the day-to-day alignment so much that the laser can be turned on any 
+
+
+
+day, and nicely formed fringes with little degradation of the finesse can be readily visible. Finally, the 
+
+
+
+interferometer output was imaged through a 300mm focal length fringe-forming lens on a low-light, cooled, 
+
+
+
+EMCCD camera. Baffles and curtains were placed around the spectroscopic setup to further reduce contamination 
+
+
+
+from stray light. 
+
+
+
+ 
+
+
+
+For the alignment of the spectroscopic setup and for determining the instrument function, a small part of the 
+
+
+
+incident laser light needed to be passed through the interferometer – this made the fourth group. To achieve this 
+
+
+
+goal, a small amount of light scattered by the fiber coupler was collected and passed to an Integrating sphere via 
+
+
+
+
+
+
+
+
+
+
+
+7 
+ 
+
+
+
+another optical fiber, marked as fiber carrying reference light in fig 4. The IS was mounted on a linear actuator, 
+
+
+
+which allowed placement of an opening of the IS in front of the collection fiber. When the IS was placed in front 
+
+
+
+of the collection fiber, the Rayleigh scattered light was blocked and the reference light from the incident beam 
+
+
+
+passed through the interferometric setup. 
+
+
+
+ 
+
+
+
+The fifth and the final group is the stabilization arrangement to correct for the slow drift of the laser frequency. 
+
+
+
+Despite the extensive use of active temperature control of the laser head some amount of slow drift caused by the 
+
+
+
+changes in the ambient temperature is inevitable. Such drifts create error in velocity measurement and makes 
+
+
+
+identification of the background glare difficult. One of the mirrors in the laser cavity was mounted on PZT stacks. 
+
+
+
+When supplied with an external DC voltage the PZT-actuated mirror allows for frequency tuning over a small 
+
+
+
+range. To monitor the drift in frequency of the laser the reference light from the integration sphere was sent to the 
+
+
+
+stabilization arrangement via another optical fiber. There the light was collimated and passed through a solid 
+
+
+
+etalon and then to a CCD camera. The camera images were continuously analyzed to determine change in the 
+
+
+
+fringe diameter. A PID based controller in a LabVIEW environment determined the DC voltage needed to supply 
+
+
+
+to the PZT stack to correct for the drift. A 0-100V DC supply provided this voltage to the stack. At the time of 
+
+
+
+writing this paper the stabilization arrangement was used to monitor the drift in the laser frequency and to decide 
+
+
+
+the amount of warm up time needed before collection of the Rayleigh data. 
+
+
+
+ 
+Fig 5. (a) Fabry-Perot fringe due to the incident laser beam; (b) horizontal and vertical cut-outs through the measured and 
+
+
+
+modelled images; finesse: 24. 
+
+
+
+ 
+Fig 6. (a) Fabry-Perot fringe due to the Rayleigh scattered light; (b) horizontal and vertical cut-outs through the measured and 
+
+
+
+modelled images. 
+
+
+
+
+
+
+
+
+
+
+
+8 
+ 
+
+
+
+ 
+
+
+
+IIb. Modelling of the Fabry-Perot fringes: 
+
+
+
+The interferometric measurement was a two-step process. The first step involved characterizing the instrument 
+
+
+
+function, for which the Rayleigh-scattered light was blocked, and a tiny amount of the incident laser light 
+
+
+
+(reference light) was passed through the FPI setup via actuating the IS. This provided the reference image Iref (fig. 
+
+
+
+5a). During the next step, the IS was moved out and the Rayleigh-scattered light was imaged through the FPI, 
+
+
+
+providing the Rayleigh image IRal (fig. 6a). Accordingly, there were two parts to the modelling: extracting the 
+
+
+
+instrument function IFP from the Reference image and using the instrument function to extract the Rayleigh-
+
+
+
+Brillouin spectra SR(x, y) from the Rayleigh image. Each step was performed via nonlinear least-square curve fits 
+
+
+
+that minimized the difference between the measured image and the modelled image for a selected set of 
+
+
+
+parameters. Because the images were made up of a set of pixels i = 1, 2, 3, … npix, the modeling was performed 
+
+
+
+for all such pixels, and the least-square was calculated as the norm of the differences between the measured and 
+
+
+
+the modelled image. To determine the angle θi created by each pixel to the optical axis, the center of the fringes 
+
+
+
+(χc, ζc), and the radius rp of the innermost fringe needed to be determined (fig 5a). Therefore, parameters extracted 
+
+
+
+from the reference image are χc, ζc, rp and the finesse (N) of the interferometer. Notice that this combination also 
+
+
+
+fixes the incidence angle θp (equation 12) at the fringe location, and ultimately specifies the variation of the phase 
+
+
+
+ψ over the entire image plane for the incident light frequency. The model for the reference image included the 
+
+
+
+magnitude of the peak transmission I0 multiplied by the transmission function of equation (7), a constant 
+
+
+
+background IB to account for the camera read noise, and noise from spurious sources. It was observed that the 
+
+
+
+change in the optical phase over an individual pixel can be large, and a better fit can be obtained by performing 
+
+
+
+interpixel integration over the pixel dimension. If a camera with square pixels of size ε is used for the collection 
+
+
+
+of the images, then the model for the intensity at the ith pixel with the coordinate for the left bottom point at (χi, ζi) 
+
+
+
+can be written as: 
+
+
+
+𝐼𝐹𝑃( 𝜒𝑖, 𝜁𝑖) = 𝐼𝐵
+
+
+
++
+𝐼0
+
+
+
+𝜀2
+ ∫ ∫ [1
+
+
+
+𝜁𝑖+𝜖𝜁
+
+
+
+𝜁=𝜁𝑖
+
+
+
+𝜒𝑖+𝜖𝜒
+
+
+
+𝜒=𝜒𝑖
+
+
+
++ (
+2Ν
+
+
+
+𝜋
+)
+
+
+
+2
+
+
+
+sin2 (
+2𝜋𝜇𝑑
+
+
+
+𝜆
+({
+
+
+
+𝑟𝑝
+
+
+
+𝑓𝑓𝜇
+}
+
+
+
+2
+
+
+
+− {
+√(𝜒𝑖 − 𝜒𝑐)2 + (𝜁𝑖 − 𝜁𝑐)2
+
+
+
+𝑓𝑓𝜇
+}
+
+
+
+2
+
+
+
+) )]
+
+
+
+−1
+
+
+
+𝑑𝜖𝜁 𝑑𝜖𝜒 (𝟏𝟏) 
+
+
+
+ 
+
+
+
+The least-square minimization was performed via two methods: (a) the Matlab® routine “lsqnonlin” applying the 
+
+
+
+'Levenberg-Marquardt' algorithm, and (b) a Maximum Likelihood Estimation procedure [19, 20]. Both are 
+
+
+
+iterative procedures to minimize the difference between the measured and the modeled intensity distribution for 
+
+
+
+six parameters, χc, ζc, rp, N, IB and I0. The former was fast and was used for a quick look into the data, the latter - 
+
+
+
+more accurate – was used for the final analysis. The Levenberg-Marquardt method is a direct minimization 
+
+
+
+process: 
+
+
+
+min
+𝜒𝑐,𝜁𝑐,𝑟𝑝,𝑁,𝐼0,𝐼𝐵
+
+
+
+( ∑ (𝐼𝑟𝑒𝑓(𝜒𝑖, 𝜁𝑖) − 𝐼𝐹𝑃(𝜒𝑖, 𝜁𝑖))
+2
+
+
+
+𝑛𝑝𝑖𝑥
+
+
+
+𝑖=1
+
+
+
+) (𝟏𝟐) 
+
+
+
+The Maximum Likelihood procedure, on the other hand, includes the expected variance σi of the intensity values 
+
+
+
+of each pixel: 
+
+
+
+min
+𝜒𝑐,𝜁𝑐,𝑟𝑝,𝑁,𝐼0,𝐼𝐵
+
+
+
+( ∑
+1
+
+
+
+𝜎𝑖
+(𝐼𝑟𝑒𝑓(𝜒𝑖, 𝜁𝑖) − 𝐼𝐹𝑃(𝜒𝑖, 𝜁𝑖))
+
+
+
+2
+𝑛𝑝𝑖𝑥
+
+
+
+𝑖=1
+
+
+
+) (𝟏𝟑) 
+
+
+
+
+
+
+
+
+
+
+
+9 
+ 
+
+
+
+Since the variance of the error associated with photon counting is equal to the mean count, and every count 
+
+
+
+corresponds to a fixed number of photoelectrons, the count associated with each pixel was used as the variance: 
+
+
+
+𝜎𝑖 = 𝐼𝑟𝑒𝑓(𝜒𝑖 , 𝜁𝑖). Note that there is a need to subtract the read noise of the camera before applying the above 
+
+
+
+equality. Therefore, a shutter-off image was collected from the camera and was subtracted from the measured 
+
+
+
+Reference and Rayleigh images. For both minimization processes an iterative procedure was started with a set of 
+
+
+
+initial guesses. Convergence was found to be particularly sensitive to the initial choice of the image center: χc, ζc, 
+
+
+
+which were prescribed after an examination of the camera image. Figure 5 shows a reference image, and the 
+
+
+
+model fit to determine the instrument function. The multiple fringes seen in the image of fig. 5(a) are indicative of 
+
+
+
+phase angle ψ variation by multiples of 2π. However, only a small, circularly cropped region around the central 
+
+
+
+fringe, shown by the dotted circle, was used to determine the instrument function. The use of the small region 
+
+
+
+limited the length of the probe volume and provided a higher value of finesse. The measured finesse of ~26 was 
+
+
+
+as expected from the manufacturer’s specification. A reference image was collected before every Rayleigh image 
+
+
+
+to account for any drift in the laser frequency. 
+
+
+
+After the reference image, the Rayleigh image was analyzed. Note that the frequency spectrum measured 
+
+
+
+by the FPI was a convolution of the actual Rayleigh scattering spectrum SR(x, y) and the characteristics of the FPI 
+
+
+
+filter represented by the instrument function 𝐼𝐹𝑃(𝑥, 𝜒𝑖 , 𝜁𝑖). In the absence of all extraneous light and noise 
+
+
+
+sources, the light intensity measured by the ith pixel in the image can be expressed by the following expression 
+
+
+
+where IR is the intensity due to the Rayleigh scattered part of the light: 
+
+
+
+𝐼𝑅𝑎𝑙−𝑚𝑜𝑑−𝑖𝑑𝑒𝑎𝑙( 𝜒𝑖 , 𝜁𝑖) =
+𝐼𝑅
+
+
+
+𝜀2
+∫ ∫ ∫ 𝑆𝑅(𝑥, 𝑦) 𝐼𝐹𝑃(𝑥, 𝜒𝑖 , 𝜁𝑖) 𝑑𝜖𝜒
+
+
+
+∞
+
+
+
+−∞
+
+
+
+𝑑𝜖𝜁
+
+
+
+𝜁𝑖+𝜖𝜁
+
+
+
+𝜁=𝜁𝑖
+
+
+
+𝜒𝑖+𝜖𝜒
+
+
+
+𝜒=𝜒𝑖
+
+
+
+𝑑𝑥 (𝟏𝟒) 
+
+
+
+Once again inter-pixel integration was performed for better accuracy. The FP instrument function that includes the 
+
+
+
+relative change of frequency from the incident light (non-dimensional factor x) is the following: 
+
+
+
+ 
+
+
+
+𝐼𝐹𝑃(𝑥, 𝜒𝑖 , 𝜁𝑖) = [1 + (
+2Ν
+
+
+
+𝜋
+)
+
+
+
+2
+
+
+
+sin2 (
+2𝜋𝜇𝑑
+
+
+
+𝜆
+({
+
+
+
+𝑟𝑝
+
+
+
+𝑓𝑓𝜇
+}
+
+
+
+2
+
+
+
+− {
+√(𝜒𝑖 − 𝜒𝑐)2 + (𝜁𝑖 − 𝜁𝑐)2
+
+
+
+𝑓𝑓𝜇
+}
+
+
+
+2
+
+
+
++
+2𝜆𝑎𝑥
+
+
+
+𝑐Λ
+) )]
+
+
+
+−1
+
+
+
+ (𝟏𝟓) 
+
+
+
+Other sources contributed to the measured intensity. These sources included, particle scattered light IPart, flare light at 
+
+
+
+the incident laser frequency ILas, and broadband noise IB from residual camera noise, background white light etc. The 
+
+
+
+particle-scattered light is expected to occur at the Doppler shift frequency, x = xD, of the bulk flow and is expected to 
+
+
+
+be slightly broadened by the turbulent fluctuations [8]; however, such broadening was not modeled in the current 
+
+
+
+work. Following represents a complete model of the intensity level by the ith pixel: 
+
+
+
+ 
+
+
+
+𝐼𝑅𝑎𝑙−𝑚𝑜𝑑( 𝜒𝑖, 𝜁𝑖) = 𝐼𝑅𝐼𝑅𝑎𝑙−𝑚𝑜𝑑−𝑖𝑑𝑒𝑎𝑙( 𝜒𝑖, 𝜁𝑖) + 𝐼𝑃𝑎𝑟𝑡𝐼𝐹𝑃(𝑥 = 𝑥𝐷 , 𝜒𝑖 , 𝜁𝑖) + 𝐼𝐿𝑎𝑠𝐼𝐹𝑃(𝑥 = 0, 𝜒𝑖 , 𝜁𝑖) + 𝐼𝐵 (𝟏𝟔) 
+
+
+
+ 
+
+
+
+The Rayleigh spectrum SR(x, y) for a fixed composition of gas is a function of the flow velocity U and temperature 
+
+
+
+T which, in addition to the various intensity levels in the above equation, were iteratively adjusted to minimize the 
+
+
+
+difference between the measured and the modeled images. Once again, Maximum Likelihood Estimation 
+
+
+
+procedure [19, 20] was used for this purpose: 
+
+
+
+min
+𝑈,𝑇,𝐼𝑅 ,𝐼𝑃,𝐼0,𝐼𝐵
+
+
+
+( ∑
+1
+
+
+
+𝜎𝑖
+(𝐼𝑅𝑎𝑙(𝜒𝑖, 𝜁𝑖) − 𝐼𝑅𝑎𝑙−𝑚𝑜𝑑(𝜒𝑖, 𝜁𝑖))
+
+
+
+2
+𝑛𝑝𝑖𝑥
+
+
+
+𝑖=1
+
+
+
+) (𝟏𝟕) 
+
+
+
+A typical Rayleigh image is shown in Fig 6. When the model function (equation 16) was fitted to the intensity 
+
+
+
+distribution of the analysis region velocity and temperature values were extracted. The non-linear fitting was 
+
+
+
+found to be robust and quick (a few seconds for each image on a personal computer), providing a reasonable 
+
+
+
+estimation of velocity and temperature. Note that such measurements were obtained from fundamental properties 
+
+
+
+
+
+
+
+
+
+
+
+10 
+ 
+
+
+
+(such as the molecular weight, coefficients of bulk and shear viscosity) of the gas mixture and some parameters of 
+
+
+
+the optical system including the wavelength of the light, the focal length of lens, etc. There is no calibration 
+
+
+
+process, or insertion of a probe, or seeding via particles or fluorescent die, or ionization by a large power laser. 
+
+
+
+III. RESULTS AND DISCUSSION 
+
+
+
+The air jet was produced from a 5mm diameter nozzle supplied with compressed air from multiple sources. The 
+
+
+
+hose was connected to a clean air compressor as well as to the unfiltered air from a separated compressor. A 
+
+
+
+commercially available MET-One BT-620 particle counter was used to determine the particle distribution. When 
+
+
+
+the jet was supplied with clean air, entrainment form the ambient air increased the particle contents. This provided 
+
+
+
+an opportunity to study the impact of different particle concentration to the accuracy of temperature and velocity 
+
+
+
+measurements. 
+
+
+
+Table I. Particle distribution 
+ 
+
+
+
+Air 
+
+
+
+type 
+
+
+
+Particle number density (particles/ft3) 
+
+
+
+ 0.3μm 0.5μm 1μm 2μm 5μm 10μ
+
+
+
+m 
+
+
+
+Cleaner 9735 2429 84 14 4 2 
+
+
+
+Ambie
+
+
+
+nt 
+
+
+
+454188 78690 2728
+
+
+
+6 
+
+
+
+1174
+
+
+
+5 
+
+
+
+207
+
+
+
+5 
+
+
+
+391 
+
+
+
+Dirtier 839036 10796 852 169 26 16 
+
+
+
+Dirtier 
+
+
+
++ 
+
+
+
+Incense 
+
+
+
+231529
+
+
+
+7 
+
+
+
+69702
+
+
+
+4 
+
+
+
+8074
+
+
+
+2 
+
+
+
+1711
+
+
+
+7 
+
+
+
+247
+
+
+
+0 
+
+
+
+229 
+
+
+
+ 
+
+
+
+ 
+Fig 7. Histogram of particle distribution 
+
+
+
+ 
+
+
+
+ 
+Fig 8. Effect of increasing particle scattered light on velocity and temperature measurement. 
+
+
+
+
+
+
+
+
+
+
+
+11 
+ 
+
+
+
+IIIa. Effect of increasing Mie scattering from particles: 
+
+
+
+To vary the particle content in the jet stream air from two different sources were supplied to the jet. The shop air 
+
+
+
+used in our experiment was found to be cleaner than the ambient due to multiple filters both at the inlet and the 
+
+
+
+outlet of the air compressor, and an oil separator and a chiller used at the outlet. Air from this source is called as 
+
+
+
+“Cleaner air.” A second compressor without any filter was the second source of air. Fine droplets of lubrication 
+
+
+
+oil added to the naturally born particles and significantly increased the particle content in this “Dirtier air.” To 
+
+
+
+further increase the particle content to the level of condensation mists in the wind tunnel couple of incense sticks 
+
+
+
+were burnt at the inlet of the compressor without any filter. The smoke from the incense sticks farther increased 
+
+
+
+the particle counts in this dirtiest case, also referred as “Dirtier air + Incense” air, which created a visible glare on 
+
+
+
+the laser path passing through the jet. Figure 7 shows the particle counts from all the above operations in a 
+
+
+
+tabular form and as a histogram. The jet velocity was changed for 0 to 290m/s and was measured by a small Pitot 
+
+
+
+tube placed at the location of the probe volume. The total pressure measured from the Pitot tube and the total 
+
+
+
+temperature from a Kiel probe was used in the isentropic relationship to determine the jet properties. The very 
+
+
+
+small jet diameter made the perfect juxtaposition of the Pitot tube at the laser probe volume difficult. This may be 
+
+
+
+the cause of the slight bias error in velocity and temperature seen in the data presented. The Pitot tube was placed 
+
+
+
+below the laser probe volume. The jet was mounted on a vertical traverse which moved the jet between the 
+
+
+
+location of the laser probe volume and that of the Pitot tube. 
+
+
+
+The model for the Rayleigh image (equation 19) provided a measure of the intensity of the Rayleigh light (IR), 
+
+
+
+particle scattered light (IPart) and that of the flare light ILas. These values were extracted for each data point (see the 
+
+
+
+heading of Fig. 6) and were used to quantify the respective scattering intensities. The ratio of the intensity of the 
+
+
+
+Mie scattered light to that of the Rayleigh light IPart/IRal was varied from 0.0001 to 6. For IPart/IRal <1, the expected 
+
+
+
+range for naturally present dust particles, it was observed that the model function was able to extract velocity 
+
+
+
+within an accuracy of ±8m/s (our data had a bias error of 6m/s), and temperature of ±5K (our data had a bias error 
+
+
+
+of 5K). For more intense Mie scattering IPart/IRal > 1, such as that would be encountered in the presence of some 
+
+
+
+condensation in the air stream, the uncertainty in velocity increased to ±12m/s – still a reasonable value, but the 
+
+
+
+temperature error increased enormously. In other words, it was found that the present spectrally measured 
+
+
+
+technique can provide good measurement of velocity in the presence of any number of particles and condensation, 
+
+
+
+but good measurement of temperature can be obtained only up to an extent of particle contamination. Further 
+
+
+
+improvements may be obtained via refinements of the model function such as by accounting for the turbulent 
+
+
+
+dispersion of the particle spectrum. In addition, the particle size may also have created uncertainty in the 
+
+
+
+measurement. 
+
+
+
+
+
+
+
+
+
+
+
+12 
+ 
+
+
+
+ 
+Fig 9. Effect of increasing flare light on velocity and temperature measurement. 
+
+
+
+ 
+IIIb. Effect of increasing flare light: 
+
+
+
+An efficient use of the baffles and beam stops minimized the flare light in the optical setup. Such data are referred 
+
+
+
+as “small flare.” A white card was placed across from the jet and facing the collection optics to increase the flare 
+
+
+
+light. Such data points are referred as “increased flare.” Finally, the baffle around the aspheric lens of the delivery 
+
+
+
+fiber was removed to significantly increase the flare light, and the same white card was used redirect such flare 
+
+
+
+light to the collection fiber. Such data points are referred as “high flare.” Figure 9 presents data from these three 
+
+
+
+conditions, all obtained from the “Cleaner + ambient” condition of the particle level. The ratio of the intensity of 
+
+
+
+the flare light to that of the Rayleigh light ILaser/IRayl was varied from 0.0005 to 3.5. Increasing the flare level is 
+
+
+
+found to increase the bias error in velocity measurement, and a larger random error in temperature measurement. 
+
+
+
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+13 
+ 
+
+
+
+ 
+Fig 9. Effect of a combination of high particle content (Mie 
+
+
+
+scattering) and hig flare light on velocity and temperature 
+
+
+
+measurement. 
+ 
+
+
+
+ 
+Fig 10. (a) Fabry-Perot fringe due to 
+
+
+
+contamination of high Mie scattered and 
+
+
+
+flare light; (b) horizontal and vertical cut-
+
+
+
+outs through the measured and modelled 
+
+
+
+images. 
+
+
+
+IIIc. Effect of high Mie scattering and flare light: 
+
+
+
+When both flare light and particle scattered lights are velocity measurements can be made within ±10m/s accuracy 
+
+
+
+(although a couple of data points were found to have higher error), but the temperature measurements become 
+
+
+
+very erroneous (Fig 9). An examination of a data point for which ILaser/IRayl=2.5 and ILaser/IRayl = 3.2 (Fig. 10) show 
+
+
+
+the scattered light image is too dominated by the flare and Mie-scattered light, and have swamped the underlying 
+
+
+
+Rayleigh spectrum. More efforts are needed to extract out the Rayleigh spectrum from such a situation. 
+
+
+
+IV. SUMMARY AND CONCLUSION 
+
+
+
+Spectrally resolved Rayleigh scattering is known to provide time-averaged measurement of velocity, temperature 
+
+
+
+and density, and spectra of turbulent fluctuations in clean, particle free flows. How to measure the same quantities 
+
+
+
+in large wind tunnels and other facilities where there are naturally born dust particles and flare light from stray 
+
+
+
+scattering is a problem. The spectrally resolved technique makes a complete measurement of the optical spectrum 
+
+
+
+of the scattered light from a probe volume inside a flow. The Mie-scattered light from the dust particles and the 
+
+
+
+flare light from the incident laser beam are simply added at distinct frequency bands to the spectrum of Rayleigh-
+
+
+
+Brillouin scattering. The extraction of velocity and temperature information is dependent upon sophistication of 
+
+
+
+the signal processing methods, and the extent of contamination. To systematically evaluate the accuracy of one 
+
+
+
+such models an optical setup was created around a small jet supplied with air with different particle loading. The 
+
+
+
+amount of flare light was adjusted by coupling different amount of background scattered light to the collection 
+
+
+
+optics. The setup used a narrow line-width CW laser that was passed through the jet. The scattered light from a 
+
+
+
+probe volume was collected by a pair of lenses and was coupled to an optical fiber. The fiber passed the light to a 
+
+
+
+Fabry-Perot interferometer for spectral analysis and final imaging by a cooled EMCCD camera. A model function 
+
+
+
+of the fringes formed by the interferometer was used to extract time averaged velocity and temperature at the 
+
+
+
+probe volume. The ratio of the intensity of the Mie scattered light to that of the Rayleigh light IPart/IRal was varied 
+
+
+
+
+
+
+
+
+
+
+
+14 
+ 
+
+
+
+from 0.001 to 6. For IPart/IRal <1, expected range for naturally present dust particles, it was observed that the model 
+
+
+
+function was able to extract velocity within an accuracy of ±6m/s (our data had a bias error of 6m/s), and 
+
+
+
+temperature of ±6K (our data had a bias error of 5K). For more intense Mie scattering IPart/IRal > 1, such as that 
+
+
+
+would be encountered in the presence of some condensation in the air stream, the uncertainty in velocity increased 
+
+
+
+to ±12m/s – still a reasonable value, but the temperature error increased enormously. In other words, it was found 
+
+
+
+that the present spectrally measured technique can provide good measurement of velocity in the presence of any 
+
+
+
+number of particles and condensation, but good measurement of temperature can be obtained only up to an extent 
+
+
+
+of particle contamination. …. 
+
+
+
+ 
+
+
+
+Acknowledgement 
+
+
+
+This work was supported by NASA's ARMD Transformational Tools and Technologies Project under the 
+
+
+
+Innovative Measurements effort led by Dr. Mark Wernet of NASA Glenn. 
+
+
+
+ 
+
+
+
+Reference: 
+
+
+
+1. Heineck, J. T., Schairer, E. T., Walker, S. M., “PIV in NASA Ames Unitary Wind Tunnels,” AIAA paper 
+
+
+
+2011-927. 
+
+
+
+2. Danehy, P.M., Burns, R. A., Reese, D. T., Retter, J. E. & Kearney, S. P., “FLEET Velocimetry for 
+
+
+
+Aerodynamics,” Ann. Rev. Fl. Mechanics, Vol. 54:525-553, https://doi.org/10.1146/annurev-fluid-032321-
+
+
+
+025544 , 2022. 
+
+
+
+3. Mark P. Wernet, Nicholas J. Georgiadis and Randy J. Locke, “Velocity, Temperature and Density 
+
+
+
+Measurements in Supersonic Jets,” AIAA paper 2021-0596. 
+
+
+
+4. Cutler, A. D., Lowe, K. T. “Laser Rayleigh Scattering, Filtered Rayleigh Scattering, and Interferometric Rayleigh 
+
+
+
+Scattering,” Chapter 3:Optical diagnostics for reacting and non-reacting flows : theory and practice, AIAA, 2023. 
+
+
+
+5. Pitz, R. W., Cattolica, R. Robben, F. and Talbot, L., (1976) Temperature and density in a Hydrogen-Air flame 
+
+
+
+from Rayleigh scattering. Combustion and Flame, Vol. 27, no. 3, pp. 313-320. 
+
+
+
+6. Lock, J. A., Seasholtz, R. G., John, W. T. “Rayleigh-Brillouin Scattering to Determine One-Dimensional 
+
+
+
+Temperature and Number Density Profiles of a Gas Flow Field,” Applied Optics, vol. 31, No. 15, 1992, pp. 2839-
+
+
+
+2844. 
+
+
+
+7. Panda, J. “Spectrally‑resolved Rayleigh scattering to measure velocity, temperature, density, and density 
+
+
+
+fluctuations in high‑speed flows,” Expt. in Fluids, https://doi.org/10.1007/s00348-020-2903-2 , pp. 61-74, 2020. 
+
+
+
+8. Fagan, A. F., Seasholtz, R. G., Elam, K. A., & Panda, J., “Time-average measurement of velocity, density, 
+
+
+
+temperature, and turbulence velocity fluctuations using Rayleigh and Mie scattering,” Experiments in Fluids 39(2), 
+
+
+
+pp. 441-454, 2005 
+
+
+
+9. Mielke-Fagan, A. F., Clem, M. M., Elam, K. A., Hirt, S. M., “Progress on a Rayleigh Scattering Mass Flux 
+
+
+
+Measurement Technique,” AIAA paper 2010-0856, 2010. 
+
+
+
+10. D. Bivolaru, M. V. Otugen, A. Tzes, & G. Papadopoulos, “Image Processing for Interferometric Mie and 
+
+
+
+Rayleigh Scattering Velocity Measurements,” AIAA J.,Vol. 37, No. 6, June 1999, pp. 688-694. 
+
+
+
+11. Miles R, Lempert W, Forkey J., Instantaneous velocity fields and background suppression by filtered 
+
+
+
+Rayleigh scattering. In: 29th AIAA aerospace sciences meeting. AIAA paper 91–0357, 1991. 
+
+
+
+12. George, J., Jenkins, T. & Miles, R., “Measurement of Density in High Speed Shear Layers and oblique Shocks 
+
+
+
+using Filtered Rayleigh Scattering,” AIAA 2017-1407, 2017. 
+
+
+
+13. Panda, J., Seasholtz, R. G. & Elam, K. A. "Measurement of Correlation between Flow Density, Velocity and 
+
+
+
+Density*Velocity2 with Far Field Noise in High Speed Jets," NASA TM-2002-211791, also AIAA paper 2002-2485, 
+
+
+
+June 2002 
+
+
+
+14. Panda, J. “Two Point Space-Time Correlation of Density Fluctuations Measured in High Velocity Free Jets,” 
+
+
+
+AIAA-2006-0006, Jan. 2006. 
+
+
+
+15. Mielke, A. F., Elam, K. A. & Sung, C-J., “Multiproperty Measurements at High Sampling Rates Using 
+
+
+
+Rayleigh Scattering,” AIAA J. 47 (4), April 2009. 
+
+
+
+16. Tenti, G., Boley, C. D. and Desai, R. C., "On the kinetic model description of Rayleigh-Brillouin scattering 
+
+
+
+from molecular gases," Canadian J. of Physics, vol. 52, no. 4, Feb. 1974, pp. 285-290. 
+
+
+
+
+
+https://doi.org/10.1146/annurev-fluid-032321-025544
+
+
+https://doi.org/10.1146/annurev-fluid-032321-025544
+
+
+https://doi.org/10.1007/s00348-020-2903-2
+
+
+
+
+
+
+
+
+15 
+ 
+
+
+
+17. Boley, C.D., Desai, R.C., & Tenti, G., “Kinetic Models and Brillouin Scattering in a Molecular Gas,” 
+
+
+
+Canadian J. of Physics, vol. 50, 1972, pp. 2158-2173. 
+
+
+
+18. Vaughan, J. M., “The Fabry–Perot Interferometer, History, Theory, Practice, and Applications,” Adam 
+
+
+
+Hilger, Philadelphia, 1989, pp. 89–134. 
+
+
+
+19. Seasholtz, R. G. “Notes on Rayleigh scattering,” personal communications. 
+
+
+
+20. Beck, J. V. Beck & Arnold, K. J., “Parameter Estimation in Engineering and Science,” John Wiley & Sons, 
+
+
+
+New York, 1977

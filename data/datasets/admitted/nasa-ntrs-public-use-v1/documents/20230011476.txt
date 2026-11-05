@@ -1,0 +1,785 @@
+Novel Hourly-Resolved Global Cloud Property 
+Composite from Operational Satellite Imagers
+
+
+
+Rabindra Palikonda1, William L Smith Jr2, Louis Nguyen2, Thad Chee3, Konstantin V 
+Khlopenkov1, Cecilia Fleeger1, and Douglas Spangenberg1
+
+
+
+1Analytical Mechanics Associates Inc., Hampton, United States,
+2NASA Langley Research Center, Hampton, VA
+
+
+
+3ADNET, Inc., Hampton, United States
+
+
+
+
+
+
+
+
+
+
+
+INTRODUCTION
+The NASA Satellite ClOud and Radiation Property retrieval System (SatCORPS) applies a suite of 
+algorithms to meteorological satellite data to provide cloud properties, radiative fluxes and other 
+parameters on a global scale.
+
+
+
+SatCORPS framework provides two separate data stream :
+
+
+
+Cloud Climate Data Records (supports NASA CERES/RBSP)
+
+
+
+• Global cloud analyses from MODIS, VIIRS and GEOsats since 2000 needed to determine 
+Earth’s radiation budget and cloud feedbacks.
+
+
+
+• Algorithms designed for consistent application to 25+ satellites in the CERES record. 
+
+
+
+Operational applications and other research needs
+
+
+
+• Near-realtime and historical cloud analyses (mostly focused on global GEO’s).
+
+
+
+• Data used to support field campaigns, weather forecasting, cloud process research, model 
+development (cloud parameterizations), etc.
+
+
+
+
+
+
+
+
+
+
+
+GOES-E (16)GOES-W (18) MET-11 MET-9 HIMAWARI
+
+
+
+CTH (km)
+
+
+
+SatCORPS team operates and utilizes a LEO and GEO imager data production and visualization system with real-
+time and historical capabilities
+
+
+
+The Satellite ClOud and Radiative Property retrieval System (SatCORPS)
+
+
+
+
+
+
+
+
+
+
+
+New Global Cloud Composites (GCC) from Satellites
+
+
+
+Objective: Optimally combines GEO and LEO radiances and derived products (cloud properties 
+and radiative fluxes) as seamlessly as possible into a unified global data product
+
+
+
+New GCC system is streamlined enabling one overarching global data production system to 
+support SatCORPS stakeholders
+
+
+
+• 3-km gridded cloud properties every 30-60 minutes
+
+
+
+• Many new cloud algorithm enhancements are being implemented that improve accuracies, 
+cross-platform consistency, and reduce artifacts
+
+
+
+- New atmospheric corrections (satellite dependent)
+
+
+
+- Improved clear sky radiances
+
+
+
+- More realistic ice cloud scattering model
+
+
+
+- Use of machine learning
+
+
+
+
+
+
+
+
+
+
+
+Global GEO/LEO composites
+
+
+
+VIIRS
+GAC @ 3-5 km/pix
+
+
+
+Level 1B data
+
+
+
+MODIS Terra/Aqua
+sampled @ 2-4 km/pix
+
+
+
+Level 1B data
+
+
+
+GOES-16,-18, Met-11,-9,
+Himawari-9
+
+
+
+@ 2-3 km/pix
+
+
+
+Hourly radiances, cloud 
+properties, fluxes, scene IDs
+
+
+
+Radiances, cloud properties, 
+fluxes and scene IDs
+
+
+
+Radiances, cloud properties, 
+fluxes and scene IDs
+
+
+
+Reproject @ 3-km 
+grid
+
+
+
+Compare Rating
+
+
+
+Pixel in Global Composite
+@ 3 km grid
+
+
+
+Reproject @ 3-km 
+grid
+
+
+
+Reproject @ 3-km 
+grid
+
+
+
+Reprojection is implemented as inverse 
+mapping and uses gradient search within input 
+Lat/Lon fields.
+Bicubic resampling is used.
+
+
+
+
+
+
+
+
+
+
+
+Satellite ID
+
+
+
+Scene ID
+
+
+
+Animation Global Cloud Composites (GCC) Parameters
+
+
+
+
+
+
+
+
+
+
+
+Problem Areas AI/ML Approach
+
+
+
+Image quality – bad scan lines in radiance imagery Apply human visual or CNN QC for most cases and satellites; apply 
+radiance reconstruction using KNN for severely corrupted images
+
+
+
+Day/Night Consistency (cloud optical properties) ANN to help overcome theoretical limits due to IR blackbody limit; 
+KNN to extrapolate optical properties from daytime
+
+
+
+Data products in the solar terminator and sun-glint KNN to extrapolate information from surrounding space/time 
+domain
+
+
+
+Assumption that clouds are single-layer and have vertically 
+homogeneous phase and PSD’s
+
+
+
+New IWP/LWP parameterizations that better account for cloud 
+vertical structure; ANN for multi-layer cloud retrieval methods
+
+
+
+Poor knowledge of land surface emission temperature 
+(affects cloud mask and retrievals)
+
+
+
+DNN to correct model reanalysis skin temperature based on 
+correlations with satellite-derived values in clear conditions
+
+
+
+Nighttime cloud detection in polar regions ANN trained with CALIPSO data for application to MODIS/VIIRS
+
+
+
+Cloud thickness and ceiling Parameterizations based on CloudSat/CALIPSO groundtruth; KNN
+for satellite/ceilometer data fusion over U.S.
+
+
+
+Satellite Cloud Remote Sensing Challenges 
+Being Addressed with AI/ML
+
+
+
+Active research areas to reduce uncertainties and improve the utility of data products
+
+
+
+
+
+
+
+
+
+
+
+Nighttime Cloud Optical Depth (COD)
+
+
+
+Problem:
+• COD can be estimated theoretically from solar 
+
+
+
+channels over a wide range during daytime
+• At night, only thin cloud retrievals are theoretically 
+
+
+
+possible (COD < ~6) due to IR blackbody limit
+• Optically thick COD’s set to pre-assigned fill values 
+
+
+
+(not consistent with daytime retrievals)
+• Other parameters derived from COD at night also 
+
+
+
+very inconsistent and less accurate than daytime
+- Cloud ice and liquid water path
+- Cloud geometric thickness and ceilings
+- Radiative fluxes, especially SFC LW↓
+- Aviation weather hazards, e.g. icing conditions
+
+
+
+2021 Annual Mean COD (DAY), Aqua-MODIS
+Global Mean = 5.1 ; Non-polar Mean = 4.7
+
+
+
+2021 Annual Mean COD (NIGHT), Aqua-MODIS
+Global Mean = 2.9 ; Non-polar Mean = 2.8
+
+
+
+Poor consistency between daytime and 
+nighttime
+
+
+
+
+
+
+
+
+
+
+
+GOES-16 Cloud Optical Depth (Feb 2019)
+
+
+
+Nighttime (KNN+Theory)Legacy Nighttime Analysis Daytime
+
+
+
+COD
+
+
+
+KNN Improves Nighttime Cloud Analyses
+
+
+
+Solution:
+• Apply KNN to extrapolate 
+
+
+
+daytime COD into nighttime using 
+6.7 and 11 µm bands and local 
+relationships with daytime COD 
+
+
+
+Outcome:
+• Much more realistic filling 
+
+
+
+method for nighttime optically 
+thick COD
+
+
+
+• More accurate downstream 
+derived parameters (e.g. 
+waterpath, ceilings, icing 
+conditions, etc)
+
+
+
+
+
+
+
+
+
+
+
+GOES-16 Cloud Tau
+Legacy Edition
+
+
+
+GOES-16 Cloud Tau
+With KNN at night
+
+
+
+- Much improved day/night consistency using KNN- Daytime and nighttime analyses are inconsistent
+
+
+
+Animation
+
+
+
+
+
+
+
+
+
+
+
+GOES-16 Cloud Phase
+Legacy Edition
+
+
+
+GOES-16 Cloud Phase
+With KNN at night
+
+
+
+- KNN can also be used to reduce terminator 
+artifacts by intelligently extrapolating information 
+from the time/space domain outside of the 
+terminator
+
+
+
+Animation
+
+
+
+
+
+
+
+
+
+
+
+Scene ID (Legacy algorithm)
+
+
+
+Scene ID (w/ artifact reduction)
+
+
+
+Cloud Optical depth (Legacy algorithm)
+
+
+
+Cloud Optical Depth(w/ artifact reduction)
+
+
+
+Animation
+
+
+
+
+
+
+Presenter
+
+
+Presentation Notes
+
+
+One-day hourly animation (July 1, 2021) showing improved day/night consistency in cloud optical depth and thermodynamic phase, and reduction n solar terminator artifacts
+
+
+
+
+
+
+
+
+
+
+13
+
+
+
+New parameterizations for ice and liquid water path
+• Incorporates cloud vertical structure information from 
+
+
+
+CloudSat/CALIPSO
+• Incorporates thermodynamic phase partitioning from 
+
+
+
+cloud models and aircraft observations
+• Enables simultaneous estimates of IWP and LWP (VI-LWP) 
+
+
+
+in ice overlapping liquid cloud conditions
+- more analogous to what models produce 
+
+
+
+Scene ID Legacy LWP (liquid topped clouds only)
+
+
+
+VI-LWP with KNN Tau at night and other artifact reductions
+
+
+
+Animation
+
+
+
+
+
+
+
+
+
+
+
+SatCORPS GIS | Transformation & Distribution
+
+
+
+Analysis Ready Data (ARD)
+
+
+
+• Rolling 2-week data parameters stored in 
+cloud-optimized format and full archive access
+
+
+
+• Built with transpose to provide more-efficient 
+time series retrieval
+
+
+
+• Global composite and regional mosaic 
+availability
+
+
+
+Image Source: Esri
+
+
+
+Geospatial Services
+
+
+
+• ~28 Multidimensional (time-enabled) parameter-level 
+geospatial services as global and regional composites
+
+
+
+• Exposed as RESTFul APIs, ArcGIS Image Services, 
+Open Geospatial Consortium (OGC) Web Mapping 
+Services/Web Coverage Services, & OpenDAP
+
+
+
+RESTful API Endpoint
+
+
+
+Cloud Raster Format with 
+Transpose
+
+
+
+ArcGIS Image Services & 
+OGC WMS/WCS
+
+
+
+
+
+https://doc.arcgis.com/en/imagery/workflows/best-practices/considerations-managing-multidimensional-data.htm
+
+
+
+
+
+
+
+
+SatCORPS GIS | Visualization & Analysis
+
+
+
+- Currently Under Development -
+
+
+
+Data Layer Manipulation 
+
+
+
+• Layer transparency settings 
+and raw pixel value 
+identification
+
+
+
+• On-the-fly filtering of pixel 
+values to identify areas of 
+interest
+
+
+
+Multidimensional Analysis
+
+
+
+• Single point time series across 
+2 week rolling ARD service
+
+
+
+• Time slider and user-defined 
+animation functionality
+
+
+
+Parameter Subsetting
+
+
+
+• Regional bounding-box 
+subsettting delivering 
+customized NetCDF/JSON
+
+
+
+
+
+
+
+
+
+
+
+Global Cloud Composites (GCC) STATUS
+• A system is developed within the NASA SatCORPS to create hourly global composites of cloud properties 
+
+
+
+from modern GEO and LEO imagers on a 3-km grid.
+
+
+
+• A one-month (July 2021) version 1 test dataset has been produced for SatCORPS Stakeholders: 
+https://satcorps.larc.nasa.gov/GCC-SNWG
+
+
+
+• Version 1 dataset derived with legacy SatCORPS cloud algorithms and empirical narrowband to broadband 
+TOA radiative flux formulas.
+
+
+
+• A version 2 system is nearly complete (release date January 2024) 
+• Used to produce annual historical datasets for SNWG ‘Clouds and Radiation’ stakeholders
+• Operationalized to meet low latency operational needs within the weather community (e.g. 
+
+
+
+NCEP), sustainable energy industry (e.g. NASA POWER), DOE ARM and elsewhere.
+
+
+
+• Version 2 applies updated cloud algorithms that includes bug fixes, improved forward models, clear sky 
+radiance maps, instrument calibrations, and atmospheric correction procedures.
+
+
+
+• Version 2 also applies AI/ML tools to correct level-0 satellite radiance artifacts (e.g. GOES-17 striping) and 
+to derive more accurate and consistent level-2 cloud and radiation data products at all times of day
+
+
+
+• A computed TOA and SFC radiative flux component is in development that ingests GCC products into a 
+radiative transfer modeling system (25-km hourly global grids). Release date: Spring 2024
+
+
+
+• Data products will be freely available, and geospatially-service enabled as ArcGIS Image Services and Open 
+Geospatial Consortium (OGC) Web Mapping/Coverage Services for visualization and analysis.
+
+
+
+
+
+https://satcorps.larc.nasa.gov/GCC-SNWG
+
+
+
+ 
+Slide Number 1
+
+ 
+Slide Number 2
+
+ 
+Slide Number 3
+
+ 
+Slide Number 4
+
+ 
+Slide Number 5
+
+ 
+Slide Number 6
+
+ 
+Slide Number 7
+
+ 
+Slide Number 8
+
+ 
+Slide Number 9
+
+ 
+Slide Number 10
+
+ 
+Slide Number 11
+
+ 
+Slide Number 12
+
+ 
+Slide Number 13
+
+ 
+Slide Number 14
+
+ 
+SatCORPS GIS | Visualization & Analysis
+
+ 
+Slide Number 16

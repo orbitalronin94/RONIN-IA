@@ -1,0 +1,2540 @@
+Notice for Copyrighted Information 
+
+
+
+This manuscript is a joint work of employees of the National Aeronautics and Space Administration and employees of HX5 LLC under Contract No 
+
+
+
+80GRC020D0003, and ERC, Inc. under Contract No. 80MSFC18C0011 with the National Aeronautics and Space Administration. The United States 
+
+
+
+Government may prepare derivative works, publish, or reproduce this manuscript and allow others to do so. Any publisher accepting this manuscript for 
+publication acknowledges that the United States Government retains a non-exclusive, irrevocable, worldwide license to prepare derivative works, publish, or 
+
+
+
+reproduce the published form of this manuscript, or allow others to do so, for United States government purposes. 
+
+
+
+Fault Management Algorithm Risk Assessment for the NASA Space 
+
+
+
+Launch System 
+
+
+
+William A. Maul, HX5 LLC 
+
+
+
+Yunnhon Lo, PhD, ERC, Inc. 
+
+
+
+Edmond Wong, NASA Glenn Research Center 
+
+
+
+Key Words: Probabilistic Risk Assessment, PRA, software risk assessment, fault tree analysis
+
+
+
+SUMMARY AND CONCLUDING REMARKS 
+
+
+
+This paper presents the false positive (FP) and false 
+
+
+
+negative (FN) risk assessment process currently being 
+
+
+
+conducted for the Space Launch System (SLS) Artemis II 
+
+
+
+Fault Management (FM) detection functions. Because initial 
+
+
+
+analyses indicated a dominance in the total risk by software 
+
+
+
+and firmware failures, efforts were made to refine those risks 
+
+
+
+which involved: 
+
+
+
+• Establishing software function traces for each 
+
+
+
+detection algorithm, 
+
+
+
+• Utilizing the Logical Source Lines of Code 
+
+
+
+(LSLOC) count, 
+
+
+
+• Refinement of the software failure rate, and 
+
+
+
+• Establishing fractional multipliers for common 
+
+
+
+hardware and software failure modes across the 
+
+
+
+applicable individual fault trees. 
+
+
+
+These efforts and their impact on the overall analyses are 
+
+
+
+also discussed. The analysis scope, general assumptions and 
+
+
+
+guide rules, and key modeling concepts are discussed to 
+
+
+
+establish the basis of the risk assessments conducted. 
+
+
+
+Even with the implementation of the analysis 
+
+
+
+refinements, software and firmware are still key risk 
+
+
+
+contributors, but hardware failures, primarily in the form of 
+
+
+
+Common Cause Failures (CCFs), are also indicated as risk 
+
+
+
+drivers. The refinements enable risk estimations of 
+
+
+
+individual detection functions as well as the entire FM suite. 
+
+
+
+There still remains issues of how to account for time and 
+
+
+
+redundancy in the software risk estimations that will 
+
+
+
+continue to be the focus of future work. 
+
+
+
+1 INTRODUCTION 
+
+
+
+The purpose of this effort is to provide a risk assessment 
+
+
+
+process for a detection system that includes hardware and 
+
+
+
+software elements. The detection system is composed of 
+
+
+
+individual functions, each monitoring unique off-nominal 
+
+
+
+conditions. The process must provide a risk assessment for 
+
+
+
+each function, as well as for the entire detection system. The 
+
+
+
+process is developed specifically for the Space Launch 
+
+
+
+System (SLS) on-board Fault Management (FM) system. 
+
+
+
+The SLS FM system is a function set that enables the 
+
+
+
+launch vehicle to assess and respond to states that deviate 
+
+
+
+from required or expected performance objectives. The FM 
+
+
+
+function on a crewed SLS vehicle will first and foremost 
+
+
+
+ensure crew safety and maximize mission success. 
+
+
+
+Additionally, it will annunciate performance deviations or 
+
+
+
+detected failures to the flight crew and mission support 
+
+
+
+personnel, and in some scenarios, perform predetermined 
+
+
+
+operational responses based on the nature of the failure. 
+
+
+
+These responses include enacting redundancy management 
+
+
+
+(RM) steps to maintain flight critical functions through fault 
+
+
+
+tolerance, enacting safing actions to reconfigure the system 
+
+
+
+to prevent failures from propagating and recommending 
+
+
+
+abort when Loss of Vehicle (LOV) is imminent or has 
+
+
+
+occurred. 
+
+
+
+For any given FM response, whether abort, safing or 
+
+
+
+redundancy management, there are inherent risks that it will 
+
+
+
+not perform as intended, either by initiating a response that 
+
+
+
+is unwarranted or by not responding when needed. The 
+
+
+
+former response is defined as a FP event – an incorrect 
+
+
+
+decision that a condition exists when it does not. The latter 
+
+
+
+response is a FN event – an incorrect decision that a 
+
+
+
+condition does not exist when it does. Both have an adverse 
+
+
+
+impact on the vehicle and crew. The response to a FP 
+
+
+
+detection places the vehicle and crew in an unnecessary 
+
+
+
+high-risk situation. For example, an abort response, whether 
+
+
+
+it is a true detection or not, has its own contribution to the 
+
+
+
+total probability of a Loss of Crew (LOC) and Loss of 
+
+
+
+Mission (LOM). On the other hand, no abort response 
+
+
+
+because of a FN misdetection means the vehicle and crew 
+
+
+
+lack the awareness of, or protection from a dangerous 
+
+
+
+situation. Other FM responses (e.g., RM or safing) can also 
+
+
+
+have FP and FN detections that impact mission and crew, 
+
+
+
+albeit at less severity than aborts. 
+
+
+
+The FM functions are divided into two distinct sub-
+
+
+
+functions: detection and response. The detection portion of 
+
+
+
+the FM function includes avionics components from the 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+ 
+
+
+
+sensing elements and avionics boxes that generate the 
+
+
+
+monitored data to the detection decision logic within the 
+
+
+
+Flight Computers (FCs) that determine whether the 
+
+
+
+monitored condition has occurred. While not part of the on-
+
+
+
+board functions, detection can also be initiated by external 
+
+
+
+entities, such as launch control, mission control and flight 
+
+
+
+crew. The response sub-functions would include the 
+
+
+
+software and hardware elements required to generate and 
+
+
+
+transmit the commands to the actuators and/or annunciations 
+
+
+
+of the detected condition to the crew and system operators, 
+
+
+
+as well as the components that transmit and perform the 
+
+
+
+response actions. For the analysis presented here, only the 
+
+
+
+on-board FM detection sub-function is considered. 
+
+
+
+The SLS FM detection sub-function FP and FN risk 
+
+
+
+estimations have two components: threshold-based (TB) and 
+
+
+
+non-threshold-based (NTB). Both are required to provide a 
+
+
+
+complete picture of the inherent risk from employing each 
+
+
+
+FM function. The TB estimation is applicable only to FM 
+
+
+
+functions that monitor continuous state variables. These 
+
+
+
+estimations can involve the detection threshold, timing 
+
+
+
+requirements, and/or the persistence applied in the detection 
+
+
+
+logic. They require a detailed understanding of the off-
+
+
+
+nominal condition being monitored, and often require 
+
+
+
+physics-based modeling and simulations to establish the 
+
+
+
+FP/FN risk estimate. The TB risk estimation is generally 
+
+
+
+performed by the hardware system designer when needed 
+
+
+
+and is beyond the scope of this paper. 
+
+
+
+NTB FP and FN risk assessments for the SLS FM 
+
+
+
+detection sub-function address the reliability of the detection 
+
+
+
+system and include hardware components along the signal 
+
+
+
+path and SLS flight software (FSW). These assessments 
+
+
+
+attempt to determine the failures that would affect the 
+
+
+
+monitored data resulting in an erroneous detection (FP case) 
+
+
+
+or misdetection (FN case). For the assessment of each FM 
+
+
+
+detection function, the function must be defined by the 
+
+
+
+monitored signals, detection criteria, and monitoring period. 
+
+
+
+Information about the hardware design, FSW processing 
+
+
+
+flow, and hardware failure modes and reliability data for 
+
+
+
+components of the detection system are also required. This 
+
+
+
+information is then used to perform a fault tree based 
+
+
+
+Probabilistic Risk Assessment (PRA). 
+
+
+
+The combination of SLS FM detection and response 
+
+
+
+sub-function FP and FN risk assessments provide the 
+
+
+
+relative risk increase due to the FM system which can be 
+
+
+
+compared to the benefit provided by correctly detecting and 
+
+
+
+responding to the off-nominal condition. The FP/FN 
+
+
+
+assessments of the FM functions provides valuable data to 
+
+
+
+support the selection, assessment, and verification of the 
+
+
+
+abort triggers [1]. These results are fed into the SLS Mission 
+
+
+
+and Fault Management (M&FM) program’s abort analyses 
+
+
+
+and are inputs to the SLS Program PRA LOM and LOC 
+
+
+
+models. In turn, the SLS PRA models feed into Cross-
+
+
+
+Program and Artemis Program PRA models. 
+
+
+
+This paper focuses on describing the NTB SLS FM 
+
+
+
+detection sub-function FP and FN risk assessments for the 
+
+
+
+SLS FM abort and safing conditions. These assessments 
+
+
+
+include only the failure risk contributions of the hardware 
+
+
+
+and software elements of the detection system, potentially 
+
+
+
+identifying areas where reliability issues should be 
+
+
+
+addressed. The analyses incorporate CCFs which are 
+
+
+
+inherent in the software and firmware failures modeled, and 
+
+
+
+explicitly modeled for the redundant hardware failure 
+
+
+
+events. They do not include contributions due to human 
+
+
+
+factors from Launch Support, Mission Control or Flight 
+
+
+
+Crew. The risk assessments do not explicitly include 
+
+
+
+phenomenological and external events (e.g., leaks, 
+
+
+
+surrounding environment, wind, lightning, debris, etc.) that 
+
+
+
+would affect the reliability of the detection hardware, 
+
+
+
+although, in some cases that information may be implicitly 
+
+
+
+included in the underlying component failure data. 
+
+
+
+Furthermore, for both FP and FN, the assessment does not 
+
+
+
+account for the effects of the underlying vehicle failure on 
+
+
+
+the detection mechanism. The assessments were conducted 
+
+
+
+following the NASA PRA Procedures Guide, NASA/SP-
+
+
+
+2011-3421 [2], and the NASA Procedural Requirements 
+
+
+
+NPR 8705.5A [3], 
+
+
+
+2 ANALYSIS SCOPE 
+
+
+
+The NTB FP/FN analyses conducted assess the risk that 
+
+
+
+a detection function will, while monitoring the system, 
+
+
+
+erroneously detect an off-nominal condition (FP outcome) 
+
+
+
+or misdetect an off-nominal condition (FN outcome). The 
+
+
+
+analysis encompasses the failure assessment of the signal 
+
+
+
+propagation path, but excludes complex external events 
+
+
+
+(e.g., debris or lightning strikes) and human factor events 
+
+
+
+(e.g., erroneous inputs from Crew or ground support 
+
+
+
+personnel actions). The detection function risk assessment is 
+
+
+
+based on the measured parameter and not on the overall 
+
+
+
+vehicle state. 
+
+
+
+This distinction is important to consider when defining 
+
+
+
+the boundaries of the PRA. For example, the SLS design 
+
+
+
+contains a pair of Autonomous Destruction Units (ADUs) 
+
+
+
+that reside on each booster. The ADUs monitor break-wire 
+
+
+
+circuits to determine if premature booster separation has 
+
+
+
+occurred. If detected, the ADUs will activate pyrotechnic 
+
+
+
+charges on the separated booster in-order to destroy it. For 
+
+
+
+an actual premature booster separation scenario, the 
+
+
+
+communication lines between the booster and the flight 
+
+
+
+computers would be severed. Therefore detection of the 
+
+
+
+ADU activation by the FCs would be an indication of 
+
+
+
+failures in the ADU or break-wire circuits that lead to an 
+
+
+
+erroneous destruction of the vehicle. An FM detection 
+
+
+
+function monitors for the unintended destruction of a booster 
+
+
+
+by the booster’s safety system. So a false detection by the 
+
+
+
+booster safety system would lead to a false abort, but for the 
+
+
+
+FM detection function this would be a true positive 
+
+
+
+detection. For the FM detection function, a FP outcome 
+
+
+
+would result only if the function detected the ADU 
+
+
+
+activation, but no ADU activation actually occurred. 
+
+
+
+Each FM detection function is defined initially by the 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+ 
+
+
+
+M&FM group in collaboration with domain experts, the 
+
+
+
+element project office which includes element prime 
+
+
+
+contractors, ground and mission support personnel, and the 
+
+
+
+SLS Integrated Avionics and Software (IAS) discipline. The 
+
+
+
+off-nominal or fault monitoring functions are initially 
+
+
+
+defined in the SLS Program FM specification document and 
+
+
+
+implemented in SysML logic diagrams [4] by the subsystem 
+
+
+
+integrated design team; a team made up of subject matter 
+
+
+
+experts and FSW developers. The SLS FSW requirements 
+
+
+
+group then creates the associated software requirements 
+
+
+
+from which the FSW code developer builds the final 
+
+
+
+executable code. The software then goes through extensive 
+
+
+
+integrated simulation and hardware testing, as well as code 
+
+
+
+and requirements verification processes. 
+
+
+
+Key elements of the detection function used to establish 
+
+
+
+the scope of the FP/FN analysis include: 
+
+
+
+• The measurements and component health status 
+
+
+
+data monitored. 
+
+
+
+• The criteria for detection (e.g., threshold(s), 
+
+
+
+persistence, and number of parameter violations 
+
+
+
+required), including any special requirements such 
+
+
+
+as number of qualified signals needed to perform 
+
+
+
+the detection. 
+
+
+
+• The start and stop events that define when the 
+
+
+
+function is active or processed. 
+
+
+
+With the FM function defined, the detection processing 
+
+
+
+architecture can be determined and the potential contributing 
+
+
+
+components to the FP/FN risk assessment established. In 
+
+
+
+general, the detection processing architecture can be broken 
+
+
+
+down into the following areas: 
+
+
+
+• Sensors – The component measuring the system 
+
+
+
+property (e.g., pressure, etc.). 
+
+
+
+• Instrumentation/Electronics – Avionics 
+
+
+
+components that gather, process and/or transfer the 
+
+
+
+subsystem data to the FCs. 
+
+
+
+• Data Buses – The wires, harnesses and connectors 
+
+
+
+transferring the analog or digital measurement from 
+
+
+
+the instrumentation to the FCs. 
+
+
+
+• Flight Computers – The final component along the 
+
+
+
+signal propagation path where the FM detection 
+
+
+
+function resides. The SLS uses three FCs that 
+
+
+
+import data streams, and perform signal validation 
+
+
+
+and data processing. The three FCs exchange data 
+
+
+
+between each other to ensure that all FC FM 
+
+
+
+functions are using identical data sets. 
+
+
+
+The following are a high level list of Ground Rules and 
+
+
+
+Assumptions that support the analysis. 
+
+
+
+• Are performed on the M&FM FM detection 
+
+
+
+functions that impact LOM/LOC. 
+
+
+
+• Are based on the SLS Block 1 crewed-vehicle 
+
+
+
+design which includes the solid rocket boosters, 
+
+
+
+Core Stage (CS) element, and the Core Stage 
+
+
+
+Engines (CSEs). 
+
+
+
+• Are based on the integrated vehicle prelaunch and 
+
+
+
+ascent timelines for the Artemis II mission. 
+
+
+
+• Do not include external failures from the Orion, 
+
+
+
+Interim Cryogenic Propulsion Stage (ICPS) 
+
+
+
+element, ground support, flight control, or the crew. 
+
+
+
+• Do not include SLS Vehicle external monitoring 
+
+
+
+functions (e.g., Launch Commit Criteria). 
+
+
+
+• Do not include the effects of the underlying vehicle 
+
+
+
+failure on the detection mechanism. 
+
+
+
+3 ANALYSIS PROCESS 
+
+
+
+The NTB FP and FN analyses were performed on each 
+
+
+
+of the monitored conditions independently. This was done to 
+
+
+
+make the development focused and manageable, and to 
+
+
+
+provide an individual risk assessment of each detection 
+
+
+
+function to perform risk-to-benefit assessments, comparing 
+
+
+
+the risk of including the detection function against the 
+
+
+
+benefit of providing detection of the off-nominal condition. 
+
+
+
+The risk estimations were generated using fault trees, which 
+
+
+
+graphically model the detection signal pathways that can 
+
+
+
+lead to a known and undesirable event. 
+
+
+
+The FP/FN fault tree development and uncertainty 
+
+
+
+analysis is performed in a software program called Systems 
+
+
+
+Analysis Programs for Hands-on Integrated Reliability 
+
+
+
+Evaluations (SAPHIRE) [5]. This program was developed 
+
+
+
+by the US Nuclear Regulatory Commission and is used by 
+
+
+
+the various NASA PRA groups such as SLS PRA for which 
+
+
+
+the FP/FN results feed. The program provides for a 
+
+
+
+development environment where the fault trees can be 
+
+
+
+constructed visually. It can solve the fault tree, generating 
+
+
+
+the minimal cut sets, and perform an uncertainty analysis by 
+
+
+
+performing a Monte Carlo simulation of the fault tree 
+
+
+
+solution with the assigned uncertainty data as the variant. 
+
+
+
+Model verification was performed by internal M&FM 
+
+
+
+reviews of the fault trees, and a review of the fault trees and 
+
+
+
+analysis outputs by the SLS PRA group. 
+
+
+
+3.1 Hardware Failure Event Modeling 
+
+
+
+The hardware failure models assume that the failure rate 
+
+
+
+is constant for the operational phase being analyzed. The 
+
+
+
+failure probability for most hardware components can be 
+
+
+
+modeled as an exponential function of operating or exposure 
+
+
+
+time, t, and the constant failure rate, 0, as shown in equation 
+
+
+
+1. For small time periods, less than 20% of the mean time 
+
+
+
+between failures, the hardware probability can be 
+
+
+
+approximated to be the product of 0 and t. 
+
+
+
+𝑃𝑓ℎ𝑎𝑟𝑑𝑤𝑎𝑟𝑒
+= 1 − 𝑒−𝜆0𝑡 ≅ 𝜆0𝑡 (1) 
+
+
+
+The hardware failure rates used in the analyses were 
+
+
+
+extracted from multiple sources and represent the best 
+
+
+
+source of data available. When possible, the SLS PRA data 
+
+
+
+was used. Where PRA based failure rate data did not exist, 
+
+
+
+the SLS element’s Reliability and Maintainability (R&M) 
+
+
+
+analysis report, Military Handbook: Reliability Prediction of 
+
+
+
+Electronic Equipment (MIL-HDBK-217F) [6], and/or 
+
+
+
+domain experts judgment were used. 
+
+
+
+Early SLS FP/FN analyses [7] were based on hardware 
+
+
+
+data with failure modes and reliability data assigned at the 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+ 
+
+
+
+functional level. The reliability analyses for the SLS Block 
+
+
+
+1 Core Stage avionics components have since become more 
+
+
+
+detailed, enabling a more refined assignment for the 
+
+
+
+hardware failure rate. The Failure Modes and Effects 
+
+
+
+(FMEA) analyses have been conducted down to the piece-
+
+
+
+part level for the avionics boxes and sensing components, 
+
+
+
+and each failure mode was traced to failure rate data. The 
+
+
+
+current analysis involves identifying a component’s failure 
+
+
+
+modes that result in effects that could contribute to FP or FN 
+
+
+
+outcomes. Assuming the individual failure modes are 
+
+
+
+independent, the failure rates aligned to those failure modes 
+
+
+
+are summed to create a single component-level failure rate. 
+
+
+
+3.2 Common Cause Failure (CCF) 
+
+
+
+CCF modeling is an attempt to include in the fault tree 
+
+
+
+logic, the intrinsic dependencies of the system that are not 
+
+
+
+explicitly represented in the independent redundant failure 
+
+
+
+models. Failures arising from these dependencies are often 
+
+
+
+difficult to identify and, if neglected in PRA modeling and 
+
+
+
+quantifications, may result in an underestimation of the risk. 
+
+
+
+CCFs can be a large risk contributor for redundant systems. 
+
+
+
+The FP/FN analysis uses the Alpha (non-staggered) 
+
+
+
+CCF method to be consistent with the SLS PRA 
+
+
+
+methodology. In a staggered system, individual units can be 
+
+
+
+tested and replaced as needed. In a non-staggered system, 
+
+
+
+the items are installed and operated as a group; individual 
+
+
+
+units cannot be isolated from the system and tested. The SLS 
+
+
+
+integrated launch vehicle is a non-staggered system. The 
+
+
+
+Nuclear Regulatory Commission (NRC) issued NUREG-
+
+
+
+5485 [8] provides information and guidelines for modeling 
+
+
+
+CCFs that are applied in this analysis. 
+
+
+
+ The CCF risk is calculated by multiplying the 
+
+
+
+component’s independent failure rate, 0, by the Global 
+
+
+
+Alpha Factor (GAF), YGAF, and the failure exposure time, t, 
+
+
+
+as shown in equation 2. 
+
+
+
+ 𝑃𝑓𝐶𝐶𝐹
+= 𝜆0 ∗ 𝑌𝐺𝐴𝐹 ∗ 𝑡 (2) 
+
+
+
+The GAF values are obtained using an Excel workbook 
+
+
+
+tool called Global Alpha Model Uncertainty Tool (GAMUT) 
+
+
+
+2012. This tool was created by the NASA Johnson Space 
+
+
+
+Center (JSC) Safety and Mission Assurance (S&MA) in 
+
+
+
+support of the Space Shuttle and International Space Station 
+
+
+
+(ISS) PRAs. GAMUT uses the 2012 version of NUREG/CR-
+
+
+
+5496 as its source for the mean and uncertainty of the global 
+
+
+
+alpha parameters. Specifically, it uses generic alpha values 
+
+
+
+as opposed to specific values (e.g., pump values, valve 
+
+
+
+values, etc.). These generic values are provided by 
+
+
+
+NUREG/CR-5496 for groups of redundant components up 
+
+
+
+to eight. GAMUT uses regression to determine values for 
+
+
+
+groups of more than eight [9]. 
+
+
+
+The output from GAMUT is the GAF mean value and a 
+
+
+
+Beta parameter which defines the GAF uncertainty. Within 
+
+
+
+SAPHIRE, these values will define the model of the specific 
+
+
+
+CCF event. The standard operation of GAMUT is for all 
+
+
+
+combinations of components for the specified redundancy 
+
+
+
+level and number of component failures required to result in 
+
+
+
+system failure, but the tool can be adjusted to output the GAF 
+
+
+
+data for a specific set of combinations [10]. 
+
+
+
+3.3 Software Failure Event Modeling 
+
+
+
+SLS FSW is flight critical code. Identical copies of the 
+
+
+
+code are loaded into all three FCs that make up the Flight 
+
+
+
+Computer Operational Group (FCOG). The current SLS 
+
+
+
+PRA approach for assessing FSW failure is described in 
+
+
+
+Novack et al [11]. 
+
+
+
+The quantification of the FSW risk follows the SLS 
+
+
+
+PRA modeling practice, which was based on Space Shuttle 
+
+
+
+Orbiter historical data, as described in the Primary Avionics 
+
+
+
+Software System (PASS) PRA [12]. The PASS PRA 
+
+
+
+estimated the probability for a Shuttle PASS failure during a 
+
+
+
+nominal mission resulting in a LOC event. The PASS PRA 
+
+
+
+defined a Source Line Of Code (SLOC) as the smallest 
+
+
+
+increment of source code that can be compiled into 
+
+
+
+executable code by a compiler, and an error in a SLOC as a 
+
+
+
+binary condition that either will or will not execute in a 
+
+
+
+manner compliant with requirements. Each SLOC was 
+
+
+
+treated as independent with a constant identical failure rate. 
+
+
+
+Firmware is coding written to a hardware device’s non-
+
+
+
+volatile memory. It is installed directly onto a piece of 
+
+
+
+hardware and is essentially software that enables the 
+
+
+
+hardware to run. Firmware elements, when identified in the 
+
+
+
+FP/FN analysis, are treated similarly to FSW with the SLOC 
+
+
+
+data and modeling approach, except the SLOC data is 
+
+
+
+extracted from the design algorithm that programs the 
+
+
+
+hardware. A coding language, Hardware Description 
+
+
+
+Language (HDL), is compiled into a configuration file which 
+
+
+
+can be loaded into the hardware. 
+
+
+
+Within NASA PRA, the firmware risk may be modeled 
+
+
+
+differently depending on data availability. In some cases the 
+
+
+
+firmware failures are modeled as described above, while in 
+
+
+
+other cases firmware failures are included within the 
+
+
+
+hardware reliability assessments, or estimated as a 
+
+
+
+percentage of the avionics box failure rate. The impact of 
+
+
+
+modeling the firmware failures as hardware is the the the 
+
+
+
+failure events inherit the properties of operational time and 
+
+
+
+redundancy that the software models do not. 
+
+
+
+For this FP/FN analysis, FSW and firmware failure 
+
+
+
+events are modeled as the software failure rate, FRSW, 
+
+
+
+multiplied by the SLOC of the software code or firmware 
+
+
+
+design code, NSLOC, in equation 3. 
+
+
+
+ 𝑃𝑓𝑠𝑜𝑓𝑡𝑤𝑎𝑟𝑒
+= 𝐹𝑅𝑆𝑊 × 𝑁𝑆𝐿𝑂𝐶 (3) 
+
+
+
+3.4 Data Uncertainty 
+
+
+
+To properly characterize and account for the state of 
+
+
+
+knowledge in the underlying data used to model the fault tree 
+
+
+
+basic events, an uncertainty distribution is applied to each of 
+
+
+
+the failure rate point estimates. When possible, basic events 
+
+
+
+that model the same failure rate and uncertainty are 
+
+
+
+correlated. Partial correlation, events modeled unique from 
+
+
+
+each other, is not possible with SAPHIRE and therefore 
+
+
+
+uncertainty distributions may be lower than expected. 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+ 
+
+
+
+Typically, the failure rate data are best characterized by 
+
+
+
+a lognormal uncertainty distribution that is either based on 
+
+
+
+existing SLS PRA data or uncertainty estimation guidelines. 
+
+
+
+The lognormal uncertainty distribution can be characterized 
+
+
+
+by an Error Factor (EF), which defines the dispersion about 
+
+
+
+the median. NASA PRAs have used and currently use EF as 
+
+
+
+defined by the ratio of the 95th percentile over the 50th 
+
+
+
+percentile. 
+
+
+
+When the failure rate data is derived or provided by the 
+
+
+
+PRA group, its inherent failure rate uncertainty distribution 
+
+
+
+is maintained. If the failure rate data is derived from other 
+
+
+
+reliability reports (e.g., MIL-HDBK-217F) or domain 
+
+
+
+expert’s inputs where no uncertainty distribution is 
+
+
+
+available, then a NASA PRA based uncertainty assignment 
+
+
+
+is based on engineering judgement. 
+
+
+
+4 ANALYSES CONDUCTED 
+
+
+
+Preliminary FP analyses conducted on several abort 
+
+
+
+detection functions indicated that software failure risk 
+
+
+
+contributions would dominate, and in some cases, be on the 
+
+
+
+same level as the probability of the abort condition. In 
+
+
+
+general, the software risk contributions were one to two 
+
+
+
+orders of magnitude greater than the hardware failures. 
+
+
+
+Because the FP/FN detection analyses were at a lower level 
+
+
+
+than the SLS PRA studies, the assumption was that 
+
+
+
+additional refinement of the failure data was required to 
+
+
+
+provide a better assessment of software and hardware 
+
+
+
+elements for the detection function. The following sections 
+
+
+
+detail the refinements that were developed and applied. 
+
+
+
+4.1 Detailed FSW Code Traces 
+
+
+
+The SLS IAS discipline provided code traces through 
+
+
+
+the actual flight software that handled or processed the 
+
+
+
+measurements or status data monitored by the detection 
+
+
+
+function. For each detection function case, the tracing 
+
+
+
+process was conducted from input data processed by the 
+
+
+
+Avionics Data Handler Input (ADHIN), to data qualification 
+
+
+
+and consolidation, [13] to the data exchange process 
+
+
+
+between the FCs by the Flight Computer Redundancy 
+
+
+
+Management (FCRM) software, and finally to the detection 
+
+
+
+and notification logic. For each area, a set of software 
+
+
+
+functions and modules were identified that could result in 
+
+
+
+the FP or FN outcome. Summing the SLOC counts for each 
+
+
+
+trace provided the overall FSW SLOC specific to the 
+
+
+
+detection function. This provided more refined code paths 
+
+
+
+than was developed for the SLS PRA and resulted in lower 
+
+
+
+SLOC counts. 
+
+
+
+4.2 Estimation of Logical SLOC Data 
+
+
+
+For the FP/FN analysis, Logical SLOC (LSLOC) counts 
+
+
+
+were used instead of SLOC counts as they focused the 
+
+
+
+failure model on the executable portions of the software, 
+
+
+
+reducing the sensitivity to the coding style convention and 
+
+
+
+code formatting. The FSW compiling package reported an 
+
+
+
+estimated SLOC and LSLOC count for each software 
+
+
+
+function, and the software trace SLOC counts were simply 
+
+
+
+converted into LSLOC counts. 
+
+
+
+4.3 Update of Software Failure Rate 
+
+
+
+The initial software failure rate estimated for the SLS 
+
+
+
+PRA modeling was based on the PASS PRA estimation. The 
+
+
+
+SLS PRA has implemented a new process for approximating 
+
+
+
+the software failure rate using the commercial Softrel 
+
+
+
+FREstimate Predictor software reliability tool. The total time 
+
+
+
+under test as well as total number of defects found in each 
+
+
+
+software version release, along with general software 
+
+
+
+development information are input into Frestimate. 
+
+
+
+Frestimate then compares this to common statistical models 
+
+
+
+of software development to quantify expected defect density 
+
+
+
+and rate of failure. This update to the FP/FN analyses alone 
+
+
+
+reduced the failure rate and hence the software risk 
+
+
+
+contributions by an order of magnitude. 
+
+
+
+4.4 Common Failure Split Fractions CFSF) 
+
+
+
+As was stated earlier, each monitored condition was 
+
+
+
+modeled and assessed independently and separately, with 
+
+
+
+the intention of combining the individual fault trees into a 
+
+
+
+total integrated fault tree that would represent the total 
+
+
+
+FP/FN impact of the SLS FM. This was done to evaluate the 
+
+
+
+risk of each detection function individually to allow for a 
+
+
+
+direct risk-to-benefit informed assessment. 
+
+
+
+One issue with this approach is that common hardware 
+
+
+
+and software failures are inherent across the fault trees. In an 
+
+
+
+integrated fault tree, the proper use of a fault tree basic event 
+
+
+
+naming convention will facilitate the Boolean reduction to 
+
+
+
+remove these common events. Common Failure Split 
+
+
+
+Fractions (CFSF) are employed within the fault trees to 
+
+
+
+divide common failure events included in multiple FP and 
+
+
+
+FN fault trees. The CFSF prevents the over-estimation of 
+
+
+
+risk across the suite of detection functions, allowing the 
+
+
+
+independent risk assessment of each detection function and 
+
+
+
+the eventual merger of the fault trees to provide a risk 
+
+
+
+assessment of the entire detection function suite. 
+
+
+
+These CFSFs address two common failure modelling 
+
+
+
+scenarios, failures that impact multiple detection functions 
+
+
+
+directly, and failures that impact multiple detection 
+
+
+
+functions exclusively. For each failure modeled in the FP/FN 
+
+
+
+analyses, across all the detection functions analyzed, a CFSF 
+
+
+
+is created. The CFSF is the inverse of the number of 
+
+
+
+detection function fault trees (including the FP and FN fault 
+
+
+
+trees) that the failure is included for the same time period. 
+
+
+
+Because detection function time periods may differ in start 
+
+
+
+and end times, and to reduce the analytical complexity, 
+
+
+
+mission phases were used to consider the detection 
+
+
+
+monitoring overlap. 
+
+
+
+5 CURRENT FP/FN ASSESSMENT RESULTS AND 
+
+
+
+COMMENTS 
+
+
+
+Current analyses conducted for the SLS Artemis II 
+
+
+
+mission have provided risk contributions for the 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+ 
+
+
+
+implemented FM detection function, as well as the relative 
+
+
+
+contributions of software and hardware elements of each 
+
+
+
+abort detection function and most safing response detection 
+
+
+
+functions. With the updates described in previous sections, 
+
+
+
+the primary risk drivers for these functions are flight 
+
+
+
+software failures, firmware design failures, and hardware 
+
+
+
+CCFs. The results provide a more reasonable estimate of the 
+
+
+
+software and firmware risk, and do not eclipse the hardware 
+
+
+
+risk estimations. 
+
+
+
+Still, there are concerns that the software risks are 
+
+
+
+overestimated. Software is represented as a demand failure, 
+
+
+
+meaning that it only fails when used, like a valve, hence no 
+
+
+
+time is included in the failure risk calculation. For a 
+
+
+
+detection function, the ‘demand’ is every processing cycle, 
+
+
+
+and yet the risk estimate for a software failure is the same 
+
+
+
+whether the condition is monitored for one second or one 
+
+
+
+hour. Future FM FP/FN analyses will consider applying 
+
+
+
+fractions based on the active processing time of the function 
+
+
+
+over the entire mission to the software failure models. 
+
+
+
+Additionally, software and firmware failures are 
+
+
+
+modeled as a common cause failure across all the redundant 
+
+
+
+devices, e.g., flight computers. In order to assess the risk 
+
+
+
+impacts of the redundancy strategies for these devices, 
+
+
+
+additional detail needs to be developed to estimate software 
+
+
+
+failures that would result in independent failures. 
+
+
+
+The issue of how to properly model software and 
+
+
+
+firmware failure events and to integrate those models with 
+
+
+
+hardware failure events is a continued focus going forward. 
+
+
+
+More accurate failure modeling of these events would 
+
+
+
+provide improved verification of design selections, and risk-
+
+
+
+informed decisions in applying future development 
+
+
+
+resources. 
+
+
+
+REFERENCES 
+
+
+
+1. Lo, Y., et al., “Application of Fault Management 
+
+
+
+Theory to the Quantitative Selection of a Launch 
+
+
+
+Vehicle Abort Trigger Suite”, IEEE 2014 International 
+
+
+
+Conference on Prognostics and Health Management, 
+
+
+
+(June) 2014. 
+
+
+
+2. Stamatelatos, M., et al., Probabilistic Risk 
+
+
+
+Assessment Procedures Guide for NASA Managers and 
+
+
+
+Practitioners, NASA/SP-2011-3421. 
+
+
+
+3. Technical Probabilistic Risk Assessment (PRA) 
+
+
+
+Procedures for Safety and Mission Success for NASA 
+
+
+
+Programs and Projects, NPR 8705.5A. 
+
+
+
+4. Mandutianu, S., et al., “Modeling Complex Cross-
+
+
+
+Systems Software Interfaces using SysML”, AIAA 
+
+
+
+InfoTech Conference, August 2013. 
+
+
+
+5. Smith, C., et al., Systems Analysis Programs for 
+
+
+
+Hands-on Integrated Reliability Evaluations 
+
+
+
+(SAPHIRE) Version 8, Volume 3: User’s Guide, 
+
+
+
+NUREG/CR-7039, June 2011. 
+
+
+
+6. Military Handbook: Reliability Prediction of 
+
+
+
+Electronic Equipment, MIL-HDBK-217F, Department 
+
+
+
+of Defense, (Dec.), 1991. 
+
+
+
+7. Melcher, K., et al., “Abort Trigger False Positive 
+
+
+
+and False Negative Analysis Methodology for 
+
+
+
+Threshold-based Abort Detection”, Annual Conference 
+
+
+
+of the Prognostics and Health Management Society, 
+
+
+
+(Oct.), 2015. 
+
+
+
+8. Mosleh, A., et al., Guidelines on Modeling 
+
+
+
+Common Cause Failures in Probabilistic Risk 
+
+
+
+Assessment, NUREG/CR-5485 INEEL/EXT-97-01327, 
+
+
+
+1998. 
+
+
+
+9. Reistle, B., Global Alpha Model Uncertainty Tool 
+
+
+
+(GAMUT), accompanying User Guide for the GAMUT 
+
+
+
+2012, (Nov.), 2014. 
+
+
+
+10. Haught, M., et al., “Modeling Common Cause 
+
+
+
+Failures of Thrusters on ISS Visiting Vehicles”, 
+
+
+
+Probabilistic Safety Assessment and Management 
+
+
+
+PSAM 12, (June) 2014. 
+
+
+
+11. Novack, S., et al., “Estimating Software Reliability 
+
+
+
+for Space Launch Vehicles in Probabilistic Risk 
+
+
+
+Assessment (PRA)”, IEEE Aerospace Conference (Big 
+
+
+
+Sky), (Mar.), 2018. 
+
+
+
+12. Primary Avionics Software System (PASS) 
+
+
+
+Probabilistic Risk Assessment, NASA, SSMA-08-11, 
+
+
+
+Rev B, August 27,2010. 
+
+
+
+13. Wong, E., “Sensor Data Qualification and 
+
+
+
+Consolidation (SDQC) for Real-Time Operation of 
+
+
+
+Launch Systems”, AIAA SPACE Forum, (Sept.), 2016. 
+
+
+
+BIOGRAPHES 
+
+
+
+William A. Maul 
+
+
+
+HX5 LLC, Brook Park, Ohio 44142 
+William Maul is an Aerospace Engineer contractor at NASA Glenn 
+
+
+
+Research Center (GRC) where he has worked for 35 years focusing 
+
+
+
+on the advancement and development of System Health 
+
+
+
+Management for launch vehicle applications. He is currently a 
+
+
+
+member of the SLS M&FM analysis team, supporting the risk 
+
+
+
+assessments of FM abort and safing algorithms for selection and 
+
+
+
+design verification. 
+
+
+
+Yunnhon Lo, PhD 
+
+
+
+ERC Inc., Huntsville, Alabama 35806 
+Yunnhon Lo, Ph.D., is the M&FM Analysis Lead at NASA 
+
+
+
+Marshall Space Flight Center (MSFC) Vehicle Management 
+
+
+
+division. As the M&FM Analysis Lead, Dr. Lo is responsible for 
+
+
+
+the performance of SLS abort analysis, various M&FM analysis 
+
+
+
+products and support the development of SLS FM capabilities. 
+
+
+
+Edmond Wong 
+
+
+
+NASA Glenn Research Center, Cleveland, Ohio 44135 
+Edmond Wong is a Senior Research Engineer at NASA GRC, 
+
+
+
+where he has worked for 32 years developing advanced control and 
+
+
+
+health management technologies for aerospace applications. 
+
+
+
+Currently, he serves as Team Lead of the GRC SLS M&FM Team.

@@ -1,0 +1,3431 @@
+Icing Performance Degradation of an eVTOL 
+
+
+
+Propeller at the NASA Glenn Icing Research 
+
+
+
+Tunnel 
+
+
+
+Paul H. von Hardenberg1 and Curtis A. Flack2 
+NASA Glenn Research Center, Cleveland, OH, 44135, United States 
+
+
+
+In March 2023, a 10-day test entry was conducted at the NASA Glenn Icing Research 
+
+
+
+Tunnel (IRT) to study ice accretion on an eVTOL propeller. The primary objective was to 
+
+
+
+collect ice accretion data to support the development of NASA’s latest ice accretion solver, 
+
+
+
+GlennICE. Various parametric sweeps of cloud and operating conditions were performed to 
+
+
+
+evaluate the sensitivity of the parameters on the resulting ice accretion, the results of which 
+
+
+
+have been published previously. A subsequent 5-day test entry was carried out in January 
+
+
+
+2024, focusing on gathering experimental data related to ice shedding and exploring 
+
+
+
+conditional icing scaling methods for propellers. Throughout both test campaigns, propeller 
+
+
+
+performance data was recorded in the form of torque rise over time. The purpose of this paper 
+
+
+
+is to present a subset of the performance data acquired during these tests and provide a 
+
+
+
+discussion of the key findings. 
+
+
+
+I. Nomenclature 
+
+
+
+𝐴𝑐 = accumulation parameter 
+
+
+
+𝐶𝑃 = power coefficient 
+
+
+
+𝐶𝑇 = thrust coefficient 
+
+
+
+𝐶𝑄 = torque coefficient 
+
+
+
+𝑐 = airfoil chord 
+
+
+
+𝐷 = propeller diameter 
+
+
+
+𝐽 = advance ratio 
+
+
+
+𝑁𝑏 = number of blades 
+
+
+
+𝑛 = freezing fraction 
+
+
+
+𝑛𝑐 = corrected freezing fraction 
+
+
+
+𝑛0 = freezing fraction at stagnation 
+
+
+
+𝑛0
+∗ = freezing potential at stagnation 
+
+
+
+𝑃 = propeller power 
+
+
+
+𝑄 = propeller torque 
+
+
+
+𝑅 = propeller tip radius 
+
+
+
+𝑟 = radial distance 
+
+
+
+𝑇 = propeller thrust 
+
+
+
+𝑡∞,0 = freestream total air temperature 
+
+
+
+𝑉𝑎𝑥 = axial component of air velocity 
+
+
+
+𝑉𝑒𝑓𝑓 = effective air velocity 
+
+
+
+𝑉𝑟𝑜𝑡 = rotational component of air velocity 
+
+
+
+𝑉∞ = freestream air velocity 
+
+
+
+𝑊𝑒𝐿 = Weber number based on length L 
+
+
+
+ 
+1 Research Aerospace Engineer, Icing Branch, 21000 Brookpark Rd., MS 11-2 
+2 Aerospace Flight Systems Engineer, Systems Engineering and Architecture Division, 21000 Brookpark Rd., MS-
+
+
+
+162-4, AIAA Member 
+
+
+
+
+
+
+
+
+
+
+
+𝛽 = collection efficiency 
+
+
+
+𝛽0 = collection efficiency at stagnation 
+
+
+
+𝛿 = drop median volumetric diameter (MVD) 
+
+
+
+𝜂 = propeller efficiency 
+
+
+
+𝜌∞ = freestream air density 
+
+
+
+𝜎 = propeller solidity 
+
+
+
+𝜏 = icing time 
+
+
+
+𝜔 = propeller rotational speed, rad/s 
+
+
+
+II. Introduction 
+
+
+
+A wide range of electric vertical takeoff and landing (eVTOL) aircraft concepts have been proposed for 
+
+
+
+Advanced Air Mobility (AAM) operations due to their potential to have lower noise, reduced operating costs, and 
+
+
+
+decreased emissions when compared to conventional VTOL aircraft, such as helicopters. Despite the diversity in 
+
+
+
+eVTOL designs, there are certain characteristics which are shared by many. For example, eVTOL concepts typically 
+
+
+
+have distributed electric propulsion systems where thrust generation is distributed across several electrically 
+
+
+
+powered rotors. To reduce their acoustic signature, eVTOL rotors generally operate at much slower tip speeds and 
+
+
+
+have higher solidities than conventional helicopter rotors [1]. In addition, many eVTOL concepts have vectored 
+
+
+
+thrust capabilities where their rotors act as propellers during the cruise phase of flight. An example of an eVTOL 
+
+
+
+aircraft with vectored thrust capabilities is the NASA tiltwing reference vehicle shown in Fig. 1 [2]. 
+
+
+
+ 
+
+
+
+Fig. 1 Renderings of NASA’s Tiltwing Reference Vehicle in a Cruise (a) and Hover (b) Configuration 
+
+
+
+ As with all aircraft, icing presents a significant challenge to the safe operation of eVTOL aircraft. Ice can form on 
+
+
+
+lifting surfaces and propulsors which leads to a reduction in lift and thrust, and an increase in drag and stall speed of 
+
+
+
+the vehicle. However, due to the novelty of eVTOL aircraft, the scope and severity of these effects is not as well 
+
+
+
+understood as for conventional aircraft. In addition, eVTOL aircraft presents several unique challenges. For example, 
+
+
+
+the large number of rotors and limited power capacity of eVTOL aircraft prohibits the use of conventional ice 
+
+
+
+protection systems (IPS). As a result, most eVTOL manufacturers are currently not seeking certification for flight into 
+
+
+
+known icing. However, they will still likely be required to demonstrate safe operation in icing for a limited duration 
+
+
+
+in the event of an inadvertent icing encounter. Thus, the ability to accurately predict and understand the impact of 
+
+
+
+icing on their performance is still of great importance. 
+
+
+
+ To investigate the icing phenomenon relevant to eVTOL aircraft, NASA Glenn Research Center developed a 
+
+
+
+general-purpose propeller test stand for conducting fundamental icing research on electrically driven propellers in the 
+
+
+
+Icing Research Tunnel (IRT). A 10-day test entry in the IRT was completed in March 2023, with the goal of generating 
+
+
+
+ice accretions on a non-proprietary propeller geometry under well-characterized conditions [3]. The data from this test 
+
+
+
+is currently being used to support the development of NASA’s latest ice accretion solver, GlennICE [4-6]. Three 
+
+
+
+carbon fiber propellers of diameters 0.610, 0.711, and 0.914 m (24, 28, and 36 in) were utilized during the test. A 
+
+
+
+follow-on test lasting 5 days was later completed in January 2024, which focused on gathering experimental ice 
+
+
+
+shedding data as well as evaluating conditional icing scaling techniques for propellers [7,8]. Propeller performance 
+
+
+
+degradation in the form of torque change over time was captured during both test entries. This paper provides an 
+
+
+
+analysis and discussion of a subset of the propeller performance data that was acquired during these tests. 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+III. Test Article and Instrumentation 
+
+
+
+A. Propeller Test Rig 
+
+
+
+ A picture of the propeller test rig installed in the IRT test section with the 0.914 m (36 in) diameter propeller is 
+
+
+
+shown in Fig. 2. The propeller is driven by an EMRAX 188 permanent magnet synchronous motor with a continuous 
+
+
+
+power rating of up to 34 kW (45 hp) and a continuous torque rating of up to 52 Nm (38 lbf-ft). The motor has an IP65 
+
+
+
+ingress protection rating and is liquid cooled to prevent overheating. The propeller hub is mounted directly to the 
+
+
+
+motor via an adapter. To measure propeller forces and moments, the propeller rig is compatible with any of the 
+
+
+
+Interface 6A68 6-axis load cells which can be mounted directly aft of the motor as shown in Fig. 3. Only the Interface 
+
+
+
+6A68C load cell was available during the 2023 test. However, the 6A68C load cell was only used during the dry (non-
+
+
+
+icing) portion of the test to acquire baseline propeller performance data due to concerns that the imbalance loads 
+
+
+
+caused by ice shedding could exceed the structural strength of the load cell. The higher capacity, 6A68E load cell was 
+
+
+
+later obtained and used throughout the 2024 test entry to measure forces and moments during the icing encounter. The 
+
+
+
+motor speed is controlled by sending commands to a Cascadia Motion CM200DX Inverter. The inverter also provides 
+
+
+
+estimates of motor power, temperature, and torque. 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Fig. 2 NASA’s eVTOL Propeller Test Stand for Fundamental Icing Studies 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Fig. 3 CAD Model of the Propeller Test Stand Showing Location of Load Cell 
+
+
+
+
+
+
+
+
+
+
+
+B. Propeller Geometry 
+
+
+
+Three carbon fiber propellers of diameters 0.610, 0.711, and 0.914 m (24, 28, and 36 in) were custom-made using 
+
+
+
+a non-proprietary propeller geometry to maximize data dissemination. All three propellers had a NACA 0012 airfoil 
+
+
+
+profile. The twist and chord distributions for the three propellers are shown in Fig. 4. The propeller geometry was 
+
+
+
+inspired by the Computationally Optimized Proprotor (COPR) design developed by NASA [9]. However, some 
+
+
+
+deviations from the original COPR design were required for manufacturing feasibility purposes. The twist and chord 
+
+
+
+distributions provided in Fig. 4 represent the final design after the necessary modifications were made. 
+
+
+
+ 
+
+
+
+ 
+
+
+
+(a) Chord Distributions (b) Twist Angle Distributions 
+
+
+
+Fig. 4 Comparisons of the propeller chord (a) and twist angle (b) distributions between the three propeller 
+
+
+
+sizes. 
+
+
+
+It can be seen from Fig. 4 that the three propellers have similar normalized twist and chord distributions from a 
+
+
+
+radial location of approximately 𝑟/𝑅 = 0.40 to 𝑟/𝑅 = 1.0. However, the use of the same hub and spinner for each set 
+
+
+
+of propeller blades prevented geometric similarity towards the root of the blade. In the complimentary paper by Rigby 
+
+
+
+and von Hardenberg, the effect of not geometrically scaling the spinner with propeller size was explored using 
+
+
+
+GlennICE and found to have a negligible effect on the predicted ice accretion [6]. 
+
+
+
+A 4-bladed, variable pitch hub was chosen for this test entry to provide greater flexibility in propeller operating 
+
+
+
+conditions. A pitch-adjustment tool was provided by the propeller manufacturer to change the collective pitch of the 
+
+
+
+blades. For both test entries, the target propeller pitch was 18° higher than the design twist distributions shown in Fig. 
+
+
+
+4b. After evaluating the laser scans of the propeller blades obtained during the test, it was determined that the blade 
+
+
+
+pitch angle could deviate as much as one degree from the target pitch setting. Future tests will utilize a calibrated 
+
+
+
+inclinometer to provide more consistent pitch settings. 
+
+
+
+IV. Test Procedure 
+
+
+
+A. Spinner Drag Characterization 
+
+
+
+ To accurately determine the thrust generated by the propeller from the load cell measurements, it is important to 
+
+
+
+account for additional forces that may influence the net load measured by the load cell. In this case, the drag force 
+
+
+
+acting on the spinner was one such force that contributed to the net axial load measured by the load cell. To account 
+
+
+
+for this, the spinner drag was characterized by conducting a sweep of tunnel speed with the spinner installed on the 
+
+
+
+test stand without the propeller blades. During the tunnel speed sweep, the motor was exercised at a speed of 1000 
+
+
+
+RPM. Once the drag on the spinner was characterized, the thrust produced by the propeller could be determined by 
+
+
+
+subtracting the spinner drag force from the net axial load measured by the load cell. The results of the spinner drag 
+
+
+
+characterization are shown in Fig. 5. 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+Fig. 5 Measured Spinner Drag vs Tunnel Speed 
+
+
+
+B. Clean (no ice) Performance Characterization 
+
+
+
+ The first three days of the 2023 test were devoted to characterizing the clean performance of the propellers. The 
+
+
+
+propeller performance is defined using the standard nomenclature for propellers. The non-dimensional coefficients of 
+
+
+
+propeller thrust, power, and efficiency are defined as: 
+
+
+
+ 
+
+
+
+ 𝐶𝑇 =
+4𝜋2𝑇
+
+
+
+𝜌∞𝜔2𝐷4
+ (1) 
+
+
+
+ 𝐶𝑃 =
+8𝜋3𝑃
+
+
+
+𝜌∞𝜔3𝐷5
+ (2) 
+
+
+
+ 𝜂 =
+𝐶𝑇
+
+
+
+𝐶𝑃
+
+
+
+𝐽 (3) 
+
+
+
+ 
+
+
+
+Where T is the propeller thrust, P is the propeller power, 𝜌∞ is the freestream air density, ω is the rotational speed of 
+
+
+
+the propeller in rad/s, D is the diameter of the propeller, and J is the advance ratio which is defined as: 
+
+
+
+ 
+
+
+
+ 𝐽 =
+2𝜋𝑉∞
+
+
+
+𝜔𝐷
+ (4) 
+
+
+
+ 
+
+
+
+Where 𝑉∞ is the freestream velocity. Note that the relationship between propeller power and propeller torque is defined 
+
+
+
+as: 
+
+
+
+ 
+
+
+
+ 𝑃 = 𝜔𝑄 (5) 
+
+
+
+ 
+
+
+
+Where 𝑄 is the dimensional propeller torque. Using the relationship defined in Eq. 5, the non-dimensional torque 
+
+
+
+coefficient can be defined as: 
+
+
+
+ 
+
+
+
+ 
+𝐶𝑄 =
+
+
+
+4𝜋2𝑄
+
+
+
+𝜌∞𝜔2𝐷5
+=
+
+
+
+𝐶𝑃
+
+
+
+2𝜋
+ (6) 
+
+
+
+
+
+
+
+
+
+
+
+ To account for varying blade numbers and planforms, the propeller performance coefficients are often divided by 
+
+
+
+the propeller solidity, σ. In its simplest form, the propeller solidity represents the ratio of the total blade area to the 
+
+
+
+swept area of the propeller, as defined in Eq. 7. 
+
+
+
+ 
+
+
+
+ 
+𝜎 = ∫
+
+
+
+𝑁𝑏𝑐(𝑟/𝑅)
+
+
+
+𝜋𝑅
+𝑑(𝑟 𝑅⁄ )
+
+
+
+1
+
+
+
+0
+
+
+
+ (7) 
+
+
+
+ 
+
+
+
+ The solidities for the 24, 28, and 36-inch diameter propellers are provided in Table 1. The slight discrepancies in 
+
+
+
+the solidities are a result of using a propeller hub of a fixed diameter for each propeller, which effectively reduces the 
+
+
+
+relative blade area of the smaller diameter propellers. 
+
+
+
+ 
+
+
+
+Table 1 Solidities of the 24, 28, and 36-inch Diameter Propellers 
+
+
+
+Propeller Diameter Solidity, σ 
+
+
+
+24” 0.1875 
+
+
+
+28” 0.2016 
+
+
+
+36” 0.2151 
+
+
+
+ 
+
+
+
+ When characterizing the aerodynamic performance of a propeller, values of 𝐶𝑇, 𝐶𝑃 (𝑜𝑟 𝐶𝑄), and 𝜂 are determined 
+
+
+
+and plotted over a range of advance ratios. During the 2023 test, the non-dimensional coefficients were obtained by 
+
+
+
+performing a sweep of advance ratios at a fixed propeller RPM. This was done by operating the propeller at some 
+
+
+
+nominal RPM and tunnel speed that resulted in a near-windmilling state (i.e., when the required motor torque was at 
+
+
+
+or near zero), and then gradually decreasing the tunnel speed while maintaining a constant propeller RPM to perform 
+
+
+
+a sweep of advance ratios. It was decided to conduct the advance ratio sweep at a fixed RPM (as opposed to a fixed 
+
+
+
+tunnel speed) to avoid potentially operating the propeller at a resonant frequency of the test stand. In addition, the 
+
+
+
+RPM of each propeller was chosen to be close to the RPMs that were expected to be tested during the icing portion of 
+
+
+
+the test. The propeller performance charts for the 0.9144 m (36 in) diameter propeller are shown in Fig 6. Figure 6 
+
+
+
+also includes comparisons of the experimental performance data with Blade Element Momentum Theory (BEMT) 
+
+
+
+predictions using XROTOR. 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+ (a) 
+
+
+
+ 
+ (b) (c) 
+
+
+
+Fig. 6 Experimental Performance Curves for the 36-inch Diameter Propeller with Comparisons to XROTOR 
+
+
+
+Predictions 
+
+
+
+ Recall from Section III that an estimate of the propeller torque could be acquired from two independent sources: 
+
+
+
+1) from the load cell measured moment about the propeller axis of rotation and 2) from the inverter estimate of motor 
+
+
+
+torque based on the motor rotational speed and power. As such, the propeller performance charts include the calculated 
+
+
+
+torque coefficient and resulting efficiency using both sources of propeller torque. As can be seen from Fig. 6c, the 
+
+
+
+torque measured by the load cell is very similar to the torque estimate provided by the inverter, albeit slightly lower 
+
+
+
+at the higher advance ratios. Given the general good agreement between the load cell and inverter estimate of motor 
+
+
+
+torque, it was decided to utilize the inverter estimate of torque for the remainder of testing. This approach offers a 
+
+
+
+significant advantage over using the load cell, as the inverter estimate of motor torque is not affected by thermal drift, 
+
+
+
+creep, and hysteresis. As a result, the inverter estimate of torque was found to be much more consistent and repeatable 
+
+
+
+than the torque measured by the load cell. In addition, significant time was saved by not having to thermal soak the 
+
+
+
+load cell prior to each run. As such, only the inverter estimate of motor torque is presented herein. 
+
+
+
+C. Icing Similarly Parameters 
+
+
+
+ To facilitate the interpretation of the results, the key icing similarity parameters (𝑛, 𝛽, 𝐴𝑐, and 𝑊𝑒𝐿) have been 
+
+
+
+calculated at 𝑟 𝑅⁄ = 0.75 at stagnation and provided for each condition. Details on how these parameters were 
+
+
+
+calculated can be found in Ref. 3 and 8. A list of the key icing similarity parameters and their descriptions can be 
+
+
+
+found in Table 2. 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+Table 2 Description of Important Icing Similarity Parameters 
+
+
+
+Parameter Variable Description 
+
+
+
+Freezing Fraction 𝑛 
+
+
+
+Fraction of water mass flux entering a 
+
+
+
+control volume that freezes within the 
+
+
+
+control volume. 
+
+
+
+Collection Efficiency 𝛽 
+Fraction of the freestream droplet 
+
+
+
+concentration that impinges on a surface. 
+
+
+
+Accumulation 
+
+
+
+Parameter 
+𝐴𝑐 
+
+
+
+Theoretical maximum leading edge ice 
+
+
+
+thickness (assuming 𝑛 and 𝛽 = 1) normalized 
+
+
+
+by the airfoil leading edge nose diameter of 
+
+
+
+curvature. 
+
+
+
+Weber’s Number 𝑊𝑒𝐿 
+Ratio of the inertial forces acting on the 
+
+
+
+surface of liquid water to its surface tension. 
+
+
+
+ 
+
+
+
+ While the icing similarity parameters varied radially along the propeller due to a combination of changing blade 
+
+
+
+chord and effective velocity, only the values calculated at 𝑟 𝑅⁄ = 0.75 will be provided for simplicity. In addition, for 
+
+
+
+the conditions tested in which the values of 𝑛0, 𝛽0, 𝐴𝑐, and/or 𝑊𝑒𝐿 matched at 𝑟 𝑅⁄ = 0.75, it was found that there was 
+
+
+
+generally good agreement of those parameters at other radial locations as well. Figure 7 provides an example 
+
+
+
+distribution of 𝑛0 along the propeller for runs RA3701 and RA3690 for which the freestream total temperature was 
+
+
+
+adjusted to match 𝑛0 at 𝑟 𝑅⁄ = 0.75 to compensate for a difference in Liquid Water Content (LWC). While 𝑛0 only 
+
+
+
+matches at 𝑟 𝑅⁄ = 0.75, the differences in 𝑛0 at other radial locations are minor. However, it is important to note that 
+
+
+
+matching these parameters at 𝑟 𝑅⁄ = 0.75 will not always result in good agreement at other radial locations and that 
+
+
+
+this is simply an observation of the current conditions tested and presented herein. 
+
+
+
+ 
+
+
+
+Fig. 7 Example Freezing Fraction vs Span Distributions for Runs RA3701 and RA3690 
+
+
+
+B. Icing Performance Characterization 
+
+
+
+ During a typical icing run, the propeller was operated at the target RPM and tunnel speed for several minutes until 
+
+
+
+the freestream total air temperature, 𝑡∞,0, reached a steady state at the target temperature for that run. After achieving 
+
+
+
+steady state conditions, the propeller was operated for 30 seconds before introducing the icing cloud to acquire baseline 
+
+
+
+performance data. The icing spray would continue for the target duration of that run or until a major shedding event 
+
+
+
+resulted in vibrations that exceeded their predefined limit. If a major shedding event occurred, the tunnel operators 
+
+
+
+would immediately turn off the cloud and begin the shutdown procedure. A linear curve fit was then applied to the 
+
+
+
+performance data from spray-on until spray-off, or until the 1st shedding event (if applicable), whichever occurred 
+
+
+
+first. Figure 8 shows a typical time history plot showing the rise in propeller torque for a run which includes a shedding 
+
+
+
+event around the 7-minute mark. 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+Fig. 8 Example Torque vs Time Plot for Run RA3677 
+
+
+
+V. Test Data 
+
+
+
+A. Repeatability 
+
+
+
+ Several repeat cases were performed to understand what level of variation could be expected in the propeller torque 
+
+
+
+measurements due to normal run to run variations in the cloud conditions. Figure 9 shows the propeller torque 
+
+
+
+requirements as a function of time for three runs with the same target cloud and operating conditions. Each case was 
+
+
+
+run indefinitely until a shedding event occurred. As seen from Fig. 9, excellent repeatability in the propeller torque 
+
+
+
+measurements was achieved. Several other repeats were performed at various other tunnel and propeller operating 
+
+
+
+conditions which showed similar levels of repeatability. 
+
+
+
+ 
+
+
+
+ 
+Fig. 9 Repeatability of Propeller Torque Measurements in Icing 
+
+
+
+
+
+
+
+
+
+
+
+Table 3 Target Test Conditions for Fig. 9 
+
+
+
+ Target Operating and Cloud Conditions 
+Similarity Parameters 
+
+
+
+(calculated at 𝑟/𝑅 = 0.75) 
+
+
+
+Run 
+𝑉∞ 
+
+
+
+knots 
+
+
+
+𝑡∞,0 
+
+
+
+°C 
+
+
+
+𝛿 
+
+
+
+µm 
+
+
+
+LWC 
+
+
+
+g/m3 
+
+
+
+𝜏 
+
+
+
+min 
+
+
+
+RPM 
+
+
+
+rev/min 
+
+
+
+D 
+
+
+
+in 
+
+
+
+𝑀𝑡𝑖𝑝 
+
+
+
+Mach 
+J 𝑛0
+
+
+
+∗ 𝐴𝑐 𝛽0 
+𝑊𝑒𝐿 
+
+
+
+106 
+
+
+
+RA3677 87 -6.0 15 1.20 7.08† 1394 28 0.20 2.71 0.53 12.85 0.88 0.14 
+
+
+
+RA3678 “ “ “ “ 7.66† “ “ “ “ “ 13.90 “ “ 
+
+
+
+RA3680 “ “ “ “ 6.45† “ “ “ “ “ 11.71 “ “ 
+
+
+
+† Time until first shedding event 
+
+
+
+B. Effect of LWC 
+
+
+
+Figure 10a shows the effect of increasing the Liquid Water Content (LWC) from 0.55 to 1.20 g/m3 on the propeller 
+
+
+
+torque for runs RA3683 and RA3684, respectively. The spray time for the 1.20 g/m3 run was reduced to match the 
+
+
+
+accumulation parameter, 𝐴𝑐, of the 0.55 g/m3 condition. All other conditions were identical as shown in Table 4. Based 
+
+
+
+on the analytical calculations of the freezing potential, 𝑛0
+∗ , it was believed that the temperature was sufficiently cold 
+
+
+
+to produce rime ice along the entire span of the propeller for both the 0.55 and 1.20 g/m3 condition. However, analysis 
+
+
+
+of the ice shapes following the test revealed that the freezing fractions for the 1.20 g/m3 case were slightly less than 
+
+
+
+one. Based on this observation, and the results of subsequent temperature sweeps, it is believed that the freezing 
+
+
+
+fractions achieved during testing were approximately 20% lower than the analytically predicted freezing potentials 
+
+
+
+reported in Table 4. As a result, the freezing fraction for run RA3684 may have been closer to 𝑛𝑐 = 1.19*0.8 = 0.95 
+
+
+
+at 𝑟 𝑅⁄ = 0.75 where 𝑛𝑐 is the corrected freezing fraction. The reason for the large discrepancy between the 
+
+
+
+experimentally achieved freezing fractions and the analytical freezing potentials is still being investigated. 
+
+
+
+Nonetheless, a comparison of the propeller torque requirements between these two conditions is presented below. 
+
+
+
+ As expected, the 1.20 g/m3 condition led to a more rapid increase in torque than the 0.55 g/m3 condition due to the 
+
+
+
+faster rate of ice accretion on the propeller. However, by plotting the change in torque as a function of the product of 
+
+
+
+the stagnation collection efficiency and accumulation parameter (𝛽0𝐴𝑐) as calculated at 𝑟 𝑅⁄ = 0.75, comparisons of 
+
+
+
+the propeller torque can be made at similar stagnation ice thicknesses. This result is shown in Fig. 10b. Note that, in 
+
+
+
+Fig. 10b, the propeller torque is presented in non-dimensional form as the torque coefficient divided by solidity 
+
+
+
+(𝐶𝑄 𝜎⁄ ). As seen from Fig. 10b, while the change in 𝐶𝑄 𝜎⁄ for the 0.55 and 1.20 g/m3 LWC conditions are similar, the 
+
+
+
+1.20 g/m3 condition still shows a slightly higher 𝐶𝑄 𝜎⁄ for a given 𝛽0𝐴𝑐. This is likely due to the 1.20 g/m3 condition 
+
+
+
+having a freezing fraction slightly less than one as explained in the previous paragraph, resulting in more glaze-like 
+
+
+
+features along the stagnation line of the propeller. It is likely that even better agreement could have been achieved had 
+
+
+
+the temperature for the 1.20 g/m3 condition been reduced further to achieve a freezing fraction of one. The ice shapes 
+
+
+
+obtained at the 𝑟 𝑅⁄ = 0.75 location for these runs are provided in Fig. 10b. Additional ice shapes for runs RA3683 
+
+
+
+and RA3684 at other radial locations are presented in Ref. 3. 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+(a) Change in Torque vs Time (b) Change in 𝐶𝑄 𝜎⁄ vs 𝛽0𝐴𝑐 
+
+
+
+Fig. 10 Effect of LWC on Propeller Torque Requirements (𝒏𝟎 = 1) 
+
+
+
+Table 4 Target Test Conditions for Fig. 10 
+
+
+
+ Target Operating and Cloud Conditions 
+Similarity Parameters 
+
+
+
+(calculated at 𝑟/𝑅 = 0.75) 
+
+
+
+Run 
+𝑉∞ 
+
+
+
+knots 
+
+
+
+𝑡∞,0 
+
+
+
+°C 
+
+
+
+𝛿 
+
+
+
+µm 
+
+
+
+LWC 
+
+
+
+g/m3 
+
+
+
+𝜏 
+
+
+
+min 
+
+
+
+RPM 
+
+
+
+rev/min 
+
+
+
+D 
+
+
+
+in 
+
+
+
+𝑀𝑡𝑖𝑝 
+
+
+
+Mach 
+J 𝑛0
+
+
+
+∗ 𝐴𝑐 𝛽0 
+𝑊𝑒𝐿 
+
+
+
+106 
+
+
+
+RA3683 87 -15.0 15 0.55 3.0 1516 28 0.21 2.49 2.37 2.59 0.88 0.15 
+
+
+
+RA3684 “ “ “ 1.20 1.4 “ “ “ “ 1.19 2.64 “ “ 
+
+
+
+ 
+
+
+
+ A similar analysis was conducted to explore the effect of LWC on the propeller torque requirements at glaze 
+
+
+
+conditions (𝑛0 < 1). Figure 11a shows the effect of increasing the LWC from 0.55 to 1.20 g/m3 at a target freezing 
+
+
+
+fraction of 𝑛0 = 0.51 for runs RA3701 and RA3690, respectively. Both the spray time and temperature for the 1.20 
+
+
+
+g/m3 condition were reduced to match 𝐴𝑐 and 𝑛0 at 𝑟 𝑅⁄ = 0.75, respectively. All other conditions were identical as 
+
+
+
+shown in Table 5. 
+
+
+
+ As expected, the propeller torque increased more rapidly for the 1.20 g/m3 condition. In addition, when expressed 
+
+
+
+in non-dimensional form as a function of 𝛽0𝐴𝑐, the propeller torque requirements are very similar for both LWC 
+
+
+
+conditions as shown in Fig. 11b. The ice shapes at 𝑟 𝑅⁄ = 0.75 are also provided in Fig. 11b, which shows that very 
+
+
+
+similar ice shapes were obtained at these two conditions. Additional ice shapes for runs RA3701 and RA3690 at other 
+
+
+
+radial locations are presented in Ref. 3. 
+
+
+
+ 
+
+
+
+𝑟 𝑅⁄ = 0.75 
+
+
+
+
+
+
+
+
+
+
+
+ 
+(a) Change in Torque vs Time (b) Change in 𝐶𝑄 𝜎⁄ vs 𝛽0𝐴𝑐 
+
+
+
+Fig. 11 Effect of LWC on Propeller Torque Requirements (𝒏𝟎 < 1) 
+
+
+
+Table 5 Target Test Conditions for Fig. 11 
+
+
+
+ Target Operating and Cloud Conditions 
+Similarity Parameters 
+
+
+
+(calculated at 𝑟/𝑅 = 0.75) 
+
+
+
+Run 
+𝑉∞ 
+
+
+
+knots 
+
+
+
+𝑡∞,0 
+
+
+
+°C 
+
+
+
+𝛿 
+
+
+
+µm 
+
+
+
+LWC 
+
+
+
+g/m3 
+
+
+
+𝜏 
+
+
+
+min 
+
+
+
+RPM 
+
+
+
+rev/min 
+
+
+
+D 
+
+
+
+in 
+
+
+
+𝑀𝑡𝑖𝑝 
+
+
+
+Mach 
+J 𝑛0
+
+
+
+∗ 𝐴𝑐 𝛽0 
+𝑊𝑒𝐿 
+
+
+
+106 
+
+
+
+RA3701 87 -3.0 15 0.55 3.0 1516 28 0.21 2.49 0.51 2.59 0.88 0.15 
+
+
+
+RA3690 “ -6.0 “ 1.20 1.4 “ “ “ “ “ 2.64 “ “ 
+
+
+
+ 
+
+
+
+ The results of the preceding analysis suggest that the propeller torque requirements due to icing may largely be 
+
+
+
+independent of LWC, provided that the distribution of 𝑛0 and 𝛽0𝐴𝑐 along the propeller remains the same or similar. 
+
+
+
+It should be noted, though, that the preceding analysis was performed at the same median volumetric diameter (MVD) 
+
+
+
+and, consequently, 𝛽0. As will be discussed in the next section, matching 𝛽0 (in addition to the product 𝛽0𝐴𝑐) may be 
+
+
+
+important for iced propeller performance similarity due to the effect of 𝛽0 on the impingement limits, and ultimately 
+
+
+
+the aerodynamic performance, of the propeller. 
+
+
+
+C. Effect of MVD 
+
+
+
+ Figure 12a shows the effect of increasing the MVD from 15 to 80 µm on the propeller torque for runs RA3711 and 
+
+
+
+RA3712, respectively. All other conditions for runs RA3711 and RA3712 were identical as shown in Table 6. A 
+
+
+
+freestream total temperature of -15°C was chosen to achieve a freezing fraction of 𝑛0 = 1 for both conditions, which 
+
+
+
+is consistent with experimental observations and analysis of the ice shapes. As a result of increasing the MVD from 
+
+
+
+15 to 80 µm, the 𝛽0 at 𝑟 𝑅⁄ = 0.75 increased from 0.88 to 0.99. 
+
+
+
+ As seen from Fig. 12a, the higher MVD condition resulted in a slightly faster rise in propeller torque. This is likely 
+
+
+
+due to the higher collection efficiency of the 80 µm case, which results in a faster rate of ice accumulation (from the 
+
+
+
+product 𝛽0𝐴𝑐) as well as increased impingement limits on the propeller. To make comparisons of the two MVD cases 
+
+
+
+at similar stagnation ice thicknesses, the non-dimensional change in torque is plotted as a function of 𝛽0𝐴𝑐, as shown 
+
+
+
+in Fig. 12b. As can be seen from Fig. 12b, the higher MVD condition requires more torque even at similar values of 
+
+
+
+𝛽0𝐴𝑐. The difference in 𝐶𝑄 𝜎⁄ between the 15 and 80 µm MVD condition for a given 𝛽0𝐴𝑐 can likely be attributed to 
+
+
+
+the difference in impingement limits at these two conditions, as evidenced by the ice shapes at 𝑟 𝑅⁄ = 0.75 provided 
+
+
+
+in Fig. 12b. This effect is especially noticeable on the pressure side of the airfoil, where the main ice shape of the 80 
+
+
+
+µm condition extends significantly further aft on the airfoil. Additional ice shapes for runs RA3711 and RA3712 at 
+
+
+
+other radial locations can be found in Fig. 20 in the Appendix. 
+
+
+
+ 
+
+
+
+𝑟 𝑅⁄ = 0.75 
+
+
+
+
+
+
+
+
+
+
+
+ 
+(a) Change in Torque vs Time (b) Change in 𝐶𝑄 𝜎⁄ vs 𝛽0𝐴𝑐 
+
+
+
+Fig. 12 Effect of MVD on Propeller Torque Requirements (𝒏𝟎 = 1) 
+
+
+
+Table 6 Target Test Conditions for Fig. 12 
+
+
+
+ Target Operating and Cloud Conditions 
+Similarity Parameters 
+
+
+
+(calculated at 𝑟/𝑅 = 0.75) 
+
+
+
+Run 
+𝑉∞ 
+
+
+
+knots 
+
+
+
+𝑡∞,0 
+
+
+
+°C 
+
+
+
+𝛿 
+
+
+
+µm 
+
+
+
+LWC 
+
+
+
+g/m3 
+
+
+
+𝜏 
+
+
+
+min 
+
+
+
+RPM 
+
+
+
+rev/min 
+
+
+
+D 
+
+
+
+in 
+
+
+
+𝑀𝑡𝑖𝑝 
+
+
+
+Mach 
+J 𝑛0
+
+
+
+∗ 𝐴𝑐 𝛽0 
+𝑊𝑒𝐿 
+
+
+
+106 
+
+
+
+RA3711 87 -15.0 15 0.55 6.0 1516 28 0.21 2.49 2.37 5.18 0.88 0.15 
+
+
+
+RA3712 “ “ 80 “ “ “ “ “ “ 2.13 “ 0.99 “ 
+
+
+
+D. Effect of Temperature 
+
+
+
+ The effect of air temperature on the propeller torque requirements were investigated at freestream total air 
+
+
+
+temperatures ranging from -3 to -18°C. Air temperature is an important parameter in icing as it has a strong influence 
+
+
+
+on the freezing fraction and, consequently, the resulting type and shape of the ice accretion. Figure 13a shows the 
+
+
+
+change in propeller torque vs time at freestream total temperatures of -3, -6, -9, -15, and -18°C corresponding to runs 
+
+
+
+RA3700, RA3692, RA3696, RA3684, and RA3697, respectively. Note that the spray times varied significantly during 
+
+
+
+these runs in order to achieve other test objectives unrelated to propeller performance. Except for temperature and 
+
+
+
+spray time, all other conditions were identical as shown in Table 7. 
+
+
+
+ As seen from Fig. 13a, the propeller torque increases more rapidly as the total air temperature increases from -18 
+
+
+
+to -6°C. This is likely caused by the change in the ice morphology during the transition from rime to glaze ice. 
+
+
+
+However, when the total air temperature increases further to -3°C, the trend reverses and the propeller torque 
+
+
+
+requirements are significantly less than the preceding -6°C case. These results are summarized in Fig. 14 which 
+
+
+
+presents the linear curve-fit slopes of the non-dimensional change in torque as a function of the corrected freezing 
+
+
+
+fraction at 𝑟 𝑅⁄ = 0.75. Recall that the corrected freezing fractions are 20% lower than the analytical freezing potentials 
+
+
+
+provided in Table 7. Note that Fig. 14 includes repeat cases, and a 2nd order polynomial curve fit has been applied to 
+
+
+
+the data through the averages of the repeats for a given freezing fraction. Due to the vastly different values of 𝐴𝑐, 
+
+
+
+comparing the ice shapes is impractical and thus are omitted from Fig. 13b for these conditions. In addition, ice shapes 
+
+
+
+are unavailable for some of the conditions due to ice shedding. 
+
+
+
+ 
+
+
+
+𝑟 𝑅⁄ = 0.75 
+
+
+
+
+
+
+
+
+
+
+
+ 
+(a) Change in Torque vs Time (b) Change in 𝐶𝑄 𝜎⁄ vs 𝛽0𝐴𝑐 
+
+
+
+Fig. 13 Effect of Temperature on Propeller Torque Requirements (𝒏𝟎 < 1) 
+
+
+
+Table 7 Target Test Conditions for Fig. 13 
+
+
+
+ Target Operating and Cloud Conditions 
+Similarity Parameters 
+
+
+
+(calculated at 𝑟/𝑅 = 0.75) 
+
+
+
+Run 
+𝑉∞ 
+
+
+
+knots 
+
+
+
+𝑡∞,0 
+
+
+
+°C 
+
+
+
+𝛿 
+
+
+
+µm 
+
+
+
+LWC 
+
+
+
+g/m3 
+
+
+
+𝜏 
+
+
+
+min 
+
+
+
+RPM 
+
+
+
+rev/min 
+
+
+
+D 
+
+
+
+in 
+
+
+
+𝑀𝑡𝑖𝑝 
+
+
+
+Mach 
+J 𝑛0
+
+
+
+∗ 𝐴𝑐 𝛽0 
+𝑊𝑒𝐿 
+
+
+
+106 
+
+
+
+RA3700 87 -3.0 15 1.20 2.1 1516 28 0.21 2.49 0.26 3.96 0.88 0.15 
+
+
+
+RA3715 “ -6.0 “ “ 2.32† “ “ “ “ 0.51 4.37 “ “ 
+
+
+
+RA3696 “ -9.0 “ “ 3.33† “ “ “ “ 0.75 6.28 “ “ 
+
+
+
+RA3684 “ -15.0 “ “ 1.4 “ “ “ “ 1.19 2.64 “ “ 
+
+
+
+RA3697 “ -18.0 “ “ 4.0 “ “ “ “ 1.40 7.54 “ “ 
+
+
+
+† Time until first shedding event 
+
+
+
+ 
+
+
+
+Fig. 14 Rate of Change of 𝑪𝑸 𝝈⁄ vs 𝜷𝟎𝑨𝑪 as a Function of the Corrected Freezing Fraction at 𝒓 𝑹⁄ = 0.75 
+
+
+
+
+
+
+
+
+
+
+
+ A similar analysis was performed to study the effect of temperature at a target freezing fraction of 𝑛0 = 1. Figure 
+
+
+
+15a shows the effect of decreasing the freestream total temperature from -7.5 to -15°C for conditions resulting in rime 
+
+
+
+ice (𝑛0 = 1). Note that the ice is believed to be rime along the entire span of the propeller at these conditions, as 
+
+
+
+verified from experimental observations and from the resulting ice shapes. As seen from Fig. 15a, the propeller torque 
+
+
+
+requirements remain virtually unchanged across the temperature range considered, as a freezing fraction of one is 
+
+
+
+maintained at these conditions. This is consistent with the resulting ice shapes which were also found to be unaffected 
+
+
+
+by temperature. The ice shapes at 𝑟 𝑅⁄ = 0.75 can be found in Fig. 15b. Ice shapes at additional radial locations for 
+
+
+
+these runs can be found in Ref. 3. 
+
+
+
+ 
+
+
+
+ 
+(a) Change in Torque vs Time (b) Change in 𝐶𝑄 𝜎⁄ vs 𝛽0𝐴𝑐 
+
+
+
+Fig. 15 Effect of Temperature on Propeller Torque Requirements (𝒏𝟎 = 1) 
+
+
+
+Table 8 Target Test Conditions for Fig. 15 
+
+
+
+ Target Operating and Cloud Conditions 
+Similarity Parameters 
+
+
+
+(calculated at 𝑟/𝑅 = 0.75) 
+
+
+
+Run 
+𝑉∞ 
+
+
+
+knots 
+
+
+
+𝑡∞,0 
+
+
+
+°C 
+
+
+
+𝛿 
+
+
+
+µm 
+
+
+
+LWC 
+
+
+
+g/m3 
+
+
+
+𝜏 
+
+
+
+min 
+
+
+
+RPM 
+
+
+
+rev/min 
+
+
+
+D 
+
+
+
+in 
+
+
+
+𝑀𝑡𝑖𝑝 
+
+
+
+Mach 
+J 𝑛0
+
+
+
+∗ 𝐴𝑐 𝛽0 
+𝑊𝑒𝐿 
+
+
+
+106 
+
+
+
+RA3705 87 -7.5 15 0.55 3.0 1516 28 0.21 2.49 1.26 2.59 0.88 0.15 
+
+
+
+RA3703 “ -9.0 “ “ “ “ “ “ “ 1.49 “ “ “ 
+
+
+
+RA3704 “ -12.0 “ “ “ “ “ “ “ 1.94 “ “ “ 
+
+
+
+RA3683 “ -15.0 “ “ “ “ “ “ “ 2.37 “ “ “ 
+
+
+
+ The results suggest that the required propeller torque in icing is highly dependent on 𝑛0 and, therefore, is highly 
+
+
+
+dependent on temperature for conditions when 𝑛0 < 1. When 𝑛0 = 1 is maintained, the ice morphology and resulting 
+
+
+
+aerodynamic impact are largely independent of temperature over the temperatures considered. Additionally, under 
+
+
+
+rime conditions, the impinging droplets freeze instantly upon impact, resulting in an ice shape that more closely 
+
+
+
+follows the original contour of the airfoil. As a result, the performance impact is generally less severe than for glaze 
+
+
+
+conditions. For 𝑛0 < 1, the propeller torque requirements initially increase with increasing temperature (decreasing 
+
+
+
+𝑛0), and then decreases with increasing temperature below a certain value of 𝑛0. For this study, the peak torque 
+
+
+
+requirements were found to occur somewhere between a 𝑛𝑐 of 0.40 and 0.60. More data is needed to fully understand 
+
+
+
+why this trend occurs and whether similar trends are present under different propeller operating regimes. 
+
+
+
+F. Effect of Tip Speed 
+
+
+
+ Figure 16 shows the effect of increasing the helical Mach tip speed, 𝑀𝑡𝑖𝑝, of the propeller from 0.21 to 0.31 Mach 
+
+
+
+at a target freezing fraction of 𝑛0 = 1 corresponding to runs RA3683 and RA3699, respectively. The higher 𝑀𝑡𝑖𝑝 was 
+
+
+
+achieved by increasing both the propeller RPM and tunnel speed to maintain a constant advance ratio. The spray time 
+
+
+
+𝑟 𝑅⁄ = 0.75 
+
+
+
+
+
+
+
+
+
+
+
+of the higher 𝑀𝑡𝑖𝑝 condition was reduced to match the 𝐴𝑐 of the lower 𝑀𝑡𝑖𝑝 condition. All other conditions were 
+
+
+
+identical as seen in Table 9. 
+
+
+
+ As expected, the higher 𝑀𝑡𝑖𝑝 case experienced a faster rise in torque due to the faster rate of ice accumulation along 
+
+
+
+the propeller. However, when the change in torque is non-dimensionalized and plotted against 𝛽0𝐴𝑐, the torque 
+
+
+
+requirements align very well for a given 𝛽0𝐴𝑐, as shown in Fig. 16b. The ice shapes at 𝑟 𝑅⁄ = 0.75 are also shown in 
+
+
+
+Fig. 16b which show good agreement between the ice shapes. Ice shapes at additional radial locations for these runs 
+
+
+
+can be found in Fig. 21 in the Appendix. 
+
+
+
+ Note that, while the higher 𝑀𝑡𝑖𝑝 condition resulted in increased local velocities along the span of the propeller, the 
+
+
+
+differences were not substantial enough to significantly affect 𝛽0, as shown in Table 9. Had the difference in 𝛽0 been 
+
+
+
+larger, it is likely that the increased impingement limits would have resulted in an effect similar to what was observed 
+
+
+
+when increasing the MVD in Section C. 
+
+
+
+ 
+
+
+
+ 
+(a) Change in Torque vs Time (b) Change in 𝐶𝑄 𝜎⁄ vs 𝛽0𝐴𝑐 
+
+
+
+Fig. 16 Effect of Tip Speed on Propeller Torque Requirements (𝒏𝟎 = 1) 
+
+
+
+Table 9 Target Test Conditions for Fig. 16 
+
+
+
+ Target Operating and Cloud Conditions 
+Similarity Parameters 
+
+
+
+(calculated at 𝑟/𝑅 = 0.75) 
+
+
+
+Run 
+𝑉∞ 
+
+
+
+knots 
+
+
+
+𝑡∞,0 
+
+
+
+°C 
+
+
+
+𝛿 
+
+
+
+µm 
+
+
+
+LWC 
+
+
+
+g/m3 
+
+
+
+𝜏 
+
+
+
+min 
+
+
+
+RPM 
+
+
+
+rev/min 
+
+
+
+D 
+
+
+
+in 
+
+
+
+𝑀𝑡𝑖𝑝 
+
+
+
+Mach 
+J 𝑛0
+
+
+
+∗ 𝐴𝑐 𝛽0 
+𝑊𝑒𝐿 
+
+
+
+106 
+
+
+
+RA3683 87 -15.0 15 0.55 3.0 1516 28 0.21 2.49 2.37 2.59 0.88 0.15 
+
+
+
+RA3699 130 “ “ “ 2.0 2265 “ 0.31 “ 1.85 2.58 0.90 0.34 
+
+
+
+ 
+
+
+
+ A similar evaluation was performed to explore the effect of 𝑀𝑡𝑖𝑝 on the propeller torque requirements at glaze 
+
+
+
+conditions (𝑛0 < 1). As with the rime case, the higher tip speed was achieved by increasing both the propeller RPM 
+
+
+
+and the tunnel speed to maintain a constant advance ratio. For these conditions, 𝑀𝑡𝑖𝑝 was increased from 0.20 to 0.25 
+
+
+
+Mach. Like the rime case, the MVD and LWC were the same for both runs. However, matching 𝑛0 required reducing 
+
+
+
+the freestream total temperature for the higher 𝑀𝑡𝑖𝑝 case. The full list of conditions can be found in Table 10. 
+
+
+
+As seen from Fig. 17a, the propeller torque increases more rapidly for the higher 𝑀𝑡𝑖𝑝 case due to the increased 
+
+
+
+local velocities along the propeller. As was done for the rime case, the non-dimensional change in torque was plotted 
+
+
+
+against 𝛽0𝐴𝑐, as shown in Fig. 17b. As seen from Fig. 17b, the non-dimensional change in propeller torque for a given 
+
+
+
+𝛽0𝐴𝑐 is slightly higher for the higher 𝑀𝑡𝑖𝑝 case. A possible explanation for this discrepancy is the difference in 𝑊𝑒𝐿 
+
+
+
+at these conditions. For fixed-wings, 𝑊𝑒𝐿 is known to be an important parameter that effects the shape of glaze ice 
+
+
+
+accretions. It is possible that 𝑊𝑒𝐿 has a similar effect on rotating wings as well which would impact the overall 
+
+
+
+aerodynamic performance of the propeller. Unfortunately, ice shapes were not acquired for these runs due to ice 
+
+
+
+𝑟 𝑅⁄ = 0.75 
+
+
+
+
+
+
+
+
+
+
+
+shedding so more testing is needed to fully understand the impact of 𝑊𝑒𝐿 on the resulting ice shape and performance 
+
+
+
+degradation of propellers. 
+
+
+
+ 
+
+
+
+ 
+(a) Change in Torque vs Time (b) Change in 𝐶𝑄 𝜎⁄ vs 𝛽0𝐴𝑐 
+
+
+
+Fig. 17 Effect of Tip Speed on Propeller Torque Requirements (𝒏𝟎 = 1) 
+
+
+
+Table 10 Target Test Conditions for Fig. 17 
+
+
+
+ Target Operating and Cloud Conditions 
+Similarity Parameters 
+
+
+
+(calculated at 𝑟/𝑅 = 0.75) 
+
+
+
+Run 
+𝑉∞ 
+
+
+
+knots 
+
+
+
+𝑡∞,0 
+
+
+
+°C 
+
+
+
+𝛿 
+
+
+
+µm 
+
+
+
+LWC 
+
+
+
+g/m3 
+
+
+
+𝜏 
+
+
+
+min 
+
+
+
+RPM 
+
+
+
+rev/min 
+
+
+
+D 
+
+
+
+in 
+
+
+
+𝑀𝑡𝑖𝑝 
+
+
+
+Mach 
+J 𝑛0
+
+
+
+∗ 𝐴𝑐 𝛽0 
+𝑊𝑒𝐿 
+
+
+
+106 
+
+
+
+RA3799 87 -9.0 15 1.20 5.83† 1394 28 0.20 2.71 0.77 10.58 0.88 0.14 
+
+
+
+RA3803 110 -10.3 “ “ 4.03† 1763 “ 0.25 “ “ 9.25 0.89 0.22 
+
+
+
+† Time until first shedding event 
+
+
+
+ The results of the preceding analysis suggest that the change in the non-dimensional torque requirements when 𝑛0 
+
+
+
+= 1 is largely independent of 𝑀𝑡𝑖𝑝 for a given 𝛽0𝐴𝑐, provided that the distribution of 𝛽0 along the propeller remains 
+
+
+
+the same or similar. It should be noted, though, that the data is limited to a small range of subsonic tip speeds and 
+
+
+
+further investigations are required to understand when these scaling relationships begin to breakdown, especially at 
+
+
+
+higher tip speeds when compressibility effects can no longer be ignored. For conditions when 𝑛0 < 1, the results 
+
+
+
+suggest that the change in the non-dimensional torque requirements are not independent of 𝑀𝑡𝑖𝑝 for a given distribution 
+
+
+
+of 𝑛0 and 𝛽0𝐴𝑐, even when a similar 𝛽0 is maintained. Further work is needed to understand whether the difference in 
+
+
+
+𝑊𝑒𝐿 may be responsible for this discrepancy, or if there are other contributing factors. 
+
+
+
+G. Effect of Propeller Size 
+
+
+
+ Figure 18a compares the change in propeller torque requirements for the 24, 28, and 36-inch diameter propellers 
+
+
+
+at a target freezing fraction of 𝑛0 = 1 corresponding to runs RA3717, RA3698, and RA3681, respectively. All three 
+
+
+
+propellers were tested at the same tunnel conditions (𝑉∞, 𝑡∞,0, MVD, and LWC) at a similar advance ratio as shown 
+
+
+
+in Table 11. The spray times were adjusted accordingly to achieve the same 𝐴𝑐 for each propeller. Note that, while 
+
+
+
+the MVD was held constant, the 𝛽0 of each propeller is approximately the same at these conditions. As seen from Fig. 
+
+
+
+18a, the rate of change in torque increases with propeller size. However, when expressed in non-dimensional form, 
+
+
+
+the change in 𝐶𝑄 𝜎⁄ was found to be independent of propeller size for a given 𝛽0𝐴𝑐, as shown in Fig. 18b. The ice 
+
+
+
+shapes normalized by the local chord length at 𝑟 𝑅⁄ = 0.75 are also shown in Fig. 18b, which show good agreement 
+
+
+
+between the ice shapes. Ice shapes at additional radial locations for these runs can be found in Ref. 3. 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+(a) Change in Torque vs Time (b) Change in 𝐶𝑄 𝜎⁄ vs 𝛽0𝐴𝑐 
+
+
+
+Fig. 18 Effect of Propeller Size on Propeller Torque Requirements (𝒏𝟎 = 1) 
+
+
+
+Table 11 Target Test Conditions for Fig. 18 
+
+
+
+ Target Operating and Cloud Conditions 
+Similarity Parameters 
+
+
+
+(calculated at 𝑟/𝑅 = 0.75) 
+
+
+
+Run 
+𝑉∞ 
+
+
+
+knots 
+
+
+
+𝑡∞,0 
+
+
+
+°C 
+
+
+
+𝛿 
+
+
+
+µm 
+
+
+
+LWC 
+
+
+
+g/m3 
+
+
+
+𝜏 
+
+
+
+min 
+
+
+
+RPM 
+
+
+
+rev/min 
+
+
+
+D 
+
+
+
+in 
+
+
+
+𝑀𝑡𝑖𝑝 
+
+
+
+Mach 
+J 𝑛0
+
+
+
+∗ 𝐴𝑐 𝛽0 
+𝑊𝑒𝐿 
+
+
+
+106 
+
+
+
+RA3717 95 -12.0 15 0.55 3.4 1928 24 0.23 2.49 1.95 3.76 0.90 0.15 
+
+
+
+RA3698 “ “ “ “ 4.0 1657 28 “ “ 1.84 3.78 0.89 0.18 
+
+
+
+RA3681 “ “ “ “ 5.0 1300 36 “ 2.47 1.67 3.67 0.86 0.23 
+
+
+
+ 
+
+
+
+ A similar evaluation was performed for the 28 and 36-inch diameter propellers at glaze conditions when 𝑛0 < 1. 
+
+
+
+For this comparison, both the 28 and 36-inch diameter propellers were operated at the same advance ratio. However, 
+
+
+
+the freestream total temperature, MVD, and tunnel speed were slightly adjusted for the 36-inch propeller to better 
+
+
+
+match 𝑛0, 𝛽0, and 𝑊𝑒𝐿, respectively. The full list of operating and cloud conditions can be found in Table 12. Note 
+
+
+
+that the final value of 𝐴𝑐 differed between these two runs as the spray times were chosen to achieve test objectives 
+
+
+
+unrelated to this comparison. 
+
+
+
+Figure 19a shows the change in torque for the 28 and 36-inch diameter propellers at these conditions. As expected, 
+
+
+
+the larger propeller experiences a faster rise in torque. However, when expressed in non-dimensional terms, the change 
+
+
+
+in 𝐶𝑄 𝜎⁄ is very similar for both propeller sizes at a given 𝛽0𝐴𝑐, as shown in Fig. 19b. The ice shapes normalized by 
+
+
+
+the local chord length at 𝑟 𝑅⁄ = 0.75 are provided in Fig. 19b. Note that the ice shape corresponding to run RA3798 is 
+
+
+
+slightly larger due to the slightly higher value of 𝐴𝑐. Additional ice shapes at other radial locations can be found in 
+
+
+
+Fig. 22 in the Appendix. 
+
+
+
+ 
+
+
+
+𝑟 𝑅⁄ = 0.75 
+
+
+
+
+
+
+
+
+
+
+
+ 
+(a) Change in Torque vs Time (b) Change in 𝐶𝑄 𝜎⁄ vs 𝛽0𝐴𝑐 
+
+
+
+Fig. 19 Effect of Propeller Size on Iced Propeller Torque Requirements (𝒏𝟎 < 1) 
+
+
+
+Table 12 Target Test Conditions for Fig. 19 
+
+
+
+ Target Operating and Cloud Conditions 
+Similarity Parameters 
+
+
+
+(calculated at 𝑟/𝑅 = 0.75) 
+
+
+
+Run 
+𝑉∞ 
+
+
+
+knots 
+
+
+
+𝑡∞,0 
+
+
+
+°C 
+
+
+
+𝛿 
+
+
+
+µm 
+
+
+
+LWC 
+
+
+
+g/m3 
+
+
+
+𝜏 
+
+
+
+min 
+
+
+
+RPM 
+
+
+
+rev/min 
+
+
+
+D 
+
+
+
+in 
+
+
+
+𝑀𝑡𝑖𝑝 
+
+
+
+Mach 
+J 𝑛0
+
+
+
+∗ 𝐴𝑐 𝛽0 
+𝑊𝑒𝐿 
+
+
+
+106 
+
+
+
+RA3798 87 -6.0 15 1.20 6.0 1394 28 0.20 2.71 0.53 10.89 0.88 0.14 
+
+
+
+RA3807 80 -6.3 16 “ “ 996 36 0.18 “ “ 7.74 0.86 0.15 
+
+
+
+ 
+
+
+
+ The results are encouraging for those who wish to gain insights into iced propeller performance degradation using 
+
+
+
+scaled models. However, the data collected during the present study is limited, as it encompasses only a small range 
+
+
+
+of propeller sizes, tip speeds, and advance ratios. Further work is needed over a larger range of propeller sizes, 
+
+
+
+operating conditions, and tunnel conditions to provide greater confidence in the scaling method. 
+
+
+
+VI. Conclusion 
+
+
+
+ An experimental investigation of an eVTOL propeller under simulated icing conditions was conducted at the 
+
+
+
+NASA Glenn Icing Research Tunnel. Propeller performance degradation, in the form of torque rise over time, was 
+
+
+
+recorded under various cloud and operating conditions. The effect of LWC, MVD, temperature, tip speed, and 
+
+
+
+propeller size on the resulting change in torque were investigated and found to align well with the expected trends. 
+
+
+
+Several repeat conditions were conducted which found the repeatability of the torque data to be excellent. 
+
+
+
+ To aid in the interpretation of the results, the key icing similarity parameters (𝑛0, 𝛽0, 𝐴𝑐, and 𝑊𝑒𝐿) have been 
+
+
+
+calculated at the blade 𝑟 𝑅⁄ = 0.75 location. The change in torque was also presented non-dimensionally as the torque 
+
+
+
+coefficient divided by solidity (𝐶𝑄 𝜎⁄ ) and plotted against the product of the stagnation collection efficiency and 
+
+
+
+accumulation parameter (𝛽0𝐴𝑐), as calculated at the 𝑟 𝑅⁄ = 0.75 location. 
+
+
+
+ Over the range of conditions tested, it was found that the change in 𝐶𝑄 𝜎⁄ under rime conditions (𝑛0 = 1) was 
+
+
+
+largely independent of LWC, tip speed, and propeller size for a given 𝛽0𝐴𝑐 and advance ratio, provided that the 
+
+
+
+distribution of 𝑛0 and 𝛽0 are the same or similar. This observation is consistent with the measured ice shapes, which 
+
+
+
+revealed that good ice shape similarity was achieved under these conditions. When independently varying 𝛽0 at rime 
+
+
+
+conditions, it was found that the higher 𝛽0 condition required more torque for a given 𝛽0𝐴𝑐, likely due to the negative 
+
+
+
+aerodynamic impact of the increased impingement limits. 
+
+
+
+ For glaze conditions (𝑛0 < 1), the change in 𝐶𝑄 𝜎⁄ was also found to be largely independent of LWC and propeller 
+
+
+
+size for a given 𝛽0𝐴𝑐 and advance ratio over the range of conditions tested, provided that the distributions of 𝑛0, 𝛽0, 
+
+
+
+and 𝑊𝑒𝐿 were the same or similar. However, when testing at a different tip speed (and consequently, 𝑊𝑒𝐿), it was 
+
+
+
+𝑟 𝑅⁄ = 0.75 
+
+
+
+
+
+
+
+
+
+
+
+found that the higher tip speed condition resulted in a slightly higher 𝐶𝑄 𝜎⁄ for a given 𝛽0𝐴𝑐. More work is needed to 
+
+
+
+understand whether the difference in 𝑊𝑒𝐿 is responsible for this observation or if there are other factors involved. 
+
+
+
+ While the results are encouraging for those who wish to apply current icing scaling methods to achieve similarity 
+
+
+
+of propeller performance in icing, the present study is limited to a small range of propeller sizes and operating 
+
+
+
+conditions. Further work is needed over a larger range of tip speeds, advance ratios, and propeller sizes to provide 
+
+
+
+greater confidence in the scaling methodology. 
+
+
+
+Appendix 
+
+
+
+ 
+ (a) 𝑟 𝑅⁄ = 0.50 (b) 𝑟 𝑅⁄ = 0.60 
+
+
+
+ 
+
+
+
+ 
+ (c) 𝑟 𝑅⁄ = 0.75 (d) 𝑟 𝑅⁄ = 0.90 
+
+
+
+Fig. 20 Effect of MVD on Propeller Ice Shape (𝒏𝟎 = 1). See conditions in Table 6. 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+ (a) 𝑟 𝑅⁄ = 0.50 (b) 𝑟 𝑅⁄ = 0.60 
+
+
+
+ 
+ (c) 𝑟 𝑅⁄ = 0.75 (d) 𝑟 𝑅⁄ = 0.90 
+
+
+
+Fig. 21 Effect of Tip Speed on Propeller Ice Shape (𝒏𝟎 = 1). See conditions in Table 9. 
+
+
+
+ 
+
+
+
+ 
+ (a) 𝑟 𝑅⁄ = 0.50 (b) 𝑟 𝑅⁄ = 0.60 
+
+
+
+ 
+ (c) 𝑟 𝑅⁄ = 0.75 (d) 𝑟 𝑅⁄ = 0.90 
+
+
+
+Fig. 22 Effect of Propeller Size on Ice Shape (𝒏𝟎 < 1). See conditions in Table 12. 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+Acknowledgments 
+
+
+
+The experimental work presented in this paper was funded by NASA’s Revolutionary Vertical Lift and 
+
+
+
+Technology (RVLT) project and the Advanced Air Transport Technology (AATT) project. The authors would also 
+
+
+
+like to acknowledge all of those who helped make this a successful test. In particular, the authors would like to 
+
+
+
+thank Keith Hunker, Xavier Collazo Fernandez, Joe Wisniewski, and Scott Hensley for their invaluable technical 
+
+
+
+support. The authors would also like to thank Jordan Salkin and Quentin Schwinn for their imaging support during 
+
+
+
+testing. In addition, this work could not have been possible without the support of the NASA Glenn Icing Branch 
+
+
+
+and the IRT engineers and technicians for their efforts in making these test campaigns a success. 
+
+
+
+References 
+
+
+
+[1] Gandhi, F., Pepe, J., and Smith, B., “High Solidity, Low Tip-Speed Rotors for Reduced eVTOL Tonal Noise,” 78th Annual 
+
+
+
+Forum of the Vertical Flight Society, Ft. Worth, TX, USA, May 10-12, 2022. 
+
+
+
+[2] Whiteside, S. K. S., Pollard, B. P., Antcliff, K. R., Zawodny, N. S., Fei, X., Silva, C., and Medina, G. L., “Design of a Tiltwing 
+
+
+
+Concept Vehicle for Urban Air Mobility,” NASA/TM-20210017971, 2021. 
+
+
+
+[3] von Hardenberg, P. H., Flack, F. C., Rigby, D. L., “Ice Shape Analysis of an eVTOL Propeller in Forward Flight at the NASA 
+
+
+
+Glenn Icing Research Tunnel,” AIAA AVIATION 2024 Forum, Las Vegas, NV, July-August 2024. 
+
+
+
+[4] Porter, C., Potapczuk, M., Ozoroski, T., Sabri, Z., Galloway, E., Rigby, D., Wright, W., and Tsao. P., 2024. “GlennICE Manual 
+
+
+
+4.1.0.” NASA/TM-20240002191, 2024. 
+
+
+
+[5] Rigby, D. L. and von Hardenberg, P.H., “Demonstration of Initial GlennICE Relative Frame Capability: Axial-Flow Propeller”, 
+
+
+
+SAE International Icing Conference, 23ICE-0029/2023-01-1457, 2023. 
+
+
+
+[6] Rigby, D. L. and von Hardenberg, P. H., “GlennICE Simulation of 24, 28, and 36 Inch Diameter eVTOL Propellers in Forward 
+
+
+
+Flight,” AIAA AVIATION 2024 Forum, Las Vegas, NV, July-August 2024. 
+
+
+
+[7] Frantz, J., Giuffre, C., and von Hardenberg, P., “Analysis of Experimental Ice Shedding Events on a Propeller at the NASA 
+
+
+
+Glenn Icing Research Tunnel”, AIAA AVIATION 2025 Forum, Las Vegas, NV, July 2025. 
+
+
+
+[8] Tsao, J., Sabri, Z., von Hardenberg, P., and Flack, C., “A Preliminary Evaluation of Icing Scaling on AAM Propellers,” AIAA 
+
+
+
+AVIATION 2025 Forum, Las Vegas, NV, July 2025. 
+
+
+
+[9] Zawodny, N. S., Pettingill, N. A., Lopes, L. V., and Ingraham, D, J., “Experimental Validation of an Acoustically and 
+
+
+
+Aerodynamically Optimized UAM Proprotor Part 1: Test Setup and Results,” NASA/TM-20220015637, 2023.

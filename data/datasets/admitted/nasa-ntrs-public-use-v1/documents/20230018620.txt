@@ -1,0 +1,880 @@
+Validation of Gas-Liquid Sharp Interface Model in Loci-Stream for Propellant Tank Self-pressurization under Normal Gravity
+
+
+January 8, 2024
+
+
+
+
+
+Chintan Patel – JSEG, Fluid Dynamics Branch (NASA MSFC-ER42)
+
+
+Hong Yang – JSEG, Fluid Dynamics Branch (NASA MSFC-ER42)
+
+
+Brandon Williams – Fluid Dynamics Branch (NASA MSFC-ER42)
+
+
+
+
+
+
+
+
+
+
+
+NASA CFM Portfolio Project  Goal to develop cryogenic fluid management (CFM) technology and capabilities to enable deep space long-duration missions
+
+
+
+
+
+Modeling portfolio  Improve and validate CFD analysis tools for use in flight project support
+
+
+
+
+
+NASA MSFC Propulsion – Fluid Dynamics Branch
+
+
+Supports multiple projects with CFM needs: HLS, CLPS, SLS, etc
+
+
+Loci-Stream CFD solver
+
+
+Loci framework: Declarative, highly parallelizable
+
+
+Develop modules for multi-physics as needed
+
+
+
+
+
+
+
+
+2
+
+
+Background
+
+
+
+
+
+
+
+
+Self-pressurization
+
+
+Liquid propellant and/or ullage is heated due to heat leakage to the propellant tank which gradually increases tank pressure
+
+
+Must be understood and controlled for safety and to minimize propellant venting
+
+
+Key dynamics
+
+
+Low Reynolds number turbulent flow and natural convection, phase change
+
+
+Nodal tools are unable to model and 3-D CFD analysis is required
+
+
+Goals of validation
+
+
+Primary: Time-accurate prediction of tank pressure for given heat leakage rate to the tank with reasonable margin of error
+
+
+Secondary: Time-accurate temperature prediction across the tank
+
+
+3
+
+
+Self-Pressurization
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Gas Phase
+
+
+
+
+
+
+
+
+Phase change at the interface 
+
+
+
+
+
+Liquid Phase
+
+
+Natural convection currents, and potentially thermal stratification at the interface
+
+
+
+
+
+Dynamics of Tank Self-pressurization
+
+
+
+
+
+
+
+
+Zero boil off tank (ZBOT)
+
+
+Desktop size – 10.16 cm diameter, 20.32 cm height
+
+
+Equipped with internal and wall sensors
+
+
+Simulant PnP (Perfluoro-n-pentane)
+
+
+ZBOT ground self-pressurization test
+
+
+90% fill volume
+
+
+307.15 K constant unstratified initial condition with saturated interface
+
+
+Strip heater with 1 W heat input
+
+
+4
+
+
+ZBOT Validation Test
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Loci-Stream
+
+
+Pressure-based solver
+
+
+Solid heat module for conjugate heat analysis
+
+
+Two phase sharp interface method or VOF method for two phase flows
+
+
+Two-phase Sharp Interface Method
+
+
+VOF advection using geometric reconstruction is expensive and slow
+
+
+Developed sharp interface method for quiescent interface
+
+
+10-100x speed up  Allows testing for model sensitivities
+
+
+Avoid stationary interface instabilities of VOF method
+
+
+Improvement on “lumped gas liquid CFD” method
+
+
+Allows simulation of ullage dynamics – Lump gas node replaced with 3-D gas CFD
+
+
+5
+
+
+CFD Modeling
+
+
+
+
+
+
+
+
+Extensively used and validated for 10+ years for wide variety of propulsion problem including CFM problems like slosh dynamics
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+6
+
+
+CFD Model
+
+
+Geometric simplifications
+
+
+Internals removed
+
+
+Axisymmetric
+
+
+Turbulent flow (u-RANS)
+
+
+Ideal gas, Boussinesq liquid
+
+
+Temperature dependent gas properties
+
+
+Constant solid properties
+
+
+Kinetics method for mass transfer
+
+
+Antoine equation for saturation condition
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Liquid
+
+
+Gas
+
+
+Acrylic Tank
+
+
+Steel Base
+
+
+
+
+
+
+
+
+7
+
+
+Mesh
+
+
+Nominal cell edge size range from 0.5 mm to 4 mm for meshes with different refinements
+
+
+Tested meshes for both wall integration (with boundary layer) and wall function (no boundary layer) approach
+
+
+2-6 cells across tank wall thickness
+
+
+Mesh independent predictions
+
+
+Baseline Mesh
+
+
+Most Refined Mesh
+
+
+
+
+
+
+
+
+Coarse Mesh
+
+
+
+
+
+
+
+
+Refined Mesh
+
+
+
+
+
+
+
+
+8
+
+
+Pressurization
+
+
+Pressurization and pressurization rate compare very well with the experiment
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+9
+
+
+Important Dynamics
+
+
+Turbulent flow, viscosity ratio, and convective currents
+
+
+Convection dominate above the strip heater and conduction dominate below the heater
+
+
+Virtually no thermal stratification in the ullage and at the interface, and phase change rate is small
+
+
+t = 120 min
+
+
+Time: 120 [min]
+
+
+
+
+
+
+
+
+
+
+
+10
+
+
+Temperature Comparison – Fluid
+
+
+Good agreement with the experiment across the tank height
+
+
+
+
+
+
+
+
+Temperature Sensor Locations
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11
+
+
+Temperature Comparison – Wall
+
+
+Again, very good temperature prediction across the acrylic tank and the steel base 
+
+
+
+
+
+
+
+
+Temperature Sensor Locations
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+12
+
+
+Mesh and Timestep Sensitivity
+
+
+All mesh are sufficiently refined to capture the pressurization of the tank
+
+
+Timestep as high as 1 second can capture the dynamics. Timestep requirement is relaxed due to the lack of thermal gradient at the interface
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+13
+
+
+Flow Regime and Accommodation Factor Sensitivity
+
+
+Laminar model lacks turbulence mixing and overpredicts interface temperature
+
+
+SST model enhances mixing but still vastly underpredicts the mixing and consequently overpredicts the interface temperature and ullage pressure
+
+
+The k-epsilon model performs best
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Determined and modeled the most important features for self-pressurization to successfully transfer the learnings to space flight application
+
+
+Liquid simulant convective currents induced by localized heating, heat transfer within the fluid and with the tank walls, and the phase change mass transfer at the interface
+
+
+Validated Loci-Stream CFD solver for self-pressurization of ZBOT tank in normal gravity
+
+
+Tank pressure, pressurization rate as well as temperature across the tank simulant, ullage and walls are predicted with very good accuracy
+
+
+Evaluated model sensitivities to ensure validation is independent of modeling parameters and can be applied to same class of problem
+
+
+14
+
+
+Contributions
+
+
+
+
+
+
+
+
+15
+
+
+Back-up
+
+
+
+
+
+
+
+
+16
+
+
+Two Phase Sharp Interface
+
+
+Solve one set of conservation equations
+
+
+Gas-liquid interface boundary treatment
+
+
+Zero boundary normal velocities
+
+
+Equal tangential velocities
+
+
+Equal tangential stress components
+
+
+Phase change mass transfer with source terms
+
+
+Phase change
+
+
+Balance Method
+
+
+Equilibrium assumption – interfacial gas is always saturated
+
+
+
+
+
+Kinetics-Balance Method (Iterative)
+
+
+Interfacial gas pressure can deviate from saturation condition
+
+
+Mass transfer using kinematic relationship by Hertz-Knudsen-Schrage (HKS)
+
+
+Solved iteratively with interfacial heat balance
+
+
+Interface Turbulence Treatment
+
+
+Experimental evidence: turbulence is damped and behaves somewhat similar to wall-bounded flow
+
+
+Also, some evidence of asymmetric behavior
+
+
+Wall-like on gas side
+
+
+Slip-wall-like on liquid side
+
+
+Simplified Egorov’s damping approach
+
+
+Gas interface is always wall-like
+
+
+Liquid interface is either wall-like or slip-wall-like
+
+
+
+
+
+
+
+
+image1.jpg
+
+
+
+
+
+image2.png
+
+
+
+
+
+image3.png
+
+
+
+
+
+image6.png
+
+
+
+
+
+image7.png
+
+
+
+
+
+image8.png
+
+
+
+
+
+image9.png
+
+
+
+
+
+image10.png
+
+
+
+
+
+image11.png
+
+
+
+
+
+image12.png
+
+
+
+
+
+image13.png
+
+
+
+
+
+image14.png
+
+
+
+
+
+image15.png
+
+
+
+
+
+image16.png
+
+
+
+
+
+image17.png
+
+
+
+
+
+media1.mp4
+
+
+
+
+
+image18.png
+
+
+
+
+
+image19.png
+
+
+
+
+
+image20.png
+
+
+
+
+
+image21.png
+
+
+
+
+
+image22.png
+
+
+
+
+
+image23.png
+
+
+
+
+
+image24.png
+
+
+
+
+
+image25.png
+
+
+
+
+
+image26.png
+
+
+
+
+
+image27.png
+
+
+
+
+
+image28.png
+
+
+
+
+
+image280.png

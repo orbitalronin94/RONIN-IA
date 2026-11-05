@@ -1,0 +1,1269 @@
+Analog Quantum Algorithms
+
+
+
+Lucas T. Brady
+
+
+
+NASA Quantum Artificial Intelligence Lab (QuAIL)/ KBR Inc.
+
+
+
+March 27, 2023
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 1 / 20
+
+
+
+
+
+
+
+
+
+
+
+Classical Optimization Problems
+
+
+
+Classical Optimization
+
+
+
+Given some constraints, find a configuration that minimizes your
+function: Find x such that f(x) is minimized
+
+
+
+Often we just want a better heuristic for
+NP-complete (i.e. exponentially hard) problems
+
+
+
+Quantum will probably not solve NP-complete
+problems efficiently
+
+
+
+Often an approximate solution is good enough
+
+
+
+Given a fixed amount of time, how good of a
+solution can you get
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 2 / 20
+
+
+
+
+
+
+
+
+
+
+
+Quantum Algorithms
+
+
+
+Quantum Adiabatic Optimization
+d
+
+
+
+dt
+|x(t)〉 = −iĤ(t) |x(t)〉
+
+
+
+Ĥ (t) =
+
+
+
+(
+1 −
+
+
+
+t
+
+
+
+τ
+
+
+
+)
+B̂+
+
+
+
+t
+
+
+
+τ
+Ĉ
+
+
+
+B̂: Simple (Driver) Hamiltonian
+
+
+
+Ĉ: Complicated (Problem) Hamiltonian
+
+
+
+τ: Total Runtime
+
+
+
+0
+
+
+
+0.2
+
+
+
+0.4
+
+
+
+0.6
+
+
+
+0.8
+
+
+
+1
+
+
+
+1.2
+
+
+
+0 0.2 0.4 0.6 0.8 1
+
+
+
+St
+re
+
+
+
+ng
+th
+
+
+
+of
+H
+
+
+
+am
+ilt
+
+
+
+on
+ia
+
+
+
+n
+
+
+
+t/τ
+
+
+
+Problem Hamiltonian, Ĉ
+Driver Hamiltonian, B̂
+
+
+
+Algorithm
+
+
+
+1 Start in the ground state of B̂
+2 Slowly change the system in total time τ
+3 At t = τ, measure to get ground state of Ĉ.
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 3 / 20
+
+
+
+
+
+
+
+
+
+
+
+Quantum Algorithms
+
+
+
+Quantum Adiabatic Theorem
+
+
+
+Adiabatic Theorem
+If a system starts in the ground state and evolves slowly enough, it will
+remain in the instantaneous ground state
+
+
+
+τAC �
+
+
+
+∣∣∣∣∣∣ dĤ
+d(t/τ)
+
+
+
+∣∣∣∣∣∣
+∆2
+min
+
+
+
+∆min = mint∈[0,τ]∆(t) is minimum of the energy gap from the
+ground state to the first excited state
+
+
+
+If this condition is met, adiabaticity is guaranteed*
+
+
+
+0
+
+
+
+0.5
+
+
+
+1
+
+
+
+0 0.2 0.4 0.6 0.8 1
+
+
+
+E
+ne
+
+
+
+rg
+y
+
+
+
+t/τ
+
+
+
+∆min
+
+
+
+Excited State Ground State
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 4 / 20
+
+
+
+
+
+
+
+
+
+
+
+Quantum Algorithms
+
+
+
+Quantum Annealing
+
+
+
+What happens if you go faster than adiabatic or have a lot of noise?
+
+
+
+Quantum Annealing is non-ideal QAO
+
+
+
+Often there are no/fewer guarantees of success
+
+
+
+Often works partially and justifies the tradeoff of quality for speed
+
+
+
+Leads to weird, complicated dynamics
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 5 / 20
+
+
+
+
+
+
+
+
+
+
+
+Quantum Algorithms
+
+
+
+More General Problem
+
+
+
+What if we allow more general evolutions
+
+
+
+Ĥ (t) = u(t)B̂+ (1 − u(t))Ĉ
+
+
+
+Can we find a u(t) that works well
+Previously u(t) = t/τ
+
+
+
+Analytically optimized
+annealing paths
+
+
+
+Variational Optimization
+
+
+
+Shortcuts to Adiabaticity
+
+
+
+Quantum speed-limits arXiv:1904.08448
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 6 / 20
+
+
+
+
+
+
+
+
+
+
+
+Quantum Algorithms
+
+
+
+Quantum Approximate Optimization Algorithm
+
+
+
+0
+
+
+
+0.2
+
+
+
+0.4
+
+
+
+0.6
+
+
+
+0.8
+
+
+
+1
+
+
+
+1.2
+
+
+
+0 0.2 0.4 0.6 0.8 1
+
+
+
+St
+re
+
+
+
+ng
+th
+
+
+
+of
+H
+
+
+
+am
+ilt
+
+
+
+on
+ia
+
+
+
+n
+
+
+
+t/τ
+
+
+
+QAOA
+
+
+
+γ1 β1 γ2 β2 γ3 β3 γ4 β4
+
+
+
+Problem Hamiltonian, Ĉ
+Driver Hamiltonian, B̂
+
+
+
+|x(τ)〉 =
+
+
+
+ p∏
+j=1
+
+
+
+e−iβjB̂e−iγjĈ
+
+
+
+ |ϕ〉
+
+
+
+Treat the quantum computer as a black-box
+E(~γ, ~β) =
+
+
+
+〈
+x(τ)|Ĉ|x(τ)
+
+
+
+〉
+Use a classical optimizer to search for the lowest energy by
+varying γs and βs
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 7 / 20
+
+
+
+
+
+
+
+
+
+
+
+Analytic Optimization
+
+
+
+Analytic Optimization
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 8 / 20
+
+
+
+
+
+
+
+
+
+
+
+Analytic Optimization
+
+
+
+Roland & Cerf Schedule
+
+
+
+Quantum Advantage is linked to the annealing schedule
+
+
+
+0
+
+
+
+0.2
+
+
+
+0.4
+
+
+
+0.6
+
+
+
+0.8
+
+
+
+1
+
+
+
+0 0.2 0.4 0.6 0.8 1
+
+
+
+A
+nn
+
+
+
+ea
+lin
+
+
+
+g
+Sc
+
+
+
+he
+du
+
+
+
+le
+
+
+
+t/τ
+
+
+
+Roland & Cerf
+Linear Ramp
+
+
+
+J. Roland, N. J. Cerf, arXiv:quant-ph/0107015
+
+
+
+R& C focuses on solving the
+unstructured search problem
+
+
+
+With a linear schedule, this
+takes O(N) time recovering the
+classical scaling
+
+
+
+In order to get the square root
+Grover speed-up in an analog
+setting, you need a schedule
+optimized based off the local
+adiabatic condition.
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 9 / 20
+
+
+
+
+
+
+
+
+
+
+
+Analytic Optimization
+
+
+
+Non-Adiabatic Optimization
+
+
+
+Your schedule doesn’t need to
+be adiabatic
+
+
+
+Diabatic quantum annealing
+permits evolution in excited
+states
+
+
+
+Diabatic annealing is quantum
+universal even with simple
+Hamiltonians (adiabatic
+annealing has more
+restrictions)
+
+
+
+S. Muthukrishnan, T. Albash, D. A. Lidar, arXiv:1505.01249
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 10 / 20
+
+
+
+
+
+
+
+
+
+
+
+Variational Optimization
+
+
+
+Variational Optimization
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 11 / 20
+
+
+
+
+
+
+
+
+
+
+
+Variational Optimization
+
+
+
+What is Best
+
+
+
+QAO QA QAOA
+
+
+
+The core question we will ask is which of these is best
+
+
+
+What form of u(t) is optimal for a given τ
+
+
+
+For now, we ignore the difficulty in finding this procedure
+
+
+
+”Best” is the state with the lowest energy at the end
+(Alternative would be highest overlap with ground state)
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 12 / 20
+
+
+
+
+
+
+
+
+
+
+
+Variational Optimization
+
+
+
+Trotterization of QAO
+
+
+
+Trotterization makes smooth adiabatic look like bang-bang
+
+
+
+0
+
+
+
+0.2
+
+
+
+0.4
+
+
+
+0.6
+
+
+
+0.8
+
+
+
+1
+
+
+
+1.2
+
+
+
+0 0.2 0.4 0.6 0.8 1
+
+
+
+St
+re
+
+
+
+ng
+th
+
+
+
+of
+H
+
+
+
+am
+ilt
+
+
+
+on
+ia
+
+
+
+n
+
+
+
+t/τ
+
+
+
+Adiabatic
+
+
+
+Problem Hamiltonian, Ĉ
+Driver Hamiltonian, B̂
+
+
+
+⇒
+
+
+
+0
+
+
+
+0.2
+
+
+
+0.4
+
+
+
+0.6
+
+
+
+0.8
+
+
+
+1
+
+
+
+1.2
+
+
+
+0 0.2 0.4 0.6 0.8 1
+
+
+
+St
+re
+
+
+
+ng
+th
+
+
+
+of
+H
+
+
+
+am
+ilt
+
+
+
+on
+ia
+
+
+
+n
+
+
+
+t/τ
+
+
+
+Trotterized Adiabatic
+
+
+
+The bang-bang form of QAOA can approximate Adiabatic
+
+
+
+Since Adiabatic is Quantum Universal, QAOA is as well
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 13 / 20
+
+
+
+
+
+
+
+
+
+
+
+Variational Optimization
+
+
+
+Bang-Anneal-Bang
+
+
+
+Ĥ (t) = u(t)B̂+ (1 − u(t))Ĉ
+
+
+
+We can also ask for the optimal form of u(t) ∈ [0, 1]1
+
+
+
+Optimal procedure has bangs at
+the beginning and end
+
+
+
+In the middle, there is a smooth
+annealing region
+
+
+
+The initial and final bangs
+decrease in length as time
+increases
+
+
+
+-0.2
+
+
+
+0
+
+
+
+0.2
+
+
+
+0.4
+
+
+
+0.6
+
+
+
+0.8
+
+
+
+1
+
+
+
+1.2
+
+
+
+0 0.5 1 1.5 2 2.5 3 3.5 4
+C
+
+
+
+on
+tr
+
+
+
+ol
+Fu
+
+
+
+nc
+tio
+
+
+
+n
+t
+
+
+
+uGD(t) ΦGD(t)
+
+
+
+This is Diabatic Annealing
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 14 / 20
+
+
+
+
+
+
+
+
+
+
+
+Variational Optimization
+
+
+
+Connections Between QAOA and Optimal
+
+
+
+L. T. B., Lucas Kocia, Przemyslaw Bienias, Aniruddha Bapat, Yaroslav Kharkov, Alexey V.
+
+
+
+Gorshkov, arXiv:2107.01218
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 15 / 20
+
+
+
+
+
+
+
+
+
+
+
+Shortcuts to Adiabaticity
+
+
+
+Shortcuts to Adiabaticity
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 16 / 20
+
+
+
+
+
+
+
+
+
+
+
+Shortcuts to Adiabaticity
+
+
+
+Goals of Shortcuts
+
+
+
+Take an adiabatic evolution and
+run it faster
+
+
+
+Use an additional Hamiltonian
+
+
+
+Exactly follows adiabatic frame arXiv:1904.08448
+
+
+
+Ĥ(t) = u(t)B̂+ (1 − u(t))Ĉ+ ĤCD(t)
+
+
+
+If ĤCD is unbounded, this works for any tf
+
+
+
+Mimics Adiabaticity, not Annealing
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 17 / 20
+
+
+
+
+
+
+
+
+
+
+
+Shortcuts to Adiabaticity
+
+
+
+Counter Diabatic Formulation
+
+
+
+Ĥ(t) =
+
+
+
+N∑
+j=1
+
+
+
+Ej(t) |j(t)〉 〈j(t)|
+
+
+
+The CD Hamiltonian is derived to keep us in the adiabatic frame
+
+
+
+ĤCD(t) = i h
+∑
+j
+
+
+
+|∂tj(t)〉 〈j(t)|
+
+
+
+ĤCD(t) can act alone
+
+
+
+The original Hamiltonian
+determines phase
+
+
+
+Eigenstate phases determined by
+adiabatic frame.
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 18 / 20
+
+
+
+
+
+
+
+
+
+
+
+Open Questions
+
+
+
+Open Questions
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 19 / 20
+
+
+
+
+
+
+
+
+
+
+
+Open Questions
+
+
+
+Areas of Active Research
+
+
+
+How do we engineer diabatic evolution
+
+
+
+Do QAOA or the optimal curve mimic counter-diabaticity (in the
+limit of short QAOA steps, the answer is yes)
+
+
+
+How can we scale up QAOA to larger systems and more
+variational parameters (This is Quantum Machine Learning)
+
+
+
+Can we consistently recover the speed-ups of QAOA without
+relying on variational approaches
+
+
+
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 20 / 20
+
+
+
+
+
+
+ 
+Quantum Algorithms
+
+ 
+Analytic Optimization
+
+ 
+Variational Optimization
+
+ 
+Shortcuts to Adiabaticity
+
+ 
+Open Questions

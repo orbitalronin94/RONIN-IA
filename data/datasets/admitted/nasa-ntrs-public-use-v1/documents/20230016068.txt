@@ -1,0 +1,1108 @@
+arcjetCV
+Automating arc jet analysis
+
+
+
+Alexandre Quintart
+Flying Squirrel 
+
+
+
+Magnus Haw
+NASA Ames Research Center
+
+
+
+Ablation Workshop, November 2023
+
+
+
+
+
+
+
+
+
+
+
+Introduction
+
+
+
+2
+
+
+
+Challenges:
+
+
+
+Ground tests are expensive ~$100k/sample and complex but necessary
+
+
+
+to evaluate material performance.
+
+
+
+Material samples are only 3D scanned before and after a test, no in-situ
+
+
+
+sensing.
+
+
+
+Tracking recession from video is sufficiently difficult that it does not occur
+
+
+
+often.
+
+
+
+Non-linear recession and complex behaviours (e.g., melt, swelling,
+
+
+
+shrinkage) cannot be quantified without time-resolved recession.
+
+
+
+
+
+
+
+
+
+
+
+Introduction
+Computer vision & machine learning automate software.
+Graphical user interface enables anyone to process video.
+Result: 
+
+
+
+Solution: arcjetCV
+
+
+
+Measure the evolution of the sample recession 
+
+
+
+Measure the evolution of the shock position
+
+
+
+3
+
+
+
+→ New time-resolved recession tracking for all samples.
+→ 2D and 3D verification and validation for coupled aerothermal, material
+codes.
+
+
+
+
+
+
+
+
+
+
+
+1. Load a video
+
+
+
+Output settings
+
+
+
+Crop & filter parameters 
+
+
+
+Clickable navigation bar: displays integrated frame intensity,
+start/stop frames (green lines) and current frame (red line).
+
+
+
+Desktop Interface
+
+
+
+4
+
+
+
+Select flow direction
+
+
+
+2. Process all frames
+
+
+
+Select filter method
+
+
+
+
+
+
+
+
+
+
+
+Desktop Interface
+
+
+
+5
+
+
+
+
+
+
+
+
+
+
+
+Web Browser Interface 
+Setup arcjetCV on a secure local server
+
+
+
+6
+
+
+
+
+
+
+
+
+
+
+
+ Typically trained on manually labeled images.
+ Robust performance compared to other methods.
+
+
+
+ material sample
+ shock
+ background
+
+
+
+CNNs are neural networks designed to recognize patterns in images.
+
+
+
+arcjetCV uses a CNN with a VGG16-UNet architecture to classify
+ a given image frame into 3 classes: 
+
+
+
+This segmentation is then passed through simple image processing methods to extract the
+leading edge of the sample.
+
+
+
+CNN Theory
+
+
+
+7
+
+
+
+
+
+
+
+
+
+
+
+Shock 
+Sample
+Background
+
+
+
+CNN Results
+
+
+
+Convolutionnal 
+Neural Network
+
+
+
+8
+
+
+
+Input frame Output frame
+
+
+
+
+
+
+
+
+
+
+
+CNN Training
+Data labelling
+Label by hand with assistance
+
+
+
+Training Set improvement = Data Augmentation
+Increasing the dataset by changing the orientation and the position of the samples
+
+
+
+9
+
+
+
+
+
+
+
+
+
+
+
+VGG16-UNetCNN Model 
+
+
+
+Sample: 0.9494
+Shock: 0.9789
+
+
+
+F1 score:
+
+
+
+Accuracy: 0.9943 
+
+
+
+Number of training images
+
+
+
+Size of the images
+
+
+
+Domain of the images
+
+
+
+Important parameters for the choice of
+the model:
+
+
+
+tp = true positif
+fp = false positif
+fn = false negative
+
+
+
+10
+
+
+
+The VGG16-UNet architecture was
+chosen because it had the best
+performance out of the available
+encoder-decoder architectures tested
+(PSPNet, ResNet, UNet, miniUNet,
+SegNet, FCN, MobileNet, etc.)
+
+
+
+
+
+
+
+
+
+
+
+Accuracy: 0.93573
+
+
+
+Decision tree = algorithm that only contains conditional control statements.
+
+
+
+Decision Tree Theory
+This model was developed to provide a faster segmentation model suitable for
+real-time feedback applications. It uses the HSV (hue, saturation, value) and
+Laplacian filter parameter space instead of RGB since the separation between
+target classes (sample, shock, background) is larger.
+
+
+
+Minimum number of samples required to split an internal node = 500
+Depth of the tree = 10
+Input params: HSV and laplacian HSV of single pixel 
+Output: Sample, Shock, Background classification
+
+
+
+Parameters selected: 
+
+
+
+11
+
+
+
+Realtime feedback for arcjet arm positioning
+Realtime feedback for operators/customers
+
+
+
+Applications:
+
+
+
+if pixel value < X1
+
+
+
+if pixel value < X2 if pixel value < X3
+
+
+
+Sample
+
+
+
+Shockif pixel value < X4
+
+
+
+Background 
+
+
+
+... ...
+
+
+
+
+
+
+
+
+
+
+
+Model CNN Decision Tree
+
+
+
+Performance 1Hz 20Hz
+
+
+
+Accuracy 0.9943 0.93573
+
+
+
+Conclusion
+Slow but performs
+really good result
+
+
+
+Faster and
+reasonably good
+
+
+
+The decision tree works
+well because the different
+
+
+
+classes are mostly
+separated in HSV space
+
+
+
+Decision Tree Results
+Why a decision tree ?
+
+
+
+Sample Shock Background
+
+
+
+S
+H
+
+
+
+V
+
+
+
+12
+
+
+
+
+
+
+
+
+
+
+
+Time Segmentation Problem: Detecting the sample insertion
+manually is a time bottle neck. 
+
+
+
+25 MINUTES 240 FPS
+50 GB 
+
+
+
+MANUALLY CROPPING EACH SAMPLE INSERTION IS HARD WORK 
+
+
+
+13
+
+
+
+
+
+
+
+
+
+
+
+Time Segmentation
+
+
+
+Training 
+Problem: Not enough data for the training.
+→ Solution: Create artificial data.
+
+
+
+Artificial signal Training data segmentation Signal prediction 
+
+
+
+Sample in the frame 
+
+
+
+No sample
+
+
+
+Transitional area
+
+
+
+Solution: Apply a CNN on the mean brightness trace of the
+video and find the sample insertion.
+
+
+
+14
+Frames Frames Frames
+
+
+
+N
+or
+
+
+
+m
+al
+
+
+
+iz
+ed
+
+
+
+ m
+ea
+
+
+
+n 
+br
+
+
+
+ig
+ht
+
+
+
+ne
+ss
+
+
+
+N
+or
+
+
+
+m
+al
+
+
+
+iz
+ed
+
+
+
+ m
+ea
+
+
+
+n 
+br
+
+
+
+ig
+ht
+
+
+
+ne
+ss
+
+
+
+N
+or
+
+
+
+m
+al
+
+
+
+iz
+ed
+
+
+
+ m
+ea
+
+
+
+n 
+br
+
+
+
+ig
+ht
+
+
+
+ne
+ss
+
+
+
+
+
+
+
+
+
+
+
+Idea: Make a tool to segment multiple model insertions in a single video.
+
+
+
+MultiTraces Tool
+
+
+
+Use the work done for the time segmentation but retaining it for multiple tests.
+
+
+
+Sample in the frame 
+
+
+
+Transitional area
+
+
+
+No Sample
+
+
+
+15
+
+
+
+N
+or
+
+
+
+m
+al
+
+
+
+iz
+ed
+
+
+
+ m
+ea
+
+
+
+n 
+br
+
+
+
+ig
+ht
+
+
+
+ne
+ss
+
+
+
+N
+or
+
+
+
+m
+al
+
+
+
+iz
+ed
+
+
+
+ m
+ea
+
+
+
+n 
+br
+
+
+
+ig
+ht
+
+
+
+ne
+ss
+
+
+
+Frames Frames
+
+
+
+
+
+
+
+
+
+
+
+Continuous improvement of the dataset.
+
+
+
+Customization of ML models by creating new class.
+
+
+
+Highest fidelity segmentation for specific frames.
+
+
+
+Create new datasets to create new ML models.
+
+
+
+Segmentation GUI
+
+
+
+16
+
+
+
+Why a labelling tool?
+
+
+
+
+
+
+
+
+
+
+
+GrabCut
+
+
+
+17
+
+
+
+Segmentation through iterative
+graph cuts using color probability.
+
+
+
+
+
+
+
+
+
+
+
+autoSAM
+
+
+
+18
+
+
+
+Segmentation using the Segment
+Anything Model (SAM) of META
+
+
+
+Based on the Segment Anything GUI co developed with Federico Semeraro. 
+
+
+
+
+
+https://github.com/fsemerar/segment-anything-gui#segment-anything-gui
+
+
+
+
+
+
+
+
+Region 1: Nearly no recession 
+Region 2: Constant recession rate 
+Region 3: reduced recession rate 
+
+
+
+Before: Recession considered linear
+
+
+
+With arcjetCV: 3 Regions:
+
+
+
+Non-linear Recession
+
+
+
+19
+
+
+
+NEW PHENOMENON! NOT POSSIBLE TO OBSERVE WITHOUT ARCJETCV
+
+
+
+
+
+
+
+
+
+
+
+→ Aerothermal conditions are changing 
+
+
+
+ Shock-sample distance decrease implies that the pressure at the
+sample surface is changing with time:
+
+
+
+→ The sample is becoming more porous 
+→ Pyrolysis gas pressure is changing
+
+
+
+Shock standoff 
+
+
+
+20
+
+
+
+
+
+
+
+
+
+
+
+Shape change 
+
+
+
+→ Provide the first validation for the new 3D material simulations. 
+21
+
+
+
+Initilal shape
+
+
+
+Final shape
+
+
+
+Surface develops
+millimeter scale
+ripples/bubbles
+
+
+
+Sample deforms/flattens
+at the nose.
+The entire sample is
+expanding (e.g. negative
+recession at the edges).
+
+
+
+Mid-point 
+
+
+
+
+
+
+
+
+
+
+
+macOS Windows Linux
+
+
+
+decision Tree
+multiTracevgg16-Unet
+
+
+
+time
+segmentation
+
+
+
+Desktop
+interface
+
+
+
+Web Browser
+interface
+
+
+
+4 ML models 
+
+
+
+2 interfaces
+
+
+
+3 operating systems
+
+
+
+Conclusion 
+
+
+
+22
+
+
+
+arcjetCV is: 
+
+
+
+ Automated recession statistics
+
+
+
+ 2D model validation 
+
+
+
+ Time resolved validation 
+
+
+
+ ArcjetCV enables new capabilities: 
+
+
+
+→ Better mission planning and risk management
+
+
+
+Ames arcjet facilities 
+
+
+
+Orion
+
+
+
+MSR
+
+
+
+arcjetCV users : 
+
+
+
+
+
+
+
+
+
+
+
+Federico Semeraro – Analytical Mechanics Associates
+Jeremie Meurisse – Analytical Mechanics Associates
+Magnus Haw – NASA Ames Research Center
+Margaret Stackpoole – NASA Ames Research Center
+
+
+
+Acknowledgments
+
+
+
+23
+
+
+
+
+
+
+
+
+
+
+
+To get updates about the opensource release 
+new features 
+
+
+
+and installation 
+
+
+
+Thank you for
+your attention !
+
+
+
+24
+
+
+
+For more information come see our poster 
+
+
+
+
+
+
+
+
+
+
+
+25

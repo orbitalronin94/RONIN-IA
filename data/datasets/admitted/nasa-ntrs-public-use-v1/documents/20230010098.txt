@@ -1,0 +1,6047 @@
+Managing Model Uncertainty, Disturbances, and Operational Space Characteristics
+
+
+John Pye
+
+
+Dr. Natalia Alexandrov
+
+
+NASA Langley Research Center
+
+
+
+
+
+1
+
+
+
+
+
+
+
+
+
+
+
+1
+
+
+
+
+
+Overview
+
+
+Achieving robustness to uncertainty is a problem that must be addressed on all levels to achieve success.
+
+
+We first examine controller design for uncertain quadrotor UAV dynamics.
+
+
+Complexity of UAV model serves as good test case for uncertainty management.
+
+
+We present three state-of-the-art control methods and demonstrate a new way to integrate them to achieve safe control.
+
+
+We then explain one heuristic standard of UAV safe operation and propose a method to integrate the standard into a controller.
+
+
+
+
+
+We formulate the issue of robust control in the context of Control Lyapunov and Control Barrier functions, then proceed to use existing methods to yield a new process.
+
+
+2
+
+
+
+
+
+
+
+
+
+
+
+2
+
+
+
+
+
+Problem Setting
+
+
+Designing for robustness to uncertainty
+
+
+3
+
+
+
+
+
+
+
+
+Problem Space
+
+
+Robotic fully autonomous systems are particularly susceptible to state and environmental uncertainty. No human in the loop – dependent on on-board sensing and decision making.
+
+
+Non-ideal sensors
+
+
+Hardware degradation
+
+
+Etc.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Uncertain physical properties
+
+
+Actuator degradation / nonlinearities
+
+
+Sensor inaccuracies, bias, processing errors
+
+
+External forces
+
+
+
+
+
+
+
+
+4
+
+
+
+
+
+
+
+
+
+
+
+4
+
+
+
+
+
+Problem Space
+
+
+Uncertain information streams require introduction of new steps in the formulation of control signals in order to compensate for unknown parameters.
+
+
+
+
+
+Approaches to formulating adaptive control schemes are generic, but sources of uncertainty must be characterized for each context.
+
+
+
+
+
+
+
+
+Nominal control
+
+
+External force correction
+
+
+Hardware degradation correction
+
+
+Physical inaccuracies correction
+
+
+Robust control
+
+
+
+
+
+
+
+
+5
+
+
+
+
+
+
+
+
+
+
+
+5
+
+
+
+
+
+Reference Mission
+
+
+Task: move between two states while avoiding obstacles.
+
+
+Common to both air and space, for example computing and modifying a non-colliding trajectory
+
+
+Quadrotor dynamical model is prone to uncertainty, ideal for demonstrating control scheme.
+
+
+The uncertainty sources are representative of both air and space systems.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+6
+
+
+
+
+
+
+
+
+
+
+
+6
+
+
+
+
+
+Informational Dependencies
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+State Variables Known to Agent
+
+
+State Evolution Variables Known to Agent
+
+
+Governing Equations Known to Agent
+
+
+Inertial position
+
+
+Inertial orientation
+
+
+Body frame velocity
+
+
+Body frame rotational velocity
+
+
+Position
+
+
+Position
+
+
+Inertial velocity
+
+
+Inertial rotational velocity
+
+
+Body frame acceleration
+
+
+Body frame rotational acceleration
+
+
+Kinematic/dynamic model
+
+
+Sensing functions (obstacle and goal)
+
+
+Control generation
+
+
+
+
+
+Inertial velocity (optional)
+
+
+Agent (self)
+
+
+Obstacles
+
+
+Goals
+
+
+Inertial velocity (optional)
+
+
+7
+
+
+
+
+
+
+
+
+
+
+
+7
+
+
+
+
+
+Operational Loop
+
+
+
+
+
+8
+
+
+
+
+
+
+
+
+
+
+
+Operational Loop
+
+
+Contains all objects in operation space
+
+
+States: position, velocity (if any)
+
+
+Control: body frame thrust and moments
+
+
+History: horizon can be adjusted, defaults to all history
+
+
+9
+
+
+
+
+
+
+
+
+
+
+
+9
+
+
+
+
+
+
+
+
+Operational Loop
+
+
+
+
+
+Sensor errors, noise
+
+
+Hardware degradation
+
+
+Software errors
+
+
+
+
+
+Unknown dynamics, outside disturbances 
+
+
+10
+
+
+
+
+
+
+
+
+Control Generation
+
+
+
+
+
+11
+
+
+
+
+
+
+
+
+
+
+
+Control Generation
+
+
+Generate body frame force vector towards goal
+
+
+Correct force vector into safe trajectory
+
+
+Translate force vector into torques and total thrust
+
+
+Goal position
+
+
+Actual controls
+
+
+Obstacle position + velocity
+
+
+12
+
+
+
+
+
+
+
+
+
+
+
+Control Generation
+
+
+
+
+
+State uncertainties
+
+
+
+
+
+Disturbance forces, state uncertainties
+
+
+
+
+
+Dynamical inaccuracies, disturbance forces, state uncertainties
+
+
+13
+
+
+
+
+
+
+
+
+Cascaded Uncertain Control
+
+
+Planning for, and Adapting to, Uncertainty
+
+
+14
+
+
+
+
+
+
+
+
+Control Loop
+
+
+Goal State
+
+
+Current State
+
+
+Obstacle State(s)
+
+
+Goal Controller
+
+
+U_ideal
+
+
+Robust Ideal Safety Controller
+
+
+
+
+
+
+
+
+Uncertain Dynamics Safety Controller
+
+
+U_vector
+
+
+Actuators
+
+
+U
+
+
+Sensors and Comms
+
+
+Generating U_ideal
+
+
+Generating U_vector
+
+
+Generating U
+
+
+Applying control effort
+
+
+Reevaluating obstacle and goal states using sensors and communication
+
+
+Position
+
+
+Position, velocity, orientation, rotational velocity
+
+
+Position, velocity
+
+
+15
+
+
+
+
+
+
+
+
+Control Loop: Quadrotor Dynamics
+
+
+Goal State
+
+
+Current State
+
+
+Obstacle State(s)
+
+
+Goal Controller
+
+
+U_ideal
+
+
+Robust Ideal Safety Controller
+
+
+
+
+
+
+
+
+Uncertain Dynamics Safety Controller
+
+
+U_vector
+
+
+Actuators
+
+
+U
+
+
+Sensors and Comms
+
+
+Generating U_ideal
+
+
+Generating U_vector
+
+
+Generating U
+
+
+Applying control effort
+
+
+Reevaluating obstacle and goal states using sensors and communication
+
+
+Position
+
+
+Position, velocity, orientation, rotational velocity
+
+
+Position, velocity
+
+
+16
+
+
+
+
+
+
+
+
+
+
+
+Quadrotor Dynamics
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+i
+
+
+j
+
+
+k
+
+
+M
+
+
+L
+
+
+N
+
+
+θ
+
+
+Ψ
+
+
+φ
+
+
+F
+
+
+Body Frame: [i, j, k]
+
+
+Dynamical Controls: [F, L, M, N]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+x
+
+
+z
+
+
+y
+
+
+
+
+
+ω2
+
+
+
+
+
+ω1
+
+
+
+
+
+
+
+
+ω3
+
+
+ω4
+
+
+f2
+
+
+f3
+
+
+f1
+
+
+f4
+
+
+v
+
+
+w
+
+
+u
+
+
+
+
+
+
+
+
+
+
+
+q
+
+
+p
+
+
+r
+
+
+Body Frame Velocities: [u, v, w, p, q, r]
+
+
+
+
+
+Bernstein, Dennis S, and Ahmad Ansari. Elements of Fixed-Wing Aircraft Dynamics. The University of Michigan, 2022. 
+
+
+
+
+
+Inertial Frame: [x, y, z]
+
+
+Inertial Euler Angles (ZYX rotations): [φ, θ, Ψ]
+
+
+
+
+
+17
+
+
+
+
+
+
+
+
+
+
+
+17
+
+
+
+
+
+Lower-Order Kinematics
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Quadrotor Dynamics
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+i
+
+
+j
+
+
+k
+
+
+M
+
+
+L
+
+
+N
+
+
+θ
+
+
+Ψ
+
+
+φ
+
+
+F
+
+
+Body Frame: [i, j, k]
+
+
+Dynamical Controls: [F, L, M, N]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+x
+
+
+z
+
+
+y
+
+
+
+
+
+ω2
+
+
+
+
+
+ω1
+
+
+
+
+
+
+
+
+ω3
+
+
+ω4
+
+
+f2
+
+
+f3
+
+
+f1
+
+
+f4
+
+
+v
+
+
+w
+
+
+u
+
+
+
+
+
+
+
+
+
+
+
+q
+
+
+p
+
+
+r
+
+
+Body Frame Velocities: [u, v, w, p, q, r]
+
+
+
+
+
+Control Efforts
+
+
+Uncertain Parameters
+
+
+Legend
+
+
+
+
+
+Bernstein, Dennis S, and Ahmad Ansari. Elements of Fixed-Wing Aircraft Dynamics. The University of Michigan, 2022. 
+
+
+
+
+
+Inertial Frame: [x, y, z]
+
+
+Inertial Euler Angles (ZYX rotations): [φ, θ, Ψ]
+
+
+
+
+
+18
+
+
+
+
+
+
+
+
+
+
+
+18
+
+
+
+
+
+Lower-Order Kinematics
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Quadrotor Dynamics
+
+
+Control Efforts
+
+
+Uncertain Parameters
+
+
+Legend
+
+
+
+
+
+
+
+
+All parameters known kinematically and can additionally be estimated through sensors easily.
+
+
+
+
+
+Result: no uncertainty control needed on low level. Simplified uncertainty control possible.
+
+
+19
+
+
+Bernstein, Dennis S, and Ahmad Ansari. Elements of Fixed-Wing Aircraft Dynamics. The University of Michigan, 2022. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+19
+
+
+
+
+
+Higher-Order Kinematics
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Quadrotor Dynamics
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+i
+
+
+j
+
+
+k
+
+
+M
+
+
+L
+
+
+N
+
+
+θ
+
+
+Ψ
+
+
+φ
+
+
+F
+
+
+Body Frame: [i, j, k]
+
+
+Dynamical Controls: [F, L, M, N]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+x
+
+
+z
+
+
+y
+
+
+
+
+
+ω2
+
+
+
+
+
+ω1
+
+
+
+
+
+
+
+
+ω3
+
+
+ω4
+
+
+f2
+
+
+f3
+
+
+f1
+
+
+f4
+
+
+v
+
+
+w
+
+
+u
+
+
+
+
+
+
+
+
+
+
+
+q
+
+
+p
+
+
+r
+
+
+Body Frame Velocities: [u, v, w, p, q, r]
+
+
+
+
+
+Control Efforts
+
+
+Uncertain Parameters
+
+
+Legend
+
+
+
+
+
+Inertial Frame: [x, y, z]
+
+
+Inertial Euler Angles (ZYX rotations): [φ, θ, Ψ]
+
+
+
+
+
+20
+
+
+Bernstein, Dennis S, and Ahmad Ansari. Elements of Fixed-Wing Aircraft Dynamics. The University of Michigan, 2022. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+20
+
+
+
+
+
+Higher-Order Kinematics
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Quadrotor Dynamics
+
+
+Control Efforts
+
+
+Uncertain Parameters
+
+
+Legend
+
+
+
+
+
+
+
+
+Unknown parameters separate from known parameters and control.
+
+
+
+
+
+Result: bounding-based uncertainty control possible.
+
+
+
+
+
+Uncertain parameters linked to control. No purely known parameters.
+
+
+
+
+
+Result: learning-based uncertainty control necessary.
+
+
+Clear opportunity for cascaded control due to differentiated complexity levels.
+
+
+21
+
+
+Bernstein, Dennis S, and Ahmad Ansari. Elements of Fixed-Wing Aircraft Dynamics. The University of Michigan, 2022. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+21
+
+
+
+
+
+Control Loop: Quadrotor Dynamics
+
+
+Goal State
+
+
+Current State
+
+
+Obstacle State(s)
+
+
+Goal Controller
+
+
+U_ideal
+
+
+Robust Ideal Safety Controller
+
+
+
+
+
+
+
+
+Uncertain Dynamics Safety Controller
+
+
+U_vector
+
+
+Actuators
+
+
+U
+
+
+Sensors and Comms
+
+
+Generating U_ideal
+
+
+Generating U_vector
+
+
+Generating U
+
+
+Applying control effort
+
+
+Reevaluating obstacle and goal states using sensors and communication
+
+
+Position
+
+
+Position, velocity, orientation, rotational velocity
+
+
+Position, velocity
+
+
+22
+
+
+
+
+
+
+
+
+
+
+
+22
+
+
+
+
+
+Goal Controller: Overview
+
+
+
+
+
+
+
+
+
+
+
+x
+
+
+z
+
+
+y
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+We aim to drive and thus reach the goal. To accomplish this, we formulate . This goal is a Lyapunov function and is assured to converge at an exponential rate. In control terminology, this goal is exponentially stable.
+
+
+
+
+
+We will formulate an appropriate three-dimensional force vector in the UAV body frame, to achieve our goal. However, as seen in the kinematic model, we must account for disturbance forces.
+
+
+Coupling matrix to ensure higher order controllability (links positions to velocities)
+
+
+23
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+23
+
+
+
+
+
+Control Lyapunov Function (CLF) Explanation
+
+
+Control Lyapunov Functions (CLFs) : Used to generate control efforts for exponential system convergence/stabilization to a goal, and has the following properties:
+
+
+Continuous and n-continually differentiable in function variables, where n is the relative degree of the system.
+
+
+Strictly positive away from origin, zero at origin.
+
+
+Is bounded above and below:
+
+
+
+
+
+Converges to 0 along system dynamics under uncertain parameters:
+
+
+
+
+
+
+
+
+ is known as an Exponentially Stabilizing Adaptive Control Lyapunov Function (ES-aCLF).
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+24
+
+
+
+
+
+
+
+
+Goal Controller: Uncertainty
+
+
+Formulate a dynamical model to account for parametric uncertainty:
+
+
+
+
+
+Where: 
+
+
+ is the state derivative
+
+
+Velocity, Rotational velocity, Acceleration, Rotational Acceleration
+
+
+At this stage, we consider only lateral state derivatives: velocity, and acceleration
+
+
+ is the uncertain parameter estimate
+
+
+Drag/disturbance force along each body axis
+
+
+ is the applied control effort
+
+
+At this stage: accelerations in the body frame
+
+
+
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+25
+
+
+
+
+
+
+
+
+
+
+
+25
+
+
+
+
+
+Goal Controller: Uncertainty
+
+
+In order to track the effect of the actual uncertain parameters , construct a history stack :
+
+
+
+
+
+Estimate the uncertain parameter vector by subtracting expected state changes from actual state changes over time:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+26
+
+
+
+
+
+
+
+
+
+
+
+26
+
+
+
+
+
+Goal Controller: Uncertainty
+
+
+In order to track the effect of the actual uncertain parameters on the state evolution, we construct a history stack :
+
+
+
+
+
+We then estimate the uncertain parameter vector by subtracting expected state changes from actual state changes over time:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Actual state change
+
+
+Expected change
+
+
+Goal Function Influence
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+27
+
+
+
+
+
+
+
+
+
+
+
+27
+
+
+
+
+
+Design Coefficients Exploration
+
+
+Two design variables: and 
+
+
+ : Scalar sensitivity to historic error
+
+
+Higher values of leads to faster error updating, but can lead to error estimate overshoot
+
+
+
+
+
+: Matrix of dimensional error weights, and coupled error weightings
+
+
+Different scaling to adapt to different dimensions along the error vector (for example, useful for adapting to different sensor inputs)
+
+
+Can update one error dimension based on others (for example, to address unknown biases)
+
+
+28
+
+
+
+
+
+
+
+
+Lie Derivative Explanation
+
+
+Useful tool to evaluate rates of change along components of dynamical model.
+
+
+: Lie derivative of along 
+
+
+rate of change of V along f
+
+
+
+
+
+The Lie derivative allows us to determine some function’s (i.e Control Barrier Functions or Lyapunov Functions) evolution due to changes in a component of the dynamical state of the system.
+
+
+Friedman, John L., and N. Stergioulas. "Lie derivatives, forms, densities, and integration." Cambridge Monographs on Mathematical Physics, Cambridge University Press (2013).
+
+
+29
+
+
+
+
+
+
+
+
+Goal Controller: Uncertainty
+
+
+With our estimation of the uncertain parameter’s evolution, and thus of the parameter itself over time, we formulate a quadratic program to yield a desired control effort:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Where is a design constant governing the convergence rate of V(x) to 0, and thus the magnitude of .
+
+
+
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+30
+
+
+
+
+
+
+
+
+
+
+
+30
+
+
+
+
+
+Goal Controller: Assumptions
+
+
+We assume,
+
+
+Bounded uncertain parameters 
+
+
+Strong, but reasonable: uncertain parameters are natural drags and force disturbances
+
+
+Naturally bounded due to airframe tolerances to force vectors.
+
+
+Existence of design constants , , which prove V(x) to be Lyapunov stable and satisfiable using control
+
+
+
+
+
+Existence of appropriate design weight and positive-definite gain matrix 
+
+
+31
+
+
+
+
+
+
+
+
+
+
+
+31
+
+
+
+
+
+Control Loop: Quadrotor Dynamics
+
+
+Goal State
+
+
+Current State
+
+
+Obstacle State(s)
+
+
+Goal Controller
+
+
+U_ideal
+
+
+Robust Ideal Safety Controller
+
+
+
+
+
+
+
+
+Uncertain Dynamics Safety Controller
+
+
+U_vector
+
+
+Actuators
+
+
+U
+
+
+Sensors and Comms
+
+
+Generating U_ideal
+
+
+Generating U_vector
+
+
+Generating U
+
+
+Applying control effort
+
+
+Reevaluating obstacle and goal states using sensors and communication
+
+
+Position
+
+
+Position, velocity, orientation, rotational velocity
+
+
+Position, velocity
+
+
+32
+
+
+
+
+
+
+
+
+Lateral Safety Controller: Overview
+
+
+
+
+
+
+
+
+
+
+
+x
+
+
+z
+
+
+y
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+We must keep in order to avoid unsafe distances. This restriction is formulated as a control barrier function. To accomplish this, we will minimally alter the desired control effort in order to generate a safe trajectory.
+
+
+
+
+
+We must first formulate a higher order control restriction in order to account for our high-relative-degree dynamics. We will then generate our control effort while taking uncertain parameters into account.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ames, Aaron D., et al. "Control barrier functions: Theory and applications." 2019 18th European control conference (ECC). IEEE, 2019.
+
+
+33
+
+
+
+
+
+
+
+
+
+
+
+33
+
+
+
+
+
+Control Barrier Function (CBF) Explanation
+
+
+Control Barrier Functions (CBFs) : Used to classify safe and unsafe regions in the environment and formulate control efforts to maintain safety, have the following properties:
+
+
+The region , defined by those states where , is forward invariant.
+
+
+To prove invariance: that where is a class-K function governing safe control effort conservativeness.
+
+
+Continuous, and continuously differentiable for system degree.
+
+
+Ames, Aaron D., et al. "Control barrier functions: Theory and applications." 2019 18th European control conference (ECC). IEEE, 2019.
+
+
+34
+
+
+
+
+
+
+
+
+
+
+
+34
+
+
+
+
+
+Lateral Safety Controller : Uncertainty
+
+
+We then independently estimate the uncertain parameter vector by subtracting expected state changes from actual state changes over time:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+35
+
+
+
+
+
+
+
+
+
+
+
+35
+
+
+
+
+
+Lateral Safety Controller : Uncertainty
+
+
+We then independently estimate the uncertain parameter vector by subtracting expected state changes from actual state changes over time:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Actual state change
+
+
+Expected change
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+36
+
+
+
+
+
+
+
+
+
+
+
+36
+
+
+
+
+
+Lateral Safety Controller : Uncertainty
+
+
+In order to ensure safety, we also characterize the “worst-case” error for purposes of forming an optimization constraint:
+
+
+
+
+
+
+
+
+
+
+
+Where is the known set containing all possible disturbance values.
+
+
+Seemingly strong assumption but bounded by airframe/propeller structural limitations. 
+
+
+
+
+
+
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+37
+
+
+
+
+
+
+
+
+
+
+
+37
+
+
+
+
+
+Exploration of 
+
+
+ defines the set of all possible unknown parameters or disturbances.
+
+
+Bounded by operational conditions – exceeding would then mean loss of flight.
+
+
+
+
+
+ defines the specific unknown parameters.
+
+
+
+
+
+In lateral dynamics, represents body axis drags.
+
+
+
+
+
+ represents the known estimation of .
+
+
+Is also bounded, by margin of error deviation.
+
+
+Margin allows for min/max of 
+
+
+
+
+
+38
+
+
+
+
+
+
+
+
+Lateral Safety Controller : Uncertainty
+
+
+In order to ensure safety, we also characterize the “worst-case” error for purposes of forming an optimization constraint:
+
+
+
+
+
+
+
+
+
+
+
+Where is the known set containing all possible disturbance values.
+
+
+Seemingly strong assumption but bounded by airframe/propeller structural limitations. 
+
+
+
+
+
+Maximum possible error allows us to formulate safe control efforts under all circumstances.
+
+
+
+
+
+
+
+
+
+
+
+Maximum possible estimation error
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+39
+
+
+
+
+
+
+
+
+
+
+
+39
+
+
+
+
+
+Lateral Safety Controller : Uncertainty
+
+
+We then also formulate the bounds of the parameter estimation error, :
+
+
+
+
+
+
+
+
+Where is the minimum eigenvalue of the matrix , defined as:
+
+
+
+
+
+
+
+
+Having characterized the boundedness of disturbances and estimation error, we are now able to formulate an optimal control scheme to maintain safety.
+
+
+
+
+
+
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+40
+
+
+
+
+
+
+
+
+
+
+
+40
+
+
+
+
+
+Lateral Safety Controller : Uncertainty
+
+
+We then also formulate the bounds of the parameter estimation error, :
+
+
+
+
+
+
+
+
+Where is the minimum eigenvalue of the matrix , defined as:
+
+
+
+
+
+
+
+
+Having characterized the boundedness of disturbances and estimation error, we are now able to formulate an optimal control scheme to maintain safety.
+
+
+
+
+
+
+
+
+
+
+
+Upper bound on maximum error estimation at any given time
+
+
+
+
+
+Disturbance dynamics model over a timestep
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+41
+
+
+
+
+
+
+
+
+
+
+
+41
+
+
+
+
+
+Lateral Safety Controller : Higher Order Safety
+
+
+Due to our system’s double-integrator dynamics, the control effort does not directly affect safety. 
+
+
+We formulate a higher-order safety function representative of our base safety function, which our control effort can affect.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Where is a class- function.
+
+
+These equations will form safety constraints for optimization against.
+
+
+
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+Xiao, Wei, and Calin Belta. "Control barrier functions for systems with high relative degree." 2019 IEEE 58th conference on decision and control (CDC). IEEE, 2019.
+
+
+42
+
+
+
+
+
+
+
+
+
+
+
+42
+
+
+
+
+
+Lateral Safety Controller : Higher Order Safety
+
+
+Due to our system’s double-integrator dynamics, the control effort does not directly affect safety. 
+
+
+We formulate a higher-order safety function representative of our base safety function, which our control effort can affect.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Where is a class- function.
+
+
+These equations will form safety constraints for optimization against.
+
+
+
+
+
+
+
+
+Lower-order; represents actual safety, but not affected directly by control
+
+
+
+
+
+Higher-order: can be affected directly by control effort
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+Xiao, Wei, and Calin Belta. "Control barrier functions for systems with high relative degree." 2019 IEEE 58th conference on decision and control (CDC). IEEE, 2019.
+
+
+43
+
+
+
+
+
+
+
+
+
+
+
+43
+
+
+
+
+
+Lateral Safety Controller : Quadratic Program
+
+
+With our estimation of the uncertain parameter’s evolution, and thus of the parameter itself over time, we formulate a quadratic program to yield a desired control effort:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Where is a design class-K function defining how strictly convergence to the safety boundary is regulated.
+
+
+
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+44
+
+
+
+
+
+
+
+
+
+
+
+44
+
+
+
+
+
+Lateral Safety Controller : Quadratic Program
+
+
+With our estimation of the uncertain parameter’s evolution, and thus of the parameter itself over time, we formulate a quadratic program to yield a desired control effort:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Where is a design class-K function defining how strictly convergence to the safety boundary is regulated.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Minimal alteration of desired control effort; no obstacle, no deviation
+
+
+Note that control effort can now be applied to safety function
+
+
+Maximum possible error bound at time used to add additional control restriction
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+45
+
+
+
+
+
+
+
+
+
+
+
+45
+
+
+
+
+
+Goal Controller: Assumptions
+
+
+We assume,
+
+
+Bounded uncertain parameters 
+
+
+Strong, but reasonable: uncertain parameters are natural drags and force disturbances
+
+
+Known , the set containing all possible disturbance values.
+
+
+Strong and reasonable: bound using maximum survivable disturbances of airframe
+
+
+Sufficiently fast sampling time , to accurately capture disturbance forces.
+
+
+Existence of appropriate design weight and appropriate class-K functions and .
+
+
+Weak: design weight and functions are pure design choices, rather than requiring derivation
+
+
+46
+
+
+
+
+
+
+
+
+Control Loop: Quadrotor Dynamics
+
+
+Goal State
+
+
+Current State
+
+
+Obstacle State(s)
+
+
+Goal Controller
+
+
+U_ideal
+
+
+Robust Ideal Safety Controller
+
+
+
+
+
+
+
+
+Uncertain Dynamics Safety Controller
+
+
+U_vector
+
+
+Actuators
+
+
+U
+
+
+Sensors and Comms
+
+
+Generating U_ideal
+
+
+Generating U_vector
+
+
+Generating U
+
+
+Applying control effort
+
+
+Reevaluating obstacle and goal states using sensors and communication
+
+
+Position
+
+
+Position, velocity, orientation, rotational velocity
+
+
+Position, velocity
+
+
+47
+
+
+
+
+
+
+
+
+
+
+
+Translating Between Control Efforts: Model
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+i
+
+
+j
+
+
+k
+
+
+M
+
+
+L
+
+
+N
+
+
+θ
+
+
+Ψ
+
+
+φ
+
+
+F
+
+
+Body Frame: [i, j, k]
+
+
+Actual Dynamical Controls: [F, L, M, N]
+
+
+Individual Thrust Forces: [f1, f2, f3, f4]
+
+
+Actual Motor Signals: [w1, w2, w3, w4]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+x
+
+
+z
+
+
+y
+
+
+Inertial Frame: [x, y, z]
+
+
+Inertial Euler Angles (ZYX rotations): [φ, θ, Ψ]
+
+
+
+
+
+ω2
+
+
+
+
+
+ω1
+
+
+
+
+
+
+
+
+ω3
+
+
+ω4
+
+
+f2
+
+
+f3
+
+
+f1
+
+
+f4
+
+
+
+
+
+
+
+
+
+
+
+Desired Body Frame Forces: [, , ]
+
+
+
+
+
+
+
+
+48
+
+
+
+
+
+
+
+
+
+
+
+Translating Between Control Efforts
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+i
+
+
+j
+
+
+k
+
+
+M
+
+
+L
+
+
+N
+
+
+θ
+
+
+Ψ
+
+
+φ
+
+
+F
+
+
+Body Frame: [i, j, k]
+
+
+Actual Dynamical Controls: [F, L, M, N]
+
+
+Individual Thrust Forces: [f1, f2, f3, f4]
+
+
+Actual Motor Signals: [w1, w2, w3, w4]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+x
+
+
+z
+
+
+y
+
+
+
+
+
+ω2
+
+
+
+
+
+ω1
+
+
+
+
+
+
+
+
+ω3
+
+
+ω4
+
+
+f2
+
+
+f3
+
+
+f1
+
+
+f4
+
+
+
+
+
+
+
+
+
+
+
+Desired Body Frame Forces: [, , ]
+
+
+
+
+
+Ideal goal-based control
+
+
+Safety-corrected vector
+
+
+Dynamically attainable control
+
+
+Individual propeller forces
+
+
+Actual motor control signals
+
+
+Done
+
+
+Current
+
+
+Closed form, no uncertainty
+
+
+Inertial Frame: [x, y, z]
+
+
+Inertial Euler Angles (ZYX rotations): [φ, θ, Ψ]
+
+
+
+
+
+49
+
+
+
+
+
+
+
+
+Translating Between Control Efforts: Method
+
+
+Translate body-frame control effort into inertial frame to derive desired Euler angles:
+
+
+
+
+
+
+
+
+: derived from trajectory planner / arbitrary
+
+
+
+
+
+
+
+
+Habibi, Hamed, et al. "Safe navigation of a quadrotor UAV with uncertain dynamics and guaranteed collision avoidance using barrier Lyapunov function." Aerospace Science and Technology 132 (2023): 108064.
+
+
+50
+
+
+
+
+
+
+
+
+
+
+
+50
+
+
+
+
+
+Formulating Desired Euler Angle Rate
+
+
+Desired angles, , have been derived. Using basic proportional control, we also derive .
+
+
+
+
+
+Using sensor measurements, we can estimate body-frame rotational velocity and translate it into the ground frame to yield .
+
+
+
+
+
+We define tracking error:
+
+
+
+
+
+And feed that tracking error into the AMFC algorithms as well, to drive .
+
+
+Habibi, Hamed, et al. "Safe navigation of a quadrotor UAV with uncertain dynamics and guaranteed collision avoidance using barrier Lyapunov function." Aerospace Science and Technology 132 (2023): 108064.
+
+
+51
+
+
+
+
+
+
+
+
+
+
+
+51
+
+
+
+
+
+Justification of Proportional Control
+
+
+Proportional control used in AMFC formulation: deriving from and .
+
+
+Proportional-only control is prone to overshoot, which can be non-ideal.
+
+
+
+
+
+Higher-level control limited by unreliable data streams. Overshoot and short-duration inaccuracies inevitable due to extreme nonlinearities in uncertainty adaptation.
+
+
+System natural damping through drag drives system to converge, even in worst-case non-decaying desired oscillations.
+
+
+Habibi, Hamed, et al. "Safe navigation of a quadrotor UAV with uncertain dynamics and guaranteed collision avoidance using barrier Lyapunov function." Aerospace Science and Technology 132 (2023): 108064.
+
+
+52
+
+
+
+
+
+
+
+
+
+
+
+52
+
+
+
+
+
+Touching Lightly on Adaptive Model-Free Control
+
+
+Our attitude dynamics are formulated as:
+
+
+
+
+
+
+
+
+Where is an unknown system diagonal, matrix representing unknown dynamics (such as moments of inertia).
+
+
+G is an unknown set of nonlinear functions reliant on unknown dynamics, current control effort, desired control effort, and other system parameters affecting state evolution.
+
+
+J is an estimate of the unknown moments of inertia matrix, and used to formulate estimates of higher-order nonlinear uncertainty equations.
+
+
+Habibi, Hamed, et al. "Safe navigation of a quadrotor UAV with uncertain dynamics and guaranteed collision avoidance using barrier Lyapunov function." Aerospace Science and Technology 132 (2023): 108064.
+
+
+Safaei, Ali, and Muhammad Nasiruddin Mahyuddin. "Optimal model‐free control for a generic MIMO nonlinear system with application to autonomous mobile robots." International Journal of Adaptive Control and Signal Processing 32.6 (2018): 792-815.
+
+
+53
+
+
+
+
+
+
+
+
+
+
+
+53
+
+
+
+
+
+Adaptive Model-Free Control Loop
+
+
+Sense current state
+
+
+Retrieve goal Euler angles, rates, accelerations
+
+
+Update unknown system matrix A estimate
+
+
+Filter updated A 
+
+
+Update unknown dynamics matrix G estimate
+
+
+Formulate commanded Euler angle accelerations
+
+
+Translate to body frame torques
+
+
+Apply to vehicle
+
+
+Timestep forward
+
+
+Estimate combined error and accumulated error
+
+
+
+
+
+54
+
+
+
+
+
+
+
+
+
+
+
+54
+
+
+
+
+
+Adaptive Model-Free Control (AMFC) Parameters
+
+
+: ZYX rotation matrix (derived from Euler angles)
+
+
+: YX rotation matrix (derived from Euler angles)
+
+
+: Body frame rotation rates
+
+
+: Body frame torques to exert
+
+
+: Body frame disturbance torques
+
+
+: Body frame disturbance torques
+
+
+: Unknown system dynamics matrix (in body frame)
+
+
+: Unknown (but estimable) nonlinear dynamical functions (in body frame)
+
+
+: Unknown system dynamics matrix (in inertial frame)
+
+
+: Unknown (but estimable) nonlinear dynamical functions (in inertial frame)
+
+
+: Time-integrated error
+
+
+Q: Positive definite design matrix
+
+
+: Error adaptation rate matrices (governing learning speed)
+
+
+: Error adaptation rate scalars (applied equally to each dimension)
+
+
+55
+
+
+
+
+
+
+
+
+Equations of AMFC of Quadrotor
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+56
+
+
+
+
+
+
+
+
+Equations of AMFC of Quadrotor
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Body-frame rotational velocity evolution
+
+
+Body-frame uncertain dynamical estimation
+
+
+Ground-frame rotational velocity evolution
+
+
+Ground-frame uncertain dynamical estimation
+
+
+Total error (current and historical)
+
+
+Body-frame torque formulation
+
+
+57
+
+
+
+
+
+
+
+
+Equations of AMFC of Quadrotor
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Habibi, Hamed, et al. "Safe navigation of a quadrotor UAV with uncertain dynamics and guaranteed collision avoidance using barrier Lyapunov function." Aerospace Science and Technology 132 (2023): 108064.
+
+
+Safaei, Ali, and Muhammad Nasiruddin Mahyuddin. "Optimal model‐free control for a generic MIMO nonlinear system with application to autonomous mobile robots." International Journal of Adaptive Control and Signal Processing 32.6 (2018): 792-815.
+
+
+58
+
+
+
+
+
+
+
+
+Equations of AMFC of Quadrotor
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Habibi, Hamed, et al. "Safe navigation of a quadrotor UAV with uncertain dynamics and guaranteed collision avoidance using barrier Lyapunov function." Aerospace Science and Technology 132 (2023): 108064.
+
+
+Safaei, Ali, and Muhammad Nasiruddin Mahyuddin. "Optimal model‐free control for a generic MIMO nonlinear system with application to autonomous mobile robots." International Journal of Adaptive Control and Signal Processing 32.6 (2018): 792-815.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Filtered uncertain system matrix estimation 
+
+
+Uncertain dynamical estimation evolution
+
+
+Uncertain system matrix evolution estimation
+
+
+Accumulated error matrix
+
+
+Uncertain system matrix estimation
+
+
+59
+
+
+
+
+
+
+
+
+Adaptive Model-Free Control Impacts
+
+
+Evolution of unknown system matrix and dynamical matrix allows system to “learn” its own dynamics.
+
+
+Matrices can be saved as initial estimates for future flights.
+
+
+Dynamical matrix requires estimation – and thus some knowledge of system dynamics, even if ideal.
+
+
+
+
+
+Historical error tracking allows system to adjust to hardware degradation over time.
+
+
+Sensor error addressed and compensated for.
+
+
+Sudden failures, or large and intermittent errors, are not compensated for.
+
+
+
+
+
+60
+
+
+
+
+
+
+
+
+Read over AMFC paper to better familiarize
+
+
+60
+
+
+
+
+
+Adaptive Model-Free Control: 
+Assumptions and Limitations
+
+
+AMFC learned matrices cannot compensate for sudden, short-duration, disturbances.
+
+
+Can reduce accuracy of both system and dynamical model.
+
+
+Thus: assume short-duration disturbances are limited.
+
+
+
+
+
+Conversion from “desired” orientation to maintain safety, to needed torques, can result in safety-critical control effort not being reached.
+
+
+Issue is mitigated when desired control efforts are weak.
+
+
+Thus: assume exact boundaries of safety never reached, strong control efforts not needed for safety maintenance.
+
+
+
+
+
+61
+
+
+
+
+
+
+
+
+Operational Safety Objectives
+
+
+Reducing the Role of the Controller in Safety Assurance
+
+
+62
+
+
+
+
+
+
+
+
+Gaps in Controller-Based Safety
+
+
+Robust controllers still assume a level of vehicle reliability.
+
+
+Bounded/expected errors and disturbances (can be planned around).
+
+
+No sudden failures (fundamental system dynamics do not immediately change).
+
+
+
+
+
+Cascaded control scheme may fail to reach safe control effort.
+
+
+Likelihood increased with sensor and dynamical degradation.
+
+
+Orientation dependency leads to non-instantaneous trajectory adjustment.
+
+
+
+
+
+63
+
+
+
+
+
+
+
+
+“Well Clear” Principle
+
+
+Uncertain, higher-order, safety-critical controllers are more effective when able to give small control corrections.
+
+
+Small corrections are easier to track, involve less nonlinearities.
+
+
+Unexpected disturbances less of an issue, at a very safe point to start with.
+
+
+
+
+
+“Well clear” standard dictates a distance to maintain, which can be maintained with low-power maneuvers.
+
+
+Ideal for uncertain autonomous operation
+
+
+“Soft” safety boundary can be violated without danger, reached again when system recovers from disturbance
+
+
+Weibel, Roland, Matthew Edwards, and Caroline Fernandes. "Establishing a risk-based separation standard for unmanned aircraft self separation." 11th AIAA Aviation Technology, Integration, and Operations (ATIO) Conference, including the AIAA Balloon Systems Conference and 19th AIAA Lighter-Than. 2011.
+
+
+64
+
+
+
+
+
+
+
+
+
+
+
+64
+
+
+
+
+
+“Well Clear” Definition Steps
+
+
+Formulate some collision risk function
+
+
+Sampling timestep
+
+
+Relative velocity and state with respect to target
+
+
+Control authority (based on dynamical error)
+
+
+Sensor reliability (based on estimation error)
+
+
+Define a context-dependent acceptable level of risk
+
+
+Solve for the relative-state crossover point from acceptable to unacceptable risk and set as “well clear” objective.
+
+
+Take steps to maintain “well clear” distance with all other obstacles.
+
+
+Can be formulated as maintaining well-clear with respect to the closest obstacle each time
+
+
+
+
+
+Weibel, Roland, Matthew Edwards, and Caroline Fernandes. "Establishing a risk-based separation standard for unmanned aircraft self separation." 11th AIAA Aviation Technology, Integration, and Operations (ATIO) Conference, including the AIAA Balloon Systems Conference and 19th AIAA Lighter-Than. 2011.
+
+
+65
+
+
+
+
+
+
+
+
+
+
+
+65
+
+
+
+
+
+Well Clear Pitfalls
+
+
+Low risk tolerance can lead to computationally infeasible airspaces, and thus counterproductive results.
+
+
+Computationally infeasible, or expensive, airspace leads to poor control of aircraft, increasing risk.
+
+
+
+
+
+Monte Carlo simulation performed to determine well-clear time-to-collision thresholds between nonreactive UAVs for varying risk tolerances.
+
+
+1% risk tolerance: 260 seconds separation
+
+
+5% risk tolerance: 59 seconds separation
+
+
+Leads to obvious issues for short-ranged, low-powered sensors equipped on UAVs.
+
+
+Weibel, Roland, Matthew Edwards, and Caroline Fernandes. "Establishing a risk-based separation standard for unmanned aircraft self separation." 11th AIAA Aviation Technology, Integration, and Operations (ATIO) Conference, including the AIAA Balloon Systems Conference and 19th AIAA Lighter-Than. 2011.
+
+
+66
+
+
+
+
+
+
+
+
+
+
+
+66
+
+
+
+
+
+Well Clear/Risk Level Contributory Factors
+
+
+Risk is not equal for all types of UAVs. Thus, well clear collision thresholds may change over time, depending on vehicle characteristics and environment.
+
+
+
+
+
+Aircraft “riskiness” discretized as acceptable number of fatalities per hour of operation: 2e-7 for manned aircraft, proposed at 1e-8 for UAVs.
+
+
+Ground impacts: Aircraft size, mass, speed, material, population density (probability of ground fatality)
+
+
+Air impacts: Aircraft cross section, trajectory, velocity, exposure time, probability of fatality given collision
+
+
+
+
+
+Can extend to space systems through debris risk, manned operations, equipment cost, etc.
+
+
+
+
+
+Weibel, Roland, Matthew Edwards, and Caroline Fernandes. "Establishing a risk-based separation standard for unmanned aircraft self separation." 11th AIAA Aviation Technology, Integration, and Operations (ATIO) Conference, including the AIAA Balloon Systems Conference and 19th AIAA Lighter-Than. 2011.
+
+
+67
+
+
+
+
+
+
+
+
+
+
+
+67
+
+
+
+
+
+Formulation of “Well Clear” as a Lyapunov Objective
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Well Clear
+
+
+Maximum Uncertainty
+
+
+Distance from current state to well clear distance
+
+
+Additional distance from well-clear to maximum uncertainty boundary
+
+
+Well-clear boundary radius from obstacle
+
+
+
+
+
+
+
+
+68
+
+
+
+
+
+
+
+
+
+
+
+68
+
+
+
+
+
+Formulation of “Well Clear” as a Lyapunov Objective: Structure
+
+
+To avoid overly conservative avoidance, set well-clear distance as objective to reach:
+
+
+
+
+
+
+
+
+Which is a bound-able Lyapunov function we can optimize against.
+
+
+
+
+
+We can formulate a relaxable objective under both and . Due to the safety-critical role of , we will relax with an optimizable value .
+
+
+
+
+
+
+
+
+69
+
+
+
+
+
+
+
+
+Formulation of “Well Clear” as a Lyapunov Objective: Estimation
+
+
+We construct an independent parameter estimation for use to correct for uncertainty in well-clear optimization:
+
+
+
+
+
+Where , , , , and take the same form as previously but may be different in practice (such as the design weights and ).
+
+
+
+
+
+Separate parameter estimates are necessary, due to the combination of and not necessarily being a Lyapunov function.
+
+
+
+
+
+
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+70
+
+
+
+
+
+
+
+
+
+
+
+70
+
+
+
+
+
+Formulation of “Well Clear” as a Lyapunov Objective: Optimization
+
+
+We finally construct our optimal, relaxable, objective:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Where is a design constant defining the convergence of to 0
+
+
+And is a design constant defining the convergence of to 0 
+
+
+
+
+
+
+
+
+
+
+
+Cohen, Max H, and Calin Belta. High Order Robust Adaptive Control Barrier Functions and Exponentially Stabilizing Adaptive Control Lyapunov Functions. 8 June 2022, https://doi.org/10.23919/acc53348.2022.9867633. Accessed 10 July 2023.
+
+
+
+
+
+71
+
+
+
+
+
+
+
+
+
+
+
+71
+
+
+
+
+
+Role of Heuristic-Based Collision Avoidance (HBCA) in Autonomous Operations
+
+
+Safety-critical autonomous systems struggle to coordinate.
+
+
+For example: other-agent intent ignorance in previous UAV control algorithm
+
+
+Analogous to manned flight, deadlock resolution required.
+
+
+
+
+
+Traffic Alert and Collision Avoidance System (TCAS) coordinates collision avoidance actions between aircraft based on predefined logic:
+
+
+Alert pilot/control software?
+
+
+Recommended action? (Climb/descend/other)
+
+
+Further action required?
+
+
+Kochenderfer, Mykel J., James P. Chryssanthacopoulos, and Roland E. Weibel. "A new approach for designing safer collision avoidance systems." Air Traffic Control Quarterly 20.1 (2012): 27-45.
+
+
+72
+
+
+
+
+
+
+
+
+Appendix
+
+
+72
+
+
+
+
+
+Role of Heuristic-Based Collision Avoidance (HBCA) in Autonomous Operations
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+HBCA-adjusted trajectory
+
+
+HBCA-adjusted trajectory
+
+
+Agent desired trajectory
+
+
+Obstacle desired trajectory
+
+
+Obstacle HBCA adjustment
+
+
+Agent HBCA adjustment
+
+
+HBCA logic on obstacle and agent is based on same predefined rules, allowing for apparent offline coordination without relying on communication.
+
+
+73
+
+
+
+
+
+
+
+
+Appendix
+
+
+73
+
+
+
+
+
+HBCA Requirements
+
+
+Traditional collision avoidance measures require up to 1 TB of memory, and intensive computing resources. Simplified (but robust) alternatives can be as small as 500 MB.
+
+
+Feasible for mid-sized UAVs running off Single Board Computers (SBCs).
+
+
+Offline logic table formulation required for each model of UAV.
+
+
+
+
+
+Sensor characterization required, uncertainty model under different conditions needed to produce robust recommendations.
+
+
+Similar requirements as control loop itself.
+
+
+Still does not address “unknown unknowns” risk from undetected aircraft – airspace coordination still needed to avoid surprises.
+
+
+Kochenderfer, Mykel J., James P. Chryssanthacopoulos, and Roland E. Weibel. "A new approach for designing safer collision avoidance systems." Air Traffic Control Quarterly 20.1 (2012): 27-45.
+
+
+74
+
+
+
+
+
+
+
+
+Appendix
+
+
+74
+
+
+
+
+
+Comparing Safety-Critical Controllers to HBCA
+
+
+Heuristic-Based Collision Avoidance
+
+
+Safety-Critical Control
+
+
+Not necessarily optimal
+
+
+
+
+
+No formal guarantees on safety
+
+
+
+
+
+Cooperative (with vehicles obeying the same system logic)
+
+
+
+
+
+Probability-based, resulting from historical best practices and simulation trials
+
+
+
+
+
+Logically predictable
+
+
+Mathematically optimal
+
+
+
+
+
+Formal safety guarantee (under strict conditions)
+
+
+
+
+
+Non-cooperative, optimal only for optimizing agent – other agents must run own optimization
+
+
+
+
+
+Constraint-based, formulated using mathematical guarantees
+
+
+
+
+
+Unpredictable, especially in cases with possible local minima
+
+
+Requires characterization of uncertainty sources (sensors and information streams in particular)
+
+
+
+
+
+Requires model parameter estimation to formulate effective control efforts
+
+
+75
+
+
+
+
+
+
+
+
+Appendix
+
+
+75
+
+
+
+
+
+Operational Safety Assumptions and Limitations
+
+
+Operational safety approaches hold similar sensor and dynamical vulnerabilities as controller-based assurance.
+
+
+Key difference: nominal state is more conservatively safe and error estimators have more time to adapt to environment.
+
+
+
+
+
+We assume feasible obstacle and goal tracking, to yield existence and position (at least).
+
+
+“Unknown unknowns” cannot be hardened against on the control level – offline coordination is needed (see: airways, airspace classes).
+
+
+76
+
+
+
+
+
+
+
+
+Closing Remarks
+
+
+Applying Lessons Learned to Uncertainty in Extreme Environments
+
+
+77
+
+
+
+
+
+
+
+
+Applying to Space Systems
+
+
+Demonstrated method of uncertainty management is general.
+
+
+Adjustments to system dynamics and controls formulations must be made, however.
+
+
+AMFC control heavily dependent on recognizing sources of uncertainty for estimation and refinement, requires a complete system model.
+
+
+AHOCBF-CLF likewise scales in derivation complexity with system dynamical properties and possible control efforts.
+
+
+
+
+
+Candidate systems have hardware limitations as well.
+
+
+System update time must be short to allow for error correction and safe control.
+
+
+System sensors must be filtered sufficiently to avoid high-amplitude noise, leading to error estimation destabilization.
+
+
+78
+
+
+
+
+
+
+
+
+Uncertain Control Design Strategy
+
+
+
+
+
+
+
+
+
+
+
+Reduce controller need to ensure safety
+
+
+Enable controller effectiveness growth
+
+
+Improve controller effectiveness
+
+
+79
+
+
+
+
+
+
+
+
+
+
+
+79
+
+
+
+
+
+
+
+Airspace
+
+
+
+
+
+
+
+
+Identify operational area
+
+
+
+
+
+
+
+
+Define risk tolerances
+
+
+
+
+
+
+
+
+Offline Design
+
+
+
+
+
+
+
+
+Formulate design coefficients
+
+
+
+
+
+
+
+
+Estimate disturbance bounds
+
+
+
+
+
+
+
+
+Online Behavior
+
+
+
+
+
+
+
+
+Estimate actual disturbance from history
+
+
+
+
+
+
+
+
+Iteratively update unknown dynamics
+
+
+
+
+
+
+
+
+Establish right-of-way priorities
+
+
+
+
+
+
+
+
+Design for robustness, reliability, resiliency
+
+
+
+
+
+
+
+
+Adjust to changing informational reliability
+
+
+
+
+
+
+
+
+
+Uncertain Control Design Strategy
+
+
+Reduce controller need to ensure safety
+
+
+Enable controller effectiveness growth
+
+
+Improve controller effectiveness
+
+
+
+
+
+
+
+
+
+
+
+Right-of-way
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Risk tolerance:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Operational area
+
+
+80
+
+
+
+
+
+
+
+
+
+
+
+80
+
+
+
+
+
+
+
+CONOPS Formulation
+
+
+
+
+
+
+
+
+Identify operational area
+
+
+
+
+
+
+
+
+Define risk tolerances
+
+
+
+
+
+
+
+
+Online Behavior
+
+
+
+
+
+
+
+
+Estimate actual disturbance from history
+
+
+
+
+
+
+
+
+Iteratively update unknown dynamics
+
+
+
+
+
+
+
+
+Establish right-of-way priorities
+
+
+
+
+
+
+
+
+Adjust to changing informational reliability
+
+
+
+
+
+
+
+
+Offline Design
+
+
+
+
+
+
+
+
+Formulate design coefficients
+
+
+
+
+
+
+
+
+Estimate disturbance bounds
+
+
+
+
+
+
+
+
+Design for robustness, reliability, resiliency
+
+
+
+
+
+
+
+
+
+Uncertain Control Design Strategy
+
+
+Reduce controller need to ensure safety
+
+
+Enable controller effectiveness growth
+
+
+Improve controller effectiveness
+
+
+
+
+
+
+
+
+
+
+
+Minimum disturbance
+
+
+Maximum disturbance
+
+
+81
+
+
+
+
+
+
+
+
+
+
+
+81
+
+
+
+
+
+
+
+Airspace
+
+
+
+
+
+
+
+
+Identify operational area
+
+
+
+
+
+
+
+
+Define risk tolerances
+
+
+
+
+
+
+
+
+Offline Design
+
+
+
+
+
+
+
+
+Formulate design coefficients
+
+
+
+
+
+
+
+
+Estimate disturbance bounds
+
+
+
+
+
+
+
+
+Online Behavior
+
+
+
+
+
+
+
+
+Estimate actual disturbance from history
+
+
+
+
+
+
+
+
+Iteratively update unknown dynamics
+
+
+
+
+
+
+
+
+Establish right-of-way priorities
+
+
+
+
+
+
+
+
+Design for robustness, reliability, resiliency
+
+
+
+
+
+
+
+
+Adjust to changing informational reliability
+
+
+
+
+
+
+
+
+
+Uncertain Control Design Strategy
+
+
+
+
+
+
+
+
+
+
+
+Reduce controller need to ensure safety
+
+
+Enable controller effectiveness growth
+
+
+Improve controller effectiveness
+
+
+
+
+
+
+
+
+Nominal control
+
+
+External force correction
+
+
+Hardware degradation correction
+
+
+Physical inaccuracies correction
+
+
+Robust control
+
+
+
+
+
+
+
+
+82
+
+
+
+
+
+
+
+
+
+
+
+82
+
+
+
+
+
+
+
+Airspace
+
+
+
+
+
+
+
+
+Identify operational area
+
+
+
+
+
+
+
+
+Define risk tolerances
+
+
+
+
+
+
+
+
+Offline Design
+
+
+
+
+
+
+
+
+Formulate design coefficients
+
+
+
+
+
+
+
+
+Estimate disturbance bounds
+
+
+
+
+
+
+
+
+Online Behavior
+
+
+
+
+
+
+
+
+Estimate actual disturbance from history
+
+
+
+
+
+
+
+
+Iteratively update unknown dynamics
+
+
+
+
+
+
+
+
+Establish right-of-way priorities
+
+
+
+
+
+
+
+
+Design for robustness, reliability, resiliency
+
+
+
+
+
+
+
+
+Adjust to changing informational reliability
+
+
+
+
+
+
+
+
+
+Concluding Remarks and Next Steps
+
+
+We have presented a new way to combine existing methods of AHOCBF-CLF and AMFC to form a cascaded uncertain safe control, and then extended this controller to respect one principle of UAV safe coordination.
+
+
+
+
+
+To refine the formulation and design constants, simulation-based testing will be conducted.
+
+
+Evaluating desired convergence rate to the goal.
+
+
+Evaluating optimal well-clear spacing to maximize safety without overly affecting efficiency.
+
+
+Comparing this cascaded method to other state-of-the-art techniques.
+
+
+83
+
+
+
+
+
+
+
+
+Present next steps
+
+
+83
+
+
+
+
+
+image1.png
+
+
+
+
+
+image2.png
+
+
+
+
+
+image3.svg
+
+
+
+
+
+image3.png
+
+
+
+
+
+image4.png
+
+
+
+
+
+image5.png
+
+
+
+
+
+image6.png
+
+
+
+
+
+image7.svg
+
+
+
+
+
+image8.png
+
+
+
+
+
+image9.png
+
+
+
+
+
+image10.png
+
+
+
+
+
+image11.png
+
+
+
+
+
+image12.png
+
+
+
+
+
+image13.png
+
+
+
+
+
+image14.png
+
+
+
+
+
+image60.png
+
+
+
+
+
+image7.png
+
+
+
+
+
+image15.png
+
+
+
+
+
+image16.png
+
+
+
+
+
+image17.png
+
+
+
+
+
+image18.png
+
+
+
+
+
+image19.png
+
+
+
+
+
+image20.png
+
+
+
+
+
+image21.png
+
+
+
+
+
+image22.png
+
+
+
+
+
+image160.png
+
+
+
+
+
+image130.png
+
+
+
+
+
+image140.png
+
+
+
+
+
+image150.png
+
+
+
+
+
+image23.png
+
+
+
+
+
+image24.png
+
+
+
+
+
+image25.png
+
+
+
+
+
+image26.png
+
+
+
+
+
+image27.png
+
+
+
+
+
+image190.png
+
+
+
+
+
+image271.png
+
+
+
+
+
+image28.png
+
+
+
+
+
+image29.png
+
+
+
+
+
+image30.png
+
+
+
+
+
+image31.png
+
+
+
+
+
+image230.png
+
+
+
+
+
+image240.png
+
+
+
+
+
+image250.png
+
+
+
+
+
+image260.png
+
+
+
+
+
+image270.png
+
+
+
+
+
+image280.png
+
+
+
+
+
+image32.png
+
+
+
+
+
+image33.png
+
+
+
+
+
+image34.png
+
+
+
+
+
+image35.png
+
+
+
+
+
+image36.png
+
+
+
+
+
+image360.png
+
+
+
+
+
+image37.png
+
+
+
+
+
+image38.png
+
+
+
+
+
+image39.png
+
+
+
+
+
+image43.png
+
+
+
+
+
+image44.png
+
+
+
+
+
+image370.png
+
+
+
+
+
+image45.png
+
+
+
+
+
+image46.png
+
+
+
+
+
+image320.png
+
+
+
+
+
+image40.png
+
+
+
+
+
+image41.svg
+
+
+
+
+
+image330.png
+
+
+
+
+
+image42.png
+
+
+
+
+
+image47.png
+
+
+
+
+
+image48.png
+
+
+
+
+
+image49.png
+
+
+
+
+
+image50.png
+
+
+
+
+
+image51.png
+
+
+
+
+
+image430.png
+
+
+
+
+
+image440.png
+
+
+
+
+
+image450.png
+
+
+
+
+
+image460.png
+
+
+
+
+
+image470.png

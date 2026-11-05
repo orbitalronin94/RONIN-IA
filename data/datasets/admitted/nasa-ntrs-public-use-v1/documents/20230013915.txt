@@ -1,0 +1,1926 @@
+Quantum Algorithms from the NISQ to the 
+
+
+
+Fault-Tolerant Era
+
+
+
+M. Sohaib Alam
+
+
+
+NASA QuAIL, Ames Research Center
+
+
+
+
+
+
+
+
+
+
+
+NISQ Fault-Tolerant
+
+
+
+Error mitigation
+
+
+
+Coherence budget
+
+
+
+Lattice Connectivity
+
+
+
+VQEs
+
+
+
+Benchmarking
+
+
+
+Error correction
+
+
+
+Ancilla
+
+
+
+Poly vs exp
+
+
+
+
+
+
+
+
+
+
+
+This talk
+
+
+
+- Reinforcement Learning for Quantum Computing (NISQ)
+
+
+
+- Combinatorial optimization with QAOA (NISQ)
+
+
+
+- Quantum Simulation of Discrete Gauge Groups (NISQ/FT)
+
+
+
+- Quantum Simulation of Scalar Field Theory (FT)
+
+
+
+- Ground State Preparation with DQE (FT / post-NISQ?)
+
+
+
+
+
+
+
+
+
+
+
+This talk
+
+
+
+- Quantum Logic Gate Synthesis as a Markov Decision 
+Process (accepted in Nature NPJ Quantum Information)
+
+
+
+- Practical Verification of Quantum Properties in Quantum-
+Approximate-Optimization Runs (Phys Rev Applied)
+
+
+
+- Primitive Quantum Gates for Dihedral Gauge Theories (Phys 
+
+
+
+Rev D)
+
+
+
+- Quantum Simulation of Scalar Field Theory (FT)
+
+
+
+- Ground State Preparation with DQE (FT / post-NISQ?)
+
+
+
+
+
+
+
+
+
+
+
+Reinforcement Learning
+
+
+
+
+
+
+
+
+
+
+
+ Markov Decision Process (MDP)
+
+
+
+Environment
+ 
+
+
+
+Probability of landing in state s’ and receiving reward r having performed action a in state s
+
+
+
+Agent
+ 
+
+
+
+Probability of performing action a in state s
+
+
+
+Goal Maximize
+
+
+
+ 
+
+
+
+Expected (discounted) return from following policy π(a|s)starting from state s
+
+
+
+
+
+
+
+
+
+
+
+Markov Decision Process (MDP)
+
+
+
+Optimal Policy
+
+
+
+ Conditional probability of performing action a in state s such that
+
+
+
+ 
+
+
+
+ the value function of this policy is greater than that of any other policy for all states
+
+
+
+
+
+
+
+
+
+
+
+Evaluating the policy
+
+
+
+• Bellman Equation[1]
+
+
+
+• Value function of a state related to that of successor states
+
+
+
+• Iterative Policy Evaluation[2]
+
+
+
+• Bellman Eqn implies Vk = V𝜋 a fixed point in the iterative update
+Backup diagram for V𝛑
+
+
+
+[1] On the Theory of Dynamic Programming, R. Bellman
+[2] A Markovian Decision Process, R. Bellman
+
+
+
+
+
+
+
+
+
+
+
+Improving the policy
+
+
+
+• State-Action Value[1]
+
+
+
+• Expected return from following policy 𝛑(a|s) after action a in state s
+
+
+
+• Policy Improvement Theorem
+
+
+
+• For deterministic policies 𝛑 and 𝛑’
+
+
+
+Backup diagram for Q𝛑
+
+
+
+[1] Learning from Delayed Rewards, C. Watkins
+
+
+
+
+
+
+
+
+
+
+
+PolicyEvaluation
+• Input: Policy 𝛑(a|s)
+• Initialize arbitrary V(s)
+• Repeat until convergence:
+
+
+
+• Update V(s) via Bellman eqn
+• Output: Value function V𝛑(s)
+
+
+
+PolicyImprovement
+• Input: Value function V(s)
+• Initialize arbitrary policy 𝛑(a|s)
+• Repeat until convergence:
+
+
+
+• Update 𝛑(a|s) greedy w.r.t. V(s)
+
+
+
+PolicyIteration[1,2]
+
+
+
+• Initialize arbitrary policy 𝛑(a|s)
+• Repeat until convergence:
+
+
+
+• V = PolicyEvaluation(𝛑)
+• 𝛑 = PolicyImprovement(V)
+
+
+
+•Output: V*, 𝛑* [1] Dynamic Programming, R. Bellman
+[2] Reinforcement Learning, Sutton & Barto
+
+
+
+
+
+
+
+
+
+
+
+Discretized Bloch Sphere
+
+
+
+For
+
+
+
+Northern polar cap:
+
+
+
+Southern polar cap:
+
+
+
+Other states: ;
+
+
+
+Actions
+Discrete RZ and RY gates with resolution 
+such that
+
+
+
+Reward
+Goal state gives r = 1, all others r = 0
+
+
+
+Environment
+Dynamics estimated by sampling:
+• Sample point on 2-sphere, record s
+• Apply each a, record resultant s’
+
+
+
+Fidelity
+Bounded above by for target states 
+|0> or |1>
+
+
+
+Generic fidelity bound
+
+
+
+Resolution 𝜖 = 𝜋/16 ⇒ cos2(𝜋/32) ~ 99% fidelity
+Discount factor γ = 0.8
+
+
+
+RY(𝜃) RY(𝜃) . RZ(𝛼)
+
+
+
+Quantum Logic Gate Synthesis as a Markov Decision Process, M. Sohaib Alam, Noah Berthusan, Peter P. 
+
+
+
+Orth, arXiv:1912.12002 (accepted in Nature npj Quantum Inf)
+
+
+
+
+
+
+
+
+
+
+
+Optimal Program from Optimal Policy
+
+
+
+Initialize empty list PrepPrograms
+
+
+
+For several roll-outs:
+
+
+
+Initialize Prog
+Start somewhere from within discrete |0> cell
+
+
+
+While (discrete |1> not found) or (takes too long):
+ Evolve (underlying quantum) state via optimal policy
+ Append actions to Prog
+
+
+
+Append Prog to PrepPrograms
+
+
+
+OptimalProgram = MinLength(PrepPrograms)
+
+
+
+
+
+
+
+
+
+
+
+Optimal Program from Optimal Policy
+
+
+
+Shuffling only at discrete
+|0> state
+
+
+
+
+
+
+
+
+
+
+
+Ring of states (HT)n |0>
+
+
+
+
+
+
+
+
+
+
+
+Noise
+
+
+
+
+
+
+
+
+
+
+
+Noisy state
+
+
+
+Noisy gates
+
+
+
+Reward
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Gate Compilation
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Conclusions & Outlook
+
+
+
+MDP based compilation
+- Works with / without noise
+- Beats Ross-Selinger in output length
+- Scales as Poly(|S|.|A|) ~ Poly(|A|/ε)
+
+
+
+- Not as good as RS ~ PolyLog(1/ε)
+
+
+
+- Infeasible for multiple qubits, S ~ 2n
+
+
+
+- Improve T gate counts by rewarding them lesser
+
+
+
+Reinforcement Learning
+- Use for larger qubit spaces
+- Other state preparation problems
+
+
+
+- E.g. combinatorial optimization[1]
+
+
+
+[1] Automated Quantum Programming via Reinforcement Learning, K. A. McKiernan, E. Davis, M. S. Alam, C. Rigetti, arXiv:1908.08054
+
+
+
+
+
+
+
+
+
+
+
+This talk
+
+
+
+- Quantum Logic Gate Synthesis as a Markov Decision 
+Process (accepted in Nature NPJ Quantum Information)
+
+
+
+- Practical Verification of Quantum Properties in Quantum-
+Approximate-Optimization Runs (Phys Rev Applied)
+
+
+
+- Primitive Quantum Gates for Dihedral Gauge Theories (Phys 
+
+
+
+Rev D)
+
+
+
+- Quantum Simulation of Scalar Field Theory (FT)
+
+
+
+- Ground State Preparation with DQE (FT / post-NISQ?)
+
+
+
+
+
+
+
+
+
+
+
+Verifying Entanglement in QAOA states
+
+
+
+Measures of entanglement:
+
+
+
+- Von-Neumann entropy (for bipartite state )
+
+
+
+- Bipartite concurrence[1] (for bipartite state )
+
+
+
+- Multipartite concurrence[2]
+
+
+
+- Entanglement witness[3,4]
+
+
+
+[1] P. Rungta, V. Buzek, C. M. Caves, M. Hillery, and G. J. Milburn, Phys. Rev. A 64, 042315 (2001)
+[2] A. R. R. Carvalho, F. Mintert, A. Buchleitner, PRL 93, 230501 (2004)
+
+
+
+[3] D. Chruscinski and G. Sarbicki, Entanglement witnesses: Construction, analysis and classification, J. Phys. A: Math. Theor. 47, 483001 (2014 )
+
+
+
+[4] J. Bae, D. Chrusci ´ nski, and B. C. Hiesmayr, Mirrored entanglement witnesses, npj Quantum Inf. 6, 15 (2020)
+
+
+
+
+
+
+
+
+
+
+
+Entanglement Witness
+
+
+
+For some state , and
+
+
+
+satisfies
+
+
+
+
+
+
+
+
+
+
+
+QAOA-MaxCut states
+
+
+
+Cost Mixer
+
+
+
+Symmetry
+
+
+
+
+
+
+
+
+
+
+
+Bell Entanglement Witness
+
+
+
+
+
+
+
+
+
+
+
+Generalized Bell Observables
+
+
+
+Theorem:
+
+
+
+Practical Verification of Quantum Properties in Quantum-Approximate-Optimization Runs, M. Sohaib Alam et al, Physical Review Applied 17, 
+024026 (2022)
+
+
+
+
+
+
+
+
+
+
+
+Generalized Bell Observables
+
+
+
+Theorems:
+
+
+
+
+
+
+
+
+
+
+
+Entanglement Witnesses for p=1 QAOA-MaxCut
+
+
+
+Ring graph
+
+
+
+Line graph
+
+
+
+
+
+
+
+
+
+
+
+Entanglement Witnesses for p=1 QAOA-MaxCut
+
+
+
+Regular triangle-free graphs
+
+
+
+Complete graph
+
+
+
+
+
+
+
+
+
+
+
+Separability Properties
+
+
+
+Linear chain Complete graph
+
+
+
+
+
+
+
+
+
+
+
+QPU Experiments (Rigetti Aspen-9)
+
+
+
+Skip first layer of CNOTs since Only (at most) 3 sets of measurements
+
+
+
+
+
+
+
+
+
+
+
+QPU Experiments (Rigetti Aspen-9)
+
+
+
+
+
+
+
+
+
+
+
+QPU Experiments (Rigetti Aspen-9)
+
+
+
+satisfied only for N=2
+
+
+
+
+
+
+
+
+
+
+
+Conclusions & Outlook
+
+
+
+- Entanglement witnesses can efficiently verify entanglement in a state
+
+
+
+- Witnesses for QAOA-MaxCut require at most 3 sets of measurements 
+
+
+
+(once each in the X, Y and Z bases)
+
+
+
+- Such witnesses can also be used for other (e.g. GHZ) states
+
+
+
+- Witnesses for other QAOA states?
+
+
+
+- Is larger entanglement necessary for QAOA to solve combinatorial 
+
+
+
+optimization problems?
+
+
+
+
+
+
+
+
+
+
+
+This talk
+
+
+
+- Quantum Logic Gate Synthesis as a Markov Decision 
+Process (accepted in Nature NPJ Quantum Information)
+
+
+
+- Practical Verification of Quantum Properties in Quantum-
+Approximate-Optimization Runs (Phys Rev Applied)
+
+
+
+- Primitive Quantum Gates for Dihedral Gauge Theories (Phys 
+
+
+
+Rev D)
+
+
+
+- Quantum Simulation of Scalar Field Theory (FT)
+
+
+
+- Ground State Preparation with DQE (FT / post-NISQ?)
+
+
+
+
+
+
+
+
+
+
+
+General Idea
+
+
+
+Simple example of a non-
+
+
+
+Abelian discrete group
+
+
+
+Approximate a continuous group 
+
+
+
+by a discrete subgroup
+
+
+
+Generic element
+
+
+
+
+
+
+
+
+
+
+
+General Methods
+
+
+
+• For some generic gauge group G,
+
+
+
+• Define a G-register with one basis element per group element
+
+
+
+ (Hilbert space on single G-register ; for L links on entire lattice, )
+
+
+
+• Define basic gates
+
+
+
+• Inverse gate
+
+
+
+• (Left) Multiplication gate
+
+
+
+• Trace gate
+
+
+
+• Fourier gate
+
+
+
+"General methods for digital quantum simulation of gauge theories", H. Lamm et al., Phys Rev D
+
+
+
+
+
+
+
+
+
+
+
+Inverse Gate
+
+
+
+n CNOTs O(n) CCNOTs + const # ancillas
+
+
+
+Computing the 2's complement of k
+
+
+
+Equivalent to computing 1's complement, then adding 1
+
+
+
+
+
+
+
+
+
+
+
+Multiplication Gate
+
+
+
+Sum and Carry bits in 
+
+
+
+Reed-Muller form
+
+
+
+Example circuit for D8 multiplication gate
+
+
+
+
+
+
+
+
+
+
+
+Trace Gate
+
+
+
+Identify corresponding Hamiltonian
+
+
+
+Fundamental (2D) representation
+
+
+
+O(N) implementation:
+
+
+
+Exact Implementation
+
+
+
+
+
+
+
+
+
+
+
+Trace Gate
+Ancilla Based Approach (O(log(N)) )
+
+
+
+• Compute (classical) trigonometric functions
+
+
+
+• Phase Kickback
+
+
+
+• Uncomputation
+
+
+
+
+
+
+
+
+
+
+
+Fourier Gate
+
+
+
+Fourier transform of a representation of some finite group G
+
+
+
+Recursive definition
+
+
+
+
+
+
+
+
+
+
+
+Fourier Gate
+
+
+
+"Efficient quantum transforms" arXiv: quant-ph/9702028 (1997), P. Hoyer
+
+
+
+
+
+
+
+
+
+
+
+Experimental Results – Rigetti Aspen-9
+
+
+
+Process tomography for D4 gates
+
+
+
+
+
+
+
+
+
+
+
+Experimental Results – Rigetti Aspen-9
+
+
+
+Process fidelity of CCPHASE gate ~ 87.1% using cycle benchmarking
+
+
+
+(c) Inversion gate for D4
+
+
+
+"Realization of arbitrary doubly-controlled quantum phase gate", A. Hill et al., arXiv: 2108.01652
+
+
+
+"Characterizing large-scale quantum computers via cycle benchmarking", A. Erhard et al., 
+
+
+
+Nature Communications
+
+
+
+
+
+
+
+
+
+
+
+Experimental Results – Rigetti Aspen-9
+
+
+
+(d) Multiplication gate for D4
+
+
+
+
+
+
+
+
+
+
+
+Conclusions
+
+
+
+• It is possible to approximate continuous group gauge theories via 
+
+
+
+discrete subgroups
+
+
+
+• For U(1) x Z2, DN is a fairly good approximation for N ~ O(10)
+
+
+
+• Experimentally, we already have > 80% estimated fidelity for D4 
+
+
+
+theory on a noisy QPU
+
+
+
+• More complicated gauge theories have more complicated discrete 
+
+
+
+subgroups, with more complicated gates to work out (future work)
+
+
+
+
+
+
+
+
+
+
+
+This talk
+
+
+
+- Quantum Logic Gate Synthesis as a Markov Decision 
+Process (accepted in Nature NPJ Quantum Information)
+
+
+
+- Practical Verification of Quantum Properties in Quantum-
+Approximate-Optimization Runs (Phys Rev Applied)
+
+
+
+- Primitive Quantum Gates for Dihedral Gauge Theories (Phys 
+
+
+
+Rev D)
+
+
+
+- Quantum Simulation of Scalar Field Theory (FT)
+
+
+
+- Ground State Preparation with DQE (FT / post-NISQ?)
+
+
+
+
+
+
+
+
+
+
+
+Basic philosophy
+
+
+
+Yuri Manin, "Computable and 
+
+
+
+Uncomputable" (1980)
+
+
+
+Richard Feynman, "Simulating 
+
+
+
+physics with computers" (1982)
+
+
+
+
+
+
+
+
+
+
+
+OMG
+
+
+
+T gate counts
+
+
+
+[1] A. Kan and Y. Nam, "Lattice Quantum Chromodynamics and Electrodynamics on a Universal Quantum Computer", arXiv:2107.12769
+
+
+
+[2] T. D. Cohen, H. Lamm, S. Lawrence, and Y. Yamauchi (NuQS Collaboration), Phys. Rev. D 104, 094514 (2021)
+
+
+
+(Age of the universe ~ )
+
+
+
+
+
+
+
+
+
+
+
+Linear Combination of Unitaries (LCU)
+
+
+
+Given
+
+
+
+Construct
+
+
+
+"Hamiltonian Simulation Using Linear Combinations of Unitary Operations", A. M. Childs, N. Wiebe, Quantum 
+
+
+
+Information and Computation 12, 901-924 (2012)
+
+
+
+
+
+
+
+
+
+
+
+Linear Combination of Unitaries (LCU)
+
+
+
+Success probability
+
+
+
+
+
+
+
+
+
+
+
+Scalar Field Theory
+
+
+
+Discretized Hamiltonian
+
+
+
+Simplest field theory:
+
+
+
+• Free theory -- relativistic energy-momentum relationship (Klein-Gordon equation)
+
+
+
+• term simplest self-interaction term bounded below
+
+
+
+• Scalar fields in nature: Higgs boson, Inflaton(?)
+
+
+
+
+
+
+
+
+
+
+
+Scalar Field Theory
+
+
+
+ Hamiltonian
+
+
+
+Rescaled variables
+
+
+
+Field amplitude basis
+
+
+
+
+
+
+
+
+
+
+
+LCU with unequally sized groups of terms
+
+
+
+
+
+
+
+
+
+
+
+LCU decompositions
+
+
+
+Equal weight LCU Unequal weight LCU[1]
+
+
+
+[1] "Quantum Algorithms for Simulating the Lattice Schwinger Model", A. F. Shaw, P. Lougovski, J. R. Stryker, N. Wiebe, Quantum 
+
+
+
+4, 306 (2020)
+
+
+
+(either way)
+
+
+
+T gates
+
+
+
+
+
+
+
+
+
+
+
+Equal weight LCU
+
+
+
+Use comparator (adapted from Gidney adder[1])
+
+
+
+to simplify
+
+
+
+[1] "Halving the cost of quantum addition", Craig Gidney, Quantum 2, 74 (2018)
+
+
+
+
+
+
+
+
+
+
+
+Equal weight LCU
+
+
+
+Other terms in the Hamiltonian
+
+
+
+
+
+
+
+
+
+
+
+Equal weight LCU
+
+
+
+Insert . . . and its inverse for
+
+
+
+(involves arithmetic and Fourier transform)
+
+
+
+
+
+
+
+
+
+
+
+T gate complexity
+
+
+
+
+
+
+
+
+
+
+
+This talk
+
+
+
+- Quantum Logic Gate Synthesis as a Markov Decision 
+Process (accepted in Nature NPJ Quantum Information)
+
+
+
+- Practical Verification of Quantum Properties in Quantum-
+Approximate-Optimization Runs (Phys Rev Applied)
+
+
+
+- Primitive Quantum Gates for Dihedral Gauge Theories (Phys 
+
+
+
+Rev D)
+
+
+
+- Quantum Simulation of Scalar Field Theory (FT)
+
+
+
+- Ground State Preparation with DQE (FT / post-NISQ?)
+
+
+
+
+
+
+
+
+
+
+
+Dissipative ground state preparation and the Dissipative Quantum Eigensolver, T. Cubitt, 
+
+
+
+arXiv:2303.11962
+
+
+
+AGSPs
+
+
+
+
+
+
+
+
+
+
+
+Convergence
+
+
+
+
+
+
+
+
+
+
+
+AGSP
+
+
+
+
+
+
+
+
+
+
+
+Circuit implementation
+
+
+
+
+
+
+
+
+
+
+
+Thank you!
+
+
+
+Email: sohaib.alam @ nasa.gov
+
+
+
+ malam @ usra.edu
+
+
+
+Funding: (SQMS) DE-AC02-07CH11359
+
+
+
+ (NASA-DOE) SAA2-403602
+
+
+
+ (NAMS) NNA16BD14C
+
+
+
+
+
+
+ 
+Slide 1
+
+ 
+Slide 2
+
+ 
+Slide 3
+
+ 
+Slide 4
+
+ 
+Slide 5
+
+ 
+Slide 6
+
+ 
+Slide 7
+
+ 
+Slide 8
+
+ 
+Slide 9
+
+ 
+Slide 10
+
+ 
+Slide 11
+
+ 
+Slide 12
+
+ 
+Slide 13
+
+ 
+Slide 14
+
+ 
+Slide 15
+
+ 
+Slide 16
+
+ 
+Slide 17
+
+ 
+Slide 18
+
+ 
+Slide 19
+
+ 
+Slide 20
+
+ 
+Slide 21
+
+ 
+Slide 22
+
+ 
+Slide 23
+
+ 
+Slide 24
+
+ 
+Slide 25
+
+ 
+Slide 26
+
+ 
+Slide 27
+
+ 
+Slide 28
+
+ 
+Slide 29
+
+ 
+Slide 30
+
+ 
+Slide 31
+
+ 
+Slide 32
+
+ 
+Slide 33
+
+ 
+Slide 34
+
+ 
+Slide 35
+
+ 
+Slide 36
+
+ 
+Slide 37
+
+ 
+Slide 38
+
+ 
+Slide 39
+
+ 
+Slide 40
+
+ 
+Slide 41: General Idea
+
+ 
+Slide 42: General Methods
+
+ 
+Slide 43: Inverse Gate
+
+ 
+Slide 44: Multiplication Gate
+
+ 
+Slide 45: Trace Gate
+
+ 
+Slide 46: Trace Gate
+
+ 
+Slide 47: Fourier Gate
+
+ 
+Slide 48: Fourier Gate
+
+ 
+Slide 49: Experimental Results – Rigetti Aspen-9
+
+ 
+Slide 50: Experimental Results – Rigetti Aspen-9
+
+ 
+Slide 51: Experimental Results – Rigetti Aspen-9
+
+ 
+Slide 52: Conclusions
+
+ 
+Slide 53
+
+ 
+Slide 54: Basic philosophy
+
+ 
+Slide 55: OMG
+
+ 
+Slide 56: Linear Combination of Unitaries (LCU)
+
+ 
+Slide 57: Linear Combination of Unitaries (LCU)
+
+ 
+Slide 58: Scalar Field Theory
+
+ 
+Slide 59: Scalar Field Theory
+
+ 
+Slide 60: LCU with unequally sized groups of terms
+
+ 
+Slide 61: LCU decompositions
+
+ 
+Slide 62: Equal weight LCU
+
+ 
+Slide 63: Equal weight LCU
+
+ 
+Slide 64: Equal weight LCU
+
+ 
+Slide 65: T gate complexity
+
+ 
+Slide 66
+
+ 
+Slide 67
+
+ 
+Slide 68
+
+ 
+Slide 69
+
+ 
+Slide 70
+
+ 
+Slide 71: Thank you!

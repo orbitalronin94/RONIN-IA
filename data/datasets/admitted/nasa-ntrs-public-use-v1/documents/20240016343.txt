@@ -1,0 +1,2018 @@
+1 
+
+
+
+NEAR-FIELD SEPARATION AND DYNAMICS ANALYSIS OF 
+NASA'S SPACE LAUNCH SYSTEM BLOCK-1 AND BLOCK-1B 
+
+
+
+SECONDARY PAYLOADS 
+
+
+
+Jared T. Rucker*, Carole J. Addona†, Peter J. McDonough‡, 
+Benjamin S. Burger§, Michael M. Sanders*, Zachary T. Muscha*, 
+
+
+
+Rekesh M. Ali**, William J. Harlin††, and Drake A. Ranquist* 
+
+
+
+The NASA Space Launch System (SLS) Program Block-1 and Block-1B missions 
+
+
+
+are expected to carry a number of CubeSat secondary payloads (SPL) to space, 
+
+
+
+where they will be ejected from internal SLS structures to begin their own mis-
+
+
+
+sions. This near-field ejection process must be closely evaluated to ensure that no 
+
+
+
+SPL contacts the SLS structures, as contacts could result in SPL component dam-
+
+
+
+age, mission loss, or aberrant SPL trajectories. To this end, multiple SPL ejection 
+
+
+
+events were analyzed for both Block-1 and Block-1B mission configurations us-
+
+
+
+ing CLVTOPS, a NASA Marshall Space Flight Center (MSFC) developed multi-
+
+
+
+body dynamics, proximity analysis, and visualization toolchain. This paper details 
+
+
+
+the SPL-to-SLS clearance assessment process, with a focus on simulation setup 
+
+
+
+and results as well as SPL design requirement analysis. Relevant CLVTOPS, sta-
+
+
+
+tistics, and mission backgrounds are covered; important constraints, difficulties, 
+
+
+
+and assumptions are also documented. Furthermore, the importance of SPL hous-
+
+
+
+ing geometry on near-field vehicle clearance is highlighted, and examples are 
+
+
+
+shown. 
+
+
+
+INTRODUCTION 
+
+
+
+The National Aeronautics and Space Administration (NASA) plans to put people back on the 
+
+
+
+moon as well as transport lunar space station components using the newly developed Space Launch 
+
+
+
+System (SLS). With the successful flight of Artemis I and the upcoming flight of Artemis II, the 
+
+
+
+SLS is well on its way to becoming the Earth-to-Moon transit vehicle. Furthermore — on top of 
+
+
+
+the Block-1 configuration used for Artemis I, II, and III flights — the development of the long term 
+
+
+
+ 
+
+
+
+* Aerospace Engineer; EV42 Guidance, Navigation, and Mission Analysis Branch; Amentum Space Exploration Division 
+
+
+
+(ASED)/Amentum; Huntsville, AL, 35806 
+† SLS Liftoff and Separation Dynamics Technical Lead; EV42 Guidance, Navigation, and Mission Analysis Branch; 
+
+
+
+ASED/Amentum; Huntsville, AL 35806 
+‡ EV42 ESSCA Lead; EV42 Guidance, Navigation, and Mission Analysis Branch; ASED/Amentum; Huntsville, AL 
+
+
+
+35806 
+§ SLS Flight Mechanics Co-Lead; EV42 Guidance, Navigation, and Mission Analysis Branch; NASA/MSFC; Huntsville, 
+
+
+
+AL 35812 
+** Aerospace Engineer; EV42 Guidance, Navigation, and Mission Analysis Branch; ASED/McLaurin Aerospace; 
+
+
+
+Knoxville, TN 37929 
+†† SLS Flight Mechanics Co-Lead; EV42 Guidance, Navigation, and Mission Analysis Branch; ASED/McLaurin 
+
+
+
+Aerospace; Knoxville, TN 37929 
+
+
+
+(Preprint) AAS 25-127 
+
+
+
+
+
+
+
+
+
+
+
+ 2 
+
+
+
+Block-1B and Block-2 SLS configurations further solidifies SLS’s role in the expansive future of 
+
+
+
+human spaceflight. 
+
+
+
+ 
+
+
+
+Figure 1. Launch of Artemis I. * 
+
+
+
+However, transport of people and habitat structures like Gateway are not the only missions for 
+
+
+
+which the SLS is designed. As each mission makes use of multiple stages with lengthy in-space 
+
+
+
+flight time, the SLS is expected to carry numerous payloads to space, where they will be launched 
+
+
+
+to serve their own missions. These payloads consist of larger co-manifested payloads and a varying 
+
+
+
+number of smaller secondary payloads. Secondary payloads (SPLs), the focus of this paper, are 
+
+
+
+comparatively small missions, typically comprising of small satellites or sensor packages that trans-
+
+
+
+mit data back to the SPL operators. 
+
+
+
+ 
+
+
+
+Figure 2. NEA Scout Design, Testing, and Theoretical Operation. † 
+
+
+
+ 
+
+
+
+* https://images.nasa.gov/details/NHQ202211160200 
+† https://www.nasa.gov/solar-system/nasa-solar-sail-mission-to-chase-tiny-asteroid-after-artemis-i-launch/ 
+
+
+
+
+
+
+
+
+
+
+
+ 3 
+
+
+
+SPLs serve a variety of missions, including technology demonstrations, science exploration, and 
+
+
+
+data gathering. For example, Figure 2 above shows the design and function of NEA Scout, one of 
+
+
+
+the SPLs that flew on Artemis I. NEA Scout was a CubeSat designed to test solar sail technology 
+
+
+
+as well as to accomplish organizational objectives of studying relatively small near-earth asteroids. 
+
+
+
+To ensure that these SPLs are able to complete their missions, they must first safely and reliably 
+
+
+
+deploy from the parent SLS mission. Successful deployment from the SLS is measured by whether 
+
+
+
+the SPL exits the SLS vicinity without recontacts (“near-field”) and remains outside of the desig-
+
+
+
+nated keep-out zones for any other vehicle the SPL may approach (“far-field”). This analysis fo-
+
+
+
+cuses on near-field clearance. 
+
+
+
+The paper begins with an introduction to the CLVTOPS toolchain and relevant post-processing 
+
+
+
+software tools. Then, the SPL ejection event is covered, including an overview of the event as well 
+
+
+
+as implemented models and assumptions necessary to simulate the event. Finally, analysis results 
+
+
+
+are discussed. The discussion contains explanations of useful plots and a method used to help set 
+
+
+
+certain requirements. 
+
+
+
+ 
+
+
+
+TOOLCHAIN BACKGROUND 
+
+
+
+To measure SPL near-field clearances, the NASA Marshall Space Flight Center Liftoff and 
+
+
+
+Separation Dynamics (LO&Sep) team utilizes the CLVTOPS toolchain to simulate trajectories, 
+
+
+
+measure proximities, process the results, and generate graphics for use in reports. 
+
+
+
+ 
+
+
+
+Figure 3. Structure of the CLVTOPS Toolchain. 1 
+
+
+
+Figure 3 above shows the composition of the LO&Sep team toolchain. This paper generally 
+
+
+
+refers to the toolchain in its entirety as CLVTOPS, with the exception of specific extension pro-
+
+
+
+grams such as Tree3D* and the MinDist tool. 
+
+
+
+The CLVTOPS Simulation 
+
+
+
+CLVTOPS is a wrapper around the NASA-funded TREETOPS flexible multi-body time-do-
+
+
+
+main dynamics and controls simulation software. TREETOPS computes the translations and rota-
+
+
+
+tions between connected bodies and elements by automatically creating the equations of motion 
+
+
+
+using Kane’s method.1,2 CLVTOPS provides accommodation for custom FORTRAN modules con-
+
+
+
+sisting of system models, forces and moments, plus other computational components, and integrates 
+
+
+
+them into the underlying TREETOPS computational physics engine.1 
+
+
+
+ 
+
+
+
+* https://software.nasa.gov/software/MFS-34076-1 
+
+
+
+
+
+
+
+
+
+
+
+ 4 
+
+
+
+Ordered Statistics 
+
+
+
+While singular nominal simulation runs are useful, CLVTOPS utilizes the Monte Carlo method 
+
+
+
+to explore the effects of random variations of input parameters (dispersions) on simulation outputs 
+
+
+
+to verify requirement compliance. Furthermore, input parameters may not be exactly known, so 
+
+
+
+they can be randomly generated within a reasonably expected or estimated range. Ordered statistics 
+
+
+
+are used to systematically quantify output parameters that result from these varied inputs.3 This 
+
+
+
+approach seeks to sample a value’s distribution to create desired bounds for success probability at 
+
+
+
+a given confidence level, such as the 99.865% highest value with a 90% level of confidence.4 To 
+
+
+
+ease the analysis and interpretation, these bounds are referred to with σ-level notation. For example, 
+
+
+
+the 99.865% ejection velocity at a 90% confidence level is referred to as the +3σ bound and can be 
+
+
+
+interpreted as the largest statistically significant ejection velocity output from the simulation. The 
+
+
+
+bounds are used to filter CLVTOPS outputs into statistically meaningful data, usually to indicate 
+
+
+
+the valid upper and lower extents of a given clearance which can help verify no-recontact require-
+
+
+
+ments. Lower levels such as ±1σ and ±2σ bounds can also be useful metrics for classifying outputs 
+
+
+
+at a lower success probability. 
+
+
+
+Tree3D 
+
+
+
+Tree3D* is a NASA-developed trajectory visualization tool created to parse and animate 
+
+
+
+CLVTOPS, or general 6-DOF (degrees of freedom), simulation output.1 The tool utilizes computer-
+
+
+
+aided design (CAD) models and simulation data to position the models in 3D space through time. 
+
+
+
+The tool can also co-animate clearance plots as well as force vectors acting on the bodies. The full 
+
+
+
+animation as well as individual frames can be recorded for use in presentations and reports. Using 
+
+
+
+Tree3D to animate the trajectories of the SPLs and vehicle is helpful in verifying that the simulation 
+
+
+
+is set up correctly and that any reported contacts are legitimate. 
+
+
+
+ 
+
+
+
+Figure 4. SPL Ejection Modeled in the Tree3D Program. 
+
+
+
+Figure 4 contains two sample frames from a Tree3D animation of the Block-1B SPL simulation, 
+
+
+
+one showing a side view of an SPL ejection and the other showing a camera attached to a previously 
+
+
+
+ejected SPL tracking the vehicle housing. 
+
+
+
+MinDist Tool 
+
+
+
+The MinDist tool, short for Minimum Distance, is a software package wrapped into CLVTOPS 
+
+
+
+that measures the distance between bodies during the simulation.1 The MinDist tool implements 
+
+
+
+the externally developed Proximity Query Package† that computes the proximities between pairs 
+
+
+
+of triangular meshes, which are then filtered into the minimum distances between custom-set pairs. 
+
+
+
+ 
+
+
+
+* https://software.nasa.gov/software/MFS-34076-1 
+† https://gamma.cs.unc.edu/SSV/ 
+
+
+
+
+
+
+
+
+
+
+
+ 5 
+
+
+
+These minimum distances, or clearances, are one of the most important parameters with respect to 
+
+
+
+separation dynamics, as they help expose requirement violations, set risk tolerances, and inform 
+
+
+
+vehicle design. SPL mission success is predicated on having positive clearance between concerned 
+
+
+
+bodies at all times after initial separation. 
+
+
+
+ 
+
+
+
+EVENT BACKGROUND AND SIMULATION SETUP 
+
+
+
+To determine near-field clearances, CLVTOPS must first be set up according to the cases being 
+
+
+
+studied. SPL and dispenser characteristics as well as vehicle housing geometries differ across the 
+
+
+
+Block-1 and Block-1B vehicle configurations. Various assumptions are also made to make the 
+
+
+
+setup simpler, such as neglecting gravitational accelerations and solar pressure that could act on 
+
+
+
+the bodies. Numerical details are sparse in this paper due to limitations on their public release, so 
+
+
+
+some components may only be discussed generically or are outright omitted. 
+
+
+
+SPL Ejection Event Background 
+
+
+
+The future Block-1 and Block-1B flights are expected to carry a varying number of SPLs to be 
+
+
+
+ejected at some point during in-space flight. At the time of the analysis, four payloads were mani-
+
+
+
+fested for Block-1, and fifteen were manifested for Block-1B. The SPLs will be stored in canis-
+
+
+
+ters/dispensers and ejected from internal SLS structures. 
+
+
+
+ 
+
+
+
+Figure 5. SPL Ejection in the Artemis I Configuration. 
+
+
+
+For this analysis, SPLs are considered solely to be CubeSats or CubeSat-style payloads, as no 
+
+
+
+specific geometry or SPL design was provided at the time. A CubeSat is a small satellite that fits 
+
+
+
+into a cubic shape of standard incremental dimensions. The basic building block of the incremental 
+
+
+
+dimensioning is the 10cm3 U, a cube that can be conjoined to form varying structures with stand-
+
+
+
+ardized dimensions. 
+
+
+
+ 
+
+
+
+Figure 6. Sample CubeSat Sizes. * 
+
+
+
+ 
+
+
+
+* https://science.nasa.gov/solar-system/10-things-cubesats-going-farther/ 
+
+
+
+
+
+
+
+
+
+
+
+ 6 
+
+
+
+Figure 6 above shows a variety of standard CubeSat sizes. There are only a few CubeSat sizes 
+
+
+
+considered for the analysis. Previously, Artemis I utilized 6U SPLs; however, Artemis II plans to 
+
+
+
+utilize up to four 12U SPLs, and Block-1B plans to carry up to 27U SPLs. As no 27U mounting 
+
+
+
+hardware models existed at the time of the analysis and 12U SPLs bound smaller CubeSats with 
+
+
+
+regards to near-field clearance, only 12U SPLs are considered. Smaller CubeSats would be ejected 
+
+
+
+faster and would therefore clear the vehicle housing before any recontact concerns manifest, indi-
+
+
+
+cating that the 12U SPL bounding the 6U SPL preserves conservatism. 
+
+
+
+This analysis focuses on the Artemis II mission and an arbitrary Block-1B Artemis mission. A 
+
+
+
+small amount of previous work has been presented on the Artemis I SPL analysis1, and the analysis 
+
+
+
+presented herein is the original simulation updated to fit the different mission profiles. Models used 
+
+
+
+for both missions are described first, then mission-specific models are introduced. 
+
+
+
+Mission-Independent Models 
+
+
+
+Models used across mission profiles are the dispenser and SPL characteristics, such as SPL mass 
+
+
+
+properties and dispenser ejection force profiles. These models are integrated into various 
+
+
+
+CLVTOPS components, such as problem definition mass property files and custom-made 
+
+
+
+FORTRAN modules that interact with and apply the ejection forces. 
+
+
+
+ 
+
+
+
+Figure 7. Simplified 12U Canisterized Satellite Dispenser Dimensions. 
+
+
+
+The dispenser characteristics are taken from the Planetary Systems Corporation* Canisterized 
+
+
+
+Satellite Dispenser (CSD) datasheet for 3U, 6U, and 12U CubeSats.5 The 12U dispenser physical 
+
+
+
+characteristics are shown in Figure 7 above. The datasheet also contains information for determin-
+
+
+
+ing the SPL ejection velocity based on SPL mass and dispenser configuration. 
+
+
+
+ 
+
+
+
+Figure 8. Dispenser Ejection Velocity Curve-fit.6 
+
+
+
+ 
+
+
+
+* Acquired by Rocket Lab 
+
+
+
+
+
+
+
+
+
+
+
+ 7 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 9. Calculation of the Dispenser Ejection Force. 
+
+
+
+Utilizing simplified physics calculations with appropriate assumptions, one can determine the 
+
+
+
+force applied by the dispenser to the SPL and reactively back into the vehicle, which can both then 
+
+
+
+be implemented into CLVTOPS. Figure 8 shows the vendor-provided dispenser ejection velocity 
+
+
+
+curve-fit, and Figure 9 shows the calculation of the ejection force fed into CLVTOPS. 
+
+
+
+ 
+
+
+
+Figure 10. V&V Between CLVTOPS and Datasheet Specifications. 
+
+
+
+Figure 10 shows a verification and validation (V&V) activity performed with the datasheet and 
+
+
+
+CLVTOPS ejection velocities to ensure CLVTOPS was properly modeling the 12U dispensers. 
+
+
+
+Arbitrary SPL masses were tested up to the maximum considered for the analysis. Data was taken 
+
+
+
+the first timestep after full ejection, where unconstrained 6-DOF motion first begins. The data was 
+
+
+
+then compared to what the curve-fit predicted the velocity should be. As seen in Figure 10, 
+
+
+
+CLVTOPS is in very good agreement with the manufacturer provided curve fit. 
+
+
+
+In addition to ejection forces, ejection moments were also considered. These moments are not 
+
+
+
+intentional dispenser design but rather inescapable effects of an imperfect ejection vector. Any 
+
+
+
+deviation from the intended ejection path will cause non-axial forces between the tip of the dis-
+
+
+
+penser and aft end of the SPL. These non-axial forces create moments on the vehicle and SPL, 
+
+
+
+which are called tipoff moments. 
+
+
+
+
+
+
+
+
+
+
+
+ 8 
+
+
+
+ 
+
+
+
+Figure 11. Two Tree3D Frames Highlighting Tipoff Rotation in an SPL, Mid-Ejection (left) and a 
+
+
+
+Few Seconds Later (right). 
+
+
+
+Due to the mass difference between the vehicle and the SPL, the SPL experiences the full effect 
+
+
+
+of these moments as seen in Figure 11 above. Tipoff moments were included in the simulation 
+
+
+
+using the manufacturer specified limit on dispenser-imparted rotation rate to calculate the torque 
+
+
+
+necessary to induce that rate. Such rotation is imperative to include, as it can reduce clearance by 
+
+
+
+rotating longer sections of the SPL towards the vehicle housing. 
+
+
+
+The analysis utilizes arbitrary SPLs to generalize setup for any Artemis mission. To accomplish 
+
+
+
+this generalization, a cuboid the size of the 12U dispenser with the mass properties provided in the 
+
+
+
+CSD datasheet was used. Figure 11 shows the cuboid being ejected, and the surface of the SPL 
+
+
+
+shows the triangular mesh that is used in the MinDist tool. 
+
+
+
+Mission-Specific Models 
+
+
+
+Models particular to a mission are the vehicle housings and vehicle kinetic states, both of which 
+
+
+
+are highly important for clearance. The kinetic states of the vehicles are controlled information, so 
+
+
+
+only the vehicle housings are detailed here. 
+
+
+
+ 
+
+
+
+Figure 12. Simplified 2D Drawing of the Block-1 Vehicle Housing. 
+
+
+
+At the time of the SPL ejection event, the SLS Block-1 vehicle consists of an empty Interim 
+
+
+
+Cryogenic Propulsion Stage (ICPS) beneath the Orion Stage Adapter (OSA), also called the Mul-
+
+
+
+tipurpose Crew Vehicle (MPCV) Stage Adapter (MSA), which itself sits beneath the Spacecraft 
+
+
+
+Adapter (SA). Dispensers are mounted around the OSA pointed through the opening of the SA. 
+
+
+
+This creates a concave housing, where the structure narrows towards the separation plane opening 
+
+
+
+that the SPL must fly through. The Block-1 configuration is shown in Figure 12 above. 
+
+
+
+
+
+
+
+
+
+
+
+ 9 
+
+
+
+ 
+
+
+
+Figure 13. Simplified 2D Drawing of the Block-1B Vehicle Housing. 
+
+
+
+For the Block-1B SPLs, the vehicle will consist of an Exploration Upper Stage (EUS) beneath 
+
+
+
+a Payload Adapter (PLA) that houses the New Exploration Secondary Transportation (NEST) at 
+
+
+
+the top. Additionally, there is a piece of leftover separation hardware attached to the top of the PLA 
+
+
+
+that the SPL must fly past called the Payload Separation System (PSS). The dispensers are mounted 
+
+
+
+to the NEST ring just below the separation plane. As opposed to the concave Block-1 housing, the 
+
+
+
+Block-1B configuration creates an open housing, with only the hardware surrounding the dispenser 
+
+
+
+posing clearance concerns. The Block-1B configuration can be seen in Figure 13 above. 
+
+
+
+Major Assumptions 
+
+
+
+Certain key assumptions have been made for this analysis in order to make the problem palatable 
+
+
+
+to CLVTOPS and keep the workload manageable. These assumptions involve forces with minute 
+
+
+
+effects on SPL trajectory, complex models that would be difficult to integrate, and concerns high-
+
+
+
+lighted by the manufacturer. 
+
+
+
+Negligible Forces. Due to the relatively close proximity of the SPLs to the vehicles and rela-
+
+
+
+tively short timeframe of near-field analysis, all gravitational accelerations acting on the vehicles 
+
+
+
+and SPLs are assumed constant and are therefore not modeled. Furthermore, all SPLs were assumed 
+
+
+
+to be passive for this time duration, meaning that the SPL does not perform any propulsive or 
+
+
+
+control maneuvers. It is also assumed that no other source of force or torque disturbances, such as 
+
+
+
+solar radiation or vehicle venting, act on the vehicle or SPLs. These assumptions simplify the sim-
+
+
+
+ulation by excluding forces with minute effects on short-term near-field clearance. Fewer forces to 
+
+
+
+program also helps to streamline and hasten the simulation. 
+
+
+
+Complex Models. All bodies in the simulation are assumed to be rigid. SPLs retain constant 
+
+
+
+mass and inertial properties, meaning that the properties are not updated if the SPL deploys ap-
+
+
+
+pendages after ejection. The ejection force vector is assumed to act perfectly parallel to the mount-
+
+
+
+ing bracket, and no dampening or lateral forces, drag in particular, are imparted to the SPL from 
+
+
+
+the interior dispenser walls, with the exception of generalized tipoff moment and ejection velocity 
+
+
+
+dispersions. These assumptions ease the workload by excluding complex, time-consuming, or ex-
+
+
+
+ternally developed models that may or may not be possible to implement into CLVTOPS. 
+
+
+
+Manufacturer Concerns. The dispenser manufacturer provided data involving dispenser door 
+
+
+
+settling time, general ejection velocity variability, and temperature effects on ejection velocity. 
+
+
+
+Firstly, the dispenser door has not been modeled and is assumed to be at its full extension. In all 
+
+
+
+cases, the SPLs did not exit the dispenser railings prior to door settling, making this a safe assump-
+
+
+
+tion. For another concern, manufacturer data shows that spring forces vary with temperature and 
+
+
+
+eject payloads at varying ejection velocities. Although Monte Carlo dispersions should cover this 
+
+
+
+variability, the dispersions are centered around what is assumed to be the manufacturer reported 
+
+
+
+nominals. 
+
+
+
+
+
+
+
+
+
+
+
+ 10 
+
+
+
+ 
+
+
+
+ANALYSIS OF SIMULATION OUTPUTS 
+
+
+
+With CLVTOPS set up, it is possible to generate meaningful results. Default TREETOPS output 
+
+
+
+records the motion of the vehicles and forces between bodies, and custom CLVTOPS output mod-
+
+
+
+ules and the other post-processing generate clearance results, animations, and other useful analyses. 
+
+
+
+Each plot is the result of at least 2000 runs for each vehicle as well as for each special study, and 
+
+
+
+post-processing filters these results according to set parameters and ordered statistics. 
+
+
+
+Trajectory Analysis 
+
+
+
+Using CLVTOPS output, one can reconstruct the trajectories of the bodies. This is useful for 
+
+
+
+determining if the bodies are behaving as intended and to detect any obvious contacts. For near-
+
+
+
+field SPL cases, a majority of the possible output parameters are unimportant so long as the SPL 
+
+
+
+clears the vehicle in a reasonable time without recontact. 
+
+
+
+ 
+
+
+
+Figure 14. Trajectories for Baseline Block-1 and Block-1B Cases. 
+
+
+
+Simulation trajectories are shown in Figure 14 above. The figure shows 2000 dispersed center-
+
+
+
+line trajectories for each SPL for both vehicles, with the outside black bars representing vehicle 
+
+
+
+geometry. By plotting all the runs together, the effects of dispersions can be seen visually. A large 
+
+
+
+spread on any one set of lines can indicate sensitivity to some dispersion, although further correla-
+
+
+
+tion analysis is needed to determine the particular sensitivities. Any curvature in the trajectories is 
+
+
+
+due to vehicle attitude rates, as the trajectories are presented in the vehicle-fixed frame with the 
+
+
+
+observer attached to the rotating vehicle while tracking the SPL locations. These cases had fairly 
+
+
+
+low initial attitude rates, which is evidenced by relatively straight SPL trajectories. 
+
+
+
+Clearance Analysis 
+
+
+
+Although studying the trajectories is useful, the most significant analyses performed on simula-
+
+
+
+tion outputs are the clearance analysis and sensitivity analysis. Clearance is determined using the 
+
+
+
+MinDist Tool along with provided CAD geometries. For separation dynamics, clearance is the main 
+
+
+
+measure by which an event is considered successful, as contact poses many mission risks ranging 
+
+
+
+from generating simple disturbances to damaging hardware to failing missions. 
+
+
+
+
+
+
+
+
+
+
+
+ 11 
+
+
+
+ 
+
+
+
+Figure 15. Clearance Results for the Baseline Block-1 and Block-1B Cases. 
+
+
+
+Figure 15 shows vastly different trajectory clearances prior to the full separation, with post-
+
+
+
+separation trajectories showing increasingly positive clearance. The gray bar represents the range 
+
+
+
+of separation times, where the SPL fully crosses the top of separation plane, indicating that the pre-
+
+
+
+separation clearance differences are mostly a result of SPL housing geometry differences. The plot 
+
+
+
+on the left uses the concave Block-1 housing, indicating that the SPL is launched away from the 
+
+
+
+walls but comes in close contact with the upper piece of the housing later. The plot on the right 
+
+
+
+uses the Block-1B open housing with SPLs launched directly at the separation plane, resulting in 
+
+
+
+monotonically increasing clearance albeit with a lower initial clearance. 
+
+
+
+Sensitivity Studies 
+
+
+
+Analysis of the nominal is important for understanding the expected dynamics of the case; how-
+
+
+
+ever, real flights do not always stay within expected parameters. In order to protect for this, addi-
+
+
+
+tional simulations are run to determine the effects of these extreme cases with a focus on sensitive 
+
+
+
+parameters. These extreme conditions are typically drawn from worst case scenario conditions, or 
+
+
+
+worst case combinations of conditions, in an attempt to create a bounding box that defines the 
+
+
+
+absolute worst conditions, within reason, that an event can undergo. This bounding box helps to 
+
+
+
+determine flight risk under off-nominal scenarios and to determine the need for preventative 
+
+
+
+measures as well as failure protocols. 
+
+
+
+Correlation studies on the baseline case help reveal the sensitive parameters. For the SPL cases 
+
+
+
+launching axially, there are only a few sensitive variables of concern with respect to near-field 
+
+
+
+clearance: vehicle attitude rates and SPL ejection forces. Vehicle attitude rates impart undesirable 
+
+
+
+velocities to the SPLs, which can cause them to fly into the vehicle housing. Likewise, if the SPL 
+
+
+
+ejection force is too low, then the SPL may not separate completely or may be too slow to separate 
+
+
+
+before the vehicle rotates itself into the SPL. 
+
+
+
+
+
+
+
+
+
+
+
+ 12 
+
+
+
+ 
+
+
+
+Figure 16. Roll Rate Sensitivity Study for the Block-1 Case. 
+
+
+
+Roll rate was tested first at varyingly large positive and negative rates. As can be seen in Fig-
+
+
+
+ure 16, clearance is indeed reduced by higher roll rates. The decrease in clearance as roll rate be-
+
+
+
+comes larger in magnitude is due to roll imparting a proportionally large lateral velocity onto the 
+
+
+
+SPL, which will fling the SPL into the vehicle housing walls before it is able to exit the housing. 
+
+
+
+ 
+
+
+
+Figure 17. Tree3D Animation Frames Depicting Lateral Motion Imparted to SPL. 
+
+
+
+Figure 17 above shows the flinging of the SPLs. The figure shows the Block-1 configuration at 
+
+
+
+the time of the red SPL ejection, and the system after 2 seconds have elapsed. The red SPL is 
+
+
+
+ejected under vehicle axial rotation with the red dashed line representing the dispenser ejection 
+
+
+
+force vector. Under non-rotational circumstances, the SPL would fly straight along that line, but 
+
+
+
+due to the rotation-imparted velocity it flies laterally into the walls. It is assumed that roll rate is 
+
+
+
+the most concerning of the standard attitude rates (roll, pitch, and yaw) for SLS secondary payloads 
+
+
+
+as roll rate acts along the main axis of the vehicle and is typically much larger than pitch and yaw. 
+
+
+
+Studies were also performed with generally larger pitch and yaw attitude rates than the baseline, 
+
+
+
+but not to the same extent shown for the roll rate clearance study. 
+
+
+
+
+
+
+
+
+
+
+
+ 13 
+
+
+
+ 
+
+
+
+Figure 18. General Attitude Rate Study for the Block-1 Case. 
+
+
+
+In Figure 18 above, the significant curvature of the trajectories in the right plot is due to the 
+
+
+
+large attitude rates imparting undesired motion onto the SPLs when viewed from the vehicle-fixed 
+
+
+
+frame. From the trajectory plots, it is obvious that clearance is reduced as SPLs curve back towards 
+
+
+
+the vehicle housing. An important note is that the shape of the vehicle housing significantly char-
+
+
+
+acterizes the clearance margins, as the concave housing provides ample opportunity for recontact 
+
+
+
+during SPL exodus. To highlight the effect of housing geometry on clearance, a similar study was 
+
+
+
+performed for the more open Block-1B housing. 
+
+
+
+ 
+
+
+
+Figure 19. Attitude Rate Sensitivity Study for the Block-1B Case. 
+
+
+
+As can be seen in Figure 19, the SPLs remain in far less danger of recontacts than in the Block-
+
+
+
+1 housing, despite the significantly larger attitude rates. There simply is no hardware for the SPL 
+
+
+
+to curve back toward with the open-housing style. The attitude rates affect the SPL trajectories in 
+
+
+
+the same manner, but the vehicle housing itself determines whether or not that is a concern. Less 
+
+
+
+opportunity for recontacts allows for more variation of attitude rate. 
+
+
+
+There are several configurations for the SPL ejection canisters provided by the manufacturer. A 
+
+
+
+study was performed with the Artemis I simulation to determine the minimum ejection velocity 
+
+
+
+necessary to successfully eject the SPL from the Block-1 housing and place it on its long-term 
+
+
+
+trajectory. The study involved comparing spring configurations: a baseline 4-spring configuration 
+
+
+
+and a reduced velocity 2-spring configuration. This study was not repeated for the Block-1B hous-
+
+
+
+ing under the assumption that the Block-1 housing is more conservative. 
+
+
+
+
+
+
+
+
+
+
+
+ 14 
+
+
+
+ 
+
+
+
+Figure 20. Ejection Velocity Sensitivity Study for the Block-1 Case. 
+
+
+
+In Figure 20, the plot on the left shows the baseline clearances for all simulated SPLs, and the 
+
+
+
+plot on the right shows the clearances for the reduced ejection velocity. For the same initial condi-
+
+
+
+tions, the SPLs with reduced ejection velocities ended up significantly closer to the vehicle housing, 
+
+
+
+even recontacting in some cases. This is largely due to the vehicle rotating into the SPL. As seen 
+
+
+
+when comparing the first sections of the plots, the clearances are similar, albeit with a less rapid 
+
+
+
+increase in clearance in the reduced velocity configuration. After that initial segment, the baseline 
+
+
+
+escapes the housing quickly, but the reduced velocity configuration lags and narrowly avoids the 
+
+
+
+concave housing. To ensure safe and reliable separation, the 4-spring configuration yields the most 
+
+
+
+ejection velocity for an SPL and therefore facilitates good clearance. 
+
+
+
+Requirement Setting 
+
+
+
+The purpose of analyzing SPL clearances is not solely to determine recontact risk but also to set 
+
+
+
+limits for canister-constrained deployables, such as solar panels or antennas. These limits are de-
+
+
+
+fined as deployment volumes that extend beyond the undeployed SPL with varying dimensions. 
+
+
+
+SPL providers did not have access to detailed information about the geometry of the vehicle and 
+
+
+
+had to rely on these established volumetric limits to determine if their SPLs would successfully exit 
+
+
+
+the vehicle housing without recontacts. Therefore, the analysis included determining the allowable 
+
+
+
+deployment volume for the SPLs. To do this, simple geometries were used in place of the un-
+
+
+
+deployed SPL CAD model. The geometries could then be scaled depending on the results of each 
+
+
+
+simulation to achieve the maximum deployment volume with minimum risk of recontact. 
+
+
+
+ 
+
+
+
+Figure 21. Sample Shapes Used in the Deployment Volume Analysis. 
+
+
+
+As shown in Figure 21, the shapes utilized in the deployment volume analysis involved cubes 
+
+
+
+and cuboids. The max dispenser volume was used to represent the size of an undeployed 12U, and 
+
+
+
+
+
+
+
+
+
+
+
+ 15 
+
+
+
+the other shapes were modeled as extensions beyond that original size. Spheres were considered 
+
+
+
+originally but were not used because cubes are more likely to cover unconventional deployable 
+
+
+
+geometries, especially when considering cube rotation due to tipoff rates. 
+
+
+
+ 
+
+
+
+Figure 22. Clearance Results for a 40” Cubic Deployment Volume for the Block-1 Case. 
+
+
+
+In all cases, the deployment volume decreases clearance. The shape of the volume can be iter-
+
+
+
+ated upon until a desirable shape is found, balancing size and risk. The effects of adding a deploy-
+
+
+
+ment volume on minimum clearance can be seen in Figure 22 above. 
+
+
+
+In addition to reducing clearance in general, clearance concerns may present themselves in new 
+
+
+
+ways when adding the deployment volume. For example, the deployment volume could be in con-
+
+
+
+tact with vehicle housing prior to when the expanded volume is considered valid and active. Fur-
+
+
+
+thermore, ignoring the invalid recontacts, the Block-1 SPLs may now be recontacting earlier due 
+
+
+
+to the deployment volume’s proximity to its neighboring dispensers immediately after ejection. 
+
+
+
+Recontacts in this timeframe are difficult to spot using only CLVTOPS and the MinDist tool. 
+
+
+
+ 
+
+
+
+Figure 23. Deployment Volume Narrowing to Eliminate Recontact with the Neighboring Dispenser. 
+
+
+
+To identify and verify these types of recontacts, Tree3D is easily used to visualize the physical 
+
+
+
+area of concern during the relevant timeframe. Using the information obtained through Tree3D 
+
+
+
+examination, alternate cube configurations were created that involved various shifting and 
+
+
+
+
+
+
+
+
+
+
+
+ 16 
+
+
+
+narrowing of the volume. For example, in Figure 23, the deployment volume was narrowed to avoid 
+
+
+
+recontacting the neighboring dispenser immediately after ejection. Iterating upon volume sizes and 
+
+
+
+transformations using the CLVTOPS toolchain allowed for the development of an effective volume 
+
+
+
+requirement for SPL canister-constrained deployables. 
+
+
+
+ 
+
+
+
+CONCLUSION 
+
+
+
+With rapidly increasing forays into space research, travel, and utilization, small project interest 
+
+
+
+in ridesharing with these new bigger projects has skyrocketed. NASA’s Artemis I has carried nu-
+
+
+
+merous small projects to space alongside its main payload, and future Artemis missions plan to 
+
+
+
+carry many more secondary payloads in the same way. As more and more vehicles carry SPLs or 
+
+
+
+other separable payloads, reliable simulations are necessary to ensure mission success where full 
+
+
+
+tests are not possible. For Artemis SPLs, the CLVTOPS multiple flexible body time-domain dy-
+
+
+
+namics simulation tool is used. The Liftoff and Separation Dynamics Team analyzes the CLVTOPS 
+
+
+
+outputs using post-processing tools such as Tree3D and the MinDist Tool to generate clearance 
+
+
+
+results, trajectory animations, and report graphics. Using the simulation along with the post-pro-
+
+
+
+cessing tools allows users to influence design by determining risk or validate requirements such as 
+
+
+
+positive clearance through separation. 
+
+
+
+In the paper, certain aspects of CLVTOPS simulation setup for SPLs riding on Artemis II and 
+
+
+
+future Block-1B Artemis missions were summarized. Particularly, the dispenser ejection forces and 
+
+
+
+moments as well as separate mission specific vehicle housing designs were shown. Furthermore, 
+
+
+
+notable assumptions that likely would not have affected results and the reasoning behind making 
+
+
+
+such assumptions were described. The analysis consisted of processing, animating, and iterating 
+
+
+
+upon CLVTOPS simulations to understand trajectories and clearances as well as to help set require-
+
+
+
+ments. Firstly, the trajectories and the clearances were discussed, showing what CLVTOPS output 
+
+
+
+produces as well as interpreting what the results mean for the SPLs. These initial results were used 
+
+
+
+to identify system sensitivities impacting clearance. The attitude rate sensitivities were iterated 
+
+
+
+upon for both vehicle configurations, identifying that roll rate is the most critical sensitivity for 
+
+
+
+SPLs on the SLS due to the lateral imparted motion and the likelihood of higher magnitude. The 
+
+
+
+other sensitivity of dispenser ejection force was also discussed. Lower dispenser ejection forces 
+
+
+
+were analyzed as these would produce lower ejection velocity. The lower ejection velocities proved 
+
+
+
+to be problematic for the SPLs as the vehicle would have time to rotate itself into the SPL and catch 
+
+
+
+it within the housing. Finally, various elements of requirement setting that this analysis helped with 
+
+
+
+was shown. Particularly, the development of the deployment volume required iterating upon 
+
+
+
+CLVTOPS, the MinDist tool, and Tree3D to determine the maximum volume that dispenser-con-
+
+
+
+strained deployables can utilize whilst minimizing the risk of recontact. Various challenges faced 
+
+
+
+while creating the deployment volume were also discussed. 
+
+
+
+The analysis did help reveal a key finding that can aid future SLS missions as well as other 
+
+
+
+vehicles that may carry secondary payloads. With regards to SPL clearance, the most important 
+
+
+
+aspect is the vehicle housing. As shown in the Block-1 design, SPLs ejected from deep within a 
+
+
+
+concave housing face a variety of potentially unnecessary challenges whereas, as shown in the 
+
+
+
+Block-1B design, SPLs ejected from near or just below the housing surface face comparatively few 
+
+
+
+challenges with regards to near-field clearance. As per the deployment volume section, volume size 
+
+
+
+is determined by recontact risk. For the concave housing, the high risk of recontact prevents a 
+
+
+
+substantial deployment volume until well after initial ejection. For the open housing, the risk of 
+
+
+
+recontact rapidly decreases, allowing for larger deployment volumes to be employed comparatively 
+
+
+
+sooner. Good vehicle housing design, with respect to near-field clearance, allots SPLs more oppor-
+
+
+
+tunity to deploy with less recontact risk. 
+
+
+
+
+
+
+
+
+
+
+
+ 17 
+
+
+
+ 
+
+
+
+ACKNOWLEDGMENTS 
+
+
+
+The authors would like to thank the American Astronautical Society for providing a session 
+
+
+
+dedicated to separation dynamics at which this unique work can be showcased. Additionally, the 
+
+
+
+authors wish to extend their gratitude to previous members of the NASA MSFC LO&Sep team for 
+
+
+
+their tireless efforts over many years, using their expertise and talents to initially develop and then 
+
+
+
+continue to enhance the simulation toolchain necessary to handle such important work. 
+
+
+
+ 
+
+
+
+REFERENCES 
+
+
+
+1 Burger, B., Addona, C., Harlin, W., McDonough, P., Muscha, Z., et al., "Space Launch System Liftoff and Separation 
+
+
+
+Dynamics Analysis Tool Chain." AIAA Scitech Forum, 2021. 
+
+
+
+2 Kane, T. and Wang, C., “On the Derivation of Equations of Motion.” Journal of the Society for Industrial and Applied 
+
+
+
+Mathematics, Vol. 13, No. 2, Jun 1965. 
+
+
+
+3 Hanson, J. and Beard, B., “Applying Monte Carlo Simulation to Launch Vehicle Design and Requirements Verifica-
+
+
+
+tion.” Journal of Spacecraft and Rockets, Vol. 49, No. 1, Jan-Feb 2012. 
+
+
+
+4 David, H. and Nagaraja, H., “Order Statistics.” Wiley, Jul 2003. 
+
+
+
+5 Rocket Lab, “Canisterized Satellite Dispenser Data Sheet 2002337G.” May 2022. 
+
+
+
+6 NASA Spacecraft/Payload Integration & Evolution Element, “Space Launch System (SLS) Artemis II Secondary Pay-
+
+
+
+loads 6U & 12U Potential Cubesat accommodations.” NASA Whitepaper, Aug 2019.

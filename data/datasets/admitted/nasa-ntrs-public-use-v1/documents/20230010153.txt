@@ -1,0 +1,3614 @@
+1 
+ 
+
+
+
+Thermal Desktop Modeling of the 2016 CRYOTE-2 Tank Chilldown and Fill Testing 
+
+
+
+Erin Tesnya and Jason Hartwiga 
+
+
+
+aNASA Glenn Research Center, Fluids and Cryogenics Branch, Cleveland, OH, 44135 
+
+
+
+ 
+
+
+
+Abstract 
+
+
+
+The storing and transfer of cryogenic propellants is an enabling technology for NASA 
+
+
+
+and industry as civilization moves to expand future missions into low Earth orbit and beyond. 
+
+
+
+Several ground propellant transfer tests have been conducted in past decades examining various 
+
+
+
+tank chilldown and fill methods. Creating accurate models using these historical datasets is a 
+
+
+
+vital step toward developing appropriate modeling tools to form pre-test predictions for 
+
+
+
+subsequent ground and flight propellant transfers. This paper presents model validation of 
+
+
+
+Thermal Desktop using data from the 2016 CRYOTE-2 liquid nitrogen transfer experiments 
+
+
+
+whose purpose was to demonstrate the chill and fill process in a spherical receiver tank. Tank 
+
+
+
+pressure, fill level, and wall temperature were all modeled and compared with 8 test cases using 
+
+
+
+two modeling methods, Mass Controlled, and Pressure Controlled. This test series is the hardest 
+
+
+
+Thermal Desktop tank chill and fill validation case to-date, yet the model was able to accurately 
+
+
+
+predict each of these metrics for the 2016 tests within 28%, 10%, 20% respectively, for pressure, 
+
+
+
+fill level, and wall temperature using the Mass Controlled model, and 29%, 79%, and 12%, 
+
+
+
+respectively for the Pressure Controlled model. 
+
+
+
+Keywords: no-vent fill, Thermal Desktop, chilldown, condensation, liquid nitrogen 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+2 
+ 
+
+
+
+1.0 Introduction 
+
+
+
+The storing and transfer of cryogenic propellants is an enabling technology for NASA 
+
+
+
+and industry as civilization moves to expand future missions into Low Earth Orbit (LEO) and 
+
+
+
+beyond. The transfer of cryogenic propellants is of particular interest because it has never been 
+
+
+
+successfully demonstrated in microgravity to-date. An in-space propellant transfer is divided into 
+
+
+
+various stages, including (1) pressurization of the supply tank, (2) propellant management 
+
+
+
+devices to extract single-phase liquid, (3) transfer line chilldown, (4) receiver tank chilldown, 
+
+
+
+and (5) receiver tank fill. This paper focuses on modeling stages 4 and 5. 
+
+
+
+While somewhat inefficient, the cryogenic transfer process in 1-g is trivial; the receiver 
+
+
+
+tank is vented throughout the transfer, and the boil-off vapor produced during chilldown is 
+
+
+
+vented through the top of the tank while the liquid accumulates to the desired final fill level. In 
+
+
+
+microgravity, where the fluid is in an unsettled configuration however, propellant transfer is 
+
+
+
+complicated by the unknown location of the liquid/vapor interface, complex heat transfer 
+
+
+
+processes, and propensity to vent liquid. Due to the high cost of launching and storing propellant 
+
+
+
+in space, venting liquid is to be avoided at all times. 
+
+
+
+Cryogenic propellants such as liquid oxygen (LO2) are prone to boiling at low heat flux 
+
+
+
+(relative to water), causing pressure rise rates that can disrupt the transfer process. Furthermore, 
+
+
+
+complex two-phase flows can arise, which would complicate system modeling efforts, making 
+
+
+
+the transfer process more unpredictable. At the time of writing this paper, no reduced gravity 
+
+
+
+cryogenic chill and fill transfer experiments have been conducted. In lieu of experimentation in 
+
+
+
+the space environment, ground tests have been conducted that still capture many of the 
+
+
+
+operational issues and heat and mass transfer processes that arise during cryogenic propellant 
+
+
+
+transfer. As a result, several chilldown and fill methods have been conceived and tested over the 
+
+
+
+
+
+
+
+
+
+
+
+3 
+ 
+
+
+
+past several decades to address the difficulties of transferring cryogens in reduced gravity 
+
+
+
+environments. 
+
+
+
+The simplest method is to utilize a cryocooler heat exchanger to prechill the receiving 
+
+
+
+tank, followed by a continuous no-vent fill (NVF). Spaceflight cryocoolers with high efficiency 
+
+
+
+are still in development and require additional system mass, power, and complexity. Without 
+
+
+
+cryocoolers, the cooling capacity of the propellant must be used to chill down the transfer 
+
+
+
+hardware. However, this leads to loss of propellant; the liquid undergoes phase change and is 
+
+
+
+vented overboard. Thus, is it necessary to remove as much thermal energy as possible to 
+
+
+
+conserve propellant. A second candidate chill and fill method was first proposed by [1] and later 
+
+
+
+explored analytically by [2, 3] deemed the charge/hold/vent (CHV) method. Here, a “charge” of 
+
+
+
+liquid is introduced into the tank with the receiver tank vent valve closed. The liquid is then held 
+
+
+
+for some time to allow complete phase change. The fluid and wall reach thermal equilibrium at a 
+
+
+
+new lower temperature. Then the vapor is vented, and the process is repeated until the wall 
+
+
+
+temperature reaches the “target temperature” [4] that is cold enough to allow a NVF. The CHV 
+
+
+
+method alleviates the possibility of venting liquid but introduces complexity due to valve 
+
+
+
+cycling, extended transfer duration, and the need to potentially gauge mass in the tank. A third 
+
+
+
+proposed method is called the vented chill (VC)/NVF originally demonstrated in [5]. Here, the 
+
+
+
+receiver tank vent valve remains open until the receiver tank reaches the target temperature, 
+
+
+
+followed by a continuous NVF. The goal of VC/NVF is to expedite the transfer process through 
+
+
+
+less valve cycling, however, care must be taken to ensure the injection method maximizes the 
+
+
+
+evaporation rate between receiver tank ullage and incoming liquid as well as the boiling heat 
+
+
+
+transfer between liquid and wall to prevent any liquid from being vented. The VC/NVF method 
+
+
+
+is the focus of this paper. A fourth method that was recently devised at NASA Marshall Space 
+
+
+
+
+
+
+
+
+
+
+
+4 
+ 
+
+
+
+Flight Center (MSFC) was the thermodynamic vent system (TVS) assisted transfer. Here, the 
+
+
+
+propellant transfer is conducted with the main vent valve closed; the injector has an embedded 
+
+
+
+TVS heat exchanger where a small amount of liquid from the main injection line is routed 
+
+
+
+through a Joule-Thomson device, expanded, cooled, and integrated with the injector to assist in 
+
+
+
+subcooling the main injection line. Data analysis from [6] showed, however, that the benefit of 
+
+
+
+the TVS was in chilling down the injector itself and allowing a stalled transfer to recommence 
+
+
+
+due to a new condensation heat transfer path opening up between the cold injector and warm 
+
+
+
+ullage. This TVS-assisted NVF still requires further testing to prove to be a viable concept. 
+
+
+
+This paper presents Thermal Desktop (TD) model development and validation against the 
+
+
+
+CRYogenic Orbital Testbed Experiment-2 (CRYOTE-2) 2016 tests, a recent set of experiments 
+
+
+
+conducted at NASA MSFC. In total 53 tests were performed, using three different liquid 
+
+
+
+injection systems, over a wide range of thermodynamic conditions and flow rates. The focus of 
+
+
+
+this paper is on model validation against a single particular spray device for 8 validation cases. 
+
+
+
+The outline of the paper is as follows: First a background section is given to briefly discuss 
+
+
+
+previous chill and fill testing and modeling. Next, the description of the CRYOTE-2 system, 
+
+
+
+hardware, experiment, and instrumentation is presented. Then, a brief description of the Thermal 
+
+
+
+Desktop model is given, along with test-specific assumptions, boundary conditions, initial 
+
+
+
+conditions, and final conditions. Finally, Thermal Desktop model results are compared with test 
+
+
+
+data along with some discussion. 
+
+
+
+2.0 Background 
+
+
+
+1-g cryogenic transfer experiments have been conducted for decades. What follows is a 
+
+
+
+brief summary of those tests; for a detailed history of cryogenic chill and fill testing and 
+
+
+
+modeling, the reader is referred to [4]. Fester [7] performed NVF tests with Freon-113 on a 
+
+
+
+
+
+
+
+
+
+
+
+5 
+ 
+
+
+
+vertical cylinder using a bottom fill method. Chato et al. [8] and [9] then used a top spray nozzle 
+
+
+
+injector on a cylindrical tank using liquid nitrogen (LN2) and LH2. [10] subsequently conducted 
+
+
+
+NVF tests on the same tank using LH2, but tested the performance of a top spray nozzle, upward 
+
+
+
+pipe discharger, and bottom diffuser. The last was used to simulate low-g cases where the 
+
+
+
+injector would be submerged. Chato [11] conducted NVFs on an aluminum sphere using LH2 
+
+
+
+with a top spray nozzle and bottom jet. Chato and Sanabria [1] conducted CHV tests on the same 
+
+
+
+tank. Moran and Nyland [12] investigated the performance of a spray bar using LN2 on a vertical 
+
+
+
+cylinder. Chato [13] tested a spray bar using LH2. Wang and Wang [14], Wang et al. [15], and 
+
+
+
+Kim et al. [16] conducted parametric NVF tests using multiple injectors. Flachbart et al. [17] 
+
+
+
+conducted NVF tests on the thick-walled Multi-purpose Hydrogen Testbed using LH2. Hartwig 
+
+
+
+et al. [4] reported results of the CRYOTE-2 test program while [5] and [6] reported test results of 
+
+
+
+the TVS-assisted injector test data analysis and the original rapid chill and fill tests, respectively. 
+
+
+
+Analysis performed in the current work falls under the Reduced Gravity Cryogenic 
+
+
+
+Transfer (RGCT) project at NASA whose goals are (1) to investigate efficient cryogenic 
+
+
+
+chilldown and transfer methods in a reduced gravity environment to enable future flight transfer 
+
+
+
+systems, and (2) to develop and validate improved empirical, analytical, lumped capacitance, and 
+
+
+
+computational fluid dynamics models for propellant transfer operations in terrestrial and reduced 
+
+
+
+gravity environments. RGCT is producing direct-cryogenic data anchored propellant transfer 
+
+
+
+models at multiple levels, including fundamental cryogenic boiling heat transfer and pressure 
+
+
+
+drop correlations [18-20], a first-principles analytical model that predicts the failure of a NVF 
+
+
+
+with 100% accuracy [21], various design tools for cryogenic tank chilldown and fill injection 
+
+
+
+methods, including (TVS)-assisted injectors, development and validation of lumped capacitance 
+
+
+
+codes Thermal Desktop and the Generalized Fluid System Simulation Program (GFSSP) for tank 
+
+
+
+
+
+
+
+
+
+
+
+6 
+ 
+
+
+
+chilldown and tank fill [22-24], CFD of tank chilldown using FLUENT [25]and CFD of the fluid 
+
+
+
+dynamics inside a propellant tank subject to sloshing and non-inertial forces in reduced gravity 
+
+
+
+[26]. Analysis in the current work is focused on validation of Thermal Desktop for the 
+
+
+
+CRYOTE-2 tank chilldown and fill experiments. This test series represents the hardest validation 
+
+
+
+case performed to-date. Relative to previous Thermal Desktop validation exercises against larger 
+
+
+
+tanks with smaller temperature differences and longer transfer time scales, the chilldown and fill 
+
+
+
+process for CRYOTE-2 transfers is relatively faster here, the injectors are the most complicated, 
+
+
+
+and the temperature gradients between wall and fluid are the highest studied. 
+
+
+
+3.0 Experimental Description 
+
+
+
+As stated in [4], “CRYOTE was first envisioned by the United Launch Alliance and 
+
+
+
+initial concepts were first reviewed in 2008 [27]. CRYOTE was designed to test a completely 
+
+
+
+integrated cryogenic test bed for testing fuel storage and transfer in as close to a flight 
+
+
+
+environment as possible. Subsystems of CRYOTE include multi-layer insulation (MLI) to reduce 
+
+
+
+parasitic heat leak, a support skirt, a TVS for managing pressure in the tank through 
+
+
+
+cooling/venting the fuel, a vapor cooled heat exchanger running through the skirt for maximizing 
+
+
+
+the usefulness of the TVS, and a liquid level sensing system.” This paper specifically focuses on 
+
+
+
+the chill and fill tests that occurred in 2016, where the emphasis was on obtaining data for 
+
+
+
+simple, higher performing injectors, as well as examining the effect of different thermodynamic 
+
+
+
+parameters. 
+
+
+
+3.1 Hardware Description 
+
+
+
+The CRYOTE test series was conducted at NASA MSFC in the Exploration Systems 
+
+
+
+Test Facility (ESTF). ESTF is a 6.10 m long, 2.74 m diameter multi-purpose vacuum chamber 
+
+
+
+that has been used for numerous cryogenic fluid management experiments at the Marshall Space 
+
+
+
+
+
+
+
+
+
+
+
+7 
+ 
+
+
+
+Flight Center. The test set up consisted of a supply tank, receiver tank, transfer line, vent line, 
+
+
+
+and various instrumentation inside a vacuum chamber shown in Figure 1. The Vibro-Acoustic 
+
+
+
+Test Article (VATA) is the supply tank that feeds the CRYOTE receiver tank inside of the 
+
+
+
+ESTF. During the CRYOTE tests, VATA is filled with LN2 initially at 77K and 1 atm and then 
+
+
+
+pressurized to the desired supply tank pressure utilizing gaseous nitrogen (GN2). 
+
+
+
+ 
+
+
+
+Figure 1 – System Diagram for the 2016 CRYOTE-2 Transfer Tests. From left to right: 
+
+
+
+CRYOTE tank, VATA tank 
+
+
+
+The CRYOTE receiver tank will be the main focus of this study. The CRYOTE receiver 
+
+
+
+tank shown in Figure 2 is a spherical 6-4 titanium (Ti) tank with an OD of 75.44 cm, 0.127 cm 
+
+
+
+wall thickness, and an MAWP of 5.7 MPa (827) psi at cryogenic temperatures. The volume of 
+
+
+
+CRYOTE at room temperature is 0.221 m3 (7.82 ft3) but is 0.216 m3 at 77K (7.62 ft3) due to 
+
+
+
+metal contraction. The spherical portion of the tank weighs approximately 10.3 kg. The tank lid, 
+
+
+
+on the other hand, is a thick cylindrical 304SS lid that weighs approximately 2.9 kg. These 
+
+
+
+masses do not include the small masses of the injectors and connectors into the lid. An MLI skirt 
+
+
+
+was placed around the receiver tank to reduce the heat load into the bottom of the tank. 
+
+
+
+
+
+
+
+
+
+
+
+8 
+ 
+
+
+
+ 
+
+
+
+Figure 2 – 2016 CRYOTE 2 Thermocouple Locations 
+
+
+
+Three injectors were tested in total, but only one was tested for the 2016 tests. The spray 
+
+
+
+pattern for this injector is shown in Figure 3. From [4], this injector used one BETE 0.33 cm 
+
+
+
+(0.13 in), 170o TF8 spray nozzle facing upwards, one BETE 0.41 cm (0.16 in), 170o TF10 spray 
+
+
+
+nozzle facing downwards, and a BETE 0.23 cm (0.09 in), 170o TF6 spray nozzle facing 
+
+
+
+downwards. As shown, this injector appears to atomize the spray well. This injector has an 
+
+
+
+overall coefficient of discharge of 0.800DC = with 32.5% of the flow going through TF8 on the 
+
+
+
+left, 50% of the flow heading through TF10 in the center, and the remaining 17.5% of the flow 
+
+
+
+heading through TF6 on the right [28] where coefficient of discharge is defined as: 
+
+
+
+𝐶𝐷 =
+�̇�
+
+
+
+𝐴√2𝜌𝛥𝑃
+ (1) 
+
+
+
+where  is the liquid density based on inlet temperature and pressure, A is the sum of the area 
+
+
+
+of the injector holes, P is the measured pressure drop between two points, and �̇� is the flow 
+
+
+
+rate determined from the following equation: 
+
+
+
+�̇� =
+𝑑𝑚𝐿𝐶
+
+
+
+𝑑𝑡
+− �̇�𝑡𝑎𝑝 (2) 
+
+
+
+
+
+
+
+
+
+
+
+9 
+ 
+
+
+
+where LCm is the mass measurement from the CRYOTE tank load cells and 𝑚𝑡𝑎𝑝̇ is the small gas 
+
+
+
+flow rate out of a small vent tap that was open (not main vent valve), roughly 1/300 of the main 
+
+
+
+liquid inlet flow rate. Note that these equations only apply during tank fill when single phase 
+
+
+
+liquid is present. 
+
+
+
+ 
+
+
+
+Figure 3: Fluid Injector for the 2016 Tests 
+
+
+
+3.2 Instrumentation 
+
+
+
+The receiver tank, MLI skirt, and feed lines were fitted with various thermocouples and 
+
+
+
+to measure the temperature inside and outside the tank as shown in Figure 2 and outlined in 
+
+
+
+Table 1. Of particular interest are thermocouples TC73-TC96 which were placed on the outside 
+
+
+
+of the tank wall in a vertical line which were used to estimate the temperature distribution as the 
+
+
+
+tank fills. There were also three load cells placed beneath the tank to measure the change in mass 
+
+
+
+as the tank fills. Pressure transducers were also placed in the fill line and inside the tank. 
+
+
+
+Unfortunately, there were no flow meters on the pressurant gas line into VATA nor in the 
+
+
+
+transfer line connecting VATA to CRYOTE, nor on the vent line, making it impossible to 
+
+
+
+determine the amount of liquid entering into CRYOTE during transfer line chilldown and tank 
+
+
+
+chilldown where two-phase flow was present. Regardless, analysis in the current work is focused 
+
+
+
+on NVF, and by that point in transfer, the inlet state into the receiver tank is primarily single-
+
+
+
+
+
+
+
+
+
+
+
+10 
+ 
+
+
+
+phase liquid, the receiver tank vent valve was closed, and the load cell data could be used 
+
+
+
+directly to determine the mass flow rate into the tank. 
+
+
+
+From [4]: uncertainty in the sensors is as follows. The thermocouples had a margin of 
+
+
+
+error of +/- 2 degrees K. Pressure transducers had a +/- 0.5% Best Fit Straight Line (BFSL) 
+
+
+
+margin of error. Load cells and volumetric flow meters had an uncertainty < 2% full scale. The 
+
+
+
+nominal record rate for all data was 1 Hz. 
+
+
+
+ 
+
+
+
+Table 1: CRYOTE Sensor Names, Locations, and Units 
+
+
+
+3.3 Test Methodology 
+
+
+
+To properly transfer propellant into a warm tank, the CRYOTE tank wall must first be 
+
+
+
+cooled to prevent the pressure front exceeded the maximum expected operating pressure 
+
+
+
+(MEOP) during fill. The injector used in the 2016 CRYOTE-2 test was designed to rapidly 
+
+
+
+remove heat from the wall during chilldown and then to subsequently cool the ullage during fill. 
+
+
+
+Thermocouple Location Description DAQ ID Uncertainty Thermocouple Location Description DAQ ID Uncertainty
+
+
+
+Wetted thru TVS tee at Lid ~ 39.5% fill level TC49 +/- 2 degrees K Transfer line TC, 47" from TC 86 (right before Valve Z) TC87 +/- 2 degrees K
+
+
+
+Wetted Fill at Lid TC50 +/- 2 degrees K
+
+
+
+Transfer line TC, 16" from TC 87 (right before tee with 
+
+
+
+CRYOTE drain line) TC88 +/- 2 degrees K
+
+
+
+On skirt inside turn 1 from tank TC52 +/- 2 degrees K 71.9% fill level, external to tank TC89 +/- 2 degrees K
+
+
+
+On skirt inside turn 4 from tank TC54 +/- 2 degrees K 57.5% fill level, external to tank TC90 +/- 2 degrees K
+
+
+
+Close to center of lid TC55 +/- 2 degrees K 42.5% fill level, external to tank TC91 +/- 2 degrees K
+
+
+
+CRYOTE tank lip (at lid but on main tank body) TC56 +/- 2 degrees K 28.1% fill level, external to tank TC92 +/- 2 degrees K
+
+
+
+On skirt inside turn 2 from tank TC57 +/- 2 degrees K 15.5% fill level, external to tank TC93 +/- 2 degrees K
+
+
+
+On skirt inside turn 5 from tank TC58 +/- 2 degrees K 6.0% fill level, external to tank TC94 +/- 2 degrees K
+
+
+
+Tank Lid, half way between edge and center of lid TC60 +/- 2 degrees K 0.7% fill level, external to tank TC95 +/- 2 degrees K
+
+
+
+TVS turn 5 from tank TC61 +/- 2 degrees K 0.0% fill level, external to tank TC96 +/- 2 degrees K
+
+
+
+on skirt inside turn 3 from tank TC64 +/- 2 degrees K
+
+
+
+TVS turn 3 from tank TC65 +/- 2 degrees K
+
+
+
+TVS turn 4 from tank TC66 +/- 2 degrees K Cryote Load Cells DAQ ID
+
+
+
+Edge of Tank Lid, thicker part TC68 +/- 2 degrees K Load Cell 4 SG004 unknown
+
+
+
+TVS turn 2 from tank TC70 +/- 2 degrees K Load Cell 5 SG005 unknown
+
+
+
+99.3% Fill level, external to tank TC73 +/- 2 degrees K Load Cell 6 SG006 unknown
+
+
+
+94.0% fill level, external to tank TC74 +/- 2 degrees K
+
+
+
+84.4% fill level, external to tank TC75 +/- 2 degrees K Pressure Transducers DAQ ID
+
+
+
+CRYOTE Wetted 95% fill level TC79 +/- 2 degrees K Pressure upstream of Spray Head AI50 +/- 0.5% BFSL 
+
+
+
+tank fill line at ESPA ring TC80 +/- 2 degrees K Pressure TVS Vent Line at HX AI51 +/- 0.5% BFSL 
+
+
+
+Temp CRYOTE Spray TC82 +/- 2 degrees K Pressure CRYOTE2 ullage tap (dedicated) AI52 +/- 0.5% BFSL 
+
+
+
+Temp TVS Vent at HX TC83 +/- 2 degrees K Pressure TVS Flowmeter AI53 +/- 0.5% BFSL 
+
+
+
+Tank sump at base of cup (Very bottom of tank) TC84 +/- 2 degrees K
+
+
+
+Wetted Vent at Lid TC85 +/- 2 degrees K Flow Meters DAQ ID
+
+
+
+Transfer line TC, 60" from VATA TC36 TC86 +/- 2 degrees K TVS Volumetric Flow Meter FM-T362 unknown
+
+
+
+CRYOTE Sensors
+
+
+
+
+
+
+
+
+
+
+
+11 
+ 
+
+
+
+The chilldown was performed with the vent valve open, described earlier in Section 2.0 as the 
+
+
+
+VC. The trigger point for the end of chilldown differed between the different tests but was most 
+
+
+
+commonly an average wall temperature. Once this point was reached, the vent valve was then 
+
+
+
+closed at the end of chilldown so that a NVF could be performed. More details on the test 
+
+
+
+methodology are in [4]. 
+
+
+
+4.0 Test Matrix and Operating Conditions 
+
+
+
+Tables 2 and 3 present the test matrix, along with initial conditions, boundary conditions, 
+
+
+
+and final conditions. Since two-phase flow always existed during the initial stages of the transfer 
+
+
+
+process due to transfer line chill down, the inlet state of the flow into CRYOTE is indeterminable 
+
+
+
+with the sensors utilized in the experiment during this phase. Therefore, it is not possible to 
+
+
+
+accurately model the initial chilldown portion of transfer due to two-phase flow. Therefore, 
+
+
+
+direct comparison with the model is achievable only during the NVF portion of transfer. 
+
+
+
+ 
+
+
+
+Table 2: Test Matrix, Initial, and Boundary Conditions 
+
+
+
+ Date
+
+
+
+VATA 
+
+
+
+Supply 
+
+
+
+Pressure
+
+
+
+Avg 
+
+
+
+CRYOTE 
+
+
+
+Inlet 
+
+
+
+Pressure 
+
+
+
+during 
+
+
+
+NVF
+
+
+
+TC50 
+
+
+
+Median 
+
+
+
+during 
+
+
+
+NVF
+
+
+
+CRYOTE 
+
+
+
+Tank 
+
+
+
+Pressure 
+
+
+
+at NVF 
+
+
+
+Start
+
+
+
+CRYOTE 
+
+
+
+Ullage 
+
+
+
+Temp at 
+
+
+
+NVF Start
+
+
+
+CRYOTE 
+
+
+
+Mass 
+
+
+
+Liquid at 
+
+
+
+NVF Start
+
+
+
+CRYOTE 
+
+
+
+Mass 
+
+
+
+Vapor at 
+
+
+
+NVF Start
+
+
+
+CRYOTE 
+
+
+
+LL at 
+
+
+
+NVF 
+
+
+
+Start
+
+
+
+CRYOTE 
+
+
+
+Mass Avg 
+
+
+
+Tank 
+
+
+
+Temp at 
+
+
+
+NVF Start
+Test Name kPa kPa K kPa K kg kg % Fill K
+
+
+
+20160914 310.3 288.83 85.88 261.53 86.75 1.42 2.19 0.83 242.89
+
+
+
+20160921 310.3 245.65 85.53 226.40 84.96 2.77 1.92 1.62 227.42
+
+
+
+20161004 310.3 277.02 86.58 244.28 86.20 2.28 2.05 1.34 192.78
+
+
+
+20161005 310.3 236.56 85.10 225.30 85.15 7.44 1.86 4.32 162.66
+
+
+
+20161006.1 310.3 243.45 85.21 233.50 85.64 6.77 1.92 3.94 165.33
+
+
+
+20161006.2 310.3 242.86 85.21 233.50 85.64 6.77 1.92 3.94 165.33
+
+
+
+20161006.3 310.3 293.05 86.08 241.34 85.96 5.35 2.00 3.11 172.56
+
+
+
+20161007 310.3 323.95 88.77 235.85 85.71 6.17 1.95 3.59 170.40
+
+
+
+20161012 310.3 291.89 86.49 245.70 86.21 5.42 2.03 3.16 172.89
+
+
+
+
+
+
+
+
+
+
+
+12 
+ 
+
+
+
+ 
+
+
+
+Table 3: Test Matrix, Initial, Boundary, and Final Conditions 
+
+
+
+A full explanation of the different parameters in Tables 2 and 3 can be found in [4]. For 
+
+
+
+example, liquid level in the tank was calculated by dividing the volume of the liquid in the tank 
+
+
+
+by the total tank volume at any point in time, ignoring the small volume change as the tank 
+
+
+
+contracts with colder temperature, after some algebraic manipulation: 
+
+
+
+( )
+ 
+
+
+
+liquid liquid LC CRYOTE vapor tank
+
+
+
+tank liquid tank liquid tank vapor tank
+
+
+
+V m m m V
+Liquid Level
+
+
+
+V V V V
+
+
+
+
+
+
+
+  
+
+
+
+− −
+= = =
+
+
+
+−
+ (3) 
+
+
+
+Similarly, “CRYOTE Mass Liquid at NVF Start” and “CRYOTE Mass Vapor at NVF Start” are 
+
+
+
+calculated using conservation of mass and a volume constraint: 
+
+
+
+LC CRYOTE liquid vaporm m m m− = +
+ (4) 
+
+
+
+tank liquid vaporV V V= +
+ (5) 
+
+
+
+where CRYOTEm is the mass of the empty receiver tank. Substituting the known liquid and vapor 
+
+
+
+densities using REFPROP [29], Equation 5 becomes: 
+
+
+
+liquid vapor
+
+
+
+tank
+
+
+
+liquid vapor
+
+
+
+m m
+V
+
+
+
+ 
+= +
+
+
+
+ (6) 
+
+
+
+Using the known liquid level: 
+
+
+
+ Date
+
+
+
+TC96 
+
+
+
+(0.0%)
+
+
+
+TC95 
+
+
+
+(0.7%)
+
+
+
+TC94 
+
+
+
+(6.0%)
+
+
+
+TC93 
+
+
+
+(15.5%)
+
+
+
+TC92 
+
+
+
+(28.1%)
+
+
+
+TC91 
+
+
+
+(42.5%)
+
+
+
+TC90 
+
+
+
+(57.5%)
+
+
+
+TC89 
+
+
+
+(71.9%)
+
+
+
+TC75 
+
+
+
+(84.4%)
+
+
+
+TC74 
+
+
+
+(94.0%)
+
+
+
+TC73 
+
+
+
+(99.3%)
+
+
+
+TC55 
+
+
+
+(Lid 
+
+
+
+Middle)
+
+
+
+TC60 
+
+
+
+(Lid 
+
+
+
+Half-
+
+
+
+Way)
+
+
+
+TC68 
+
+
+
+(Lid 
+
+
+
+Edge)
+
+
+
+NVF 
+
+
+
+Duration
+
+
+
+Tank 
+
+
+
+Pressure 
+
+
+
+at NVF 
+
+
+
+End
+
+
+
+Tank 
+
+
+
+Temperature 
+
+
+
+at NVF End
+
+
+
+LL at 
+
+
+
+NVF 
+
+
+
+End
+Test Name K K K K K K K K K K K K K K seconds kPa K % Fill
+
+
+
+20160914 262.11 251.80 247.51 204.69 201.11 263.19 229.77 266.96 224.95 242.95 274.28 233.93 236.69 272.20 24 414.24 233.81 1.13
+
+
+
+20160921 259.94 241.76 233.37 157.98 162.73 260.47 198.76 266.55 201.98 216.15 278.63 223.51 224.18 277.77 1735 320.35 109.32 89.68
+
+
+
+20161004 94.59 91.39 142.84 156.65 172.09 203.68 196.15 184.30 189.26 196.65 226.92 236.94 239.70 272.13 33 395.70 174.56 2.34
+
+
+
+20161005 90.82 90.81 89.38 103.44 131.18 168.82 163.98 148.92 150.68 157.27 195.56 222.56 222.79 275.70 1479 297.56 88.29 91.77
+
+
+
+20161006.1 91.34 91.09 89.82 111.27 134.72 171.84 166.59 151.41 153.15 160.05 197.73 225.43 226.23 276.40 1622 303.17 88.46 94.05
+
+
+
+20161006.2 91.34 91.09 89.82 111.27 134.72 171.84 166.59 151.41 153.15 160.05 197.73 225.43 226.23 276.40 1634 302.53 88.41 94.88
+
+
+
+20161006.3 92.43 91.37 90.16 123.95 143.53 179.66 172.68 157.79 160.82 169.32 210.22 232.80 234.31 282.02 144 410.37 140.94 6.87
+
+
+
+20161007 92.20 91.43 89.98 122.10 141.55 178.52 172.47 157.38 159.58 166.54 204.17 228.39 229.92 278.98 700 406.61 121.05 16.34
+
+
+
+20161012 92.37 91.69 90.40 126.55 145.26 181.68 175.44 160.56 163.43 170.43 207.78 229.70 231.44 278.66 111 416.93 144.75 5.81
+
+
+
+
+
+
+
+
+
+
+
+13 
+ 
+
+
+
+liquid liquid tankm V LL=
+ (7) 
+
+
+
+( )1vapor vapor tankm V LL= −
+ (8) 
+
+
+
+Some additional points to consider: First, the temperature dependent specific heat of the 
+
+
+
+304SS lid and Ti6-4 tank walls were obtained from Marquardt et al. [30] and the Titanium 
+
+
+
+Metals Corporation [31], respectively. The density, thermal conductivity, and specific heat as a 
+
+
+
+function of temperature were imported into Thermal Desktop and applied to the solid finite 
+
+
+
+element nodes that composed the solid wall and the lid of the model. Thermal Desktop uses an 
+
+
+
+internal property file with values calculated from REFPROP Version 9.1 for the fluid properties 
+
+
+
+of nitrogen [29]. Second, on account of a thin tank wall thickness, the measured external tank 
+
+
+
+wall temperature can be used to approximate the internal wall temperature. Lastly, parasitic heat 
+
+
+
+leak for this test series is quite small relative to the flow energy of the fluid and thus excluded 
+
+
+
+from the Thermal Desktop model considerations. 
+
+
+
+For the purposes of this study the conditions at the start of NVF are important, as well as 
+
+
+
+the conditions at the end of fill. The last column of Table 3 shows the liquid level (LL) or fill 
+
+
+
+level at the end of NVF. It can be seen that many of the tests failed prematurely and did not reach 
+
+
+
+a liquid level near or above 90% because the pressure in the tank exceeded the MEOP. Using this 
+
+
+
+metric all tests can be classified as either “Successful” or “Failed.” Results will be presented 
+
+
+
+separately for these two different test types. Note also that the test name corresponds to year, 
+
+
+
+month, day (ex. 20160904 is September 9, 2016). 
+
+
+
+ 
+
+
+
+5.0 Description of the Model 
+
+
+
+Thermal Desktop is a multi-node, solid-fluid solver modeling tool that can provide 
+
+
+
+relatively high-fidelity solutions without the high computational cost of higher order models such 
+
+
+
+
+
+
+
+
+
+
+
+14 
+ 
+
+
+
+as CFD. CAD models can be imported and meshed to create a network of finite elements to 
+
+
+
+represent solid geometry [32]. TD interfaces with SpaceClaim where the CAD geometry 
+
+
+
+designed in another program can be simplified and then meshed when imported into TD’s 
+
+
+
+AutoCAD interface. The user has a significant amount of control over the mesh creation 
+
+
+
+(maximum number of nodes, allowable curvature, allowable scaling) both globally and at the 
+
+
+
+local level for individual surfaces or solids. For the CRYOTE-2 Receiver Tank, the default 
+
+
+
+values were used, because this is a relatively simple spherical geometry without small features or 
+
+
+
+sharp edges. The resulting mesh contained 530 solid nodes. 
+
+
+
+SINDA/FLUINT is the thermal/fluid solution engine used within Thermal Desktop. 
+
+
+
+SINDA solves the conduction and thermal capacitance of the thermal network in the model in 
+
+
+
+addition to outside heat loads or radiation [32]. Within SINDA, the network consists of nodes 
+
+
+
+and conductors. Energy is stored in the nodes and transferred via the conductors between nodes 
+
+
+
+to create the network. FLUINT solves the thermohydraulic network in the model, both fluid flow 
+
+
+
+through a network or accumulation in a tank [32]. The two solvers work simultaneous to 
+
+
+
+converge on a solution. Within FLUINT, the fluid network consists of fluid lumps and fluid 
+
+
+
+paths. In this model, two types of fluid lumps were used: tanks and plena. A tank is a lump 
+
+
+
+representing a finite control volume governed by differential equations of mass conversation and 
+
+
+
+energy conservation. In contrast a plenum is a lump with an infinite volume and represents a 
+
+
+
+boundary condition, in this case the inlet flow conditions into the receiver tank. Fluid paths are 
+
+
+
+governed by differential equations for momentum conservation and connect two fluid lumps. 
+
+
+
+Heat transfer between the fluid lumps and solid nodes is governed by a tie. 
+
+
+
+Only the CRYOTE-2 receiver tank was constructed in this Thermal Desktop model. The 
+
+
+
+tank wall and lid were modeled using finite elements with the material properties of stainless 
+
+
+
+
+
+
+
+
+
+
+
+15 
+ 
+
+
+
+steel (SS304) and Ti applied. The fluid inside the tank is represented using twin lumps, with a 
+
+
+
+single lump representing the vapor and liquid phases that are at the same pressure but different 
+
+
+
+temperatures. The quality of each lump is also tracked independently, meaning that the “vapor” 
+
+
+
+and “liquid” lump can either contain subcooled liquid, saturated liquid, two-phase fluid, 
+
+
+
+saturated vapor, or superheated vapor. Three different paths represent the inlet flow into the tank, 
+
+
+
+each representing one of the three nozzle injectors. 
+
+
+
+5.1 Compartments and Bays 
+
+
+
+Previous work on modeling tank chilldown has focused on a simple dip tube or bottom-
+
+
+
+fill injector. A compartment is used to represent the location of the internal volume that is 
+
+
+
+occupied by the fluid. The volume of the compartment does not change with time and is 
+
+
+
+occupied by twin lumps so that the volume of the two lumps combined at any point in time is 
+
+
+
+always equal to the internal volume of the tank. The compartment will also track the location of 
+
+
+
+the liquid-vapor interface as the tank drains or fills over time. In these models, a single inlet 
+
+
+
+flow path is directed to the bottom of the tank to represent a bottom-fill scenario. As liquid 
+
+
+
+begins to accumulate in the bottom of the tank during a fill, the flow is directed into the liquid 
+
+
+
+lump first and only enters the vapor lump through evaporation across the liquid-vapor interface. 
+
+
+
+All mass transfer across the interface is tracked by a separate flow path in TD. 
+
+
+
+Due to the different injection patterns of the 2016 injector from Figure 3, the tank wall 
+
+
+
+was sprayed unevenly and therefore chilled down at the different rates. This resulted in variation 
+
+
+
+in wall temperature at different tank wall heights at the start of fill. For example, as shown in 
+
+
+
+Figure 4 for Test 20160921, most of the flow was directed at the level of TC92 and TC93, and 
+
+
+
+these regions are significantly colder than the surrounding areas at the start of NVF. To represent 
+
+
+
+these different cooling rates, the compartment in the tank was split into various bays based on the 
+
+
+
+
+
+
+
+
+
+
+
+16 
+ 
+
+
+
+height of the respective thermocouple. With these different sections, the inlet flow path can be 
+
+
+
+split between the different tank heights to represent where more fluid is directly in contact with 
+
+
+
+the wall. This effectively separated the tank horizontally into different bays with fluid being able 
+
+
+
+to freely pass between them without a separate interface. The distribution of the flow for the 
+
+
+
+three different injector types is shown in Table 4. 
+
+
+
+ 
+
+
+
+Figure 4: Thermal Desktop Model at the Start of No-Vent Fill for Test 20160921 
+
+
+
+ 
+
+
+
+5.2 Inlet Flow Rate Control 
+
+
+
+Because of the lack of inlet flow rate data, two different methods were used to model 
+
+
+
+each test case. The first, hereafter referred to as “Mass Controlled,” fed the flow rate data backed 
+
+
+
+out from the load cells directly into the model as an input. This was the first method used but 
+
+
+
+resulted in overprediction of the initial pressure spike inside the receiver tank likely attributed to 
+
+
+
+a possible overprediction of wall boiling or an underprediction of condensation. In order to 
+
+
+
+attempt to combat this issue, the second method was developed. This second method, hereafter 
+
+
+
+
+
+
+
+
+
+
+
+17 
+ 
+
+
+
+referred to as “Pressure Controlled,” used the pressure difference between the inlet pressure and 
+
+
+
+tank pressure with the known coefficient of discharge to determine a flow rate using Equation 1. 
+
+
+
+Both of these methods result in different flow rates and therefore different pressure curves and 
+
+
+
+fill levels. Results for these two methods will be discussed subsequently. 
+
+
+
+Thermocouple Location 3-spray nozzle 
+
+
+
+TC73-89 33.3% 
+
+
+
+TC90-93 55.5% 
+
+
+
+TC94-96 11.2% 
+
+
+
+Table 4: Flow Distribution at Different Tank Heights for 2016 Tests 
+
+
+
+5.3 Wall Temperatures 
+
+
+
+The original test dataset used a mass-averaged temperature reading to represent the 
+
+
+
+overall wall outside wall temperature. However, the Thermal Desktop model calculates average 
+
+
+
+wall temperature by using the arithmetic average of all finite element nodes in the model, 
+
+
+
+meaning all nodes were summed (weighted equally) and divided by the total number of nodes to 
+
+
+
+get the average. Because all nodes are weighted equally, this arithmetic average gives a different 
+
+
+
+result than the mass-averaged temperature from the data. Even though there is generally good 
+
+
+
+agreement between these two metrics, the difference in methodology may explain some of the 
+
+
+
+error. 
+
+
+
+6.0 Results and Discussion 
+
+
+
+6.1 Successful Tests 
+
+
+
+Figure 5 plots Thermal Desktop model results for Test 20160921, a successful NVF at an 
+
+
+
+average starting wall temperature of 227K. Figures 5a-c plot results for tank pressure, fill level, 
+
+
+
+and average wall temperature for the mass- controlled method and Figures 5d-f plot those 
+
+
+
+
+
+
+
+
+
+
+
+18 
+ 
+
+
+
+variables for the Pressure Controlled method. The data shows the classic stages of NVF 
+
+
+
+described in [4], an initial pressure rise due to flash evaporation at the inlet and boiling at the 
+
+
+
+wall as the tank wall moves through the various transition points on the quenching boiling curve. 
+
+
+
+Soon after, the pressure exhibits the roll-over as condensation at the liquid-vapor (L/V) interface 
+
+
+
+overtakes boiling at the wall. The tank fills with liquid. The final stage is the “piston-cylinder” 
+
+
+
+stage where the ullage compresses, causing the receiver tank pressure to equilibrate with the 
+
+
+
+supply pressure. At this point, the receiver tank is >90% full. Figure 5b shows a near linear 
+
+
+
+increase in receiver tank fill level during NVF as liquid rapidly accumulates. Close inspection 
+
+
+
+shows a slightly steeper accumulation during the remainder of chilldown after the start of NVF 
+
+
+
+for the first ~300s followed by a final steeper accumulation during the final portion of transfer. 
+
+
+
+Meanwhile the average wall temperature in Figure 5c, dominated by film boiling, gradually pass 
+
+
+
+through film then transition then nucleate boiling before bottoming out. 
+
+
+
+ Figure 5a shows that Mass Controlled Thermal Desktop model predicts the initial 
+
+
+
+pressure rise well but then over-predicts the pressure spike likely attributed to overprediction of 
+
+
+
+boiling at the wall or underprediction of condensation as mentioned previously. The model-
+
+
+
+predicted pressure then sharply decreases and then remains fairly flat for the remainder of the 
+
+
+
+test. The final predicted pressure is ~33% higher than the data, despite predicting a successful 
+
+
+
+fill. Figure 5b shows the predicted fill level agrees well with the data despite deviation in the 
+
+
+
+predicted pressure; the slope change is captured well. Meanwhile, Figure 5c shows that the wall 
+
+
+
+chilldown rate is under-predicted relative to the data because of the leveling off in flow rate 
+
+
+
+
+
+
+
+
+
+
+
+19 
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 5: Test 20160921: a) Mass Controlled Pressure Rise, b) Mass Controlled Fill Level, 
+
+
+
+c) Mass Controlled Average Temperature, d) Pressure Controlled Pressure Rise, e) 
+
+
+
+Pressure Controlled Fill Level, and f) Pressure Controlled Average Temperature 
+
+
+
+25
+
+
+
+30
+
+
+
+35
+
+
+
+40
+
+
+
+45
+
+
+
+50
+
+
+
+0 500 1000 1500 2000
+
+
+
+Data
+Model
+
+
+
+P
+re
+
+
+
+ss
+u
+re
+
+
+
+ [
+p
+si
+
+
+
+a]
+
+
+
+Time [s]
+
+
+
+CRYOTE 2
+
+
+
+ Test 20160921
+
+
+
+Pressure Controlled
+
+
+
+d)
+
+
+
+
+
+
+
+
+
+
+
+20 
+ 
+
+
+
+ For the Pressure Controlled model in Figure 5d, Thermal Desktop again over-predicts the 
+
+
+
+pressure spike, but here, the peak is shifted to later in the test relative to Figure 5a. The final 
+
+
+
+pressure is again over-predicted by ~33%. Figure 5e shows the fill level is again slightly 
+
+
+
+overpredicted and Figure 5f shows the predicted wall chilldown rate is faster than the data. The 
+
+
+
+wall cools down faster for the Pressure Controlled model due to the higher flow rate at the 
+
+
+
+beginning of the simulation relative to the Mass Controlled. Overall, Thermal Desktop does a 
+
+
+
+reasonably good job at predicting fill level and wall temperature but struggles to predict the 
+
+
+
+pressure for this high delta-T NVF successful fill case. 
+
+
+
+ Figure 6 plots Thermal Desktop model predictions against the data for Test 20161006.1, 
+
+
+
+a successful NVF at a starting wall temperature of 165K. For Mass Controlled, the model 
+
+
+
+predicted pressure is again overpredicted and the pressure remains high for the duration of the 
+
+
+
+test, likely attributed to either overprediction of boiling at the wall or underprediction of 
+
+
+
+condensation at the wall;; the final pressure is off by ~40%. Fill level is again slightly 
+
+
+
+overpredicted but this time wall temperature cooling rate is overpredicted. Figures 6d-f show 
+
+
+
+slightly better prediction for the Pressure Controlled case; here the pressure spike and rollover 
+
+
+
+are predicted in the model, and the final pressure is only ~17% off from the data. The 
+
+
+
+overprediction in fill level is slightly worse for Pressure Controlled over Mass Controlled case. 
+
+
+
+Because the Pressure Controlled case’s flow rate is driven by the pressure differential between 
+
+
+
+the inlet and receiver tank, flow rate fluctuates significantly over the course of the test. 
+
+
+
+Particularly when the pressure difference is greatest near the start of the test, the flow rate 
+
+
+
+increases and there is a spike in the fill level. As the pressure evens out, the flow rate and 
+
+
+
+resultant fill level also taper off. This early increase in fill level also results in a faster chilldown 
+
+
+
+
+
+
+
+
+
+
+
+21 
+ 
+
+
+
+of the nodes at the bottom of the tank and faster decrease in average tank wall temperature as 
+
+
+
+compared to the Mass Controlled model. 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+28
+
+
+
+30
+
+
+
+32
+
+
+
+34
+
+
+
+36
+
+
+
+38
+
+
+
+40
+
+
+
+42
+
+
+
+44
+
+
+
+0 500 1000 1500 2000
+
+
+
+Data
+Model
+
+
+
+P
+re
+
+
+
+ss
+u
+
+
+
+re
+ [
+
+
+
+p
+si
+
+
+
+a]
+
+
+
+Time [s]
+
+
+
+CRYOTE 2
+
+
+
+ Test 20161006.1
+
+
+
+Pressure Controlled
+
+
+
+d)
+
+
+
+
+
+
+
+
+
+
+
+22 
+ 
+
+
+
+Figure 6: Test 20161006.1: a) Mass Controlled Pressure Rise, b) Mass Controlled Fill 
+
+
+
+Level, c) Mass Controlled Average Temperature, d) Pressure Controlled Pressure Rise, e) 
+
+
+
+Pressure Controlled Fill Level, and f) Pressure Controlled Average Temperature 
+
+
+
+6.2 Unsuccessful Tests 
+
+
+
+ Figure 7 plots Thermal Desktop model predictions against the data for Test 20161004, an 
+
+
+
+unsuccessful fill at an initial wall temperature of 193K. Figure 7a shows the model tracks the 
+
+
+
+pressure rise rate and stall with good accuracy. Figure 5b shows the Mass Controlled method 
+
+
+
+drastically underpredicts the fill level throughout the test, and Figure 5c shows the model 
+
+
+
+predicted chilldown rate is overpredicted initially for the first 100s, but then underpredicts the 
+
+
+
+chilldown slightly for the remainder of the failed fill. For Pressure Controlled, Figure 7d shows 
+
+
+
+the opposite trend; the pressure rise rate is underpredicted, but then agrees well with the data 
+
+
+
+after the first 200s. Figure 7e shows the model underpredicts the fill level again, but not as 
+
+
+
+drastically as in the Mass Controlled method. Finally, Figure 7f shows similar behavior as Figure 
+
+
+
+7c, but the underprediction of wall chilldown rate is higher for Pressure Controlled scheme. 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+23 
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 7: Test 20161004: a) Mass Controlled Pressure Rise, b) Mass Controlled Fill Level, 
+
+
+
+c) Mass Controlled Average Temperature, d) Pressure Controlled Pressure Rise, e) 
+
+
+
+Pressure Controlled Fill Level, and f) Pressure Controlled Average Temperature 
+
+
+
+ Figure 8 shows model predictions for Test 20161012 at a starting wall temperature of 
+
+
+
+173K. This test lasted less than a minute, and over that time both schemes show that the model 
+
+
+
+predicts the pressure rise rate and change in fill level well. The main discrepancy between data 
+
+
+
+and model is in the predicted wall temperature; both schemes overpredict the wall chilldown 
+
+
+
+rate, but then there is a crossover and eventual underprediction. Overall, Pressure Controlled 
+
+
+
+scheme performs better than the Mass Controlled scheme. 
+
+
+
+
+
+
+
+
+
+
+
+24 
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 8: Test 20161012: a) Mass Controlled Pressure Rise, b) Mass Controlled Fill Level, 
+
+
+
+c) Mass Controlled Average Temperature, d) Pressure Controlled Pressure Rise, e) 
+
+
+
+Pressure Controlled Fill Level, and f) Pressure Controlled Average Temperature 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+25 
+ 
+
+
+
+6.3 Consolidated Results and General Discussion 
+
+
+
+ To quantify error between data and model, a mean absolute error (MAE) value is 
+
+
+
+computed for pressure, fill level, and wall temperature data point time step and summed using 
+
+
+
+Equation 9: 
+
+
+
+data-model1
+MAE= 
+
+
+
+dataN
+ (9) 
+
+
+
+To convert to a mean absolute percentage error (MAPE), the MAE value was multiplied by 100. 
+
+
+
+MAPE results are shown in Table 5. Overall, pressure is predicted within 29% for all cases and 
+
+
+
+average wall temperature within 20% of the data for all 8 cases. Error is as high as 79% for fill 
+
+
+
+level. 
+
+
+
+There were several very apparent differences between the Mass and Pressure Controlled 
+
+
+
+results. The fill level from the model always matched within 5% from the data for the Mass 
+
+
+
+Controlled method for all cases. This agreement is expected because the load cell data is fed 
+
+
+
+directly into the model as an input. Any discrepancy between the two numbers is likely due to 
+
+
+
+slightly different physics e.g., more or less evaporation in the tank resulting in a lower or higher 
+
+
+
+mass. However, for the Pressure Controlled cases there were significantly higher MAPEs for the 
+
+
+
+fill level. This large discrepancy is due to the difference in inlet flow rate between the two 
+
+
+
+methods. However, for several cases the final fill level, and therefore the total mass injected into 
+
+
+
+the tank, was very similar to the Mass Controlled result. 
+
+
+
+Conversely, the opposite trend holds for comparing the pressure rise in the tank between 
+
+
+
+the two modeling methods although the trend is not as significant as the difference in fill levels. 
+
+
+
+The Mass Controlled method often resulted in lower MAPEs for the pressure than the Pressure 
+
+
+
+Controlled method. Again, this difference can be attributed to the different flow rates. The 
+
+
+
+
+
+
+
+
+
+
+
+26 
+ 
+
+
+
+Pressure Controlled method is directly tied to the reported pressure in the receiver tank, and 
+
+
+
+therefore gives better agreement with the test data. 
+
+
+
+Test Success 
+
+
+
+or 
+
+
+
+Fail? 
+
+
+
+Pressure 
+
+
+
+MAPE 
+
+
+
+(%) 
+
+
+
+Fill 
+
+
+
+Level 
+
+
+
+MAPE 
+
+
+
+(%) 
+
+
+
+Average 
+
+
+
+Wall 
+
+
+
+Temperature 
+
+
+
+MAPE (%) 
+
+
+
+20160921 S 17.1 9.6 12.1 
+
+
+
+20161005 S 19.2 2.4 20.1 
+
+
+
+20161006.1 S 25.0 7.0 11.0 
+
+
+
+20161006.2 S 25.0 7.0 11.0 
+
+
+
+20161004 F 0.9 5.6 3.7 
+
+
+
+20161006.3 F 3.3 1.8 2.0 
+
+
+
+20161007 F 27.8 1.6 6.6 
+
+
+
+20161012 F 1.6 0.5 1.9 
+
+
+
+ 
+
+
+
+Table 5: Resultant Mean Absolute Percentage Error for Pressure, Fill Level, and Average 
+
+
+
+Tank Wall Temperature using Mass Controlled Modeling Approach 
+
+
+
+There were also notable differences between the successful and failed tests. In looking at 
+
+
+
+the fill level and average temperatures, the failed tests often had lower MAPEs than the 
+
+
+
+successful tests. This is largely due to the decreased time of the failed tests, most of which were 
+
+
+
+under two minutes in length. For such a short duration, the fill level and average wall 
+
+
+
+temperature do not have time to vary significantly and so result in very small MAPEs. However, 
+
+
+
+
+
+
+
+
+
+
+
+27 
+ 
+
+
+
+for the pressure rise inside the tank there is not a significant difference between the successful 
+
+
+
+and failed tests. 
+
+
+
+Test Success 
+
+
+
+or 
+
+
+
+Fail? 
+
+
+
+Pressure 
+
+
+
+MAPE 
+
+
+
+(%) 
+
+
+
+Fill 
+
+
+
+Level 
+
+
+
+MAPE 
+
+
+
+(%) 
+
+
+
+Average 
+
+
+
+Wall 
+
+
+
+Temperature 
+
+
+
+MAPE (%) 
+
+
+
+20160921 S 21.2 10.4 5.9 
+
+
+
+20161005 S 10.5 60.8 9.6 
+
+
+
+20161006.1 S 16.3 78.7 4.6 
+
+
+
+20161006.2 S 8.3 78.7 4.6 
+
+
+
+20161004 F 2.7 4.6 9.2 
+
+
+
+20161006.3 F 2.8 1.8 2.0 
+
+
+
+20161007 F 28.7 1.6 12.3 
+
+
+
+20161012 F 21.2 10.4 5.9 
+
+
+
+ 
+
+
+
+Table 6: Resultant Mean Absolute Percentage Error for Pressure, Fill Level, and Average 
+
+
+
+Tank Wall Temperature using Pressure Controlled Modeling Approach 
+
+
+
+7.0 Conclusion 
+
+
+
+ This paper presented validation of a Thermal Desktop model against the 2016 CRYOTE-
+
+
+
+2 liquid nitrogen tank transfer experiments. This test series represents the most difficult model 
+
+
+
+validation case performed for Thermal Desktop to-date, due to the rapid transients and high 
+
+
+
+delta-T flow physics and heat transfer. Two modeling schemes were presented, one that 
+
+
+
+controlled the mass flow rate as the boundary condition, and one that relied on inlet pressure as 
+
+
+
+
+
+
+
+
+
+
+
+28 
+ 
+
+
+
+the boundary condition. Both schemes do a reasonable job at predicting pressure within 29% and 
+
+
+
+wall temperature within 21% of the data across the 8 test cases examined. the largest disparity 
+
+
+
+between the two methods is in predicting fill level, which is off by as much as 79% of the da. 
+
+
+
+Nonetheless, Thermal Desktop does a very reasonable job at predicting performance for this 
+
+
+
+difficult validation case and such high initial wall temperature NVFs and will continue to be a 
+
+
+
+useful tool for predicting various cryogenic fluid management phenomena. 
+
+
+
+ 
+
+
+
+Acknowledgements 
+
+
+
+This work was funded by the Reduced Gravity Cryogenic Transfer Project under the Cryogenic 
+
+
+
+Fluid Management Project under the Space Technology Mission Directorate at NASA. 
+
+
+
+ 
+
+
+
+[1] Chato, D.J., and Sanabria, R. “Review and Test of Chilldown Methods for Space-Based 
+
+
+
+Cryogenic Tanks” NASA-TM-104458 June, 1991. 
+
+
+
+[2] Keefer, K.A. and Hartwig, J.W. “Development and Validation of an Analytical Charge-Hold-
+
+
+
+Vent Model for Cryogenic Tank Chilldown” International Journal of Heat and Mass 
+
+
+
+Transfer 101, 175 – 189. 2016. 
+
+
+
+[3] Kartuzova, O. and Kassemi, M. “Modeling K-Site LH2 Tank Chilldown and No Vent Fill in 
+
+
+
+Normal Gravity” AIAA-2017-4662, 53rd AIAA Joint Propulsion Conference, Atlanta, GA, 
+
+
+
+July 10 – 12, 2017. 
+
+
+
+[4] Hartwig, J.W., Rhys, N., Clark, J., Mercado, M., LeClair, A., and Majumdar, A. “Test Data 
+
+
+
+Analysis of the Vented Chill, No-Vent Fill Liquid Nitrogen CRYOTE-2 Experiments” 
+
+
+
+International Journal of Heat and Mass Transfer 167, 120781. 2021. 
+
+
+
+
+
+
+
+
+
+
+
+29 
+ 
+
+
+
+[5] Hartwig, J.W., Mercado, M., and Moore, R. “Test Data Analysis of the Liquid Hydrogen 
+
+
+
+Chilldown and Fill Transfer Experiments of a Flightweight Aluminum Tank” 
+
+
+
+International Journal of Heat and Mass Transfer 202, 123766. 2023a. 
+
+
+
+[6] Hartwig, J.W., Stevens, J., Rhys, N. Clark, J., LeClair, A., and Majumdar, A. “Test Data 
+
+
+
+Analysis of the CRYOTE-2 TVS Augmented Top Spray Injector Liquid Nitrogen 
+
+
+
+Transfer Experiments” International Journal of Heat and Mass Transfer 194, 122986. 
+
+
+
+2022. 
+
+
+
+[7] Fester, D.A. and Page, G.R. “Liquid Fluorine No-Vent Loading Studies” AIAA-69-579 5th 
+
+
+
+Joint Propulsion Conference, Colorado, CO, June 9 – 13, 1969. 
+
+
+
+[8] Chato, D.J., Moran, M.E., and Nyland, T.W. “Initial Experimentation on the Nonvented Fill 
+
+
+
+of a 0.14 m3 (5 ft3) Dewar with Nitrogen and Hydrogen” NASA-TM-103155 June, 1990. 
+
+
+
+[9] Moran, M.E., Nyland, T.W., and Papell, S.S. “Liquid Transfer Cryogenic Test Facility – 
+
+
+
+Initial Hydrogen and Nitrogen No-Vent Fill Data” NASA-TM-102572 March, 1990. 
+
+
+
+[10] Moran, M.E., Nyland, T.W., and Driscoll, S.L. “Hydrogen No-Vent Fill Testing in a 1.2 
+
+
+
+Cubic Foot (34 Liter) Tank” NASA-TM-105273 October, 1991. 
+
+
+
+[11] Chato, D.J. “Ground Testing on the Nonvented Fill Method of Orbital Propellant Transfer: 
+
+
+
+Results of Initial Test Series” NASA-TM-91-2326 June, 1991. 
+
+
+
+[12] Moran, M.E. and Nyland, T.W. “Hydrogen No-Vent Fill Testing in a 5 Cubic Foot (142 
+
+
+
+Liter) Tank using Spray Nozzle and Spray Bar Liquid Injection” NASA-TM-105759 
+
+
+
+July, 1992. 
+
+
+
+[13] Chato, D.J. “Ground Testing for the No-Vent Fill of Cryogenic Tanks: Results of Tests for a 
+
+
+
+71 Cubic Foot Tank” NASA-TM-106293 June, 1993. 
+
+
+
+
+
+
+
+
+
+
+
+30 
+ 
+
+
+
+[14] Wang, C. and Wang, R. “The Effects of Vertical and Horizontal Placement on No-Vent Fill 
+
+
+
+of Cryogenic Insulated Vessels” Cryogenics 50, 480 – 485. 2010. 
+
+
+
+[15] Wang, C., Li, Y., and Wang, R. “Performance Comparison between No-Vent and Vented 
+
+
+
+Fills in Vertical Thermal-Insulated Cryogenic Cylinders” Experimental Thermal and 
+
+
+
+Fluid Sciences 35, 311 – 318. 2011. 
+
+
+
+[16] Kim, Y., Lee, C., Park, J., Seo, M., and Jeong, S. “Experimental Investigation on No-Vent 
+
+
+
+Fill Process using Tetrafluoromethane (CF4)” Cryogenics 74, 123 – 130. 2016. 
+
+
+
+[17] Flachbart, R.H., Hedayat, A., Holt, K., Sims, J., Johnson, E.F., Hastings, L.J., and Lak, T. 
+
+
+
+“Large-Scale Liquid Hydrogen Tank Rapid Chill and Fill Testing for the Advanced 
+
+
+
+Shuttle Upper Stage Concept” NASA-TP-2013-217482, April, 2013. 
+
+
+
+[18] Ganesan, V., Patel, R., Hartwig, J.W., and Mudawar, I. “Universal Critical Heat Flux (CHF) 
+
+
+
+Correlations for Cryogenic Flow Boiling in Uniformly Heated Tubes” International 
+
+
+
+Journal of Heat and Mass Transfer 166, 120678. 2021. 
+
+
+
+[19] Ganesan, V., Patel, R., Hartwig, J.W., and Mudawar, I. “Review of Databases and 
+
+
+
+Correlations for Saturated Flow Boiling Heat Transfer Coefficient for Cryogens in 
+
+
+
+Uniformly Heated Tubes, and Development of New Consolidated Database and 
+
+
+
+Universal Correlations” International Journal of Heat and Mass Transfer 179. 121656. 
+
+
+
+2021. 
+
+
+
+[20] Ganesan, V., Patel, R., Hartwig, J.W., and Mudawar, I. “Universal Correlations for Post-
+
+
+
+CHF Saturated and Superheated Flow Film Boiling Heat Transfer Coefficient, Minimum 
+
+
+
+Heat Flux and Rewet Temperature for Cryogenic Fluids in Uniformly Heated Tubes” 
+
+
+
+International Journal of Heat and Mass Transfer 195, 123054. 2022. 
+
+
+
+
+
+
+
+
+
+
+
+31 
+ 
+
+
+
+[21] Clark, J. and Hartwig, J.W. “Assessment of Prediction and Efficiency Parameters for 
+
+
+
+Cryogenic No-Vent Fill” Cryogenics 117, 103309. 2021. 
+
+
+
+[22] Majumdar, A., LeClair, A., Martin, A., Rhys, N., and Hartwig, J.W. “Numerical Modeling 
+
+
+
+of No Vent Fill of a Cryogenic Tank” AIAA-2020-3797, 2020 Joint Propulsion 
+
+
+
+Conference New Orleans, LA, August 24 – 26, 2020. 
+
+
+
+[23] Majumdar, A., LeClair, A., Hartwig, J.W., and Ghiaasiaan, M. “Numerical Modeling of No 
+
+
+
+Vent Filling of a Cryogenic Tank with Thermodynamic Vent System Augmented 
+
+
+
+Injector” Cryogenics 2022. 
+
+
+
+[24] Majumdar, A., LeClair, A., Hartwig, J.W., and Ghiaasiaan, M. “Numerical Modeling of No 
+
+
+
+Vent Filling of a Cryogenic Tank with Thermodynamic Vent System Augmented 
+
+
+
+Injector” Cryogenics 131, 103651. 2023. 
+
+
+
+[25] White, D. “FLUENT Conjugate Heat Transfer Simulations of K-Site LH2 Tank Chilldown” 
+
+
+
+RGCT-DOC-FY20-03, June 19, 2020. 
+
+
+
+[26] Hartwig, J.W., Esser, N., Jain, S., Souders, D., Tafuni, A., and Prasad-Varghese, A. “CFD 
+
+
+
+Modeling of a Bi-Directional Propellant Management Device inside a Cryogenic 
+
+
+
+Propellant Tank Onboard a Parabolic Flight” Journal of Spacecraft and Rockets 2023b. 
+
+
+
+[27] Gravlee, M., Kutter, B., Wollen, M., Rhys, N.O., and Walls, L.K. Nyland, T.W. “CRYOTE 
+
+
+
+(Cryogenic Orbital Testbed) Concept” AIAA-09-6440 September, 2009. 
+
+
+
+[28] BETE. (2019). “TF Full Cone” Retrieved October 31, 2019, from 
+
+
+
+https://www.bete.com/PDFs/BETE_TF.pdf 
+
+
+
+[29] Lemmon, E.W., Bell, I.H., Huber, M.L., McLinden, M.O. “NIST Standard Reference 
+
+
+
+Database 23: Reference Fluid Thermodynamic and Transport Properties-REFPROP, 
+
+
+
+
+
+
+
+
+
+
+
+32 
+ 
+
+
+
+Version 9.0” National Institute of Standards and Technology, Standard Reference Data 
+
+
+
+Program, Gaithersburg, 2010. 
+
+
+
+[30] Marquardt, E.D., Le, J.P., and Radebaugh, R. “Cryogenic Material Properties Database” 
+
+
+
+11th International Cryocooler Conference June, 2000. 
+
+
+
+[31] Titanium Metals Corporation. (1998). “Properties and Processing of TIMETAL 6-4” 
+
+
+
+Retrieved October 31, 2019, from 
+
+
+
+https://www.timet.com/assets/local/documents/technicalmanuals /TIMETAL_6-
+
+
+
+4_Properties.pdf. 
+
+
+
+[32] C&R Technologies. TD Suite Manual For Thermal Desktop, TD Direct, and 
+
+
+
+SINDA/FLUINT. Version 6.3, Thermal Desktop Patch 13, SINDA/FLUINT Patch 10, 
+
+
+
+2022.

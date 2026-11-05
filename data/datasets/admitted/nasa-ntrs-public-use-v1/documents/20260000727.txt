@@ -1,0 +1,252 @@
+Creating Composite Biosignatures from Multiple-Method Data: Elemental, Isotopic, Reflectance, and Raman
+
+
+
+Diana Gentry1, Abdullah Shahid2, Tao Sheng3, and Sunanda Sharma4
+
+
+
+1NASA Ames Research Center 2North Carolina State University
+3University of Pittsburgh 4Carnegie Institute of Science
+
+
+
+Introduction:A biosignature is a data feature that in-
+dicates past or present life. The Statistical Classification
+of Biosignature Information (SCOBI) project is the first
+attempt to algorithmically classify potential biosignatures
+across multiple types of data. This approach is more rep-
+resentative of data return from planetary exploration mis-
+sions, which typically carry suites of multiple instruments
+and can incorporate information from earlier missions and
+observations.
+
+
+
+Early work used a subset of ∼1200 measurements ei-
+ther indicative or non-indicative of life [1]. Current results
+use a improved data set of >4600measurements span-
+ning 22 systems, with particular improvements in aque-
+ous non-indicative samples (sterile ices) and environmen-
+tal materials containing both indicative and non-indicative
+material (mixed: snow, seawater, limestone). We sum-
+marize here the results of applying five classification al-
+gorithms, including supervised learning, to this multiple-
+method data set. The data set is described in more detail
+in [2], and the methods in [3].
+
+
+
+Table 1: Number of observations for each data type.
+Type Scope #
+
+
+
+E (elemental) 300 ppm 480
+I (isotopic) δ13C, δ18C, δ2H 1552
+R (Raman) 200–1800 cm−1 2201
+
+
+
+V (reflectance) 400–2100 nm 452
+sum 4685
+
+
+
+Methods: Indicative samples included both au-
+totrophic and heterotrophic bacteria, archaea, plant leaves,
+and biogenic limestones and kerogens. Non-indicative
+samples included meteorites, ices, and Mars regolith. The
+classifiers were k-nearest neighbors (KNN), logistic re-
+gression (LR), support vector machines (SVM), random
+forest (RF), Gaussian naı̈ve Bayes (GNB), and a “voting”
+sum of the prior five. Principal component analysis (PCA)
+and n− 1 tests provided added introspection into the rel-
+ative importance of each data type, sample, and feature.
+
+
+
+We acknowledge the limits of extrapolating from
+Earth life. Where possible, features were chosen to re-
+duce dependence on Earth-like biochemistry; where not
+possible, these features – such as the particular spectral
+properties of chlorophyll, which has evolved in coordina-
+tion with Earth’s surface insolation – were tagged to allow
+future investigation into how their inclusion or exclusion
+affects performance.
+
+
+
+Results and Conclusions:The complete data set, us-
+ing all four data types, resulted in ROC AUC = 0.78.
+Individually, reflectance spectroscopy had the highest
+AUC (0.78) and elemental abundance the lowest (0.69).
+
+
+
+Three data type subsets (E+V+R, I+V+R, V+R) outper-
+formed both the full set and the highest individual data
+type (V+R AUC = 0.81), demonstrating that while com-
+posite biosignature information can indeed improve on
+single-data-type classification, more data can also mean
+more opportunities to reinforce errors.
+
+
+
+The performance of the different algorithms was vari-
+able. RF yielded the highest overall performance, though
+KNN was higher for several data type combinations and
+the voting classifier was more consistent. SVM was gen-
+erally the least accurate.
+
+
+
+In n − 1 tests, Mg abundance had the biggest pos-
+itive impact on AUC (+0.02), followed by Fe and P
+(+AUC > 0.01). Raman mean intensity, Raman mean
+peak width, N, and H had negative impact > 0.01 AUC.
+(The confounding effect of H likely reflects that it is of-
+ten not reported in the source data, especially for mineral
+samples.) The lower apparent performance of elemental
+abundance as an overall data type likely reflects this pres-
+ence of both high- and low-value features, and indicates
+that subsetting the data would likely significantly increase
+performance. More advanced feature extraction methods
+for reflectance and Raman data would likely further im-
+prove these data types’ performance as well.
+
+
+
+Carbonatite (non-indicative) and microbial mats (in-
+dicative) were frequent outliers, with carbonatite being
+misclassified in a majority of cases. When all indicative
+samples were further subclassed as alive, non-alive, or
+mixed, classification was generally less accurate for mixed
+sample types – an important caveat, as these most closely
+resemble potential planetary samples.
+
+
+
+KNN
+GNB
+
+
+
+LR+L2
+RF
+
+
+
+SVM-PC
+Voter
+
+
+
+R
+I+
+
+
+
+R
+E
+
+
+
++IE
+E
+
+
+
++I
++V
+
+
+
+E
++I
+
+
+
++R
+E
+
+
+
++Ral
+lI
+
+
+
+E
++V
+
+
+
++RE
++VI+
+
+
+
+V
+V
+
+
+
++R
+I+
+
+
+
+V
++R
+
+
+
+V
+
+
+
+0.5
+
+
+
+0.6
+
+
+
+0.7
+
+
+
+0.8
+
+
+
+0.9
+
+
+
+1
+AUC by data type combination
+
+
+
+Figure 1: AUC for data type combinations.
+
+
+
+Future Work: The SCOBI data set will be released
+through the Open Data Repository. These initial results
+strongly justify further investigation, including with neu-
+ral networks and other deep learning tools.
+
+
+
+References:
+[1] Gentry D, et al. 2024 Astrobiology Science Confer-
+
+
+
+ence, #202–05. 2024
+[2] Sharma S, et al. 2026. (this conf.)
+[3] Shahid A, et al. 2026. (this conf.)

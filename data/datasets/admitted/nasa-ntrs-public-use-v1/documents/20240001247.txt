@@ -1,0 +1,327 @@
+National Aeronautics and 
+Space Administration
+
+
+
+Purpose
+1. Examine common heart rate pre-
+
+
+
+processing and analysis pipelines
+2. Develop an R package to address 
+
+
+
+gaps found
+3. Compare the new R pipeline to the 
+
+
+
+pipelines identified in step 1
+
+
+
+Motivation
+Heart rate data is often used in lab 
+studies to gain insight into various 
+physical and psychological health, sleep, 
+and team science outcomes (e.g., 
+autonomic arousal as indicated by the 
+ratio of high and low frequency, an 
+indicator of stress). Using it longitudinally 
+in spaceflight could allow crews to 
+monitor themselves more autonomously 
+but, like other biological signals, using 
+heart rate data poses challenges. 
+Managing and using this big data source 
+has been neglected due to its complexity 
+and has resulted in stagnated heart rate 
+related science and missed opportunities 
+to optimize its usage. The purpose of this 
+project is to develop and validate a data 
+processing pipeline that reads, 
+preprocesses, analyzes and tidies ECG 
+data collected in spaceflight analog 
+studies.
+
+
+
+Method
+1. Conduct literature review (n = 167)
+2. Summarize and try common 
+
+
+
+processing pipelines
+3. Try to develop a pipeline using 
+
+
+
+existing libraries
+4. Make a new library to address 
+
+
+
+identied gaps
+5. Preliminary validation
+
+
+
+Workflow: Read in data > Filter, clean and interpolate > Metric generation and visualization
+Features: Automatable + Batch apply + File-type agnostic + No black box + Flexible
+
+
+
+HeaRRt: Development Of A New R Library 
+for Processing Analog ECG Data
+Cara A. Spencer1, Alaa M. Khader1, Sheena I. Dev2, and Suzanne T. Bell3
+
+
+
+1JES Tech, 2KBR Inc., 3NASA Johnson Space Center, Houston, TX
+
+
+
+Acknowledgments. This project was funded by a NASA Human Research Program Human Factors and Behavioral Performance Element directed task: HFBP-EM in HERA (Suzanne Bell, PI). KBR Inc. and JES Tech authors were supported by KBR’s Human 
+Health and Performance Contract NNJ15HK11B with NASA. *Disclaimer of Endorsement. Neither the U.S. Government nor NASA endorse or recommend any commercial products, processes, or services. Reference to or appearance of any specific 
+commercial products, processes, or services by trade name, trademark, manufacturer, or otherwise, does not constitute or imply its endorsement, recommendation, or favoring by the U.S. Government or NASA. The views and opinions of authors do not 
+necessarily state or reflect those of JESTech, KBR, the U.S. Government or NASA, and they may not be used for advertising or product endorsement purposes of endorsement by NASA.
+
+
+
+Common Software
+Commercial: 
+• Kubios*
+• BioPac*
+Open Source:
+• PhysioNet
+
+
+
+• HRV Toolkit
+• HeartPy + SciPy
+• rHRV
+• ARTi-iFACT
+
+
+
+Common Pipeline Structure
+• Read in signal & segment (if 
+
+
+
+needed)
+• Remove noise (outliers, 
+
+
+
+artifacts, baseline drift)
+• Extract R-R intervals
+• Generate heart beats
+• Interpolate missing or 
+
+
+
+removed beats (if needed)
+• Generate metrics of interest
+
+
+
+Summary: 
+Kubios is a frequently used research tool 
+but has a heavy manual processing 
+requirement. There are difficulties 
+handling Big Data and the output is not 
+easily parsed. The MatLab packages are 
+more cardiology-centric, some difficult to 
+use, and do not always provide the 
+behavioral health related metrics. 
+HeartPy and rHRV would be ideal but 
+both are missing what the others provide. 
+
+
+
+HeaRRt: New R package for Heart Rate Research
+A comprehensive R package with capabilities from HeartPy & compatibility with rHRV
+
+
+
+The State of the Art
+
+
+
+Preliminary Validation
+Data from MD5 ROBoT run during HERA C5 and C6 (n=29)
+
+
+
+Data Comparison Error Comparison
+
+
+
+Performance Comparison (n= 10)
+
+
+
+Conclusion
+HeaRRt is a package capable of 
+providing the essential steps in a 
+heart rate processing pipeline for 
+research. Preliminary results show 
+little to small differences in the data 
+comparison, a more conservative beat 
+removal algorithm, and better speed. 
+Results are comparable to gold 
+standard research tools. With 
+continued refining, the HeaRRt + 
+rHRV pipeline can be a useful, valid 
+and robust alternative to the current 
+tools. Future work includes adding 
+additional features (filters, logging for 
+reproducibility, etc.), and further 
+validation. 
+
+
+
+Please contact the first author for 
+notification when the package is 
+released.
+
+
+
+23
+
+
+
+71
+
+
+
+112
+
+
+
+134
+
+
+
+179
+
+
+
+27
+
+
+
+40
+
+
+
+65
+
+
+
+80
+
+
+
+165
+
+
+
+0
+
+
+
+20
+
+
+
+40
+
+
+
+60
+
+
+
+80
+
+
+
+100
+
+
+
+120
+
+
+
+140
+
+
+
+160
+
+
+
+180
+
+
+
+200
+
+
+
+0:30 5:00 7:00 12:00 16:00
+
+
+
+Ru
+n 
+
+
+
+Ti
+m
+
+
+
+e 
+(s
+
+
+
+ec
+on
+
+
+
+ds
+)
+
+
+
+Length of Signal (hh:mm)
+
+
+
+Pipeline Processing Time
+
+
+
+Kubios heaRRt
+
+
+
+Metric P-value of the difference
+Avg HR 0.765832
+RMSSD 0.645453
+LF/HF 0.99947
+
+
+
+Pipeline % Avg Beats Removed
+Kubios* 12
+HeaRRt 15

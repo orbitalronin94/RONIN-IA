@@ -1,0 +1,766 @@
+SIAM Conference on Computational Science and Engineering 2023, Amsterdam, the Netherlands 
+Minisymposium #92: Models and Software for Multiscale Computational Chemistry
+
+
+
+Chemical Thermodynamics and the 
+Mathematical Integration of Reaction 
+Kinetics
+Ayoub Gouasmi, Oak Ridge Associated Universities 
+Scott Murman, NASA Ames Research Center
+
+
+
+
+
+
+
+
+
+
+
+Outline
+
+
+
+I. Background
+
+II. Chemical Thermodynamics
+
+III. Discrete Nonlinear Stability
+
+IV. Implicit Thermodynamics 
+
+
+
+2
+
+
+
+
+
+
+
+
+
+
+
+I. Background
+
+
+
+3
+
+
+
+
+
+
+
+
+
+
+
+High-Temperature Hypersonics
+• Prediction of heating loads (convective and 
+
+
+
+radiative) during entry physics, to provide 
+thermal protection system design
+
+
+
+
+• Ignoring chemistry leads to over-predicted 
+temperature
+
+
+
+
+• Numerics challenges: Shock capturing, 
+Boundary conditions, Stiffness/Convergence 
+associated with multi physics operating at 
+different scales
+
+
+
+
+• Modeling challenges: internal energy 
+representation, thermo-chemical non-
+equilibrium, multicomponent transport, 
+radiation => Data-driven efforts.
+
+
+
+4
+
+
+
+
+
+
+
+
+
+
+
+Angle of Attack: Entropy-Stable Schemes
+• Entropy-Stable (ES) schemes (Tadmor 
+
+
+
+1987) have gathered considerable attention 
+of the last decade
+
+• Enforce conservation/production of 
+
+
+
+entropy at discrete level (2nd principle)
+
+• Considerably improved the robustness of 
+
+
+
+high-resolution schemes (Fisher & 
+Carpenter 2013, Diosady & Murman 2015)
+
+
+
+
+• Amount of entropy produced is known 
+explicitly 
+
+
+
+• NASA CFD Vision 2030 Study: “Longer term, 
+high-risk research should focus on the 
+development of truly enabling technologies such 
+as monotone or entropy-stable schemes.”
+
+
+
+5
+
+
+
+
+
+
+
+
+
+
+
+Towards multi-physics applications
+
+
+
+• Extended the formulation 
+of ES schemes to 
+multicomponent flows 
+(Gouasmi et al. 2020)
+
+
+
+
+• Entropy-Conservative 
+and Entropy-Stable 
+numerical flux functions
+
+
+
+
+• Shock-bubble 
+interaction (Qualitative 
+comparisons - Karni & 
+Quirk 1996) 
+
+
+
+6
+
+
+
+Density gradients (Air-Helium bubble)
+
+
+
+
+
+
+
+
+
+
+
+Towards multi-physics applications 
+
+
+
+• Proved a minimum entropy principle (Tadmor 1987, Gouasmi et al. 2020) for the 
+multicomponent system:
+
+
+
+• Nice follow-up work by Ching et al. 2022 : minimum entropy principle applies to 
+the reacting system (without transport) as well + positivity-preserving & entropy-
+stable high-order discretization
+
+
+
+• ES schemes typically enforce nonlinear stability at the global level
+
+
+
+
+• Local nonlinear stability calls for local prescriptions on solution behavior
+
+
+
+7
+
+
+
+
+
+
+
+
+
+
+
+The present talk
+
+
+
+• Focus on chemical reaction source term
+
+
+
+
+• What do chemical thermodynamics have 
+to offer ?
+
+
+
+
+• Discuss preliminary discrete nonlinear 
+analysis work on constant-temperature 
+ODE systems.
+
+
+
+
+• 5-species, 17-reaction air kinetic model 
+adapted form Park 
+
+
+
+8
+
+
+
+
+
+
+
+
+
+
+
+II. Chemical Thermodynamics
+
+
+
+9
+
+
+
+
+
+
+
+
+
+
+
+Classical Thermodynamics
+• Evolution of systems in equilibrium through (reversible) 
+
+
+
+exchanges of matter and energy 
+
+• Systems can be open, closed, isolated. Equilibrium 
+
+
+
+can be mechanical, thermal, chemical.
+
+• Systems can be described by macroscopic state 
+
+
+
+variables (p, V, T, N_k …)
+
+• 1st law: Energy
+
+• 2nd law (closed systems): Entropy
+
+
+
+• Thermally perfect gas - Gibbs’ theorem:
+
+
+
+10
+
+
+
+
+
+
+
+
+
+
+
+Nonequilibrium Thermodynamics
+• Belgian school (Prigogine et al. 1950s) : Classical Thermodynamics 
+
+
+
+concepts can be applied to systems out of equilibrium:
+
+
+
+
+• 2nd law applies to open systems as well
+
+
+
+• Catch: formula. For chemical nonequilibrium (Gibbs - Law of Mass Action)dSi
+
+
+
+11
+
+
+
+
+
+
+
+
+
+
+
+Dynamical Prescriptions 
+• The constraints of the system of interest determine which thermodynamic 
+
+
+
+function is monotone (Zemansky 1957)
+
+• Constant energy -> Entropy increases.
+
+• Constant pressure -> Gibbs Free Energy decreases.
+
+• Constant temperature -> Helmholtz Free Energy decreases
+
+
+
+• Standard Mass Action Kinetics are consistent with these predictions (Krambeck 1970) 
+
+
+
+12
+
+
+
+
+
+
+
+
+
+
+
+Illustration
+• Free Energy is the guiding compass for constant temperature systems.
+
+
+
+13
+
+
+
+Entropy time evolution for different ICs
+
+
+
+Helmholtz Free Energy time evolution for different ICs
+
+
+
+
+
+
+
+
+
+
+
+II. Discrete Nonlinear Stability
+
+
+
+14
+
+
+
+
+
+
+
+
+
+
+
+Time-Integration
+
+
+
+• Diagonally Implicit Runge Kutta 
+schemes popular (Kennedy & 
+Carpenter 2017/2019) 
+
+
+
+• Challenging because of stiffness 
+& stability issues
+
+• Long-time research on high-
+
+
+
+order implicit schemes
+
+
+
+• ODE system:
+
+
+
+15
+
+
+
+Molar fractions over time (characteristic units)
+
+
+
+
+
+
+
+
+
+
+
+Time-Integration
+• Discontinuous Galerkin scheme in time. Time slab I := [tn, tn+1]
+
+
+
+• Nonlinearly-stable variant (Barth 1999): Discretize the chemical potential functions
+
+
+
+16
+
+
+
+
+
+
+
+
+
+
+
+ES time-integration enables larger tΔ
+
+
+
+• DIRK schemes (Crouzeix 
+1977) 
+
+
+
+• ES-DIRK-SA schemes of 
+(Kennedy & Carpenter 
+2019) 
+
+
+
+• X-DG : DG in time 
+discretizing the molar 
+concentrations
+
+
+
+
+• -DG : DG in time 
+discretizing the chemical 
+potentials 
+
+
+
+μ
+
+
+
+17 Temporal order of accuracy
+
+
+
+Maximum resolved step - 1000 Newton Iterations − tol = 10−15
+
+
+
+
+
+
+
+
+
+
+
+Model Breakdown
+• Thermodynamic contributions from distinct reactions can be readily tracked
+
+
+
+18
+
+
+
+Model contributions to free energy decay over time
+
+
+
+
+
+
+
+
+
+
+
+Model vs Discrete Breakdown
+• We can readily track respective contributions from physics and numerics (Tadmor 2002)
+
+
+
+19
+
+
+
+Discrete PhysicsTotal
+
+
+
+Free energy temporal evolution
+
+
+
+Larger time step → Discrete contribution grows
+
+
+
+broken down into model and discrete parts
+
+
+
+
+
+
+
+
+
+
+
+IV. Implicit Thermodynamics
+
+
+
+20
+
+
+
+
+
+
+
+
+
+
+
+Implicit Thermodynamics
+• Nonlinear stability proofs assume forward and backward 
+
+
+
+rates related through an equilibrium constant which 
+satisfies the law of Mass Action.
+
+• Limiting condition for more advanced chemistry 
+
+
+
+problems (high-temperature hypersonics with thermal 
+non-equilibrium, radiation ...) 
+
+
+
+• Engineering practice (data-driven / empirical / reduced 
+models) begs a two-fold inverse problem
+
+
+
+
+1. Does a data-driven thermo-chemical relaxation 
+model inherently defines its own thermodynamics ?
+
+
+
+
+2. Would such “implicit thermodynamics” be 
+compatible with the flow equations themselves ?
+
+
+
+21
+
+
+
+
+
+
+
+
+
+
+
+Implicit Thermodynamics
+• YES (under certain conditions - Gouasmi & Murman 2023)
+
+• All numerical results actually obtained with curve-fit models
+
+
+
+• Implicit Entropy exists and does form a convex extension (Compressible Flow)
+
+
+
+• Implicit Free Energy (Generalized to arbitrary chemical systems) :
+
+
+
+22
+
+
+
+
+
+
+
+
+
+
+
+Summary
+• Computational physics grows with our ability to: 
+
+• numerically enforce physical prescriptions within algorithms
+
+• grasp the physics inherent to the models we use, be they theoretical or data-
+
+
+
+driven
+
+• Time-integration schemes for thermo-chemical relaxation processes can greatly 
+
+
+
+benefit from enforcing thermodynamics (F, G, S) discretely.
+
+• We argue that reverse-engineering the maths is possible
+
+• relaxation model -> “thermodynamics” 
+
+
+
+
+• This line of work heavily builds on classical thermodynamics notions, which are 
+inherently limited (Prigogine & Defay 1954). 
+
+• Follow-up work building from broader microscopic/statistical stance. 
+
+
+
+23
+
+
+
+
+
+
+
+
+
+
+
+Acknowledgments & References
+• NASA Postdoctoral Program (NPP) fellowship sponsored by 
+
+
+
+Universities Space Research Association (2020-2022) and Oak Ridge 
+Associated Universities (2022 - present).
+
+
+
+
+• NASA Space Technology Mission Directorate (STMD) through the 
+Entry Systems Modeling (ESM) project. 
+
+
+
+
+• Frederick Krambeck and Dave Levermore for helpful comments and 
+references.
+
+
+
+• References:
+
+• Gouasmi, A., and Murman, S.M. : Chemical Thermodynamics and 
+
+
+
+the Mathematical Integration of Reaction Kinetics, under review, 
+2023. 
+
+
+
+• Vincenti, W.G., and Kruger, C.H. : Introduction to Physical Gas 
+Dynamics, Second Edition, Wiley, 1965.
+
+
+
+24

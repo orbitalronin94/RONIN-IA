@@ -1,0 +1,1640 @@
+1
+
+
+
+Challenges of Vehicle Attitude Control Prior to and During On-Orbit 
+
+
+
+Propellant Transfer
+
+
+
+Jing Pei, Aerospace Engineer, Atmospheric Flight and Entry Systems Branch, NASA Langley 
+
+
+
+Research Center
+
+
+
+Dr. William Elke, Aerospace Engineer, Dynamic Systems & Control Branch, NASA Langley Research 
+
+
+
+Center
+
+
+
+October 26th, 2023
+
+
+
+ACGSC Meeting 131, Session B.2
+
+
+
+
+
+
+
+
+
+
+
+2
+
+
+
+Introduction
+
+
+
+• On-orbit refueling essential as 
+
+
+
+demand for increased payload 
+
+
+
+capability beyond LEO grows
+
+
+
+• Small scaled propellant transfer 
+
+
+
+had been demonstrated in the 
+
+
+
+past
+
+
+
+SpaceX Spine-Spine 
+
+
+
+Configuration
+
+
+
+Ref: Wikipedia
+
+
+
+ΔV map
+
+
+
+Credit: Tony Bela
+
+
+
+Blue Origin CONOPS
+
+
+
+Ref: Wikipedia
+
+
+
+
+
+
+
+
+
+
+
+3
+
+
+
+GN&C Challenges (and what we’ll focus on today)
+
+
+
+• Rendezvous and Proximity Operations
+
+
+
+– Navigation sensors/filters
+
+
+
+• Docking Dynamics
+
+
+
+– Low-g slosh dynamics
+
+
+
+– Docking mechanism
+
+
+
+• Docked Configuration
+
+
+
+– Attitude dynamics and control
+
+
+
+– Settling
+
+
+
+
+
+
+
+
+
+
+
+4
+
+
+
+Docking Dynamics:
+
+
+
+Low-g Slosh Dynamics
+
+
+
+
+
+
+
+
+
+
+
+5
+
+
+
+Introduction
+
+
+
+SpaceX Spine-Spine 
+
+
+
+Configuration
+
+
+
+Credit: Tony Bela
+
+
+
+Bottom Line: We want fast and accurate 
+modeling of the forces imparted on the 
+
+
+
+spacecraft by the gross motion of the liquid.
+
+
+
+Spacecraft 
+motion 
+variables
+
+
+
+Spacecraft Attitude 
+Dynamics
+
+
+
+Low-g Slosh 
+Dynamics
+
+
+
+Slosh 
+forces
+
+
+
+Large amplitude liquid 
+
+
+
+sloshing in a high-g 
+
+
+
+environment
+
+
+
+Pendulum analog for liquid 
+
+
+
+sloshing
+
+
+
+Credit: SP-106
+
+
+
+Not as straightforward for low-g slosh!
+
+
+
+How do we model 
+
+
+
+low-g slosh 
+
+
+
+dynamics?
+
+
+
+Precise attitude control 
+
+
+
+during docking phase for 
+
+
+
+safe and successful contact
+
+
+
+HLS docking with Orion
+
+
+
+
+
+
+
+
+
+
+
+6
+
+
+
+Computational Fluid Dynamics
+
+
+
+Some capabilities of CFD for Low-g 
+slosh applications
+
+
+
+– Accurate free surface computations
+
+
+
+– Flow out of/into tank
+
+
+
+– Body forces due to slosh*
+
+
+
+– Thermodynamics (heat transfer, boil off)
+
+
+
+– Precise computation of liquid motion due to 
+settling sequences
+
+
+
+Drawbacks & limitations of CFD for 
+GNC applications
+
+
+
+– DOF > 1 million
+
+
+
+– Significant computational burden
+
+
+
+– Mesh tuning, sensitivity studies, etc.
+
+
+
+– *Typically, no coupling between dynamics. 
+Possible, but expensive
+
+
+
+– Requires CFD expert (also expensive)
+
+
+
+CFD sim
+
+
+
+GNC 6 DOF sim
+
+
+
+𝜃
+
+
+
+Slosh disturbance 
+forces and moments*
+
+
+
+Liquid motion, wetted 
+wall area, fluid-ullage 
+
+
+
+interface area, etc.
+
+
+
+Translational accelerations 
+and angular velocities
+
+
+
+
+
+
+
+
+
+
+
+7
+
+
+
+Approximate Mechanical Models for Low-g Slosh
+
+
+
+Second-Order 
+Oscillators
+
+
+
+Sliding Particle Contained Particle Pulsating Sphere
+
+
+
+Fidelity
+
+
+
+Simplicity
+
+
+
+Pulsating 
+Sphere
+
+
+
+There is not a one-size-fits-all solution to low-g slosh. Each of 
+these methods have had success in their respective applications.
+
+
+
+
+
+
+
+
+
+
+
+8
+
+
+
+Modeling
+
+
+
+• Liquid modeled as a lumped point mass 
+translating within an ellipsoidal constraint 
+surface
+
+
+
+– Two particles, one particle per constraint surface
+
+
+
+– Particles have infinitesimal volume
+
+
+
+– (6 RB spacecraft DOF) + 2×(3 point-mass DOF) = 
+12 DOF
+
+
+
+– Assumptions:
+• Liquid remains cohesive
+
+
+
+• Cylindrical tank with hemispherical end caps
+
+
+
+• Bare tank (i.e., no baffles)
+
+
+
+• Features include:
+
+
+
+– Wall interaction dynamics
+
+
+
+– Variable-size constraint surface as a function of 
+
+
+
+fill ratio
+
+
+
+• Increasing volume decreases range of motion of 
+
+
+
+point masses
+
+
+
+Rigid-body 
+spacecraft
+
+
+
+Particle
+
+
+
+Ellipsoidal 
+constraint surface
+
+
+
+Example of Apollo service module modeled with the particle model
+
+
+
+
+
+
+
+
+
+
+
+9
+
+
+
+Apollo Era Heritage
+
+
+
+Residual propellant + RCS thruster profile 
+= anomalous retrograde motion [1].
+
+
+
+Conclusion from Ref. [2] using a contained particle model.
+
+
+
+Particle model was used to replicate anomalous motion, and then to confirm that the 
+corrected thruster profile would eliminate the possibility of retrograde motion [1,2].
+
+
+
+[1] “MSC-03466, Apollo 11 Mission Anomaly Report No. 3, Service Module 
+Entry,” NASA Apollo 11 Technical Crew Briefing, vol. 2, Nov. 1970.
+[2] Merchant, Gates, and Murray, “Prediction of Apollo Service Module Motion 
+after Jettison,” Journal of Spacecraft and Rockets, vol. 8, pp. 587-592, 1971.
+
+
+
+
+
+
+
+
+
+
+
+10
+
+
+
+Simulation Logic Flowchart
+
+
+
+Nomenclature:
+Both off = Both particles are away from their constraint surface
+1 on, 1 off = Either particle is on its constraint surface, and the 
+
+
+
+other one is away from its
+Both on = Both particles are on their constraint surface
+
+
+
+
+
+
+
+
+
+
+
+11
+
+
+
+Integrating the Slosh Model into Docking Simulations
+
+
+
+Fuel Slosh 
+Simulation
+
+
+
+Forces & 
+Moments
+
+
+
+Spacecraft 
+States
+
+
+
+Pilot
+
+
+
+Blackbox Spacecraft 
+Simulation
+
+
+
+Stick Inputs
+Visual, Aural, & 
+
+
+
+Motion Cues
+
+
+
+Simulator Cockpit
+
+
+
+Manual controls
+
+
+
+Automatic controls
+
+
+
+Slosh model
+
+
+
+Credit: Ogata 2004
+
+
+
+
+
+
+
+
+
+
+
+12
+
+
+
+Docked Configuration: Dynamics, Control, and 
+
+
+
+Settling
+
+
+
+
+
+
+
+
+
+
+
+13
+
+
+
+Attitude Dynamics
+
+
+
+• Vehicles have identical mass properties when empty
+
+
+
+• Combined empty stack configuration behaves as a 
+
+
+
+single rigid body (MB, IB/B*)
+
+
+
+• Fuel mass inside the pipes are considered small and 
+
+
+
+ignored
+
+
+
+• No fuel leakage or boiloff (total propellant mass in 
+
+
+
+the system is conserved)
+
+
+
+• Fuel considered incompressible and constrained
+
+
+
+– Liquid assumed to occupy a cylindrical volume with 
+
+
+
+varying height
+
+
+
+• Two tanks considered for simplicity
+
+
+
+Supply S/C
+
+
+
+Vehicle 1
+Receiving S/C
+
+
+
+Vehicle 2
+
+
+
+Direction of propellant travel
+
+
+
+Ref: Pei, J. and Roithmayr C., “Attitude Control of On-Orbit Refueling 
+
+
+
+Configurations”. AAS Conference. August 2022
+
+
+
+
+
+
+
+
+
+
+
+14
+
+
+
+Attitude Dynamics
+
+
+
+Final expression for angular momentum about the system mass center, S*:
+
+
+
+Control + 
+
+
+
+Disturbance Torque
+
+
+
+Euler’s Eq. with variable inertia 
+
+
+
+Terms accounting for moving mass
+
+
+
+Terms omitted in previous 
+
+
+
+literature (accounting for 
+
+
+
+moving mass effects)
+
+
+
+Angular momentum principle:
+
+
+
+Complete description of the attitude dynamics during propellant transfer:
+
+
+
+Where:
+
+
+
+
+
+
+
+
+
+
+
+15
+
+
+
+Prescribed Motion Analysis: Spine-Spine Configuration
+
+
+
+Supply S/C
+
+
+
+Vehicle 1
+
+
+
+Receiving S/C
+
+
+
+Vehicle 2
+
+
+
+S*(to)
+
+
+
+S*(tf)
+
+
+
+P
+o
+
+
+
+s
+it
+io
+
+
+
+n
+ b
+
+
+
+1
+, 
+
+
+
+m
+P
+
+
+
+o
+s
+it
+io
+
+
+
+n
+ b
+
+
+
+2
+, 
+
+
+
+m
+
+
+
+Time, sec
+
+
+
+• Goal: Estimate the 
+
+
+
+contributions of each terms 
+
+
+
+in the full attitude equation
+
+
+
+• Assumption: Sun pointing 
+
+
+
+attitude (b1 axis aligned 
+
+
+
+with Sun vector for prop 
+
+
+
+boiloff minimization)
+
+
+
+B*: dry system mass center
+
+
+
+S*: System mass center
+
+
+
+Ci*: Mass center of ith tank
+
+
+
+
+
+
+
+
+
+
+
+16
+
+
+
+Prescribed Motion Analysis: Spine-Spine Configuration
+
+
+
+Components of [ ሶ𝑰]S/S* 
+
+
+
+k
+g
+
+
+
+-m
+2
+/s
+
+
+
+k
+g
+
+
+
+-m
+2
+/s
+
+
+
+k
+g
+
+
+
+-m
+2
+/s
+
+
+
+Time, sec Time, sec Time, sec
+
+
+
+[ ሶ𝐼]S/S*(1,1) [ ሶ𝐼]S/S*(1,1) [ ሶ𝐼]S/S*(1,3)
+
+
+
+[ ሶ𝐼]S/S*(2,3)
+
+
+
+[ ሶ𝐼]S/S*(3,3)[ ሶ𝐼]S/S*(3,2)
+
+
+
+[ ሶ𝐼]S/S*(2,2)[ ሶ𝐼]S/S*(2,1)
+
+
+
+[ ሶ𝐼]S/S*(3,1)
+
+
+
+M
+ b
+
+
+
+2
+, 
+
+
+
+N
+-m
+
+
+
+M
+ b
+
+
+
+2
+, 
+
+
+
+N
+-m
+
+
+
+M
+ b
+
+
+
+3
+, 
+
+
+
+N
+-m
+
+
+
+Gravity Gradient 
+
+
+
+Torque dominates 
+
+
+
+Time, sec
+
+
+
+
+
+
+
+
+
+
+
+17
+
+
+
+Prescribed Motion Analysis: Tail-to-Tail Results
+
+
+
+Prop transferred from vehicle 1 to vehicle 2
+
+
+
+Supply S/C
+
+
+
+Vehicle 1
+
+
+
+Receiving S/C
+
+
+
+Vehicle 2
+
+
+
+S*(tf)S*(to)
+
+
+
+P
+o
+
+
+
+s
+it
+io
+
+
+
+n
+, 
+m
+
+
+
+Time, sec
+
+
+
+~11 m shift S* 
+
+
+
+along b1
+
+
+
+
+
+
+
+
+
+
+
+18
+
+
+
+Prescribed Motion Analysis: Tail-to-Tail Results
+
+
+
+Gravity Gradient 
+
+
+
+Torque dominates 
+
+
+
+Components of [ ሶ𝑰]S/S* 
+
+
+
+Time, sec
+
+
+
+M
+ b
+
+
+
+3
+, 
+
+
+
+N
+-m
+
+
+
+M
+ b
+
+
+
+1
+, 
+
+
+
+N
+-m
+
+
+
+M
+ b
+
+
+
+2
+, 
+
+
+
+N
+-m
+
+
+
+k
+g
+
+
+
+-m
+2
+/s
+
+
+
+k
+g
+
+
+
+-m
+2
+/s
+
+
+
+k
+g
+
+
+
+-m
+2
+/s
+
+
+
+Time, sec Time, sec Time, sec
+
+
+
+[ ሶ𝐼]S/S*(1,1)
+
+
+
+[ ሶ𝐼]S/S*(2,2)
+
+
+
+[ ሶ𝐼]S/S*(3,3)
+
+
+
+[ ሶ𝐼]S/S*(1,2) [ ሶ𝐼]S/S*(1,3)
+
+
+
+[ ሶ𝐼]S/S*(2,3)[ ሶ𝐼]S/S*(2,1)
+
+
+
+[ ሶ𝐼]S/S*(3,1) [ ሶ𝐼]S/S*(3,2)
+
+
+
+
+
+
+
+
+
+
+
+19
+
+
+
+Docked Control
+
+
+
+• Flying the tank using 6-DoF LEO trajectory inputs
+
+
+
+• No settling thrust
+
+
+
+• Control inputs applied to maintain constant vehicle 
+
+
+
+orientation (Sun pointing)
+
+
+
+Key Observations:
+
+
+
+• Baffles can keep the fluid aft somewhat, 
+
+
+
+but can introduce some unexpected effects
+
+
+
+• Tendency is for fluid to wet as much of the 
+
+
+
+wall as possible and to rotate around the 
+
+
+
+tank long axis
+• Not ideal for transfer 
+
+
+
+• Significant more boiloff
+
+
+
+• Detrimental for vehicle control
+
+
+
+• Use of tangential thrusters tends to unsettle 
+
+
+
+the propellant
+
+
+
+Credit: John Mishic, GRC
+
+
+
+Generic tank configuration
+
+
+
+Possible Solution: use axial thrusters for 
+
+
+
+simultaneous settling and vehicle control 
+
+
+
+
+
+
+
+
+
+
+
+20
+
+
+
+Settling and Vapor Pull Through (VPT)
+
+
+
+• under zero-g only the relatively weak 
+
+
+
+surface tension forces remain to 
+
+
+
+prevent the liquid from being 
+
+
+
+removed in a central force
+
+
+
+• If unmitigated, significant amount of 
+
+
+
+residual propellant before gas is 
+
+
+
+ingested (VPT)
+
+
+
+Critical fill level, switch from 
+
+
+
+high rate to low rate. 
+
+
+
+“flatten” out the free surface 
+
+
+
+and minimize losses
+
+
+
+F
+lo
+
+
+
+w
+ r
+
+
+
+a
+te
+
+
+
+Time
+
+
+
+High Flow 
+
+
+
+Phase
+
+
+
+Low Flow Phase 
+
+
+
+(We < Wecrit)
+
+
+
+Objective: Minimize the sum of the 
+
+
+
+residual propellant and RCS propellant 
+
+
+
+usage for settling and control
+• High settling acceleration → less VPT residual 
+
+
+
+but more RCS gas used 
+
+
+
+• Low transfer massflow rate → less VPT residual 
+but more RCS gas used (longer transfer time)
+
+
+
+Tuning knobs: Flow rates, switching, 
+
+
+
+acceleration profile
+
+
+
+Highly coupled, multi-
+
+
+
+objective design problem with 
+
+
+
+impacts to other subsystems
+
+
+
+Ref: NASA SP-106
+Ref: Dodge 2000
+
+
+
+Ullage Gas
+
+
+
+Propellant
+
+
+
+
+
+
+
+
+
+
+
+21
+
+
+
+Conclusion
+
+
+
+• On-orbit refueling is essential for reusability and sustained human 
+
+
+
+exploration of the solar system
+
+
+
+• Multi-facet problem with many GN&C challenges that contributes to 
+
+
+
+advancing the state-of-the-art
+
+
+
+
+
+
+
+
+
+
+
+Extra Slides
+
+
+
+
+
+
+
+
+
+
+
+Ellipsoidal Constraint Surface
+
+
+
+30% fill ratio 50% fill ratio 80% fill ratio
+
+
+
+1 g
+
+
+
+𝐶 𝑥, 𝑦, 𝑧 =
+𝑥2
+
+
+
+𝑎2
++
+
+
+
+𝑦2 + 𝑧2
+
+
+
+𝑏2
+− 1 = 0
+
+
+
+𝑎
+
+
+
+𝑏
+
+
+
+[4] Z. Zhou, H. Huang, (2015).
+[5] R.L. Berry, J.R. Tegart, (1975).
+[6] P.G. Good et al., (1998).
+
+
+
+• ↑ fill ratio ⇒ ↓ range of motion
+• Use an ellipsoid that is a function of 
+
+
+
+tank geometry and fill ratio [4-6].
+
+
+
+Tank Constraint 
+surface
+
+
+
+Constraint 
+surface

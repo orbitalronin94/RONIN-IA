@@ -1,0 +1,548 @@
+Making NASA GES DISC Level 2 Data GIS Analysis Ready 
+
+
+
+
+
+Proxy Service
+
+
+
+
+
+Peisheng Zhao1,2, Eugene Yu1,2, David Meyer1 
+
+
+Introduction
+
+
+1NASA Goddard Earth Sciences Data & Information Services Center (GES DISC), 2Center for Spatial Information Science and Systems, George Mason University, 3ADNET System Inc., 
+
+
+Building Mosaic Datasets
+
+
+Service Clients
+
+
+There are many valuable data hosted by NASA Goddard Earth Sciences Data and Information Services Center (GES DISC) for GIS applications in the areas of extreme weather events, climatic anomaly, and public health. However, using NASA Earth Science Data poses some challenges for GIS users. Many of these users are not experts in Earth Observation and have little knowledge about NASA's Earth science data. In the GIS community, GeoTiff is the most widely used raster format, whereas NASA's data is primarily in complex multidimensional netCDF and HDF formats. This complexity makes it difficult for GIS users, especially those who are unfamiliar with these formats. Although GIS software like ArcGIS has made progress in processing multidimensional netCDF data, certain issues still remain, particularly with level 2 data. In this study, we use TROPSpheric Monitoring instrument (TROPOMI) level 2 data as an example to demonstrate how to make such data GIS analysis ready.
+
+
+
+
+
+
+
+
+The proxy service is designed to break a supposedly single point service for a huge data store into spatiotemporally and variable-based multi-level hierarchical services at the backend and create one or a few proxy services at the frontend for users to access. Proxy services will dispatch user requests to the appropriate backend services based on the user’s request criteria. Such a service architecture not only avoids the need to convert and duplicate the huge archival data but also provides a much more flexible service framework for achieving optimal service performance and scalability.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Reprojection – from geographic to polar
+
+
+
+
+
+Building Mosaic Datasets for GPM Data 
+
+
+A mosaic dataset is designed to use geodatabase to manage a collection of raster datasets. It is stored as a catalog with advanced querying capabilities and viewed as a mosaicked image with processing functions. 
+
+
+The netCDF data collected over time can be used to add data to a mosaic dataset directly. In addition to common properties of a mosaic dataset, a netCDF mosaic dataset stores multidimensional information in the footprint table:
+
+
+Variable – The variable name
+
+
+Dimension – The dimension name used for mosaicing
+
+
+Service Performance
+
+
+AGU/23
+
+
+IN43C-
+
+
+0637
+
+
+Clients
+
+
+ ArcGIS Pro
+
+
+ ArcGIS Portal/Online
+
+
+ OGC Client
+
+
+ArcGIS Image Service for NASA netCDF-based EOS Data
+
+
+ArcGIS Enterprise
+
+
+Data Archive
+
+
+Data Archive
+
+
+Data Archive
+
+
+Data Archive
+
+
+EOS Data
+
+
+EOS Data
+
+
+EOS Data
+
+
+EOS Data
+
+
+OPeNDAP Service
+
+
+Geoprocessing Workflow 
+
+
+Create Mosaic Dataset
+
+
+Add Rasters to Mosaic Dataset
+
+
+Calculate and Set Statistic
+
+
+Build Pyramid
+
+
+ ArcGIS Image Service
+
+
+ OGC WMS
+
+
+ OGC WCS
+
+
+Proxy Services
+
+
+ Time Filter
+
+
+ Variable Filter
+
+
+ArcGIS Enterprise
+
+
+ ArcGIS Image Service
+
+
+ OGC WMS
+
+
+ OGC WCS
+
+
+ArcGIS Enterprise
+
+
+ ArcGIS Image Service
+
+
+ OGC WMS
+
+
+ OGC WCS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Build a shapefile as a spatial-temporal index
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+Dataset:
+ 
+GPM IMERG Early Precipitation L3
+ 
+Format:
+ 
+netCDF
+
+
+
+ 
+Spatial Coverage:
+ 
+-180.0,-90.0,180.0,90.0
+ 
+Spatial:
+ 
+0.1 ° x 0.1 °
+
+
+
+ 
+Temporal Coverage:
+ 
+2000-05-31 to current
+ 
+Temporal:
+ 
+Half-Hourly
+
+
+
+
+ArcGIS Portal for GPM Data
+
+
+
+
+
+
+
+
+Retrieving GPM Data from ArcGIS Image Service in ArcGIS Pro 
+
+
+Proxy Service for GPM and MERRA2 Datasets
+
+
+ 
+
+
+
+
+
+z
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Proxy Service
+
+
+
+
+
+Service for GPM Precipitation in 2000
+
+
+ GPM 2000 Mosaic Dataset 
+
+
+...............
+
+
+GPM Precipitation Service
+
+
+...............
+
+
+MERRA2 Service
+
+
+Service for GPM Precipitation in 2001
+
+
+ GPM 2001 Mosaic Dataset 
+
+
+Service for GPM Precipitation in 2002
+
+
+ GPM 2002 Mosaic Dataset 
+
+
+Service for GPM Precipitation in 2018
+
+
+ GPM 2018 Mosaic Dataset 
+
+
+Service for GPM Precipitation in 2019
+
+
+ GPM 2019 Mosaic Dataset 
+
+
+Service for GPM Precipitation in 2020
+
+
+ GPM 2020 Mosaic Dataset 
+
+
+Service for MERRA2 Ice Covered Fraction
+
+
+ Iced Covered Mosaic Dataset 
+
+
+Service for MERRA2 Surface Pressure
+
+
+ Surface Pressure Mosaic Dataset 
+
+
+Service for MERRA2 Air Density
+
+
+ Air Density Mosaic Dataset 
+
+
+Service for MERRA2 Surface Roughness
+
+
+ Surface Roughness Mosaic Dataset 
+
+
+Service for MERRA2 Surface Soil Wetness
+
+
+ Soil Wetness Mosaic Dataset 
+
+
+Service for MERRA2 Soil Temperature
+
+
+ Soil Temperature Mosaic Dataset 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Create daily mosaic Datasets
+
+
+
+
+
+
+
+
+Input: 48 half-hourly data files in nc4
+
+
+
+
+
+
+
+
+Create monthly mosaic Datasets
+
+
+
+
+
+
+
+
+Input: daily mosaic datasets
+
+
+
+
+
+
+
+
+Create yearly mosaic Datasets
+
+
+
+
+
+
+
+
+Input: monthly mosaic datasets
+
+
+
+
+
+
+
+
+Create mosaic Datasets for all
+
+
+
+
+
+
+
+
+Input: yearly mosaic datasets
+
+
+
+
+
+
+
+
+Response Time of ArcGIS Image Service for GPM Data
+
+
+
+
+Image Service 
+
+
+WMS GetMap WMS GetMap Repeat Request Export Image Export Image Repeat Request ArcGIS Pro 8.3000000000000007 7.7 7.8 7.6 8.8000000000000007 Image Service with Proxy 
+
+
+WMS GetMap WMS GetMap Repeat Request Export Image Export Image Repeat Request ArcGIS Pro 3.8 4 3.7 3.4 3.9 
+
+
+
+Response Time (Second)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+image4.png
+
+
+
+
+
+image5.tiff
+
+
+
+
+
+image1.png
+
+
+
+
+
+image2.png
+
+
+
+
+
+image3.tiff

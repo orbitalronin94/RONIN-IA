@@ -1,0 +1,265 @@
+National Aeronautics and Space Administration
+
+
+
+www.nasa.gov 
+
+
+
+NASA Systems Software 
+Management and Integration
+ECP Inter-Agency Council Workshop
+
+
+
+October 3, 2023
+
+
+
+Bob Ciotti
+CTO NASA Advanced Supercomputing Division
+NASA Ames Research Center
+
+
+
+
+
+
+
+
+
+
+
+CI/CD - As applied to systems software?
+
+
+
+• Keyword here is Automation for the “trigger”s
+• What tools and why
+• How much automation
+• Where is improvement needed
+
+
+
+
+
+
+
+
+
+
+
+Systems Build and Image Management
+Kernel Updates
+• Policy Driven – 30 Days
+• Feature Add/Bug Fix
+• 4 Release Streams
+
+
+
+• 6 different build results
+• Deployed to 20k’ish systems
+
+
+
+Notes
+• 30 max -> 5 days min
+
+
+
+• Expedited Critical
+
+
+
+• 0 day exploits –> TOSS
+• SRPM ahead of distro
+
+
+
+• 2 versions MOFED
+• GPU dependent
+
+
+
+• Test
+• Do what's possible
+
+
+
+ (limited)
+• User based input Test? 
+
+
+
+ 30-> 60 days
+
+
+
+• Change Management
+• Configuration Change Board
+
+
+
+• Progress? Yes
+• But, … Big Changes needed!
+
+
+
+
+
+
+
+
+
+
+
+Changes Needed
+Stateless Images -> most systems (e.g. no local configuration)
+
+
+
+• Many systems require the image to be pushed out
+» System Down, HW issue, SW config problem (e.g. ssh config)
+
+
+
+• Access to external repo’s from inside 
+• Repeat pulls into local system (e.g. rpm update) different systems for the same update
+
+
+
+» Find the one that didn’t work out of the 200 that did
+
+
+
+Leverage Containers -> many ‘infrastructure’ systems can use
+
+
+
+Improved Automation
+• We clearly have some ‘Automation’
+• Critical Staff – still arcane and fragile
+• Push button ease? 
+
+
+
+Will require substantial development to improve metrics:
+• Reduce downtime/user impact
+• Towards 100% compliance (no misses)
+• Decoupling of test and deployment
+• Faster *and* Reduced effort
+
+
+
+
+
+
+
+
+
+
+
+Software outside of the “Operating System”
+SW installed on the system – most typically installed in ‘modules’ (not base)
+
+
+
+• Agency Guidance (executive order(s) re: IT supply chain)
+» All ‘procured’ software requires “IT Supply Chain approval”.
+» Process is beyond NASA
+
+
+
+• Two Important Assertions
+» Any software installed on the system has been ‘procured’
+
+
+
+Whether it cost money or not - doesn’t matter
+» Standard of Care
+
+
+
+Software installed/accessible on government system
+held to a higher standard (than that of users)
+
+
+
+• What to do? 
+» NIST guidance
+» Auditing
+
+
+
+“'Free software' is a matter of liberty, not price.” Richard Stallman 
+
+
+
+
+
+
+
+
+
+
+
+Software outside of the “Operating System”
+How much? (mostly accessible in modules)?
+
+
+
+cdo/1.9.0 ncl/6.4.0 nco/4.6.7 ncview/2.1.7 octave/4.2.1
+
+
+
+comp-aocc/3.2.0 hdf5/1.12.2_nvidia_serial netcdf/4.4.1.1_mpt scicon/app-tools 
+comp-intel/2016.2.181 idl/8.8 netcdf/4.4.1.1_serial scicon/app-tools-1.2 vtune/2019
+comp-intel/2018.3.222 jvm/jdk10 netdrms/9.3.1 scicon/app-tools-1.2.1 visit/3.1.4 
+comp-intel/2019.5.281 mathematica/12.1.0 nvhpc-nompi/22.3 scicon/aws_cli_tools x2go/stable vtune/2021.9
+comp-intel/2020.0.166 matlab/2021a nvhpc-nompi/23.5 scicon/cli_tools xxdiff/5.1
+
+
+
+comp-intel/2020.4.304 matlab/2022b nvhpc/22.3 scicon/lumber paraview/5.4.1
+cuda/11.0 metis/5.1.0 nvhpc/23.5 scicon/mpiprof
+dakota/6.15 mpi-hpe/mpt nvhpc/openmpi-3.1.5 scicon/mpiprof-gcc
+deprecated/mpi-hpcx-mt/2.10 mpi-hpe/mpt.2.23 nvhpc/openmpi-4.0.5 singularity/3.10.2
+fieldview/22.0 mpi-hpe/mpt.2.25 paraview/5.9.1 singularity/3.11.0
+
+
+
+firefox/latest mpi-hpe/mpt.2.26 paraview/5.11.1 szip/2.1.1
+grads/2.1.1.b0 mpi-hpe/mpt.2.28_25Apr23_rhel87 parmetis/3.1.1 tecplot/2021r2
+hdf4/4.2.12 nas parmetis/4.0.3 tecplot/2022r1
+hdf5/1.8.18_mpt ncl/6.3.0 petsc/3.14.5_intel_mpt totalview/2017.0.12
+hdf5/1.8.18_serial ncview/2.1.9 petsc/3.17.3_intel_mpt_py visit/3.0.0
+
+
+
+boost/1.78 gcc/6.5 gcc/7.5 gcc/8.4 gcc/9.3
+gcc/10.3 octave/6.4 pkgsrc/2022Q1-rome python3/3.9.12
+
+
+
+Pkgsrc alone
+» Order 1000+ executables
+» Order 2000+ libraries
+
+
+
+E4S?
+• Good stuff in there
+• Can I trust DOE?
+
+
+
+Containers
+• Encouraged – only via singularity
+• But security concerns over squashfs broke singularity containers for several months
+• Podman in review – not there yet
+• Not always workable for parallel codes with specific requirements (e.g. MPI)
+
+
+
+Software environments will continue to dramatically 
+increase in diversity and complexity.

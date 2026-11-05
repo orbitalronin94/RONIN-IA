@@ -1,0 +1,1728 @@
+Dynamic Assurance Cases: 
+Closing the Loop between Design 
+
+
+
+and Operational Assurance
+
+
+
+Ewen Denney, Jonathan Menzies, Ganesh Pai
+
+
+
+KBR / NASA Ames Research Center
+
+
+
+Software Certification Consortium, Meeting 21
+
+
+
+May 11, 2023. Annapolis, MD
+
+
+
+
+
+
+
+
+
+
+
+Assurance Methodology
+
+
+
+• Focus of earlier work
+
+
+
+⁃ Development of
+
+
+
+‣ Safety architectures
+
+
+
+‣ Arguments
+
+
+
+‣ Runtime risk assessment
+
+
+
+• Current work
+
+
+
+⁃ Safety performance 
+indicators
+
+
+
+⁃ Assurance case 
+update
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 2
+
+
+
+
+
+
+
+
+
+
+
+Static vs Dynamic Assurance
+
+
+
+• Traditional assurance cases are static
+
+
+
+⁃ Design time assurance
+
+
+
+⁃ Establish a level of confidence to approve a 
+
+
+
+system for service
+
+
+
+⁃ Arguments should not be frequently updated
+
+
+
+‣ Argument update after operation → Argument was 
+
+
+
+invalid to begin
+
+
+
+• Dynamic assurance
+
+
+
+⁃ Confirmation in operation that safety / 
+
+
+
+assurance baseline is maintained (or improved)
+
+
+
+⁃ Need a computable notion of assurance
+
+
+
+‣ Safety Architectures
+
+
+
+• (Compositions of) event-chain / barrier models connected to 
+
+
+
+safety targets a.k.a. target level of safety (TLOS)
+
+
+
+• Dynamic Assurance
+
+
+
+‣ Safety Architectures
+
+
+
+• Model for risk assessment
+
+
+
+⁃ The goal is insight, not numbers
+
+
+
+• Linking design to operations
+
+
+
+‣ Runtime risk assessment models
+
+
+
+‣ Safety performance metrics and indicators
+
+
+
+• Relate to event and barrier risk levels
+
+
+
+• Relate to other assurance artifacts
+
+
+
+⁃ Need to define what is updated, when, and how 
+
+
+
+frequently
+
+
+
+‣ During missions (inner loop)
+
+
+
+‣ Between missions (outer loop)
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 3
+
+
+
+
+
+
+
+
+
+
+
+Dynamic Assurance Case Concept
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 4
+
+
+
+Safety and Assurance 
+
+
+
+Requirements
+
+
+
+Other V&V
+
+
+
+HW/SW/ML verification
+
+
+
+SW/HW/Mixed Simulation
+
+
+
+External assurance 
+
+
+
+artifacts 
+
+
+
+Multi-viewpoint, multi-artifact, model-based 
+
+
+
+Plans (Dev, Test, Cert, Ops)
+
+
+
+Hazard Analysis 
+
+
+
+(PHA, FHA)
+
+
+
+Evidence 
+
+
+
+Model
+
+
+
+Assurance Rationale 
+
+
+
+(Structured Arguments)
+
+
+
+Argument 
+
+
+
+Patterns
+
+
+
+Safety Architecture
+
+
+
+(Barrier Models)
+
+
+
+Core Assurance Artifacts internal to AdvoCATE
+
+
+
+Functional/Physical Organization
+
+
+
+System Description
+
+
+
+Traceability Matrices
+
+
+
+Queries, Views
+
+
+
+Operational configurations
+
+
+
+Trade Trees
+
+
+
+Dashboard Analytics
+
+
+
+Supporting Artifacts for Assurance
+
+
+
+Runtime Risk 
+
+
+
+Assessment
+
+
+
+Design Artifacts
+
+
+
+Safety Performance 
+
+
+
+Measures/Metrics
+
+
+
+Operational Data
+
+
+
+Static 
+
+
+
+Element
+
+
+
+Dynamic 
+
+
+
+Element
+
+
+
+
+
+
+
+
+
+
+
+Linking Assurance Cases to Safety Processes
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 5
+
+
+
+Safety Assessment 
+
+
+
+Process (ARP 4761 A)
+
+
+
+Assurance Case 
+
+
+
+Elements
+Hazard Log Safety and Assurance Requirements
+
+
+
+Safety Architecture
+Safety Verification 
+
+
+
+Evidence Items
+
+
+
+Structured Argument
+
+
+
+TLOS
+
+
+
+Function-level 
+
+
+
+Design Safety Target
+
+
+
+Safety Performance
+
+
+
+Measures / Metrics 
+
+
+
+/ Indicators
+
+
+
+System/Subsystem/Item 
+
+
+
+level Design Safety Targets
+
+
+
+Assurance levels
+
+
+
+
+
+
+
+
+
+
+
+Dynamic Assurance and Update Concept
+
+
+
+• System – Assurance 
+Case Interface
+
+
+
+⁃ Measure and modulate 
+safety performance in 
+operation
+
+
+
+⁃ Ensure system stays within 
+approved risk baseline 
+
+
+
+⁃ Operational verification of 
+established safety 
+performance targets 
+
+
+
+⁃ Triggers for 
+runtime/dynamic 
+assurance and 
+corresponding updates
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 6
+
+
+
+
+
+
+
+
+
+
+
+Motivating Example – Autonomous Taxiing
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 7
+
+
+
+• TaxiNet System
+
+
+
+⁃ Autonomy Pipeline
+
+
+
+‣ Wing mounted camera 
+
+
+
+‣ Deep convolutional neural network for perception
+
+
+
+• Provides estimate of cross-track error and heading 
+error from camera images
+
+
+
+‣ Controller to actuate/steer aircraft 
+
+
+
+⁃ Safety
+
+
+
+‣ Avoid lateral runway excursion
+
+
+
+• Do not exceed allowed lateral offset
+
+
+
+⁃ Performance
+
+
+
+‣ Do not stop too often
+
+
+
+‣ Follow centerline within allowed lateral offset for 
+duration of taxiing
+
+
+
+
+
+
+
+
+
+
+
+Runtime Risk Assessment
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 8
+
+
+
+• Trained in clear and overcast 
+weather conditions
+⁃ LEC follows centerline
+
+
+
+• Anomaly: 
+⁃ Runway intersection without 
+
+
+
+centerline 
+
+
+
+• Assurance visualization
+⁃ Forecast of uncertainty (confidence) 
+
+
+
+in true CTE
+
+
+
+⁃ Pr(Offset Violation) 
+
+
+
+⁃ Input anomaly detection
+
+
+
+⁃ Contingency action
+
+
+
+
+
+
+
+
+
+
+
+Runtime Risk Assessment
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 9
+
+
+
+• Trained in clear and overcast 
+conditions
+
+
+
+• Anomalies: 
+⁃ LEC veering off centerline
+
+
+
+⁃ Obscured centerline
+
+
+
+⁃ Shadows
+
+
+
+• Assurance visualization
+⁃ Forecast of uncertainty (confidence) 
+
+
+
+in true CTE
+
+
+
+⁃ Pr(Offset Violation) 
+
+
+
+⁃ Input anomaly detection
+
+
+
+⁃ Contingency action
+
+
+
+
+
+
+
+
+
+
+
+Evidence Model
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 10
+
+
+
+
+
+
+
+
+
+
+
+Metamodel
+
+
+
+• Measures: Directly observable parameters of the system or environment
+
+
+
+• Metrics: Computed value based on measures and other metrics
+
+
+
+• Indicator: Target value that a metric reaches in a given duration
+
+
+
+⁃ Safety performance indicators
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 11
+
+
+
+Indicator
+
+
+
+Duration MetricThreshold
+
+
+
+Measure Expression
+
+
+
+Assurance 
+
+
+
+Artifact
+
+
+
+Argument 
+
+
+
+Node
+Evidence Requirement
+
+
+
+Claim Assumption
+
+
+
+1 ..*
+
+
+
+1 ..*
+
+
+
+
+
+
+
+
+
+
+
+Operational Safety Management System
+
+
+
+• Safety Management System 
+
+
+
+⁃ The formal, top-down, organization-wide approach to managing safety risk and 
+assuring the effectiveness of safety risk controls. It includes systematic procedures, 
+practices, and policies for the management of safety risk. (FAA Order 8000.369)
+
+
+
+• Operational SMS 
+
+
+
+⁃ Collection of indicators, each of which is associated with an assurance artifact
+
+
+
+⁃ Complies with structure of dynamic evidence model
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 12
+
+
+
+
+
+
+
+
+
+
+
+Defining Metrics
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 13
+
+
+
+#(Short landings per 10K landings)
+
+
+
+#((Flares where 6-DOF 
+
+
+
+parameters are outside required 
+
+
+
+ranges) per 10K landings)
+
+
+
+#(Nav. State Estimation failure 
+
+
+
+conditions per 10s intervals 
+
+
+
+over descent duration)
+
+
+
+#(Approach on final where 
+
+
+
+(altitude < required altitude) or 
+
+
+
+(sink rate < required sink rate)
+
+
+
+#(Altitude violations from top 
+
+
+
+of descent till entry on final in 
+
+
+
+10s intervals)
+
+
+
+
+
+
+
+
+
+
+
+Defining Metrics
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 14
+
+
+
+Localization accuracy: Deviation 
+
+
+
+between estimated 6-DOF and IRS 
+
+
+
+based 6-DOF < Threshold
+
+
+
+Mean average precision over 6-DOF 
+
+
+
+estimates over 10s intervals
+
+
+
+Mean average precision for 
+
+
+
+6-DOF estimates over 10s 
+
+
+
+intervals from flight tests
+
+
+
+Mean average 
+
+
+
+precision for 6-DOF 
+
+
+
+estimates over 10s 
+
+
+
+intervals from 
+
+
+
+simulation
+
+
+
+Intersection-over-Union Value for 
+
+
+
+bounding box estimates over 10s 
+
+
+
+intervals for test data
+
+
+
+
+
+
+
+
+
+
+
+Implementation in AdvoCATE
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 15
+
+
+
+Example metrics for autonomous taxiing example
+Assurance Artifact
+
+
+
+Metrics Visualization, connected to Simulations
+
+
+
+
+
+
+
+
+
+
+
+Implementation in AdvoCATE – Metrics Visualization
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 16
+
+
+
+
+
+
+
+
+
+
+
+Dynamic Argument Update
+
+
+
+• Linking arguments and argument 
+
+
+
+update to 
+
+
+
+⁃ Assurance measures
+
+
+
+⁃ Dynamic metrics
+
+
+
+• Deciding what to monitor and update
+
+
+
+⁃ Operational claims (and evidence) vs. 
+
+
+
+Design-time claims and evidence
+
+
+
+⁃ Reflected in assurance architecture as 
+
+
+
+events, escalations, and mitigations
+
+
+
+• Conditional evidence specification on 
+
+
+
+solution nodes using DSL
+
+
+
+⁃ e.g., monitored signal received for last 3 
+
+
+
+time steps
+‣ %x% != null for 3
+
+
+
+⁃ e.g., AUV control LEC inputs for current 
+
+
+
+time step are out of distribution
+
+
+
+‣ State of random variable in anomaly detection 
+
+
+
+component of assurance measure < threshold
+
+
+
+%non_conf% < 20
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 17
+
+
+
+
+
+
+
+
+
+
+
+Dynamic Argument Update
+
+
+
+• Confidence visualization
+
+
+
+⁃ Stoplight node coloring
+
+
+
+‣ Red: Very Low / No confidence
+
+
+
+‣ Green: Very High / Full confidence
+
+
+
+‣ Orange: Uncertain
+
+
+
+• Confidence propagation as color 
+
+
+
+propagation rules 
+
+
+
+⁃ Apply node coloring to conditional evidence 
+
+
+
+based on monitored data
+
+
+
+⁃ Parent node color based on conditional 
+
+
+
+evidence, and argument structure
+
+
+
+• Simple propagation rules
+
+
+
+⁃ AND structure: Goal → Strategy → (Sub-goals)
+
+
+
+‣ Parent goal is green only if all child goals are green 
+
+
+
+‣ Parent goal is orange if k/n child goals are orange 
+
+
+
+or green, and none of the n-k child goals are red. 
+
+
+
+‣ Parent goal is red if k/n child goals are red and 
+
+
+
+none of the n-k child goals are green (permissive)
+
+
+
+‣ Parent goal is red if any child goal is red (strict)
+
+
+
+• Alternative visualizations and rules
+
+
+
+⁃ Confidence categories / intervals
+
+
+
+⁃ Colors spectrum ∝ uncertainty (probability 
+
+
+
+density) / Belief mass
+
+
+
+⁃ e.g., Evidential (Dempster-Shafer) theory
+
+
+
+⁃ Subjective logic
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 18
+
+
+
+
+
+
+
+
+
+
+
+Implementation in AdvoCATE – Dynamic Argument Update
+
+
+
+• Assured visual 
+landing
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 19
+
+
+
+
+
+
+
+
+
+
+
+Implementation in AdvoCATE – Dynamic Bow Ties
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 20
+
+
+
+
+
+
+
+
+
+
+
+Dynamic Update to Risk Assessment
+
+
+
+• Pr(c) = p : Allocated event probability 
+
+
+
+⁃ p is an expected upper bound 
+
+
+
+⁃ Equivalent to m observations of event C in N
+
+
+
+missions or simulation runs 
+
+
+
+⁃ Observations of C could be direct or inferred 
+
+
+
+via some metric M(C)
+
+
+
+‣ M(C) = m
+
+
+
+‣ Pr(c) = p = m/N
+
+
+
+• Let metric threshold T = t
+
+
+
+⁃ Number of additional observations of the 
+
+
+
+state of event C to be made in k subsequent 
+
+
+
+missions / simulation runs
+
+
+
+• p ideally constant across all missions
+
+
+
+⁃ m/N = (m + t)/(N + k) → t = k(m/N) →
+
+
+
+t = k p
+
+
+
+• Update rules for events 
+
+
+
+⁃ No updates necessary when observed M(C) ≤ 
+
+
+
+Nearest integer(t) 
+
+
+
+⁃ Otherwise
+
+
+
+‣ Updated Pr(c) = p’ = (m + t)/(N + k)
+
+
+
+‣ Updated T for k’ subsequent runs = t’ = k’ p’
+
+
+
+• Similarly for barriers Bi
+
+
+
+• Estimate residual risk for Pr(e) based on 
+
+
+
+updates to Pr(c) and Pr(bi)
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 22
+
+
+
+
+
+
+
+
+
+
+
+Risk-based Decision Support
+
+
+
+• Pr(c) and Pr(bi) unchanged or decrease 
+
+
+
+⁃ Pr(e) unchanged or decreases
+
+
+
+‣ Validates risk assessment
+
+
+
+‣ Design may be more conservative than necessary
+
+
+
+⁃ Pr(e) increases but < TLOS
+
+
+
+‣ Design is incomplete
+
+
+
+⁃ Pr(e) increase > TLOS 
+
+
+
+‣ Design is unsafe, cease operation
+
+
+
+• Pr(c) and Pr(bi) both increase
+
+
+
+⁃ Pr(e) increases but < TLOS 
+
+
+
+‣ Either improve Pr(bi) to reduce Pr(e) to previous level
+
+
+
+‣ Extent of improvement determined from re-allocation of safety target 
+
+
+
+‣ Or Accept risk
+
+
+
+⁃ Pr(e) increases > TLOS
+
+
+
+‣ Design likely unsafe, cease operation
+
+
+
+‣ Reassess risk and introduce new mitigations / re-design
+
+
+
+• Pr(c) unchanged, Pr(bi) changes
+
+
+
+⁃ Some barriers underperform, some perform as expected, 
+
+
+
+others perform better than expected
+
+
+
+⁃ Pr(e) increases but < TLOS
+
+
+
+‣ Improve underperforming barriers 
+
+
+
+‣ Re-allocate safety targets fixing integrities of performant barriers
+
+
+
+⁃ Pr(e) increases > TLOS
+
+
+
+‣ Design likely unsafe; Reassess risk and introduce new mitigations / 
+
+
+
+re-design
+
+
+
+‣ Cease operation 
+
+
+
+• Pr(c) increases, Pr(bi) unchanged
+
+
+
+⁃ Pr(e) increases but < TLOS
+
+
+
+‣ Either improve Pr(bi) to reduce Pr(e) to previous level, or accept risk
+
+
+
+‣ Extent of improvement determined from re-allocation of safety target
+
+
+
+⁃ Pr(e) increases > TLOS
+
+
+
+‣ Design likely unsafe; Reassess risk and introduce new mitigations / 
+
+
+
+re-design
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 23
+
+
+
+
+
+
+
+
+
+
+
+Next Steps
+• Consistency of metrics
+
+
+
+⁃ Horizontal: w.r.t. TLOS
+
+
+
+⁃ Vertical: refinement
+
+
+
+• Defining update/change process based on observations
+
+
+
+⁃ System Update
+
+
+
+‣ Changes to hazard mitigations, safety performance requirements
+
+
+
+⁃ System – Assurance Case Interface
+
+
+
+‣ To metrics/measures/indicators
+
+
+
+‣ Associated monitors
+
+
+
+‣ Corresponding safety mitigations / contingency management mechanisms
+
+
+
+⁃ Assurance Case
+
+
+
+‣ Record evidence of effectiveness
+
+
+
+‣ Changes to safety architecture, argument, and other assurance artifacts
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 24
+
+
+
+
+
+
+
+
+
+
+
+Conclusions and Extensions
+
+
+
+• Dynamic assurance cases
+
+
+
+⁃ Closing the loop between design and operations
+
+
+
+‣ Performance measures
+
+
+
+‣ Assurance measures
+
+
+
+‣ Record design decisions
+
+
+
+‣ Update assurance case (arg + arch)
+
+
+
+• Map decisions into updated assurance case
+
+
+
+⁃ ALARP, ASARP
+
+
+
+• Extend safety model with
+
+
+
+⁃ Barrier/control dependencies
+
+
+
+⁃ Repair of barriers (replace, retire, modify)
+
+
+
+• Further automation
+
+
+
+⁃ Monte Carlo simulation to generate test cases 
+
+
+
+for assurance case
+
+
+
+⁃ Generate structure of monitor model from safety 
+
+
+
+architecture
+
+
+
+⁃ Scenario generation → learn model parameters 
+
+
+
+from sim
+
+
+
+⁃ Training workflows
+
+
+
+⁃ Generate field test plans
+
+
+
+• Future application to wildfire mitigation 
+
+
+
+using UAS
+
+
+
+May 11, 2023 Software Certification Consortium Meeting 21 25
+
+
+
+
+
+
+ 
+Slide 1: Dynamic Assurance Cases: Closing the Loop between Design and Operational Assurance
+
+ 
+Slide 2: Assurance Methodology
+
+ 
+Slide 3: Static vs Dynamic Assurance
+
+ 
+Slide 4: Dynamic Assurance Case Concept
+
+ 
+Slide 5: Linking Assurance Cases to Safety Processes
+
+ 
+Slide 6: Dynamic Assurance and Update Concept
+
+ 
+Slide 7: Motivating Example – Autonomous Taxiing
+
+ 
+Slide 8: Runtime Risk Assessment
+
+ 
+Slide 9: Runtime Risk Assessment
+
+ 
+Slide 10: Evidence Model
+
+ 
+Slide 11: Metamodel
+
+ 
+Slide 12: Operational Safety Management System
+
+ 
+Slide 13: Defining Metrics
+
+ 
+Slide 14: Defining Metrics
+
+ 
+Slide 15: Implementation in AdvoCATE
+
+ 
+Slide 16: Implementation in AdvoCATE – Metrics Visualization
+
+ 
+Slide 17: Dynamic Argument Update
+
+ 
+Slide 18: Dynamic Argument Update
+
+ 
+Slide 19: Implementation in AdvoCATE – Dynamic Argument Update
+
+ 
+Slide 20: Implementation in AdvoCATE – Dynamic Bow Ties
+
+ 
+Slide 22: Dynamic Update to Risk Assessment
+
+ 
+Slide 23: Risk-based Decision Support
+
+ 
+Slide 24: Next Steps
+
+ 
+Slide 25: Conclusions and Extensions

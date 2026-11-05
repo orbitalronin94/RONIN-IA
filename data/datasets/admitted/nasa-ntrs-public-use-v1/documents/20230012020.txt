@@ -1,0 +1,404 @@
+Optimizing spectroheliogram deconvolution methods : MaGIXS - A case study
+Arthur E. Hochedez1,2, P. S. Athiray2,3, Amy R. Winebarger3, Dyana Beabout3, S. L. Savage3
+
+
+
+4. Study of hyper parameters
+
+
+
+We define two criteria to evaluate the goodness of inversion.
+Criteria 1 : 𝛘2 score
+● Calculate 𝛘2 by comparing flight and inverted data weighted with uncertainty : We perform inversion with each 
+
+
+
+parameter combination and make 𝛘2 maps. Deviations from flight data results in relatively high 𝛘2 and suggest 
+inaccurate inversion.
+
+
+
+Criteria 2 : Smoothness of spectrally pure images
+● For all combinations, evaluate smoothness of spectrally pure images by plotting the intensity of a spatial 
+
+
+
+structure over running averaged (smoothed) intensity profile of the structure. Large spatial variation compared 
+to the smoothed profile indicate over/under resolution.
+
+
+
+1. MaGIXS Flight data
+The ‘spectroheliogram’ is composed of overlaps of spectrally pure images of the Sun repeated for 
+several emission lines.
+
+
+
+2. Inversion method
+
+
+
+Conclusion
+● This study compared two different modes of inversion, multiple and single ion, and provides pros/cons to each 
+
+
+
+mode. 
+● This study also quantitatively explores the influence of hyper parameters on the inversion of MaGIXS data. We 
+
+
+
+completed a parameter space study and identified a range of hyperparameter space that essentially provide 
+identical inversion data products. 
+
+
+
+● These results provide confidence that the inversion products are independent of hyperparameter selection. 
+
+
+
+Figure 1: The summed level 1.5 data from the first MaGIXS rocket flight, taken from [1]. The repetitive 
+structures indicate X-ray emission from several bright points arising from different ions at different 
+wavelengths (Marked in different colors). (See [1] for details)
+
+
+
+3. Modes of inversion
+We have defined two modes of inversion that differ in the way it solves for a plasma model to match the observations. Both the 
+modes rely on a multi-dimensional matrix, M, (or) response function, which combines instrument characteristics (using MaGIXS 
+calibration [3]) and plasma properties (using atomic database Chianti V10.0.2 [4]). It provides a list of elementary spectra (from 
+single ion (or) multiple ions) with emission from different field angles and plasma properties.
+
+
+
+Acknowledgments: We acknowledge the MaGIXS instrument team for making data available through the 2021 NASA Heliophysics Low Cost Access to Space (LCAS) program. We grately acknowledge the funding and support from the University of Alabama in Huntsville and NASA Marshall Space Flight Center for this project. We acknowledge the support of Mines Paris - PSL.
+
+
+
+A. Multi-ion mode
+
+
+
+● Pros:
+○ Similar to standard Differential Emission Measure (DEM) calculations and can provide DEM map
+○ Spectra with wide temperature sensitive lines can tightly constrain EM slope 
+○ Computationally less expensive (M is smaller)
+○ Less sensitive to instrument noise because all lines constrain all temperatures 
+
+
+
+● Cons:
+○ Requires assumptions on the elemental abundance and state of the emitting plasma. These assumptions are 
+
+
+
+“baked in” to M. To test different abundance or plasma state, a new inversion must be calculated with a new M.
+
+
+
+B. Single ion mode
+
+
+
+● Pros:
+○ Inversion is agnostic of abundances and ionization equilibrium
+○ Can glean relative abundances and ionization state from spectrally pure images 
+○ Can determine absolute abundances from continuum vs line intensity 
+
+
+
+● Cons:
+○ Computationally expensive based on number of ions and its atomic dependencies that affects 
+
+
+
+relative line ratios
+
+
+
+Fitting of the model x# to match the data using the ElasticNet method of Scikit 
+Learn:
+
+
+
+x# = argmin[ ǁy-Mxǁ2
+2 + αρǁxǁ1 + 0.5α(1-ρ)ǁxǁ2
+
+
+
+2 ]
+
+
+
+Inverted
+plasma 
+model
+
+
+
+1: 2: 3:
+
+
+
+M
+‘Response’
+
+
+
+List of elementary spectra allowed by 
+atomic physics and instrument response
+
+
+
+Coefficients of the linear combination of elementary spectra, listed in M, 
+that best fits the flight data.
+
+
+
+x#
+
+
+
+y
+MaGIXS Flight data 
+
+
+
+A variant of this inversion method was first demonstrated in [2].
+
+
+
+Figure 4 : Comparison of flight (Pink 
+dashed) and inverted spectra 
+
+
+
+(Black), averaged over 21 rows. 
+Different colors indicate linear 
+
+
+
+combinations of elementary spectra 
+that best fits the data.
+
+
+
+x# is chosen so that the prediction Mx# best matches the flight data y. 
+
+
+
+The regularization parameters control the penalty term of optimization:
+● α increases the penalty
+● ρ is a knob to specify the proportion between the l1 and l2 norms in the penalty
+
+
+
+The solution, x#, is found at a given spatial resolution, Δθ. 
+
+
+
+Solver finds a plasma model with a suitable linear 
+combination of elementary spectra with emission 
+from all ions [determined by atomic physics (T, n)], 
+that best matches the observed spatially 
+overlapped spectra.
+
+
+
+Solver finds a plasma model with a suitable linear 
+combination of elementary spectra with emission 
+from single ions [determined by atomic physics 
+(T, n)], that best matches the observed spatially 
+overlapped spectra.
+
+
+
+Figure 6 : Comparison of flight (Pink 
+dashed) and inverted spectra 
+
+
+
+(Black), averaged over 21 rows. 
+Different colors indicate linear 
+
+
+
+combinations of elementary spectra 
+from ‘single’ ions that best fits the 
+
+
+
+data
+
+
+
+Parameter Definition Values explored Comment
+
+
+
+α Weight of the penalty 3x10-5 to 0.01 Smallest penalty where inversion 
+completes successfully
+
+
+
+ρ Proportion between the l1 and 
+l2 norms in the penalty 0.1 to 1 0.1 = mostly smooth solution, 
+
+
+
+1.0 = sparse solution 
+
+
+
+Δθ Field angle step size 5.6” to 44.8” Minimum/maximum spatial resolution 
+based on instrument response 
+
+
+
+Figure 2 : (Left) Spectrally pure image of O7 at 21.602A in photon/pixel; (Right Top) The full detector 
+broken down into contributing spectral lines. (Right Middle) Comparison of flight and inverted spectra. 
+(Right Bottom) Ratio of inverted data to flight data
+
+
+
+inputs
+
+
+
+Figure 3 : Sample elementary spectra (electron s-1cm5), 
+for two different field angles, multi ion mode.
+
+
+
+Figure 5 : Sample elementary spectra (electron. s-1.cm5) 
+at on-axis field angle for two different ratios, single ion 
+
+
+
+mode.
+
+
+
+References
+
+
+
+Figure 8 : Row 514 of the O8 
+spectrally pure images resulting 
+
+
+
+from inversions using two different 
+set of parameters. A portion of the 
+image showing two bright spots is 
+
+
+
+shown in the top left corner for 
+each plot. (Left) over-resolved 
+
+
+
+solution. (Right) Smoothed solution 
+obtained using high l2 norm 
+
+
+
+penalty.
+
+
+
+Figure 7 : (Left Top) 
+Comparison of flight (Black) 
+
+
+
+and two inverted spectra 
+(Green and Red) averaged 
+along 34 rows for different 
+
+
+
+parameter in multi-ion 
+mode. (Left Bottom) 
+
+
+
+corresponding values of 𝛘2. 
+(Right) Table listing all the 
+
+
+
+𝛘2 values calculated in 
+multi-ion mode over O7 
+
+
+
+lines for different 
+parameters.
+
+
+
+Ph/px
+
+
+
+[3] Athiray et al 2021, ApJ
+[4] Del Zanna et al 2021, ApJ
+
+
+
+[1] Savage et al 2023, ApJ
+[2] Winebarger et al 2019, ApJ
+
+
+
+Abstract
+
+
+
+Results :
+● The first criteria bans high penalty (when α is larger 
+
+
+
+than 0.001)
+● The second criteria bans too low values of the l2 
+
+
+
+norm penalty depending on Δθ
+● The remaining solutions essentially provide similar 
+
+
+
+inversion products
+
+
+
+Figure 9 : Map of the satisfactory smoothness in the parameter space for 
+O8 spectrally pure image. Above a colored line, a spectrally pure map is 
+
+
+
+considered to be smooth. The line depends on Δθ. For Δθ ≥ 5, all 
+solutions are smooth.
+
+
+
+An unfolding method has been successfully developed and demonstrated on the first rocket flight MaGIXS. The inversion invokes several variable hyperparameters to unfold the 
+spatial-spectral overlaps. In the present work, we conduct a systematic investigation of the hyperparameters that controls the inversion and perform parameter optimization to unfold 
+overlappogram data. We also demonstrate two different modes of inverting spectroheliogram data, one that relies on inverting all ion simultaneously (akin to standard emission 
+measure inversions) and another that inverts single ions alone and does not require previous assumptions on the thermal and ionization equilibrium and abundance state of the plasma.
+
+
+
+The Marshall Grazing Incidence X-ray Spectrometer (MaGIXS) sounding rocket mission proved the long abandoned slitless imaging spectrometry to be promising in tackling the 
+challenge of understanding the complex dynamics of the coronal plasma heating events. Indeed, the spectroheliogram contains both spatial and spectral information collected 
+simultaneously over a large field of view (9.5’ x 25’). MaGIXS observed several strong emission lines (from ~9 to 30Å) from different portions of two active regions. Depending on the 
+size of the extended source combined with the extent of spectral dispersion, there will be locations in the focal plane where spectral lines from different spatial locations overlap and 
+must be deconvolved.
+
+
+
+M y

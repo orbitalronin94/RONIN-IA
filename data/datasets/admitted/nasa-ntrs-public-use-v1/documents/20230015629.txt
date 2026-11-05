@@ -1,0 +1,433 @@
+Distribution Statement A: Approved for public release; distribution is unlimited. 
+ 
+
+
+
+HYBRID CFD ENGINEERING MODEL OF PLUME INDUCED EROSION AND CRATER FORMATION 
+
+
+
+DURING DESCENT OF LUNAR LANDERS 
+
+
+
+T. P. Shurtz, Jacobs Space Exploration Group, Huntsville, AL, A. B. Weaver, Sev1Tech, Huntsville, AL; J. 
+S. West, NASA Marshall Space Flight Center, Huntsville, AL; and P. A. Liever, CFD Research 
+
+
+
+Corporation, Huntsville, AL 
+
+
+
+ABSTRACT 
+
+
+
+With rapidly increased worldwide interest in landing on the moon, the issue of Plume Surface 
+Interactions (PSI) is gaining attention. Hazards posed by lander plume induced dust and debris, as well 
+as landing site deformation can be mitigated when better understood through predictive simulations. As 
+simulation enabling computational power continues to increase, hybrid Computational Fluid Dynamics 
+(CFD)/Engineering models provide the immediate ability to conduct parametric/trade studies driving 
+design decisions for landers. Reduced order erosion engineering models apply correlations of the 
+surface erosion rate to the plume induced surface forces with the correlations anchored to flight 
+observations from Apollo LM landings. The MSFC propulsion fluid dynamics branch has developed such 
+a hybrid model for predicting the plume induced viscous erosive regression of the Lunar surface beneath 
+a landing vehicle. The (Descent Interpolated Gas Granular Erosion Model) DIGGEM was originally 
+implemented as a post processing tool to calculate induced erosion rates through vehicle descent using 
+CFD solutions of the vehicle plume at several fixed altitudes. This capability has since been advanced in 
+the Loci/Chem-DIGGEM model to allow transient, moving vehicle, fully coupled viscous erosion modeling 
+of vehicle descent PSI. This model has recently been used to make preflight predictions of the erosive 
+regression of the ground beneath a Commercial Lunar Payload Services (CLPS) vehicle in support of 
+measurements to be made by the Stereo Cameras for Lunar Plume Surface Studies (SCALPSS) 
+instrument. 
+
+
+
+INTRODUCTION 
+
+
+
+As a vehicle descends using propulsive deceleration, the impingement of the rocket exhaust 
+plume on the granular ground surface results in complex interactions that pose risks to the lander and 
+surrounding assets. These PSI risks can include visual obscuration of the landing site, debris impacts to 
+the vehicle or other existing assets, and deformation of the landing terrain that may result in excessive 
+vehicle tilt. Some of these risks were identified and observed as early as the Apollo landings. Audio 
+recordings of astronaut descriptions and video footage of landings indicate significant obscuration once 
+the regolith is disturbed by the engine plume and can be seen in Figure 1. The Apollo 12 Lunar Module 
+landed 160m away from the Surveyor III craft, sandblasting it with PSI debris, the effects of which were 
+visible on samples returned to Earth. 
+
+
+
+The ER42 propulsion fluid dynamics branch as NASA Marshall Space Flight Center has 
+developed a suite of tools for predicting PSI effects with various levels of fidelity. A two-phase CFD tool 
+built on the Loci framework1, Gas Granular Flow Solver2 (GGFS) is a high-fidelity tool capable of directly 
+simulating much of the complex soil particle phase physics relevant to PSI, including ejecta sheet 
+formation, regolith bed fluidization, and crater formation. However, computational costs still prevent 
+production use of this tool for parametric studies of vehicle and landing trajectory design. To fill this gap 
+in capability and allow fast turnaround simulations of multiple lander trajectories and configurations, 
+several hybrid CFD/Engineering models have been developed. One such tool, Loci/CHEM-DIGGEM, 
+uses CFD to simulate the plume gas flow field, and an engineering model to approximate the effects on 
+the regolith surface by making simplifying assumptions about the nature of the interactions. The model 
+also makes use of a time-compression technique to further reduce the required computational time to 
+allow production level simulations. Details of the Loci/CHEM/DIGGEM model and the time compression 
+approach are included in the following section, followed by a presentation of preflight cratering predictions 
+for the Nova-C lander made using this model. 
+
+
+
+
+
+
+
+
+
+
+
+Distribution Statement A: Approved for public release; distribution is unlimited. 
+ 
+ 
+
+
+
+ 
+
+
+
+Figure 1: Frames from video footage of Apollo 15 landing showing difference between clear view of ground (left) and view 
+obscured by PSI effects (right) 
+
+
+
+ 
+
+
+
+MODEL DESCRIPTION 
+
+
+
+LOCI-CHEM/DIGGEM MODEL 
+
+
+
+The Descent Interpolated Gas Granular Erosion Model3 (DIGGEM) was originally developed as a 
+one-way coupled post-processing application to predict time-varying crater depth on the Lunar surface 
+beneath a descending vehicle using propulsive deceleration. The model assumes that the erosion regime 
+is limited to viscous shear erosion such that a functional relationship between plume induced shear stress 
+on the ground and eroded regolith mass flux can be established. For the viscous erosion regime, the 
+liberation of particles from the granular surface requires applying a shear stress sufficient to overcome the 
+other forces (gravity and cohesion) holding the particle in place. The relationship between the mass flux 
+of particles leaving the surface and the excess shear stress can be written as: 
+
+
+
+�̇�(𝑥, 𝑦, 𝑡) = 𝐶(𝜏(𝑥, 𝑦, 𝑡) − 𝜏 ) (1) 
+
+
+
+where �̇� is the locally eroded mass flux, 𝜏 is the local shear stress on the ground, and 𝐶, 𝑛, and 
+𝜏 are model parameters which must be calibrated using available data. The model parameters 
+were determined by comparing CFD predicted shear stress for the Apollo 12 LM at several fixed altitudes 
+to observationally calculated erosion mass flow rates from an analysis of Apollo 12 landing footage by 
+Lane and Metzger4. To predict crater formation for a lander, DIGGEM would use an interpolation 
+algorithm applied as a post-processing step to the results of several CFD simulations to calculate the time 
+dependent shear stress on the flat, solid ground. Equation 1 was used after the interpolation algorithm to 
+calculate the resulting mass removal rate in the affected regions, and ultimately the accumulated 
+excavated crater volume. 
+
+
+
+While the use of this engineering model allowed for relatively quick turnaround times for 
+predicting crater growth beneath a vehicle, it suffered from some notable limitations in its one-way 
+coupled implementation. The CFD solutions could not account for the changing terrain shape due to 
+crater growth, thereby limiting application to cases which are loosely coupled (very shallow craters). Also, 
+the process requires separate pseudo-steady CFD solutions of the vehicle at several fixed altitudes as 
+inputs. Because the shear stress for altitudes between those which are simulated must be interpolated, 
+and it is not always clear which altitudes will need to be simulated to capture important plume 
+impingement features, the solution quality could be highly dependent on which altitudes were chosen for 
+simulation. To overcome these limitations, the DIGGEM model has been directly integrated into the 
+
+
+
+
+
+
+
+
+
+
+
+Distribution Statement A: Approved for public release; distribution is unlimited. 
+ 
+ 
+
+
+
+Loci/CHEM tool to allow fully two-way coupled simulations of a moving vehicle through the final portion of 
+descent where significant erosion occurs. 
+
+
+
+Loci/CHEM includes two capabilities which allow this implementation of the DIGGEM model. The 
+first is a moving body overset mesh capability (componentMotion), which allows one mesh for the 
+background and the Lunar surface and a separate mesh surrounding the vehicle. Relative motion 
+between the vehicle mesh and the background mesh can be prescribed such that the vehicle position in 
+time throughout the simulation can be made to match an expected/known trajectory. The second 
+capability is a module (gridMotion), which allows the mesh to be deformed by altering the location of 
+surface nodes and then smoothly displacing volume elements in the region surrounding the deformed 
+surface. The DIGGEM model was implemented by creating an additional module (surfaceErosionFlux), 
+which uses the instantaneous shear stress on the surface mesh to determine the required local 
+displacement of the surface at each timestep. This displacement is calculated using the relationship from 
+the DIGGEM model: 
+
+
+
+𝑑 = −[𝐶(𝜏 − 𝜏 ) /𝜌]𝑑𝑡 (2) 
+
+
+
+where d is the distance that the surface at a given location should be displaced in the normal direction, 𝜌 
+is the regolith density, and dt is the simulation timestep size. Note the negative sign in the equation for 
+displacement, since the displacement is in the direction into the solid surface to represent a loss of 
+surface material at that location. The calculation of the surface motion and flow field (and shear stress) 
+calculation occurs at each timestep, allowing for tight coupling of the simulation. 
+
+
+
+TIME COMPRESSION APPROACH 
+
+
+
+The timescales involved in simulating the flow of rocket engine exhaust plumes are quite different 
+from those involved in the descent of a landing vehicle, or the regression of the Lunar surface under 
+viscous erosion effects. Fluctuations in plume flow take place in microseconds, and gas velocities are in 
+kilometers per second. The vehicle final descent takes several seconds at speeds around 1 meter per 
+second, and Lunar surface regression velocity is on the order of centimeters per second at maximum. 
+This presents a difficulty for the fully coupled simulations. Maintaining a time step of 1 or 10 
+microseconds to accurately model the plume flow, for a duration of 10s of seconds to capture a landing 
+sequence, would require millions of simulation timesteps. This would require computational time in 
+excess of a year even when using thousands of processors simultaneously. Because the timescales are 
+separated by several orders of magnitude, it is possible to compress some of the timescales without 
+drastically altering the nature of the interactions in the simulation. The Lunar surface does not need to 
+respond to each and every short-term fluctuation in the plume, because it is the average effect over 
+longer durations that matters. Similarly, in the time that it takes the vehicle to move considerably closer to 
+the ground, the plume has undergone thousands of fluctuations and can be seen to respond almost 
+instantaneously to changes in the vehicle position. 
+
+
+
+A very good approximation to the solution to the problem of viscous erosion crater formation may 
+be obtained by compressing many fluid field solution steps into a single vehicle motion or ground 
+deformation step. In the coupled Loci/CHEM-DIGGEM tool, this is done by artificially increasing the rates 
+of vehicle motion and eroding surface regression by a factor of 100. This allows an entire descent 
+trajectory to be simulated using only tens of thousands of fluid solver timesteps. Exact implementation is 
+achieved by multiplying the constant C in the erosion/ shear stress calculation by 100, and multiplying the 
+times at which vehicle location is specified in the component motion file by 100. An additional step is 
+made to correct some of the error introduced when using this method. When the vehicle speed is 
+increased to hundreds of meters per second, an accompanying error in the applied engine exhaust 
+velocity occurs. When the engine exhaust velocity is 3000 m/s and the actual vehicle velocity is 3 m/s 
+(increased to 300 m/s for time compression), the error in exhaust velocity is 10% because the apparent 
+velocity of the gas in the simulation is the sum of the 3000 m/s applied at the engine outlet and the 300 
+m/s motion of the engine outlet itself. The correction is made by subtracting the excess vehicle velocity 
+(in this case 297 m/s) from the gas velocity applied at the engine outlet boundary. 
+
+
+
+A sensitivity study of the effects of various degrees of time compression was carried out to verify 
+the appropriateness of this approximation on the prediction of crater depth over time. Factors of 1 (no 
+
+
+
+
+
+
+
+
+
+
+
+Distribution Statement A: Approved for public release; distribution is unlimited. 
+ 
+ 
+
+
+
+compression), 10, 100, and 1000 were used in a simplified axisymmetric case for 5 s of simulated 
+physical time (to allow the simulation without time compression to complete in a reasonable amount of 
+computational wall-time). The results are shown in Figure 2. The solutions for compression factors up to 
+100 are very close to the solution for the uncompressed approach. At a factor of 1000, the differences 
+become noticeable, and qualitative features are no longer captured correctly. 
+
+
+
+ 
+
+
+
+Figure 2: Comparison of time compression factor effect on crater shape after 5 seconds of plume impingement 
+
+
+
+ 
+
+
+
+APPLICATION TO INTUITIVE MACHINES NOVA-C LANDER 
+
+
+
+The Loci/CHEM-DIGGEM model is being applied in a synergistic way to simulate PSI crater 
+formation for Commercial Lunar Payload Services (CLPS) vehicle landings. Multiple CLPS landers will be 
+fitted with instrumentation systems to gather data regarding PSI effects. The Stereo Cameras for Lunar 
+Plume Surface Studies (SCALPSS) instrument will be used to capture three-dimensional crater formation 
+data. Loci/CHEM-DIGGEM predictions are being used to inform SCALPSS camera requirements and 
+placement. The data collected by the instrument will then be used to update the calibration of 
+Loci/CHEM-DIGGEM model parameters. 
+
+
+
+The first CLPS landing that will include SCALPSS is the CLPS-2 mission to be flown by the 
+Intuitive Machines Nova-C lander. Loci/CHEM-DIGGEM has been used to make preflight predictions of 
+crater formation beneath this lander using the fully 2-way coupled, moving body, time compression 
+approach described above. The Nova-C spacecraft has a single central engine for landing, like the 
+Apollo LM, however, the Nova-C spacecraft’s mass and thrust are much lower, and the engine uses 
+different propellants. This shows the benefit of the hybrid CFD engineering model, which was calibrated 
+using Apollo data, but can still be used to simulate a different vehicle because the flow properties 
+responsible for PSI can be simulated for any plume composition. The naive expectation might be for 
+shallower cratering than Apollo due to the lower thrust level, but for the viscous erosion regime, the local 
+mass flux is expected to depend on the local shear stress rather than total thrust. In fact, the higher total 
+pressure of the Nova-C engine has the potential for greater impingement pressure and shear stress than 
+Apollo, and it may form a deeper crater. 
+
+
+
+
+
+
+
+
+
+
+
+Distribution Statement A: Approved for public release; distribution is unlimited. 
+ 
+ 
+
+
+
+The simulated portion of the vehicle descent trajectory begins at an altitude of approximately 36 
+m above the Lunar surface. The vehicle thrust and velocity are varied throughout the descent to match 
+the planned propulsion system operation as provided by Intuitive Machines. Initially, the engine thrust is 
+near maximum as the vehicle is decelerated, but for the final portion of the descent the engine is deeply 
+throttled to maintain a nearly constant vehicle velocity. The changing thrust levels and vehicle velocity 
+necessitate applying a variable correcting adjustment to the engine exhaust profile as described when 
+using time compression. Results of the simulation are depicted in Figure 3. At the start of the simulation 
+a large plume expands beneath the vehicle to very high Mach number. Due to the low density of the 
+plume far from the vehicle, there is very little interaction with the ground and the erosion rate is slow. As 
+the vehicle descends to 17m, an annular crater begins to grow, but is still very shallow. At very low 
+altitudes the plume interactions with the ground strengthen significantly and the plume shape is altered. 
+The crater depth below 5m altitude should be visibly detectable by SCALPSS, but the high density hot 
+gas in the simulation starts to obscure the view of the ground. High density gas has the capability of 
+entraining a large mass of ejecta which may similarly obscure SCALPSS view of the crater. When the 
+vehicle touches down, the plume has altered drastically as the flow interacts with the vehicle legs. The 
+final crater depth is predicted to be about 4.5 cm. 
+
+
+
+ 
+
+
+
+Figure 3: Simulation results for Nova-C descent. A) initial altitude of 35.77m with no erosion yet. B) altitude of 17 m with 
+annular crater beginning to form. C) 2.67m altitude with crater almost 3 mm deep with high density plume gas covering ground. 
+D) Vehicle has touched down in its own crater and plume is deflected around legs. 
+
+
+
+The simulation took approximately 1 week to complete using 4000 processors. The simulated 
+time for the final 36 meters of descent was approximately 23 seconds, and the time step used was 10 
+microseconds, resulting in 23,000 timesteps needed for completion. Without the time compression 
+technique, this simulation would have required 2.3 million timesteps, and nearly 2 years of constant 
+computation. These preflight predictions will be validated against SCALPSS data as it becomes 
+available. The Loci/CHEM-DIGGEM tool is currently being used to predict crater formation for other 
+CLPS vehicles, as well as Human Landing System (HLS) vehicles which are much larger than Apollo. 
+
+
+
+SUMMARY AND CONCLUSIONS 
+
+
+
+Risks posed by PSI phenomena amid recent development of several new Lunar landers has 
+created renewed interest in understanding and quantifying these effects. The fluid dynamics branch at 
+
+
+
+
+
+
+
+
+
+
+
+Distribution Statement A: Approved for public release; distribution is unlimited. 
+ 
+ 
+
+
+
+MSFC has a cascade of tools available for computationally predicting PSI effects, including the hybrid 
+CFD/engineering model Loci-CHEM DIGGEM. The Loci/CHEM-DIGGEM tool allows simulations of 
+viscous erosion crater formation beneath Lunar descent vehicles to be completed with approximately 1 
+week of computation time. The tool has been calibrated using available data from Apollo but can benefit 
+from updated data including measurements specifically designed to detect crater formation by SCALPSS. 
+While awaiting SCALPSS data, Loci/CHEM-DIGGEM is being used to make preflight predictions of 
+cratering for CLPS and HLS vehicles. 
+
+
+
+
+
+
+
+
+
+
+
+Distribution Statement A: Approved for public release; distribution is unlimited. 
+
+
+
+ 
+
+
+
+REFERENCES 
+
+
+
+1. E. Luke and T. George, Loci: A Rule-Based Framework for Parallel Multidisciplinary Simulation 
+Synthesis, Journal of Functional Programming, Special Issue on Functional Approaches to High-
+Performance Parallel Programming, Volume 15, Issue 03, pp. 477-502 (2005). 
+ 
+
+
+
+2. Gale, M. P., Mehta, R. S., Liever, P. A., Buettner, K. E., and Curtis, J. S. Gas-Granular Flow Solver 
+for Plume Surface Interaction and Cratering Simulations, 23rd AIAA Computational Fluid 
+Dynamics Conference, AIAA Paper 2017-4503 (June 2017) 
+ 
+
+
+
+3. Shurtz, T., Krolick, W., Weaver, A., Liever, P., and West, J. A Hybrid CFD/Engineering Model for 
+Predicting Plume Induced Erosion and Cratering, IPPW, Abstract #102, Santa Clara, CA (2022). 
+ 
+
+
+
+4. Lane, J. E. and Metzger, P. T. Estimation of Apollo Lunar Dust Transport using Optical 
+Extinction Measurements, Acta Geophysica, 63(2), 568-599, 10.1515/acgeo-2015-0005 (2015).

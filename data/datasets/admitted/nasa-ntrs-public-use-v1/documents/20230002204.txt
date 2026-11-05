@@ -1,0 +1,1048 @@
+Lessons Learned Developing Flight, Ground, and Mission Operations Software for the GPX2 Technology Demonstration 3U CubeSat
+
+
+
+
+
+http://engineering.larc.nasa.gov/
+
+
+
+
+
+Mark Banchy & David Keck
+
+
+GPX2 Flight and Ground Software Leads
+
+
+
+
+
+
+
+
+GPX2 Project Overview 
+
+
+Mission Objectives
+
+
+Project Status
+
+
+Flight Software/Hardware Architecture
+
+
+Ground Software/Hardware Architecture
+
+
+Software Lessons Learned
+
+
+Design
+
+
+Development
+
+
+Integration/Test
+
+
+Operations
+
+
+Questions
+
+
+
+
+
+
+
+
+
+
+
+Agenda
+
+
+
+
+
+
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+What is GPX2?
+
+
+3U technology demonstration CubeSat
+
+
+Increase the Technology Readiness Level (TRL) of hardware components
+
+
+LaRC Flight Computer Processing Unit (FCPU), uCAM-III cameras, and chassis made from Windform XT 2.0
+
+
+Increase knowledge/experience utilizing Iridium Short Burst Data (SBD) communications
+
+
+Build on NASA Ames experience utilizing SBD
+
+
+Attempt an off-the-shelf Align experiment via the NovAtel OEM719 GPS Receivers
+
+
+Aimed at measuring a known distance between the G5 Antennae via Align relative positioning
+
+
+Workforce development (small and young team)!
+
+
+
+
+
+Mission Objectives
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+Launched July 2nd 2022 on Virgin Orbit’s LauncherOne as part of the “Straight Up” mission
+
+
+Successfully reached a ~500km circular orbit
+
+
+Received first health and status beacon ~45 minutes after deployment
+
+
+Demonstrated Iridium SBD transmissions and are working to further characterize them
+
+
+>1MB through Iridium SBD thus far
+
+
+Demonstrated uCAM-III camera operates on orbit
+
+
+26 images from orbit transmitted thus far
+
+
+Demonstrated NovAtel OEM719 receivers are operational, unfortunately an Align mode lock has not been achieved
+
+
+Have been operating nominally since launch!
+
+
+
+
+
+Project Status
+
+
+
+
+
+
+
+
+Credit: NASA
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+ LaRC developed flight hardware and software 
+
+
+LaRC Flight Computer Processing Unit (FCPU) design utilizing STM32F407VG chip
+
+
+16MHz Internal Clock, 196KB RAM, 1MB Internal Flash, Direct Memory Access (DMA) controller
+
+
+32MB external flash chip running Little File System (LFS)
+
+
+LaRC flight software (FreeRTOS) and ground software (Python/COSMOS)
+
+
+GPX2 Flight Software/Hardware Architecture
+
+
+GPX2 Flight Software Architecture
+
+
+
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+GPX2 Ground Software/Hardware Architecture
+
+
+
+
+
+GPX2 Ground Software Architecture
+
+
+Two data interfaces into GPX2
+
+
+GSE: COSMOS utilized as primary ground testing/development software 
+
+
+LaRC Python scripts leveraging COSMOS interface for definitions for database logging.
+
+
+COSMOS utilized heavily for development and testing (test script running, limits monitoring, telemetry logging, etc.)
+
+
+MODEM: (Iridium) Interfaces via email
+
+
+LaRC Python GUIs for command crafting and telemetry processing (stitching packets back together)
+
+
+
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+Leverage open-source tools to allow for quick and flexible design and development
+
+
+
+
+
+Lessons Learned (Design & Development)
+
+
+Neither the U.S. Government nor NASA endorse or recommend any commercial products, processes, or services. Reference to or appearance of any specific commercial products, processes, or services by trade name, trademark, manufacturer, or otherwise, in NASA materials does not constitute or imply its endorsement, recommendation, or favoring by the U.S. Government or NASA.
+
+
+
+
+
+Flight Software
+
+
+FreeRTOS
+
+
+Little File System (LFS)
+
+
+LUA
+
+
+
+
+
+
+
+
+Static Analysis
+
+
+Cppcheck
+
+
+Sourcemonitor
+
+
+Cobra
+
+
+
+
+
+
+
+
+Ground Software
+
+
+COSMOS
+
+
+Python
+
+
+Grafana
+
+
+MariaDB
+
+
+DearPyGUI
+
+
+
+
+
+
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+
+
+
+Leveraging DMA controller optimized capabilities of the resource limited microcontroller
+
+
+DGPS, IMU, EPS, ADC, and Flash interfaces all heavily utilize the onboard DMA controller
+
+
+2x UART, 2x I2C, 1x ADC, and 1x SPI
+
+
+
+
+
+Utilizing Little File System (LFS) onboard for long term telemetry storage added flexibility and data integrity to GPX2
+
+
+LFS performs dynamic wear-leveling, power-loss resilience, CRC checking, and bounded RAM/ROM usage
+
+
+
+
+
+
+
+
+GPX2 Flight Software Architecture
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lessons Learned (Design & Development)
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+Flexible ground software design allowed for sharing and collaboration of test and flight data
+
+
+Ground software populates a MariaDB database via a Python script that pulled from COSMOS
+
+
+Flexible Python “glue” with a single point of truth for telemetry and command definitions
+
+
+Utilizes LaRC hosted Grafana database viewer
+
+
+Easily able to add users and customize their views
+
+
+Remote viewing/sharing of test data for project members and management during integration, testing, and operations activities
+
+
+Great for timestamped time-series data
+
+
+Not ideal for viewing images
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GPX2 Grafana Page Examples
+
+
+Lessons Learned (Design & Development)
+
+
+
+
+
+
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+Utilize telemetry indexing to reduce data bandwidth and increase flexibility
+
+
+GPX2 Iridium SBD bandwidth is extremely limiting (average throughput ~3.5kB per day)
+
+
+The software team devised a way to splice and index the system’s logged telemetry
+
+
+Late addition to the software development effort
+
+
+Able to implement this feature quickly (< 1 week) and it has proven invaluable on-orbit
+
+
+
+
+
+Lessons Learned (Design & Development)
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+Importance of flight-like flatsat for software development and testing
+
+
+Complete system with flight-like hardware
+
+
+Able to run end-to-end testing years before launch
+
+
+Caught a lot of issues early!
+
+
+Importance of utilizing automated system level testing
+
+
+Wrote system level tests via COSMOS “TestRunner” framework
+
+
+Sends every command within the system, checks for correct number of Rx/Tx bytes, relevant counters incrementing, and reports all error masks before/after command processing
+
+
+Produced output logs that proved invaluable
+
+
+Could go back and check historical test runs as needed
+
+
+Allowed automation of TVAC testing!
+
+
+Every TVAC test point ran 33 tests in ~5min
+
+
+Lessons Learned (Integration & Test)
+
+
+
+
+
+
+
+
+GPX2 Flatsat
+
+
+COSMOS “TestRunner” Sample Output
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+Stay connected with hardware/software vendors regarding the project specific configuration details
+
+
+Spurious watchdog reset discovered on GOMSpace Electrical Power System (EPS) during TVAC
+
+
+This meant random unintended power cycles
+
+
+Evidence of this reset was found in archived test data
+
+
+The vendor admitted to having knowledge of this
+
+
+They even had a patch for it! 
+
+
+It was too late for GPX2 to apply this patch
+
+
+The software team quickly developed a FSW patch that allowed for mitigation of reset on-orbit
+
+
+Problem continues to occur ~6hrs on orbit without hindering the mission
+
+
+This issue could have been mitigated if there was better communication with the vendor
+
+
+
+
+
+Lessons Learned (Integration & Test)
+
+
+Manifestation of GOMSpace EPS Reset
+
+
+
+
+
+
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+Have a detailed operations plan including who will staff this phase of the project
+
+
+FSW engineers often become operators
+
+
+Secure funding for software team
+
+
+Automate operations as much as feasible
+
+
+The team quickly learned it was clunky to manually operate the way it was originally planned
+
+
+Over time, various scripts/tools have been developed for quality-of-life improvements
+
+
+Enjoy the view!
+
+
+Lessons Learned (Operations)
+
+
+
+
+
+First Image From GPX2
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+GPX2 is a 3U technology demonstration CubeSat developed by LaRC
+
+
+Successfully launched via Virgin Orbit’s LauncherOne and operational since July 2nd, 2022
+
+
+Key Lessons Learned
+
+
+Leverage tools that are available to you (first step is to learn what tools are even available!)
+
+
+Good software designs pay dividends
+
+
+Automate things in an efficient way (work smart not hard)
+
+
+Embrace being able to “fix-it-in-software”
+
+
+Stay connected with vendors
+
+
+Next Steps
+
+
+Continue operations of GPX2 and monitor its health and status
+
+
+Continue attempting Align experiments and characterizing Iridium SBD transmissions
+
+
+Apply these software lessons to other LaRC projects and future CubeSat projects
+
+
+Software reuse is already underway for some GPX2 software
+
+
+
+
+
+
+
+
+
+
+
+Concluding Remarks
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+
+
+
+Questions?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sample Pictures Taken From GPX2
+
+
+
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+
+
+
+‹#›
+
+
+
+
+
+
+
+
+
+
+
+Ground Software Python GUIs
+
+
+
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+
+
+
+Ground Software Python GUIs
+
+
+
+
+
+2023 Flight Software Workshop 
+
+
+GPX2
+
+
+‹#›
+
+
+
+
+
+image2.jpg
+
+
+
+
+
+image3.png
+
+
+
+
+
+image5.jpeg
+
+
+
+
+
+image6.jpeg
+
+
+
+
+
+image7.png
+
+
+
+
+
+image8.png
+
+
+
+
+
+image9.png
+
+
+
+
+
+image10.jpg
+
+
+
+
+
+image11.png
+
+
+
+
+
+image12.png
+
+
+
+
+
+image13.png
+
+
+
+
+
+image14.png
+
+
+
+
+
+image15.png
+
+
+
+
+
+image16.png
+
+
+
+
+
+image17.png
+
+
+
+
+
+image18.png
+
+
+
+
+
+image19.png
+
+
+
+
+
+image20.jpg
+
+
+
+
+
+image21.jpg
+
+
+
+
+
+image22.jpg
+
+
+
+
+
+image23.jpg
+
+
+
+
+
+image24.jpg
+
+
+
+
+
+image25.jpg
+
+
+
+
+
+image26.jpg
+
+
+
+
+
+image4.jpeg
+
+
+
+
+
+image27.png
+
+
+
+
+
+image28.jpg
+
+
+
+
+
+image29.png
+
+
+
+
+
+image1.jpg

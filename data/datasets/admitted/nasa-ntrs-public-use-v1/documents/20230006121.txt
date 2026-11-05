@@ -1,0 +1,4218 @@
+1 
+
+
+
+ 
+
+
+
+Design Studies on Mechanically Geared, Magnetically 
+
+
+
+Geared, and Direct Drive Drivetrains for UAM Applications 
+
+
+
+Thomas Tallerico1, Jeffryes Chapman2, and Andrew Smith3 
+NASA Glenn Research Center, Cleveland, OH, 44135 
+
+
+
+Urban air mobility vehicles require high reliability and high performance electric motor 
+
+
+
+drivetrains. In this paper, a design optimization study is carried out to compare mechanically 
+
+
+
+geared, magnetically geared, and direct drive motor drivetrain topologies’ achievable 
+
+
+
+performance in a 100 kW hover power quad rotor propulsor application. Design studies are 
+
+
+
+carried out accounting for a nominal mission profile and assuming constant propulsor rotor 
+
+
+
+RPMs of 400, 1000, 2000, and 3000 RPM. Results show that mechanically geared drives are 
+
+
+
+the lightest at all RPMs but their mass benefit over direct drive and magnetically geared 
+
+
+
+decays with increased rotor RPM. Direct drive is shown to always achieve the highest 
+
+
+
+efficiency due to its lower motor speed resulting in low electrical frequencies. Magnetically 
+
+
+
+geared drivetrains in the initial study are required to provide 50% torque margin and have 
+
+
+
+similar performance to direct drive drivetrains. It is shown that reducing this margin makes 
+
+
+
+magnetically geared drivetrains performance competitive with high efficiency mechanically 
+
+
+
+geared drivetrains and lighter than direct drive drivetrains. 
+
+
+
+I. Introduction 
+
+
+
+Urban Air Mobility (UAM) requires high performance electric motor drivetrains to minimize the energy 
+
+
+
+consumption and cost of each flight. One of the fundamental questions in the design of an electric motor drivetrain is 
+
+
+
+whether or not to use a gearbox. Additionally, research groups at NASA [1], Texas A&M [2], and The University of 
+
+
+
+Portland [3] [4] have proposed and developed magnetic gears for electric aircraft propulsion applications. This paper 
+
+
+
+presents a comparison of three electric aircraft drivetrain topologies (Mechanically Geared, Magnetically Geared, and 
+
+
+
+Direct Drive) within the context of a 100 kW hover power quadrotor UAM vehicle propulsor. 
+
+
+
+Past work by the University of Illinois studied mechanically geared vs direct drive drivetrains topologies for larger 
+
+
+
+fixed wing transport style aircraft [5]. Schweigert et al completed a detailed study on optimum machine speed and 
+
+
+
+gearbox design for electric cars [6]. Neither study targets UAM applications, mission profile considerations, or full 
+
+
+
+propulsion system design (gearbox, inverter, motor, and thermal management system). 
+
+
+
+In this paper, the UAM motor design tool developed in [7] and [8] is used to compare the different drivetrain 
+
+
+
+topologies. The target mission profile for the design is based on the NASA UAM concept vehicles studied in [9] [10] 
+
+
+
+and [11]. Prior studies by NASA on magnetically geared motors [12] [13] and [14] are used to down select magnetic 
+
+
+
+gear motor topology down to an outer stator magnetically geared motor (OSMGM). All three drive train topologies 
+
+
+
+are optimized for a 100 kW hover power propulsor at 400, 1000, 2000, and 3000 RPM. Results are compared in terms 
+
+
+
+of total propulsor mass and total propulsor mission efficiency. The results of this paper are only for a single set of 
+
+
+
+assumptions, power level, application, and technology and should not be considered generally applicable across the 
+
+
+
+full UAM design space. 
+
+
+
+Section II of this paper details design methodology and updates to the UAM motor design tool. Section III presents 
+
+
+
+results of the design study. Section IV provides a conclusion summarizing the results. 
+
+
+
+ 
+
+
+
+ 
+1 Aerospace Research Engineer, Rotating and Drives Systems 
+2 Aerospace Research Engineer, Systems Analysis 
+3 Aerospace Engineer, Thermal Management 
+
+
+
+
+
+
+
+
+
+
+
+2 
+
+
+
+ 
+
+
+
+II. Design Optimization Methodology 
+
+
+
+The design tools used in this paper corresponds to updated versions of the UAM motor drivetrain design tool 
+
+
+
+presented in [7]. The two flow diagrams in Figure 1 depict the two versions of the design tool used in this paper, one 
+
+
+
+for motor-based designs and one for OSMGM-based designs. The following sections first detail the updates to the 
+
+
+
+motor-based design tool and then the adaptation of the design tool to OSMGM-based designs. 
+
+
+
+ 
+
+
+
+Figure 1 Design Tool Flow Diagrams 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+3 
+
+
+
+ 
+
+
+
+A. Updates to Motor Drivetrain Design Tool 
+
+
+
+1. Analytical Preoptimization 
+
+
+
+To reduce the computational cost of the detailed finite element analysis (FEA) based optimization, analytical pre-
+
+
+
+optimizations of gearbox, motor, inverter, and thermal management system (TMS) were incorporated into this version 
+
+
+
+of the motor drivetrain design tool. This analytical optimization uses the preoptimized mechanical gearbox 
+
+
+
+performance curves generated using the method described in [15], the analytical motor model from [8], the analytical 
+
+
+
+inverter design tool discussed in [7] and [16], and HEATSSPY [17] an open source thermal management system 
+
+
+
+design tool based on OPENMDAO. The analytical preoptimizations build a good initial population for the FEA based 
+
+
+
+tool. The FEA based optimization then filters out designs whose performance was overpredicted using analytical 
+
+
+
+equations before completing further optimization of the remaining designs. 
+
+
+
+2. Mechanical Gear Box Sizing 
+
+
+
+In [7], gearbox mass and efficiency were assumed to only depend on the gear ratio for a given power and output 
+
+
+
+speed. As an update to the tool, a gearbox specific torque index was added as a genetic optimization variable. Gearbox 
+
+
+
+designs were still pre-generated using the design tool described in [15]. The pareto fronts at each gear ratio analyzed 
+
+
+
+were then used to create a scattered interpolant function with inputs of gear ratio and specific torque index. The specific 
+
+
+
+torque index controls whether at a given gear ratio a high mass, high efficiency design or a low mass, low efficiency 
+
+
+
+design is selected. The result of this update is that the overall mass of the drivetrain in the mechanically geared results 
+
+
+
+do not purely trend with motor mass as they did in [7] and more significantly correlate with gearbox mass. 
+
+
+
+3. Rotor Loss at Each Mission Point 
+
+
+
+In past versions of the motor mission profile analysis, rotor magnet and iron loss were assumed to be constant 
+
+
+
+across the entire mission [7] [8]. To make some attempt to account for the effect of stator current on the magnitude of 
+
+
+
+rotor loss, max magnetic field in each component is calculated via static FEA for zero stator current and each mission 
+
+
+
+design point. The difference in max magnetic field for each stator current relative to no stator current is used to scale 
+
+
+
+the rotor and magnet losses calculated using the pseudo time stepping FEA at climb condition. The scaling is 
+
+
+
+completed using 
+
+
+
+𝑅𝑜𝑡𝑜𝑟_𝐿𝑜𝑠𝑠𝑚𝑖𝑠𝑠𝑖𝑜𝑛𝑝𝑜𝑖𝑛𝑡 = 𝑅𝑜𝑡𝑜𝑟_𝐿𝑜𝑠𝑠𝑝𝑠𝑢𝑒𝑑𝑜𝐹𝐸𝐴 ∗ (
+𝐵𝑠𝑡𝑎𝑡𝑖𝑐,𝑚𝑖𝑠𝑠𝑖𝑜𝑛 − 𝐵𝑛𝑜−𝑐𝑢𝑟𝑟𝑒𝑛𝑡
+𝐵𝑠𝑡𝑎𝑡𝑖𝑐𝑐𝑙𝑖𝑚𝑏 − 𝐵𝑛𝑜−𝑐𝑢𝑟𝑟𝑒𝑛𝑡
+
+
+
+)𝛽 
+
+
+
+Where 𝑅𝑜𝑡𝑜𝑟_𝐿𝑜𝑠𝑠𝑚𝑖𝑠𝑠𝑖𝑜𝑛𝑝𝑜𝑖𝑛𝑡 is the estimated loss at each mission point, 𝑅𝑜𝑡𝑜𝑟_𝐿𝑜𝑠𝑠𝑝𝑠𝑢𝑒𝑑𝑜𝐹𝐸𝐴 is the rotor loss 
+
+
+
+calculated using pseudo time stepping FEA at climb condition, 𝐵𝑠𝑡𝑎𝑡𝑖𝑐,𝑚𝑖𝑠𝑠𝑖𝑜𝑛 is the max field in a rotor component 
+
+
+
+from static FEA at the mission point, 𝐵𝑛𝑜−𝑐𝑢𝑟𝑟𝑒𝑛𝑡 is the max field in a rotor component from the no stator current 
+
+
+
+static FEA, 𝐵𝑠𝑡𝑎𝑡𝑖𝑐𝑐𝑙𝑖𝑚𝑏 is the max field in a rotor component from static FEA at the climb mission point, and 𝛽 is the 
+
+
+
+field depended exponent for the loss in the component (2 for magnet eddy currents and 1.5 for iron loss). 
+
+
+
+4. TMS Design Flow 
+
+
+
+In the previous version of the motor drivetrain design tool [7], the TMS liquid-to-air heat exchanger design was 
+
+
+
+completed once before passing the results to the transient thermal model of the motor and if that model resulted in a 
+
+
+
+failure of the design due to thermo-mechanical stress or winding thermochemical life, the design was assigned a fitness 
+
+
+
+of zero. In this updated version of the tool, a failure as a result of either inverter or motor transient thermal FEA results 
+
+
+
+in a redesign of the liquid-to-air heat exchanger with a lower target steady state temperature and another iteration of 
+
+
+
+the transient thermal models unless the target steady state temperature for the fluid has dropped below 50 C. 
+
+
+
+5. Inverter Transient 
+
+
+
+To raise the fidelity of the thermal analysis of the inverter in the design tool, a transient mission profile FEA 
+
+
+
+thermal analysis of the inverter was incorporated into the design flow. This allows for more accurate predictions of 
+
+
+
+inverter component temperature over the mission profile at a relatively small computational cost. 
+
+
+
+B. Adaptation for Direct Drive 
+
+
+
+For direct drive machines, three changes are made to the design tool. Firstly, the bearing code is changed from the 
+
+
+
+motor bearing code from [8] to the propellor shaft and bearing code from [15] so that both geared and direct drive 
+
+
+
+machines account for the bearings and shafts needed to react the loads of the propellor. Second, the assumed coolant 
+
+
+
+is changed from oil to a 50/50 PGW mixture since there is no gearbox requiring oil lubrication. Third, rotor pole count 
+
+
+
+is not an optimization variable for the direct drive case. Since RPM is assumed to be constant in these studies, electrical 
+
+
+
+frequency is used to define rotor pole count in the optimization. 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+4 
+
+
+
+ 
+
+
+
+C. Adaptation to OSMGM design Tool 
+
+
+
+1. Optimization Variables 
+
+
+
+For the OSMGM design tool, 12 genetic optimization variables are used. Table 1 lists the variables. Sun gear radius 
+
+
+
+instead of tip speed is used to control the diameter of the gear, because of magnetic gear’s high mass sensitivity to 
+
+
+
+radius [18]. Both a second stage concentric magnetic gear (CMG) gear ratio, if applicable, and the OSMGM’s gear 
+
+
+
+ratio are used to control the rotational speed of the sun gear and modulator of the OSMGM. Electrical frequency in 
+
+
+
+turn sets the sun gear pole count. Sun magnet, ring magnet, and modulator thickness are all controlled at the top level 
+
+
+
+of the optimization. OSMGM stator mass replaces motor mass since the stack length and mass of the magnetic gear 
+
+
+
+portion of the OSMGM is set by the required torque. Using stator mass as a genetic optimization variable allows the 
+
+
+
+stator to be designed to maximize efficiency and thermal performance within a fitness evaluation. Both ring magnet 
+
+
+
+and sun magnet temperatures are allowed to be optimized by the code. Internal airgap cooling and the added windage 
+
+
+
+losses to maintain magnet temperatures are accounted for as described in Section III B 4. 
+
+
+
+Table 1 Genetic Optimization Variables for OSMGM Design Tool 
+
+
+
+Second Stage Gear Ratio OSMGM Gear Ratio 
+
+
+
+Sun Gear Radius Electrical Frequency 
+
+
+
+Sun Magnet Thickness Modulator Thickness 
+
+
+
+Ring Magnet Thickness OSMGM Stator Mass 
+
+
+
+Inverter Mass Ring Magnet Temperature 
+
+
+
+Sun Magnet Temperature Coolant Volumetric Flow Rate 
+
+
+
+ 
+
+
+
+2. CMG Gearbox Stage 
+
+
+
+If a concentric magnetic gear stage is used before the OSMGM in a 2-stage drivetrain, a simple one-dimensional 
+
+
+
+correlation for gearbox mass and efficiency as a function of gear ratio is used to include CMG mass and efficiency in 
+
+
+
+the performance prediction for the drivetrain. A two-dimensional one like the one used for mechanical gearboxes is 
+
+
+
+not used due to the higher mass and higher efficiency of the magnetic gears per Section III-A-2 making it logical to 
+
+
+
+prioritize minimizing the mass of the magnetic gearbox at the cost of efficiency in these design studies. 
+
+
+
+The data used to create the correlation for gearbox mass and efficiency as a function of gear ratio are generated 
+
+
+
+using a genetic optimization of a concentric magnetic gear. The design flow within the genetic optimization fitness 
+
+
+
+evaluation is based off of the design code used in previous magnetic gear sizing studies [19]. Different from [19], the 
+
+
+
+code makes an approximate efficiency estimate for the gear based on static FEA (Figure 2) and ring gear back iron is 
+
+
+
+included in the geometry of the concentric magnetic gear to allow the use of a metal housing around the gear. The 
+
+
+
+bearings and shafts of the concentric magnetic gear are sized using the code from [15] so that propellor loads and 
+
+
+
+moments are accounted for in both mechanical and magnetic gearbox designs. 
+
+
+
+The loss estimation methodologies used in [14] and [12] are used to estimate modulator iron, ring gear magnet, 
+
+
+
+ring gear iron, and windage losses. Some estimates of the difference between these loss calculations and loss 
+
+
+
+calculations that used pseudo time stepping FEA can be found in [12] [13] [14]. Sun gear magnetic loss was neglected 
+
+
+
+in past work. As a simple approximation in the paper, sun gear magnet loss is estimated as 
+
+
+
+𝑆𝑢𝑛𝐿𝑜𝑠𝑠 = 𝑅𝑖𝑛𝑔𝐿𝑜𝑠𝑠 ∗ (𝐺𝑅 − 1)2 
+
+
+
+The magnets are assumed to be samarium cobalt operating at 160 C. All magnets are assumed to be composed of 
+
+
+
+1 mm laminations to suppress eddy current losses in the magnets. In the magnetic simulations of the gears, a 10% 
+
+
+
+reduction is applied to the remanent flux density of the magnets to account for loss of magnet fill due to the use of 
+
+
+
+laminations. 
+
+
+
+
+
+
+
+
+
+
+
+5 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 2 Example CMG Magnetic Simulation Geometry and Result 
+
+
+
+3. OSMGM Sizing 
+
+
+
+Static 2D FEA simulations are used to calculate the torque per meter of the magnetic gear portion of the OSMGM 
+
+
+
+and the torque per meter per amp of stator current of the motor portion of the OSMGM. An example geometry and 
+
+
+
+result for this simulation is shown in Figure 3. The torque-per-meter of the gear portion is used to define its stack 
+
+
+
+length based on the required torque. 3D leakage is accounted for in the magnetic gear torque prediction and in the 
+
+
+
+motor torque calculation using a correlation based on the data found in [20] for magnetic gear 2D to 3D torque 
+
+
+
+reductions. 
+
+
+
+ 
+
+
+
+Figure 3 Geometry and Example Result for Static 2D OSMGM FEA 
+
+
+
+The stator stack length is sized by extrapolating from the 2D FEA the stator and its heat sink performance vs stator 
+
+
+
+radial thickness, stator back iron thickness, stator tooth thickness, and heat sink fin height. Stack length for set 
+
+
+
+combinations of these variables is back calculated such that the stator mass is roughly equal to the stator mass selected 
+
+
+
+by the genetic optimizer for a given fitness evaluation. Losses and an analytical prediction of stator thermal 
+
+
+
+performance are calculated for each case. A stator design is then selected based on maximizing the thermal 
+
+
+
+performance of the OSMGM. 
+
+
+
+A parametric stator electrical current sweep for the selected geometry is carried out in static 2D FEA. Required 
+
+
+
+stator electrical current for each mission design point is defined. Static FEA is then carried out at each of these set 
+
+
+
+electrical current points to calculate both the fields in all components and the inductance of the stator coil. The field 
+
+
+
+data is used to create magnetic loss estimates for the various components at each mission design point using the 
+
+
+
+methodology from [13]. To capture an estimate of the sun gear iron and magnet loss caused by the ring gear, a static 
+
+
+
+FEA simulation is carried out with the sun gear magnetization set to zero. The field data in the sun magnets and the 
+
+
+
+sun gear back iron from this simulation is used to estimate the losses caused by ring gear magnetic flux. Stator 
+
+
+
+
+
+
+
+
+
+
+
+6 
+
+
+
+ 
+
+
+
+electrical current caused losses in the sun gear are neglected assuming that the ring gear generates the bulk of the loss 
+
+
+
+given its relative magnetic strength and high electrical frequency relative to the sun gear [18]. 
+
+
+
+ 
+
+
+
+4. OSMGM Airgap Cooling Flow 
+
+
+
+In [14] [13] [12], the modulator of the magnetically geared motor was consistently found to reach high 
+
+
+
+temperatures when high fidelity thermal analysis was completed. To compensate for this and to allow magnet 
+
+
+
+temperature to be an optimization variable, air gap cooling flow was added to the machine designs. A parametric 
+
+
+
+sweep of volumetric flow rates was carried out in 3D thermal FEA to define the required volumetric flow rate of 
+
+
+
+coolant required to maintain target magnet and modulator temperatures in the OSMGM designs. The geometry of this 
+
+
+
+model is shown in Figure 4. Like in [12] and [14], the internal air is modeled as a solid body with high thermal 
+
+
+
+conductivity and thermal contact boundary conditions are used to represent the convective heat transfer between the 
+
+
+
+OSMGM components and the internal air. 
+
+
+
+From the analysis, magnet, and iron temperatures are extracted as a function of airgap flow and a required 
+
+
+
+volumetric flow rate of air is defined. Windage calculations are completed for this required axial flow rate of air and 
+
+
+
+incorporated into efficiency estimates for the machine. All subsequent thermal simulations of the machine include 
+
+
+
+boundary conditions with heat transfer coefficients corresponding to the required airgap cooling flow rate. Magnet 
+
+
+
+and Iron temperatures are checked after thermal transient FEA to verify that temperature limits for their respective 
+
+
+
+materials have not been exceeded. 
+
+
+
+ 
+
+
+
+Figure 4 Geometry of Airgap Cooling Flow Simulations and Example Results. Temperature shown in degrees 
+
+
+
+C 
+
+
+
+III. Results 
+
+
+
+Design studies were completed for the NASA RVLT six passenger quad rotor reference vehicle. The assumed 
+
+
+
+mission profile for this vehicle is defined in Table 2. This is the same mission as was used in [7] and [8]. Design 
+
+
+
+optimizations are carried out for each drive topology at 400, 1000, 2000, and 3000 RPM. All designs are assumed to 
+
+
+
+operate at constant RPM throughout the mission profile. All magnetic gears are sized for 150% the peak nominal 
+
+
+
+mission power so that slip, and corresponding loss of control can be avoided. 50% margin may be a conservative 
+
+
+
+estimate in the general studies presented here. More complete knowledge of a vehicle and its required control response 
+
+
+
+could raise or lower this margin. Section III-A presents the mechanical gearbox and magnetic gearbox optimization 
+
+
+
+results used in subsequent optimizations of geared drivetrains. Section III-B presents results for full drivetrains at each 
+
+
+
+RPM. Section III-C presents results for reduced airgap and reduced margin magnetically geared drives and a 
+
+
+
+discussion of what would be needed to make the magnetically geared drives competitive with direct drive and 
+
+
+
+mechanically geared drives. 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+7 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Table 2 Design Mission Profile 
+
+
+
+Assumed Quadrotor Propulsion Mission Profile 
+
+
+
+Mission Segment Power (kW) Time (s) 
+
+
+
+Hover1 (takeoff 1) 100 40 
+
+
+
+Climb1 140 240 
+
+
+
+Cruise1 70 1200 
+
+
+
+Hover2 (land 1 + takeoff 2) 100 80 
+
+
+
+Climb2 140 240 
+
+
+
+Cruise2 70 1200 
+
+
+
+Hover3 (land 2 100 40 
+
+
+
+Emergency 133 120 
+
+
+
+ 
+
+
+
+A. Gearbox Results 
+
+
+
+1. Mechanical Gearboxes 
+
+
+
+Mechanical gearbox preoptimizations were carried out 400, 100, 2000, and 3000 RPM. In each case the gears were 
+
+
+
+sized for a life of 5000 hours with 99% reliability at peak mission torque (climb condition – 140 kW). Optimizations 
+
+
+
+were carried out for 3 types of gearboxes: 1 stage planetary, 2 stage planetary, and a planetary output stage plus a spur 
+
+
+
+gear input stage. The results of the optimizations are shown in Appendix A. Figures 5 thru 8 show the outputs of the 
+
+
+
+gearbox scattered interpolant functions at each RPM. Minimum gearbox mass is shown to decay with rotor RPM in 
+
+
+
+Figures 5-8 but with marginal returns corresponding to gearbox specific torque decaying with reduced gearbox torque 
+
+
+
+[15] [21]. Gear efficiency at a given motor RPM is shown to increase with propulsor rotor speed due to higher rotor 
+
+
+
+RPM resulting in less load on the gears and lower gear ratios. Gear mass is shown to stay relatively constant at gear 
+
+
+
+ratios greater than 5 in Figures 5-8 due to 2 stage gearboxes becoming optimum at those gear ratios and the second 
+
+
+
+stage being lower mass and having minimum impact on the overall gearbox mass. 
+
+
+
+ 
+
+
+
+Figure 5 Gearbox scattered interpolant function results for mass and efficiency at 400 rpm 
+
+
+
+
+
+
+
+
+
+
+
+8 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 6 Gearbox scattered interpolant function results for mass and efficiency at 1000 rpm 
+
+
+
+ 
+
+
+
+Figure 7 Gearbox scattered interpolant function results for mass and efficiency at 2000 rpm 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 8 Gearbox scattered interpolant function results for mass and efficiency at 3000 rpm 
+
+
+
+
+
+
+
+
+
+
+
+9 
+
+
+
+ 
+
+
+
+ 
+
+
+
+2. Magnetic Gearboxes. 
+
+
+
+Second stage magnetic gearbox optimizations were only completed for a 400 RPM propulsor rotor speed assuming 
+
+
+
+an OSMGM on its own, without a second stage CMG, would be optimum at rotor speeds at or above 1000 RPM since 
+
+
+
+optimum concentric magnetic gear (CMG) gear ratio is typically 5 or 6 [18]. CMGs were first optimized for a nominal 
+
+
+
+1 mm mechanical airgap and a 150% torque margin and then optimized with a 0.5 mm airgap and a 150% torque 
+
+
+
+margin. Appendix B provides the pareto front data at each gear ratio for these optimizations. There is some difficulty 
+
+
+
+in equating mechanical gearboxes designed for a life at peak nominal mission torque and magnetic gearboxes without 
+
+
+
+knowing the required control response for the aircraft and what the absolute maximum required torque is. Here 50% 
+
+
+
+is assumed to be a conservative estimate of what would be required 
+
+
+
+Figure 9 shows a mass comparison of the lightest magnetic gearboxes with both 1 mm and 0.5 mm airgaps 
+
+
+
+compared to the lightest mechanical gearboxes with 99% efficiency. Magnetic gears are shown to be 10 to 15 kg 
+
+
+
+heavier at a gear ratio of 3 depending on airgap than mechanical gears. The CMGs are shown to increase more 
+
+
+
+significantly in mass with gear ratio then the mechanical gears, but that is in part due to the CMGs only being single 
+
+
+
+stage gearboxes while the mechanical gearboxes are 2 stages above a gear ratio of 5. The 0.5 mm airgap designs 
+
+
+
+increase less significantly in mass with increased gear ratio due to the smaller airgap resulting in less pole-to-pole 
+
+
+
+leakage flux when ring gear pole count gets larger and pole to pole distance gets smaller. 
+
+
+
+Figures 10 and 11 show the curves used to define second stage magnetic gearbox mass and efficiency at 400 rpm 
+
+
+
+with 1.0 mm and 0.5 mm airgaps. The lightest design at each gear ratio from the data in Appendix B is used assuming 
+
+
+
+magnetic gears need to prioritize mass over their mechanical counterparts to be competitive. At low gear ratios, 
+
+
+
+magnetic gears are shown to be able to achieve efficiencies greater than 99.5% in both Figure 10 and 11 as well as the 
+
+
+
+appendix data at this RPM. This high efficiency is due to the low electrical frequency of the components relative to 
+
+
+
+one another at 400 RPM. Figure 12 shows how efficiency of the CMGs trend with the electrical frequency of the sun 
+
+
+
+gear relative to the ring gear. 
+
+
+
+ 
+
+
+
+Figure 9 Comparison of magnetic gearbox minimum mass to mechanical gearbox mass with 99% efficiency 
+
+
+
+0
+
+
+
+10
+
+
+
+20
+
+
+
+30
+
+
+
+40
+
+
+
+50
+
+
+
+60
+
+
+
+70
+
+
+
+80
+
+
+
+90
+
+
+
+100
+
+
+
+0 5 10 15 20
+
+
+
+M
+as
+
+
+
+s 
+(k
+
+
+
+g
+)
+
+
+
+Gear Ratio
+
+
+
+400 RPM 140 kW Gearbox Mass Vs Gear Ratio
+
+
+
+1.0 mm airgap CMG
+
+
+
+0.5 mm airgap CMG
+
+
+
+Mechanical Gear Box
+
+
+
+(99% Efficiency)
+
+
+
+
+
+
+
+
+
+
+
+10 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 10 Curves used to define magnetic gearbox mass and efficiency at 140 kW, 400 RPM, 1.0 mm Airgap, 
+
+
+
+and 50% Torque Margin 
+
+
+
+ 
+
+
+
+Figure 11 Curves used to define magnetic gearbox mass and efficiency at 140 kW, 400 RPM, 0.5 mm Airgap, 
+
+
+
+and 50% Torque Margin 
+
+
+
+Mass = 3.5884*GR + 40.715
+
+
+
+R² = 0.9855
+
+
+
+E = -0.0017*GR + 1.0055
+
+
+
+R² = 0.9702
+
+
+
+97.5%
+
+
+
+98.0%
+
+
+
+98.5%
+
+
+
+99.0%
+
+
+
+99.5%
+
+
+
+100.0%
+
+
+
+0
+
+
+
+10
+
+
+
+20
+
+
+
+30
+
+
+
+40
+
+
+
+50
+
+
+
+60
+
+
+
+70
+
+
+
+80
+
+
+
+90
+
+
+
+100
+
+
+
+0 5 10 15 20
+
+
+
+E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+M
+a
+
+
+
+ss
+ (
+
+
+
+K
+g
+
+
+
+)
+
+
+
+Gear Ratio
+
+
+
+Correlations for Magnetic Gearbox Mass and Efficiency 
+
+
+
+(140 kW, 400 RPM, 1.0 mm Aigap, 50% Torque Margin)
+
+
+
+Mass Efficiency Linear (Mass) Linear (Efficiency)
+
+
+
+Mass = 2.1082x + 38.568
+
+
+
+R² = 0.9852
+
+
+
+Efficiency = -0.0016x + 1.0052
+
+
+
+R² = 0.9672
+
+
+
+98.0%
+
+
+
+98.2%
+
+
+
+98.4%
+
+
+
+98.6%
+
+
+
+98.8%
+
+
+
+99.0%
+
+
+
+99.2%
+
+
+
+99.4%
+
+
+
+99.6%
+
+
+
+99.8%
+
+
+
+100.0%
+
+
+
+0
+
+
+
+10
+
+
+
+20
+
+
+
+30
+
+
+
+40
+
+
+
+50
+
+
+
+60
+
+
+
+70
+
+
+
+80
+
+
+
+90
+
+
+
+100
+
+
+
+0 5 10 15 20
+
+
+
+E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+M
+a
+
+
+
+ss
+ (
+
+
+
+K
+g
+
+
+
+)
+
+
+
+Gear Ratio
+
+
+
+Correlations for Magnetic Gearbox Mass and Efficiency 
+
+
+
+(140 kW, 400 RPM, 0.5 mm Aigap, 50% Torque Margin)
+
+
+
+Mass Efficiency Linear (Mass) Linear (Efficiency)
+
+
+
+
+
+
+
+
+
+
+
+11 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 12 CMG Efficiency Vs Sun Gear Electrical Frequency Relative to the Ring Gear at 140 kW and 400 
+
+
+
+RPM 
+
+
+
+ 
+
+
+
+B. Drivetrain Comparison 
+
+
+
+Figures 13 thru 16 show the best design of each topology at 400, 1000, 2000, and 3000 RPM rotor speed. In all 
+
+
+
+cases, the mechanically geared drive is shown to be the lightest. Mechanically geared drivetrains’ mass benefit relative 
+
+
+
+to the direct drive and magnetically geared motor topologies is shown to reduce with increased RPM. Figure 17 shows 
+
+
+
+a mass comparison of each drivetrain topology’s minimum mass design. Mechanically geared motor drivetrains are 
+
+
+
+shown to have a 30 kg mass benefit at 400 RPM that decays to less than 5 kg at 3000 RPM. All three drives have 
+
+
+
+essentially the same mass at 3000 RPM. This reduction in gearbox benefit with increased rotor RPM trend is primarily 
+
+
+
+the result of gearbox specific torque decaying with reduced torque as shown in the data in Appendix A. Figure 18 
+
+
+
+shows how overall mechanically geared drivetrain mass primarily trends with the mass of the gearbox for all best 
+
+
+
+designs at all RPM. It also shows that the mass and performance of the other components in the drivetrain (inverter, 
+
+
+
+motor, and TMS) stay roughly constant with changes in rotor RPM as would be suspected. This result verifies that, in 
+
+
+
+the future, only a single full mechanically geared drivetrain study for a given application needs to be completed and 
+
+
+
+then the results can be extrapolated to other rotor RPM’s by updating the gearbox mass and efficiency based on 
+
+
+
+reoptimizing the gearbox for different rotor speeds. 
+
+
+
+97.5%
+
+
+
+98.0%
+
+
+
+98.5%
+
+
+
+99.0%
+
+
+
+99.5%
+
+
+
+100.0%
+
+
+
+0 200 400 600 800 1000 1200
+
+
+
+E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+Sun Gear Electrical Frequency (Hz)
+
+
+
+CMG Efficiency Vs Sun Gear Electrical Frequency 
+
+
+
+1.0 mm Airgap
+
+
+
+0.5 mm Airgap
+
+
+
+
+
+
+
+
+
+
+
+12 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 13 Comparison of different drivetrain topology performances for the mission profile of Table 2 at 400 
+
+
+
+RPM. Results are reported in terms of total drivetrain mass (TMS + Motor + Gears + Inverter) and 
+
+
+
+drivetrain mission efficiency 
+
+
+
+ 
+
+
+
+Figure 14 Comparison of different drivetrain topology performances for the mission profile of Table 2 at 
+
+
+
+1000 RPM. Results are reported in terms of total drivetrain mass (TMS + Motor + Gears + Inverter) and 
+
+
+
+drivetrain mission efficiency 
+
+
+
+88%
+
+
+
+90%
+
+
+
+92%
+
+
+
+94%
+
+
+
+96%
+
+
+
+98%
+
+
+
+100%
+
+
+
+40 60 80 100 120 140 160 180 200
+
+
+
+D
+ri
+
+
+
+v
+et
+
+
+
+ra
+in
+
+
+
+ M
+is
+
+
+
+si
+o
+
+
+
+n
+ E
+
+
+
+ff
+ic
+
+
+
+ie
+n
+cy
+
+
+
+Total Drivetrain Mass (kg)
+
+
+
+Drivetrain Mission Efficiency Vs Total Mass 
+
+
+
+(400 RPM - 100 kW Hover Quadrotor Propulsor)
+
+
+
+Mechanically Geared
+
+
+
+Direct Drive
+
+
+
+OSMGM
+
+
+
+2 Stage OSMGM
+
+
+
+90%
+
+
+
+92%
+
+
+
+94%
+
+
+
+96%
+
+
+
+98%
+
+
+
+100%
+
+
+
+40 50 60 70 80 90 100
+
+
+
+M
+is
+
+
+
+si
+o
+
+
+
+n
+ E
+
+
+
+ff
+ic
+
+
+
+ie
+n
+cy
+
+
+
+Drivetrain Mass
+
+
+
+Drivetrain Mission Efficiency Vs Total Mass 
+
+
+
+(1000 RPM - 100 kW Hover Quadrotor Propulsor)
+
+
+
+Mechanically Geared
+
+
+
+Direct Drive
+
+
+
+OSMGM
+
+
+
+
+
+
+
+
+
+
+
+13 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 15 Comparison of different drivetrain topology performances for the mission profile of Table 2 at 
+
+
+
+2000 RPM. Results are reported in terms of total drivetrain mass (TMS + Motor + Gears + Inverter) and 
+
+
+
+drivetrain mission efficiency 
+
+
+
+ 
+
+
+
+Figure 16 Comparison of different drivetrain topology performances for the mission profile of Table 2 at 
+
+
+
+3000 RPM. Results are reported in terms of total drivetrain mass (TMS + Motor + Gears + Inverter) and 
+
+
+
+drivetrain mission efficiency 
+
+
+
+90%
+
+
+
+92%
+
+
+
+94%
+
+
+
+96%
+
+
+
+98%
+
+
+
+100%
+
+
+
+40 50 60 70 80 90 100
+
+
+
+M
+is
+
+
+
+si
+o
+
+
+
+n
+ E
+
+
+
+ff
+ic
+
+
+
+ie
+n
+cy
+
+
+
+Drivetrain Mass
+
+
+
+Drivetrain Mission Efficiency Vs Total Mass 
+
+
+
+(2000 RPM - 100 kW Hover Quadrotor Propulsor)
+
+
+
+Mechanically Geared
+
+
+
+Direct Drive
+
+
+
+OSMGM
+
+
+
+90%
+
+
+
+92%
+
+
+
+94%
+
+
+
+96%
+
+
+
+98%
+
+
+
+100%
+
+
+
+40 50 60 70 80 90 100
+
+
+
+M
+is
+
+
+
+si
+o
+
+
+
+n
+ E
+
+
+
+ff
+ic
+
+
+
+ie
+n
+cy
+
+
+
+Drivetrain Mass (kg)
+
+
+
+Drivetrain Mission Efficiency Vs Total Mass 
+
+
+
+(3000 RPM - 100 kW Hover Quadrotor Propulsor)
+
+
+
+Mechanically Geared
+
+
+
+Direct Drive
+
+
+
+OSMGM
+
+
+
+
+
+
+
+
+
+
+
+14 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 17 Minimum Mass Drivetrain Mass Vs Propulsor Rotor Speed of Each Drivetrain Topology. 
+
+
+
+ 
+
+
+
+Figure 18 Mechanically geared drivetrain mass dependency on gearbox mass. Left shows trend of total mass 
+
+
+
+vs gearbox mass. Right shows total drivetrain mission efficiency vs the sum of inverter, motor, and TMS mass 
+
+
+
+for mechanically geared drives. 
+
+
+
+In Figure 13 thru 16, the direct drive drivetrains are generally able to achieve higher efficiency than the 
+
+
+
+mechanically geared and magnetically geared drivetrains. Figure 19 shows the dependance of mission efficiency on 
+
+
+
+the electrical frequency of the motor for all drivetrain pareto front designs. As seen in [7] and [8], electrical frequency 
+
+
+
+is the primary driver of overall drivetrain mission efficiency for the UAM missions. Figure 20 shows that at 400 RPM 
+
+
+
+and at climb condition the geared drivetrain motor and gearbox performance exceeds that of the direct drive motors; 
+
+
+
+however, the direct drive inverters outperform the geared drivetrain inverters at the same condition due to the lower 
+
+
+
+electrical frequencies. 
+
+
+
+ 
+
+
+
+40
+
+
+
+50
+
+
+
+60
+
+
+
+70
+
+
+
+80
+
+
+
+90
+
+
+
+100
+
+
+
+110
+
+
+
+120
+
+
+
+130
+
+
+
+0 500 1000 1500 2000 2500 3000 3500
+
+
+
+D
+ri
+
+
+
+v
+et
+
+
+
+ra
+in
+
+
+
+ M
+as
+
+
+
+s 
+(k
+
+
+
+g
+)
+
+
+
+Propulsor Rotor RPM
+
+
+
+Lightest Design Drivetrain of Each Topology 
+
+
+
+Mass Vs RPM
+
+
+
+Mechanically Geared OSMGM Direct Drive 2 Stage OSMGM
+
+
+
+0
+
+
+
+20
+
+
+
+40
+
+
+
+60
+
+
+
+80
+
+
+
+100
+
+
+
+120
+
+
+
+140
+
+
+
+160
+
+
+
+0 20 40 60 80 100
+
+
+
+D
+ri
+
+
+
+v
+et
+
+
+
+ra
+in
+
+
+
+ T
+o
+ta
+
+
+
+l 
+M
+
+
+
+as
+s 
+
+
+
+(K
+g
+)
+
+
+
+Gearbox Mass (kg)
+
+
+
+Mechanically Geared Drivetrain Total Mass 
+
+
+
+Vs Gearbox Mass
+
+
+
+400 RPM 1000 RPM 2000 RPM 3000 RPM
+
+
+
+88%
+
+
+
+90%
+
+
+
+92%
+
+
+
+94%
+
+
+
+96%
+
+
+
+20 25 30 35 40 45 50
+
+
+
+M
+is
+
+
+
+si
+o
+n
+
+
+
+ E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+Inverter, Motor, and TMS Mass (kg)
+
+
+
+Mechanically Geared Drivetrain Mission 
+
+
+
+Efficiency Vs Inverter, Motor, and TMS Mass
+
+
+
+400 RPM 1000 RPM 2000 RPM 3000 RPM
+
+
+
+
+
+
+
+
+
+
+
+15 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 19 All Pareto Front Drivetrain Designs at every RPM Mission Efficiency Vs Motor Electrical Frequency 
+
+
+
+ 
+
+
+
+Figure 20 Result of lower electrical frequency at 400 RPM. Left shows that the gear and motor portions of the 
+
+
+
+mechanically and magnetically geared drive trains are able to outperform direct drive at climb conditions. 
+
+
+
+Right shows that the direct drive inverter has appreciably higher efficiency 
+
+
+
+C. OSMGM Additional Studies 
+
+
+
+In Figure 13 thru 16 OSMGMs are shown to have minimal mass benefit and worse efficiency than their direct drive 
+
+
+
+counterparts. In past papers [13] [14] [12], it was shown that magnetically geared motors can achieve continuous 
+
+
+
+specific torques greater than their direct counterparts. In this study with the whole drivetrain accounted for, the 
+
+
+
+transient mission profile, and the 50% torque margin on the OSMGM they performed worse. The transient profile 
+
+
+
+allows the direct drive motors to take advantage of the fact that they can boost torque temporarily and use their thermal 
+
+
+
+inertia to not overheat. Magnetically and mechanically geared drives must be sized for full torque and carry the extra 
+
+
+
+88%
+
+
+
+90%
+
+
+
+92%
+
+
+
+94%
+
+
+
+96%
+
+
+
+98%
+
+
+
+100%
+
+
+
+0 200 400 600 800 1000 1200 1400 1600
+
+
+
+M
+is
+
+
+
+si
+o
+n
+
+
+
+ E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+Motor Electrical Frequency (Hz)
+
+
+
+Drivetrain Mission Efficiency Vs Electrical Frequency 
+
+
+
+for All Drivetrain Pareto Front Designs
+
+
+
+Mech Geared 400 RPM Mech Geared 1000 RPM Mech Geared 2000 RPM Mech Geared 3000 RPM
+
+
+
+DD 400 RPM DD 1000 RPM DD 2000 RPM DD 3000 RPM
+
+
+
+OSMGM 400 RPM OSMGM 1000 RPM OSMGM 2000 RPM OSMGM 3000 RPM
+
+
+
+86%
+
+
+
+88%
+
+
+
+90%
+
+
+
+92%
+
+
+
+94%
+
+
+
+96%
+
+
+
+98%
+
+
+
+100%
+
+
+
+0 50 100 150 200 250 300
+
+
+
+C
+li
+
+
+
+m
+b
+
+
+
+ E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+Motor + Gearbox Mass (kg)
+
+
+
+Climb Efficiency Vs Motor+Gear Mass
+
+
+
+Mechanically Geared Direct Drive
+
+
+
+OSMGM 2 Stage OSMGM
+
+
+
+96.0%
+
+
+
+96.5%
+
+
+
+97.0%
+
+
+
+97.5%
+
+
+
+98.0%
+
+
+
+98.5%
+
+
+
+0 10 20 30 40 50
+
+
+
+In
+v
+er
+
+
+
+te
+r 
+
+
+
+C
+li
+
+
+
+m
+b
+
+
+
+ E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+Inverter Mass (kg)
+
+
+
+Inverter Climb Performance Comparison
+
+
+
+Mechanically Geared Direct Drive
+
+
+
+OSMGM 2 Stage OSMGM
+
+
+
+
+
+
+
+
+
+
+
+16 
+
+
+
+ 
+
+
+
+mass and losses corresponding with the additional active mass throughout the mission profile. Additionally, as 
+
+
+
+mentioned above the direct drive case gets appreciable benefits in its inverter by having lower electrical frequency. 
+
+
+
+Two additional studies were carried out for OSMGMs at 1000 RPM to explore the feasibility of OSMGM’s 
+
+
+
+becoming more competitive in the design space. The first study reduced the 50% torque margin for the OSMGM down 
+
+
+
+to 10% corresponding to the required control response torque margin being less than what was estimated in Section 
+
+
+
+III B. The second study left the torque margin the same and reduced airgap to 0.5 mm. 0.5 mm airgaps are feasible in 
+
+
+
+magnetic gears but will have additional manufacturing costs and structural constraints. Figure 21 shows these two 
+
+
+
+studies along with the original 1000 RPM results from Section III B. Both of the two additional studies shift the 
+
+
+
+OSMGM to being directly competitive with the mechanically geared drivetrains for the application. The 0.5 mm 
+
+
+
+airgap results suggest that more refinement of OSMGM geometry could further improve their performance and 
+
+
+
+competitiveness for the application. 
+
+
+
+ 
+
+
+
+Figure 21 Comparison of different drivetrain topologies performances for the mission profile of Table 2 at 
+
+
+
+1000 RPM. Results are reported in terms of total drivetrain mass (TMS + Motor + Gears + Inverter) and 
+
+
+
+drivetrain mission efficiency 
+
+
+
+An additional study was also carried out for a 2 stage OSMGM drive with 0.5 mm airgaps at 400 RPM. The data 
+
+
+
+from Figure 11 was used to define the mass and efficiency of the second stage CMG in the drive. Figure 22 shows the 
+
+
+
+results of this study with the original 400 RPM results. Only a small improvement in 2 stage OSMGM mass is shown. 
+
+
+
+This result is because all pareto optimum 2 stage OSMGM results have second stage gear ratios of 4 or 5. As seen in 
+
+
+
+Figure 9, at these lower gear ratios a 0.5 mm airgap in a CMG only provides a 10 kg benefit over a 1 mm airgap. 
+
+
+
+ 
+
+
+
+90%
+
+
+
+92%
+
+
+
+94%
+
+
+
+96%
+
+
+
+98%
+
+
+
+100%
+
+
+
+40 50 60 70 80 90 100 110
+
+
+
+M
+is
+
+
+
+si
+o
+n
+
+
+
+ E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+Drivetrain Mass
+
+
+
+Drivetrain Mission Efficiency Vs Total Mass 
+
+
+
+(1000 RPM - 100 kW Hover Quadrotor Propulsor)
+
+
+
+Mechanically Geared
+
+
+
+Direct Drive
+
+
+
+OSMGM
+
+
+
+OSMGM 0.5 mm ag
+
+
+
+OSMGM 10% Margin
+
+
+
+
+
+
+
+
+
+
+
+17 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 22 Comparison of different drivetrain topologies performances for the mission profile of Table 2 at 
+
+
+
+400 RPM. Results are reported in terms of total drivetrain mass (TMS + Motor + Gears + Inverter) and 
+
+
+
+drivetrain mission efficiency 
+
+
+
+IV. Conclusions and Future Work 
+
+
+
+In this paper, drivetrain topologies were explored for a 100 kW hover power quadrotor propulsor application. 
+
+
+
+Mechanically geared, direct drive, and magnetically geared drivetrain topologies were compared by optimizing them 
+
+
+
+for a given mission profile at different rotor RPM. Across the design space mechanically geared drives are shown to 
+
+
+
+achieve the lowest mass while direct drive drivetrains achieve the highest efficiencies. The magnetically geared 
+
+
+
+topologies were nominally not competitive in the design space, but that was in large part due to the assumption of a 
+
+
+
+50% torque margin requirement on nominal mission power for magnetic gears. Reduction of this margin to 10% or 
+
+
+
+the used of 0.5 mm airgaps in the magnetically geared drives did make them competitive in the design space. It should 
+
+
+
+be noted that these studies were completed for a specific power level, a specific application, and with a specific 
+
+
+
+assumed set of technologies and correspondingly do not provide general results that are applicable to all applications 
+
+
+
+and technologies. Future work in this area will: 
+
+
+
+1. Incorporate reliability models in the design optimization 
+
+
+
+2. Integration of explicit control response requirements to eliminate torque margin assumptions 
+
+
+
+3. Expand studies to different applications, technologies, and power levels 
+
+
+
+4. Explore other possible methods of improving magnetic gear performance beyond just reducing airgap 
+
+
+
+ 
+
+
+
+ 
+
+
+
+88%
+
+
+
+90%
+
+
+
+92%
+
+
+
+94%
+
+
+
+96%
+
+
+
+98%
+
+
+
+100%
+
+
+
+40 60 80 100 120 140 160 180 200
+
+
+
+D
+ri
+
+
+
+v
+et
+
+
+
+ra
+in
+
+
+
+ M
+is
+
+
+
+si
+o
+n
+
+
+
+ E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+Total Drivetrain Mass (kg)
+
+
+
+Drivetrain Mission Efficiency Vs Total Mass 
+
+
+
+(400 RPM - 100 kW Hover Quadrotor Propulsor)
+
+
+
+Mechanically Geared Direct Drive OSMGM 2 Stage OSMGM 2 Stage OSMGM 0.5 mm ag
+
+
+
+
+
+
+
+
+
+
+
+18 
+
+
+
+ 
+
+
+
+Appendix 
+
+
+
+A. Gearbox Preoptimization Results 
+
+
+
+ 
+
+
+
+Figure 23 Mechanical Gear Efficiency Vs Specific Torque at 140 kW and 400 RPM 
+
+
+
+ 
+
+
+
+Figure 24 Mechanical Gear Efficiency Vs Specific Torque at 140 kW and 400 RPM 
+
+
+
+97.0%
+
+
+
+97.5%
+
+
+
+98.0%
+
+
+
+98.5%
+
+
+
+99.0%
+
+
+
+99.5%
+
+
+
+100.0%
+
+
+
+0 10 20 30 40 50 60 70 80 90 100 110 120 130 140
+
+
+
+E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+Specific Torque (Nm/kg)
+
+
+
+RVLT Electric Quad Rotor Gearbox 
+
+
+
+(140 kW 400 RPM)
+
+
+
+Specific Torque Vs Efficiency 
+
+
+
+1 Stage GR=3 1 Stage GR=5 1 Stage GR=8 1 Stage GR=10
+2 Stage GR=10 2 Stage GR=15 2 Stage GR=20 2 Stage GR=30
+2 Stage GR=40 Planet+Spur GR=5 Planet+Spur GR=10 Planet+Spur GR=15
+Planet+Spur GR=20 Planet+Spur GR=25 Planet+Spur GR=30 Planet+Spur GR=40
+
+
+
+97.00%
+
+
+
+98.00%
+
+
+
+99.00%
+
+
+
+100.00%
+
+
+
+0 10 20 30 40 50 60 70 80 90
+
+
+
+E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+Specific Torque (Nm/kg)
+
+
+
+RVLT Electric Quad Rotor Gearbox 
+
+
+
+(140 kW 1000 RPM)
+
+
+
+Specific Torque Vs Efficiency 
+
+
+
+Planetary GR=3 Planetary GR=5 Planetary GR=7 Planetary GR=9
+Spur +Planetary GR=5 Spur +Planetary GR=7 Spur +Planetary GR=9 Spur +Planetary GR=12
+Spur +Planetary GR=15 Spur +Planetary GR=20 Spur +Planetary GR=25 Spur +Planetary GR=30
+Spur +Planetary GR=40 Spur +Planetary GR=35 2 Planetary GR=9 2 Planetary GR=15
+2 Planetary GR=12 2 Planetary GR=25 2 Planetary GR=20
+
+
+
+
+
+
+
+
+
+
+
+19 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Figure 25 Mechanical Gear Efficiency Vs Specific Torque at 140 kW and 2000 RPM 
+
+
+
+ 
+
+
+
+Figure 26 Mechanical Gear Efficiency Vs Specific Torque at 140 kW and 2000 RPM 
+
+
+
+97.0%
+
+
+
+97.5%
+
+
+
+98.0%
+
+
+
+98.5%
+
+
+
+99.0%
+
+
+
+99.5%
+
+
+
+100.0%
+
+
+
+0 10 20 30 40 50 60
+
+
+
+E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+Specific Torque (Nm/kg)
+
+
+
+RVLT Electric Quad Rotor Gearbox 
+
+
+
+(140 kW 2000 RPM)
+
+
+
+Specific Torque Vs Efficiency 
+
+
+
+Planetary GR=3 Planetary GR=5 Planetary GR=7 Planetary GR=9
+
+
+
+2 Planet GR=7 2 Planet GR=9 2 Planet GR=12 2 Planet GR=15
+
+
+
+Spur+Planet GR=7 Spur+Planet GR=9 Spur+Planet GR=12 Spur+Planet GR=15
+
+
+
+Spur+Planet GR=20 Spur+Planet GR=25 Spur+Planet GR=30
+
+
+
+97.0%
+
+
+
+98.0%
+
+
+
+99.0%
+
+
+
+100.0%
+
+
+
+0 5 10 15 20 25 30 35 40
+
+
+
+E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+Specific Torque (Nm/kg)
+
+
+
+RVLT Electric Quad Rotor Gearbox 
+
+
+
+(140 kW 3000 RPM)
+
+
+
+Specific Torque Vs Efficiency 
+
+
+
+Planetary GR=3 Planetary GR=5 Planetary GR=7
+
+
+
+Planetary GR=9 Planetary Plus Spur GR=7 Planetary Plus Spur GR=12
+
+
+
+Planetary Plus Spur GR=15 Planetary Plus Spur GR=20
+
+
+
+
+
+
+
+
+
+
+
+20 
+
+
+
+ 
+
+
+
+B. Magnetic Second Stage Gearbox Data 
+
+
+
+ 
+
+
+
+Figure 27 Magnetic Gear Efficiency Vs Specific Torque at 400 RPM, 140 kW, and a 1mm airgap 
+
+
+
+ 
+
+
+
+Figure 28 Magnetic Gear Efficiency Vs Specific Torque at 400 RPM, 140 kW, and a 0.5 mm airgap 
+
+
+
+97.0%
+
+
+
+97.5%
+
+
+
+98.0%
+
+
+
+98.5%
+
+
+
+99.0%
+
+
+
+99.5%
+
+
+
+100.0%
+
+
+
+0 10 20 30 40 50 60 70
+
+
+
+E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+Specific Torque (Nm/kg)
+
+
+
+RVLT Electric Quad Rotor CMG
+
+
+
+(140 kW, 400 RPM, 1.0 mm Airgap, 50% Torque Margin)
+
+
+
+Specific Torque Vs Efficiency 
+
+
+
+GR=3
+
+
+
+GR=5
+
+
+
+GR=7
+
+
+
+GR=8
+
+
+
+GR=9
+
+
+
+GR=11
+
+
+
+GR=13
+
+
+
+98.0%
+
+
+
+98.5%
+
+
+
+99.0%
+
+
+
+99.5%
+
+
+
+100.0%
+
+
+
+0 20 40 60 80
+
+
+
+E
+ff
+
+
+
+ic
+ie
+
+
+
+n
+cy
+
+
+
+Specific Torque (Nm/kg)
+
+
+
+RVLT Electric Quad Rotor CMG
+
+
+
+(140 kW, 400 RPM, 0.5 mm Airgap, 50% Torque Margin)
+
+
+
+Specific Torque Vs Efficiency 
+
+
+
+3
+
+
+
+5
+
+
+
+7
+
+
+
+9
+
+
+
+11
+
+
+
+13
+
+
+
+15
+
+
+
+
+
+
+
+
+
+
+
+21 
+
+
+
+ 
+
+
+
+C. Additional Plots 
+
+
+
+ 
+
+
+
+Figure 29 Direct Drive Motor Drivetrain Mission Efficiency Vs Mass at Different Rotor Rotational Speeds 
+
+
+
+Table 3 Motor and OSMGM Specific Power, Specific Torque, and Efficiency of each lowest mass design 
+
+
+
+ 
+RPM Mass Torque 
+
+
+
+Specific 
+Torque 
+(Nm/kg) 
+
+
+
+Specific 
+Power 
+
+
+
+(kW/kg) 
+Efficiency 
+
+
+
+ 
+
+
+
+Direct Drive 
+Motors 
+
+
+
+400 88.89 3342 37.60 1.57 96.88% 
+
+
+
+1000 69.04 1337 19.36 2.03 96.75% 
+
+
+
+2000 38.53 668 17.35 3.63 96.24% 
+
+
+
+3000 37.10 446 12.01 3.77 95.79% 
+
+
+
+Geared 
+Motors 
+
+
+
+8904 21.65 150 6.94 6.47 96.99% 
+
+
+
+9470 19.29 141 7.32 7.26 97.40% 
+
+
+
+13125 18.30 102 5.57 7.65 97.56% 
+
+
+
+16350 17.82 82 4.59 7.86 97.23% 
+
+
+
+OSMGM 
+
+
+
+400 96.99 3342 34.46 1.44 97.09% 
+
+
+
+1000 60.29 1337 22.18 2.32 95.63% 
+
+
+
+2000 43.33 668 15.43 3.23 96.31% 
+
+
+
+3000 39.61 446 11.25 3.53 95.37% 
+
+
+
+OSMGM 10% 
+Margin 
+
+
+
+1000 52.17 1337 25.63 2.68 95.75% 
+
+
+
+OSMGM 
+0.5mm Airgap 
+
+
+
+1000 53.17 1337 25.14 2.63 96.65% 
+
+
+
+Acknowledgments 
+
+
+
+The authors would like to acknowledge NASA’s Revolutionary Vertical Lift Technology Project for sponsoring this 
+
+
+
+work. 
+
+
+
+88%
+
+
+
+90%
+
+
+
+92%
+
+
+
+94%
+
+
+
+96%
+
+
+
+98%
+
+
+
+100%
+
+
+
+0 50 100 150 200
+
+
+
+D
+ri
+
+
+
+v
+et
+
+
+
+ra
+in
+
+
+
+ M
+is
+
+
+
+si
+o
+
+
+
+n
+ E
+
+
+
+ff
+ic
+
+
+
+ie
+n
+cy
+
+
+
+Drivetrain Mass(Kg)
+
+
+
+100 kW Quadrotor Direct Drive Drivetrain 
+
+
+
+Mission Efficiency Vs Mass
+
+
+
+3000 RPM
+
+
+
+2000 RPM
+
+
+
+1000 RPM
+
+
+
+400 RPM
+
+
+
+
+
+
+
+
+
+
+
+22 
+
+
+
+ 
+
+
+
+V.References 
+
+
+
+ 
+
+
+
+[1] J. Scheidler, V. Asnani and T. Tallerico, "NASA's Magnetic Gearing Research for Electrified Aircraft 
+
+
+
+propulsion," in AIAA/IEEE Electric Aircraft Technologies Symposium, Cincinnati, 2018. 
+
+
+
+[2] M. C. Gardner, B. Praslicka, M. Johnson and H. A. Toliyat, "Optimization of Coaxial Magnetic Gear Design 
+
+
+
+and Magnet Material Grade at Different Temperatures and Gear Ratios," IEEE Transactions on Energy 
+
+
+
+Conversion, vol. 36, no. 3, pp. 2493-2501, 2021. 
+
+
+
+[3] J. Z. Bird, "A Review of Electric Aircraft Drivetrain Motor Technology," IEEE Transactions on Magnetics, vol. 
+
+
+
+58, no. 2, pp. 1-8, 2022. 
+
+
+
+[4] H. Y. Wong, H. Baninajar, B. Dechant and J. Bird, "Designing a Magnetic Gear for an Electric Aircraft 
+
+
+
+Drivetrain," in IEEE Energy Conversion Congress and Exposition, 2020. 
+
+
+
+[5] A. D. Anderson, N. J. Renner, Y. Wang, D. Lee, S. Agrawal, S. Sirimanna, K. Haran, A. Banerjee, M. Starr and 
+
+
+
+J. Felder, "System Weight Comparison of Electric Machine Topologies for Electric Aircraft Propulsion," in 
+
+
+
+AIAA/IEEE Electric Aircraft Technologies Symposium, Cincinnati, 2018. 
+
+
+
+[6] D. Schweigert, M. Gerlach, A. Hoffmann, B. Morhard, A. Tripps, T. Lohner, M. Otto, B. Ponick and K. Stahl, 
+
+
+
+"On the Impact of Maximum Speed on the Power Density of Electromechanical Powertrains," Vehicles, vol. 2, 
+
+
+
+pp. 365-397, 2020. 
+
+
+
+[7] T. F. Tallerico, J. Chapman and A. D. Smith, "Preliminary Electric Motor Drivetrain Optimization Studies for 
+
+
+
+Urban Air Mobility Vehicles," in AIAA/IEEE Electric Aircraft Technologies Symposium, Anaheim, 2022. 
+
+
+
+[8] T. F. Tallerico, "NASA Reference Motor Designs for Electric Vertical Takeoff and Landing Vehicles," in AIAA 
+
+
+
+Propulsion and Energy 2021 Forum, Virtual, 2021. 
+
+
+
+[9] W. Johnson, C. Silva and E. Solis, "Concept Vehicles for VTOL Air Taxi Operations," in American Helicopter 
+
+
+
+Society Technical Conferance on Aeromechanics Design for Transfromative Vertical Flight, San Francisco, 
+
+
+
+2018. 
+
+
+
+[10] C. Silva, W. Johnson, K. Antcliff and P. D. Michael, "VTOL Urban Air Mobility Concept Vehicles for 
+
+
+
+Technology Development," in AIAA Aviation, Alanta, 2018. 
+
+
+
+[11] M. Patterson, B. J. German and M. D. Moore, ""Performance and Design of On-Demand Electric Aircraft 
+
+
+
+Concepts"," in AIAA Aviation Technology, Integration, and Operations Conferance, Inianapolis, 2012. 
+
+
+
+[12] T. F. Tallerico, J. J. Scheidler and A. Smith, "Design Study of Double-Sided Axial-Flux Magnetically-Geared 
+
+
+
+Motors for Electric Aircraft Applications," in AIAA Propulsion and Energy Forum, Virtual, 2021. 
+
+
+
+[13] T. F. Tallerico, Z. A. Cameron, J. J. Sheidler and H. Hasseeb, "Outer Stator Magnetically-Geared Motors for 
+
+
+
+Electrified Urban Air Mobility Vehicles," in AIAA/IEEE Electric Aircraft Technologies Symposium (EATS), 
+
+
+
+Virtual, 2020. 
+
+
+
+[14] T. Tallerico and J. J. Scheidler, "Design Study of a Coupled Inner-Stator Magnetically Geared Motor for Electric 
+
+
+
+Aircraft Applications," in IEEE Transportation Electrification Conference & Expo (ITEC), Anaheim, 2022. 
+
+
+
+[15] T. F. Tallerico, "Genetic Optimization of Planetary Gearboxes Based on Analytical Gearing Equations," NASA 
+
+
+
+TM-20220008843, Cleveland, 2022. 
+
+
+
+[16] T. Tallerico and A. D. Smith, "Combined Electromagnetic and Thermal Design Optimization Studies of in-Slot 
+
+
+
+Cooling for UAM Electric Motors," in IEEE Transportation Electrification Conference & Expo (ITEC), 
+
+
+
+Anaheim, 2022. 
+
+
+
+[17] J. Chapman, H. Hasseeb and S. Schnulo, "Thermal Management System Design for Electrified Aircraft 
+
+
+
+Propulsion Concepts," in AIAA Propulsion and Energy 2020 Forum, Virtual, 2020. 
+
+
+
+[18] T. F. Tallerico, J. J. Scheidler and Z. A. Cameron, "Electromagnetic Mass and Efficiency of Magnetic Gears for 
+
+
+
+Electrified Aircraft," in AIAA/IEEE Electrified Aircraft Technologies Symposium, Indinapolis, 2019. 
+
+
+
+[19] T. F. Tallerico, Z. A. Cameron and J. J. Scheidler, "Design of a Magnetic Gear for NASA’s Vertical Lift 
+
+
+
+Quadrotor Concept Vehicle," in AIAA/IEE Electric Aircraft Technologies Symposium, Indianapolis, 2019. 
+
+
+
+[20] S. Gerber and R. J. Wang, "Analysis of the End-Effects in Magnetic Gears and Magnetically Geared Machines," 
+
+
+
+in Inernational Conferance on Electical Machines Proceedings, Berlin, 2014. 
+
+
+
+
+
+
+
+
+
+
+
+23 
+
+
+
+ 
+
+
+
+[21] G. V. Brown, A. F. Kascak, B. Ebihara, D. Johnson, B. Choi, M. Siebert and C. Buccieri, "NASA Glenn 
+
+
+
+Research Center Program in High Power Density Motors for Aeropropulsion," NASA, Cleveland, 2005.

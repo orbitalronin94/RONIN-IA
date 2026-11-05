@@ -1,0 +1,2058 @@
+AIAA SciTech Forum 2024
+
+
+
+January 8-12, Orlando, FL
+
+
+
+Vineet Ahuja, Ashvin Hosangadi and Tim Weathers
+Combustion Research and Flow Technology, Inc. (CRAFT Tech)
+
+
+
+Emilio Baglietto
+Massachusetts Institute of Technology
+
+
+
+Justin Pesich
+NASA Glenn Research Center
+
+
+
+Mohammad Kassemi
+Case Western Reserve University
+
+
+
+Innovative Solutions to Complex Problems
+
+
+
+Simulations of Cryogenic Line Chilldown with 
+
+
+
+Advanced Sub-Grid Wall Boiling Models
+
+
+
+
+
+
+
+
+
+
+
+Motivation
+
+
+
+2
+
+
+
+• Predictions of chilldown in cryogenic transfer lines 
+requires improved understanding of boiling process and 
+surface heat transfer
+
+
+
+➢ Due to operation close to the Critical Point; Large Variability in 
+Properties including Specific Heat and Thermal Conductivity
+
+
+
+➢ Physics of Nucleation/Microlayer and bubble dynamics not 
+well understood 
+
+
+
+• Accurate modeling of critical heat flux and departure 
+from nucleate boiling critical to estimating surface 
+temperature history and quenching
+
+
+
+➢ Difficult to characterize heat flux directly with correlations; 
+predictions come with large error bands and uncertainty 
+
+
+
+➢ Data for water does not correlate well due to much larger 
+thermal effects of phase change
+
+
+
+➢ Higher Reynolds number results in increased sensitivity of 
+heat transfer to roughness
+
+
+
+Boiling Curve
+
+
+
+Innovative solutions to complex problems
+
+
+
+
+
+
+
+
+
+
+
+Motivation (Contd.)
+
+
+
+3
+
+
+
+• In collaboration with Prof. Emilio Baglietto at MIT as part of a NASA funded program, 
+
+
+
+advanced boiling sub-models for cryogens are being developed
+
+
+
+➢ Experimental test program at MIT in liquid nitrogen to generate data for cryogenic fluids 
+
+
+
+➢ New boiling correlations for cryogens being developed from test data
+
+
+
+• Present effort employs earlier models developed for water that have been adapted 
+
+
+
+for cryogenic fluids by employing thermodynamic similarity scaling
+
+
+
+• Sub-grid models with thermodynamic scaling have been tested and demonstrated 
+
+
+
+for line chilldown in both liquid nitrogen and liquid hydrogen
+
+
+
+➢ Quenching prediction in liquid nitrogen for Test 40 of experiments by Darr et al.
+
+
+
+➢ Quenching prediction in liquid hydrogen for Test 8b of experiments by Hartwig et al.
+
+
+
+Darr, S.R., Hong Hu, Glikin, N.G. Hartwig, J.W. et al. “An experimental study on terrestrial cryogenic transfer line chilldown I. Effect of mass flux, 
+equilibrium quality, and inlet subcooling”, Intl Journal of Heat and Mass Transfer, 103, December 2016.
+
+
+
+Hartwig J.W., Styborski, J. et al. “., “Liquid Hydrogen line chilldown experiments at high Reynolds Numbers II. Analysis ” Intl Journal of Heat and Mass 
+Transfer, 156, 2020.
+
+
+
+Innovative solutions to complex problems
+
+
+
+
+
+
+
+
+
+
+
+Outline
+
+
+
+4
+
+
+
+• Overview of boiling sub-models and thermodynamic scaling modifications for boiling 
+
+
+
+parameters in cryogenic fluids
+
+
+
+• Overview of CRUNCH CFD® numerical framework and implementation of boiling 
+
+
+
+model
+
+
+
+• Simulations of line chilldown in liquid nitrogen and comparisons with data for Test 40 
+
+
+
+of experiments by Darr et al.
+
+
+
+• Simulations of line chilldown in liquid hydrogen and comparisons with data for Test 
+
+
+
+8b of experiments by Hartwig et al.
+
+
+
+➢ Sensitivity studies to various physical parameters conducted to better understand 
+
+
+
+the rapid chilldown in liquid hydrogen
+
+
+
+• Conclusions
+
+
+
+Innovative solutions to complex problems
+
+
+
+
+
+
+
+
+
+
+
+5
+
+
+
+Cryogenic boiling model development
+
+
+
+Figure: General map of boiling heat transfer mechanisms
+
+
+
+[Gilman, L. and Baglietto, E. (2017)]
+
+
+
+Pool Boiling Test Data in Liquid 
+
+
+
+Nitrogen
+Florian Chavagnat and Prof. Baglietto
+
+
+
+Massachusetts Institute of Technology
+
+
+
+Objectives:
+• Efficient and flexible Cryogenic Boiling Implementation 
+
+
+
+• Focus is to “reduce” complexity in favor of numerical 
+
+
+
+efficiency
+
+
+
+• Allow for rapid evolution with availability of new 
+
+
+
+Cryogenic data
+
+
+
+From NASA Phase II SBIR 80NSSC20C0195 Final Report “Simulation of Chilldown Process with a Sub-Grid Boiling Model” July 2023
+
+
+
+Innovative solutions to complex problems
+
+
+
+
+
+
+
+
+
+
+
+( )'' '' '' ''1 ( )tot c q eq q VOF q q= + − +
+
+
+
+( )"q q w qq h T T= −
+
+
+
+Wall Heat Flux Partitioning
+
+
+
+at Solid Surface 
+
+
+
+Computed 
+
+
+
+From CFD
+Computed From 
+
+
+
+Boiling Model
+
+
+
+Convective Quenching
+
+
+
+Evaporative
+
+
+
+Quenching Heat Flux Term
+
+
+
+Del Valle 
+
+
+
+Kenning 
+
+
+
+Model
+ 
+
+
+
+ 
+ 
+
+
+
+ 
+ 𝑡𝑤 
+
+
+
+𝐶𝑤
+𝑓
+
+
+
+𝑞𝑒
+′′ ′′𝑓
+
+
+
+ 
+3
+
+
+
+6
+𝜌𝑔ℎ𝑙𝑔
+
+
+
+Evaporative Heat Flux Term
+
+
+
+Baseline Boiling Sub-Model for Water 
+
+
+
+6
+
+
+
+Bubble Departure Diameter 
+
+
+
+(Kocamutafaogullari, 1983)
+
+
+
+( )
+p
+
+
+
+sup
+N m T= 
+
+
+
+• Accurate prediction of wall heat flux depends on sub models for 
+bubble departure frequency and diameter as well as bubble 
+nucleation site density
+
+
+
+• Key parameter that requires calibration is the parameter d1 in the 
+model for bubble departure diameter 
+
+
+
+• Constants used for boiling in water are inadequate for cryogens and 
+result in bubble departure diameters that are orders of magnitude 
+lower
+
+
+
+( )4
+
+
+
+3
+ld
+
+
+
+l g
+g
+
+
+
+f
+D
+
+
+
+ 
+
+
+
+
+
+
+
+−
+=
+
+
+
+0.9
+0
+
+
+
+1
+
+
+
+.5
+
+
+
+   
+
+
+
+g
+
+
+
+d
+D d
+
+
+
+g
+
+
+
+ 
+
+
+
+
+ 
+
+
+
+
+=
+
+
+
+
+
+
+
+  
+   
+   
+
+
+
+Nucleation Site Density 
+
+
+
+(Lemmert-Chawla Model, 1977)
+
+
+
+Bubble Departure Frequency 
+
+
+
+(Cole, 1983)
+
+
+
+Innovative solutions to complex problems
+
+
+
+
+
+
+
+
+
+
+
+Large Disparity in Density Ratio of Vapor 
+
+
+
+to Liquid between Water and Nitrogen
+
+
+
+Property Water at 0.12 MPa Nitrogen at 0.12 MPa
+
+
+
+Surface Tension (N/m) 0.058 0.008
+
+
+
+Liquid Density (kg/m3) 954.8 800
+
+
+
+Vapor Density (kg/m3) 0.7 5.35
+
+
+
+Density Ratio 1,364 149.5
+
+
+
+Constant d1 needs to be 
+
+
+
+recalibrated for cryogens
+
+
+
+7
+
+
+
+Evaluation of Baseline Sub Model for Cryogens 
+
+
+
+• Test data from pool boiling data for liquid nitrogen (Kida et 
+
+
+
+al, 1981) shows bubble diameters of 0.5-1 mm
+
+
+
+• Boiling correlations for water yield bubble diameter values 
+
+
+
+0f 0.05 mm (an order of magnitude lower)
+
+
+
+• Thermodynamic effects due to proximity to critical point 
+
+
+
+may be the cause of this discrepancy
+
+
+
+• Large disparity in liquid to vapor density ratio results 
+
+
+
+requires recalibration of parameter in bubble departure 
+
+
+
+diameter formulation
+
+
+
+0.9
+0
+
+
+
+1
+
+
+
+.5
+
+
+
+   
+
+
+
+g
+
+
+
+d
+D d
+
+
+
+g
+
+
+
+ 
+
+
+
+
+ 
+
+
+
+
+=
+
+
+
+
+
+
+
+  
+   
+   
+
+
+
+Innovative solutions to complex problems
+
+
+
+
+
+
+
+
+
+
+
+Bubble Departure Diameter :
+
+
+
+Comparison of value for water and cryogen 
+
+
+
+8
+
+
+
+Thermodynamic Similarity Scaling for Cryogens 
+
+
+
+0.9
+0 5
+
+
+
+,
+
+
+
+1,
+.
+
+
+
+ 
+
+
+
+ 
+
+
+
+d w
+
+
+
+g
+
+
+
+w
+d
+
+
+
+g
+
+
+
+D
+
+
+
+ 
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+  
+   
+  
+
+
+
+=
+
+
+
+
+
+
+
+X
+
+
+
+O
+
+
+
+Without Cryo Scaling
+
+
+
+With Cryo Scaling
+
+
+
+1 1
+L L
+
+
+
+w n
+
+
+
+v vwater Cryogenic
+
+
+
+d d
+ 
+
+
+
+ 
+
+
+
+   
+=   
+
+
+
+   
+
+
+
+Step 1:
+Get equivalent “reduced” pressure 
+
+
+
+in water to evaluate
+
+
+
+2
+
+
+
+2
+
+
+
+n
+Eq c w
+
+
+
+c n
+
+
+
+P
+P P
+
+
+
+P
+−
+
+
+
+−
+
+
+
+=
+
+
+
+Step 2 :
+Evaluate constant d1 in water 
+
+
+
+using test data or correlations for 
+
+
+
+bubble departure diameter at this 
+
+
+
+pressure 
+
+
+
+Step 3 :
+Scale Evaluate constant d1 in 
+
+
+
+water with ratio of liquid to vapor 
+
+
+
+density
+
+
+
+Innovative solutions to complex problems
+
+
+
+
+
+
+
+
+
+
+
+9
+
+
+
+Sub-Model Behavior with Cryogenic Scaling: Liquid Nitrogen 
+
+
+
+01 Void Fraction
+
+
+
+Measured Heat Fluxes from Darr et al.Total Heat Fluxes from Boiling ModelBubble Departure Diameter from 
+
+
+
+Boiling Model ~ 0.5 mm
+
+
+
+Innovative solutions to complex problems
+
+
+
+
+
+
+
+
+
+
+
+10
+
+
+
+CRUNCH CFD® Multi-Physics Framework
+
+
+
+Innovative solutions to complex problems
+
+
+
+• Generalized “all-speed” preconditioned flow solver for compressible fluids
+• Robust Non-ideal/real fluid equations of state with utility for NIST table generation
+• Advanced turbulence models with accurate roughness modeling
+• Chemistry manager allows reaction mechanisms specified in Chemkin/Cantera formats
+• Non-equilibrium dispersed phase via Eulerian formulation
+• Grid motion for moving bodies
+
+
+
+Compressible Solver (CRUNCH COMP)
+
+
+
+• Incompressible/weakly compressible multi-phase flow solver for cavitating liquids
+• Cryogenic fluids: thermal effects modeled
+• Grid motion for moving bodies
+
+
+
+Incompressible Solver (CRUNCH INCOMP)
+
+
+
+• Heat conduction module
+• Coupled COMP/THERMAL calculations via heat transfer BC
+
+
+
+Thermal Solver (CRUNCH THERMAL)
+
+
+
+• Grid adaptation tool for unstructured grids with error quantification
+
+
+
+• Adaptation for mesh deformation due to moving boundaries
+
+
+
+• Adaptation based on flow features
+
+
+
+CRISP CFD 
+
+
+
+
+
+
+
+
+
+
+
+11
+
+
+
+Preconditioned All-Speed Compressible Formulation
+
+
+
+• Generalized Preconditioned Formulation
+➢ Solves for pressure and temperature instead of 
+
+
+
+density and internal energy to overcome stiffness 
+issues. Pressure and temperature are always well-
+defined even for stiff systems
+
+
+
+➢ Techniques used for traditional “density” based 
+codes can be used for this formulation now by 
+casting it in time-marching form
+
+
+
+• Versatile Thermodynamics
+➢ Matrices retain derivatives in generalized form
+
+
+
+➢ Allows specification of generalized EOS routines 
+without modifying the code numerical formulation
+
+
+
+➢ Specifically, enthalpy can be a function of pressure 
+and temperature e.g., cryogenic fluids
+
+
+
+➢ Speed of sound of generalized fluid determined by 
+the eigenvalues of matrix [A]
+
+
+
+Innovative solutions to complex problems
+
+
+
+i
+
+
+
+i
+
+
+
+i
+
+
+
+y
+
+
+
+y
+
+
+
+y0
+
+
+
+(1 ) (1 )
+
+
+
+0
+i
+
+
+
+i
+
+
+
+p T
+
+
+
+p T
+
+
+
+i P i T
+i Y
+
+
+
+p
+
+
+
+ij
+
+
+
+T
+
+
+
+p T y
+
+
+
+u u u
+
+
+
+H Hh h hu H
+
+
+
+Y Y Y
+
+
+
+   
+
+
+
+     
+
+
+
+ 
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+ 
+ 
+
+
+
+ =  
+ − − − − +
+ 
+ + 
+
+
+
+1
+
+
+
+;
+
+
+
+;
+
+
+
+v
+v
+
+
+
+v v
+
+
+
+Q E
+S D
+
+
+
+t x
+
+
+
+Q E
+A
+
+
+
+Q Q
+
+
+
+ 
+
+
+
+ 
+
+
+
+−
+
+
+
+ + = +
+
+
+
+ 
+ = = 
+
+
+
+ 
+
+
+
+; ;
+
+
+
+ref
+
+
+
+v
+
+
+
+i i
+
+
+
+p p
+
+
+
+u u
+Q Q
+
+
+
+e T
+
+
+
+Y Y
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+−  
+  
+  = =
+  
+  
+    
+
+
+
+( , , ),
+
+
+
+( , , )
+
+
+
+i
+
+
+
+i
+
+
+
+F P T Y
+
+
+
+h G P T Y
+
+
+
+ =
+
+
+
+=
+
+
+
+
+
+
+
+
+
+
+
+12
+
+
+
+Thermodynamic Property Evaluation cont.
+• EoS specification can either be through analytical formulations (e.g. SRK) or through 
+
+
+
+NIST table look-up
+
+
+
+➢ Ability to handle real fluid properties and large “spiky” gradients near critical point
+
+
+
+• Phase change models for cryogenic fluids with thermodynamic effects rigorously 
+accounted for
+
+
+
+➢ Equilibrium framework: Robust, inexpensive and well validated for near critical 
+condensation and cavitation. Phase change with finite-rate driving fluid to equilibrium
+
+
+
+➢ Non-Equilibrium: dispersed Lagrangian phase with velocity and temperature non-
+equilibrium. Hertz-Knudsen phase change formulation
+
+
+
+• Extensive validation for both cavitation and condensation phase change for liquid 
+nitrogen, hydrogen, oxygen and near critical CO2
+
+
+
+Innovative solutions to complex problems
+
+
+
+Hosangadi, A. and Ahuja, V., “Numerical Study Of Cavitation In Cryogenic Fluids,” Journal of Fluids Engineering, Vol. 127, pp. 267-281, March 2005
+
+
+
+Hosangadi, A., Ahuja, V., and Ungewitter, R.J., “Simulations of Rotational Cavitation Instabilities in the SSME LPFP Inducer,” Paper No. AIAA-2007-5536, 43rd 
+AIAA/ASME/SAE/ASEE Joint Propulsion Conference & Exhibit, Cincinnati, OH, July 8 – 11, 2007.
+
+
+
+Hosangadi, A., Liu, Z., Weathers, T, Ahuja, A., and Busby, J., “Modeling Multiphase effects in CO2 Compressors at Subcritical Inlet Conditions”, J. Eng. Gas Turbines
+Power, August 2019, 141: 081005-1
+
+
+
+
+
+
+
+
+
+
+
+Quenching in Liquid Nitrogen Flows
+
+
+
+Innovative solutions to complex problems
+
+
+
+
+
+
+
+
+
+
+
+➢ Chilldown with Tube in Vertical Upward Configuration
+
+
+
+➢ Liquid Nitrogen Fed From a Dewar; Test Section in Vacuum chamber
+
+
+
+➢ Saturated and Sub-cooled Conditions at the Inlet
+
+
+
+➢ Darr, S. R., et al., “An experimental study on terrestrial cryogenic transfer line chilldown
+
+
+
+I. Effect of mass flux, equilibrium quality, and inlet subcooling,” Intl J. of Heat and Mass 
+
+
+
+Transfer, Vol. 103, 2016.
+
+
+
+➢ Used Precooler to Condition Flow before Injection in Test Section
+
+
+
+➢ Test 40 from Darr Test Matrix Simulated 
+
+
+
+14
+
+
+
+Quenching in Liquid Nitrogen Under Terrestrial Conditions
+
+
+
+AVERAGE INLET CONDITIONS
+
+
+
+Ginlet (mass flux) = 327.82 kg/m2s
+
+
+
+Pinlet = 325.9357 kPa
+
+
+
+Tinlet = 86.61 K
+
+
+
+Tsub = Tsat(Pinlet) – Tinlet = 2.23 
+
+
+
+αinlet,liq = 1.0
+
+
+
+Computational Domain
+Inlet Outlet
+
+
+
+Innovative solutions to complex problems
+
+
+
+
+
+
+
+
+
+
+
+0.1 s 0.2 s
+
+
+
+Strong Instability 
+
+
+
+leads to two-phase 
+
+
+
+flow. Misty 
+
+
+
+Appearance of Flow 
+
+
+
+in most of the tube
+
+
+
+Low Inflow 
+
+
+
+Velocity and 
+
+
+
+Sub-Cooled Inlet 
+
+
+
+leads to an 
+
+
+
+Annular Front
+
+
+
+Early Evolution of Flow in Vertical Tubes
+
+
+
+Walls show Temperature distribution; Tubes show density distribution
+
+
+
+15
+
+
+
+0.26 s 0.56 s 0.86 s0.36 s
+
+
+
+Mixture Density kg/m3Temp (K)
+
+
+
+Innovative solutions to complex problems
+
+
+
+
+
+
+
+
+
+
+
+1.0 s 2.3 s
+
+
+
+Ligaments break off
+Dispersed Flow in Most of 
+
+
+
+Tube Characteristic of 
+
+
+
+Cryogenic Flows
+
+
+
+Evolution of Flow in Vertical Tubes After Initial Stages
+Walls show Temperature distribution; Tubes show density distribution
+
+
+
+16
+
+
+
+4.1 s 8.7 s 11.23 s6.1 s 13.7 s
+
+
+
+Mixture Density kg/m3
+Temp (K)
+
+
+
+Innovative solutions to complex problems
+
+
+
+
+
+
+
+
+
+
+
+14.5 s 14.95 s
+
+
+
+Rapid Shrinkage of Dispersed 
+
+
+
+Phase Region
+
+
+
+Quench 
+
+
+
+Front
+
+
+
+Late-Stage Evolution of Flow in Vertical Tubes
+
+
+
+Walls show Temperature distribution; Tubes show density distribution
+
+
+
+17
+
+
+
+15.4 s 15.94 s 16.44 s 17.04 s
+
+
+
+Mixture Density kg/m3Temp (K)
+
+
+
+Innovative solutions to complex problems
+
+
+
+
+
+
+
+
+
+
+
+Prediction of Quenching by Boiling Model
+
+
+
+Averaged TC1 Data 
+
+
+
+from Experiment 
+
+
+
+being Compared with 
+
+
+
+CFD Trace Values
+
+
+
+Innovative solutions to complex problems 18
+
+
+
+
+
+
+
+
+
+
+
+Quenching in Liquid Hydrogen Flows
+
+
+
+Innovative solutions to complex problems
+
+
+
+
+
+
+
+
+
+
+
+Overview of Issues with Hydrogen Boiling
+
+
+
+• There is a need for improved understanding of hydrogen boiling 
+
+
+
+characteristics for more efficient storage and transfer
+
+
+
+• Hydrogen behaves very differently than other cryogens such as 
+
+
+
+liquid nitrogen
+– Chilldown in liquid hydrogen is very rapid and the traditional “knee” in surface temperature 
+
+
+
+curve is not prominent
+
+
+
+– Hydrogen exhibits annular flow with liquid later on the wall and two-phase flow in core as 
+
+
+
+opposed to inverted annular flow in liquid nitrogen
+
+
+
+• Simulations of liquid hydrogen line chilldown experiments conducted at NASA 
+
+
+
+(Hartwig et al.) were simulated to understand numerical sensitivities and 
+
+
+
+improve understanding of physics
+
+
+
+Hartwig J.W., Styborski, J. et al. “., “Liquid Hydrogen line chilldown experiments at high Reynolds Numbers II. Analysis ” Intl 
+Journal of Heat and Mass Transfer, 156, 2020.
+
+
+
+Innovative solutions to complex problems 20
+
+
+
+
+
+
+
+
+
+
+
+Hydrogen Chilldown Test 
+
+
+
+Computational domain: PT3 to SD18 (98 cms)
+
+
+
+Mass flux : 400 Kg/m2-s
+
+
+
+Average Pressure: 0.2 MPa
+
+
+
+Liquid Inflow temperature: 23.61 K (0.25 K sub-cooling)
+
+
+
+Innovative solutions to complex problems 21
+
+
+
+
+
+
+
+
+
+
+
+Thermal Properties of Stainless Steel 
+
+
+
+Thermal Conductivity Specific Heat
+
+
+
+• Lower thermal conductivity sustains large temperature gradient in solid for the same heat flux
+
+
+
+• Similarly lower specific heat leads to larger temperature drop with time
+
+
+
+• Combination of these effects leads to more rapid rate of temperature drop
+
+
+
+Innovative solutions to complex problems 22
+
+
+
+
+
+
+
+
+
+
+
+Chilldown Temperature History: 
+
+
+
+Sensitivity Studies 
+
+
+
+Effect of Variable Material Properties
+
+
+
+For Stainless Steel Compared with 
+
+
+
+Constant Material Properties
+
+
+
+Effect of Surface Roughness for Inner 
+
+
+
+Wall
+
+
+
+• Specifying variable thermal 
+properties for solid material 
+critical for obtaining 
+accurate chilldown profile
+
+
+
+• Due to rapid slope in film 
+cooling, “knee” from 
+quenching has very small 
+drop in temperature
+
+
+
+Innovative solutions to complex problems 23
+
+
+
+
+
+
+
+
+
+
+
+Fluid Density and Wall Temperature 
+
+
+
+Flow Evolution Before Quenching
+
+
+
+• Unlike in liquid nitrogen where a liquid front advances, here we observe a two-phase core in the pipe close to 
+
+
+
+equilibrium. Quenching proceeds with the density in the core rising rather than an advancing liquid front
+
+
+
+• Present simulations were done with a sub-cooled liquid at inlet. For annular flow we likely will require a two-phase 
+
+
+
+saturation inflow at inlet
+
+
+
+Flow Evolution after Onset of 
+
+
+
+Quenching
+
+
+
+Innovative solutions to complex problems 24
+
+
+
+
+
+
+
+
+
+
+
+• Advanced boiling sub-models developed in collaboration with MIT 
+have been implemented in CRUNCH CFD®
+
+
+
+➢ Adapted for cryogenic fluids with thermodynamic scaling concepts based on 
+reduced pressures and temperature relative to critical point
+
+
+
+➢Mechanistic representation of physics at the boiling wall that explicitly tracks 
+bubble parameters
+
+
+
+• The boiling sub-model was tested in liquid nitrogen for Test 40 of 
+experiments by Darr et al.
+➢ Temperature history at TC1 showed good comparison with test data 
+
+
+
+➢ Wall temperature at which quenching occurs matches well with test data
+
+
+
+Conclusions
+
+
+
+Innovative solutions to complex problems 25
+
+
+
+
+
+
+
+
+
+
+
+• Demonstration for quenching in liquid hydrogen performed for Test 
+8b of Hartwig et al.
+➢ Flow turbulence effects substantially increase film heat transfer
+
+
+
+➢Modeling variable thermal properties of solid particularly at lower temperatures are 
+critical
+
+
+
+➢The hydrogen core flow at quenching onset presents as a two-phase mixture in 
+equilibrium as opposed to an advancing liquid front observed in liquid nitrogen 
+flows. After onset of quenching density rises rapidly due to condensation of vapor, 
+
+
+
+➢More studies are needed to understand how annular quench fronts observed in 
+some liquid hydrogen tests evolve; may require modeling of saturated two-phase 
+flow at inlet as opposed to sub-cooled liquid as currently modeled.
+
+
+
+Conclusions (Cont..)
+
+
+
+Innovative solutions to complex problems 26
+
+
+
+
+
+
+
+
+
+
+
+Acknowledgements
+
+
+
+This work was performed under a NASA SBIR Phase II (80NSSC20C0195)
+contract with Dr. Ali Hedayat at NASA MSFC as the technical contract
+monitor. We gratefully acknowledge this support. We would also like to
+acknowledge funding under a NASA SBIR Phase III contract
+(80NSSC21C0619) and thank Mr. Dan Hauser at NASA GRC for his support.
+Many thanks also to Dr. Jason Hartwig at NASA GRC for his feedback and
+advice on both the liquid nitrogen and liquid hydrogen chilldown tests that
+he had performed and helping us better understand this data.
+
+
+
+27
+Innovative solutions to complex problems

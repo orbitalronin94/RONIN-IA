@@ -1,0 +1,971 @@
+(Preprint) AAS 23-293
+
+
+
+PERFORMANCE OF AN ACTIVE VEHICLE STABILIZATION
+SYSTEM DURING TOUCHDOWN IN THE PRESENCE OF
+
+
+
+PROPELLANT SLOSH DYNAMICS
+
+
+
+Jing Pei†
+
+
+
+This paper characterizes the effect of propellant slosh on the performance of an
+active stabilization control system for the two-two-and-over symmetric landing
+mode during touchdown. Generalized impulse and momenta theory is used to
+model the instance when the landing leg strikes the ground as an inelastic collision
+event. For active stabilization, a rate damping controller is used to stabilize the
+attitude of the vehicle via onboard reaction control system. Simulation results are
+shown comparing the performance of the control system with and without slosh
+dynamics.
+
+
+
+INTRODUCTION
+
+
+
+The landing phase of any planetary mission represents one of the most crucial stages of the
+mission. For the Apollo missions, the elapsed time between one of the landing legs initially striking
+the lunar surface and the vehicle coming to rest was less than 2 seconds, as discussed in Ref. [1].
+The landing gear design must account for local surface conditions and uncertainties in the vehicle
+states during touchdown to guard against toppling. Numerous studies of touchdown stability were
+published in Refs. [2–8] as a result of the work performed during the Apollo program. Analytical
+approaches ranged from using simple two-dimensional inelastic collision theory to six-degree-of-
+freedom simulations. Subsequently, the analytical results were verified with sub-scale and full-
+scale experiments (Refs. [2–4, 7]). Despite the abundance of literature, few studies detail how to
+account for propellant slosh dynamics. Recently, in Ref. [9], the authors built on the foundation
+laid down in Ref. [2] and used a compound pendulum attached to a rigid body to model lander
+containing sloshing propellant. A two-step procedure was used to characterize the dynamics of a
+planar touchdown: 1) A theory involving generalized momenta and generalized impulses described
+in Ref. [10] is used to predict the post-collision angular velocities of the vehicle and pendulum; 2)
+Equations of motion for the two-degree-of-freedom, post-collision system are solved numerically
+to determine whether toppling occurs. Stability boundaries corresponding to the two-and-over and
+two-two-and-over landings were then compared for the models with and without slosh.
+
+
+
+The aforementioned literature focus on the passive landing scenario in which the main engine
+shuts down prior to touchdown and the inherent passive stability of the vehicle takes over thereafter.
+Most lander designs, like Apollo, have a relatively moderate ratio of landing footprint width Hd to
+
+
+
+*This material is declared a work of the U.S. Government and is not subject to copyright protection in the United
+States.
+
+
+
+†Aerospace Engineer, Atmospheric Flight Entry Systems Branch, NASA Langley Research Center, Hampton, Virginia,
+23681, USA.
+
+
+
+1
+
+
+
+
+
+
+
+
+
+
+
+center-of-mass height H , hence adequate passive stability. Figure 55 of Ref. [1] shows the Apollo
+lunar module (LM) landing envelope or “Doghouse” plot illustrates tolerance to a relatively wide
+range of horizontal and vertical velocities at touchdown and capable of landing on a downhill slope
+of up to 11 deg. However, for the upcoming Artemis missions, SpaceX’s Lunar Starship (Ref. [11])
+is a single-stage vehicle with a significant amount of propellant onboard at the time of touchdown.
+Due to its height and relatively narrow base, the design has a reduced ratio of Hd to H suggesting
+poor passive stability characteristics compared with previous lander concepts. It is likely that active
+stabilization via onboard reaction control system (RCS) thrusters may be necessary to meet landing
+requirements and prevent the vehicle from toppling. This active stabilization will require additional
+software and operational complexity. An active control strategy at touchdown is likely implemented
+on the Falcon 9 booster landings [12]. However, in this case, slosh is unlikely a major factor since
+the propellant tanks are nearly empty at the time of touchdown.
+
+
+
+The present study extends the dynamics formulation developed in Ref. [9] and investigates how
+slosh dynamics affects the performance of an actively controlled vehicle during touchdown. The
+two-two-and-over symmetric landing mode is shown in Fig. 1. In this mode, one pair of legs
+initially collides with the surface, followed by the collision of a second pair of legs with the surface
+and rebound which may or may not lead to toppling of the lander.
+
+
+
+Figure 1. Active Two-Two and Over Landing Mode
+
+
+
+The paper is organized as follows. In Section II, the treatment of the collision dynamics and
+equations governing the motion in between collisions from Ref. [9] is summarized. Section III
+discusses the parameters of the rate damping controller used in this study for active attitude stabi-
+lization. Simulation results obtained for the Altair lunar lander configuration are presented for the
+active two-two-and-over landing mode with and without slosh dynamics are shown in Section IV.
+Section V. provides concluding remarks.
+
+
+
+DYNAMICS
+
+
+
+A simplified representation of the lander used for this analysis is shown in Figure 2. To facilitate
+the two-dimensional analysis, the vehicle-surface contact points are assumed to the midpoint be-
+tween two of the four landing gear footpads. The first collision between a point P fixed on vehicle
+body B and the surface whose slope relative to the horizontal is measured by the angle σ. A set of
+right-handed, mutually perpendicular unit vectors fixed in B is introduced such that b̂′
+
+
+
+3 = n̂3, b̂′
+2
+
+
+
+has the same direction as the position vector rB
+⋆P from B⋆ to P , and b̂′
+
+
+
+1 completes the set. The
+distance from B⋆, the mass center of B, to P is equal to L; therefore, rB
+
+
+
+⋆P = Lb̂′
+2. The landing
+
+
+
+vehicle is modeled as a rigid body B having mass mB , together with a uniform rigid bar C having
+
+
+
+2
+
+
+
+
+
+
+
+
+
+
+
+mass mC and length 2LC . One end of C is pinned to B at B⋆, so that C is a compound pendulum.
+The pendulum’s hinge point is chosen as B⋆ in order to make the mathematics tractable. In general,
+however, the placement of and the amount of fuel left in a propellant tank will dictate a hinge point
+other than B⋆ for accurate modeling. The system S made up of B and C moves in an inertial or
+Newtonian reference frame N in which a set of right-handed, mutually perpendicular unit vectors
+n̂1, n̂2, and n̂3 are fixed. A set of right-handed, mutually perpendicular unit vectors fixed in C is
+introduced such that ĉ3 = n̂3, ĉ2 has the same direction as the position vector rB
+
+
+
+⋆C⋆
+from B⋆ to C⋆,
+
+
+
+the mass center of C, and ĉ1 completes the set. Unit vectors ĉ1 and ĉ2 are shown in Fig. 3. A key
+assumption made in Ref. [2] is that landing is two-dimensional in the sense that motion just prior to
+a collision, the impulsive forces produced during the collision, and, consequently, the motion after
+the collision are all symmetrical about a vertical plane that contains the center of mass. Thus, in the
+analysis that follows, all motions of S in N take place in the plane containing n̂1 and n̂2. Landing
+is modeled as an inelastic collision between the surface and a point P fixed in B midway between
+the feet of a pair of landing legs.
+
+
+
+q
+1
+
+
+
+β
+
+
+
+σ
+
+
+
+L
+
+
+
+B
+
+
+
+Pθ
+
+
+
+Pθ
+
+
+
+Pθ
+
+
+
+Q
+
+
+
+b2'̂
+
+
+
+'b1^
+
+
+
+Pn1^
+
+
+
+n2^
+N
+
+
+
+q
+2
+
+
+
+B★
+
+
+
+C
+
+
+
+Figure 2. First Collision of Lander with Surface, Two-Two-and-Over
+
+
+
+n1^
+
+
+
+n2^
+
+
+
+N
+
+
+
+q
+2
+
+
+
+q
+2
+
+
+
+c1̂
+
+
+
+2LC
+
+
+
+C
+
+
+
+B★
+
+
+
+c2̂
+
+
+
+Figure 3. Detail of Compound Pendulum
+
+
+
+3
+
+
+
+
+
+
+
+
+
+
+
+First Inelastic Collision
+
+
+
+Prior to the inelastic collision of P with the surface, S has four degrees of freedom in N . The
+configuration of S in N is characterized by the four generalized coordinates qr (r = 1, 2, 3, 4). The
+angle θP between local vertical and the line PB⋆ at the beginning of the collision is shown in Fig.
+2. In this illustration, q1 has a negative value, therefore θP +β−q1 = π/2. Kinematic and dynamic
+analysis requires four motion variables ur, which can be defined simply as the time derivatives of
+
+
+
+the generalized coordinates, ur
+△
+=
+
+
+
+.
+qr (r = 1, 2, 3, 4). The angular velocity NωB of B in N is
+
+
+
+defined as
+NωB △
+
+
+
+= u1n̂3 = u1b̂3 (1)
+
+
+
+The angular velocity Nω C of C in N is defined as
+
+
+
+Nω C △
+= u2n̂3 = u2ĉ3 (2)
+
+
+
+The velocity NvB⋆
+of B⋆ in N is defined as
+
+
+
+NvB⋆ △
+= u3n̂1 + u4n̂2 (3)
+
+
+
+During the process of landing there is a collision of point P with the surface where large forces
+come into play during a short time interval t1 ≤ t ≤ t2. The collision is presumed to be inelastic, in
+which case NvP (t2) = 0. The values ur(t1) of the motion variables are regarded as known (r =
+1, 2, 3, 4). The values ur(t2) are to be determined on the basis of the presumption of an inelastic
+collision and a theory involving generalized impulses and generalized momenta, as discussed in
+Secs. 7.8 and 7.9 of Ref. [10]. The theory holds that the configuration of S in N does not change
+during the collision, so that the values of qr and θP remain unaltered during the interval t1 ≤ t ≤ t2.
+The two motion variables post-collision are shown in Eqs. (4) and (5).
+
+
+
+{
+IB +
+
+
+
+[
+mB +mC − (mCLC)
+
+
+
+2
+
+
+
+IC +mCLC
+2 cos
+
+
+
+2(θP − q2)
+
+
+
+]
+L2
+
+
+
+}
+u1(t2) =
+
+
+
+IBu1(t1) + L
+
+
+
+{
+(mB +mC)[u3(t1) cos θP + u4(t1) sin θP ]
+
+
+
+− (mCLC)
+2
+
+
+
+IC +mCLC
+2 cos(θP − q2)[u3(t1) cos q2 + u4(t1) sin q2]
+
+
+
+}
+(4)
+
+
+
+u2(t2) = u2(t1) +
+mCLC
+
+
+
+IC +mCLC
+2 {L cos(θP − q2)u1(t2)− [u3(t1) cos q2 + u4(t1) sin q2]} (5)
+
+
+
+Motion During the Interval Between the First and Second Collisions
+
+
+
+Following the collision at P , according to the approach taken in Ref. [2], B rotates as though P is
+pinned to the surface until the second collision occurs when Q strikes the ground, at which time the
+pin at P is released. Let t3 denote the time at the beginning of the second collision. For t2 ≤ t ≤ t3,
+S has two degrees of freedom in N characterized by the generalized coordinates q1 and q2, and two
+dynamical equations of motion governing u1 and u2 and shown in Eq. (6).
+
+
+
+4
+
+
+
+
+
+
+
+
+
+
+
+[
+IB + (mB +mC)L
+
+
+
+2 −mCLCL cos(θP − q2)
+−mCLCL cos(θP − q2) IC +mCLC
+
+
+
+2
+
+
+
+]{ .
+u1.
+u2
+
+
+
+}
+={
+
+
+
+(mB +mC)gL sin θP +mCLCL sin(θP − q2)u2
+2 + δ(u2 − u1)
+
+
+
+−mCgLC sin q2 −mCLCL sin(θP − q2)u1
+2 − δ(u2 − u1)
+
+
+
+}
+(6)
+
+
+
+Second Inelastic Collision + Post Collision
+
+
+
+A simplified representation of the lander post second-collision is shown in Figure 4. Following
+the similar approach in determining u1(t2) and u2(t2) after the first collision, expressions for u1(t4)
+and u2(t4) are shown in Eqs. (7) and (8). Toppling occurs as θQ takes on negative value (rB
+
+
+
+⋆P goes
+past local vertical) and exponentially approaches -90 deg.
+
+
+
+n1^
+
+
+
+n2^
+b2
+^
+
+
+
+b1
+^
+
+
+
+N
+
+
+
+B
+
+
+
+L
+
+
+
+β
+
+
+
+q
+2
+
+
+
+q
+1
+
+
+
+Q
+
+
+
+B★C
+
+
+
+Qθ
+
+
+
+Qθ
+
+
+
+Qθ
+
+
+
+Figure 4. Second Collision of Lander with Surface, Two-Two-and-Over
+
+
+
+u1(t4) =
+z1(IC +mCLC
+
+
+
+2) + z2mCLCL sin(q2 − σ + β)
+
+
+
+z3(IC +mCLC
+2) + z2mCLCL sin(q2 − σ + β)
+
+
+
+u1(t3) (7)
+
+
+
+u2(t4) = u2(t3) +
+mCLCL sin(q2 − σ + β)
+
+
+
+IC +mCLC
+2 [u1(t4)− u1(t3)] (8)
+
+
+
+where z1 = [IB − (mB + mC)L
+2 cos(2β) − mCLCL sin(q2 − σ + β)], z2 = [IC + mCLC
+
+
+
+2 +
+mCLCL sin(q2 − σ − β)], and z3 = [IB − (mB +mC)L
+
+
+
+2 cos(2β) −mCLCL sin(q2 − σ + β)].
+Equation (6) can be used to simulate the motion of the system after the second collision.
+
+
+
+RESULTS
+
+
+
+The Altair lander configuration (Ref. [13]) is used in this study with the system parameters listed
+in Table 1. For the six Apollo landings (see Ref. [1]), the recorded absolute values for q1(t1), vehicle
+
+
+
+5
+
+
+
+
+
+
+
+
+
+
+
+attitude angle before the collision, were less than 5 deg and the values of u1(t1), angular speed of
+the vehicle with respect to an inertial frame before the collision, were negligible. The pendulum
+half-length, LC , was selected such that the slosh frequency is close to the 0.2 Hz to 0.3 Hz range as
+described in Ref. [13] for the Altair vehicle at the time of touchdown.
+
+
+
+Table 1. System Parameters
+
+
+
+Parameter Value units
+lunar gravity, g 1.62 m/s2
+
+
+
+mass of the vehicle without propellant, mB 16190 kg
+pitch inertia of the vehicle without propellant about B⋆, IB 2.7692 × 105 kg-m2
+
+
+
+center-of-mass height of vehicle, H 6.725 m
+landing footprint diameter, Hd 13 m
+
+
+
+effective landing footprint diameter, w = Hd cos 45
+◦ 9.19 m
+
+
+
+angle between base plane of the vehicle and line B⋆Q, β 55.65 deg
+distance from B⋆ to Q (landing leg foot), L 8.186 m
+half-length of the compound pendulum, LC 1 m
+
+
+
+mass of the compound pendulum, mC 0.05mB kg
+pitch inertia of compound pendulum about C⋆, IC mCLC
+
+
+
+2/12 kg-m2
+
+
+
+Figure 5 presents simulation results for a single point on the sloshless stability boundary [9] for
+σ = 10 deg, u3(t1) = 3 m/s, u4(t1) = 0.78 m/s, q2(t1) = 0 deg, and u2(t1) = 0 deg/s. In the absence
+of slosh, θQ asymtoptically approaches 0 after the second collision. Whereas with the inclusion of
+slosh, the vehicle tips over 6.6 s after the second collision.
+
+
+
+Figure 5. Passive Two-Two-and-Over Case
+
+
+
+In this work, a simple rate-damping controller with a rate deadband of ±2.5 deg/s is used. The
+configuration is equipped with a pair of opposing thrusters in the pitch plane with an angular accel-
+eration capability of 6 deg/s2 (at full thrust) about either points P or Q. A latency value of 0.1 sec is
+used to mimic control system delays and thruster transients. The appropriate thruster is commanded
+to full thrust whenever the rate deadband is reached. Mass depletion is assumed to be negligible.
+Figures 6 illustrates the same scenario considered in Fig. 5 with active control. With the inclusion
+
+
+
+6
+
+
+
+
+
+
+
+
+
+
+
+of slosh dynamics, the closed-loop system takes roughly 3 sec longer to reach zero attitude error
+post second-collision. The thruster firing time history is shown in Fig. 7 with the thrusters on for a
+total of 6.9 sec for the case with slosh compare to the 6.5 sec without.
+
+
+
+Figure 6. Active Two-Two-and-Over Case, Vehicle States
+
+
+
+Figure 7. Active Two-Two-and-Over Case, Control Time History
+
+
+
+Figures 8 and 9 illustrate the same scenario but with reduced thruster control power at 2 deg/s2.
+With the reduced control power, the controller (with the baseline parameters) is unable to prevent
+the vehicle from toppling post second-collision. However, closed-loop system regains stability once
+the rate deadband is reduced to ±1.5 deg/s (not shown) at a cost of propellant penalty with a total
+thruster on-time of 9.4 sec. Time history of the slosh states for the two values of control power are
+shown in Fig. 10.
+
+
+
+Slosh states are uncontrolled and random, but bounded during touchdown. A parametric analysis
+was performed for q2(t1) varying from −14 deg to 14 deg in increments of 2 deg and u2(t1) varying
+from −12 deg/s to 12 deg/s in increments of 2 deg/s. Figure 11 shows results of the parametric
+analysis. The yellow region indicates where toppling occurs whereas in the cyan region, no toppling
+
+
+
+7
+
+
+
+
+
+
+
+
+
+
+
+Figure 8. Active Two-Two-and-Over Case (reduced control power), Vehicle States
+
+
+
+Figure 9. Active Two-Two-and-Over Case (reduced control power), Control Time History
+
+
+
+Figure 10. Active Two-Two-and-Over Case, Slosh State Time History
+
+
+
+8
+
+
+
+
+
+
+
+
+
+
+
+occurs. It is apparent that with baseline controller parameter, toppling occurs for large negative value
+of u2(t1). Reducing the controller deadband and delay time or increasing the control power reduce
+the yellow region at the expense of addition propellant consumption. For reference, Fig. [19] of
+Ref. [9] illustrates the same parametric analysis without active control in which over 95% of the
+cases resulted in toppling. Also note the size of the unstable region increases with the ratio of MC
+
+
+
+to MB . In practice, the parameters of the active control system would need to be tuned such that it
+is robust to the worst case vehicle and slosh states at touchdown.
+
+
+
+Figure 11. Parametric Analysis with Slosh and Active Control
+
+
+
+CONCLUSION
+
+
+
+In this work the impact of propellant slosh on the performance of an active stabilization control
+system during touchdown was presented with the focus on the planar two-two-and-over symmetric
+landing mode. Collision dynamics were modeled via Kane’s theory of generalized impulse and mo-
+menta. Reducing the controller deadband and delay time or increasing the control power improved
+the robustness of the closed-loop system to slosh conditions prior to touchdown.
+
+
+
+REFERENCES
+
+
+
+[1] Zupp, G. A., An Analysis and a Historical Review of the Apollo Program Lunar Module Touchdown
+Dynamics, NASA SP 2013-605, Houston TX, 2013.
+
+
+
+[2] Walton, W. C., Herr, R. W., and Leonard, H. W., “Studies of Touchdown Stability for Lunar Landing
+Vehicles,” Journal of Spacecraft, Vol. 1, No. 5, 1964, pp. 552–556.
+https://doi.org/10.2514/3.27696
+
+
+
+[3] Hilderman, R. A., Mueller, W. H., and Mantus, M., “Landing Dynamics of the Lunar Excursion Mod-
+ule,” Journal of Spacecraft, Vol. 3, No. 10, 1966, pp. 1484–1489.
+https://doi.org/10.2514/3.28681
+
+
+
+[4] Black, R. J., “Quadrupedal Landing Gear Systems for Spacecraft”, Journal of Spacecraft, Vol. 1, No. 2,
+1964, pp. 196–203.
+https://doi.org/10.2514/3.27626
+
+
+
+9
+
+
+
+
+
+https://doi.org/10.2514/3.27696
+
+
+https://doi.org/10.2514/3.28681
+
+
+https://doi.org/10.2514/3.27626
+
+
+
+
+
+
+
+
+[5] Zupp, G. A., and Doiron, H. H., A Mathematical Procedure for Predicting the Touchdown Dynamics of
+a Soft-landing Vehicle, NASA TN D-7045, Houston TX, 1971.
+
+
+
+[6] Walton, W. C., and During, D. J., A Procedure for Computing the Motion of a Lunar-Landing Vehicle
+During the Landing Impact, NASA TN D-4216, Hampton VA, 1967.
+
+
+
+[7] Herr, R. W., and Leonard, H. W., Dynamic Model Investigation of Touchdown Stability of Lunar-
+Landing Vehicles, NASA TN D-4215, Hampton VA, 1967.
+
+
+
+[8] Lavender, R., “On Touchdown Dynamics for Lunar Landing,” AIAA Symposium on Structural Dynamics
+and Aeroelasticity, AIAA, 1965.
+https://doi.org/10.2514/6.1965-1124
+
+
+
+[9] Roithmayr, C., and Pei, J., “Effects of Propellant Slosh on Touchdown Stability for Landing Vehicles,”
+submitted to AIAA Journal of Spacecraft and Rocket
+
+
+
+[10] Kane, T. R., and Levinson, D. A., Dynamics: Theory and Applications, McGraw-Hill, New York, 1985,
+Chaps. 6, 7.
+
+
+
+[11] “As Artemis Moves Foward, NASA Picks SpaceX to Land Next Americans on Moon,” April, 2021.
+https://www.nasa.gov/press-release/as-artemis-moves-forward-nasa-
+picks-spacex-to-land-next-americans-on-moon [accessed 26 December, 2022].
+
+
+
+[12] “How Not to Land an Orbital Rocket Booster,” Sept 14, 2017. https://www.youtube.com/
+watch?v=bvim4rsNHkQ [accessed 30 March, 2023].
+
+
+
+[13] Lee, A. Y., Strahan, A. L., Tanimoto, R., and Casillas, A., “Preliminary Characterization of the Altair
+Lunar Lander Slosh Dynamics and Some Implications for the Thrust Vector Control Design,” Proceed-
+ings of the AIAA Guidance, Navigation, and Control Conference, Toronto, Canada, August 2–5, 2010.
+https://doi.org/10.2514/6.2010-7721
+
+
+
+10
+
+
+
+
+
+https://doi.org/10.2514/6.1965-1124
+
+
+https://www.nasa.gov/press-release/as-artemis-moves-forward-nasa-picks-spacex-to-land-next-americans-on-moon
+
+
+https://www.nasa.gov/press-release/as-artemis-moves-forward-nasa-picks-spacex-to-land-next-americans-on-moon
+
+
+https://www.youtube.com/watch?v=bvim4rsNHkQ
+
+
+https://www.youtube.com/watch?v=bvim4rsNHkQ
+
+
+https://doi.org/10.2514/6.2010-7721
+
+
+
+ 
+Introduction
+
+ 
+Dynamics
+
+ 
+First Inelastic Collision
+
+ 
+Motion During the Interval Between the First and Second Collisions
+
+ 
+Second Inelastic Collision + Post Collision
+
+
+ 
+Results
+
+ 
+Conclusion

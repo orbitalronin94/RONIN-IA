@@ -1,0 +1,1792 @@
+A N N I V E R S A R Y 
+
+
+
+NASA DEVELOP National Program 
+California - Ames 
+
+
+
+Summer 2023 
+ 
+
+
+
+ 
+ 
+
+
+
+Marin County Wildfires II 
+ Improving Fire Suppression Modeling to Inform Fire Prevention and Suppression 
+
+
+
+Decisions in Marin County, CA 
+
+
+
+ 
+ 
+ 
+ 
+
+
+
+ 
+ Technical Report 
+
+
+
+August 11th, 2023 
+ 
+
+
+
+Harrison Raine (Project Lead) 
+Anai Tene 
+
+
+
+Katherine Scott 
+Tiffany Mar 
+
+
+
+Nikitha Shivakumar 
+ 
+
+
+
+Advisors: 
+Dr. Juan Torres-Pérez, NASA Ames Research Center (Science Advisor) 
+Dr. John (Jake) Dialesandro, Santa Clara University (Science Advisor) 
+
+
+
+Britnay Beaudry, NASA Ames Research Center (Science Advisor) 
+ 
+
+
+
+Previous Contributors: 
+Suhani Dalal 
+Katera Lee 
+
+
+
+Chandler Ross 
+Gabriel Rosenstein 
+
+
+
+ 
+Fellow: 
+
+
+
+Lisa Tanh (ARC) 
+ 
+
+
+
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+1 
+
+
+
+ 
+
+
+
+ 
+
+
+
+1. Abstract 
+A future of increased wildfires requires greater integration of spatial analysis and local knowledge of 
+emergency responders. We examine the application of a Potential Operational Delineations (PODs) 
+framework for strategic pre-fire planning in Marin County. PODs are spatial units for wildfire management 
+that combine predictive modeling and local firefighter expertise to identify potential control locations as unit 
+boundaries and assess the difficulty of suppression within units. Additionally, this project explores the 
+integration of road networks and social vulnerability to assess environmental justice in evacuation safety. This 
+project constitutes a novel application of the PODs framework as it integrates expertise from Marin County 
+senior firefighters with a Fireline Location Model (FLM) to achieve POD definition and uses a Suppression 
+Difficulty Score (SDS) to rank each POD. The FLM uses network analysis and hydrologic modeling to 
+identify key roads and ridgelines as boundaries and combines them with expert knowledge, in the form of 
+workshops, to construct PODs. Once identified, PODs are classified using SDS, which includes processed 
+inputs such as LiDAR-derived aboveground biomass, ECOSTRESS Evaporative Stress Index, land use cover 
+type from Sentinel-2 Imagery, and a digital elevation model. Environmental justice for evacuation safety 
+incorporated three key road metrics such as connectivity, travel area, and exit capacity, the Social Vulnerability 
+Index from the Center for Disease Control, and cell coverage to determine a final Evacuation Difficulty 
+Score. Results indicate a strong link between road networks as primary POD boundaries, with ridgelines and 
+waterways as secondary and tertiary locations. Specifically, we find 78.5% of expertise-identified POD 
+boundaries align with FLM-determined boundaries. More validation is needed to support this process; 
+however, initial results signal a feasible framework to integrate expertise and spatial analysis in local level 
+strategic fire planning. 
+ 
+Key Terms: 
+Wildfire modeling, Potential Operational Delineations (PODs), Suppression Difficulty, Random Forest, 
+ECOSTRESS, Network Analysis, Evacuation, Environmental Justice 
+
+
+
+ 
+2. Introduction 
+2.1 Background Information 
+2.1.1 Background Information 
+Wildfires are increasing in intensity and frequency in California, and this is attributed to climate warming, 
+severe drought, and fuel accumulation due to decades of active fire suppression (Chen & Jin, 2022). Weather 
+is the most variable component that affects the speed and intensity of wildfires, as temperature and humidity 
+fluctuate daily and determine the probability of ignition for vegetation (Millison et al., 2018). Topography is 
+another driver of fire behavior, as slope and landform influence the intensity and speed of wildfire spread 
+(Millison et al., 2018). Fuel, in the form of vegetation, is the ultimate factor in determining how wildfire 
+travels through a given landscape and is most imperative when predicting wildfire risk (Millison et al., 2018). 
+ 
+The rapid expansion of infrastructure and human settlements into previously undeveloped areas in California 
+is increasing the wildland-urban interface (WUI; Radeloff et al., 2005; Chen & Jin, 2022). WUI areas are 
+characterized as high-risk due to an interspersion of flammable wildland vegetation with human structures, 
+and California’s most catastrophic wildfires often occur within the WUI (Moritz et al., 2014). 
+ 
+Due to the increasing volatility of wildfires, fire managers and researchers are in need of new solutions to 
+address growing risk, especially within the WUI. Tools such as remote sensing and fire modeling are of rising 
+importance to support disaster planning, response, and recovery. Remote sensing can be utilized for mapping 
+fuel types on a global scale (Mitsopoulos et al, 2017). High spatial resolution imagery allows for the creation 
+of fine-scale measurements in the fuel models, consequently allowing for mapping of the fuel model’s spatial 
+extent and fire suppression difficulty maps (Mitsopoulos et al, 2017). 
+ 
+
+
+
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+2 
+
+
+
+ 
+
+
+
+Additionally, Potential Operational Delineations (PODs) are now being developed by state, local, and federal 
+agencies as a means of fire management and assessment (Thompson et al., 2020). POD maps 
+compartmentalize a continuous landscape into discrete units, demarcated by rivers, roads, and ridgelines. 
+These compartmentalized areas are bounded by potential fire control locations that support strategic fire 
+planning and emergency response (Greiner et al., 2021). POD Networks are identified through workshops 
+that combine the expertise of local fire managers with geospatial data for fire control likelihood (Caggiano et 
+al., 2021). These quantitative inputs are then combined with qualitative data via wildfire planning workshops 
+to determine POD networks. 
+ 
+2.1.2 Study Area and Period 
+Marin County is in the northwestern part of the San Francisco Bay Area in California (CalFire FRAP GIS 
+Data, 2023; Figure 1). Marin County experiences strong seasonal fire weather conditions in the late summer 
+& fall, rugged terrain, and a growing wildland-urban interface. All these factors combine to make wildfire 
+suppression in Marin County a difficult and dynamic task. 
+
+
+
+ 
+
+
+
+ 
+ 
+
+
+
+Figure 1. 10-meter spatial resolution imagery of Marin County. 
+
+
+
+ 
+ 
+The first term of the Marin County Wildland Fire project collaborated with the Marin County Fire 
+Department (MCFD) and FIRE Foundry (Fire, Innovation, Recruitment, and Education) to create models 
+that assist with fire management and suppression. The NASA DEVELOP team’s models used various input 
+data to evaluate where to best target wildfire suppression (Dalal et al., 2023). This term’s project enhanced 
+these suppression models with additional inputs and supplemented the suppression model findings with a 
+PODs network. Additionally, this term expanded beyond biophysical risk and sought to incorporate an 
+environmental justice framework. 
+ 
+Critical to our team and project is recognition of the disproportionate impacts from wildfire across 
+disadvantaged communities in Marin County. Masri et al (2020) identified that wildfires disproportionately 
+impact elderly and low-income communities in California, thereby making safety from wildfires a focus for 
+
+
+
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+3 
+
+
+
+ 
+
+
+
+Environmental Justice (EJ). EJ encompasses the right to a clean, healthy, and (importantly in this context) 
+safe environment and access to resources, such as emergency services, that influence the wellbeing of 
+communities. Our methodology forefronts EJ values by using cell reception data, evacuation route data, 
+indicators of social vulnerability from the United States Census to identify areas vulnerable to wildfire 
+evacuation challenges. 
+ 
+2.2 Project Partners & Objectives 
+The objective of this project was to integrate spatial analysis for wildfire risk with local knowledge and 
+expertise. We used multiple biophysical inputs related to vegetation, terrain, and weather to assess fire risk 
+and identify areas of high likelihood for successful fire suppression. These areas were then vectorized into 
+spatial units, allowing them to be compared against one another through the application of key metrics such 
+as aboveground biomass and evaporative stress. Data on social vulnerability was integrated in this analysis to 
+yield a lens focused on human dimensions within spatial units. Our team used local knowledge to validate the 
+potential areas for fire suppression and their associated risk profiles. 
+ 
+Our project was conducted in partnership with FIRE Foundry and MCFD to explore opportunities to 
+integrate spatial analysis into wildfire management in Marin County. FIRE Foundry is an educational and 
+workforce development program that prepares historically underrepresented populations in Marin County to 
+pursue full-time fire service and fire prevention careers. The program is supported by Conservation Corps 
+North Bay, College of Marin, U.C. Berkeley, Marin Fire, the County of Marin, and more. Through this 
+project, FIRE Foundry recruits benefited from learning remote sensing applications as they learn to make 
+informed decisions regarding vegetation management projects. 
+ 
+MCFD is the primary agency responsible for wildfire management and life safety within Marin County. 
+MCFD can benefit from the results of this NASA DEVELOP project by utilizing the applicable tools and 
+deliverables we provided to expand on their firefighting response and suppression strategy. 
+ 
+
+
+
+3. Methodology 
+3.1 Data Acquisition 
+3.1.1 USFS Risk Management Assistance Products 
+In 2020, the US Department of Agriculture collaborated with Pyrologix to analyze and create open-source 
+Risk Management Assistance (RMA) products for critical fire-prone areas in the Western U.S. Our team 
+downloaded RMA products at 30m spatial resolution, including raster sets for Wildfire Hazard Potential 
+(WHP) and Potential Control Locations (PCLs). These indices are currently identified as the foremost form 
+of analysis for integrating wildfire hazard, exposure, and probability into single metrics. 
+ 
+WHP quantifies the relative potential for wildfire to be difficult to control. This metric relies heavily on high 
+resolution fire modeling outputs to analyze burn and fire length probabilities on a pixel-by-pixel basis. PCLs 
+are scaled from 0-100% and are intended to communicate the probability of successfully containing a wildfire. 
+PCLs are determined by comparing historic fires and their controls with specific landscape characteristics 
+such as fuel transition zones, roads, and topographic features such as ridgelines. 
+ 
+3.1.2 Moisture & Vegetation Health 
+ECOsystem Spaceborne Thermal Radiometer Experiment on Space Station (ECOSTRESS) is a NASA 
+thermal instrument currently onboard the International Space Station that measures vegetation and soil 
+temperature to analyze plant stress with a 70m spatial resolution. We downloaded various ECOSTRESS data 
+layers from NASA’s Application for Extracting and Exploring Analysis Ready Samples (AppEEARS; 
+Appendix A1). The data layer downloaded from AppEEARS was the Level-4 Evaporative Stress Index (ESI; 
+Hook & Fisher, 2019), and this was used to evaluate the stress level of vegetation as well as the drought-
+susceptibility of Marin County. We also downloaded Level-2 Cloud Masks (Hook & Hulley, 2022) which 
+removed clouds from the data. We then collected ESI and Cloud Mask data for the fire season, which is from 
+May to October, and compiled all images in that season for 2018 to 2023. 
+
+
+
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+4 
+
+
+
+ 
+
+
+
+ 
+3.1.3 One Tam Products & Aboveground Biomass 
+Our team downloaded various LiDAR datasets from the California Forest Observatory that contained 
+canopy height models for Marin County (Appendix A1). Each metric was derived from airborne LiDAR data 
+that was processed through deep learning pattern recognition models. The data was then stored in UTM 10 
+North coordinate reference system (ESPG: 32610). These data provide canopy cover and canopy bulk density 
+at 3ft resolution. Our team processed high-resolution canopy height rasters in an open-source Random Forest 
+Machine Learning Algorithm to yield Aboveground Biomass data. MarinVegMap also provided rasters for 
+canopy cover and canopy bulk density at 0.91m resolution. These data layers stem from an effort to assess 
+vegetation across Marin County, titled One Tam, from Marin County Parks and supporting agencies to 
+conduct high resolution mapping in December 2018 and March 2019. In addition to canopy height, we 
+accessed county-wide One Tam LiDAR topography products such as a digital elevation model (DEM) slope 
+& aspect. Collection of these 10m spatial resolution products occurred between December 2018 and March 
+2019. Lastly, One Tam provided high resolution orthoimagery at 0.5ft resolution. 
+ 
+3.1.4 Environmental Justice 
+Our team accessed United States Census Bureau data to obtain Marin County demographic information 
+(Explore Census Data, n.d.). We utilized the Center for Disease Control’s (CDC) Social Vulnerability Index 
+to identify environmental and social factors that are most relevant to Marin County’s communities (ATSDR, 
+2023). We also used Fire Safe Marin’s evacuation maps to obtain information about evacuation routes and 
+areas classified as Wildland Urban Interface (WUI; Zonehaven, 2020). Lastly, we downloaded available 
+cellular data from T-Mobile and Verizon 4G LTE coverage from the Financial Communication Commission 
+Mobile LTE Coverage Map (2021). 
+ 
+3.1.5 Ancillary Datasets & First Term Imagery 
+Our team acquired datasets related to critical infrastructure such as roads, evacuation routes, trails, 
+transmission lines, and building footprints. These vector datasets are located in two key sources: Marin 
+County GIS Portal for all local level structures and infrastructure and the California Energy Commission for 
+transmission lines. These data were incorporated into the suppression model. Additionally, we utilized the 
+same Sentinel-2 imagery from the first term team’s models as a model input for land classification, and as 
+such it did not require further acquisition or processing steps. 
+ 
+3.2 Data Processing 
+3.2.1 Potential Operational Delineations 
+Our team processed statewide risk management assessment (RMA) data from Pyrologix with additional 
+localized vector datasets from Marin County. Initially in ArcGIS Pro 3.1.1, we defined projection coordinate 
+systems for multiple RMA raster sets to NAD 1983 2011 State Plane III and clipped them to the area of 
+interest. Due to their status as publicly available products for fire suppression, minimal preprocessing was 
+necessary for the RMA datasets. However, to best localize the data to Marin County, we added additional 
+vector datasets acquired from the Marin County GIS portal. Our partners identified the importance of roads, 
+ridgelines, and rivers as important features for fire suppression and these inputs required data processing 
+prior to analysis with RMA products. Our team processed the roads layer through the creation of a network 
+dataset that can be input into Network Analyst tools. This required the calculation of drive times for each 
+road type, as specified by cross-referencing the dataset’s attribute table with Census Feature Class Codes 
+(CFCCs) to derive approximate speeds. Additionally, we buffered the roads centerlines to their appropriate 
+widths based upon CFCC specifications for each road type. Next, we processed county hydrologic data to 
+delineate watersheds utilizing a suite of tools in the ArcHydro toolbox to yield ridgeline vector files. This 
+included a series of models and iterators in ModelBuilder to conduct a workflow that included flow direction, 
+flow accumulation, stream segmentation (watersheds), and the creation of catchment delineation polygons. 
+The boundaries of these polygons serve as ridgelines, as they are the edges of watershed basins. No 
+preprocessing was necessary for river vector data. Finally, our team ran each vector file through a zonal 
+
+
+
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+5 
+
+
+
+ 
+
+
+
+statistics tool to calculate the Suppression Difficulty Score (SDS) and Potential Control Line (PCL) disaster 
+products to yield their average value for each vector file. 
+ 
+3.2.2 Aboveground Biomass & Canopy Height 
+Our team used a canopy height model derived from airborne LiDAR and processed it through a machine 
+learning image recognition algorithm. To translate this model to output aboveground biomass data, we ran 
+the data through a watershed delineation method and the Random Forest algorithm. To start, we used a 
+gaussian smooth convolution method across the canopy height dataset to remove outliers associated with 
+sensor error that could possibly skew the data. Next, using the smoothed canopy height model, we ran an 
+algorithm to determine local maximums and identify the highest tree points in the image. After doing this, we 
+created a mask to represent all the local maximums in the array and removed all the NaN values that could 
+also skew the data. We ran this mask and the smoothened array into the watershed segmentation algorithm, 
+which outputs an array of labels representing the separated tree canopies to be used in the biomass 
+calculations. Finally, we split the array into predictor variables for the biomass and the tree IDs. 
+ 
+Next, we trained and fitted the Random Forest model using training data that was acquired from an SJER 
+biomass dataset. This model was fit to output predictions with an accuracy of 85%. Using the fitted model, 
+we uploaded the predictor variables that were output from the watershed segmentation algorithm. The model 
+then produced an estimate of the total biomass in Marin County as well as a raster that represented the 
+predicted biomass of each individual tree in Marin County. 
+ 
+3.2.3 Moisture & Vegetation Health 
+Once ECOSTRESS ESI and WUE data were downloaded from AppEEARS, it was processed by our team 
+using a Python script that was developed by Dr. Gregory Halverson for the “Applications of Remote 
+Sensing-Based Evapotranspiration Data Products for Agricultural and Water Resource Management” Applied 
+Remote Sensing Training (ARSET, 2022) program. The Python script masked out “no data” values and 
+applied a cloud mask. We then computed composite images for both WUE and ESI for the 2022 fire season. 
+Finally, values that were negative or outside of the expected range for the dataset were removed. 
+ 
+3.2.4 Environmental Justice 
+We chose to create an evacuation route analysis to characterize Marin County’s road networks. We first made 
+fixed buffer areas of 2km centered around each of the 32 towns in Marin County and then analyzed the 
+surrounding towns using three road metrics. The first metric we used was an Exit Capacity metric, which we 
+obtained by buffering at a fixed distance of 2 km and intersecting the buffer edge with roads or evacuation 
+routes. This demonstrated the number of roads available from a town’s center point (Dye et. Al, 2021). 
+ 
+The second metric we used was a Travel Area metric that measured the maximum number of places that can 
+be reached within a specified distance of 2 km from the starting point in the center of the town. This metric 
+measured travel area exclusively along the path of the road network and allowed us to account for the 
+curviness of the roads (Dye et al., 2021). On ArcGIS Pro we used the "Service Area Network Analyst", "Add 
+Locations", and "Solve" tools to calculate travel along the road network. Then, we created polygons for each 
+buffer area to bound and summarize the travel area. The resulting metric was the total area square kilometers 
+of the polygons. Buffer areas with larger travel areas were less vulnerable, as it implies that there is more 
+potential road space to be able to drive away in the event of an evacuation. 
+ 
+Lastly, we created a connectivity metric which summarizes the total number of connected roads at each 
+intersection. The metric is based upon the idea that well-connected streets are more efficient in directing 
+people to their destinations (Handy et al, 2003). We used the "Line and Junction Connectivity" tool in 
+ArcGIS Pro to find the road intersections as vector points and an attribute showing the total of connecting 
+roads at each point. Then, we clipped the areas to be within the buffer areas for each town. Any points that 
+overlapped were added together. Higher values are indicative of greater flexibility and emergency access 
+
+
+
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+6 
+
+
+
+ 
+
+
+
+during wildfire evacuation. The final metric was the sum of the number connecting roads in each buffer area 
+(Dye et al., 2021). 
+ 
+3.2.5 Additional Data 
+We processed road, trail, and power line data in ArcGIS Pro. First, an 8-meter buffer was applied to road 
+data, and a 1-meter buffer was applied to trail and power line data. Then, the polygon buffer file was run 
+through the Polygon to Raster tool so that it could be added to the suppression difficulty model. Digital 
+Elevation Model (DEM) raster images were mosaicked with the “Mosaic to New Raster” tool. Then, the 
+DEM was resampled from 1.5 ft to 10 m, so it matched the resolution of the other inputs to the suppression 
+model. To derive slope and aspect from the DEM, the “Slope” and “Aspect” tools were used respectively. 
+ 
+Additionally, we used network analysis tools in ArcGIS Pro to produce an emergency response layer that 
+calculated areas within 15 minutes of Marin County and partnering fire department stations. This layer 
+utilized the road network dataset that our team created and used traffic conditions based upon ESRI default 
+traffic levels for Saturday, July 8th, 2023. This output polygons resembling accessible service areas for fire 
+stations and imply higher rates of suppression success due to rapid response. 
+ 
+
+
+
+3.3 Data Analysis 
+3.3.1 Workshop on Potential Operational Delineations 
+
+
+
+Without input and buy-in from local experts, Potential Operational Delineations are unlikely to become 
+integrated and operationalized by fire managers. Additionally, local expertise serves as a critical form of 
+qualitative data that can support validation for GIS-derived POD boundaries. Therefore, we facilitated an in-
+person workshop with senior fire managers at Marin County Fire Department. During the workshop, our 
+team provided experts with overlays of the processed ridgelines and roadways with their probabilities of 
+control demarcated and asked experts to draw and or otherwise indicate where they would attempt to control 
+a wildfire under different scenarios. We also determined from experts which major roadways are to be used in 
+the event of a wildfire. After documenting the control lines that the MCFD would use or construct in the 
+event of a wildfire, our team acquired a sum equivalent of 14.1 miles of expert-defined POD boundaries to be 
+used as a validation set. We then digitized this validation dataset to provide a dataset for GIS-defined POD 
+boundaries and expert-defined POD boundaries. Next, we buffered the GIS-defined POD boundaries by 
+30ft and used them to clip the expert-defined boundaries. This buffer size was selected to account for 30m 
+spatial resolution in the raster dataset. The clipping removed all overlapping areas of GIS- and expertise-
+defined boundaries, leaving only the areas of difference between the two datasets. 
+
+
+
+ 
+3.3.2 Fire Suppression Difficulty Score 
+To calculate the SDS, all the inputs were reclassified on a scale of -1 to 5, with -1 values actively detracting 
+from fire suppression difficulty, like roads and trails, and values of 1 to 5 adding to suppression difficulty to 
+various degrees, with values of 5 being the most difficult to suppress. For slope, canopy base height, canopy 
+bulk density, aboveground biomass, ladder fuels, and the evaporative stress index (ESI), the default 
+reclassification values for 5 classes in ArcGIS was used, so values were equally distributed on the 1-5 scale 
+based on how much they would affect fire suppression difficulty. For the land, we took the first team’s 
+Sentinel-2 classification and classified trees as 5, shrub & scrub as 4, grass as 3, crops and bare land as 2, and 
+snow & ice, built, and flooded vegetation as 1. Layers that detracted from fire suppression difficulty, namely 
+roads, trails, and areas within a 15-minute response time from the closest fire department, were all given 
+values of -1 and added to a raster of the whole county that had a value of 0. 
+ 
+Then, all input layers were weighted and added together using the Weighted Sum tool in ArcGIS Pro. The 
+weights must add up to 1, and higher weights had more of an effect on the final SDS. Land cover, slope, and 
+ESI were all weighted the most at 0.16. The 15-minute response time variable was weighted second highest at 
+0.12. Aspect was weighted as 0.08. Aboveground biomass, canopy cover, and canopy bulk density were 
+weighted as 0.06. Roads, ladder fuels, canopy base height, and trails were weighted the lowest at 0.055. 
+
+
+
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+7 
+
+
+
+ 
+
+
+
+ 
+ 
+ 
+3.3.3 Weighting Evacuation Challenges and Social Vulnerability 
+
+
+
+To create the Evacuation Difficulty Score for each buffer area, we weighted each category in the following 
+ranges: road metrics (0-3), cellular coverage (0-4), and CDC’s Social Vulnerability Index (SVI) from (0-4). The 
+cell coverage and social vulnerability inputs of the Evacuation Difficulty Score were reclassified to a scale of 
+0-4, where 0 values were lowest vulnerability, and 4 values were highest vulnerability. For cell coverage, 0 
+values were where there was no cell coverage, 2 values had one cellular provider, and 4 values had both T-
+Mobile and Verizon coverage. Each of the three-road metrics (Exit Capacity, Travel Area, Connectivity) were 
+reclassified to a scale of 0-1, then summed together for a total score of 0-3. For all road metrics 1 represents 
+the maximum amount of either exits, roads, or intersections and 0 the minimum. 
+ 
+
+
+
+4. Results & Discussion 
+4.1 Analysis of Results 
+
+
+
+4.1.1 Potential Operational Delineations 
+
+
+
+Results from the PODs workshop with MCFD senior firefighters identified that 78.5% of expert-defined 
+POD boundaries align with GIS-derived POD boundaries. These results, while preliminary, suggest that the 
+GIS workflow utilized for PODs identification produce results similar to control locations likely to be utilized 
+by Marin County fire managers. This validation supported the use of GIS workflow for POD boundaries for 
+the broader Marin County landscape. For the extent of the study area, PODs followed a similar framework to 
+align POD boundaries with watershed boundaries and major roadways. However, this validation test 
+occurred on a subsection of Marin County and greater validation is necessary to support the implementation 
+and accuracy of a GIS-derived POD network. 
+
+
+
+Figure 2. This is an image of POD boundaries as red vectors as they appear in Google Earth. The boundaries 
+indicate potential control locations for fire that occurs within each unit. These boundaries follow along 
+
+
+
+ridgelines, major roads, and waterbodies. 
+
+
+
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+8 
+
+
+
+ 
+
+
+
+ 
+Figure 3. This is an image of the Suppression Difficulty Score (SDS) on the left, added to the PODs map in 
+the middle, with the PODs ranked by their cumulative SDSs on the right. In both the left and right maps, 
+
+
+
+reddish orange represents higher SDSs, and blue represents the lowest SDSs. 
+ 
+4.1.2 Fire Suppression Difficulty Score 
+As can be seen in Figure 2 above, the Suppression Difficulty Score estimates where fire suppression will be 
+more difficult in Marin County, CA on a scale of 0 to 4, with 4 representing areas where fire is estimated to 
+be hardest to suppress. In the map, which is on the left of the figure, dark orange areas are the areas where 
+fire would be hardest to suppress, and blue areas are where fire is estimated to be easiest to suppress. This 
+concentration of higher scoring PODs correlates with the Mt. Tamalpais Open Space, an area of steep 
+canyons with dense vegetation that experiences moderate to high evaporative stress. Full evacuation difficulty 
+scores can be found in Appendix A2. 
+
+
+
+ 
+Figure 4. Census-designated areas in Marin County with Evacuation Difficulty Scores based on road networks, 
+
+
+
+social vulnerability scores, and availability of cell coverage. 
+
+
+
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+9 
+
+
+
+ 
+
+
+
+4.1.3 Evacuation Difficulty Score 
+As shown in Figure 4, the Evacuation Difficulty Score was applied to all the buffer areas, summing together 
+the scores for cell coverage, the three-road metrics, and social vulnerability. The score is on a scale of 0-100, 
+100 representing the most vulnerable areas. In the areas where evacuation is most difficult, the buffer areas 
+are red and areas where evacuation is least difficult are shown in yellow. From a physical location standpoint, 
+the east side of Marin County has more exits available, more places that can be reached and more roads 
+connecting at intersections, than the west side. The top three towns with the most roads connected at each 
+intersection were Northeast San Quentin, San Anselmo, and Mill Valley. However, from an overall approach 
+accounting for road metrics, cell coverage and social vulnerabilities, we found the top three towns with the 
+highest difficulty scores were: San Rafael with a score of 100, San Quentin with a score of 91.4, and Santa 
+Venicia with a score of 83.8. We identified that many of the communities with higher scores correlate with 
+areas of higher CDC Social Vulnerability Scores, such as San Rafael. This demonstrates that evaluating 
+evacuation difficulty from just a physical location standpoint is not sufficient. Once social factors and 
+communication networks are included it provides a holistic approach for evaluating difficulty throughout the 
+towns of Marin County. 
+ 
+4.1.4 Error Analysis 
+Our final suppression model predicted the fire severity of each POD that was identified based on Potential 
+Control Locations for wildfire containment. However, due to time constraints and data limitations, there are 
+some pieces of uncertainty that exist in our model. Regarding Suppression Difficulty Score, the input 
+parameters may not be as up to date or real time as possible, due to the temporal availability of the EO data. 
+Also, the factors that influence fire behavior are difficult to identify due to the unpredictable nature of the 
+weather. Furthermore, in Marin County, due to the cloud cover, numerous EO images during our study 
+period were unusable, resulting in only inputs for the summer seasons that have less cloud coverage. This 
+may misrepresent Marin County as an overwhelmingly cloudless county to partners trying to replicate our 
+Suppression Difficulty Score. 
+ 
+Additionally, the aboveground biomass (AGB) estimation was produced using the Random Forest machine 
+learning model. However, the machine learning model was trained using data from the NEON SJER site, 
+which imposes limitations on the AGB accuracy. Because some trees in Marin County were not represented 
+by this set of training data, there could be some variances in the biomass estimation for individual trees. Our 
+team faced data limitations in this way, as it was not feasible to collect the required data to train the model on 
+Marin County vegetation information. 
+ 
+The Evacuation Difficulty Score was created using the Social Vulnerability Index (SVI) made by the CDC 
+using Census Bureau data. However, there were some uncertainties when using the SVI because the data was 
+collected on a national scale and our study area was localized to a single county. There were also data 
+limitations with the cell coverage network information – our team was only able to acquire for two major cell 
+coverage providers (Verizon and T-Mobile). Therefore, this is not a fully comprehensive description of cell 
+coverage in Marin County because it does not account for populations that use different cellular providers. 
+ 
+
+
+
+4.2 Feasibility Assessment 
+
+
+
+Through this project, our team assessed the feasibility of implementing Earth Observations to inform wildfire 
+suppression and evacuation vulnerability. We incorporated multispectral NASA satellite data for 
+evapotranspiration measurements, as well as aerial LiDAR survey observations for aboveground biomass and 
+tree data. We concluded that it is feasible to create a Suppression Difficulty Score and risk characterized POD 
+map using the remote sensing methods mentioned previously. Further, we were also able to successfully 
+create an Evacuation Difficulty Score to supplement our analysis on wildfire behavior. 
+ 
+Using the outputs provided from our project, the Marin County Fire Department (MCFD) will be able to 
+successfully understand fire suppression for specific spatial regions in Marin County. Because the MCFD has 
+previously relied on local expertise and past fire behavior to understand fire suppression, our Suppression 
+
+
+
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+10 
+
+
+
+ 
+
+
+
+Difficulty Score will provide a standardized way to strategically plan wildfire management and supplement 
+experience-based knowledge. The POD map will allow our partners to understand which regions of the 
+county require further allocation of resources and vegetation management, as well as identify strategic 
+boundaries for suppressing fire. Furthermore, the accompanying Evacuation Difficulty Score will also 
+provide a lens on the environmental justice aspect of wildfires, allowing vulnerable communities to better 
+assess their evacuation options. 
+ 
+
+
+
+4.3 Future Work 
+
+
+
+Future work should incorporate local knowledge and expertise to validate our Suppression Difficulty Score 
+and ensure that each POD delineation is drawn to maximize wildfire suppression efficiency. Additionally, the 
+Suppression Difficulty Score can incorporate additional parameters such as weather data and other NASA 
+earth observations to produce a more well-rounded index. The MCFD would also like to see 4-5 separate 
+POD maps characterized by monthly Suppression Difficulty Scores for each month of the fire season in 
+Marin as well as divided by fire department within the county. Through this adjustment, the MCFD could 
+gain a more comprehensive and detailed approach about fire suppression in response to changing fire 
+behavior. For the Evacuation Difficulty Score, future work can include community refuges as an additional 
+parameter when identifying communities most vulnerable to evacuation barriers. In addition, the Census-
+designated zones used for the buffer areas can be expanded and localized to town boundaries for a more in-
+depth analysis. 
+ 
+
+
+
+5. Conclusions 
+In this feasibility study, we found that Earth observations can effectively be used to estimate fire suppression 
+difficulty in Marin County’s unique environment of microclimates. Potential Operation Delineations (PODs) 
+were found to be a useful framework for the Marin County Fire Department to identify strategic boundaries 
+where fire could be contained and fought effectively. Further, we also found that physical and social factors 
+of evacuation difficulty can be effectively analyzed through an Environmental Justice-based analysis. 
+ 
+The Suppression Difficulty Score output revealed that most of the county is susceptible to moderate fire 
+suppression difficulty. After combining our score with the POD map that was created using processed 
+Ridgeline data, our team was able to produce an output that classified spatial regions of Marin based on fire 
+suppression difficulty. The Evacuation Difficulty Score also demonstrated that assessing evacuation difficulty 
+only based on physical factors is insufficient. Incorporating social and communication networks provides a 
+comprehensive method for assessing evacuation challenges across Marin County. 
+ 
+Our team hopes that the Marin County Fire Department can integrate our characterized POD map to better 
+understand fire suppression for Marin County. Firefighters will be able to use our maps to identify potential 
+control locations, support strategic planning, as well as evaluate which PODs could benefit from vegetation 
+management. Additionally, our hope is that the metrics presented within the Evacuation Difficulty Score may 
+help communities understand and prioritize how their evacuation options may be limited by physical and 
+social vulnerabilities. 
+
+
+
+ 
+6. Acknowledgements 
+Our team would like to thank everyone involved in this project for their support and guidance, especially our 
+science advisors Dr. John (Jake) Dialesandro at Santa Clara University and Dr. Juan Torres-Pérez and Britnay 
+Beaudry at NASA Ames Research Center. We thank our project partners, Josh Dimon (FIRE Foundry) and 
+Graham Groneman (Marin County Fire Department) for their support and guidance. Lastly, we want to 
+thank our NASA DEVELOP ARC Fellow, Lisa Tanh, for her great help and our project coordination Fellow 
+Laramie Plott. 
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+11 
+
+
+
+ 
+
+
+
+This material contains modified Copernicus Sentinel data (2020, 2021) processed by ESA. 
+ 
+
+
+
+Any opinions, findings, and conclusions or recommendations expressed in this material are those of the 
+author(s) and do not necessarily reflect the views of the National Aeronautics and Space Administration. 
+ 
+
+
+
+This material is based upon work supported by NASA through contract NNL16AA05C. 
+ 
+
+
+
+7. Glossary 
+Canopy Base Height (CBH) – The distance between the bottom of the canopy and the forest floor. If base 
+height is smaller, a fire is more likely to spread into the canopy where it will do maximum damage while a 
+large base height suggests a crown fire is less likely. 
+ 
+
+
+
+Canopy Bulk Density (CBD) – A measure of the weight of the canopy per unit of ground, which tracks 
+how much fine fuel would likely burn in a canopy fire. 
+ 
+
+
+
+Canopy Cover (CC) – The percent of horizontal land covered by tree canopy. Complete canopy could lead 
+to more rapid spread of a damaging tree crown fire. 
+ 
+
+
+
+Canopy Height (CH) – The distance from the forest floor to the top of the canopy. Used to understand the 
+total aboveground biomass that may be converted into wildfire fuel. 
+ 
+
+
+
+Earth observations – Satellites and sensors that collect information about the Earth’s physical, chemical, and 
+biological systems over space and time. 
+ 
+
+
+
+Fire break – A gap in vegetation that impedes the spread of wildfire. 
+ 
+
+
+
+Ladder fuels – Ladder fuels provide a connection for fire to travel from a mild surface fire into the tree 
+canopy, creating a much more severe and uncontrollable fire. Ladder fuel density measures how much of this 
+dangerous fuel is present per unit of ground. Satellite products alone cannot measure ladder fuel as it is 
+typically obscured by the tree canopy, but LiDAR can measure these fuels. 
+ 
+
+
+
+LiDAR – Short for Light Detection and Ranging, LiDAR is an active remote sensing technique that uses a 
+pulsed laser to measure the distance to the Earth and other objects on its surface. 
+ 
+
+
+
+WUI – Wildland Urban Interface, a term for urban and residential development that extends into natural 
+areas, putting the infrastructure at fire risk and complicating efforts to fight fire that otherwise could burn 
+naturally without threatening human life or property. 
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+12 
+
+
+
+ 
+
+
+
+8. References 
+ 
+ArcGIS Web Application. (n.d.). Marincounty.maps.arcgis.com. Retrieved June 29, 2023, from 
+
+
+
+https://marincounty.maps.arcgis.com/apps/webappviewer/index.html?id=688f506cfb144067826bb3
+5a062b0f0a 
+
+
+
+ARSET - Applications of Remote Sensing-Based Evapotranspiration Data Products for Agricultural and 
+Water Resource Management. NASA Applied Remote Sensing Training Program (ARSET). (2022). 
+https://appliedsciences.nasa.gov/join-mission/training/english/arset-applications-remote-sensing-
+based-evapotranspiration-data 
+
+
+
+Brown, C.F., Brumby, S.P., Guzder-Williams, B. et al. (2022). Dynamic World, Near real-time global 10 m 
+land use land cover mapping. Sci Data 9, 251. doi:10.1038/s41597-022-01307-4 
+
+
+
+Caggiano, M. D, Thompson, M. P., & Gannon, B. M. (2021). Forest Roads and operational wildfire response 
+planning. Forests, 12(2), 110. https://doi.org/10.3390/f12020110 
+
+
+
+CalFire FRAP GIS Data. (2023). https://frap.fire.ca.gov/mapping/gis-data/ 
+ 
+Cell Towers, Small Cells, Fiber | Crown Castle. (n.d.). Www.crowncastle.com. Retrieved June 29, 2023, from 
+
+
+
+https://www.crowncastle.com/infrastructure-solutions/?level=9¢er=-122.40494 
+
+
+
+Centers for Disease Control and Prevention/ Agency for Toxic Substances and Disease Registry/ Geospatial 
+Research, Analysis, and Services Program. CDC/ATSDR Social Vulnerability Index 2020 Database 
+US. https://www.atsdr.cdc.gov/placeandhealth/svi/data_documentation_download.html. Accessed 
+on June 29, 2023. 
+
+
+
+Chen, B., & Jin, Y. (2022). Spatial patterns and drivers for wildfire ignitions in California. Environmental 
+ Research Letters, 17(5), 055004. https://doi.org/10.1088/1748-9326/ac60da 
+
+
+
+Dalal, S., Lee, K., Rosenstein, G., Ross, C. (2023). Marin County Wildland Fires: Examining Fuel Load and Land 
+Cover Change to Inform Fire Prevention and Suppression Decisions in Marin County, CA. NASA DEVELOP 
+National Program, NASA Ames Research Center. 
+
+
+
+ 
+Dye, A.W., Kim, J.B., McEvoy, A. et al. Evaluating rural Pacific Northwest towns for wildfire evacuation 
+
+
+
+vulnerability. Nat Hazards 107, 911–935 (2021). https://doi.org/10.1007/s11069-021-04615-x 
+ 
+EJI Data Download | Place and Health | ATSDR. (2023, May 25). Www.atsdr.cdc.gov. 
+
+
+
+https://www.atsdr.cdc.gov/placeandhealth/eji/eji-data-download.html 
+ 
+Explore Census Data. (n.d.). Data.census.gov. Retrieved June 29, 2023, from 
+
+
+
+https://data.census.gov/table?q=S2503:+FINANCIAL+CHARACTERISTICS&g=050XX00US06
+041 
+
+
+
+ 
+Explore Census Data. (2021a). Data.census.gov. 
+
+
+
+https://data.census.gov/table?t=Housing&g=050XX00US06041 
+ 
+Explore Census Data. (2021b). Data.census.gov. 
+
+
+
+https://data.census.gov/table?q=S1601:+LANGUAGE+SPOKEN+AT+HOME&tid=ACSST1Y2
+021.S1601 
+
+
+
+ 
+Explore Census Data. (2021c). Data.census.gov. 
+
+
+
+https://data.census.gov/table?t=Educational+Attainment&g=050XX00US06041 
+
+
+
+
+
+https://marincounty.maps.arcgis.com/apps/webappviewer/index.html?id=688f506cfb144067826bb35a062b0f0a
+
+
+https://marincounty.maps.arcgis.com/apps/webappviewer/index.html?id=688f506cfb144067826bb35a062b0f0a
+
+
+https://appliedsciences.nasa.gov/join-mission/training/english/arset-applications-remote-sensing-based-evapotranspiration-data
+
+
+https://appliedsciences.nasa.gov/join-mission/training/english/arset-applications-remote-sensing-based-evapotranspiration-data
+
+
+https://doi.org/10.1038/s41597-022-01307-4
+
+
+https://doi.org/10.3390/f12020110
+
+
+https://frap.fire.ca.gov/mapping/gis-data/
+
+
+http://www.crowncastle.com/
+
+
+https://www.crowncastle.com/infrastructure-solutions/?level=9
+
+
+https://www.atsdr.cdc.gov/placeandhealth/svi/data_documentation_download.html
+
+
+https://doi.org/10.1088/1748-9326/ac60da
+
+
+https://doi.org/10.1007/s11069-021-04615-x
+
+
+http://www.atsdr.cdc.gov/
+
+
+https://www.atsdr.cdc.gov/placeandhealth/eji/eji-data-download.html
+
+
+https://data.census.gov/table?q=S2503:+FINANCIAL+CHARACTERISTICS&g=050XX00US06041
+
+
+https://data.census.gov/table?q=S2503:+FINANCIAL+CHARACTERISTICS&g=050XX00US06041
+
+
+https://data.census.gov/table?t=Housing&g=050XX00US06041
+
+
+https://data.census.gov/table?q=S1601:+LANGUAGE+SPOKEN+AT+HOME&tid=ACSST1Y2021.S1601
+
+
+https://data.census.gov/table?q=S1601:+LANGUAGE+SPOKEN+AT+HOME&tid=ACSST1Y2021.S1601
+
+
+https://data.census.gov/table?t=Educational+Attainment&g=050XX00US06041
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+13 
+
+
+
+ 
+
+
+
+ 
+Explore Census Data. (2021d). Data.census.gov. 
+
+
+
+https://data.census.gov/table?q=S1701:+POVERTY+STATUS+IN+THE+PAST+12+MONTHS
+&tid=ACSST1Y2021.S1701 
+
+
+
+ 
+Greiner, S. M., Schultz, C. A., & Kooistra, C. (2021). Pre-season fire management planning: The use of 
+
+
+
+potential operational delineations to prepare for wildland fire events. International Journal of Wildland Fire, 
+30(3), 170. https://doi.org/10.1071/wf20124 
+
+
+
+ 
+Handy, S, Paterson, RG, & Butler, K (2003). Planning for street connectivity. Getting from here to there. 
+
+
+
+American Planning Association, Planning Advisory Service (Planning Advisory Service report, no. 
+515), Chicago. 
+
+
+
+Hook, S. & Fisher, J. (2019). ECOSTRESS Evaporative Stress Index PT-JPL Daily L4 Global 70 m V001 [Data 
+set]. NASA EOSDIS Land Processes DAAC. Accessed 2023-06-28 from 
+https://doi.org/10.5067/ECOSTRESS/ECO4ESIPTJPL.001 
+
+
+
+Hook, S. & Fisher, J. (2019). ECOSTRESS Water Use Efficiency Daily L4 Global 70 m V001 [Data set]. NASA 
+EOSDIS Land Processes DAAC. Accessed 2023-06-28 from 
+https://doi.org/10.5067/ECOSTRESS/ECO4WUE.001 
+
+
+
+Hook, S., Hulley, G. (2022). ECOSTRESS Swath Cloud Mask Instantaneous L2 Global 70 m v002 [Data set]. 
+NASA EOSDIS Land Processes DAAC. Accessed 2023-06-28 from 
+https://doi.org/10.5067/ECOSTRESS/ECO_L2_CLOUD.002 
+
+
+
+Mitsopoulos, I., Mallinis, G., Zibtsev, S., Yavuz, M., Saglam, B., Kucuk, O., Bogomolov, V., Borsuk, A., & 
+Zaimes, G. (2017). An integrated approach for mapping fire suppression difficulty in three different 
+ecosystems of Eastern Europe. Journal of Spatial Science, 62(1), 139–155. 
+http://dx.doi.org/10.1080/14498596.2016.1169952 
+
+
+
+Mobile LTE Coverage Map. (2021, August 6). Federal Communications Commission. 
+https://www.fcc.gov/BroadbandData/MobileMaps/mobile-map 
+
+
+
+Radeloff, V. C., Hammer, R. B., Stewart, S. I., Fried, J. S., Holcomb, S. S., and McKeefry J. F. (2005) The 
+wildland–urban interface in the United States. Ecological Applications, 15, 799–805. 
+
+
+
+ 
+ Thompson, M. P., Gannon, B. M., Caggiano, M. D., O’Connor, C. D., Brough, A., Gilbertson-Day, J. W., & 
+ Scott, J. H. (2020). Prototyping a geospatial Atlas for Wildfire Planning and Management. Forests, 
+ 11(9), 909. https://doi.org/10.3390/f11090909 
+ 
+ Yavuz, M., & Saglam, B., (2012). Use of remote sensing and GIS techniques for forest fires. KSU Journal of 
+
+
+
+ Engineering Sciences Vol 11. Issue 1. 235-242. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+
+
+
+https://data.census.gov/table?q=S1701:+POVERTY+STATUS+IN+THE+PAST+12+MONTHS&tid=ACSST1Y2021.S1701
+
+
+https://data.census.gov/table?q=S1701:+POVERTY+STATUS+IN+THE+PAST+12+MONTHS&tid=ACSST1Y2021.S1701
+
+
+https://doi.org/10.1071/wf20124
+
+
+https://doi.org/10.5067/ECOSTRESS/ECO4ESIPTJPL.001
+
+
+https://doi.org/10.5067/ECOSTRESS/ECO4WUE.001
+
+
+https://doi.org/10.5067/ECOSTRESS/ECO_L2_CLOUD.002
+
+
+http://dx.doi.org/10.1080/14498596.2016.1169952
+
+
+https://doi.org/10.3390/f11090909
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+14 
+
+
+
+ 
+
+
+
+9. Appendices 
+Appendix A 
+
+
+
+Appendix A1. 
+
+
+
+List of data products used in the project 
+
+
+
+Data Name Use Data Resolution 
+
+
+
+Risk Assessment Data 
+
+
+
+Suppression Difficulty Index 
+Pyrologix 
+
+
+
+2022 30m 
+
+
+
+Wildfire Hazard Potential 
+Pyrologix 
+
+
+
+2020 30m 
+
+
+
+Potential Control Locations 
+Pyrologix 
+
+
+
+2023 30m 
+
+
+
+Earth Observation Data 
+
+
+
+Land Cover Classification Dynamic World 
+
+
+
+2018, 2019, 
+
+
+
+2020, 2021, 
+
+
+
+2022 10m 
+
+
+
+Imagery Landsat 8 
+
+
+
+2018, 2019, 
+
+
+
+2020, 2021 10m 
+
+
+
+Imagery Sentinel 2 2020, 2021 10m 
+
+
+
+ESI ECOSTRESS 
+
+
+
+2018, 2019, 
+
+
+
+2020, 2021 60m 
+
+
+
+Vegetation Metrics (Canopy 
+
+
+
+Height, Cover, Ladder fuels, 
+
+
+
+Bulk Density) 
+
+
+
+One Tam and 
+
+
+
+Cal Forest 
+
+
+
+Observatory 
+2019 1m 
+
+
+
+Digital Elevation Model 
+One Tam 
+
+
+
+2019 10m 
+
+
+
+Vector Data 
+
+
+
+Roads 
+
+
+
+Marin County 
+
+
+
+GIS 2017 - 
+
+
+
+Trails 
+
+
+
+Marin County 
+
+
+
+GIS 2014 - 
+
+
+
+Evacuation Routes Zonehaven 2020 - 
+
+
+
+Social Vulnerability 
+
+
+
+Center for 
+
+
+
+Disease Control 2022 - 
+
+
+
+Cell Coverage 
+
+
+
+Federal 
+
+
+
+Communication 
+
+
+
+Commission 2021 - 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+https://data-usfs.hub.arcgis.com/datasets/usfs::wildfire-suppression-difficulty-index-97th-percentile-2022-image-service/explore?location=38.070082%2C-122.551496%2C12.61
+
+
+https://data-usfs.hub.arcgis.com/datasets/usfs::wildfire-suppression-difficulty-index-97th-percentile-2022-image-service/explore?location=38.070082%2C-122.551496%2C12.61
+
+
+https://data-usfs.hub.arcgis.com/datasets/usfs::wildfire-suppression-difficulty-index-97th-percentile-2022-image-service/explore?location=38.070082%2C-122.551496%2C12.61
+
+
+https://vegmap.marincounty.org/pages/vegetation-and-land-cover-map-products
+
+
+https://forestobservatory.com/
+
+
+https://forestobservatory.com/
+
+
+https://vegmap.marincounty.org/pages/vegetation-and-land-cover-map-products
+
+
+https://gisopendata.marincounty.gov/
+
+
+https://gisopendata.marincounty.gov/
+
+
+https://gisopendata.marincounty.gov/
+
+
+https://gisopendata.marincounty.gov/
+
+
+https://www.atsdr.cdc.gov/placeandhealth/svi/data_documentation_download.html
+
+
+https://www.atsdr.cdc.gov/placeandhealth/svi/data_documentation_download.html
+
+
+https://www.crowncastle.com/infrastructure-solutions/?level=9&center=-122.61643,37.92585
+
+
+https://www.crowncastle.com/infrastructure-solutions/?level=9&center=-122.61643,37.92585
+
+
+https://www.crowncastle.com/infrastructure-solutions/?level=9&center=-122.61643,37.92585
+
+
+
+
+
+
+
+
+A N N I V E R S A R Y 
+
+
+
+ 
+ 
+
+
+
+15 
+
+
+
+ 
+
+
+
+Appendix A2. 
+
+
+
+Results Evacuation Difficulty Scores 
+
+
+
+Rank Town Name Score 
+
+
+
+1 San Rafael 100 
+
+
+
+2 San Quentin 91.4 
+
+
+
+3 Santa Venicia 88.3 
+
+
+
+4 Marhsall 86.8 
+
+
+
+5 Northeast San Quentin 83.8 
+
+
+
+6 Las Gallinas 80.7 
+
+
+
+7 San Anselmo 80.4 
+
+
+
+8 Stinson Beach 77.7 
+
+
+
+9 Bolinas 70.4 
+
+
+
+10 Muir Beach 69.4 
+
+
+
+11 Sausalito 67.2 
+
+
+
+12 Tomales 66.6 
+
+
+
+13 Dillion Beach 62.7 
+
+
+
+14 Strawberry 59.9 
+
+
+
+15 Inverness 58.4 
+
+
+
+16 Corte Madera 54.7 
+
+
+
+17 Marin City 51.8 
+
+
+
+18 Tiburon 49.6 
+
+
+
+19 Ross 47.6 
+
+
+
+20 Mill Valley 46.7 
+
+
+
+21 West Marinwood 46.6 
+
+
+
+22 Tamalpais 43.1 
+
+
+
+23 Southwest Ignacio 40.4 
+
+
+
+24 Fairfax 34.4 
+
+
+
+25 Point Reyes 33.2 
+
+
+
+26 San Geronimo 32.9 
+
+
+
+27 Novato 31.7 
+
+
+
+28 Woodacre 28.5 
+
+
+
+29 
+Black Point/ Green 
+
+
+
+Point 
+27.4 
+
+
+
+30 Lagunitas 23.4 
+
+
+
+31 Kentfield 23.1 
+
+
+
+32 West Novato 18.8 
+
+
+
+33 
+Lucas Valley - 
+
+
+
+Marinwood 
+18.4

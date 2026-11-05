@@ -1,0 +1,977 @@
+OPTIMIZED PARAMETERS FOR MCCLAIN 
+CORRELATION IN GLENNICE
+William Wright, HX5 LLC
+Thomas Ozorowski, NASA Glenn
+David Rigby, HX5 LLC
+
+
+
+Presented at the SAE International Conference on Icing of 
+Aircraft, Engines and Structures, June 20-22, 2023
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Presentation Overview
+
+
+
+• Roughness effects on heat transfer
+• GlennICE overview
+• Heat transfer augmentation in GlennICE due to roughness
+• Empirical case study process
+• Results
+• Conclusions
+
+
+
+2
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Prior Efforts to Augment Heat Transfer with Roughness
+
+
+
+• LEWICE/LEWICE3D
+Ø Reads in CFD flow solution
+Ø CFD solution only used for trajectory calculation
+Ø Heat transfer coefficient calculated via integral boundary layer with sand-grain roughness 
+
+
+
+(Schlichting)
+• RANS Models that incorporate roughness effects
+Ø Wilcox
+Ø Aupoix
+Ø Menter
+
+
+
+• GlennICE 
+Ø Reads in CFD flow solution
+Ø Uses heat transfer coefficient from CFD
+
+
+
+– CFD may or may not have included roughness effects
+– Need to account for cases where CFD did not incorporate roughness (such as Spalart-
+
+
+
+Allmaras)
+
+
+
+3
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+GlennICE Overview
+
+
+
+4
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Heat Transfer Augmentation in GlennICE
+
+
+
+• Heat transfer coefficients are supplied to GlennICE via two modes
+Ø Reading surface heat transfer coefficient (HTC) directly
+Ø Reading surface heat fluxes and computing HTC
+– Requires two flow solutions with different wall temperature boundary conditions
+– These flow solutions are user-supplied as GlennICE does not directly interact with 
+
+
+
+the CFD solver
+• Roughness can be incorporated via turbulence model or by adjustment in 
+
+
+
+GlennICE
+Ø Adjustment via turbulence model could require modifications to flow solvers
+– Adjustments we can't make since we do not develop CFD solvers
+
+
+
+• Heat transfer in GlennICE can be augmented by a constant or by using an 
+augmentation based on roughness height
+Ø Roughness height calculated by McClain correlation
+
+
+
+5
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+McClain Roughness Correlation
+
+
+
+• Experiments conducted over several years in IRT to measure roughness
+Ø Uses scanned ice shapes (short time sprays) for a variety of conditions 
+Ø Tests performed on multiple geometries
+
+
+
+• An experimentally-derived correlation was produced that provides 
+roughness distribution on a given geometry
+Ø Utilizes both surface and freestream variables
+
+
+
+• Roughness height correlation may not be applicable to ice crystals or 
+geometries other than wings.
+
+
+
+• The purpose of this effort is to empirically relate roughness height 
+distribution to HTC augmentation
+
+
+
+6
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+McClain Correlation for Roughness Distribution
+
+
+
+𝑅! = min 𝐼𝑅𝐿,
+�̇�"#$ ∗ 𝑡
+𝐴%&'( ∗ 𝜌"'(
+
+
+
+0.7 1 − 𝐶$ 𝜂%[0.34 +
+2
+3
+∆T)*&+ exp −
+
+
+
+∆T)*&+
+2.25
+
+
+
+]
+
+
+
+IRL = ideal rime limit (user input)
+�̇�imp= impinging water mass rate (kg/s)
+t = time (s)
+Aface = area of surface face (m2)
+rice = ice density (kg/m3)
+Cp = pressure coefficient (dimensionless)
+hf = freezing fraction (dimensionless)
+∆𝑇)*&+ = 𝑇#(,* − 𝑇*-* (K)
+
+
+
+7
+
+
+
+• Roughness distribution will 
+set location where maximum 
+roughness occurs. 
+
+
+
+• This will fix the horn angle for 
+glaze cases (location of 
+maximum augmentation).
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Heat Transfer Augmentation in GlennICE
+
+
+
+HTCAugmented = (1+ Aug*Rq/0.001)*HTCinput
+Aug = augmentation factor (user input)
+Rq = roughness height (mm)
+• Roughness distribution defined on previous slide
+HTCinput=input heat transfer coefficient
+
+
+
+8
+
+
+
+Augmentation value will 
+determine where local 
+freezing fraction =1 and 
+stops water runback
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Sample Roughness Augmentation Distribution
+
+
+
+9
+
+
+
+NACA0012 c=0.3048 m, V=90 m/s, 
+AOA=3°, T=266.1 K, LWC=0.5 g/m3, 
+MVD=20 µm, t=900 s, Ad=4.57, Nf=0.47
+
+
+
+NACA0012 c=0.3048 m, V=90 m/s, 
+AOA=3°, T=266.1 K, LWC=0.5 g/m3, 
+MVD=20 µm, t=900 s, Ad=4.57, Nf=0.47
+
+
+
+Roughness 
+correlation sets 
+location of maximum 
+roughness
+
+
+
+Augmentation sets 
+location where 
+freezing fraction =1
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Iterative Process for Heat Transfer Augmentation
+
+
+
+• Roughness depends on freezing fraction
+• Freezing fraction depends on htc
+• HTC depends on roughness
+• Iteration process 
+Ø Use initial htc to find freezing fraction
+Ø Use freezing fraction to find roughness
+Ø Use roughness to find new HTC
+Ø Process iterates to convergence
+Ø Number of roughness iterations is also a user 
+
+
+
+input
+
+
+
+10
+
+
+
+Rq
+
+
+
+NfHTC
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Empirical Case Study Process
+
+
+
+• Three user inputs need to be defined
+Ø Augmentation multiplier
+Ø Ideal rime limit
+Ø Number of roughness iterations (fixed at 6 iterations in this study)
+
+
+
+• Selected 95 cases from LEWICE validation database
+Ø All cases were large (accumulation parameter based on diameter over 3)
+Ø All cases were glaze (stagnation freezing fraction less than 0.5)
+Ø Data consists of 2D tracings on straight wing airfoil cross-sections
+– Six airfoils represented
+
+
+
+11
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Process to Determine Correlation Coefficients
+
+
+
+• Create grids in Pointwise
+Ø Rhino used to create smooth airfoil geometries
+
+
+
+• Run FUN3D on all 95 conditions
+Ø Grid sensitivity study performed 
+Ø No variation in turbulence model (SA-neg used for all cases)
+
+
+
+• Run GlennICE on all 95 conditions for using one combination of 
+correlation parameters
+
+
+
+• Obtain ice shape measurements using THICK utility
+Ø Horn angles and horn thicknesses
+Ø THICK utility introduces its own errors
+
+
+
+• Repeat GlennICE runs for another combination of correlation parameters
+
+
+
+12
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Virtual Test Matrix
+
+
+
+Augmentation factor varied from 1 to 7 (1,3,5,7)
+Ideal rime limit varied from 1 to 15 (1,3,5,7,9,11,13,15)
+Total GlennICE cases ran 2280
+Roughness iterations set at 6 
+• Convergence of iteration confirmed
+For these cases, augmentation factor and ideal rime limit are not 
+
+
+
+independent
+• Same ice shape produced by Aug=1, IRL=7 as with Aug=7, IRL=1
+ØThis occurs because the large glaze horns heights are > ideal rime limit
+• Results plotted based on the product of these factors
+For a given combination of correlation parameters, results shown are 
+
+
+
+based on THICK measurements for the 95 conditions (GlennICE –
+Experiment) and averaging the absolute difference
+
+
+
+13
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Errors Introduced by THICK Utility
+
+
+
+• Utility measures horn angle from the maximum ice thickness location
+• Due to natural variation in this location, the reported horn angle can vary 
+
+
+
+by 20° for ice shapes that are visibly very similar
+
+
+
+14
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+THICK Utility Error
+
+
+
+15
+
+
+
+15
+
+
+
+31°
+
+
+
+GlennICE Horn 
+Angle difference 
+(GlennICE-
+Experiment) is 
+17.5°
+
+
+
+Example of Horn 
+Angle Errors 
+introduced by 
+THICK Utility
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Results – Difference in Upper Horn Angle
+
+
+
+• Each blue dot 
+represents the average 
+difference for 95 
+GlennICE runs
+
+
+
+• GlennICE prediction is 
+within tunnel 
+repeatability.
+
+
+
+• Best prediction 
+between 40-60 
+
+
+
+16
+
+
+
+0
+
+
+
+10
+
+
+
+20
+
+
+
+30
+
+
+
+40
+
+
+
+50
+
+
+
+60
+
+
+
+70
+
+
+
+0 20 40 60 80 100 120
+
+
+
+De
+lta
+
+
+
+ U
+pp
+
+
+
+er
+ H
+
+
+
+or
+n 
+
+
+
+An
+gl
+
+
+
+e 
+(d
+
+
+
+eg
+)
+
+
+
+Augmentation*Ideal_Rime_Limit
+
+
+
+Average of Absolute Difference 
+in Upper Horn Angle
+
+
+
+GlennICE for a given user input LEWICE (this data set)
+
+
+
+LEWICE (all cases) Estimated Angle Error Introduced by THICK utility
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Example Case where Horn Angle Difference is Similar to Average Horn Angle 
+Difference
+
+
+
+17
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Example of Good Comparison
+
+
+
+18
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Results – Difference in Upper Horn Height
+
+
+
+• Asymptotic behavior for 
+a wide range of 
+multipliers
+
+
+
+• Average height 
+difference (7 mm) 
+slightly above tunnel 
+repeatability (5 mm) 
+
+
+
+19
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Results – Difference in Lower Horn Angle
+
+
+
+• Similar behavior to 
+Upper Horn Angle
+
+
+
+• Differences are also 
+within Tunnel 
+Repeatability
+
+
+
+20
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Results – Difference in Lower Horn Height
+
+
+
+• Minimum Difference at 
+18 but exhibits similar 
+asymptotic behavior
+
+
+
+• Difference of 8.5 mm 
+slightly higher than 
+tunnel repeatability
+
+
+
+21
+
+
+
+0
+
+
+
+10
+
+
+
+20
+
+
+
+30
+
+
+
+40
+
+
+
+50
+
+
+
+60
+
+
+
+70
+
+
+
+0 20 40 60 80 100 120
+
+
+
+De
+lta
+
+
+
+ Lo
+w
+
+
+
+er
+ H
+
+
+
+or
+n 
+
+
+
+An
+gl
+
+
+
+e 
+(d
+
+
+
+eg
+)
+
+
+
+Augmentation*Ideal_Rime_Limit
+
+
+
+Average of Absolute Difference 
+in Lower Horn Angle
+
+
+
+GlennICE for a given user input LEWICE (this data set)
+
+
+
+LEWICE (all cases) Estimated Angle Error Introduced by THICK utility
+
+
+
+
+
+
+
+
+
+
+
+SAE INTERNATIONAL
+
+
+
+Conclusion
+
+
+
+• User inputs successfully calibrated to experimental data
+Ø Defaults set to augmentation of 5 and ideal rime limit of 9 mm (product = 45)
+
+
+
+• Augmentation multiplier and ideal rime limit exhibit similar behavior
+Ø Results plotted as the multiple of those factors 
+
+
+
+• Similar behavior on all cases above a multiplier of about 20
+• Augmentation used is far higher than the measured augmentation of heat 
+
+
+
+transfer due to roughness
+Ø Augmentation will need to be re-evaluated if multi-shot capability is 
+
+
+
+implemented.
+• This study only examined differences in geometry
+Ø Changes in aerodynamic performance were not examined.
+
+
+
+22

@@ -1,0 +1,1069 @@
+WVU Robotic Technology Center
+
+
+
+Assembling Large Infrastructures in Space using Intelligent Robots
+Workshop at IROS 2023 in Detroit, MI, USA
+October 1, 2023
+
+
+
+Hardware-in-the-loop simulation of modular antenna assembly
+
+
+
+A. Gailey, G. Marani
+
+
+
+
+
+
+
+
+
+
+
+Outline
+
+
+
+1 Preface
+West Virginia Robotic Technology Center
+Some of the past and current WVRTC
+activities
+Facility: Robot Hardware Systems
+
+
+
+2 Introduction
+Hardware-in-the-loop simulation:
+Objectives
+Applications
+
+
+
+3 Hardware-in-the-loop simulation: overview
+Workspace discretization
+High level organization
+Components
+
+
+
+4 Real-Time Dynamic Simulator
+System Modeling
+Dynamics solver
+Code Generation
+Real-time simulation of flexibility
+
+
+
+5 Contact Forces Extractor
+Isolate contact forces from gravity and
+inertial forces
+Contact load example 1
+Contact load example 2
+Dynamic Parameters Estimation
+
+
+
+6 Demonstrations
+Demo 1: testing the robot flexibility
+Demo 2: assemblying parts
+
+
+
+7 Arm Programming Language
+Overview
+Client-Server architecture of APL
+
+
+
+8 Conclusions
+
+
+
+
+
+
+
+
+
+
+
+1 - Preface
+West Virginia Robotic Technology Center
+
+
+
+Located in Fairmont, WV, the West Virginia University Robotic Technology Center
+is a world class space simulation facility supporting multiple tasks in the field of
+
+
+
+In-Space Servicing, Assembly, and Manufacturing
+
+
+
+
+
+
+
+
+
+
+
+1 - Preface
+Facility: Robot Hardware Systems
+
+
+
+Yaskawa Manipulators:
+
+
+
+Yaskawa Motoman SIA10D
+Yaskawa Motoman SIA20D
+Yaskawa Motoman SIA50D (3x)
+Yaskawa Motoman MH250
+
+
+
+Mikrolar Platforms:
+
+
+
+Mikrolar R-3000 Rotopod (2x)
+
+
+
+
+
+
+
+
+
+
+
+2 - Introduction
+Hardware-in-the-loop simulation: Objectives
+
+
+
+Hybrid simulation of a generic robotic space intervention system in 1-g environment with:
+
+
+
+Actual hardware for manipulation task with a suitable industrial robot
+A real-time dynamic simulator for simulating the space manipulator kinematics and dynamics,
+in its own space environment (on-orbit, zero-g, etc.)
+
+
+
+Possibility of choosing which capabilities of the space robotic system are to be simulated or
+replicated in hardware
+
+
+
+Reduce cost of on-Earth test/validation/verification of a space robotic systems by pushing to
+real-time dynamic simulations the aspects difficult to replicate on Earth (e.g. simulating the
+effect of thrust on a long flexible manipulator)
+
+
+
+Perform a parameterized performance study of a space robotic mission
+
+
+
+Discover the benefits, limitations and sensitivities of the robotic system to known performance
+contributors such as properties of the robot controller and sensors
+
+
+
+Verify the performance sensitivity to key hardware and software characteristics.
+
+
+
+Earlier steps: Use Monte Carlo simulation methods to predict robot arm performance against
+selected hardware and software characteristics
+
+
+
+Later steps: validate these Monte Carlo predictions on robot hardware
+
+
+
+
+
+
+
+
+
+
+
+2 - Introduction
+Applications
+
+
+
+The presented HIL approach is currently used to perform IV&V of the SPIDER mission
+
+
+
+
+
+
+
+
+
+
+
+3 - Hardware-in-the-loop simulation: overview
+Workspace discretization
+
+
+
+The smaller workspace of the industrial manipulator operates in a subset of the larger space
+robot workspace
+The selected space robot workspace volume is dynamically changed according to the task
+
+
+
+SIA50 Base frame
+
+
+
+dynamically placed within
+the Spider workspace
+
+
+
+Sm ≡ Ym
+
+
+
+End-Effector frames coincident
+
+
+
+Ym
+
+
+
+SIA50 end-effector frame replicates
+the Spider end-effector frame
+
+
+
+
+
+
+
+
+
+
+
+3 - Hardware-in-the-loop simulation: overview
+High level organization
+
+
+
+Mission Manager Unilink ServerAPL Server
+
+
+
+Space Robot
+
+
+
+Controller
+
+
+
+Space Robot
+
+
+
+Servo
+
+
+
+Simulator
+
+
+
+Space Robot
+
+
+
+Arm
+
+
+
+Simulator
+
+
+
+Spider Telemetry
+
+
+
+Target
+
+
+
+Ground Robot
+
+
+
+Servo
+
+
+
+Ground Robot
+
+
+
+Controller
+
+
+
+Ground Robot Telemetry
+
+
+
+Target
+
+
+
+JR3
+Contact F/T
+
+
+
+Extractor
+
+
+
+Control Station Unilink Client
+
+
+
+Space Robot Simulator
+Ground Robot Hardware
+
+
+
+
+
+
+
+
+
+
+
+3 - Hardware-in-the-loop simulation: overview
+Components
+
+
+
+Principal components of the hybrid loop
+
+
+
+Dynamic Simulator
+
+
+
+Real-time simulator with elasticity
+
+
+
+Contact forces extractor
+
+
+
+Dynamic parameters estimation
+
+
+
+Arm Programming Language (APL)
+
+
+
+Advanced Task Description Language
+for robotic systems
+
+
+
+Advanced cartesian controller
+
+
+
+Kinematic and algorithmic singularities
+avoidance
+
+
+
+Joint limits optimization
+
+
+
+Industrial Robot Controller
+
+
+
+Real-time link with servo drives
+
+
+
+Synchronous Ethercat Drivers for min-
+imal latency
+
+
+
+Statistical Analysis
+
+
+
+Accelerated multi-thread simulation
+for Monte Carlo analysis
+
+
+
+Parameters sensitivity analysis
+
+
+
+
+
+
+
+
+
+
+
+4 - Real-Time Dynamic Simulator
+System Modeling
+
+
+
+The Plasma library
+
+
+
+Geometric, kinematic and dynamic modeling of
+a multi-DOF general multibody system (ramified
+chain)a
+
+
+
+Automatic C++ code generation from model descrip-
+tion using Maple
+
+
+
+Iterative optimization
+
+
+
+aTheoretical details available in Marani, Yuh: Introduction to
+
+
+
+Autonomous Manipulation, Springer, 2014, Sec. 3.
+
+
+
+
+
+
+
+
+
+
+
+4 - Real-Time Dynamic Simulator
+Dynamics solver
+
+
+
+Dynamic model:
+
+
+
+Lagrange equation for quasi-coordinates1:
+
+
+
+A (q) ṗ + B (q,p)p + V TC (q) = V T
+µ
+
+
+
+e (1)
+
+
+
+where:
+
+
+
+q is the configuration vector
+p is the quasivelocity vector
+The matrix A is known as the inertia matrix of the structure.
+B (q, p) is the Coriolis-centrifugal matrix
+The quantity V TC (q) represents the projection in the joint velocity space of the gravitational
+forces
+V T
+
+
+
+µ
+e is the projection in the joint velocity space of all the other external forces (for example
+
+
+
+the actuator forces)
+
+
+
+Numeric solver:
+
+
+
+Custom C++ implementation of Runge-Kutta 4
+
+
+
+1Marani, Yuh: Introduction to Autonomous Manipulation, Springer, 2014, Sec. 2.
+
+
+
+
+
+
+
+
+
+
+
+4 - Real-Time Dynamic Simulator
+Code Generation
+
+
+
+Main challenge: real-time dynamics → Automatic Code Generation via Maple2
+
+
+
+Several thousands lines of code!!!
+The strong iterative automatic optimization
+
+
+
+makes it possible to run the dynamics at
+
+
+
+more than 30kHz
+
+
+
+2Giacomo Marani: ROBOSIM: a program for simulating mechanical systems in Robotics (in Italian)
+
+
+
+
+
+
+
+
+
+
+
+4 - Real-Time Dynamic Simulator
+Real-time simulation of flexibility
+
+
+
+Flexibility with augmented model (+ 1 DoF per joint)
+
+
+
+Elasticity is reduced at the joint level, along the torque trans-
+mission path between the motor and the joint
+
+
+
+Dynamic model is augmented by adding extra branches
+
+
+
+This is equivalent to attaching each motor to the original joint
+through a spring/mass/damper
+Total degrees of freedom doubles
+
+
+
+The ”spring” acts only on the axis of the motor; every other
+part of the structure is supposed rigid
+
+
+
+This model assumes the dominant action is the elasticity of the
+torque transmission between the motor and the joint
+
+
+
+This model requires only 50µs to perform one update step on
+a 7-DoF robot
+
+
+
+
+
+
+
+
+
+
+
+5 - Contact Forces Extractor
+Isolate contact forces from gravity and inertial forces
+
+
+
+JR3 T/F
+−
+
+
+
++
+
+
+
+wT (actual)
+
+
+
+JR3
+Simulator
+
+
+
+wI (simulated)
+
+
+
+TL0
+J
+
+
+
+ν
+L0
+
+
+
+J/L0
+
+
+
+aJ J/L0
+
+
+
+Dynamic
+Parameters
+Estimator
+
+
+
+Filter Contact T/F
+
+
+
+Generalized position of JR3 frame TL0
+J
+
+
+
+is computed using joint servo data
+
+
+
+Generalized velocity of JR3 frame
+ν
+
+
+
+L0
+J/L0 is computed using joint servo
+
+
+
+data
+
+
+
+Generalized acceleration of JR3 frame
+aJ
+J/L0 is currently computed with nu-
+
+
+
+merical differentiation of a filtered ver-
+sion of ν
+
+
+
+L0
+J/L0. This is being replaced
+
+
+
+with the acceleration data read directly
+from the JR3 sensor.
+
+
+
+
+
+
+
+
+
+
+
+5 - Contact Forces Extractor
+Contact load example 1
+
+
+
+
+
+
+
+
+
+
+
+5 - Contact Forces Extractor
+Contact load example 2
+
+
+
+
+
+
+
+
+
+
+
+5 - Contact Forces Extractor
+Dynamic Parameters Estimation
+
+
+
+The Force/Torque sensor simulator needs to know the dynamic parameters of its load.
+
+
+
+Dynamic Parameters Estimator objectives:
+
+
+
+Identifies dynamic parameters of a robot end-effector
+
+
+
+Estimates velocities and accelerations of the end effector center of mass using an Extended
+Kalman Filter (EKF)
+
+
+
+Estimates the externally applied forces and moments acting on the end effector using the
+EKF
+
+
+
+Primary use: contact forces isolation in a 1-G environment for the HIL simulator
+
+
+
+How it works:
+
+
+
+Inputs: 12-DoF sensor data (linear/angular accelerations, forces and moments)
+
+
+
+Inputs: end effector pose w.r.t the robot base, which is provided by the robot controller
+
+
+
+A mathematical model of the end effector dynamics developed using Maple CAS provides
+a solution for the F/T sensor inertial forces
+
+
+
+Simulated inertial forces are subtracted from the F/T readings to isolate the contact forces
+
+
+
+
+
+
+
+
+
+
+
+5 - Contact Forces Extractor
+Dynamic Parameters Estimation
+
+
+
+The DPE interface
+
+
+
+
+
+
+
+
+
+
+
+5 - Contact Forces Extractor
+Dynamic Parameters Estimation
+
+
+
+Example of parameters convergency:
+
+
+
+
+
+
+
+
+
+
+
+6 - Demonstrations
+Demo 1: testing the robot flexibility
+
+
+
+
+
+
+
+
+
+
+
+6 - Demonstrations
+Demo 2: assemblying parts
+
+
+
+
+
+
+
+
+
+
+
+7 - Arm Programming Language
+Overview
+
+
+
+Advanced Task Description Language for robotic systems
+
+
+
+
+
+
+
+
+
+
+
+7 - Arm Programming Language
+Client-Server architecture of APL
+
+
+
+CompilerPre-processor
+
+
+
+SPL script
+
+
+
+Token generator:
+
+
+
+Lex & Yacc
+
+
+
+Syntax tree
+
+
+
+construction
+
+
+
+Code generator
+
+
+
+Encoder
+
+
+
+Encoded 
+
+
+
+executable
+
+
+
+x
+B
+
+
+
+u
+s
+
+
+
+Encoded 
+
+
+
+executable
+Decoder
+
+
+
+SPL OS
+
+
+
+VMemory
+
+
+
+Stack
+
+
+
+<VCPU=
+
+
+
+High-level programming language for
+Semi-Autonomous operations written in
+C++
+
+
+
+Grammar compiled via Flex/Bison
+
+
+
+Client/Server architecture connected
+through unilink
+
+
+
+Client resides in the GUI, using console
+input or script file
+
+
+
+Virtual CPU for sampled-mode execution
+
+
+
+Basic symbolic manipulation
+
+
+
+Customizable to many different real-time
+robot controllers
+
+
+
+
+
+
+
+
+
+
+
+8 - Conclusions
+
+
+
+Investigated feasibility of an hybrid hardware-in-the-loop simulation environment of a generic
+robotic space intervention system in 1-g environment with:
+
+
+
+Actual hardware for manipulation task with a suitable industrial robot
+A real-time dynamic simulator for simulating the space manipulator kinematics and dynamics,
+in its own space environment (on-orbit, zero-g, etc.)
+
+
+
+Major challenge: implementation of real-time dynamics
+
+
+
+Approach seems promising; this solution allowed us assess several possible problems such as
+tele-manipulation in zero-g in case of large and flexible manipulators
+
+
+
+Cost of the simulation environment was greatly reduced with respect the adoption of large
+mechanical platforms
+
+
+
+The optimized implementation is suitable for advanced statistical analysis such as a parameter
+sensitivity analysis that requires a very large number of simulation runs
+
+
+
+
+
+
+
+
+
+
+
+Hardware-in-the-loop simulation of modular antenna assembly
+
+
+
+Thank you

@@ -1,0 +1,1766 @@
+SPACE LAUNCH SYSTEM
+
+
+
+National Aeronautics and Space Administration
+
+
+
+www.nasa.gov/sls
+
+
+
+5 . . . 4 . . . 3 . . . 2 . . . 1 . . .
+
+
+
+Sub-Minimum Impulse Attitude Control of Spacecraft
+
+
+
+John P. McCullough, III (Jacobs Space Exploration Group (JSEG) / NASA MSFC)
+
+
+
+Steven L. Hough (Dynamic Concepts, Inc. / JSEG /NASA MSFC)
+
+
+
+Robert A. Hall (Mclaurin Aerospace / JSEG / MSFC)
+
+
+
+Keith R. Clements (NASA MSFC)
+
+
+
+February 4, 2020
+
+
+
+
+
+
+
+
+
+
+
+.2
+
+
+
+• SLS EUS Configuration
+• Baseline Control Algorithm and Limitations
+• Control Algorithm Solutions
+
+
+
+– Feed Forward State Estimator
+– Minimum Impulse
+– Sub-Minimum Impulse
+
+
+
+• Monte Carlo Results
+• Conclusions
+
+
+
+Agenda
+
+
+
+
+
+
+
+
+
+
+
+.3
+
+
+
+• Rendezvous, Proximity Operations, and Docking (RPOD) occurs after the Orion Multi-
+Purpose Crew Vehicle (MPCV) separation and jettison of the Universal Stage Adapter in 
+Artemis IV (previously Exploration Mission II).
+
+
+
+• Eight attitude Reaction Control System (RCS) thrusters,
+already chosen by the prime contractor based on NASA
+specifications, located behind the center of mass of the
+spacecraft, provide roll, pitch, and yaw control/
+maneuvers. 
+
+
+
+Exploration Upper Stage (EUS) Vehicle Configuration
+
+
+
+Space Launch System (SLS) Exploration Upper Stage (EUS) With Universal 
+
+
+
+Stage Adaptor, Spacecraft Adapter, Service Module, and Orion Capsule.
+
+
+
+
+
+
+
+
+
+
+
+Baseline Algorithms and Limitations
+
+
+
+.4.4
+
+
+
+• During docking, the Orion is the active vehicle, while the EUS is the passive vehicle 
+performing an attitude hold.
+
+
+
+• EUS and Orion were assigned significantly reduced portions of the International Docking 
+System Standard2 (IDSS) requirements during docking. IDSS calls for < 0.2 deg/s in Roll 
+and < 0.2 deg/s for the vector sum of pitch/yaw relative between vehicles.
+
+
+
+• Baseline phase plane simulation results exceeded initial allocations by up to 700% in 
+Monte Carlo runs!
+
+
+
+• For this algorithm, the min rate achievable is limited by the max of these constraints:
+– Thruster minimum impulse or firing duration, and
+– Control loop latency (Sensors, Bus, Flight Control System (FCS) / Flight Software (FSW), Hardware 
+
+
+
+Controllers, Flex Filters).
+
+
+
+
+
+
+
+
+
+
+
+Alternate Control Modes Developed for Docking / Attitude Hold
+
+
+
+.5
+
+
+
+• Feed Forward State Estimator (FFSE)
+– FFSE is a second order Luenberger Observer.
+– Typically not all vehicle states are directly measured, hence an “observer” is used to estimate
+
+
+
+unmeasured states.
+• For example, Apollo3 and Shuttle4 on-orbit RCS control had attitude measurement input, so the 
+
+
+
+software estimated rotational rate and rotational acceleration.
+• The approach here was derived from Apollo and Shuttle.
+• Filter gains are based on stability and performance.
+
+
+
+– The basic premise is that feed forward of the expected thruster firing torque to minimize 
+latency while using the state estimator to remove error, attenuate flex (with a supplemental 
+filter), and better estimate rate.
+
+
+
+– The current implementation uses a priori
+data thrust and mass properties to 
+compute a feed forward signal 
+(estimated rate of change from a 
+firing). Future investigations could
+include higher fidelity thrust profile
+and potential use of RCS tank pres-
+sure measurements. 
+
+
+
+– Another application is RCS thruster
+Failure Detection Isolation and 
+Recovery.
+
+
+
+Rate Filterωc
+
+
+
+ωs1
+
+
+
+-
+
+
+
+Supplemental 
+
+
+
+Rate Filter
+
+
+
+     
+
+
+
+     )ˆ(ˆˆ
+
+
+
+)ˆ(ˆˆ
+
+
+
+111
+
+
+
+111
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+kkk
+
+
+
+kkk
+
+
+
+T
+
+
+
+K
+
+
+
+K
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+
+
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1
+
+
+
+11
+
+
+
+kk
+
+
+
+RCSkkk
+
+
+
+ˆˆ
+
+
+
+Tˆˆˆ
+
+
+
+
+
+
+
+
+
+
+
++
+
+
+
+-
+
+
+
+SE Measurement SE Extrapolation
+
+
+
+
+
+
+
+
+
+
+
+Alternate Control Modes Developed for Docking / Attitude Hold
+
+
+
+.6
+
+
+
+• Minimum Impulse Mode
+– Issues thruster firing commands at fixed duration (min firing time) and then waits (time based on 
+
+
+
+system latencies: ) before firing again to allow the filtered rate measurement to converge on the 
+true vehicle rate.
+
+
+
+– Can only shorten the pulses to the capability of the thrusters. As pulses get shorter, uncertainty 
+increases in the amount of thrust produced due to incomplete propellant oxidation.
+
+
+
+– Currently has logic in place to exit out of this mode when large phase plane excursions are 
+observed.
+
+
+
+0.00 0.02 0.04 0.06 0.08 0.120.10
+
+
+
+Thruster fired in desired direction
+
+
+
+time
+0.14 0.16 0.18 0.20 0.22 0.260.24
+
+
+
+Thruster fired in desired direction
+
+
+
+Minimum desired wait time for system response, based on RCS 
+
+
+
+firing delay and sensor, bus, and FCS (filters,etc.) latencies
+
+
+
+th
+ru
+
+
+
+s
+t
+
+
+
+Impulse Impulse
+
+
+
+
+
+
+
+
+
+
+
+Alternate Control Modes Developed for Docking / Attitude Hold
+
+
+
+.7
+
+
+
+• Sub Minimum Impulse Mode
+– Is a potential enhancement to Minimum Impulse Mode where opposing thrusters are fired 
+
+
+
+with a time offset to reduce the net torque on the vehicle below the minimum impulse level.
+
+
+
+0.00 0.02 0.04 0.06 0.08 0.120.10
+
+
+
+Thruster fired in desired direction
+
+
+
+Thruster fired in opposing direction
+
+
+
+Net Impulse
+
+
+
+time
+
+
+
+Time Offset
+
+
+
+th
+ru
+
+
+
+s
+t
+
+
+
+Impulse
+
+
+
+Impulse
+
+
+
+
+
+
+
+
+
+
+
+.8
+
+
+
+Monte Carlo* Results for 4 of the Control Options Considered – Pitch Rate
+
+
+
+* 2000 runs were executed per case in the Marshall 
+Aerospace Vehicle Representation in C (MAVERIC) 
+modeling and simulation tool. 
+
+
+
+**Results were very similar for roll, pitch, and yaw for a 
+combined Feed Forward State Estimator with Minimum 
+Impulse with 0ms wait time. The 0 ms wait time allows 
+for quicker response in the presence of disturbances. 
+
+
+
+Standard Phase Plane – Original Baseline
+
+
+
+Upper
+
+
+
+Initial
+
+
+
+Desired
+
+
+
+Limit
+
+
+
+Lower
+
+
+
+Initial
+
+
+
+Desired
+
+
+
+Limit
+
+
+
+P
+it
+c
+h
+
+
+
+ R
+a
+te
+
+
+
+ (
+d
+
+
+
+e
+g
+/s
+
+
+
+)
+
+
+
+P
+it
+c
+h
+
+
+
+ R
+a
+te
+
+
+
+ (
+d
+
+
+
+e
+g
+/s
+
+
+
+)
+
+
+
+Feed Forward State Estimator
+
+
+
+(second order Luenberger Observer)
+
+
+
+P
+it
+c
+h
+
+
+
+ R
+a
+te
+
+
+
+ (
+d
+
+
+
+e
+g
+/s
+
+
+
+)
+
+
+
+Minimum Impulse with 200ms Wait**
+
+
+
+P
+it
+c
+h
+
+
+
+ R
+a
+
+
+
+te
+ (
+
+
+
+d
+e
+
+
+
+g
+/s
+
+
+
+)
+
+
+
+Sub Minimum Impulse with 200ms Wait
+
+
+
+Outlier caused by
+
+
+
+flex sensitivity
+
+
+
+
+
+
+
+
+
+
+
+Monte Carlo Results Summary
+
+
+
+.9
+
+
+
+• Cases 4, 6, and 8 all achieve updated docking error budget (2.5-3.0x initial). 
+• Sub-minimum impulse achieves both allocations, once flex outliers are addressed.
+• Alternate algorithms drastically reduced propellant usage over the baseline algorithm, 
+
+
+
+with minimum impulse variants using the least propellant. 
+• EUS selected the FFSE with Minimum Impulse (0 ms wait time) for the design. 
+
+
+
+– Has Shuttle flight heritage.4
+
+
+
+– Meets the updated allocations with the least propellant usage, and it minimizes the wait period 
+between firings which increases the disturbance rejection capability.
+
+
+
+Case
+
+
+
+% of 
+Initial Roll 
+
+
+
+Rate 
+Allocation
+
+
+
+% of 
+Updated
+Roll Rate 
+
+
+
+Allocation
+
+
+
+% of
+Initial 
+
+
+
+Pitch/Yaw Rate 
+Allocation
+
+
+
+% of 
+Updated
+
+
+
+Pitch/Yaw Rate 
+Allocation
+
+
+
+% of Initial 
+Translational 
+
+
+
+Velocity 
+Allocation
+
+
+
+% of Updated 
+Translational 
+
+
+
+Velocity 
+Allocation
+
+
+
+% of 
+Baseline 
+
+
+
+Propellant 
+Used
+
+
+
+1-Baseline 700% 233% 440% 176% 182% 87% 100%
+
+
+
+2-Reduced Lag Filter 500% 167% 310% 124% 120% 57% 31%
+
+
+
+3-FFSE 300% 100% 270% 108% 94% 45% 11%
+
+
+
+4-Min Impulse (200 
+ms wait)
+
+
+
+170% 57% 100% 40% 92% 44% 7%
+
+
+
+6-Sub-Min Impulse 
+(200 ms wait)
+
+
+
+95%* / 
+140%
+
+
+
+47% 95%* / 105% 42% 81% 39% 22%
+
+
+
+8-FFSE w/ Min 
+Impulse (0 ms wait)
+
+
+
+180% 60% 140% 56% 89% 42% 7%
+
+
+
+
+
+
+
+
+
+
+
+.10
+
+
+
+• The sub-minimum impulse algorithm provides the lowest body rates of the 
+analyzed control modes in Monte Carlo cases. 
+
+
+
+• Investigations show excess propellant usage is not a significant concern. 
+• Robustness against potential flexible body interaction is a significant concern, yet 
+
+
+
+time domain Monte Carlo simulations demonstrate good response.
+• Refinements to the RPOD requirements for the impacted mission show that the 
+
+
+
+minimum impulse mode, feed forward state estimator, and a combination of those 
+are sufficient to robustly achieve requirements. Therefore, the sub-minimum 
+impulse is not needed for the baseline design. 
+
+
+
+• However, sub-minimum impulse shows promise where further reductions in body 
+rates are desired for a particular vehicle configuration, with only a modest impact 
+to complexity and propellant usage.
+
+
+
+Conclusions
+
+
+
+
+
+
+
+
+
+
+
+.11
+
+
+
+Backup
+
+
+
+
+
+
+
+
+
+
+
+References
+
+
+
+.12
+
+
+
+1. “Design and Stability of an On-Orbit Attitude Control System Using Reaction 
+Control Thrusters,” GN&C Conference, AIAA SciTech 2016, Hall R., Hough S., 
+Orphee C., Clements K., January 4-8, 2016.
+
+
+
+2. “International Docking System Standard (IDSS) Interface Definition Document 
+(IDD) Rev. E,” NASA, International Space Station (ISS) Multilateral Control Board 
+(MCB), October 2016, Table 3.3.1.1-2.
+
+
+
+3. “Performance Comparison of Apollo and AAP CSM RCS DAP State Estimation 
+Schemes”, Project Apollo Internal Note MSC-EG-69-46, Edward T. Kubiak, 
+November 25, 1969.
+
+
+
+4. “Space Shuttle Orbiter Operational Level C Functional Subsystem Software 
+Requirements (FSSR) Guidance Navigation and Control Part C, Flight Control Orbit 
+DAP”, Prepared by the Boeing Company, STS-83-0009-30, December 14, 2000.
+
+
+
+
+
+
+
+
+
+
+
+.13
+
+
+
+Figure 3.3.1.1-2 Coordinate System of Docking Objects (Active and Passive) 
+
+
+
+
+
+
+
+
+
+
+
+.14
+
+
+
+Table 3.3.1.1-2 Initial Contact Conditions
+
+
+
+
+
+
+
+
+
+
+
+.15
+
+
+
+• During docking, the MPCV is the active vehicle, while the EUS is the passive vehicle 
+performing an attitude hold.
+
+
+
+• Phase plane control is used for each attitude axis.1
+
+
+
+• Phase plan parameters are time segment based. 
+• International Docking System Standard2 requirements during docking
+
+
+
+– Relative rotational rates between active and passive vehicles
+• < 0.2 deg/s in roll, and 
+• < 0.2deg/s for the vector sum of pitch/yaw, 
+
+
+
+– Relative translational rate < 0.131ft/s (0.04m/s), and
+– Relative angles < 4.0deg. 
+
+
+
+• EUS and Orion were assigned 
+portions of these values, so that
+relative values could be met.
+
+
+
+• Baseline nominal phase plane
+results greatly exceeded initial
+allocations!
+
+
+
+Baseline Algorithms and Docking Allocations
+
+
+
+
+
+
+
+
+
+
+
+Baseline Algorithm Limitations
+
+
+
+.16.16
+
+
+
+• The baseline algorithm relies on feedback from sensors to determine state changes and 
+make decisions on turning thrusters On/Off.
+
+
+
+• For this algorithm, the min rate achievable is limited by the max of these constraints:
+– Thruster minimum impulse or firing duration, and
+– Control loop latency (Sensors, Bus, Flight Control System (FCS) / Flight Software (FSW), Hardware 
+
+
+
+Controllers, Flex Filters).
+
+
+
+qNAV
+
+
+
+qc
+
+
+
+Attitude Filter*
+
+
+
+Thruster 
+
+
+
+Constraints
+
+
+
+Rate Filter*ωc
+
+
+
+ωs1
+thrusterCmd[0:7]
+
+
+
+rollRCS pitchRCS yawRCS THR1 THR3 THR4 THR6 THR7 THR9 THR10 THR12
+
+
+
+-1 -1 -1 1 0 0 0 0 1 1 0
+
+
+
+-1 -1 0 1 0 0 0 0 0 1 0
+
+
+
+-1 -1 1 1 0 0 0 0 0 1 1
+
+
+
+-1 0 -1 0 0 0 0 1 0 1 0
+
+
+
+-1 0 0 1 0 1 0 1 0 1 0
+
+
+
+-1 0 1 1 0 1 0 0 0 0 0
+
+
+
+-1 1 -1 0 0 0 1 1 0 1 0
+
+
+
+-1 1 0 0 0 1 0 1 0 0 0
+
+
+
+-1 1 1 1 1 1 0 0 0 0 0
+
+
+
+0 -1 -1 0 0 0 0 0 1 1 0
+
+
+
+0 -1 0 0 0 0 0 0 0 1 1
+
+
+
+0 -1 1 1 0 0 0 0 0 0 1
+
+
+
+0 0 -1 0 0 0 0 1 1 0 0
+
+
+
+0 0 1 1 1 0 0 0 0 0 0
+
+
+
+0 1 -1 0 0 0 1 1 0 0 0
+
+
+
+0 1 0 0 0 1 1 0 0 0 0
+
+
+
+0 1 1 0 1 1 0 0 0 0 0
+
+
+
+1 -1 -1 0 0 0 0 0 1 1 1
+
+
+
+1 -1 0 0 0 0 0 0 1 0 1
+
+
+
+1 -1 1 0 1 0 0 0 1 0 1
+
+
+
+1 0 -1 0 0 0 1 0 1 0 0
+
+
+
+1 0 0 0 1 0 1 0 1 0 1
+
+
+
+1 0 1 0 1 0 0 0 0 0 1
+
+
+
+1 1 -1 0 1 0 1 0 1 0 0
+
+
+
+1 1 0 0 1 0 1 0 0 0 0
+
+
+
+1 1 1 0 1 1 0 0 0 0 1
+
+
+
+Jet SelectPhase Plane1qe = qNAV
+T * qc
+
+
+
+ϴe = f (qe)
+
+
+
+Attitude Error
+
+
+
++
+
+
+
+-
+
+
+
+R
+a
+te
+
+
+
+ E
+rr
+
+
+
+o
+r
+
+
+
+Att Error
+
+
+
+*two 4th order 
+
+
+
+cascaded flex filters
+
+
+
+
+
+
+
+
+
+
+
+.17
+
+
+
+• Mass properties (masses, inertias, CGs),
+• Flex (frequencies, damping, gains),
+• Slosh (masses, frequencies, damping),
+• Sensors (alignment, locations, parameters),
+• Stage alignments (X, Y, Z),
+• Venting/ (force, direction, flow rate), and
+• Thrusters (alignment, pressure drops, max thrust, thrust factor).
+
+
+
+Monte Carlo Runs – Over 1500 Dispersed Variables in MAVERIC
+
+
+
+
+
+
+
+
+
+
+
+R
+o
+ll 
+
+
+
+R
+a
+te
+
+
+
+ (
+d
+
+
+
+e
+g
+/s
+
+
+
+)
+
+
+
+.18
+
+
+
+Monte Carlo* Results for 4 of the Control Options Considered – Roll Rate
+
+
+
+1400s+ of 
+
+
+
+attitude 
+
+
+
+hold with 
+
+
+
+“fine” 
+
+
+
+control 
+
+
+
+system
+
+
+
+* 2000 runs were executed per case in the 
+
+
+
+Marshall Aerospace Vehicle Representation in C 
+
+
+
+(MAVERIC) modeling and simulation tool. 
+
+
+
+**Results were very similar for roll, pitch, and yaw 
+
+
+
+for a combined Feed Forward State Estimator 
+
+
+
+with Minimum Impulse with 0ms wait time. The 0 
+
+
+
+ms wait time allows for quicker response in the 
+
+
+
+presence of disturbances. 
+
+
+
+Upper
+
+
+
+Initial
+
+
+
+Desired
+
+
+
+Limit
+
+
+
+Lower
+
+
+
+Initial
+
+
+
+Desired
+
+
+
+Limit
+
+
+
+Standard Phase Plane – Original Baseline
+
+
+
+R
+o
+ll 
+
+
+
+R
+a
+te
+
+
+
+ (
+d
+
+
+
+e
+g
+/s
+
+
+
+)
+
+
+
+Feed Forward State Estimator
+
+
+
+R
+o
+ll 
+
+
+
+R
+a
+te
+
+
+
+ (
+d
+
+
+
+e
+g
+/s
+
+
+
+)
+
+
+
+Minimum Impulse with 200 ms Wait**
+
+
+
+R
+o
+
+
+
+ll 
+R
+
+
+
+a
+te
+
+
+
+ (
+d
+
+
+
+e
+g
+/s
+
+
+
+)
+Sub Minimum Impulse with 200 ms Wait
+
+
+
+Outliers caused by flex sensitivity
+
+
+
+
+
+
+
+
+
+
+
+Feed Forward State Estimator
+
+
+
+(second order Luenberger Observer)
+
+
+
+.19
+
+
+
+Monte Carlo Results for 4 of the Control 
+Options Considered - Prop Usage
+
+
+
+Minimum Impulse with 200 ms Wait
+
+
+
+Standard Phase 
+
+
+
+Plane – Original 
+
+
+
+Baseline
+
+
+
+Sub-
+
+
+
+Minimum 
+
+
+
+Impulse 
+
+
+
+prop 
+
+
+
+usage is 
+
+
+
+more than 
+
+
+
+State 
+
+
+
+Estimator 
+
+
+
+and 
+
+
+
+Minimum 
+
+
+
+Impulse, 
+
+
+
+but still 
+
+
+
+much 
+
+
+
+reduced 
+
+
+
+from 
+
+
+
+original 
+
+
+
+phase 
+
+
+
+plane only 
+
+
+
+method!
+
+
+
+Sub Minimum Impulse with 200 ms Wait
+
+
+
+100%
+
+
+
+80%
+
+
+
+60%
+
+
+
+40%
+
+
+
+20%
+
+
+
+0 %
+
+
+
+25%
+
+
+
+20%
+
+
+
+15%
+
+
+
+10%
+
+
+
+5%
+
+
+
+0%
+
+
+
+7%
+
+
+
+0%
+
+
+
+12%
+
+
+
+6%
+
+
+
+0%
+
+
+
+Plots are scaled based on 100% as the top of the original phase plane plot.
+
+
+
+
+
+
+
+
+
+
+
+Concerns with Sub-Minimum Impulse
+
+
+
+.20
+
+
+
+• Some potential concerns with sub-
+minimum impulse are:
+– Prop Usage,
+– Disturbance Rejection / Control 
+
+
+
+authority,
+– Rates near filtered signal noise limits 
+
+
+
+causing extra firings,
+– Stability, and 
+– Flex interaction.
+
+
+
+• There were 2 outliers in roll and 1 in pitch 
+that exceeded the initial angular rate 
+allocations.
+
+
+
+• Except for the outliers, all the rest of the 
+runs in were below the threshold and well 
+below the threshold in yaw. 
+
+
+
+• Adaptive phase plane can reduce the 
+outliers.
+
+
+
+Sub Min Impulse Pitch/Yaw rate gave small 
+increments of with each firing in the nominal case.

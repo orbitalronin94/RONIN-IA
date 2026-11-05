@@ -1,0 +1,2580 @@
+1 
+
+
+
+ 
+
+
+
+Surface Instability of Liquid Propellants in 
+
+
+
+Microgravity During Pulsed Settling 
+
+
+
+Operations 
+
+
+
+Bryan D. Hoffman1, Marco D. Sansone1, and Jacob M. Brodnick2 
+NASA Marshall Space Flight Center, Huntsville, Alabama, USA 
+
+
+
+Pulsing reaction control system (RCS) thrusters, vent valves, or other propulsion devices 
+
+
+
+can preserve propellant resources in space, but this operation also effectively introduces a 
+
+
+
+vibration to the vehicle. When the vibration is perpendicular to the liquid propellant surface, 
+
+
+
+Faraday waves may be generated at the liquid-vapor interface. These Faraday instabilities 
+
+
+
+can perturb or break up the liquid surface of cryogenic tanks, leading to inefficiencies in 
+
+
+
+thermal management or even ullage collapse. Drawing from theory and experiments, an 
+
+
+
+engineering model defining the allowable design regions for pulsed settling in microgravity 
+
+
+
+was assembled and verified with computational fluid dynamics (CFD) simulations. A 
+
+
+
+traditional settling metric, the Bond number, was also overlaid in the model to indicate which 
+
+
+
+duty cycles were insufficient to overcome surface tension and aggregate propellant. Mission 
+
+
+
+planners and engineers can consult the tool to rapidly evaluate the stability of a liquid-vapor 
+
+
+
+interface given the pulse frequency and the excitation acceleration. Expressions developed for 
+
+
+
+Faraday waves induced by a sinusoidal forcing input at standard gravity were found to 
+
+
+
+provide excellent predictive capabilities for pulsed, or rectangular, waveforms in the absence 
+
+
+
+of a consistent gravitational acceleration. This study extends the usage of these equations to 
+
+
+
+an alternative forcing function and microgravity environments for the purpose of estimating 
+
+
+
+natural frequencies, surface mode shapes, surface wave amplitudes, and the onset of droplet 
+
+
+
+ejection. CFD simulations with the Loci/STREAM-VoF (Volume of Fluid) solver were initially 
+
+
+
+validated against experimental results in standard gravity. Discrete points on the design map 
+
+
+
+were then investigated with CFD and confirmed that the engineering model reliably indicates 
+
+
+
+surface stability and most Faraday wave characteristics without requiring higher-fidelity 
+
+
+
+tools. The engineering model is highly extensible and can be adapted for various propellant 
+
+
+
+fill fractions, fluid properties, and tank sizes. 
+
+
+
+I. Nomenclature 
+
+
+
+𝑇 = pulse, or forcing, period 
+
+
+
+𝑇0 = surface wave period 
+
+
+
+𝐵𝑜 = Bond number 
+
+
+
+𝑅 = tank radius 
+
+
+
+𝑔 = gravitational acceleration 
+
+
+
+𝜎 = surface tension 
+
+
+
+𝜌 = liquid density 
+
+
+
+𝜐 = kinematic viscosity 
+
+
+
+𝜔 = pulse, or forcing, angular frequency 
+
+
+
+𝜔0 = surface wave angular frequency 
+
+
+
+𝑎𝑐 = sinusoidal excitation acceleration at the onset of Faraday waves 
+
+
+
+𝑘 = wavenumber 
+
+
+
+ 
+1 Computational Fluid Dynamics Engineer, Jacobs Space Exploration Group, NASA MSFC-ER42 
+2 Computational Fluid Dynamics Engineer, NASA MSFC-ER42 
+
+
+
+
+
+
+
+
+
+
+
+2 
+
+
+
+ 
+
+
+
+𝐻 = liquid surface height from the tank bottom 
+
+
+
+𝜆 = surface wavelength 
+
+
+
+𝑎𝑑 = sinusoidal excitation acceleration at the droplet ejection threshold 
+
+
+
+𝑏 = surface wave amplitude 
+
+
+
+II. Introduction 
+
+
+
+In microgravity, liquid propellants tend to easily distribute throughout a tank, or unsettle, unless consistent 
+
+
+
+acceleration is applied. This behavior can be problematic for propulsion systems or propellant transfer between tanks 
+
+
+
+due to the risk of vapor ingestion in feed lines or liquid ingestion in vent lines. Unsettling can also submerge ullage 
+
+
+
+gas diffusers, hindering performance of pressurization systems not designed for that mode of operation. Moreover, 
+
+
+
+unsettling can lead to unintentional mixing between a cryogenic liquid and a relatively warm vapor volume above it, 
+
+
+
+known as the ullage. This mixing generates heat and mass transfer between the two phases and can lead to ullage 
+
+
+
+collapse, or the decline of pressure towards saturated conditions. 
+
+
+
+In architectures without propellant management devices, typical of tanks in large-scale orbital rockets, the 
+
+
+
+acceleration applied to aggregate liquid is commonly produced by reaction control system (RCS) thrusters. These 
+
+
+
+thrusters are allotted a budget of propellant mass for the purpose of settling cryogens. For thrusters with a fixed force 
+
+
+
+output, the amount of propellant mass expended and the average acceleration can be reduced by pulsing, or introducing 
+
+
+
+a time delay between thruster firings. Consequently, a range of average accelerations can be achieved by considering 
+
+
+
+the vehicle mass, the RCS thrust output, the pulse duration, and the duty cycle, or the ratio of the pulse duration to the 
+
+
+
+pulse period. Propulsion engineers are responsible for evaluating these parameters and selecting RCS hardware which 
+
+
+
+satisfy objectives for many mission phases, including for liquid aggregation. 
+
+
+
+A side effect of pulsing, however, is that a vibration is effectively introduced. Instabilities in liquids within a 
+
+
+
+vibrating container are well known. The polymathic physicist and chemist, Michael Faraday, recorded the first 
+
+
+
+observations in an appendix to his article to the Royal Society of London in 1831 [1]. He documented the observation 
+
+
+
+that liquid on a vibrating plate displayed regular patterns. Notably, he described changes in the behavior of these 
+
+
+
+patterns due to liquid properties, liquid depth, frequency, and force, but not to parameters such as surface size. He 
+
+
+
+even observed the primary ½-subharmonic response of the surface waves. As illustrated in Fig. 1, when the container 
+
+
+
+goes down, the liquid inertia tends to create a surface deformation which disappears when the surface comes back up, 
+
+
+
+completing the excitation period (𝑇). The flow induced from the destruction of the previous waves drives the following 
+
+
+
+waves, whose maxima occur at the location of the prior waves’ minima (and vice versa), making the surface wave 
+
+
+
+period (𝑇0) equal to two excitation periods. At high enough forcing inputs or low enough frequencies, the patterns 
+
+
+
+became chaotic, and splashing occurred. Droplet ejection could be problematic in space applications where ullage 
+
+
+
+collapse is a concern. Unlike experiments done in earth’s gravity well, the only significant acceleration propellants 
+
+
+
+experience in space may be from the vehicle’s thrusters. At very low frequencies, liquids inclined to wet surfaces may 
+
+
+
+climb the walls between pulses, exaggerating the unsettling effects. Therefore, it is necessary to understand the 
+
+
+
+constraints imposed on RCS thrusters by surface instabilities to adequately design settling operations. 
+
+
+
+ 
+
+
+
+Fig. 1 For an excitation perpendicular to the liquid-vapor interface, the most visible liquid surface response 
+
+
+
+is at half the excitation frequency, known as the ½-subharmonic [2]. 
+
+
+
+
+
+
+
+
+
+
+
+3 
+
+
+
+ 
+
+
+
+III. Engineering Model 
+
+
+
+A. Theory 
+
+
+
+The Bond number (𝐵𝑜) is a well-known metric used to define the relative magnitudes of gravitational acceleration 
+
+
+
+(𝑔) and surface tension (𝜎) given the tank radius (𝑅), and the liquid density (𝜌). By selecting a target Bond number, 
+
+
+
+shown in Eq. (1), the metric provides a constraint on the minimum average acceleration designers must meet to 
+
+
+
+overcome surface tension in microgravity and aggregate liquid reliably. An analysis by Hochstein et al. in 1992 used 
+
+
+
+a 2D computational model with a Volume of Fluid (VoF) approach to evaluate the impact of Bond number on the 
+
+
+
+settling function, a correlation enabling prediction of pulsed settling performance for a wide range of tank sizes [3]. 
+
+
+
+They found that reorientation performance, or the efficiency of the settling operation, is similar for different pulse 
+
+
+
+patterns when the Bond number is greater than 10. As the Bond number was increased from 10 to 100, the model 
+
+
+
+results showed a very narrow range of variation in the settling function, indicating that there was a very strong 
+
+
+
+correlation between average acceleration and the vehicle velocity increment (delta-v), which is proportional to the 
+
+
+
+propellant used to accomplish the maneuver. 
+
+
+
+ 𝐵𝑜 = 𝑔𝑅2𝜌/𝜎 (1) 
+
+
+
+ 
+
+
+
+When vibrations first begin, an isochronous wave forms at the boundary if there is a meniscus, which is common 
+
+
+
+for cryogenic propellants with low contact angles in microgravity. The size of the meniscus is tied to the capillary 
+
+
+
+length scale, 𝑙𝑐 ≈ √𝑇/𝜌𝑎. Since the capillary length is inversely proportional to the root of the instantaneous 
+
+
+
+acceleration (𝑎), ripples are generated due to the shifting capillary length and the conversation of mass, as depicted in 
+
+
+
+Fig. 2. These waves dissipate as they move towards the center of the tank but may interfere with parametric waves, 
+
+
+
+depending on the decay length, 𝑙𝑑 ≈ 𝜎/(4𝜈𝜌𝜔), which is a function of the surface tension, kinematic viscosity (𝜈), 
+
+
+
+liquid density, and the driving angular frequency (𝜔). The side wall boundary effects can only be disregarded when 
+
+
+
+the tank radius is significantly greater than the decay length (𝑅 ≫ 𝑙𝑑). 
+
+
+
+ 
+
+
+
+Fig. 2 Meniscus wave propagation from a boundary and its decay [2]. 
+
+
+
+In addition to the Bond number constraint, Faraday instabilities impose limitations on the pulsed settling operating 
+
+
+
+conditions. The onset of parametric waves takes place when the combination of driving frequency and excitation 
+
+
+
+acceleration crosses a stability threshold. A simple estimate of this threshold (𝑎𝑐) is given in Eq. (2). The equation 
+
+
+
+applies to capillary waves on the surface of low-viscosity liquids with infinite depth [4]. Instability thresholds for ideal 
+
+
+
+fluids were first described theoretically by Benjamin and Ursell by finding the solutions to Mathieu’s equation [5]. 
+
+
+
+Later, the theoretical threshold for viscous fluids was expounded by Kumar and Tuckerman by numerically solving 
+
+
+
+the full hydrodynamic system starting from the Navier-Stokes equations [6]. 
+
+
+
+ 
+
+
+
+ 𝑎𝑐 = 8(𝜌/𝜎)1/3𝜈𝜔5/3 (2) 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+4 
+
+
+
+ 
+
+
+
+If surface waves are excited, linearized theory using the unsteady Bernoulli equation in Eq. (3) can be used to 
+
+
+
+characterize the response [7]. The principal components are the velocity potential (𝜑) in Eq. (4), the pressure (𝑝) in 
+
+
+
+Eq. (5), and the interface shape (𝜂) in Eq. (6), assumed to be a sinusoidal wave with amplitude 𝑏. The pressure term 
+
+
+
+originates from Eq. (7), which captures the pressure difference across a curved liquid-vapor interface with radii of 
+
+
+
+curvature 𝑅1 and 𝑅2. Solving for the surface wave frequency (𝜔0) in the x-z plane produces the dispersion relation in 
+
+
+
+Eq. (8), a relationship between frequency and wavelength. This formula also accounts for the height of the stationary 
+
+
+
+liquid-vapor interface from the tank bottom (𝐻). 
+
+
+
+ 
+𝜕𝜑
+
+
+
+𝜕𝑡
++
+𝑝
+
+
+
+𝜌
++ 𝑔𝜂 = 0 (3) 
+
+
+
+ 
+
+
+
+ 𝜑 =
+𝑏𝜔0 𝑐𝑜𝑠ℎ(𝑘(𝑧 + 𝐻)) 𝑠𝑖𝑛(𝑘𝑥 − 𝜔0𝑡)
+
+
+
+𝑘 𝑠𝑖𝑛ℎ(𝑘𝐻)
+ (4) 
+
+
+
+ 
+
+
+
+ 𝑝𝑧=𝜂 ≅ −𝜎
+𝜕2𝜂
+
+
+
+𝜕𝑥2
+ (5) 
+
+
+
+ 
+
+
+
+ 𝜂 = 𝑏𝑐𝑜𝑠⁡(𝑘𝑥 − 𝜔0𝑡) (6) 
+
+
+
+ 
+
+
+
+ ∆𝑝 = ⁡𝜎(
+1
+
+
+
+𝑅1
++
+
+
+
+1
+
+
+
+𝑅2
+) (7) 
+
+
+
+ 
+
+
+
+ 𝜔0
+2 = (𝑘3
+
+
+
+𝜎
+
+
+
+𝜌
++ 𝑘𝑔) 𝑡𝑎𝑛ℎ(𝑘𝐻) (8) 
+
+
+
+ 
+
+
+
+Faraday waves initially behave very orderly, and this dispersion relation can be used to calculate surface wave 
+
+
+
+frequencies or wavenumbers (𝑘) of the surface response. These orderly waves can be categorized as either gravity or 
+
+
+
+capillary waves. The transition between capillary waves and gravity waves is determined by setting the surface 
+
+
+
+tension term in Eq. (8) equal to the gravitational acceleration term. The result is a crossover wavenumber 
+
+
+
+(𝑘𝑐𝑟𝑜𝑠𝑠𝑜𝑣𝑒𝑟), described by Eq. (9). The crossover wavenumber can be reinserted into the dispersion relation to return 
+
+
+
+the gravity-capillary crossover frequency in Eq. (10), which assumes infinite depth (𝑡𝑎𝑛ℎ(𝑘𝐻) ≈ 1). 
+
+
+
+ 𝑘𝑐𝑟𝑜𝑠𝑠𝑜𝑣𝑒𝑟 = √
+𝑔𝜌
+
+
+
+𝜎
+ (9) 
+
+
+
+ 
+
+
+
+ 𝜔0,𝑐𝑟𝑜𝑠𝑠𝑜𝑣𝑒𝑟 = (4𝑔3𝜌/𝜎)1/4 (10) 
+
+
+
+ 
+
+
+
+ Capillary waves have small wavelengths (𝜆), and the dominant restoring force is the surface tension. On the other 
+
+
+
+hand, gravity waves are characterized by relatively long wavelengths and weak surface tension. Equation (11) provides 
+
+
+
+the method for converting between wavenumber and wavelength for all propellant tanks and spatial dimensions. 
+
+
+
+Likewise, the radial mode (𝑚) and the circumferential mode (𝑛) can be related to the wavenumber using Eq. (12) and 
+
+
+
+Eq. (13) for rectangular tanks and circular cylinders, respectively. In Eq. (13), ξ is the 𝑚-th root of the derivative of 
+
+
+
+the 𝑛-th order Bessel function of the first kind. For convenience, the “jnp_zeros” function within the Special 
+
+
+
+submodule of the scipy package in python can be used to compute this term. 
+
+
+
+ 𝑘 =
+2𝜋
+
+
+
+𝜆
+ (11) 
+
+
+
+ 
+
+
+
+ 𝑘𝑚 =
+𝜋𝑚
+
+
+
+𝑅
+ (12) 
+
+
+
+ 
+
+
+
+ 𝑘𝑛𝑚 =
+𝐽′𝑛(𝜉)
+
+
+
+𝑅
+ (13) 
+
+
+
+
+
+
+
+
+
+
+
+5 
+
+
+
+ 
+
+
+
+Experiments have demonstrated that capillary waves experience predictable droplet ejection independent of the 
+
+
+
+gravitational acceleration. This feature has obvious benefits in low-gravity applications, where the surface tension 
+
+
+
+term would dominate. An example of this behavior is shown in Fig. 3. The sinusoidal excitation acceleration at which 
+
+
+
+droplet ejection occurs (𝑎𝑑) was empirically determined by Goodridge et al. [8]. Using ethanol, distilled water, and 
+
+
+
+glycerin-water solutions, they recorded the acceleration which produced two ejected droplets within a ten second 
+
+
+
+period. According to their research, the threshold is non-hysteretic for capillary waves, but it does vary by 5-10% for 
+
+
+
+gravity waves, depending on whether it is approached from higher or lower accelerations [9]. 
+
+
+
+ 
+
+
+
+Fig. 3 Droplet-ejecting waves in distilled water at 30 Hz [9]. 
+
+
+
+A theoretical basis for droplet formation comes from the assumption that the ratio of wave amplitude (𝑏) and 
+
+
+
+wavelength approaches unity at the droplet ejection threshold. Mathematically, this ratio (𝑏/𝜆) was evaluated to be a 
+
+
+
+maximum of 0.73 for capillary waves, exceeding the value of 0.142 for gravity waves [10]. Wave crests become self-
+
+
+
+intersecting at higher ratios, trapping vapor in the troughs. From observations, the wave amplitude for pure capillary 
+
+
+
+waves can be described by Eq. (14) [8]. Rearranging terms and substituting wavelength for wave amplitude, the 
+
+
+
+excitation acceleration then varies with 𝜆𝜔2. Taking the gravitational acceleration term as negligible for capillary 
+
+
+
+waves and assuming infinite depth, the dispersion relation from Eq. (8) can be combined with Eq. (11) and 𝜔 = 2𝜔0 
+
+
+
+(subharmonic) to produce Eq. (15). Measured droplet ejection accelerations by Goodridge et al. were fit to this gravity-
+
+
+
+independent functional form and the coefficient (𝐶1) determined from a linear regression. Later, the expression was 
+
+
+
+further validated with the addition of an uncertainty range to the coefficient in Eq. (16) [11]. Goodridge notes that the 
+
+
+
+relationship is suitable for low-viscosity fluids and an alternative form was proposed for high viscosity liquids. Note 
+
+
+
+that the droplet ejection equation is independent of tank fill level and tank size; the effects of these factors are primarily 
+
+
+
+observed in the surface response according to Eq. (8). 
+
+
+
+ 
+
+
+
+ 𝑏 = 47𝑎/𝜔2 (14) 
+
+
+
+ 𝑎𝑑 = 𝐶1(𝜎/𝜌)
+1/3𝜔4/3 (15) 
+
+
+
+ 𝐶1 = 0.26 ± 0.05 (16) 
+
+
+
+The thresholds for gravity wave breakup are not as well formed. In the other limit, where surface tension is 
+
+
+
+negligible, the droplet ejection acceleration reduces to Eq. (17). Puthenveettil and Hopfinger stated that the coefficient 
+
+
+
+in the gravity wave regime, 𝐶2, is less defined since the relationship between 𝑎𝑑 and the wave amplitude at ejection is 
+
+
+
+not unique [11]. They also pointed out that, using a gravity-capillary scaling, the generic relationship in Eq. (18) is 
+
+
+
+produced, where the coefficient (𝐶) and exponent (𝑛) are a function of the driving frequency. In the transition region 
+
+
+
+between pure gravity-dominated breaking (𝜔∗ ≪⁡0.61) and capillary-dominated breaking (𝜔∗ ≫⁡0.61), the value of 𝑛 
+
+
+
+may be expected to vary from 0 to 4/3. Given the uncertainty in gravity wave ejection threshold, targeting a design to 
+
+
+
+operate in the capillary wave regime is the recommended path to confidently avoid unstable operation. 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+6 
+
+
+
+ 
+
+
+
+ 𝑎𝑑 = 𝐶2𝑔 (17) 
+
+
+
+ 
+𝑎𝑑
+
+
+
+𝑔
+= 𝑎∗ = 𝐶(𝜔/(𝜔0,𝑐𝑟𝑜𝑠𝑠𝑜𝑣𝑒𝑟/√2))
+
+
+
+𝑛 = 𝐶𝜔∗𝑛 (18) 
+
+
+
+ 
+
+
+
+Fig. 4 Droplet ejection threshold vs. forcing frequency, non-dimensionalized by gravity-capillary scaling [11]. 
+
+
+
+B. Pulsed Acceleration Profile 
+
+
+
+The key parameters in a pulse wave are annotated in the visual overview of Fig. 5. Equation (19) describes a pulsed 
+
+
+
+settling profile where the instantaneous acceleration is a function of the peak pulse acceleration (𝑎𝑝𝑢𝑙𝑠𝑒), the duty 
+
+
+
+cycle (𝑑), the excitation frequency, and the summation term (𝑛), which is not to be confused with the circumferential 
+
+
+
+mode number from Eq. (13). Equation (20) is the sinusoidal acceleration profile typically assumed by literature and 
+
+
+
+used in the experiments of Goodridge and Puthenveettil. When the amplitude of the sine wave (𝑎𝑠𝑖𝑛𝑒) induces Faraday 
+
+
+
+waves, its value is 𝑎𝑐. Similarly, when it is high enough to break up the liquid surface, its value is equal to 𝑎𝑑. 
+
+
+
+ 
+
+
+
+Fig. 5 Description of pulsed, or rectangular, waveform parameters. 
+
+
+
+
+
+
+
+
+
+
+
+7 
+
+
+
+ 
+
+
+
+ 𝑎 =
+2𝑎𝑝𝑢𝑙𝑠𝑒
+
+
+
+𝜋
+∑
+
+
+
+1
+
+
+
+𝑛
+𝑠𝑖𝑛(𝑛𝜋𝑑) 𝑐𝑜𝑠(𝑛𝜔𝑡)
+
+
+
+∞
+
+
+
+𝑛=1
+
+
+
++ 𝑎𝑝𝑢𝑙𝑠𝑒𝑑 (19) 
+
+
+
+ 
+
+
+
+ 𝑎 = 𝑎𝑠𝑖𝑛𝑒 𝑐𝑜𝑠(𝜔𝑡) + 𝑔 (20) 
+
+
+
+ 
+
+
+
+When 𝑛 = 1, Eq. (19) reduces to the same functional form as Eq. (20). Equating the two produces Eq. (21), 
+
+
+
+which converts the magnitude of a pulse wave into an equivalent excitation amplitude of the sine wave at the same 
+
+
+
+frequency. This conversion from a peak pulse amplitude and duty cycle to an equivalent sinusoidal amplitude is 
+
+
+
+necessary to compare the strength of the excitation against the values of 𝑎𝑐 and 𝑎𝑑 on a design map. Physically, it 
+
+
+
+represents the contribution of the fundamental frequency to the pulse wave. At low duty cycles, a small angle 
+
+
+
+approximation will simplify the value of 𝑎𝑠𝑖𝑛𝑒 to 2𝑎𝑝𝑢𝑙𝑠𝑒𝑑, or twice the average acceleration (𝑔 = 𝑎𝑝𝑢𝑙𝑠𝑒𝑑). 
+
+
+
+Comparisons between a pulse wave and its equivalent sine wave using this method of conversion show good 
+
+
+
+agreement in Fig. 6. Other approaches were considered as well. For example, conserving the area of the pulsed 
+
+
+
+waveform above or below the average. The result was a similar arc as Eq. (21) in the form of 𝑎𝑠𝑖𝑛𝑒 =
+𝑎𝑝𝑢𝑙𝑠𝑒𝜋(𝑑 − 𝑑2). However, this produced excitations which were too high, particularly at lower duty cycles. 
+
+
+
+ 𝑎𝑠𝑖𝑛𝑒 =
+2𝑎𝑝𝑢𝑙𝑠𝑒
+
+
+
+𝜋
+𝑠𝑖𝑛(𝜋𝑑) (21) 
+
+
+
+ 
+
+
+
+Fig. 6 Wave amplitude vs. time showing the comparison between a pulsed acceleration waveform and an 
+
+
+
+equivalent sine wave using Eq. (21) for various operating conditions in a two-dimensional rectangular tank. 
+
+
+
+An example of three duty cycles and the magnitude of their associated sinusoidal excitation acceleration is 
+
+
+
+presented in Fig. 7. In the uppermost plots, the pulse frequency and peak acceleration are held constant while the 
+
+
+
+pulse on-time and duty cycle are variable. The lower plot shows the arc of excitation acceleration with duty cycle. In 
+
+
+
+the limits where duty cycle goes to 0% (no on-time) and 100% (no off-time), there is no perturbation to the system. 
+
+
+
+
+
+
+
+
+
+
+
+8 
+
+
+
+ 
+
+
+
+Thus, the equivalent sine wave amplitude is zero. As the duty cycle is increased from 0%, the excitation amplitude 
+
+
+
+increases until a maximum occurs at 50% duty cycle. Above 50%, the equivalent sine wave amplitude begins to 
+
+
+
+decrease in the same way that it ascended while the average acceleration continues to climb. 
+
+
+
+ 
+
+
+
+Fig. 7 Examples of pulse waves and their equivalent sine wave amplitudes (10%, 50%, and 90% duty cycles). 
+
+
+
+C. Design Map 
+
+
+
+The practical result of the collection of theory, empirical results, and analytical relationships is the pulsed 
+
+
+
+settling design map in Fig. 8. The map is based on the generic propellant tank and fluid properties presented in 
+
+
+
+section V. With this engineering model, designers can determine whether the operating condition that they have 
+
+
+
+selected is stable, subject to surface waves at the liquid-vapor interface, or unstable by plotting the pulse frequency 
+
+
+
+against the sinusoidal excitation acceleration. For convenience, the duty cycle can be overlaid on the y-axis using the 
+
+
+
+conversion in Eq. (21). The map assumes that a single pulse frequency is maintained and that the operation is 
+
+
+
+performed for a long period of time relative to the pulse period. 
+
+
+
+Since extreme ranges in duty cycle and frequency are possible, the map is plotted in a log-log scale. Outlined in 
+
+
+
+Fig. 7, the excitation acceleration is a function of the duty cycle and is also symmetric about the 50% value, so the 
+
+
+
+plot is split with the y-axis logarithmically approaching 100% duty cycle at the top and 0% duty cycle at the bottom. 
+
+
+
+It is expected that very low duty cycles are more common than very high ones. This is not only because a common 
+
+
+
+objective of pulsing is to save as much propellant mass as possible, but also because the areas of highest confidence 
+
+
+
+in the equations are where surface tension is much stronger than the average acceleration, falling to the right of the 
+
+
+
+gravity-capillary crossover curve. 
+
+
+
+The engineering model is divided by color into three regions based on the Faraday wave response. The red, 
+
+
+
+unstable region is characterized by liquid breakup and droplet ejection from the surface, with the boundary 
+
+
+
+determined by Eq. (15). To the right of this boundary – the yellow region – surface waves are predicted to occur at 
+
+
+
+the liquid surface. Wave amplitudes are relatively high near the droplet ejection threshold and decrease to the right, 
+
+
+
+as pulse frequencies increase. The transition from surface waves to a stable, unperturbed surface – the green region – 
+
+
+
+is delineated by the Faraday wave onset formula in Eq. (2). 
+
+
+
+
+
+
+
+
+
+
+
+9 
+
+
+
+ 
+
+
+
+The gravity-capillary crossover from Eq. (10) is also highlighted, marking the transition from gravity-dominated 
+
+
+
+waves (left) to waves dominated by surface tension (right). Since duty cycle and the average acceleration (effective 
+
+
+
+gravity) are coupled, it runs parallel to the droplet ejection threshold for most of the low duty cycles before deviating 
+
+
+
+around 50%. The deviation occurs because the average acceleration continues to go up with duty cycle while the 
+
+
+
+excitation acceleration trends back down. Note that the droplet ejection threshold is plotted up to 100% even though 
+
+
+
+it lies entirely in the gravity wave regime above 50%. The data points in Fig. 4 indicate there is some applicability of 
+
+
+
+this equation between the gravity-capillary breaking line and the crossover line. This relationship will break down 
+
+
+
+when treading too close to the breaking line, however, since the equation assumes capillary-dominated breaking as 
+
+
+
+discussed in part A (𝜔∗ ≫⁡0.61). 
+
+
+
+ 
+
+
+
+Fig. 8 Pulsed settling design map for liquid oxygen with a peak pulse acceleration (𝒂𝒑𝒖𝒍𝒔𝒆) of 0.1 m/s/s, a fill 
+
+
+
+height of 4 m, and a tank radius of 2 m. 
+
+
+
+A cross-hatched region at the bottom of the map shows the duty cycles at which the Bond number criterion has 
+
+
+
+been violated. While the colored regions inform the user about the stability of an operating condition, the Bond 
+
+
+
+number metric provides an understanding of whether liquid can be brought from an unsettled state to a settled state. 
+
+
+
+If the Bond number is too low, the duty cycle must be increased to overcome surface tension and move the liquid. 
+
+
+
+Ideally, 𝐵𝑜 ≫ 1, and the selection of the Bond number was discussed in the Theory portion of this section. A limit 
+
+
+
+of 15 is plotted because it exceeds the cited literature recommendation of 𝐵𝑜 ≥ 10 and because separate analyses 
+
+
+
+have shown this value to prevent complete wetting at high fill levels. If a range of duty cycles are achievable after 
+
+
+
+consulting the design map, the time it takes to settle the propellant for a single operating condition can be predicted 
+
+
+
+with computational fluid dynamics (CFD). A tradeoff between the total time it takes to aggregate the liquid and the 
+
+
+
+amount of time the propulsive system is operating (e.g., RCS thrusters, propulsive vent system) can then be 
+
+
+
+evaluated for other duty cycles [12]. Designing a settling scheme or selecting hardware to operate in the stable 
+
+
+
+region is not always possible (nor essential, since wave amplitudes may be very low compared with the tank scale). 
+
+
+
+In cases where surface waves are predicted, the wavenumber/mode shape and wave amplitude can be estimated. 
+
+
+
+Verification and discussion of these predictions is addressed in section V. 
+
+
+
+IV. Droplet Ejection Validation in Standard Gravity 
+
+
+
+A. Simulation Inputs and Mesh 
+
+
+
+Loci/STREAM, a pressure-based CFD solver, combined with a VoF module was used to conduct a series of 
+
+
+
+simulations to verify the accuracy of the engineering model described in the previous section. The capabilities of the 
+
+
+
+Loci/STREAM-VoF solver in standard gravity were first demonstrated by validation against the experimental results 
+
+
+
+
+
+
+
+
+
+
+
+10 
+
+
+
+ 
+
+
+
+of Goodridge [8]. The experimental setup used a 20 Hz sinusoidal forcing input from a shaker table to drive a 19.5 cm 
+
+
+
+diameter circular cylinder with a fluid depth of 10 cm. Fluid properties for the simulation are provided in Table 1. 
+
+
+
+Multiple views of the mesh are presented in Fig. 9. The mesh is constructed of approximately 19.4 million hexahedral 
+
+
+
+cells, which provide the highest quality results using the VoF module. The nominal cell size in the high-resolution 
+
+
+
+region around the interface is 0.5 mm. A semi-block structured meshing approach was used to build the tank interior 
+
+
+
+with a nearly uniform volumetric cell size throughout. 
+
+
+
+The maximum time step was generally set to 1e-3 s – well below the 0.05 s pulse period – and further limited by 
+
+
+
+the maximum Courant number (Co) of 0.2 in the computational domain. For the problems addressed in this study, a 
+
+
+
+laminar flow regime was sufficient to capture the bulk movement of propellant in the tank and a first-order upwind 
+
+
+
+advection scheme was used for robust convergence. Tank boundaries throughout this report were modeled as adiabatic 
+
+
+
+walls, so no heat transfer into or out of the system was simulated. Acceleration inputs were applied to a non-inertial 
+
+
+
+reference frame centered on the computational domain. 
+
+
+
+Table 1 Fluid property inputs for standard gravity validation cases. 
+
+
+
+Fluid Property Water Air 
+
+
+
+Temperature (K) 345.15 
+
+
+
+Static Pressure (bar) 1.01325 
+
+
+
+Density (kg/m3) 998.2 1.204 
+
+
+
+Dynamic Viscosity (Pa*s) 9.494e-4 1.825e-5 
+
+
+
+Surface Tension (N/m) 0.072 N/A 
+
+
+
+ 
+
+
+
+Fig. 9 Top view (looking down, left) and front view (right) of the mesh for the 19.5 cm diameter cylinder. 
+
+
+
+B. Droplet Ejection in Standard Gravity 
+
+
+
+The shaker table in the tests was ramped up in acceleration amplitude (𝑎𝑠𝑖𝑛𝑒) at the 20 Hz driving frequency until 
+
+
+
+it excited Faraday waves (𝑎𝑐), although the onset acceleration was not documented. Then, it was steadily increased 
+
+
+
+until droplets were visibly broken off the surface. The ejection criteria defined by Goodridge et al. was two droplets 
+
+
+
+observed within a 10 s period. This ejection thresholds (𝑎𝑑) were recorded over a range of about 60 Hz for a variety 
+
+
+
+of fluids and all the results subsequently collapsed into Eq. (15) and (16). 
+
+
+
+The pair of images in Fig. 10 illustrate the type of droplet-ejecting waves produced by the experiment and the CFD 
+
+
+
+simulation. An excitation acceleration was not provided for the experimental photograph since it was only meant to 
+
+
+
+be characteristic of liquid breakup in capillary waves. However, it compares well qualitatively to the CFD solution at 
+
+
+
+twice the predicted ejection acceleration, which was calculated to be 6.8 m/s2. The waves are highly irregular with 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+11 
+
+
+
+ 
+
+
+
+some long filaments, some short and blunt waves, and some droplets, particularly near the wall. The surface waves, 
+
+
+
+and especially the droplets, become random in time and space at this unstable condition. 
+
+
+
+ 
+
+
+
+Fig. 10 Droplet ejection using distilled water at 20 Hz. The experiment (left) shows droplets being ejected 
+
+
+
+at an unspecified acceleration above the ejection threshold. The CFD simulation (right) excited at twice the 
+
+
+
+ejection threshold also shows spikes forming and immediately breaking into droplets. 
+
+
+
+The ejection criteria implies relatively infrequent breakup since the wave period is 0.05 s (1% of all wave periods 
+
+
+
+liberate droplets). The authors estimated about 2-3% error in their threshold. The uncertainty on the prefactor 
+
+
+
+introduced by Puthenveettil was about ± 20%, however. Therefore, the threshold is best understood as a band, as 
+
+
+
+plotted on the design map. The CFD solution at the ejection threshold in Fig. 11 shows consistency with this banded 
+
+
+
+threshold. The number of droplets is perhaps one every 1-2 s and a precise count likely depends strongly on mesh 
+
+
+
+resolution. Most importantly, the simulations confirm that relatively infrequent droplets are forming at the acceleration 
+
+
+
+that they are expected. Yang and Peugeot found similar conclusions with their validation of the CFD-ACE+ solver 
+
+
+
+against these empirical results as well as other experiments carried out at the Marshall Space Flight Center [13]. 
+
+
+
+ 
+
+
+
+Fig. 11 Droplets forming at the expected 20 Hz ejection threshold of 6.8 m/s2. 
+
+
+
+V. Verification of the Pulsed Settling Model in Microgravity 
+
+
+
+A. Computational Domain and Mesh 
+
+
+
+A cryogenic propellant tank representative of a large-scale main tank for an orbital rocket was selected for these 
+
+
+
+analyses. The total height from end to end is eight meters, the radius of the tank is two meters, the barrel section is 
+
+
+
+four meters in height, and the forward and aft dome sections are two-meter radius hemispheres. An illustration of the 
+
+
+
+tank, along with coordinate axes, is shown in Fig. 12. The origin of the coordinate system is at the center of the tank, 
+
+
+
+but the coordinate axes are labeled outside of the tank for visibility. A single liquid fill level of 50% was chosen to 
+
+
+
+typify an in-space environment, where a portion of the propellant has already been consumed. Separate analyses (not 
+
+
+
+shown) with low fill levels (<10%) and high fill levels (>90%) are in accord with the conclusions presented here. 
+
+
+
+
+
+
+
+
+
+
+
+12 
+
+
+
+ 
+
+
+
+Two versions of the tank were meshed to demonstrate the impact of spatial dimensions (geometry) on the surface 
+
+
+
+response. The primary three-dimensional tank used in the analyses is circular in cross-section comprising 11.1 million 
+
+
+
+cells with a minimum cell size of about 0.0125 m. Hexahedral cells were used in a ± 0.5 m band around the interface 
+
+
+
+and allowed to grow out as tetrahedral cells where no interface dynamics were anticipated. The two-dimensional 
+
+
+
+rectangular tank in Fig. 13 was constructed with all hexahedral cells (74,580 cells) and a similar minimum cell size, 
+
+
+
+but the cross section (into and out of the page) is a rectangle with a thickness of one cell. 
+
+
+
+ 
+
+
+
+Fig. 12 Three-dimensional cylindrical propellant tank geometry and mesh. 
+
+
+
+ 
+
+
+
+Fig. 13 Two-dimensional rectangular tank geometry and mesh. The thickness of the tank (into and out of 
+
+
+
+the page) is one cell width. 
+
+
+
+B. Simulation Inputs 
+
+
+
+The liquid-vapor interface in all propellant tank simulations was initialized from a quiescent condition. The actual 
+
+
+
+equilibrium condition will depend primarily on the axial acceleration at the start of the pulsed operation (if any), the 
+
+
+
+ ection 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+13 
+
+
+
+ 
+
+
+
+fluid properties, and the contact angle. Although there are some transient effects from the meniscus waves when 
+
+
+
+starting from this simplified condition, the effects of Faraday waves are still apparent. Contact angles are typically 
+
+
+
+very low for liquid cryogens, therefore a contact angle boundary condition of 10° was assumed in these cases. Since 
+
+
+
+pulse widths were usually on the order of tenths of seconds, a timestep resolution of 0.01 s was used to ensure that 
+
+
+
+pulses were fully resolved. A peak pulse acceleration of 0.1 m/s2 was selected because it allowed for reasonable 
+
+
+
+combinations of timesteps, pulse on-times, and duty cycles for CFD simulations. 
+
+
+
+Liquid oxygen (LOX) and gaseous oxygen (GOX) were chosen as the fluids due to their commonplace usage in 
+
+
+
+modern rocketry. The engineering model should work equally well for other low-viscosity cryogens. Table 2 
+
+
+
+documents the fluid properties used for LOX and GOX in the propellant tank simulations. All propellant tank analyses 
+
+
+
+were performed assuming liquid and vapor saturated at 1 bar. A future study devoted to the effects of heat transfer 
+
+
+
+and mixing from Faraday waves could be undertaken with a hot ullage and a subcooled cryogen. 
+
+
+
+Table 2 Fluid property inputs CFD verification cases. 
+
+
+
+Fluid Property LOX GOX 
+
+
+
+Temperature (K) 90.0621 
+
+
+
+Static Pressure (bar) 1 
+
+
+
+Density (kg/m3) 1141.796 4.413 
+
+
+
+Dynamic Viscosity (Pa*s) 1.953e-4 6.94e-6 
+
+
+
+Surface Tension (N/m) 0.013177 N/A 
+
+
+
+In the next few sections, the propellant tank geometry was analyzed at various points on the design map. 
+
+
+
+Simulations discussed or shown in sections C and D are plotted in Fig. 14, though this is not an exhaustive list of 
+
+
+
+evaluated cases. These operating conditions were selected to represent the behavior over a broad range of duty cycles, 
+
+
+
+around the droplet ejection threshold, and within the Faraday response region. Contour lines of ½-subharmonic mode 
+
+
+
+numbers for the cylindrical propellant tank intersect each point to give an impression of how the response varies as 
+
+
+
+frequency and acceleration change. For ease of visualization, the azimuthal mode number (𝑛) is fixed at 0 and radial 
+
+
+
+mode numbers (𝑚) are shown. As discussed later, three-dimensional tanks have competing modes as frequency 
+
+
+
+increases. The contour lines shift to the right for higher azimuthal mode numbers and may overlap other (𝑛,𝑚) pairs. 
+
+
+
+ 
+
+
+
+Fig. 14 Design map with contours of cylindrical tank radial mode numbers (solid grey, 𝒏 held at 0) and 
+
+
+
+selected points analyzed in subsequent sections overlaid. 
+
+
+
+
+
+
+
+
+
+
+
+14 
+
+
+
+ 
+
+
+
+C. Droplet Ejection in Microgravity 
+
+
+
+ After establishing the reliability of the CFD solver to predict liquid breakup in standard gravity, the engineering 
+
+
+
+model was extended to a microgravity environment. In this context, the sole contributor to acceleration is the pulsed 
+
+
+
+settling. No data was immediately available to validate the model and CFD results in reduced gravity. One potentially 
+
+
+
+germane experiment, however, is the Gator GATSBY (“GrAvitational effecTS on the faraday instaBilit ’). The 
+
+
+
+International Space Station (ISS) project was organized by the University of Florida and videos were generously 
+
+
+
+shared while analysis of the results is currently underway [14]. The team excited two liquids, FC72 and Silicone Oil, 
+
+
+
+in an 8 mm by 32 mm by 20 mm box with a sinusoidal forcing input orthogonal to the interface of the two fluids. 
+
+
+
+Images in Fig. 15 confirm that subharmonic Faraday waves were generated in microgravity at a driving frequency of 
+
+
+
+2.5 Hz. Vibrations were even increased significantly enough to break the interface (not shown). Observation of waves 
+
+
+
+provides some qualitative reinforcement of the engineering model with the possibility of future validation. 
+
+
+
+ 
+
+
+
+Fig. 15 Subharmonic Faraday waves in microgravity captured by the ISS project, Gator GATSBY. Images 
+
+
+
+a) and b) show the change in interface shape over 0.4 s, or one forcing period (half of one wave period) [14]. 
+
+
+
+Examples of interface deformation in the unstable region are shown in Fig. 16 and Fig. 17. The pulse frequencies 
+
+
+
+are 0.2 Hz and 0.05 Hz and duty cycles are 10% and 1%, respectively. The engineering model accurately predicts that 
+
+
+
+these operating conditions result in droplet ejection. Comparable to the validation in standard gravity, the pulsed 
+
+
+
+forcing profile raises ligaments well above the surface where they then separate and break up. Wave motions are 
+
+
+
+chaotic in these conditions. Still, the impact of frequency is apparent in the wavelengths when looking at the top-down 
+
+
+
+views. The 0.2 Hz, 10% duty cycle result has much thinner ligaments than the 0.05 Hz, 1% duty cycle condition. 
+
+
+
+ 
+
+
+
+Fig. 16 Droplet ejection at 10% duty cycle with a pulse on-time of 0.5 s (0.2 Hz). 
+
+
+
+
+
+
+
+
+
+
+
+15 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Fig. 17 Droplet ejection at 1% duty cycle with a pulse on-time of 0.2 s (0.05 Hz). 
+
+
+
+The droplet ejection threshold equation is built on assumptions that the point of interest is far to the right of the 
+
+
+
+capillary-gravity breaking line (𝜔∗ ≫ 0.61), so it is expected to become less reliable for the 90% duty cycle, 0.3 Hz 
+
+
+
+case. Indeed, although some local breakup is observed in Fig. 18 due to constructive interference between modes, the 
+
+
+
+overall interface is not as prone to breakup globally. 
+
+
+
+ 
+
+
+
+Fig. 18 Local droplet ejection at the center of the tank at 90% duty cycle and a pulse width of 3 s (0.3 Hz). 
+
+
+
+As for the points in the yellow region of Fig. 14, the model correctly identified these as high amplitude (for the 
+
+
+
+applied duty cycle), but without forming droplets. Both cases at 1% and 10% duty cycles failed to break the interface, 
+
+
+
+but instead, continued steadily with hemispherical caps oscillating in subharmonic motion. A snapshot of the 10% 
+
+
+
+duty cycle, 0.5 Hz pulse frequency result is illustrated in Fig. 19. Notably, the difference in driving frequency between 
+
+
+
+the low, steady oscillation at this duty cycle and the substantial droplet-ejecting state in Fig. 16 is only 0.3 Hz. This 
+
+
+
+underscores the importance of ensuring that hardware tolerances and design margins will position the system in a 
+
+
+
+stable configuration. 
+
+
+
+
+
+
+
+
+
+
+
+16 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Fig. 19 Surface wave heights below droplet ejection at 10% duty cycle and a pulse width of 0.2 s (0.5 Hz). 
+
+
+
+D. Surface Modal Responses 
+
+
+
+Surface waves produced by pulsed settling were evaluated for consistency with analytical equations. For a circular 
+
+
+
+cylinder, the wavenumber can be calculated with Eq. (13) while Eq. (12) can be used for a rectangular tank. Since the 
+
+
+
+wave frequency of the ½-subharmonic is half the pulse frequency, Eq. (8) is combined with the wavenumber equation 
+
+
+
+appropriate for the tank to estimate the mode shape. Two-dimensional rectangular tanks only have a single node count. 
+
+
+
+Cylindrical mode shapes, on the other hand, are expressed as (𝑛, 𝑚) pairs indicating the number of nodal diameters 
+
+
+
+and circles, respectively. Imaging of the first 50 modes in a cylindrical tank were documented by Shao, et al. [15]. 
+
+
+
+Surface shapes may take various forms over time, exemplified by the sequence in Fig. 20. At the pulsing inception, 
+
+
+
+harmonic edge waves are propagated towards the center according to a (0, 21) or (0, 22) pattern for a driving frequency 
+
+
+
+of 0.3 Hz at 90% duty cycle. However, these waves yield to the dominant ½-subharmonic waves in part b) of the 
+
+
+
+image. A (0, 6) mode takes over as the most visible response, although a distinct high-order circumferential mode is 
+
+
+
+also observed at the same time. As the simulation continues to evolve in part c), mode mixing begins to distort and 
+
+
+
+warp the shapes into a mosaic of interfering patterns. 
+
+
+
+ 
+
+
+
+Fig. 20 Transient CFD mode shapes for a cylindrical tank at 90% duty cycle and 3 s pulse on-time (0.3 Hz). 
+
+
+
+Image a) shows the initial harmonic waves, b) displays the higher amplitude subharmonic waves which take 
+
+
+
+over, and c) shows how additional high-order modes begin to mix and interfere. 
+
+
+
+An excellent example of predicting the surface response through CFD is the (0, 2) mode shown in the top-down 
+
+
+
+view in Fig. 21. As one of the lowest modes, there is little interference from other wave shapes. There is also 
+
+
+
+
+
+
+
+
+
+
+
+17 
+
+
+
+ 
+
+
+
+consistency between both cylindrical and rectangular tanks with respect to the interface shape. The calculated natural 
+
+
+
+frequency of this response is 0.00464 Hz, which is almost exactly half of the pulse frequency, as expected. As the 
+
+
+
+frequency increases for a given duty cycle though, competition between modes and mixing becomes more probable. 
+
+
+
+The surface of the cylindrical tank in Fig. 22 appears to be vibrating in a (8, 4) arrangement. The associated natural 
+
+
+
+frequency of (8, 4) is 0.0249 Hz – once again, corresponding to half of the pulse frequency. A different nodal count – 
+
+
+
+about 𝑚 = 7 – is shown in the rectangular tank. The natural frequency of the 𝑚 = 7 rectangular tank mode (0.0258 
+
+
+
+Hz) is nearly equivalent to that of the (8, 4) cylindrical response. In fact, even for the cylindrical tank alone there are 
+
+
+
+several (𝑛, 𝑚) pairs that would produce a similar value to (8, 4): (1, 7), (3, 6), (6, 5), (11, 3), and more. 
+
+
+
+ 
+
+
+
+Fig. 21 CFD mode shape for a two-dimensional rectangular tank (left) and cylindrical tank (right) at 0.1% 
+
+
+
+duty cycle and 0.1 s pulse width (0.01 Hz). 
+
+
+
+ 
+
+
+
+Fig. 22 CFD mode shape for a two-dimensional rectangular tank (left) and cylindrical tank (right) at 1% 
+
+
+
+duty cycle and 0.2 s pulse width (0.05 Hz). 
+
+
+
+E. Wave Amplitude Predictions 
+
+
+
+The estimation of wave amplitude may be valuable in a cryogenic tank for heat transfer modeling. The impact of 
+
+
+
+lateral slosh wave amplitude on pressure and temperature were explored by Ludwig, Dreyer, and Hopfinger [16] via 
+
+
+
+a sloshing Reynolds number and Nusselt number. Although it is not the same manner of motion, Faraday waves and 
+
+
+
+their disruption of the thermal stratification around the interface could potentially be modeled in kind. 
+
+
+
+
+
+
+
+
+
+
+
+18 
+
+
+
+ 
+
+
+
+Experiments have documented linear behavior between the wave amplitude of non-breaking waves and the 
+
+
+
+amplitude of the sinusoidal displacement function. For the sinusoidal acceleration in Eq. (20), the double integral is 
+
+
+
+the sinusoidal displacement (𝑎𝑠𝑖𝑛𝑒/𝜔
+2). Goodridge observed that capillary waves respond linearly according to Eq. 
+
+
+
+(14). Using this relationship for wave amplitude entails that the ratio of wave amplitude to wavelength (rearrange Eq. 
+
+
+
+(8) and Eq. (11)) is unity at the droplet ejection threshold, consistent with their initial assumptions. Jiang, Perlin, and 
+
+
+
+Schultz also documented a linear movement of wave amplitude with the sinusoidal displacement amplitude, albeit at 
+
+
+
+a much lower rate [17]. Once droplet ejection began, they measured wave amplitudes at substantially higher values. 
+
+
+
+ 
+
+
+
+Fig. 23 Average wave amplitude vs. 𝒂𝒔𝒊𝒏𝒆/𝝎
+𝟐 for many two-dimensional rectangular tank cases. 
+
+
+
+Wave amplitudes in the propellant tank were measured by the maximum and minimum values of the VoF = 0.5 
+
+
+
+(cells with 50% liquid in them) iso-surface within the inner 80% radius of the tank. Using a clipped radius removes 
+
+
+
+the meniscus from the calculation, which can extend much higher than the waves oscillate. The range is then divided 
+
+
+
+in half to obtain the amplitude of the surface waves. As Fig. 7 showed, the wave amplitudes can vary with time, so an 
+
+
+
+average of the last twenty peak amplitudes was taken. A composite of the 3D cylindrical tank and 2D rectangular tank 
+
+
+
+cases is given in Fig. 23. Regression lines are overlaid with the y-intercept forced through the (0, 0) point. The data 
+
+
+
+points suggest that Eq. (14) is a conservatively high estimate, with lower slopes of 31.6 and 17.5 for the cylindrical 
+
+
+
+tank and rectangular tank, respectively. However, if some of the operating conditions with ejected droplets are 
+
+
+
+included, a slope of 47 appears to better capture the height of those surface elevations. It is not clear whether Goodridge 
+
+
+
+et al. were referring to breaking or non-breaking capillary waves when their observations confirmed a slope of 47. 
+
+
+
+VI. Conclusion 
+
+
+
+An engineering model for assessing the stability of a liquid surface in microgravity which is subject to pulsed 
+
+
+
+accelerations perpendicular to the interface was compiled and verified with CFD. Validation of the CFD solver against 
+
+
+
+experimental data in standard gravity provided confidence in the tool’s ability to forecast surface behavior in 
+
+
+
+conditions where experimental data is sparse. The engineering model relies on empirical and theoretical formulae 
+
+
+
+developed for sinusoidal forcing. Consequently, a method for converting the pulsed forcing waveform into an 
+
+
+
+equivalent sinusoidal wave amplitude was proposed. Several methods were considered, included conserving the 
+
+
+
+average power of the wave, but the recommended method of using the first harmonic resulted in good agreement. 
+
+
+
+Predictions made using the pulsed settling engineering model are in good agreement with CFD solutions showing 
+
+
+
+droplet breakup and surface wave characteristics such as the subharmonic frequency response and mode shape. Wave 
+
+
+
+amplitude is more complex to determine accurately, but scaled functions can serve as rules of thumb if estimates are 
+
+
+
+needed. The Faraday wave onset criterion was not scrutinized closely like other characteristics presented here. 
+
+
+
+Computationally, very small cell sizes are required to resolve the waves at those frequencies and acceleration levels, 
+
+
+
+requiring larger meshes and time. Practically, the risk of ullage collapse should be very low around this boundary, so 
+
+
+
+the threshold should largely serve as a helpful target for designers who are deciding how much margin to build into 
+
+
+
+their systems. 
+
+
+
+
+
+
+
+
+
+
+
+19 
+
+
+
+ 
+
+
+
+Acknowledgments 
+
+
+
+The authors would like to thank members of the Fluid Dynamics Branch (ER42) at the Marshall Space Flight 
+
+
+
+Center: Brandon Williams, Chintan Patel, H. Q. Yang, and Narayanan Ramachandran. In addition, the authors would 
+
+
+
+like to thank Hiroumi Tani at Space Exploration Technologies (SpaceX) and Dr. Ranga Narayanan at the University 
+
+
+
+of Florida. Resources supporting this work were provided by the NASA High-End Computing (HEC) Program through 
+
+
+
+the NASA Advanced Supercomputing (NAS) Division at Ames Research Center. 
+
+
+
+References 
+
+
+
+[1] Faraday, M., “On the Forms and tates assumed by Fluids in contact with vibrating elastic surfaces,” an appendix to “On a 
+
+
+
+peculiar class of coustical Figures,” Philosophical Transactions of the Royal Society, Vol. 121, 1831 (Parts I and II), pp. 
+
+
+
+299-340. 
+
+
+
+[2] Douady, ., “Experimental study of the Faraday instability,” Journal of Fluid Mechanics, Vol. 221, 1990, pp. 383-409. 
+
+
+
+doi:10.1017/S0022112090003603 
+
+
+
+[3] Hochstein, J.I., and Chato, D.J., “Pulsed Thrust Propellant Reorientation: Concept and Modeling,” Journal of Propulsion and 
+
+
+
+Power, Vol. 8, No. 4, 1992, pp. 770-777. 
+
+
+
+[4] Edwards, W. . and Fauve, ., “Patterns and quasi-patterns in the Faraday experiment,” Journal of Fluid Mechanics, Vol. 
+
+
+
+278, 1994, pp. 123-148. 
+
+
+
+[5] Benjamin, T.B. and Ursell, F., “The tability of the Plane Free urface of a Liquid in Vertical Periodic Motion,” 
+
+
+
+Proceedings of the Royal Society of London. Series A, Mathematical and Physical Sciences, Vol. 225, 1954, pp. 505-515. 
+
+
+
+[6] Kumar, K. and Tuckerman, L. ., “Parametric instability of the interface between two fluids,” Journal of Fluid Mechanics, 
+
+
+
+Vol. 279, 1994, pp. 49-68. 
+
+
+
+[7] Kundu, P.K., Cohen, I.M., and Dowling, D.R., Fluid Mechanics, 5th ed., Academic Press, Waltham, MA, 2012, Ch. 7. 
+
+
+
+[8] Goodridge, C.L., Tao Shi, W., Henschel, H.G.E., and Lathrop, D.P., “Viscous effects in droplet-ejecting capillary waves,” 
+
+
+
+Physical Review E, Vol. 56, No.1, 1997, pp. 472-475. 
+
+
+
+[9] Goodridge, C.L., Tao Shi, W., and Lathrop, D.P., “Threshold Dynamics of Singular Gravity-Capillary Waves,” Physical 
+
+
+
+Review Letters, Vol. 76, No.11, 1996, pp. 1824-1827. 
+
+
+
+[10] Crapper, G.D., “An Exact Solution for Progressive Capillary Waves of Arbitrary Amplitude,” Journal of Fluid Mechanics, 
+
+
+
+Vol. 2, No. 6, 1957, pp. 532-540. 
+
+
+
+[11] Puthenveettil, B.A. and Hopfinger, E.J., “Evolution and breaking of parametrically forced capillary waves in a circular 
+
+
+
+cylinder,” Journal of Fluid Mechanics, Vol. 633, 2009, pp. 355-379. doi:10.1017/S0022112009007162. 
+
+
+
+[12] Hoffman, B.D. and Brodnick, J.M., "Operational Techniques in Microgravity for Cryogenic Fluid Management," AIAA 
+
+
+
+2023-1217. AIAA SciTech 2023 Forum. January, 2023. doi:10.2514/6.2023-1217. 
+
+
+
+[13] ang, H.Q. and Peugeot, J., “ urface Instability of Liquid Propellants under Vertical Oscillatory Forcing,” AIAA 2011-
+
+
+
+5773. 47th AIAA/ASME/SAE/ASEE Joint Propulsion Center and Exhibit. July, 2011. doi:10.2514/6.2011-5773. 
+
+
+
+[14] From ISS: Gravitational Effects on the Faraday Instability- NSF 2025117- PI. R. Narayanan- team: J. Livesay, R. Singiser, 
+
+
+
+Z. Karpinski and R. Narayanan. 
+
+
+
+[15] hao, ., et al., “ urface Wave Pattern Formation in a Cylindrical Container,” Journal of Fluid Mechanics, Vol. 915, 2021, 
+
+
+
+pp. A19-1 – A19-19. doi:10.1017/jfm.2021.97. 
+
+
+
+[16] Ludwig, C., Dreyer, M. E., and Hopfinger, E.J., “Pressure Variations in a Cryogenic Liquid torage Tank ubjected to 
+
+
+
+Periodic Excitations,” International Journal of Heat and Mass Transfer, Vol. 66, 2013, pp. 223-234. 
+
+
+
+[17] Jiang, L., Perlin, M., and hultz, W., “ teep and Breaking Faraday Waves,” National Research Council. 1997. Twenty-First 
+
+
+
+Symposium on Naval Hydrodynamics, pp. 812-826. Washington, DC: The National Academies Press. doi:10.17226/5870.

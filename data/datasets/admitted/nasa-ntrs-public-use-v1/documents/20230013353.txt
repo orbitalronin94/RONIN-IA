@@ -1,0 +1,541 @@
+Requirement Discovery Using Embedded Knowledge 
+Graph with ChatGPT
+
+
+
+Nipa Phojanamongkolkij, Braxton VanGundy, Ramana Polavarapu, Ian Levitt
+
+
+
+NASA Langley Research Center
+
+
+
+Barclay Brown
+
+
+
+Collins Aerospace, Windsor Locks, CT 1
+
+
+
+
+
+
+
+
+
+
+
+Outline
+
+
+
+• Introduction
+– Project description
+– Knowledge graph
+
+
+
+• Exploratory Approaches
+• Comparison, Lessons Learned, and Next Steps
+
+
+
+2
+
+
+
+
+
+
+
+
+
+
+
+Introduction
+
+
+
+• NASA’s Air Traffic Management-Exploration (ATM-X) Urban Air Mobility 
+(UAM) Subproject is conducting research that evolves UAM airspace 
+towards a highly automated and operationally flexible system of the future.
+– See https://www.nasa.gov/uam-overview/ for more information
+
+
+
+• The complexity of UAM airspace evolution requires a plan to effectively 
+organize, integrate, and communicate NASA’s research and development.
+– This planning tool is called the UAM airspace research roadmap. 
+– Implemented through Model-Based Systems Engineering (MBSE) methodology
+– Leveraging machine learning natural language processing (ML NLP, or just NLP), 
+
+
+
+Knowledge Graph data science, and Large Language Model (i.e., ChatGPT)
+
+
+
+3
+
+
+
+
+
+https://www.nasa.gov/uam-overview/
+
+
+
+
+
+
+
+
+Knowledge Graph for Roadmap Development
+
+
+
+• Schema (left) showing graph structure between nodes.
+• Node represents the type of objects (e.g., Actor, Roadmap 
+
+
+
+Requirement, etc.)
+• Link represents the relationship types. 
+
+
+
+• Due to the CUI nature of data, only focus on Roadmap 
+Requirement and Actor for this study.
+
+
+
+4
+
+
+
+• Knowledge graph (middle and right) 
+displays complexity beyond human user’s 
+ability to perform Roadmap’s requirement 
+discovery and analysis to identify potential 
+missing requirements.
+
+
+
+
+
+
+
+
+
+
+
+Requirement Discovery Using Embedded Knowledge Graph with ChatGPT
+
+
+
+Challenges:
+- SE is worried that we might miss some 
+
+
+
+requirements in the roadmap.
+- SE has a limited bandwidth to perform 
+
+
+
+requirement analysis.
+
+
+
+Solution:
+- Using Knowledge Graph structure with 
+
+
+
+ChatGPT capability
+
+
+
+Expected Impact:
+- Revolutionize the way SE works
+
+
+
+
+
+
+
+
+
+
+
+Approaches
+• ChatGPT (Large Language Model (LLM) Approach) Graph Database + ChatGPT
+
+
+
+6
+
+
+
+Original • “Destructure” 
+Requirements
+
+
+
+Create 
+embeddings
+
+
+
+• Using LLM 
+embeddings 
+model
+
+
+
+RAG
+• Retrieval 
+
+
+
+Augmented 
+Generation
+
+
+
+Verify
+• Compare to 
+
+
+
+ground truth 
+using computed 
+answers
+
+
+
+
+
+
+
+
+
+
+
+ChatGPT (Azure OpenAI GPT 3.5)
+
+
+
+7
+
+
+
+Applied Stereotype ReqID Actor Requirement Text
+Allocate [Abstraction] 19 UML-2.AM ATC When ATC is the designated separator; The Fleet Manager and PIC will receive services from ATC.
+
+
+
+Requirement number “19 UML-2.AM" states "When ATC is the designated separator; The Fleet 
+Manager and PIC will receive services from ATC." and has an Allocate relationship to the actor “ATC".
+
+
+
+Query submitted to LLM after retrieval of relevant requirements information
+
+
+
+How many unique requirements do we have for the System?
+
+
+
+How many unique system actors do we have?
+
+
+
+Please list the unique system actors
+
+
+
+Give me 5 requirements with multiple actors. List them using a Python list of Requirement Numbers
+
+
+
+List all existing requirements for UAM Aircraft
+
+
+
+Predict five requirements for Urban Air Mobility systems that I may have missed
+
+
+
+Create ten new requirements based on these predictions.
+
+
+
+
+
+
+
+
+
+
+
+Graph Database (neo4j) + ChatGPT (Azure OpenAI GPT 4.0)
+
+
+
+8
+
+
+
+
+
+
+
+
+
+
+
+Graph Database + ChatGPT
+
+
+
+9
+
+
+
+MATCH r = (a:Actor {name:’ATC’})-[:Allocated]-(`Roadmap 
+Requirement`) RETURN r LIMIT 3
+
+
+
+[[<Node element_id='215' labels=frozenset({'Roadmap 
+Requirement'}) properties={'owner': 'UAM Airspace RAC Details', 
+'pageRank': 0.6946460391326209, 'community': 350, 'rml': 2.0, 
+'combined_index': 2.2, 'actors': ['PIC', 'ATC', 'Fleet Manager', 
+'FAA', 'PSU', 'Vertiport Manager'], 'component': '07_SS.C04. Roles 
+and Responsibilities', 'fy': 'FY22', 'uml': 'UML-4 [NamedElement]', 
+'children': ['Initial UAM Airspace Structure Concept_DASC2022', 
+'InitialAirspaceStructureConcept-4 ATC separation services', 'Fleet 
+Operator'], 'name': '89 UML-4.SS', 'trl_min': '', 'text': 'The FAA will 
+approve flight rules that allow ATC to delegate separation 
+responsibility to the PIC, Fleet Manager, or Vertiport Manager, or 
+PSU under appropriate conditions.', 'id': 89, 'element': '07_SS. 
+Separation Services and Standards'}>], [<Node element_id='199' 
+labels=frozenset({'Roadmap Requirement'}) properties={'owner': 
+'UAM Airspace RAC Details', 'pageRank': 0.3978375937584387, 
+'community': 347, 'rml': 2.0, 'combined_ …
+
+
+
+ChatGPT generates an 
+appropriate cypher query
+
+
+
+Database runs the query 
+and returns the result
+
+
+
+ChatGPT converts the 
+response to something 
+
+
+
+“human readable”
+
+
+
+
+
+
+
+
+
+
+
+Graph Database + ChatGPT
+
+
+
+10
+
+
+
+• The system predicts requirements using Adamic-Adar link prediction provided by the Neo4J Graph 
+Data Science Library.
+
+
+
+
+
+
+
+
+
+
+
+Graph Database + ChatGPT
+
+
+
+11
+
+
+
+• The UAM Chatbot combines the information from the ATC and the predicted requirements to 
+generate a whole new set of requirements catered towards the ATC. 
+
+
+
+
+
+
+
+
+
+
+
+Preliminary Comparison Results
+
+
+
+12
+
+
+
+Aspects ChatGPT (Azure OpenAI GPT 3.5) Graph Database / Data Science + 
+ChatGPT (Azure OpenAI GPT 4.0)
+
+
+
+Implementation Moderate: Retrieval-augmented 
+generation pattern using LLM and 
+vector store
+
+
+
+Difficult and more expensive
+
+
+
+Cost for cloud server and developer OpenAI subscription • Open AI subscription
+• Server for graph database
+• Server for web-application
+• Application / system 
+
+
+
+administrator
+
+
+
+Quality of solutions Varies based on type of query and 
+structure of embedding vector store: 
+better on general open queries, worse 
+on numerical counting
+
+
+
+Using the graph database provides a 
+ground truth, chances of hallucination 
+are much lower (almost 0 but not 
+quite).
+
+
+
+Lessons Learned • CUI content not permitted • CUI content not permitted
+• Difficult to get consistent, 
+
+
+
+complex, cypher queries from 
+GPT.
+
+
+
+• Capacity issues during peak 
+hours.
+
+
+
+
+
+
+
+
+
+
+
+Next Steps
+
+
+
+ChatGPT
+• Continue testing through better prompt engineering
+
+
+
+Graph Database + ChatGPT
+• Optimize performance of ChatGPT interface, currently some responses can 
+
+
+
+take 30+ seconds to come back to the user. 
+• Improve requirement prediction algorithm, utilize a combination of 
+
+
+
+community detection and link prediction.
+
+
+
+13
+
+
+
+
+
+
+ 
+Requirement Discovery Using Embedded Knowledge Graph with ChatGPT
+
+ 
+Outline
+
+ 
+Introduction
+
+ 
+Knowledge Graph for Roadmap Development
+
+ 
+Requirement Discovery Using Embedded Knowledge Graph with ChatGPT
+
+ 
+Approaches
+
+ 
+ChatGPT (Azure OpenAI GPT 3.5)
+
+ 
+Graph Database (neo4j) + ChatGPT (Azure OpenAI GPT 4.0)
+
+ 
+Graph Database + ChatGPT
+
+ 
+Graph Database + ChatGPT
+
+ 
+Graph Database + ChatGPT
+
+ 
+Preliminary Comparison Results
+
+ 
+Next Steps

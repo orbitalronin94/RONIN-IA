@@ -1,0 +1,397 @@
+1 
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+LUNAR LANDER LANDING MODELING AND SIMULATION IN 
+
+
+
+SIMSCAPE 
+
+
+
+Wei Wu+ 
+
+
+
+The landing gear is a critical subsystem of a lander for a successful landing 
+
+
+
+on the moon or a planet. During a landing event, structural loading, energy 
+
+
+
+absorption and toppling stability are important factors for the landing gear 
+
+
+
+development. These aspects can be studied using simulations. 
+
+
+
+The landing gear comprising the primary struct, secondary structs, 
+
+
+
+footpad, and joints, is easily modeled using Simscape Multibody toolbox. 
+
+
+
+The energy absorption mechanisms in the structs is readily modeled using 
+
+
+
+Simulink and Multibody blocks based on the relative motions of the inner 
+
+
+
+and outer cylinder of the structures. During touchdown, the footpads strike 
+
+
+
+the lunar surface, and the contact forces can be modeled including the soil 
+
+
+
+mechanical properties. Slosh dynamics are included using a mechanical 
+
+
+
+pendulum model. Tip-over controllers are developed using Simulink 
+
+
+
+blocks and toolboxes. 
+
+
+
+This model was intensively tested manually then additionally with Monte 
+
+
+
+Carlo simulation. It offers the opportunity for landing stability study, i.e. 
+
+
+
+the max slope a lander can land without tipping over in 3D realistic landing 
+
+
+
+situations. 
+
+
+
+INTRODUCTION/MODELING 
+
+
+
+The landing gear is a critical subsystem of a lander for a successful landing on the moon or a planet. 
+
+
+
+For the Apollo program, Lunar module (LM) landing gear touchdown dynamics was both 
+
+
+
+experimentally tested (Reference 1) and simulated by computer (Reference 2). During a landing 
+
+
+
+event, structural loading, energy absorption and toppling stability are important factors for the 
+
+
+
+landing gear development. 
+
+
+
+Landing legs usually have a primary strut and two secondary struts equipped with an energy 
+
+
+
+absorption mechanism, as with the LM landing gear shown in Figure 1(a) (Reference 3). The 
+
+
+
+landing leg structure can be easily modeled using Simscape Multibody toolbox. The Simscape 
+
+
+
+Multibody toolbox’s Body Elements, Joints, Frames and Transforms libraries contain blocks which 
+
+
+
+can be graphically connected to model the leg struts, the footpad, the joint connecting the primary 
+
+
+
+strut to the secondary struts, and joints connecting the legs to the vehicle main body. The energy 
+
+
+
+absorption mechanisms in the struts, such as a spring-dashpot damper, can be easily modeled using 
+
+
+
+ 
++Senior Aerospace engineer, Jacobs (ESSCA, MSFC), Huntsville, AL
+
+
+
+ 
+
+
+
+(Preprint) AAS XX-XXX 
+
+
+
+
+
+
+
+
+
+
+
+2 
+ 
+
+
+
+Simulink and Multibody blocks based on the relative motions of the inner and outer cylinder of the 
+
+
+
+struts. The Multibody toolbox provides a Transform Sensor block which can output translational 
+
+
+
+and rotational motion variables between two frames, which are used to compute the dissipative 
+
+
+
+forces. The General Variable Mass block is used to specify the mass properties of each leg element 
+
+
+
+including mass and moments of inertia. A sample landing leg model developed in Simscape is 
+
+
+
+shown in Figure 1(b). 
+
+
+
+ 
+
+
+
+(a) (b) 
+
+
+
+Figure 1. LM landing leg (a) and leg model in Simscape (b) 
+
+
+
+During a lander touchdown, the footpads strike the lunar surface and there is dynamic interaction 
+
+
+
+between the landing legs and the lunar soil. It is important to model the footpad and soil interaction 
+
+
+
+in a landing performance assessment. The surface can be model as a plane using the Infinite Plane 
+
+
+
+block. The contact forces can be modeling using the Spatial Contact Force block, where the normal 
+
+
+
+force is computed based on the footpad penetration, specified soil stiffness, and damping coefficient 
+
+
+
+and the friction force is computed based on the normal force and the soil friction coefficient. The 
+
+
+
+soil mechanical properties computed based on Apollo touchdown data can be found in Reference 
+
+
+
+4. In the simulation, the landing contact normal force is initially modeled using a linear spring-
+
+
+
+damper method provided within Simscape. But this method is too conservative without considering 
+
+
+
+the inelastic deformation of the lunar regolith and increased soil stiffness with increasing footpad 
+
+
+
+penetration. A custom nonlinear contact normal force model is also developed to simulate the 
+
+
+
+landing events with increased accuracy. 
+
+
+
+SIMULATION 
+
+
+
+Having modeled the landing leg structure, energy attenuation, and contact forces, landing dynamics 
+
+
+
+under various landing modes (Reference 5) can be simulated given the vehicle states and local slope 
+
+
+
+at touchdown. The model can be instrumented to output key variables such as stroke, penetration 
+
+
+
+depth, tilt angle and vehicle body rates, so the structural integrity and toppling stability for a given 
+
+
+
+landing leg design can be assessed against the requirements. Figure 2(a) shows the lander stable 
+
+
+
+landing on a 4.6 degrees slope for the passive 2-2-over landing mode (Reference 5) and Figure 2(b) 
+
+
+
+shows the primary structure stroke distances. 
+
+
+
+
+
+
+
+
+
+
+
+3 
+ 
+
+
+
+To successfully land on steeper slopes, hot gas thrusters can be fired during touchdown to prevent 
+
+
+
+the vehicle from tipping over via feedback control logic. Because Simscape is embedded inside 
+
+
+
+Simulink, it is very easy to model different tip-over control strategies using various Simulink blocks 
+
+
+
+and toolboxes. For higher fidelity modeling, the slosh dynamics of the liquid propellant in tanks 
+
+
+
+can be easily modeled using a pendulum mechanical model using Simscape Multibody library. 
+
+
+
+ 
+
+
+
+(a) (b) 
+
+
+
+Figure 3. Stable landing, 2-2-over landing mode (a) and primary structure stroke (b) 
+
+
+
+CONCLUSION 
+
+
+
+First, this model was intensively tested manually then through Monte Carlo simulation. It offers 
+
+
+
+the opportunity for landing stability study, i.e. the max slope a lander can land without tipping over 
+
+
+
+in 3D realistic landing situations. 
+
+
+
+REFERENCES 
+
+
+
+1 Blanchard, U.J., Full-scale Dynamic Landing-Impact Investigation Of A Prototype Lunar 
+
+
+
+Module Landing Gear, NASA technical note, NASA TN D-5029, 1969. 
+
+
+
+2 Doiron, H.H. and Zupp, Jr., G.A., “APOLLO lunar module dynamics,” 41st 
+
+
+
+AIAA/ASME/ASCE/AHS/ASC Structures, Structural Dynamics, and Materials conference and 
+
+
+
+Exhibit, April 2000. 
+
+
+
+3 Rogers, W.F., Apollo Experience Report-Lunar Module Landing Gear Subsystem. NASA TN 
+
+
+
+D-6850, 1972. 
+
+
+
+4 Zupp, Jr., G.A. An Analysis and a Historical Review of the Apollo Program Lunar Module 
+
+
+
+Touchdown Dynamics, NASA/SP-2013-605, 2013. 
+
+
+
+5 Walton Jr., W.C., Herr R.W., and Leonard, H.W., “Studies of Touchdown Stability for Lunar 
+
+
+
+Landing Vehicles,” J. Spacecraft, Vol. 1, 1964.

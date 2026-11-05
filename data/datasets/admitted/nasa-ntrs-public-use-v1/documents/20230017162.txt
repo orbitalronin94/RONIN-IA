@@ -1,0 +1,2567 @@
+Comparison of Wind-Tunnel and Flight Unsteady Pressure
+Stochastic Characteristics for the Space Launch System
+
+
+
+Artemis I Flight
+
+
+
+Patrick S. Heaney,∗ David J. Piatak,† Oleg Goushcha,∗ James M. Ramey,∗ Francesco Soranna,∗ and Martin K. Sekula‡
+
+
+
+NASA Langley Research Center, Hampton, VA, 23681
+
+
+
+Over the course of more than ten years, numerous wind tunnel tests have been conducted
+to acquire data for characterizing the unsteady pressure environments expected to act on the
+Space Launch System Block 1 crew launch vehicle during ascent. These wind tunnel tests
+of highly-instrumented rigid models are the current standard for the estimation of unsteady
+environments. Following the successful launch of the Artemis I mission, the extensive flight data
+acquired can be analyzed to evaluate the accuracy of unsteady pressure environments predicted
+in subscale wind tunnel testing in comparison to the flight test data. In this paper, analyses
+focusing on data from several Space Launch System wind-tunnel tests and the Artemis I flight
+test are presented, including assessments of test-to-test, tunnel-to-tunnel, and tunnel-to-flight
+stochastic characteristics and preflight modeling validity based on wind tunnel testing. In
+general, the fluctuating pressure environments measured during several preflight subscale wind-
+tunnel tests compare favorably and provide relatively accurate estimates of the environments
+measured during flight. Discrepancies in fluctuating magnitudes, spatial extent of regions of
+unsteadiness, and narrowband frequency peaks are noted in the multibody region aft of the
+solid rocket booster forward attachment to the core stage.
+
+
+
+Note to the Reader
+The Space Launch System, including its predicted performance and certain other features and characteristics, have
+been defined by the U.S. Government to be Controlled Unclassified Information (CUI). Information deemed to be CUI
+requires special protection and may not be disclosed to an international audience. To comply with CUI restrictions,
+details such as absolute values have been removed from some plots and figures in this paper. It is the opinion of the
+authors that despite these alterations, there is no loss of meaningful technical content. Analytical methodologies and
+capabilities are discussed, significant and interesting technical results are still present, and meaningful conclusions are
+presented.
+
+
+
+Acronyms
+
+
+
+ARC = Ames Research Center LOX = liquid oxygen
+B1 = Block 1 LSRB = left solid rocket booster
+B1B = Block 1B LVSA = launch vehicle stage adapter
+BET = best estimated trajectory LaRC = Langley Research Center
+BFF = buffet forcing function MPCV = multi-purpose crew vehicle
+BSTR = booster PSD = power spectral density
+CCJ = cone cylinder junction PT = pressure transducer
+CWT = continuous wavelet transform RBM = rigid buffet model
+DFI = developmental flight instrumentation RSRB = right solid rocket booster
+FAH = forward attachment hardware SLS = Space Launch System
+FDA = flight data analysis SM = service module
+FTO = flight test objectives SRB = solid rocket booster
+
+
+
+∗Research Aerospace Engineer, Aeroelasticity Branch, MS 340, AIAA Member.
+†Assistant Branch Head, Aeroelasticity Branch, MS 340, AIAA Senior Member.
+‡Senior Research Aerospace Engineer, Aeroelasticity Branch, MS 340.
+
+
+
+1
+
+
+
+
+
+
+
+
+
+
+
+ICPS = interim cryogenic propulsion stage SWT = Supersonic Wind Tunnel
+IE = Induced Environments TDT = Transonic Dynamics Tunnel
+KDE = kernel density estimate TWT = Transonic Wind Tunnel
+LAS = launch abort system UPWT = Unitary Plan Wind Tunnel
+LDI = Loads, Dynamics, and Integration WT = wind tunnel
+LH2 = liquid hydrogen
+
+
+
+Nomenclature
+
+
+
+𝐶𝑝 = pressure coefficient rms = root mean square
+𝐶′
+
+
+
+𝑝 = fluctuating pressure coefficient 𝑡 = time
+𝐷 = reference diameter 𝑈∞ = freestream velocity
+𝑓 = frequency 𝑥,𝑦,𝑧 = longitudinal, lateral, and vertical body axes
+𝑀∞ = freestream Mach number 𝛼 = angle of attack
+ms = model scale 𝛽 = sideslip angle
+𝑝 = pressure \ = body coordinate system clocking angle
+𝑞∞ = freestream dynamic pressure Φ = power spectral density
+𝑅𝑒𝐷 = Reynolds number based on core diameter 𝐷
+
+
+
+I. Introduction
+
+
+
+Launch vehicle buffet environments arise from the unsteady external pressure field during atmospheric ascent that
+can force local and global vehicle structural responses. Contributing flow features can include boundary layer
+
+
+
+separation, shock oscillations, flow reattachment, vortex shedding, wake impingement, and multibody effects, notionally
+depicted in Fig. 1 along with a representative Space Launch System (SLS) Block 1 crew global vehicle bending mode
+that can respond to these forces. Each of these flow environments can generate significant external aerodynamic forces
+and the resulting buffet responses, structural buffet loads, and impacts on avionics and secondary structures must
+be shown to be within the capabilities and margins of safety of the launch vehicle when considered with all other
+load environments [1, 2]. These buffet environments must be considered in the design cycles of a combined launch
+vehicle and payload using suitable buffet forcing functions (BFFs) that are typically obtained via highly instrumented
+wind-tunnel (WT) models tested in transonic and supersonic test facilities. The technique of combining buffet forcing
+function environments with other load environments such as aeroacoustic, ignition overpressure, steady aerodynamic
+line loads, and more is known as coupled loads analysis and involves application of these environment loads to a
+vehicle finite element model that represents the vehicle structure bounded within key flight regimes based on trajectory
+freestream Mach number (𝑀∞). The BFFs and resulting vehicle responses and loads are highly dependent on vehicle
+shape, trajectory and modal properties of the vehicle. Typically, buffet environments are most severe in the transonic
+regime and can be the largest contributor to vehicle responses and loads during that portion of ascent [3–5].
+
+
+
+Fig. 1 Notional unsteady flow environment and structural deflection for SLS Block 1 crew configuration.
+
+
+
+The BFFs used in design of the SLS Block 1 crew vehicle were obtained from a WT test campaign in 2014 at the
+NASA Langley Research Center (LaRC) Transonic Dynamics Tunnel (TDT) using a highly instrumented 3%-scale rigid
+
+
+
+2
+
+
+
+
+
+
+
+
+
+
+
+buffet model (RBM) representing the SLS Block 1 crew configuration (SLS-10005). This configuration represents the
+Artemis I launch configuration at that stage of development and was a modification of the WT model tested in 2012,
+which initially revealed high buffet environments associated with the booster forward attachment hardware and gap
+region between booster and core stage. The second WT test in 2014 was part of a buffet mitigation task team that sought
+to understand this environment and its impact on vehicle loads. Both tests and proposed buffet mitigation options are
+discussed in detail in Refs. [6–9] and the source of these WT-observed buffet environments and comparison to flight
+measurements will be the subject of further discussion in this paper.
+
+
+
+Early in the SLS developmental flight instrumentation (DFI) design effort, one key focus of the Induced Environments
+(IE) team was on assuring that the program would capture key unsteady aerodynamic environments for the purpose of
+post-flight loads reconstruction. Even for a first flight of a new crewed vehicle, Artemis I carried an unprecedented
+2,270 DFI sensors to support flight test objectives to observe vehicle performance across numerous design disciplines
+and vehicle elements [10]. Buffet and its parent IE team supported the structures and environments flight test objectives
+(FTO) and the Loads Dynamics and Integration (LDI) team, with the buffet FTO intending to anchor and validate the
+underlying methods and tools represented by the BFF database using the Artemis I flight data measurements. To achieve
+this objective, 183 unsteady aerodynamic DFI sensors were designated on the Artemis I vehicle for buffet environments
+by the IE team with the majority of these external sensors having identical analogs to those on the RBM used as part of
+BFF development program.
+
+
+
+This paper will provide a review of the wind tunnel test campaigns used to characterize the predicted unsteady
+pressure environments during the ascent of Artemis I. These data from WT tests were used to develop the preflight buffet
+environments implemented in vehicle design analysis cycles. Assessments of the repeatability of important metrics
+associated with several WT tests will be discussed, and comparisons of fluctuating pressure environments from the
+Artemis I DFI data will be made with those from WT tests of several SLS launch vehicle configurations. Data presented
+will include root mean squared and spectral density comparisons of fluctuating pressure coefficient to assess the validity
+of the preflight buffet environments.
+
+
+
+II. Background
+
+
+
+A. Wind Tunnel Tests
+Numerous wind tunnel tests have been conducted during the SLS program characterizing blocks and revisions of the
+
+
+
+crew and cargo launch vehicle configurations at both the NASA LaRC TDT and the NASA Ames Research Center (ARC)
+Unitary Plan Wind Tunnel (UPWT) 11-Foot Transonic Wind Tunnel (11-Ft TWT) and 9- by 7-Foot Supersonic Wind
+Tunnel (9x7 SWT). Table 1 presents a summary of tests that have been related to buffet and aeroacoustic environments
+and are discussed in this paper. Photographs of the SLS RBMs for which data are discussed in this paper are presented in
+Fig. 2, which includes models tested during: (1) LaRC TDT Test 645, (2) ARC UPWT Ascent Unsteady Aerodynamics
+Test (AUAT), (3) ARC UPWT Ascent Transient Aerodynamics Test (ATAT), and (4) LaRC TDT Test 668. Wind tunnel
+tests at the ARC UPWT were conducted in air, while R134a (heavy gas) test medium was used for the majority of the
+data acquired at the LaRC TDT. Limited data are also acquired in air at TDT during these tests for Reynolds number and
+test medium sensitivity studies.
+
+
+
+The RBM tested during the LaRC TDT Test 645 served as the final buffet test configuration of the Block 1
+crew configuration that would support the Artemis I mission and employed a high sensor density to observe buffet
+environments more accurately downstream of the booster-to-core forward attachment. Since data acquired during this
+test were used in the development of the BFF database for Artemis I, other tunnel and flight data will primarily be
+compared against this test. The RBM core and boosters were based on the SLS-10003 early look design with updated
+protuberances to reflect the SLS-10005 configuration. The RBM is shown in Fig. 2a mounted on the sting and roll
+coupler in the TDT test section.
+
+
+
+B. Artemis I Flight
+The sensor locations for external aerodynamic environments for the SLS Block 1 crew configuration flown as part
+
+
+
+of Artemis I were largely based on sensor locations from the WT tests described above. Of the 2,270 DFI sensors
+flown on Artemis I, there were 289 external aerodynamic sensors intended to be used as part of each launch vehicle
+environment flight data analysis (FDA) task in support of SLS program FTOs. Of these 289 aerodynamic sensors, 183
+DFI sensors were dedicated to observing the buffet environment and had matching WT sensor data for comparison
+
+
+
+3
+
+
+
+
+
+
+
+
+
+
+
+Table 1 Summary of SLS buffet and aeroacoustic wind tunnel tests analyzed in this study.
+
+
+
+Test NASA facility Year SLS configuration Model scale
+
+
+
+Test 645 LaRC TDT 2013-2014
+SLS-10005 Block 1 crew
+
+
+
+3%
+FAH buffet mitigation options
+
+
+
+Ascent Unsteady
+ARC UPWT
+
+
+
+2017-2018
+Aerodynamics Test SLS-27005 Block 1B cargo 2.5% (full-stack)
+
+
+
+(AUAT) SLS-28005 Block 1B crew 4% (forebody)
+T11-0344/T97-0345 11-Ft TWT / 9x7 SWT
+
+
+
+Ascent Transient
+ARC UPWT
+
+
+
+2019 2.5% (full-stack)
+Aerodynamics Test SLS-10506 Block 1 cargo
+
+
+
+(ATAT) SLS-27005 Block 1B cargo
+T11-0377/T97-0376 11-Ft TWT / 9x7 SWT
+
+
+
+Test 668 LaRC TDT 2022
+SLS-28006 Block 1B crew
+
+
+
+3%
+SLS-27005 Block 1B cargo
+
+
+
+at nearly identical locations. Some buffet sensors were shared by other environments, including ascent aeroacoustics
+and ignition overpressure, and thus had sample rates set according to the highest frequency of interest for all shared
+environments. Figure 3 summarizes the stations corresponding to buffet sensor rings on the RBM as tested during the
+TDT Test 645 in comparison to those corresponding to the DFI sensor arrangement for Artemis I. While there were
+aerodynamic DFI instrumenting the right solid rocket booster (RSRB), no rings of unsteady pressure sensors were
+placed on that body for buffet environment data reduction and comparison to the BFF database, so only the core and left
+SRB (LSRB) stations are shown.
+
+
+
+During prelaunch vehicle tanking activities, including hot fires, launch attempts, and tanking test, sensors in several
+regions of the vehicle on the core stage experienced port icing that partially or fully blocked the sensor orifice. These
+sensors were mainly located on the cryogenic tanks (liquid oxygen (LOX) and liquid hydrogen (LH2) tanks), leading to
+severely degraded or unusable data for many sensors in these regions. At station 25, for example, all six azimuthally
+spaced sensors experienced icing during the Artemis I launch. The ice blockage at one of these sensors, located at
+clocking angle \ = 90◦, was liberated during ascent and led to valuable data being acquired during the remainder of
+flight for this critical region of the vehicle.
+
+
+
+III. Methodology
+In this section, brief descriptions of the methodologies used to analyze flight and tunnel data in this paper are
+
+
+
+provided (following the same methods described in Ref. [11]). Analyses focus on comparisons at the core stage stations
+shown in Fig. 4, which are representative of several unsteady pressure environments present on the SLS launch vehicle
+and are stations where pressure transducers (PTs) are closely located for both the Test 645 RBM and the Artemis I flight
+vehicle:
+
+
+
+1) station 4: launch abort system (LAS), in the wake of the LAS nozzles
+2) station 8: service module (SM), aft of the multi-purpose crew vehicle (MPCV) to SM shoulder
+3) station 13: launch vehicle stage adapter (LVSA), aft of interim cryogenic propulsion stage (ICPS) to LVSA
+
+
+
+compression corner and recirculation zone
+4) station 16: forward skirt, aft of the LVSA to forward skirt cone cylinder junction (CCJ)
+5) station 25: LH2 tank, in the multibody region downstream of the booster forward attachment hardware
+6) station 33: engine section, in the multibody region downstream of the booster aft attachment hardware
+
+
+
+Limited results will also be presented for PTs located at several other stations. Throughout the paper, PT locations will
+be referenced by the longitudinal 𝑥-station number from TDT Test 645 (shown in Fig. 3) and the clocking angle, \,
+defined for the core and SRBs according to the convention shown in Fig. 5.
+
+
+
+4
+
+
+
+
+
+
+
+
+
+
+
+(a) Block 1 crew 3%-scale RBM tested during the LaRC
+TDT Test 645.
+
+
+
+(b) Block 1B cargo 2.5%-scale RBM (tangent-ogive payload
+fairing) tested during the ARC UPWT AUAT.
+
+
+
+(c) Block 1B crew 3%-scale RBM tested during the LaRC
+TDT Test 668.
+
+
+
+(d) Block 1B crew 4%-scale RBM tested during the ARC
+UPWT AUAT.
+
+
+
+(e) Block 1 cargo 2.5%-scale RBM tested during the ARC
+UPWT ATAT. Model surface painted with unsteady pressure
+sensitive paint.
+
+
+
+Fig. 2 SLS launch vehicle RBMs analyzed in this study [Source: NASA].
+
+
+
+A. Flight Data
+The first challenge in analyzing unsteady pressure data using absolute pressure data acquired during the flight test is
+
+
+
+the estimation and removal of the constantly varying trend due to changing flight conditions. As an example of the flight
+data processing, Fig. 6a presents measured pressures for a PT located at analysis station 25 and a clocking angle \ = 90◦.
+In this figure, the black curve represents the estimated steady component of the pressure time history using a moving
+mean calculated with a duration of 0.5 s. This sensor, located on the LH2 cryogenic tank, was iced over during the first
+part of flight, and therefore, measured no fluctuating pressures. After the ice was liberated, the sensor signal provided
+valuable data in the most critical region of the vehicle downstream of the booster forward attachment hardware.
+
+
+
+Figure 6b presents wideband and bandpass filtered time histories for the detrended pressure coefficient after removing
+the steady trend, where a bandpass filter between 0.5 to 100 Hz full scale has been used to focus on the bandwidth
+generally considered important for buffet excitation of global vehicle flexible dynamics. For this fluctuating signal
+example, most of the energy is within that bandwidth, so the wideband and bandpass filtered data are overwhelmingly
+the same. Figure 6c presents a summary of the moving window root mean square (rms) of the detrended pressure
+coefficient, 𝐶′
+
+
+
+𝑝,rms, where the window for the moving rms has a duration of 0.5 s.
+In comparison to WT testing, when relatively long records are acquired to better characterize the stationary stochastic
+
+
+
+processes with converged estimates of the underlying distribution, during flight the freestream aerodynamic conditions
+and vehicle attitude are constantly varying. The nonstationary nature of the fluctuating pressure stochastic processes
+during accelerating flight thus results in much shorter duration 𝑀∞ windows relative to tunnel data records over which
+
+
+
+5
+
+
+
+
+
+
+
+
+
+
+
+(a) Core.
+
+
+
+(b) LSRB.
+
+
+
+Fig. 3 Artemis I DFI buffet stations in comparison to Test 645.
+
+
+
+Fig. 4 Analysis stations. Vehicle components referenced in this paper are also annotated.
+
+
+
+Fig. 5 Body coordinate system convention for clocking angle, \. View in the aft facing, +𝑥, direction.
+
+
+
+the flow physics may be approximated as quasistationary. In addition, there is no expectation that estimated statistics of
+the underlying distribution are converged. For these reasons, the flight data are processed using moving windows of
+relatively short duration, and as will be shown below, the long record tunnel data are processed using windows of the
+same scaled duration to generate prediction distributions of quantities of interest (𝐶′
+
+
+
+𝑝,rms and 𝐶′
+𝑝 spectra, for example) to
+
+
+
+compare with flight data.
+
+
+
+B. Wind Tunnel Data
+Several WT tests have been conducted throughout the SLS program to characterize the unsteady pressure environments
+
+
+
+predicted to act on the vehicle during ascent. The test matrices for these tests have covered a wide variety of aerodynamic
+conditions, such as 𝑀∞, freestream dynamic pressure (𝑞∞), freestream velocity (𝑈∞), and Reynolds number (𝑅𝑒), as
+well as vehicle orientations defined by angles of attack 𝛼 and sideslip 𝛽. In Section IV.A, repeat point data (where the
+aerodynamic conditions and vehicle orientations are within small bounds of each other) from Test 645 are compared
+to assess variability present in the unsteady data acquired within a single test. In Section IV.B, similar comparisons
+
+
+
+6
+
+
+
+
+
+
+
+
+
+
+
+(a) Signal time history and trend based on 0.5 s moving mean
+windows shown in black.
+
+
+
+(b) Fluctuating pressure coefficient.
+
+
+
+(c) 𝐶′
+𝑝,rms based on moving window rms.
+
+
+
+Fig. 6 Artemis I flight data example processing for PT at station 25, \ = 90◦.
+
+
+
+are presented across several WT tests to assess the variability present between tests and between the two test facilities.
+Results in both of these sections utilize data from the WT tests acquired at 𝛼 = 𝛽 = 0◦ vehicle orientations. While
+attitude variations can have an important effect on the unsteady pressure field, thus limiting the scope of applicability for
+the results presented outside the small 𝛼total domain, it is deemed more important to have as many repeat test points as
+possible for the assessment of point-to-point and test-to-test repeatability. Since the most repeat points during these WT
+test are acquired at 𝛼 = 𝛽 = 0◦, these points are used for the repeatability assessment.
+
+
+
+Later, in Section IV.C, where WT data are compared to flight, data from both the 𝛼 = 𝛽 = 0◦ repeats and from
+points where the vehicle attitude best matches the Artemis I best estimated trajectory (BET) are presented. Since 𝛼total
+is relatively small for the Artemis I BET, it is deemed a reasonable compromise to present some WT comparisons using
+the matched attitude condition and others using the many repeats available at 𝛼 = 𝛽 = 0◦. For each 𝑀∞ acquired during
+Test 645, the matched attitude WT test point minimizes the sum of squared differences for the corresponding flight 𝛼
+and 𝛽.
+
+
+
+Since data from tests of several different WT models fabricated at several geometric scales are analyzed in this
+paper (model scales summarized in Table 1), all results are scaled to the Artemis I full-scale vehicle and BET using
+rigid buffet scaling laws. In this paper, unsteady pressures have been normalized as 𝐶′
+
+
+
+𝑝 to compare tunnel and flight
+conditions at different dynamic pressures, and time and frequencies have been scaled based on a reduced frequency. The
+relationships used for scaling are presented in Table 2. Although many WT parameters can be matched or scaled, the
+Reynolds number, 𝑅𝑒𝐷 , based on the core stage diameter is an order of magnitude lower for the WT test points than
+for the flight. Although trip strips were applied to the models during all SLS WT tests to cause the boundary layer to
+transition at appropriate model locations on the core stage and boosters, given the importance of Reynolds number
+in simulating the unsteady flow field these differences are potentially important in interpreting comparisons between
+tunnel and flight data [12].
+
+
+
+Table 2 Rigid buffet scaling laws based on the reference diameter, 𝐷, dynamic pressure, 𝑞∞, and velocity, 𝑈∞.
+
+
+
+Quantity to be scaled Full-scale (fs) to model-scale (ms) relation
+
+
+
+Pressure, 𝑝 𝑝fs = 𝑝ms
+𝑞∞,fs
+𝑞∞,ms
+
+
+
+Time, 𝑡 𝑡fs = 𝑡ms
+𝐷fs
+𝐷ms
+
+
+
+𝑈∞,ms
+𝑈∞,fs
+
+
+
+Frequency, 𝑓 𝑓fs = 𝑓ms
+𝐷ms
+𝐷fs
+
+
+
+𝑈∞,fs
+𝑈∞,ms
+
+
+
+Pressure PSD, Φ𝑝 (psi2/Hz) Φ
+𝑝
+
+
+
+fs = Φ
+𝑝
+ms
+
+
+
+(
+𝑞∞,fs
+𝑞∞,ms
+
+
+
+)2
+𝐷fs
+𝐷ms
+
+
+
+𝑈∞,ms
+𝑈∞,fs
+
+
+
+7
+
+
+
+
+
+
+
+
+
+
+
+An example of the steps used to process the tunnel data is shown in Fig. 7, where the full duration time history
+acquired in the WT during Test 645 and estimated trend are shown in Fig. 7a for a PT located at station 25. The WT
+data are processed in a similar way to the flight data, using time windows of scaled duration corresponding to equivalent
+flight durations. By analyzing the WT data in a manner similar to the flight data, each WT test point contains many
+realizations of scaled-to-flight time windows, and corresponding prediction distributions based on the statistics for the
+ensemble of these realizations can be compared to flight data. As such, although removing the signal mean or low order
+polynomial fit is sufficient for detrending WT pressure time histories, for consistency in processing with the flight data
+the WT trend is determined using a moving mean calculated with a full scale duration of 0.5 s. For this example, the
+0.5 s full scale window scales to a model scale duration of approximately 0.028 s (450 samples for data acquired at
+16 kHz during TDT Test 645). The wideband and bandpass filtered time histories of 𝐶′
+
+
+
+𝑝 are shown in Fig. 7b. For this
+example at 𝑀∞ = 0.95 for the 3%-scale RBM, the 0.5 to 100 Hz full-scale bandpass filter bandwidth scales to a model
+scale bandwidth of approximately 8.9 to 1,779 Hz.
+
+
+
+(a) Signal time history. Moving mean trend based on scaled
+0.5 s full-scale windows shown in black.
+
+
+
+(b) Fluctuating pressure coefficient.
+
+
+
+(c) 𝐶′
+𝑝,rms based on moving window rms, corresponding ensemble mean, and full record rms. KDE of the probability
+
+
+
+distribution for 𝐶′
+𝑝,rms realizations plotted to the right.
+
+
+
+Fig. 7 WT data example processing for PT at station 25, \ = 90◦, at 𝑀∞ = 0.95.
+
+
+
+The moving window rms of the filtered 𝐶′
+𝑝 for realizations of scaled duration corresponding to the matching flight
+
+
+
+window is shown in Fig. 7c. The ensemble mean of the moving window rms values and rms of the full time record,
+which compare well, are plotted for reference. To give an indication of the variability of the estimated WT 𝐶′
+
+
+
+𝑝,rms, the
+kernel density estimate (KDE) of the 𝐶′
+
+
+
+𝑝,rms probability distribution is shown as a violin plot to the right in this figure.
+Assessments of the spread of the KDE will be discussed in the results section to provide context for comparisons to
+flight data and indicators of particular regions on the vehicle and tunnel conditions at which the 𝐶′
+
+
+
+𝑝,rms realizations have
+high variability.
+
+
+
+IV. Results
+In this section, comparisons of unsteady pressure environments using 𝐶′
+
+
+
+𝑝,rms and the power spectral density (PSD) of
+𝐶′
+
+
+
+𝑝 are presented. First, results related to point-to-point repeatability for Test 645 are discussed, and then corresponding
+results for several other WT tests are compared. Assessments of the WT environments are then made in comparison to
+data acquired during the Artemis I flight test.
+
+
+
+A. Comparison of Fluctuating Pressures, WT Point to Point
+Results presented in this section compare the unsteady pressure environments measured for repeat points at
+
+
+
+𝛼 = 𝛽 = 0◦ during Test 645. One measure of point-to-point repeatability is how much 𝐶′
+𝑝,rms varies over the course of
+
+
+
+the test for repeat points. In Fig. 8, data acquired for 22 repeat points at 𝛼 = 𝛽 = 0◦ and 𝑀∞ = 0.95 are presented for
+PTs at the representative analysis stations. For each point, a scaled moving window corresponding to 0.5 s full-scale
+duration is used to compute the ensemble of 𝐶′
+
+
+
+𝑝,rms, and the resulting (1) ensemble mean and (2) upper and lower
+
+
+
+8
+
+
+
+
+
+
+
+
+
+
+
+bounds that represent the 2.5- to 97.5-percentile range (95% of the 𝐶′
+𝑝,rms ensemble) are plotted.
+
+
+
+In addition, data for all repeats are concatenated for each comparison PT and the mean and corresponding 95%
+bounds for all records combined are plotted for reference. Generally, sensor 𝐶′
+
+
+
+𝑝,rms point-to-point repeatability during
+Test 645 is relatively consistent, with the ensemble means generally varying between points less than the variability for
+flight-representative sample windows within a single point. Throughout the test, the 95% bounds are also relatively
+consistent.
+
+
+
+A significant source of variability in the ensemble mean 𝐶′
+𝑝,rms between points appears to be related to model
+
+
+
+roll angle within the test section. In Fig. 9, the ensemble mean 𝐶′
+𝑝,rms for the 22 repeat points is plotted against the
+
+
+
+model roll angle. Trends in 𝐶′
+𝑝,rms are present for all PTs presented, with the most significant differences appearing for
+
+
+
+stations 16 and 25, where small changes in vehicle attitude would be expected to yield larger differences in fluctuating
+pressure environments due to the nature of the flowfield in those locations.
+
+
+
+As can be seen in Figs. 8 and 9, fluctuating pressure magnitudes for the analysis stations presented are highest
+downstream of the booster-to-core forward attachment hardware (FAH). A closeup view of the FAH on the TDT RBM
+is shown in Fig. 10. Multibody configurations like the SLS can result in challenging buffet environments due to the
+interaction of flow phenomenon in the vicinity of the SRB and core stage attachment regions. At transonic conditions,
+the shock that forms at the expansion corner of the SRB nose cone-cylinder junction just upstream of the booster
+forward attachment protuberance is easily perturbed by the unsteady environment (vortex shedding wake) behind this
+protuberance, and a strong interaction between the expansion shock and shed wake can develop with distinct narrowband
+frequency peaks corresponding to unsteady pressure modes associated with the FAH wake [13].
+
+
+
+This environment has been shown to be quite sensitive to the forward attachment protuberance geometry and vehicle
+attitude. To illustrate the sensitivity to vehicle attitude, the peak buffet environment 𝐶′
+
+
+
+𝑝,rms trend with respect to a 𝛽
+
+
+
+sweep between ±6◦ at 𝑀∞ = 0.95 and 𝛼 = 0◦ is shown in Fig. 11a. Data for PTs on the core at \ = 90◦ in the LSRB gap
+region and at \ = 270◦ in the RSRB gap region downstream of the booster FAH are presented. Note that peak 𝐶′
+
+
+
+𝑝,rms
+occurs on the windward side of the vehicle (\ = 90◦ for 𝛽 = −6◦ and \ = 270◦ for 𝛽 = +6◦) and increases with sideslip
+at station 25 and at stations downstream. The corresponding sensitivity of the buffet environment at 𝑀∞ = 0.95 to a
+sweep in 𝛼 between ±6◦ for 𝛽 = 0◦ is shown in Fig. 11b. Here, as 𝛼 increases the peak 𝐶′
+
+
+
+𝑝,rms decreases at station 25,
+but tends to increase at stations downstream of station 25. Thus, the spatial distribution of the peak environment shifts
+depending on the vehicle attitude and may not always be fully characterized with spatially discrete PT locations.
+
+
+
+At this test condition, a summary of the 𝐶′
+𝑝,rms repeatability is presented in Fig. 12. In these figures, data for all
+
+
+
+sensors is plotted to give an overview of the spatial distribution of fluctuating pressure magnitudes, variability, and
+repeatability. Different markers are used for PTs that are located near the booster (BSTR) plane (𝑥-𝑦 plane at 𝑧 = 0
+corresponding to the coordinate system in Fig. 5), where the unsteady environments are most elevated in the multibody
+section of the vehicle, as well as for PTs on the upper and lower surface of the vehicle near the feedlines, which are
+somewhat elevated due to the local protuberance effects. These notes about the azimuthal variation in 𝐶′
+
+
+
+𝑝,rms can be
+observed in Figs. 12a and 12b for the core and LSRB sensors. Figures 12c and 12d present an assessment of how much
+the test point ensemble means of 𝐶′
+
+
+
+𝑝,rms vary relative to the mean for all repeats. The largest relative differences based
+on this metric are located in the same regions where unsteadiness is high, in the vicinity of the CCJ on the forward
+skirt and downstream of the booster FAH. An interpretation of these figures is that the point-to-point total variation
+(minimum to maximum) in 𝐶′
+
+
+
+𝑝,rms reaches a peak of approximately 40% of the mean in some regions of the vehicle, but
+generally varies approximately 10% to 20% of the mean outside of the peaks and multibody regions.
+
+
+
+Similar features are present in Figs. 12e and 12f, where the 95%-bound ranges are plotted in the same manner for
+the core and LSRB sensors. These indicate the longitudinal regions of the vehicle where the within point variability is
+relatively high for flight-representative sample windows, similarly pointing to the relative unsteadiness in the booster
+FAH region. Figures 12g and 12h present an assessment how much that metric of within point variability compares
+relative to the mean 𝐶′
+
+
+
+𝑝,rms for all repeats. Here it can be seen that this measure reaches a peak of approximately 80% of
+the mean in the most unsteady regions of the vehicle and 40% of the mean in the least unsteady regions. Compared
+to the mean 𝐶′
+
+
+
+𝑝,rms variability discussed above, this supports the assertion that the mean 𝐶′
+𝑝,rms repeatability during
+
+
+
+Test 645 for all PTs varies significantly less than the within point variability for flight-representative sample windows.
+Thus to characterize the distribution of possible values of 𝐶′
+
+
+
+𝑝,rms expected to be seen in comparable flight conditions
+and vehicle attitude, the variability present within a single test point covers more of the possible 𝐶′
+
+
+
+𝑝,rms distribution than
+the point-to-point variability.
+
+
+
+In addition to the high unsteadiness downstream of the FAH indicated by 𝐶′
+𝑝,rms, the fluctuating pressures in this
+
+
+
+region of the vehicle are dominated by narrowband spectral peaks associated with the FAH wake vortices [14]. The peak
+frequencies observed by PTs in the wake downstream of the FAH consists of two distinct tones. The wake behind the
+
+
+
+9
+
+
+
+
+
+
+
+
+
+
+
+(a) Station 4, \ = 90◦. (b) Station 16, \ = 45◦.
+
+
+
+(c) Station 8, \ = 90◦. (d) Station 25, \ = 90◦.
+
+
+
+(e) Station 13, \ = 90◦. (f) Station 33, \ = 225◦.
+
+
+
+Fig. 8 𝐶′
+𝑝,rms repeatability during Test 645 for sensors located at the core analysis stations for 𝑀∞ = 0.95 and
+
+
+
+𝛼 = 𝛽 = 0◦. Data for 22 repeat records are shown and used to compute the 𝐶′
+𝑝,rms means and 95% bounds for all
+
+
+
+records combined.
+
+
+
+FAH contains alternating shed vortices released from both sides of the FAH and combined, they generate a single, higher
+frequency tone. There also exists frequency content associated with each individual shed vortex that has a frequency of
+one-half that of the alternating shed vortices. Depending on the PT location, model attitude, flight condition, one or
+
+
+
+10
+
+
+
+
+
+
+
+
+
+
+
+(a) Station 4, \ = 90◦. (b) Station 16, \ = 45◦.
+
+
+
+(c) Station 8, \ = 90◦. (d) Station 25, \ = 90◦.
+
+
+
+(e) Station 13, \ = 90◦. (f) Station 33, \ = 225◦.
+
+
+
+Fig. 9 𝐶′
+𝑝,rms versus model roll angle for sensors located at the core analysis stations for 𝑀∞ = 0.95 and
+
+
+
+𝛼 = 𝛽 = 0◦ for data acquired during Test 645.
+
+
+
+both peaks may be present and may be relatively stronger or weaker. Another important measure of test repeatability
+is thus how much those narrowband spectral peaks vary for repeat points. Using two PTs located at station 25 at
+\ = {90◦, 270◦} on the booster plane, spectra of 𝐶′
+
+
+
+𝑝 for repeat points are presented in Fig. 13 for several 𝑀∞. Each
+figure contains blue spectra for a particular 𝑀∞ with 𝛼 = 𝛽 = 0◦ overlaid with opacity, and red vertical lines indicating
+the peak narrowband frequencies identified for each repeat point.
+
+
+
+11
+
+
+
+
+
+
+
+
+
+
+
+Fig. 10 Test 645 WT model booster-to-core FAH [Source: NASA].
+
+
+
+(a) 𝛼 = 0◦ and 𝛽 sweep up to ±6◦. (b) 𝛼 sweep between ±6◦ and 𝛽 = 0◦.
+
+
+
+Fig. 11 𝐶′
+𝑝,rms at 𝑀∞ = 0.95 for PTs on the core at \ = 90◦ facing the LSRB and at \ = 270◦ facing the RSRB
+
+
+
+downstream of the booster FAH.
+
+
+
+As 𝑀∞ increases for the cases shown in Fig. 13, the narrowband peaks broaden and the peak frequencies identified
+for each repeat point vary more. These data are summarized in Fig. 14, where the more prominent and higher peak
+is plotted with darker curves and the second lower peak is plotted with lighter curves. For each 𝑀∞ where data are
+available, the mean peak frequency for all repeats is plotted, as well as the maximum and minimum frequencies identified
+for each peak. Several observations can be made: (1) the peak frequencies shift with 𝑀∞, with a significant dip centered
+at 𝑀∞ ≈ 0.92 occurring between 𝑀∞ ∈ [0.85, 0.98], (2) there is a relatively consistent offset in peak frequencies
+identified between the \ = 90◦ sensor facing the LSRB and the \ = 270◦ sensor facing the RSRB, and (3) the peak
+frequency variability differs with 𝑀∞, but generally ranges between ±2 Hz of the mean for the more prominent, higher
+frequency, peak. Figure 14b presents the same data with frequencies normalized by the freestream velocity 𝑈∞, which
+indicates that the relatively flat curves in the range 𝑀∞ ∈ [1.00, 1.18] could be adequately modeled using the reduced
+frequency scaling methodology.
+
+
+
+As in the discussion above regarding 𝐶′
+𝑝,rms, a significant source of between point variability in the narrowband
+
+
+
+spectral peaks downstream of the FAH appears to be related to model roll angle within the test section. Figure 15
+illustrates the peak frequencies for repeat points at several 𝑀∞ versus the model roll angle. Trends in identified peak
+frequencies are observed for all conditions presented: (1) at model roll angle of 0◦, the \ = 90◦ sensor facing the LSRB
+has a higher peak than the \ = 270◦ sensor facing the RSRB, (2) in general, as the model roll angle moves away from
+zero toward ±180◦, the narrowband peaks decrease for the sensor facing the LSRB and increase for the sensor facing
+the RSRB. These observations could indicate physically meaningful differences in the peak frequencies due to small
+model asymmetries, or more likely variations associated with model attitude within the test section or test section flow
+angularity.
+
+
+
+Since the narrowband frequency peaks associated with these unsteady pressure modes are generally dependent upon
+sensor location, 𝑀∞, and vehicle attitude, small variations in test conditions could lead to observable differences in the
+identified peaks. The sensitivity of these FAH spectral peaks to changes in 𝛽 between ±6◦ at 𝛼 = 0◦ for 𝑀∞ = 0.95 is
+shown in Fig. 16a for sensors at clocking angles \ = {90◦, 270◦} at station 25. The higher frequency mode is quite
+prominent at these sensor locations, with significant changes in magnitude and frequency with changing 𝛽. For the
+
+
+
+12
+
+
+
+
+
+
+
+
+
+
+
+(a) Mean 𝐶′
+𝑝,rms for core PTs. (b) Mean 𝐶′
+
+
+
+𝑝,rms for LSRB PTs.
+
+
+
+(c) Ratio of maximum to minimum 𝐶′
+𝑝,rms differences to the
+
+
+
+mean for core PTs.
+(d) Ratio of maximum to minimum 𝐶′
+
+
+
+𝑝,rms differences to the
+mean for LSRB PTs.
+
+
+
+(e) 𝐶′
+𝑝,rms 95%-bound ranges for core PTs. (f) 𝐶′
+
+
+
+𝑝,rms 95%-bound ranges for LSRB PTs.
+
+
+
+(g) Ratio of 𝐶′
+𝑝,rms 95%-bound ranges to the mean for core
+
+
+
+PTs.
+(h) Ratio of𝐶′
+
+
+
+𝑝,rms 95%-bound ranges to the mean for LSRB
+PTs.
+
+
+
+Fig. 12 𝐶′
+𝑝,rms repeatability summary for 𝑀∞ = 0.95 and 𝛼 = 𝛽 = 0◦ for data acquired during Test 645. Data
+
+
+
+for 22 repeat points are shown for all PTs versus longitudinal station, 𝑥.
+
+
+
+sensor on the windward side of the vehicle, the magnitude increase and frequency decrease are both quite large. The
+change in the frequency peak, for example, is approximately 10 to 12 Hz between 𝛽 = 0◦ and |𝛽 | = 6◦. This sensitivity
+in peak frequency and magnitude with 𝛽 can be a challenge for coupled loads analyses and vehicle guidance when other
+structural components near and downstream of the FAH have structural modes at or near these frequencies.
+
+
+
+The sensitivity of the FAH environment frequency and magnitude to 𝛼 is shown in Fig. 16b. Increasing from 𝛼 = 0◦
+to |𝛼 | = 2◦, magnitudes for both peaks decrease and the peak frequencies increase. In addition to magnitude and
+frequency sensitivity to 𝛼, the lower frequency mode becomes dominant in the |𝛼 | = 6◦ test data measured at these
+sensor locations.
+
+
+
+The peak transonic buffet environments at 𝑀∞ = 0.95 observed in the PTs discussed in Figs. 11 and 16 demonstrate
+that the FAH environment is highly sensitive to both 𝛼 and 𝛽. Review of sensors azimuthally adjacent to \ = 90◦ and
+\ = 270◦ at stations 24 and 25 suggest the FAH environment is highly localized in this region and sensor density plays
+a key role in adequately observing its spatial distribution. However, the FAH environment and its distinct frequency
+content can be observed in WT data as far downstream as the engine section of the vehicle. These frequencies have been
+observed in the WT data to vary between approximately 13 to 29 Hz (lower frequency mode) and 29 to 45 Hz (higher
+frequency mode). Post-flight data analyses, which will be discussed below, have shown that the FAH environment is
+also dominant in the external PT signals for the Artemis I flight.
+
+
+
+13
+
+
+
+
+
+
+
+
+
+
+
+(a) Station 25, \ = 90◦ at 𝑀∞ = 0.80. (b) Station 25, \ = 270◦ at 𝑀∞ = 0.80.
+
+
+
+(c) Station 25, \ = 90◦ at 𝑀∞ = 0.85. (d) Station 25, \ = 270◦ at 𝑀∞ = 0.85.
+
+
+
+(e) Station 25, \ = 90◦ at 𝑀∞ = 0.90. (f) Station 25, \ = 270◦ at 𝑀∞ = 0.90.
+
+
+
+(g) Station 25, \ = 90◦ at 𝑀∞ = 0.95. (h) Station 25, \ = 270◦ at 𝑀∞ = 0.95.
+
+
+
+Fig. 13 𝐶′
+𝑝 narrowband spectral peaks repeatability for PTs on the booster plane and located downstream of
+
+
+
+the booster FAH during Test 645.
+
+
+
+B. Comparison of Fluctuating Pressures, WT Test to Test
+In this section, the repeatability analysis is extended to compare test-to-test data for repeat points during Test 645,
+
+
+
+Test 668, ATAT, and AUAT. In Fig. 17, the comparison core analysis stations are represented on the SLS configurations
+tested during each WT test, and in Fig. 18, data are presented for PTs at core stage comparison stations for these tests.
+Stations 24 and 27 have been added for additional context, station 32 on the engine section is compared, instead of
+station 33, to better match PT locations between tests, and azimuthal locations are chosen to match PTs between all tests.
+For this figure, all repeat data for each test and for each condition are combined and the mean 𝐶′
+
+
+
+𝑝,rms and 95% bounds
+are compared, corresponding to the blue lines in Fig. 8.
+
+
+
+At station 16 (Fig. 18a), both Test 645 and ATAT have elevated𝐶′
+𝑝,rms levels at 𝑀∞ = 0.85 due to the shock-boundary
+
+
+
+layer interaction unsteadiness associated with the normal shock downstream of the CCJ. High-speed shadowgraph
+images from ATAT in Fig. 19 illustrate the shock footprint at 𝑀∞ = 0.85 and the downstream movement of the shock
+(away from the sensor position at station 16) at 𝑀∞ = 0.90. For Test 668 and AUAT, the WT models tested were
+Block 1B configurations (seen in Fig. 17), which has a longer forebody than the Block 1 configurations and shift the
+shoulder of the upper stage adapter forward. Thus, the shock-boundary layer interaction unsteadiness is not present at
+station 16 during those tests. For the higher 𝑀∞ conditions shown in Fig. 18a, Test 645 has higher unsteadiness relative
+to the other tests, which are generally comparable, possibly because the combined effects of the expansion corner at the
+aft end of the LVSA and LAS nozzle wake (not present in the Block 1 cargo model tested during ATAT).
+
+
+
+At stations 24, 25, and 27 (Figs. 18b–18d), 𝐶′
+𝑝,rms amplitudes generally compare well for tests in the same facility,
+
+
+
+14
+
+
+
+
+
+
+
+
+
+
+
+(a) Peak frequencies. (b) Peak frequencies normalized by velocity.
+
+
+
+Fig. 14 Comparison of peak frequencies versus 𝑀∞ at PTs downstream of the FAH at 𝛼 = 𝛽 = 0◦ for sensors on
+the booster plane of the core (\ ∈ {90◦, 270◦}) for data acquired during Test 645.
+
+
+
+(a) 𝑀∞ = 0.85. (b) 𝑀∞ = 0.90.
+
+
+
+(c) 𝑀∞ = 0.95. (d) 𝑀∞ = 1.10.
+
+
+
+Fig. 15 Peak frequencies versus model roll angle for PTs located downstream of the FAH and 𝛼 = 𝛽 = 0◦ for
+data acquired during Test 645.
+
+
+
+but are often quite different for tests at different facilities. For example, at station 25 (Fig. 18c), for the lower 𝑀∞
+presented the ATAT and AUAT unsteadiness is 25% to 50% higher than the Test 645 and Test 668 data. At 𝑀∞ = 1.18,
+however, the opposite is true. These data suggest that between models or facilities, the spatial extent of the peak
+
+
+
+15
+
+
+
+
+
+
+
+
+
+
+
+(a) 𝛼 = 0◦ and 𝛽 sweep between ±6◦. (b) 𝛼 sweep between ±6◦ and 𝛽 = 0◦.
+
+
+
+Fig. 16 PSDs measured during Test 645 at 𝑀∞ = 0.95 for PTs on core at \ = 90◦ facing the LSRB and at
+\ = 270◦ facing the RSRB downstream of booster FAH.
+
+
+
+unsteadiness downstream of the booster FAH may differ, with PTs at matched locations measuring the moving peak
+unsteadiness at different conditions. Farther aft at station 32 (Fig. 18e), all WT data compare well at the conditions
+shown. Based on these data, in the multibody region of the vehicle, where comparisons between facilities and tests are
+most applicable due to the wide variety of forebodies that have been tested, there are differences in the 𝐶′
+
+
+
+𝑝,rms amplitudes
+between facilities. Data for tests at the same facility, however, appear to be broadly similar.
+
+
+
+(a) Test 645, Block 1 crew. (b) Test 668, Block 1B crew.
+
+
+
+(c) ATAT, Block 1 cargo. (d) AUAT, Block 1B cargo.
+
+
+
+Fig. 17 Core analysis stations for test-to-test comparisons.
+
+
+
+Next, sensor spectra data are presented to compare test-to-test repeatability. Two regions of the vehicle are dominated
+by spectral peaks in 𝐶′
+
+
+
+𝑝: (1) the region downstream of the booster FAH as previously discussed, and (2) the region
+downstream of the LAS nozzles on the MPCV. Using four sensors located at station 5 for the Block 1 (B1) configuration
+(and the corresponding station at the same distance from the LAS nozzles for tests of the Block 1B (B1B) configuration),
+Fig. 20 presents peak frequencies associated with the LAS nozzle shedding for data from Test 645, Test 668, and AUAT.
+Both Test 668 and AUAT tested the Block 1B crew configuration, with AUAT testing only the forebody at 4% scale
+(all WT test articles are shown in Fig. 2). For Test 668, data acquired during the air checkout portion of testing are
+also included for comparison. The mean spectral peaks correspond quite well between tests, while there are rather
+large bounds for the maximum and minimum spectral peaks. A significant contributor to this within-test variability
+is the different sensor location clocking angles relative to the LAS nozzles as well as the broad character of the LAS
+nozzle peak. Figure 20b presents the same data with frequencies normalized by the freestream velocity, 𝑈∞, which
+indicates relatively constant reduced frequencies within this 𝑀∞ range. Overall, the test-to-test comparisons indicate
+good agreement for peak spectral frequencies corresponding to the LAS nozzle shedding, with no notable differences
+observed between the Test 668 air and heavy gas data.
+
+
+
+16
+
+
+
+
+
+
+
+
+
+
+
+𝑀∞ = 0.85 𝑀∞ = 0.90 𝑀∞ = 0.94 𝑀∞ = 0.98 𝑀∞ = 1.18
+
+
+
+(a) Station 16, \ = 90◦.
+
+
+
+(b) Station 24, \ = 90◦.
+
+
+
+(c) Station 25, \ = 90◦.
+
+
+
+(d) Station 27, \ = 90◦.
+
+
+
+(e) Station 32, \ = 135◦.
+
+
+
+Fig. 18 𝐶′
+𝑝,rms test-to-test repeatability during Test 645, Test 668, ATAT, and AUAT for PTs located at the core
+
+
+
+analysis stations for 𝑀∞ = 0.95 and 𝛼 = 𝛽 = 0◦.
+
+
+
+For the region downstream of the booster FAH, Fig. 21 presents the narrowband spectral peaks identified for
+Test 668, ATAT, and AUAT. Similar to the results presented for Test 645, for most 𝑀∞, there is an offset between
+the peaks identified for the LSRB-facing (\ = 90◦) and RSRB-facing (\ = 270◦) sensors in these data, appearing
+relatively largest for Test 668 and ATAT. Peaks up to 𝑀∞ = 1.40 are presented for the two tests at UPWT, which in the
+
+
+
+17
+
+
+
+
+
+
+
+
+
+
+
+(a) 𝑀∞ = 0.85. (b) 𝑀∞ = 0.90.
+
+
+
+Fig. 19 High-speed shadowgraph pixel variance images acquired during ATAT indicating regions of high flow
+unsteadiness.
+
+
+
+(a) Peak frequencies. (b) Peak frequencies normalized by velocity.
+
+
+
+Fig. 20 Comparison of peak frequencies versus 𝑀∞ at PTs downstream of the LAS nozzles at 𝛼 = 𝛽 = 0◦ for
+several WT tests.
+
+
+
+velocity-normalized curves in Figs. 21b and 21c indicate the region of relatively flat reduced frequencies extends for
+𝑀∞ ∈ [1.00, 1.40]. Only the higher frequency peak is plotted in the ATAT and AUAT figures as the lower frequency
+peak is either not measured at this PT location or not extracted using the peak picking parameters utilized.
+
+
+
+In Fig. 22, a summary of the narrowband peak frequencies identified in the 𝐶′
+𝑝 spectra for all the WT tests are
+
+
+
+presented. Data from the Test 668 air runs and the ATAT 9x7 SWT runs have been added in addition to the data
+presented above, and the ATAT 11-Ft TWT runs after unsteady pressure sensitive paint (uPSP) was applied have
+been separated from the remainder of the unpainted model ATAT runs. While there are small differences in the peak
+frequencies between the unpainted and painted ATAT WT test points (“ATAT, B1 cargo” versus “ATAT, B1 cargo
+uPSP”), painting the model and thus changing the surface roughness slightly does not appear to affect the peak shedding
+frequency significantly in the region downstream of the FAH.
+
+
+
+During Test 668, limited data were acquired in air, which, up to 𝑀∞ = 0.90, do indicate notable differences in peak
+shedding frequency relative to the comparison Test 668 data conducted in heavy gas (“T668 air, B1B crew” versus
+“T668, B1B crew” in Fig. 22). For sensors facing the LSRB and RSRB (Figs. 22a and 22b), the air run peaks are
+consistently lower than that for heavy gas by ≈ 3 Hz. For the higher 𝑅𝑒𝐷 heavy gas test points at 𝑀∞ = 0.90, the mean
+𝑅𝑒𝐷 = 6.03 based on core diameter is a factor of approximately 6 larger than the mean 𝑅𝑒𝐷 = 1.08 for the air run
+data points, which, along with possible test medium effects, may be part of the explanation for systematic differences.
+There are also notable differences in peak frequencies on both sides of the core between the AUAT and ATAT tests
+for 𝑀∞ > 0.98. While there were some minor geometry changes to the WT models between these tests farther aft on
+the boosters (addition of booster field joints farther downstream), the only major change is the difference in forebody
+(Block 1B cargo for AUAT and Block 1 cargo for ATAT). Other potential sources of these differences may be test-to-test
+
+
+
+18
+
+
+
+
+
+
+
+
+
+
+
+(a) Test 668.
+
+
+
+(b) ATAT.
+
+
+
+(c) AUAT.
+
+
+
+Fig. 21 Comparison of peak frequencies versus 𝑀∞ at 𝛼 = 𝛽 = 0◦ for PTs downstream of the FAH on the booster
+plane of the core (\ ∈ {90◦, 270◦}). Figures in the left column present frequencies, and figures in the right column
+present velocity-normalized frequencies.
+
+
+
+variability, small geometry differences, or installation orientation variability for the additively manufactured booster
+FAH protuberance.
+
+
+
+The most significant differences in peak frequencies are between facilities, with the data for tests conducted at
+UPWT indicating significantly lower peak frequencies (by ≈8-10 Hz, for example, between TDT Test 645 and UPWT
+ATAT) than those conducted at TDT throughout the 𝑀∞ range presented. Differences in model designs, such as the
+detailed geometry of the booster-to-core gap in this region or the booster FAH geometry, are the hypotheses currently
+under study using time-accurate CFD to investigate possible explanations for these peak frequency differences. Since
+the mean peak frequencies identified in the region downstream of the LAS nozzles, presented in Fig. 21, compare
+favorably between facilities, the consistent differences identified in the booster FAH region appear to be related to local
+geometry or flowfield differences in the multibody region of the vehicle. These differences in peak shedding frequency
+are of significant importance in the context of the flight data, to be presented in the next section, where the flight peak
+
+
+
+19
+
+
+
+
+
+
+
+
+
+
+
+(a) Booster plane sensor on the core at \ = 90◦ (facing LSRB).
+
+
+
+(b) Booster plane sensor on the core at \ = 270◦ (facing RSRB).
+
+
+
+Fig. 22 Comparison of peak frequencies versus 𝑀∞ at 𝛼 = 𝛽 = 0◦ for PTs downstream of the FAH for several WT
+tests. Figures in the left column present frequencies, and figures in the right column present velocity-normalized
+frequencies.
+
+
+
+frequencies are shown to be closer to those identified in the tests conducted at UPWT. These observations have driven
+the computational studies described above, as well as WT model modifications to more accurately match the as-flown
+vehicle geometry for an upcoming test at TDT to determine how increasing the fidelity of the core stage geometry in the
+vicinity of the booster FAH changes the identified peak frequencies. As has been shown in several previous tests, the
+unsteady pressure field is sensitive to the geometry in this region [14].
+
+
+
+C. Comparison of Fluctuating Pressures, Flight to WT
+In this section, results are presented comparing the unsteady pressure environments measured during the Artemis I
+
+
+
+flight to preflight WT tests. In Fig. 23, the vehicle attitude based on the BET for Artemis I is shown versus 𝑀∞.
+Throughout this portion of ascent, the vehicle 𝛼total is relatively low, which provides some support for the applicability
+of the repeatability analyses described above for this flight despite the sensitivity of fluctuating pressure environments to
+vehicle orientation. Most of the WT results shown below will be for points that best match the flight conditions and
+vehicle attitudes, but results from the repeatability analyses described above will also be referenced for context.
+
+
+
+Figure 24 compares distributions of 𝐶′
+𝑝,rms for several 𝑀∞ using Test 645 matched conditions and data from the
+
+
+
+Artemis I flight. A uniformly distributed 𝑥-\ (unwrapped) grid is mapped to the nearest sensor data in these figures,
+providing a broad look at the spatial distribution of unsteady pressures. This overview, where relatively local regions of
+increased 𝐶′
+
+
+
+𝑝,rms are present downstream of the booster FAH, illustrates the importance of that region on core stage and
+booster unsteady pressure environments during transonic flight. In addition, the relative sparsity of instrumentation in
+
+
+
+20
+
+
+
+
+
+
+
+
+
+
+
+Fig. 23 Artemis I attitude from the BET.
+
+
+
+this region on the Artemis I flight vehicle in comparison to the WT RBM illustrates the challenge of characterizing this
+environment using flight data and assessing the accuracy of preflight WT test environments. One notable feature is
+that the 𝑀∞ = 0.80 condition is the only matched WT point presented in this figure where the attitude parameters are
+nonzero – for this condition, the matched point attitude is 𝛼 = 1.02◦. With the high sensor density on the RBM, the
+change in 𝐶′
+
+
+
+𝑝,rms spatial distribution is visible, with the wake of the booster FAH rotating away from the windward lower
+surface of the model (\ = 180◦). For the other cases shown here, the wake unsteadiness is oriented directly aft in the
+WT distributions. Due to sensor density limitations on the flight vehicle, these characteristics are not easily identified,
+which serves as a reminder that the observability of peak unsteady environments is strongly related to sensor location.
+
+
+
+In Fig. 25, azimuthal slices of these 𝐶′
+𝑝,rms distributions are presented for several 𝑀∞ and for clocking angles
+
+
+
+\ = {0◦, 90◦}. For the WT data, the ensemble mean as well as the KDE of the corresponding moving 𝐶′
+𝑝,rms windows
+
+
+
+of the matched point are plotted. For the \ = 0◦ slice, the tunnel and flight data match well for all 𝑀∞ presented here, to
+include matching the increase in unsteadiness downstream of the LVSA CCJ. The largest qualitative difference appears
+at 𝑀∞ = 0.90 for station 8, where the tunnel data indicate a relatively high unsteadiness and variability, while the
+comparison flight sensor, slightly aft, is relatively quiet. This difference is related to the high unsteadiness associated
+with a normal shock that travels downstream as 𝑀∞ increases on this segment of the vehicle, and which was positioned
+close to this sensor during the tunnel test at 𝑀∞ = 0.90. As will be shown below, the high unsteadiness associated with
+that normal shock oscillating fore and aft of the sensor position does not appear in the flight data, where the shock
+travels monotonically downstream during ascent.
+
+
+
+For the \ = 90◦ slice on the vehicle forebody, the trends and magnitudes match well between flight and tunnel. At
+the beginning of the booster nose cones, flight magnitudes appear somewhat increased relative to the tunnel data for
+𝑀∞ ≥ 0.85. Due to the relative sparsity of sensors on the flight vehicle, the trends downstream of the booster FAH,
+where the pressure field unsteadiness is largest, are more difficult to compare. It is clear, however, that the flight data at
+matched sensor stations on the booster plane do not match the WT data as well as in other regions of the vehicle. Based
+on the three flight sensors located in this region of the vehicle, compared to the tunnel data it appears that one or several
+characteristics may be true during flight: (1) 𝐶′
+
+
+
+𝑝,rms magnitudes are generally higher, (2) 𝐶′
+𝑝,rms peak may occur further
+
+
+
+downstream, and (3) longitudinal extent of elevated 𝐶′
+𝑝,rms may be larger. Any one or combination of these may be true,
+
+
+
+depending on assumptions related to the shape of the flight and tunnel 𝐶′
+𝑝,rms distributions, which even for the tunnel
+
+
+
+data is not highly resolved. Uncertainties associated with the magnitudes and spatial extent of high unsteadiness in this
+region are significantly important due to the high coherence of the unsteady pressure modes associated with the booster
+FAH wake and the relatively low frequencies associated with those modes that may interact with vehicle structural
+modes. Better understanding of this vehicle region both in subscale tests and the next launch are high priorities.
+
+
+
+The remainder of this section will present results focusing on the analysis stations shown in Fig. 4. Comparisons
+of flight and tunnel data are shown in Fig. 26 for stations 4 and 8, located on the LAS and SM. In the top row of the
+figures, 𝐶′
+
+
+
+𝑝,rms versus 𝑀∞ is plotted with comparison tunnel data including: (1) KDEs for ensembles of the matched
+condition test point from Test 645, (2) the mean of that ensemble, and (3) maximum and minimum mean 𝐶′
+
+
+
+𝑝,rms for
+all 𝛼 = 𝛽 = 0◦ repeats acquired at each 𝑀∞. Although the vehicle attitude throughout its ascent was not 𝛼 = 𝛽 = 0◦,
+these repeat cases give an indication of how variable the matched WT point mean 𝐶′
+
+
+
+𝑝,rms would likely be if repeats
+were available at the matched attitudes. For both of these stations, the flight data correspond reasonably well with the
+matched tunnel data, particularly in light of the mean 𝐶′
+
+
+
+𝑝,rms dispersions indicated by the repeat data and the moving
+window distributions plotted with the KDEs. For station 8, the high tunnel 𝐶′
+
+
+
+𝑝,rms at 𝑀∞ = 0.90 is related to the normal
+shock that, oscillating fore and aft of this sensor during Test 645, led to high unsteadiness. During flight, however, the
+
+
+
+21
+
+
+
+
+
+
+
+
+
+
+
+(a) 𝑀∞ = 0.80, tunnel. (b) 𝑀∞ = 0.80, flight.
+
+
+
+(c) 𝑀∞ = 0.90, tunnel. (d) 𝑀∞ = 0.90, flight.
+
+
+
+(e) 𝑀∞ = 0.95, tunnel. (f) 𝑀∞ = 0.95, flight.
+
+
+
+Fig. 24 Unwrapped 𝐶′
+𝑝,rms distributions based on Test 645 and flight data for increasing 𝑀∞.
+
+
+
+shock passed over this station at approximately that same 𝑀∞, but did not oscillate, so the flight magnitudes dropped to
+the levels measured in the tunnel data after the shock has moved past that sensor.
+
+
+
+The spectrograms of flight 𝐶′
+𝑝, shown in the second row of figures, both indicate the increasing peak frequency
+
+
+
+associated with LAS nozzle shedding. Comparisons of this peak frequency will be made with the tunnel predicted
+peaks below. In the remaining plots in Fig. 26, global continuous wavelet transform (CWT) spectra of the flight sensors
+
+
+
+22
+
+
+
+
+
+
+
+
+
+
+
+(a) 𝑀∞ = 0.80, PTs located along \ = 0◦. (b) 𝑀∞ = 0.80, PTs located along \ = 90◦.
+
+
+
+(c) 𝑀∞ = 0.85, PTs located along \ = 0◦. (d) 𝑀∞ = 0.85, PTs located along \ = 90◦.
+
+
+
+(e) 𝑀∞ = 0.90, PTs located along \ = 0◦. (f) 𝑀∞ = 0.90, PTs located along \ = 90◦.
+
+
+
+(g) 𝑀∞ = 0.95, PTs located along \ = 0◦. (h) 𝑀∞ = 0.95, PTs located along \ = 90◦.
+
+
+
+(i) 𝑀∞ = 1.05, PTs located along \ = 0◦. (j) 𝑀∞ = 1.05, PTs located along \ = 90◦.
+
+
+
+(k) 𝑀∞ = 1.15, PTs located along \ = 0◦. (l) 𝑀∞ = 1.15, PTs located along \ = 90◦.
+
+
+
+Fig. 25 Comparison of 𝐶′
+𝑝,rms longitudinal distribution between Test 645 and flight.
+
+
+
+are presented in comparison to tunnel global CWT spectral bounds. The global CWT is calculated as the time average
+of the CWT over a specified window (here, 0.5 s full-scale window durations), and several WT quantiles are formed
+for the ensemble global CWTs calculated for matched points. The red curve in each figure corresponds to the tunnel
+ensemble mean spectrum, and the red areas correspond to quantile ranges containing the percentage of the ensemble
+
+
+
+23
+
+
+
+
+
+
+
+
+
+
+
+(a) 𝐶′
+𝑝,rms.
+
+
+
+(b) 𝐶′
+𝑝 spectrogram.
+
+
+
+(c) Global CWTs, 𝑀∞ = 0.70.
+
+
+
+(d) Global CWTs, 𝑀∞ = 0.80.
+
+
+
+(e) Global CWTs, 𝑀∞ = 0.90.
+
+
+
+Station 4, flight PT located at \ = 58.3◦, WT matched PT
+located at \ = 90◦.
+
+
+
+(f) 𝐶′
+𝑝,rms.
+
+
+
+(g) 𝐶′
+𝑝 spectrogram.
+
+
+
+(h) Global CWTs, 𝑀∞ = 0.70.
+
+
+
+(i) Global CWTs, 𝑀∞ = 0.80.
+
+
+
+(j) Global CWTs, 𝑀∞ = 0.90.
+
+
+
+Station 8, flight PT located at \ = 330◦, WT matched PT
+located at \ = 0◦.
+
+
+
+Fig. 26 Artemis I flight data compared to WT data from Test 645 for analysis stations on the LAS and MPCV.
+
+
+
+specified in the legend. For the station 4 sensor comparisons, the tunnel bounds plotted contain the flight spectra well,
+
+
+
+24
+
+
+
+
+
+
+
+
+
+
+
+and as will be shown in more detail below, the flight spectral peak frequency matches the tunnel data well. For station
+8, the comparisons are reasonable in the lower frequencies, with the flight spectra generally lower than the tunnel
+ensemble spectra. However, for the higher frequencies plotted, the flight spectra exceed the WT bounds at 𝑀∞ = 0.70
+and 0.80. This is caused by the influence of the LAS nozzle wake, which is observable as a peak in the flight spectra but
+not present in the WT spectra. In this case, the difference is due to a difference in sensor location between flight and
+tunnel: the flight sensor is located at \ = 330◦, while the closest matched WT sensor is located at \ = 0◦. Since the
+LAS nozzles are clocked at \ ∈ {58.3◦, 148.3◦, 238.3◦, 328.3◦}, the 30◦ of separation between these “closest-matched”
+sensors brings the tunnel sensor outside the dominant wake of the upstream LAS nozzle. Considering the flight sensor
+located at \ = 90◦ at this same longitudinal station, the dominant frequency peaks identifiable in the spectrogram in
+Fig. 26g are not present in the spectrogram for this sensor in Fig. 27, as this flight sensor is azimuthally separated from
+the dominant wake of the upstream LAS nozzles by approximately the same angle as the tunnel sensor above. This
+example is illustrative of sensor location sensitivity on measured unsteadiness in the presence of nonspatially uniform
+pressure fields.
+
+
+
+Fig. 27 𝐶′
+𝑝 spectrogram for sensor located at station 8, \ = 90◦.
+
+
+
+Figure 28 provides comparisons of the spectrogram for flight sensors at station 4 and the mean peak frequencies
+for three WT tests (from Section IV.B). Throughout the 𝑀∞ range, the peak frequencies compare well with the flight
+spectrogram, particularly considering that the flight attitude was continuously varying during ascent and the tunnel data
+presented are for the 𝛼 = 𝛽 = 0◦ repeatability analyses. Similar results have been shown for LAS nozzle peak frequency
+matching between tunnel and flight for the Ares I-X flight test vehicle [11].
+
+
+
+(a) Peak frequencies. (b) Peak frequencies normalized by velocity.
+
+
+
+Fig. 28 Comparison of peak frequencies from WT tests versus 𝑀∞ at PTs downstream of the LAS nozzles. WT
+data are overlaid on the flight data spectrogram for matched sensor location.
+
+
+
+In Fig. 29, summary flight to tunnel comparisons for stations 13 and 16, located on the LVSA and forward skirt, are
+
+
+
+25
+
+
+
+
+
+
+
+
+
+
+
+presented. For station 13, the 𝐶′
+𝑝,rms versus 𝑀∞ trends in the flight curve are correspond well with the tunnel data,
+
+
+
+including the relatively increased unsteadiness in this recirculation region at lower supersonic 𝑀∞. The global CWTs
+presented also match well between flight and tunnel. Generally similar conclusions can be drawn for the comparisons
+shown for station 16. In the 𝐶′
+
+
+
+𝑝,rms versus 𝑀∞ plot, the tunnel data indicate high unsteadiness between 𝑀∞ = 0.85 and
+0.88 corresponding to the normal shock oscillating in the vicinity of this sensor position during the WT test points
+(shown in Fig. 19 for 𝑀∞ = 0.85 during the comparable ATAT test). During flight, however, little evidence of shock
+oscillation is present in the data, with the shock transitioning aft over this sensor location and the unsteady pressure
+magnitudes decreasing to the reduced, attached boundary layer, levels at 𝑀∞ ≈ 0.88.
+
+
+
+Comparisons are shown in Fig. 30 for two sensors on the booster plane located at station 24 on either side of the
+core. For both of these sensors, the tunnel data predicts relatively high transonic unsteadiness and large point-to-point
+variability in the ensemble 𝐶′
+
+
+
+𝑝,rms means as represented by the repeat upper and lower bounds. Generally, the 𝐶′
+𝑝,rms
+
+
+
+trend versus 𝑀∞ compares well between flight and tunnel, with the exception of the peak centered at 𝑀∞ ≈ 0.94 in the
+flight data that is not measured in the tunnel data. In the spectrograms, the presence of the dominant unsteady pressure
+modes associated with the booster FAH wake are clear – comparisons to the previously identified tunnel peaks will be
+shown below. In the global CWTs, however, indications of differences between the WT and flight peaks are evident.
+Depending on 𝑀∞, either one or both peaks are present, but for both sensors and for all 𝑀∞ the peaks occur at lower
+frequencies relative to the tunnel data. The magnitudes of the spectra are generally comparable at and away from the
+peaks for these 𝑀∞.
+
+
+
+In Fig. 31, comparisons of the flight spectrograms and WT mean peak frequencies, for PTs at station 24, are
+summarized. For the tunnel data, only the higher frequency peak is plotted for all tests. While the general trends match
+between flight and tunnel, the flight peaks are much lower than those identified for tests conducted in the TDT and
+match closer to those tests conducted in UPWT. As discussed above, it is not known why the frequencies differ between
+facilities, but current work is underway to explore differences in WT RBM geometries in this region, as well as with the
+Artemis I as-built geometry.
+
+
+
+Figure 32 summarizes flight comparisons to tunnel data for sensors on the booster plane at stations 25 and 75. At
+station 25, the flight 𝐶′
+
+
+
+𝑝,rms is higher than, or at, the upper bound of the tunnel data for 𝑀∞ ≤ 0.92, and at station 75, the
+flight 𝐶′
+
+
+
+𝑝,rms is higher for all 𝑀∞. The major source of these differences is the increased magnitudes of the unsteady
+pressure modes associated with the booster FAH shedding during flight, as can be seen in the increased spectral
+magnitudes for these modes in the global CWT comparisons (where the same frequency shift down, relative to tunnel
+data, is also present). Based on these comparisons, and those shown in Fig. 25, it appears that the tunnel data do not
+accurately estimate the magnitude and/or the spatial extent of the increased pressure field unsteadiness in this region of
+the vehicle for a range of transonic and low supersonic 𝑀∞.
+
+
+
+Comparisons of the flight spectrograms and WT mean peak frequencies, for sensors at stations 25 and 75, are
+summarized in Fig. 33. As is the case for the comparisons at station 24, the flight peaks are much lower than those
+identified for tests conducted in TDT and match closer to those tests conducted in UPWT. At these stations, it is also
+clear that the increased magnitudes of the narrowband peaks persist into the supersonic flight conditions, particularly at
+station 75. These flight peaks are quite different than those identified during the ATAT test in the 9- by 7-ft test section
+and do not match the tunnel trend in reduced frequencies shown in Figs. 33c and 33f.
+
+
+
+Figure 34 presents summary flight to tunnel comparisons for sensors at station 33, located on the engine section. For
+both sensors, the flight 𝐶′
+
+
+
+𝑝,rms are higher than the matched tunnel data for all 𝑀∞. The flight spectrograms indicate that
+the frequency peak associated with the FAH wake is present even this far aft, and the global CWT comparisons show
+that this peak is also present in the tunnel data (albeit at a higher frequency as discussed above). However, the spectral
+peak magnitude associated with this unsteady pressure mode is larger in the flight data, and the higher frequency spectral
+magnitudes are significantly larger for the station 33 sensor located at \ = 315.35◦ compared to the WT spectral bounds.
+This broadband excitation increase is reflected in the 𝐶′
+
+
+
+𝑝,rms versus 𝑀∞ comparison, and may be related to engine-on
+contributions not present in the tunnel data.
+
+
+
+26
+
+
+
+
+
+
+
+
+
+
+
+(a) 𝐶′
+𝑝,rms.
+
+
+
+(b) 𝐶′
+𝑝 spectrogram.
+
+
+
+(c) Global CWTs, 𝑀∞ = 0.70.
+
+
+
+(d) Global CWTs, 𝑀∞ = 0.80.
+
+
+
+(e) Global CWTs, 𝑀∞ = 0.90.
+
+
+
+Station 13, flight PT located at \ = 95◦, WT matched PT
+located at \ = 90◦.
+
+
+
+(f) 𝐶′
+𝑝,rms.
+
+
+
+(g) 𝐶′
+𝑝 spectrogram.
+
+
+
+(h) Global CWTs, 𝑀∞ = 0.70.
+
+
+
+(i) Global CWTs, 𝑀∞ = 0.80.
+
+
+
+(j) Global CWTs, 𝑀∞ = 0.90.
+
+
+
+Station 16, flight PT located at \ = 181.8◦, WT matched PT
+located at \ = 180◦.
+
+
+
+Fig. 29 Artemis I flight data compared to WT data from Test 645 for analysis stations on the LVSA and forward
+skirt.
+
+
+
+27
+
+
+
+
+
+
+
+
+
+
+
+(a) 𝐶′
+𝑝,rms.
+
+
+
+(b) 𝐶′
+𝑝 spectrogram.
+
+
+
+(c) Global CWTs, 𝑀∞ = 0.70.
+
+
+
+(d) Global CWTs, 𝑀∞ = 0.80.
+
+
+
+(e) Global CWTs, 𝑀∞ = 0.90.
+
+
+
+Station 24, flight PT located at \ = 88.65◦, WT matched PT
+located at \ = 90◦.
+
+
+
+(f) 𝐶′
+𝑝,rms.
+
+
+
+(g) 𝐶′
+𝑝 spectrogram.
+
+
+
+(h) Global CWTs, 𝑀∞ = 0.70.
+
+
+
+(i) Global CWTs, 𝑀∞ = 0.80.
+
+
+
+(j) Global CWTs, 𝑀∞ = 0.90.
+
+
+
+Station 24, flight PT located at \ = 268.70◦, WT matched PT
+located at \ = 270◦.
+
+
+
+Fig. 30 Artemis I flight data compared to WT data from Test 645 for analysis station on the intertank
+downstream of the booster FAH.
+
+
+
+28
+
+
+
+
+
+
+
+
+
+
+
+(a) Peak frequencies. (b) Peak frequencies normalized by velocity.
+
+
+
+(c) \ = 90◦.
+
+
+
+(d) Peak frequencies. (e) Peak frequencies normalized by velocity.
+
+
+
+(f) \ = 270◦.
+
+
+
+Fig. 31 Comparison of peak frequencies from WT tests versus 𝑀∞ for PTs located at station 24, downstream of
+the FAH. WT data are overlaid on the flight data spectrogram for matched PT location.
+
+
+
+29
+
+
+
+
+
+
+
+
+
+
+
+(a) 𝐶′
+𝑝,rms.
+
+
+
+(b) 𝐶′
+𝑝 spectrogram.
+
+
+
+(c) Global CWTs, 𝑀∞ = 0.70.
+
+
+
+(d) Global CWTs, 𝑀∞ = 0.80.
+
+
+
+(e) Global CWTs, 𝑀∞ = 0.90.
+
+
+
+Station 25, flight PT located at \ = 90◦, WT matched PT
+located at \ = 90◦.
+
+
+
+(f) 𝐶′
+𝑝,rms.
+
+
+
+(g) 𝐶′
+𝑝 spectrogram.
+
+
+
+(h) Global CWTs, 𝑀∞ = 0.70.
+
+
+
+(i) Global CWTs, 𝑀∞ = 0.80.
+
+
+
+(j) Global CWTs, 𝑀∞ = 0.90.
+
+
+
+Station 75, flight PT located at \ = 87.78◦, WT matched PT
+located at \ = 90◦.
+
+
+
+Fig. 32 Artemis I flight data compared to WT data from Test 645 for analysis stations on the LH2 tank
+downstream of the booster FAH.
+
+
+
+30
+
+
+
+
+
+
+
+
+
+
+
+(a) Peak frequencies. (b) Peak frequencies normalized by velocity.
+
+
+
+(c) Station 25.
+
+
+
+(d) Peak frequencies. (e) Peak frequencies normalized by velocity.
+
+
+
+(f) Station 75.
+
+
+
+Fig. 33 Comparison of peak frequencies from WT tests versus 𝑀∞ for PTs at \ = 90◦, facing the LSRB,
+downstream of the FAH. WT data are overlaid on the flight data spectrogram for matched PT location.
+
+
+
+31
+
+
+
+
+
+
+
+
+
+
+
+(a) 𝐶′
+𝑝,rms.
+
+
+
+(b) 𝐶′
+𝑝 spectrogram.
+
+
+
+(c) Global CWTs, 𝑀∞ = 0.70.
+
+
+
+(d) Global CWTs, 𝑀∞ = 0.80.
+
+
+
+(e) Global CWTs, 𝑀∞ = 0.90.
+
+
+
+Station 33, flight PT located at \ = 225◦, WT matched PT
+located at \ = 225◦.
+
+
+
+(f) 𝐶′
+𝑝,rms.
+
+
+
+(g) 𝐶′
+𝑝 spectrogram.
+
+
+
+(h) Global CWTs, 𝑀∞ = 0.70.
+
+
+
+(i) Global CWTs, 𝑀∞ = 0.80.
+
+
+
+(j) Global CWTs, 𝑀∞ = 0.90.
+
+
+
+Station 33, flight PT located at \ = 315.35◦, WT matched PT
+located at \ = 315◦.
+
+
+
+Fig. 34 Artemis I flight data compared to WT data from Test 645 for analysis station on the engine section.
+
+
+
+32
+
+
+
+
+
+
+
+
+
+
+
+V. Conclusion
+In this paper, repeat point data from the NASA LaRC TDT Test 645 at various 𝑀∞ and 𝛼 = 𝛽 = 0◦ have been
+
+
+
+presented to give an overview of repeatability during SLS unsteady aerodynamics wind tunnel tests. In general, mean
+𝐶′
+
+
+
+𝑝,rms compare well point-to-point, and the variation of 𝐶′
+𝑝,rms for flight-comparable windows within a single wind
+
+
+
+tunnel test point is consistent for that seen over all the repeats for a given sensor, vehicle attitude, and flight condition.
+This suggests that in comparing to flight data, using matched attitude and flight condition test points should yield
+good comparisons if the subscale test articles and methods are accurate representations of the full scale flight. Repeat
+point data from several other wind tunnel tests have also been presented to provide an overview for test-to-test and
+tunnel-to-tunnel repeatability. These results suggest that for matched sensors on the core stage at matched aerodynamic
+conditions and vehicle attitudes, the test-to-test variability in 𝐶′
+
+
+
+𝑝,rms is relatively low for tests conducted in the same
+facility, but can be significant for tests conducted at different facilities (NASA LaRC TDT versus the NASA ARC
+UPWT). Due to differences in the wind tunnel models tested, comparisons are only presented for sensors located on the
+core stage and mainly in the multibody region of the vehicle, where small geometric differences have been previously
+shown to lead to significant differences in the unsteady pressure field. The most significant difference discussed is the
+tunnel-to-tunnel variation in peak frequencies identified in the wake of the booster forward attachment hardware. The
+resulting unsteady pressure modes shed highly coherent vortices at distinct frequencies that are shown to consistently
+differ between tests conducted at the two facilities. Results comparing the tunnel test data with data acquired during the
+Artemis I flight test indicate that at the analysis stations discussed, 𝐶′
+
+
+
+𝑝,rms and 𝐶′
+𝑝 spectra compare well for many stations
+
+
+
+on the vehicle. Significant differences in the multibody region of the vehicle, particularly in (1) the peak frequencies of
+the booster forward attachment hardware wake and (2) the spatial extent of high fluctuating environments associated
+with those unsteady pressure modes, are presented and discussed. Interestingly, the peak frequencies identified in the
+NASA ARC UPWT tests for these modes are closer to those measured during flight than the peaks identified using data
+acquired during the NASA LaRC TDT tests. Current computational studies and future experimental work are ongoing
+to better understand these differences between tunnels and between flight and tunnel.
+
+
+
+References
+[1] Rainey, A. G., “Progress on the Launch-Vehicle Buffeting Problem,” Journal of Spacecraft and Rockets, Vol. 2, 1965, pp.
+
+
+
+289–299. https://doi.org/10.2514/3.28174.
+
+
+
+[2] Cole, H. A., Jr., Erickson, A. L., and Rainey, A. G., “Buffeting during atmospheric ascent,” NASA SP-8001, Nov. 1970.
+
+
+
+[3] Fleming, E. R., “Transonic Buffeting Loads Experience at The Aerospace Corporation,” Tech. Rep. TOR-95(5530)-6, Mar.
+1995.
+
+
+
+[4] Kabe, A. M., “Time Domain Buffet Loads Analysis,” Tech. Rep. TOR-2007(2209)-6078, Nov. 2006.
+
+
+
+[5] NASA, “Load Analyses of Spacecraft and Payloads,” NASA NASA-STD-5002A, 2019.
+
+
+
+[6] Piatak, D. J., Sekula, M. K., and Rausch, R. D., “Test Summary Document for the SLS Rigid Buffet Model Test Program: TDT
+Test T632,” NASA TM-2016-219218, 2016.
+
+
+
+[7] Piatak, D. J., Sekula, M. K., and Rausch, R. D., “Test Summary Document for the SLS Rigid Buffet Model Test Program: TDT
+Test T645,” NASA TM-2016-219332, 2016.
+
+
+
+[8] Piatak, D. J., Sekula, M. K., Rausch, R. D., Florance, J. R., and Ivanco, T. G., “Overview of the Space Launch System Transonic
+Buffet Environment Test Program,” AIAA SciTech 2015, 2015. https://doi.org/10.2514/6.2015-0557.
+
+
+
+[9] Sekula, M. K., Piatak, D. J., Rausch, R., Florance, J. R., and Ramey, J., “Initial Assessment of Space Launch System Transonic
+Unsteady Pressure Environment,” AIAA SciTech 2015, 2015. https://doi.org/10.2514/6.2015-0558.
+
+
+
+[10] NASA, “Space Launch System Program Exploration Mission-1 (EM-1) Flight Evaluation Plan,” NASA SLS-PLAN-100
+Revision E, 2021.
+
+
+
+[11] Heaney, P. S., Piatak, D. J., Sekula, M. K., and Soranna, F., “Comparison of Wind-Tunnel and Flight Unsteady Pressure
+Environments for the Ares I-X Flight Test Vehicle,” AIAA SciTech 2022, San Diego, CA, 2022. https://doi.org/10.2514/6.2022-
+2413.
+
+
+
+[12] Ericsson, L., and Reding, J., “Reynolds number criticality in dynamic tests,” 16th Aerospace Sciences Meeting, 1978.
+https://doi.org/10.2514/6.1978-166.
+
+
+
+33
+
+
+
+
+
+https://doi.org/10.2514/3.28174
+
+
+https://doi.org/10.2514/6.2015-0557
+
+
+https://doi.org/10.2514/6.2015-0558
+
+
+https://doi.org/10.2514/6.2022-2413
+
+
+https://doi.org/10.2514/6.2022-2413
+
+
+https://doi.org/10.2514/6.1978-166
+
+
+
+
+
+
+
+
+[13] Brauckmann, G. J., Streett, C., Kleb, W. L., Alter, S. J., Murphy, K. J., and Glass, C., “Computational and Experimental
+Unsteady Pressures for Alternate SLS Booster Nose Shapes,” AIAA SciTech 2015, 2015. https://doi.org/10.2514/6.2015-0559.
+
+
+
+[14] Ramey, J. M., Giles, I. M., Goushcha, O., Heaney, P. S., Piatak, D. J., Sekula, M. K., and Soranna, F., “Parametric Study of the
+Forward Attachment Geometry for the Space Launch System Next Generation Booster,” AIAA SciTech 2023, National Harbor,
+MD, 2023. https://doi.org/10.2514/6.2023-0427.
+
+
+
+34
+
+
+
+
+
+https://doi.org/10.2514/6.2015-0559
+
+
+https://doi.org/10.2514/6.2023-0427
+
+
+
+ 
+Introduction
+
+ 
+Background
+
+ 
+Wind Tunnel Tests
+
+ 
+Artemis I Flight
+
+
+ 
+Methodology
+
+ 
+Flight Data
+
+ 
+Wind Tunnel Data
+
+
+ 
+Results
+
+ 
+Comparison of Fluctuating Pressures, WT Point to Point
+
+ 
+Comparison of Fluctuating Pressures, WT Test to Test
+
+ 
+Comparison of Fluctuating Pressures, Flight to WT
+
+
+ 
+Conclusion

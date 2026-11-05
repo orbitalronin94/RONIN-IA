@@ -1,0 +1,1728 @@
+1 
+
+
+
+ 
+
+
+
+Multi-Objective Optimization and 
+
+
+
+Validation of a Diodic Profile 
+ 
+
+
+
+Avidh Bavkar1, Peter Salek2, Venkat Athmanathan3, Guillermo 
+
+
+
+Paniagua4, Terrence Meyer5 
+Purdue University, West-Lafayette, Indiana, 47907, USA 
+
+
+
+James Braun6
+ 
+
+
+
+North Carolina State University, Raleigh, North Carolina, 27695, USA 
+
+
+
+Hugh D. Perkins7
+ 
+
+
+
+Nasa Glenn Research Center, Cleveland, OH 43315, USA 
+
+
+
+Chris Fugger8
+ 
+
+
+
+Spectral Energies, Beavercreek, Ohio, 45430, USA 
+
+
+
+The present paper investigates the flow physics of Tesla valves and studies how various 
+
+
+
+geometric parameters affect their performance. The performance of the valve is measured by 
+
+
+
+its diodicity, evaluated by comparing pressure drops and discharge coefficients in the forward 
+
+
+
+and reverse flow directions. First, only the flow return angle of a baseline geometry was varied 
+
+
+
+to understand the impact of return angle on valve performance. These baseline geometries are 
+
+
+
+first analyzed with CFD, and then fabricated and installed in a steady-state experimental test 
+
+
+
+rig equipped with pressure transducers, to measure forward and reverse discharge 
+
+
+
+coefficients. Seven additional geometries are also tested in cold flow to identify the impact of 
+
+
+
+diode count, diode volume, and orifice size on valve performance. Next, a multi-objective 
+
+
+
+optimizer is allowed to vary 12 geometric parameters to produce an optimum geometry. 
+
+
+
+I. Introduction 
+
+
+
+The diodic profile considered in this work is based on Nikola Tesla's Valvular Conduit, originally patented in 1920 
+
+
+
+[1]. This passive flow-control device uses a fixed internal geometry to promote low resistance to flow in one direction, 
+
+
+
+but high resistance to flow in the opposite direction. The simplicity of this design has led it to be considered across 
+
+
+
+many disciplines, including biomedical, agricultural, and aerospace. Previous optimizations of the Tesla valve can be 
+
+
+
+found in literature: Bohm et al. generated elevated-diodicity valves at the microfluidic scale by performing a largely 
+
+
+
+unconstrained topological multistage optimization [2]. At the macrofluidic scale, another topological optimization was 
+
+
+
+performed in Gaymann et al. [3], including considerations for manufacturability of the geometry with additive 
+
+
+
+techniques. Numerical analysis performed in Nobakht et al. show that the geometry of the junction between the reverse 
+
+
+
+flow channel and the main flow channel is critical for valve performance [4]. Thompson et al. presents a numerical 
+
+
+
+ 
+1 Undergraduate Student 
+2 Research Assistant, AIAA Student Member 
+3 Research Scientist, AIAA member 
+4 Professor, AIAA Fellow 
+5 Professor, AIAA Associate Fellow 
+6 Assistant Professor, AIAA member 
+7 Aerospace Research Engineer, Research and Engineering Directorate, AIAA Senior Member 
+8 Research Engineer, AIAA senior member 
+
+
+
+
+
+
+
+
+
+
+
+2 
+
+
+
+ 
+
+
+
+technique to model flow inside a Tesla valve [5]. Gamboa et. al performed a 2-D optimization of a micro-scale diodic 
+
+
+
+profile at low Reynolds numbers and identified the angle of injection of the secondary flow during reverse operation 
+
+
+
+as a key parameter linked to valve performance [6]. This parameter was studied and investigated in our work as well. 
+
+
+
+Nguyen et al. theorize that pulsatile flows have the potential to vastly improve valve performance in macrofluidic 
+
+
+
+applications [7]. This feature is of particular interest in applications such as the one considered by Yang et. al, where 
+
+
+
+Tesla-inspired valves were applied to inject a premixed kerosene-air mixture into a rotating detonation combustor [8] 
+
+
+
+as well described by [9]. This study investigates the fluid dynamics of Tesla valves, utilizing a multi-objective 
+
+
+
+optimization approach to enhance valve performance by modifying its geometry. Additionally, an experimental 
+
+
+
+steady-state panel was built at Purdue University to calculate the diodicity of various injectors. 
+
+
+
+II. Performance Metrics 
+
+
+
+The discharge coefficient of a fluidic diode is a dimensionless parameter that quantifies the deviation of the actual 
+
+
+
+mass flow rate from the theoretical mass flow rate through a straight tube under identical conditions. Mathematically, 
+
+
+
+this coefficient is defined as the following ratio: 
+
+
+
+𝐶𝑑 = 
+�̇�
+
+
+
+𝐴√2𝜌∆𝑃
+, 
+
+
+
+(1) 
+where 𝐴, �̇�, 𝜌, ∆𝑃, are the orifice area, actual mass flow rate, fluid density, and pressure drop respectively. 
+
+
+
+ Hence, the discharge coefficient gives a way to measure the irreversible losses incurred as fluid transits through 
+
+
+
+the diode. As the purpose of the fluidic diode is to minimize losses in the forward flow direction while enhancing 
+
+
+
+losses in the reverse flow direction, the performance of a fluidic diode can be expressed in terms of the discharge 
+
+
+
+coefficients computed in the forward and reverse flow directions, or alternatively by the pressure drop directly: 
+
+
+
+𝐷𝑖 = (
+𝐶𝑑𝐹𝑊𝐷
+
+
+
+𝐶𝑑𝑅𝐸𝑉
+
+
+
+)
+
+
+
+2
+
+
+
+= (
+∆𝑃𝑟
+
+
+
+∆𝑃𝑓
+
+
+
+)
+�̇�
+
+
+
+ 
+
+
+
+(2) 
+
+
+
+where 𝐶𝑑𝐹𝑊𝐷
+ 𝑎𝑛𝑑 𝐶𝑑𝑅𝐸𝑉
+
+
+
+ are the forward and reverse discharge coefficients respectively [10]. 
+
+
+
+III. Numerical Methodology 
+
+
+
+Through a multi-objective 2-D optimization approach, we aim to maximize the diodicity of the fluidic diode while 
+
+
+
+simultaneously minimizing pressure loss in the forward flow direction. This optimization is controlled by the CADO 
+
+
+
+multi-objective optimization tool [11]. The following procedure is conducted for each geometry: 
+
+
+
+A) Geometry is parametrically created from control variables in MATLAB® 
+
+
+
+B) 2D mesh generated with Numeca IGG™ and HEXpress™ 
+
+
+
+C) Evaluation with Metacomp CFD++ [12] 
+
+
+
+D) Post processed in TecPlot® 
+
+
+
+In the following section, each of the above subroutines is further elaborated. 
+
+
+
+ 
+
+
+
+A. Parameterization of Diodic Profile 
+
+
+
+The following parameters of interest were identified for the parameterization and are sketched in Fig. 1: 
+
+
+
+• Inlet Width 
+
+
+
+• Outlet Width 
+
+
+
+• Center Width 
+
+
+
+• Length from inlet to center (L1) 
+
+
+
+• Length from center to outlet (L2) 
+
+
+
+• Angle of injection (𝜃) 
+
+
+
+• A series of control points generating recirculation lobe. 
+
+
+
+
+
+
+
+
+
+
+
+3 
+
+
+
+ 
+
+
+
+ 
+ Fig. 1 Sketch of parameterization of diode. 
+
+
+
+ 
+
+
+
+The curve of the diode is defined by a modified Akima spline (MAKIMA interpolation in MATLAB®). The diodic 
+
+
+
+valve is shown as parameterized in MATLAB® (Fig. 2). There is a parametric “centerbody” that can either be switched 
+
+
+
+on or off. Two plenums are also included for the inlet and exhaust. A more constrained parameterization with the 
+
+
+
+technique shown here is used for the main optimization (Fig. 13). 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+ Fig. 2 Example geometry parameterized in MATLAB® 
+
+
+
+ 
+
+
+
+B. Meshing 
+
+
+
+The geometry is then exported from MATLAB® and meshed in Numeca HEXpress™, an unstructured mesher. 
+
+
+
+A mesh inflation is applied along the viscous walls of the valve to capture the boundary layer, as can be seen in the 
+
+
+
+close-up of Fig. 3. All meshing operations are scripted for automation, for use in the optimization step. 
+
+
+
+Additionally, a centerbody is added to divide the reverse flow. The centerbody can be enabled/disabled by the 
+
+
+
+optimizer. A simple circular centerbody is shown in Fig. 3, but more complex center-bodies are used later on in the 
+
+
+
+manuscript. 
+
+
+
+ 
+ 
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+4 
+
+
+
+ 
+
+
+
+ 
+ Fig. 3 Mesh with centerbody and CFD Boundary Conditions 
+
+
+
+ 
+
+
+
+C. 2-D CFD Evaluation and 1-D Validation 
+
+
+
+To evaluate the diodicity, two CFD runs are carried out for each geometry: one in the forward flow direction (left 
+
+
+
+to right in Fig. 3) and one in the reverse flow direction (right to left in Fig. 3). 
+
+
+
+For the forward flow simulation, the boundary conditions are depicted in Fig. 3: A total pressure/temperature is 
+
+
+
+imposed on the inlet, a simple back-pressure is imposed at the exit, and all other boundaries are treated as viscous 
+
+
+
+adiabatic walls. For the reverse flow case, the total pressure/temperature and backpressure boundary conditions are 
+
+
+
+simply swapped. The 2D Reynolds averaged Navier Stokes equations are solved, and for turbulence closure the k-
+
+
+
+omega-SST model is employed. Incompressible water is used as the fluid. 
+
+
+
+To ensure CFD produces appropriate results, a 1-D flow tool was created for both an incompressible liquid, 
+
+
+
+assuming incompressible flow, and for a compressible gas, assuming isentropic flow. The different outputs that the 
+
+
+
+tool outputs are shown in Fig. 4 for water and in Fig. 5 for air. 
+
+
+
+ 
+Fig. 4 Incompressible 1-D Tool. a) Geometry b) Velocity c) Pressure d) Reynolds Number e) Area 
+
+
+
+ 
+
+
+
+ 
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+5 
+
+
+
+ 
+
+
+
+ 
+Fig. 5 Isentropic 1D Flow Tool a) Geometry b) Mach c) Pres. Ratio d) Temp. Ratio e) Area f) Velocity 
+
+
+
+ 
+
+
+
+D. Post Processing 
+
+
+
+A randomly selected, non-dimensional geometry was used as a CFD test case. An incompressible medium, water, 
+
+
+
+was selected as the working fluid, with a manifold pressure of 3 bar and a chamber pressure of 1 bar for the forward 
+
+
+
+flow case (Fig.6 a, b). In the reverse flow case, the boundary conditions for chamber and manifold were reversed, such 
+
+
+
+that there was 3 bar in the chamber and 1 bar in the manifold. These cases are shown in Fig.6. For this particular 
+
+
+
+geometry, the flow skips the lobe, resulting in a recirculation bubble (Fig.6 e). 
+
+
+
+ 
+
+
+
+ 
+Fig. 6 Test Geometry CFD; 
+
+
+
+a) Velocity (Forward) b) Total Pressure (Forward) 
+
+
+
+c) Velocity (Reverse) d) Total Pressure (Reverse) e) Recirculation 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+6 
+
+
+
+ 
+
+
+
+IV. Experimental Methodology 
+
+
+
+A. Steady-State Test Rig 
+
+
+
+To experimentally evaluate fluidic diode performance, several 3-D printed plastic injectors are fabricated, each 
+
+
+
+containing different diodic internal geometries. These injectors are evaluated at steady-flow conditions with the help 
+
+
+
+of a steady-state test rig. 
+
+
+
+ 
+Fig. 7 CAD Model of steady-flow rig & water tanks 
+
+
+
+ 
+
+
+
+A schematic representation of the steady-state test rig along with the actual experimental setup is shown in Fig. 7. 
+
+
+
+A manual regulator is used to set the ullage pressure of the run tank, which is filled with water. A set of four solenoid 
+
+
+
+valves are used to control the flow direction through the injector which allow forward and reverse flow to be tested 
+
+
+
+without having to remove the injector from the system. The dump tank collects water through the test to be pumped 
+
+
+
+back into the run tank for subsequent tests. 
+
+
+
+ The panel has a maximum nitrogen and water flow rate of 2265 SLPM and 9.1 SLPM respectively. The injectors 
+
+
+
+can experience a max pressure ratio of 5.25 and can support a maximum orifice diameter of ~3 mm. The panel has a 
+
+
+
+Coriolis flow meter for mass flow measurements, with a range up to 2 g/s precision and a precision <1%. 
+
+
+
+ The entire testing and operation of the steady-flow rig is automated using a LabVIEW VI interface. The LabVIEW 
+
+
+
+VI provides live estimates of the pressure drop, flow rate and the 𝐶𝑑 for the injector. Based on the pressure drop set 
+
+
+
+by the operator, the 𝐶𝑑 value for the forward and reverse direction can be readily obtained through an automated test 
+
+
+
+sequence. The valves are appropriately cycled to ensure a settling time and data acquisition time per experiment to 
+
+
+
+obtain the steady flow discharge coefficient. This system is readily used for various pressure drops and flow rates of 
+
+
+
+interest for the given injector. The uncertainty for the pressure transducers is +/- 1.0% and the Coriolis flow meter is 
+
+
+
++/- 0.1%. Using error propagation, the uncertainty for each of the calculated 𝐶𝑑 values is +/- 0.71%. 
+
+
+
+V. Results 
+
+
+
+A. Experimental Evaluation 
+
+
+
+In parallel with the CFD optimization, the experimentally designed and fabricated set of injectors with diodic 
+
+
+
+internal geometry. Diodic injectors were classified by three different parameters including number of diodes, volume 
+
+
+
+of the diodes, and final orifice diameter. The baseline for this design of experiments consists of an injector with two 
+
+
+
+diodes, medium volume, and a final orifice diameter, indicated as 𝑅0”. The parameters and reference numbers of all 
+
+
+
+diode injectors can be seen in Table 1. 
+
+
+
+Table 1 Experimental Diode Injector Parameters 
+
+
+
+Injector # Orifice Diameter(𝑅𝑡) Number of Diodes Diode Size 
+
+
+
+2.1 𝑅0 2 Medium 
+
+
+
+2.2 𝑅0/2 2 Medium 
+
+
+
+2.3 2𝑅0/390 2 Medium 
+
+
+
+
+
+
+
+
+
+
+
+7 
+
+
+
+ 
+
+
+
+The diode is constructed by scaling a parametric axisymmetric spade design for the different diode sizes. The 
+
+
+
+spade design is also scaled with respect to the radius of the orifice (Rt) as shown in Fig. 8. The volume of the diode is 
+
+
+
+defined by the length of the diode (L), the radius of the diode (R), and the offset of the diode curve (S). Three diode 
+
+
+
+volumes are initially selected, and the corresponding diode parameters are shown in Table 2. 
+
+
+
+ 
+ 
+
+
+
+ 
+
+
+
+Table 2 Experimental Diode Volume Sizes 
+
+
+
+Diode Size 
+
+
+
+(Volume) 
+
+
+
+L R S 
+
+
+
+Small 3*Rt 0.75*Rt Rt/2 
+
+
+
+Medium 4*Rt 1*Rt Rt/2 
+
+
+
+Large 5*Rt 1.25*Rt Rt/2 
+
+
+
+ 
+
+
+
+Forward and reverse discharge coefficients are determined by several discrete pressure drops across the injector. 
+
+
+
+Small variations in the achieved forward and reverse pressure drops may occur due to the difference in flow paths to 
+
+
+
+the injector, which can lead to variations in flow associated total pressure loss. To account for this slight variation in 
+
+
+
+the pressure drop within an individual test, data from the experiment is fitted with a polyfit curve, for the trends of 
+
+
+
+forward and reverse 𝐶𝑑 vs pressure drop. 
+
+
+
+This can be seen in Fig. 9a where the forward flow is represented by a positive pressure drop and the reverse is 
+
+
+
+represented by a negative pressure drop. Each star represents a sample collected at that pressure drop, and the polyfit 
+
+
+
+curve fitting procedure is applied separately to the forward and reverse 𝐶𝑑 trends. This polyfit provides a continuous 
+
+
+
+and smooth functional relationship between the discharge coefficient and the pressure drop across the injector. The 
+
+
+
+diodicity vs pressure drop is calculated by using the ratio of the polyfit forward over reverse functions. The pressure 
+
+
+
+dependent diodicity function is then plotted over the range over the experimental data, as seen in Fig. 9b. 
+
+
+
+ 
+
+
+
+2.4 𝑅0 1 Medium 
+
+
+
+2.5 𝑅0 3 Medium 
+
+
+
+2.6 𝑅0 2 Small 
+
+
+
+2.7 𝑅0 2 Large 
+
+
+
+t t
+
+
+
+Diode 
+
+
+
+Volume
+
+
+
+Fig. 8 Experimental Diode Parameterization 
+
+
+
+
+
+
+
+
+
+
+
+8 
+
+
+
+ 
+
+
+
+ 
+Fig. 9 a) 𝑪𝒅 vs ∆𝑷 in forward and reverse direction b) Di vs ∆𝑷 for Injector 2.1 
+
+
+
+ 
+
+
+
+ The functional dependence of number of diodes, volume of diodes, and orifice diameter on diodicity is explored 
+
+
+
+in the steady state case. The impact of pressure drop on diodicity can be seen in Fig. 10a. Increasing the number of 
+
+
+
+diodes provides a significant increase in the diodicity for a given pressure drop, however this change starts to plateau 
+
+
+
+with increasing pressure drop across the injector. 
+
+
+
+ With increasing diode volume, the diodicity starts to increase with increasing pressure drop. However, there 
+
+
+
+appears to be a threshold volume for a given orifice size, beyond which the increase in diode volume seems to have 
+
+
+
+negligible effect. 
+
+
+
+ The orifice size appears to be impactful to injector behavior, but trends cannot be readily observed. This change 
+
+
+
+can be attributed to the fact that in the current spade parameterization, various geometric parameters such as curvature 
+
+
+
+and volume are affected by the orifice size. 
+
+
+
+ 
+Fig. 10 Functional dependence on various parameters including: 
+
+
+
+(a) number of diodes, (b) volume of diodes, (c) orifice size (diodicity uncertainty +- 0.72%) 
+
+
+
+ 
+
+
+
+B. Numerical Baseline Geometry 
+
+
+
+To produce a baseline for further numerical optimization, the parameterization of Fig. 2 is adapted to generate 
+
+
+
+geometries like those found in literature for Tesla valves. This adapted parameterization, shown in Fig. 13, constrains 
+
+
+
+the diode wall into a semicircular shape and creates a concentric centerbody, which together make a return channel 
+
+
+
+for the reverse flow to travel through. The geometry of the diode and centerbody is controlled by the channel width, 
+
+
+
+expressed as a percentage of the center diameter, as well as the return angle, which describes the angle that the reverse 
+
+
+
+flow moving through the return channel is injected into the main flow. 
+
+
+
+In the experiments performed by Gamboa et. al., there is a high correlation between the flow return angle and the 
+
+
+
+diodicity. To explore this, two geometries were assessed, one with a high flow return angle and one with a low flow 
+
+
+
+return angle. This baseline geometry is an attempt to scale the geometry presented in Gamboa et. al. to match the inlet 
+
+
+
+and outlet diameters that match those tested by the experimental team in cold-flow testing. The boundary conditions 
+
+
+
+for this run as well as all subsequent optimization steps remain unchanged: Water is used as the fluid with a 3 Bar 
+
+
+
+total pressure upstream and 1 bar back pressure downstream. 
+
+
+
+
+
+
+
+
+
+
+
+9 
+
+
+
+ 
+
+
+
+ 
+Fig. 11 Comparison of baseline geometries at different flow return angles. 
+
+
+
+ 
+
+
+
+In line with the results from Gamboa et. al, the low flow return angle case (Geometry #2) featured enhanced 
+
+
+
+performance, showing a 17% improvement in diodicity over Geometry #1. 
+
+
+
+ 
+
+
+
+C. Experimental Validation of the Numerical Baseline 
+
+
+
+The baseline geometries described above in Fig. 11 were manufactured and tested in accordance with the steady 
+
+
+
+state testing outline described above. The diodicity vs pressure drop curve for these injectors can be seen in Fig. 12. 
+
+
+
+As calculated by the RANS CFD models, geometry #2 outperforms geometry #1. 
+
+
+
+ 
+
+
+
+ 
+Fig. 12 Experimental Di vs ∆𝑷 for baseline geometries #1 & #2 (diodicity uncertainty +- 0.72%) 
+
+
+
+ 
+
+
+
+ 
+
+
+
+D. CFD Optimized Geometry 
+
+
+
+In pursuit of additional improvements to the valve geometry, a multi-objective optimization routine was 
+
+
+
+implemented. To allow more freedom in the geometries considered, the parameterization was modified based on the 
+
+
+
+baseline results. For the optimization, the inlet, outlet, and center widths are all held constant, while the inclination 
+
+
+
+angle and the flow return angle are allowed to vary. Furthermore, 5 control points are placed on both the diode and 
+
+
+
+the center body, allowing the geometry of the return passage to vary. These parameters and an example geometry are 
+
+
+
+shown in Fig. 13 and Table 3. 
+
+
+
+
+
+
+
+
+
+
+
+10 
+
+
+
+ 
+
+
+
+ 
+Fig. 13 Diode Parameterization for Numerical Optimization 
+
+
+
+ 
+
+
+
+Table 3 Parameterization Variables for Optimization 
+
+
+
+Variable(s) Variable Number Minimum Maximum 
+
+
+
+Flow Return Angle 1 0° 60° 
+
+
+
+Diode Radial Perturbation 
+
+
+
+Control Points 
+
+
+
+1-5 
+
+
+
+ 2, 3, 4, 5, 6 -75% of channel +75% of channel 
+
+
+
+Centerbody Radial 
+
+
+
+Perturbation Control Points 
+
+
+
+1-5 
+
+
+
+ 7, 8, 9, 10, 11 -75% of channel +75% of channel 
+
+
+
+Inclination Angle 12 0° 60° 
+
+
+
+ 
+
+
+
+For the initial design of experiments, the inclination angle was fixed at 45 degrees, and 64 individuals were 
+
+
+
+generated through a fractional factorial approach. Fig. 14a shows the discharge coefficient of these individuals. Fig. 
+
+
+
+14b shows the results full optimization, showing all 393 individuals that were run. The optimization objectives were 
+
+
+
+set to maximize the forward 𝐶𝑑 and elevate the diodicity. A pareto front is found where individuals have both elevated 
+
+
+
+forward and reverse 𝐶𝑑 , however individuals with elevated forward 𝐶𝑑 and low reverse 𝐶𝑑 are also found, those 
+
+
+
+featuring elevated diodicity. 
+
+
+
+
+
+
+
+
+
+
+
+11 
+
+
+
+ 
+
+
+
+ 
+Fig. 14 a) Discharge coefficient initial run (n=64) b) Discharge coefficients full optimization (n=393) 
+
+
+
+ 
+
+
+
+Fig. 15 depicts a poor performing individual from the optimization with low diodicity and an elevated forward 
+
+
+
+Cd of 0.75. It can be seen in this geometry that the flow travelling in the reverse direction flows via the main path 
+
+
+
+rather than the diodic lobe, resulting in poor reverse-flow resistance and low diodicity. The mass flow convergence 
+
+
+
+of these CFD runs is given in Fig. 16. 
+
+
+
+ 
+Fig. 15 Low diodicity individual. Forward Flow (Left) & Reverse Flow (Right) 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+12 
+
+
+
+ 
+
+
+
+ 
+Fig. 16 Mass flow convergence for low diodicity individual 
+
+
+
+ 
+
+
+
+However, it was observed that the CFD simulations of certain individuals had difficulty with convergence due to 
+
+
+
+extreme geometry features like sharp corners that induced separation within the diode. To remedy this, the 
+
+
+
+interpolation of the centerbody was changed from an Akima-spline to a Bezier based interpolation, resulting in the 
+
+
+
+smoother centerbody shown in Fig. 17. 
+
+
+
+ 
+
+
+
+ 
+Fig. 17 Comparison of Bezier vs Akima-Spline Interpolation on randomly selected individual to improve 
+
+
+
+CFD convergence. 
+
+
+
+ 
+
+
+
+Alternately, Fig.. 18 depicts an elevated performing individual. In contrast to the previous individual, most of the 
+
+
+
+reverse flow is directed through the diodic lobe rather than the main path. Additionally, it was observed that all 
+
+
+
+geometries with elevated diodicity featured a high return angle. 
+
+
+
+
+
+
+
+
+
+
+
+13 
+
+
+
+ 
+
+
+
+ 
+Fig.. 18: Elevated Diodicity Individual: forward case (left) and reverse case (right) 
+
+
+
+ 
+
+
+
+This trait is exemplified in Figure 19, where all 393 individuals are color-marked according to their return angle. 
+
+
+
+Elevated-diodicity individuals, with a low reverse Cd and elevated forward Cd, often feature a high return angle. 
+
+
+
+ 
+Figure 19: Influence of the Return Angle 
+
+
+
+ 
+
+
+
+Finally, the inclination angle of the valve was allowed to vary between 0 and 60 degrees. As the inclination is 
+
+
+
+lowered, higher discharge coefficients in both directions are observed. One such individual is shown in Figure 
+
+
+
+20(right). However, at lower inclinations, large oscillations in mass-flow are detected (Figure 21). 
+
+
+
+ 
+Figure 20 optimization with varying inclination angle: plot of forward Cd vs reverse Cd (left), and a 
+
+
+
+geometry with low inclination angle with forward flow (right) 
+
+
+
+
+
+
+
+
+
+
+
+14 
+
+
+
+ 
+
+
+
+ 
+Figure 21: Mass Flow as function of the iteration step for the forward (top) and reverse flow (bottom) 
+
+
+
+ 
+
+
+
+VI. Conclusions 
+
+
+
+In this work, we have devised an approach and developed the tools to improve the geometry of a diodic profile for 
+
+
+
+steady incompressible fluids, inspired by the geometry of a Tesla valve. Several parameterization strategies have been 
+
+
+
+described to provide flexibility in profile geometry with a minimum number of parameters, and an optimization was 
+
+
+
+carried out numerically to understand the parameters that promote elevated-diodicity designs. We have found that the 
+
+
+
+angle at which the reverse flow in the diodic passage impinges upon the main flow path (flow-return angle in our 
+
+
+
+discussion above) should be maximized, and the geometry should be shaped to allow most of the reverse flow to 
+
+
+
+transit through the diodic passage. The numerical tools were validated and additional parameters such as diode count 
+
+
+
+were investigated by experimental testing of 3-D printed diodic profiles in a steady-state cold-flow test-rig. 
+
+
+
+Specifically, two geometries from the computational analysis were manufactured and tested, and the observed 
+
+
+
+improvements from the CFD were confirmed by the experiments. 
+
+
+
+ 
+
+
+
+Acknowledgements 
+ 
+
+
+
+ We would also like to thank Krishna Nagarajan for supporting the experimental efforts. This work was funded 
+
+
+
+by NASA SBIR contracts 80NSSC22PB194 and 80NSSC23CA152 
+
+
+
+ 
+
+
+
+References 
+
+
+
+ 
+[1] Tesla, N. (1920). Valvular conduit 
+
+
+
+ [Review of Valvular conduit]. https://patents.google.com/patent/US1329559A/en 
+
+
+
+[2] Bohm, S., Phi, H. B., Moriyama, A., Runge, E., Strehle, S., König, J., Cierpka, C., and Dittrich, L., “Highly 
+
+
+
+Efficient Passive Tesla Valves for Microfluidic Applications,” Microsystems & Nanoengineering, Vol. 8, No. 1, 
+
+
+
+2022, pp. 1–12. https://doi.org/10.1038/s41378-022-00437-4 
+
+
+
+[3] Gaymann, A., Montomoli, F., and Pietropaoli, M., “Design for Additive Manufacturing: Valves Without Moving 
+
+
+
+Parts,” presented at the ASME Turbo Expo 2017: Turbomachinery Technical Conference and Exposition, 
+
+
+
+Charlotte, North Carolina, USA, 2017. https://doi.org/10.1115/GT2017-64872 
+
+
+
+[4] Nobakht, A. Y., Shahsavan, M., and Paykani, A., “Numerical Study of Diodicity Mechanism in Different Tesla-
+
+
+
+Type Microvalves,” Journal of Applied Research and Technology, Vol. 11, No. 6, 2013, pp. 876–885. 
+
+
+
+https://doi.org/10.1016/S1665-6423(13)71594-3 
+
+
+
+[5] Thompson, S. M., Jamal, T., Paudel, B. J., & Walters, D. K. (2013). Transitional and Turbulent Flow Modeling in 
+
+
+
+a Tesla Valve. Volume 7B: Fluids Engineering Systems and Technologies. https://doi.org/10.1115/imece2013-65526 
+
+
+
+[6] Gamboa, A. R., Morris, C. J., & Forster, F. K. (2004). Improvements in fixed-valve micropump performance 
+
+
+
+through shape optimization of valves. Journal of Fluids Engineering, 127(2), 339–346. 
+
+
+
+https://doi.org/10.1115/1.1891151 
+
+
+
+[7] Nguyen, Q. M., Abouezzi, J., & Ristroph, L. (2021). Early turbulence and pulsatile flows enhance diodicity of 
+
+
+
+Tesla’s macrofluidic valve. Nature Communications, 12(1). https://doi.org/10.1038/s41467-021-23009-y 
+
+
+
+
+
+https://patents.google.com/patent/US1329559A/en
+
+
+https://doi.org/10.1038/s41378-022-00437-4
+
+
+https://doi.org/10.1115/GT2017-64872
+
+
+https://doi.org/10.1115/1.1891151
+
+
+
+
+
+
+
+
+15 
+
+
+
+ 
+
+
+
+[8] Yang, X., Wu, Y., Song, F., Zhou, J., Liu, H., Xu, S., & Chen, X. (2023). Experimental study on a premixed 
+
+
+
+rotating detonation combustor using Tesla inlet configuration fueled by kerosene. Experimental Thermal and Fluid 
+
+
+
+Science, 146, 110928. https://doi.org/10.1016/j.expthermflusci.2023.110928 
+
+
+
+[9] Teasley, T.W., Protz, C.S., Larkey, A.P., Williams, B.B. and Gradl, P.R., 2021. A Review Towards the Design 
+
+
+
+Optimization of High Performance Additively Manufacthttps://doi.org/10.2514/6.2021-3655ured Rotating 
+
+
+
+Detonation Rocket Engine Injectors. In AIAA Propulsion and Energy 2021 Forum (p. 3655). 
+
+
+
+[10] Keller, A. R., Otomize, J., Nair, A. P., Minesi, N. Q., and Spearrin, R. M., “High-Diodicity Impinging Injector 
+
+
+
+Design for Rocket Propulsion Enabled by Additive Manufacturing,” 2022. https://doi.org/10.2514/6.2022-1265 
+
+
+
+[11] Verstraete T, Alsalihi Z, Van den Braembussche R. Multidisciplinary optimization of a radial compressor for 
+
+
+
+microgas turbine applications. J Turbomach 2010;132(3):031004. doi: 10.1115/1.3144162 
+
+
+
+[12] Chakravarthy S, Peroomian O, Goldberg U, Palaniswamy S. The CFD ++ computational fluid dynamics software 
+
+
+
+suite. AIAA and SAE. World Aviation Conference Anaheim, CA; 1998. doi: 10.2514/6.1998-5564 
+
+
+
+ 
+
+
+
+
+
+https://doi.org/10.1016/j.expthermflusci.2023.110928
+
+
+https://doi.org/10.2514/6.2022-1265

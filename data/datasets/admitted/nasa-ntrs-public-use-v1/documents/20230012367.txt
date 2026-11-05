@@ -1,0 +1,1218 @@
+Alison Runninger | NASA - GRC9/14/2023
+
+
+
+
+
+
+
+
+
+
+
+ Background
+ Prototype Rogowski Coil Based Fault 
+
+
+
+Detection
+ Test Results
+ Conclusion 
+
+
+
+Agenda
+
+
+
+
+
+
+
+
+
+
+
+Background
+
+
+
+
+
+
+
+
+
+
+
+Silicon Carbide MOSFETS
+
+
+
+• Enticing option for converters
+• Fast switching
+• High efficiency
+• Higher breakdown voltage 
+
+
+
+• Downsides include
+• Higher short circuit current density 
+• Smaller thermal capacitance
+
+
+
+• Small internal inductance and small on-state resistance causes 
+large di/dt -> Current rapidly increases during a short circuit 
+event
+
+
+
+• Typically results in damage to the module
+
+
+
+
+
+
+
+
+
+
+
+Common Short Circuit Detection Methods
+
+
+
+• Desaturation (Desat)
+• Measures the voltage at the drain of the 
+
+
+
+MOSFET
+• When the voltage exceeds the specified 
+
+
+
+voltage, power is stopped to the device
+• Can shut down a fault in several 
+
+
+
+microseconds
+• Originally designed to work with IGBTs, 
+
+
+
+not SiC MOSFETs
+• Much better at protecting IGBTs
+• Better at limiting current during short circuit 
+
+
+
+events
+S. Mocevic et al., “Comparison and Discussion on Shortcircuit
+Protections for Silicon-Carbide MOSFET Modules: Desaturation Versus 
+Rogowski Switch-Current Sensor,” IEEE Transactions on Industry 
+Applications, vol. 56, no. 3, pp. 2880–2893, May 2020, doi: 
+https://doi.org/10.1109/TIA.2020.2972816.
+
+
+
+
+
+
+
+
+
+
+
+Problems With Common Methods
+
+
+
+• Some off the shelf SiC MOSFETS have a short circuit withstand 
+time of <2 microseconds
+
+
+
+• Desat at its fastest can shut down a fault in several 
+microseconds
+
+
+
+
+
+
+
+
+
+
+
+Current Based Fault Detection
+
+
+
+• Proven to respond faster
+• Main factor driving performance is current 
+
+
+
+transducer 
+• Air cores – aka Rogowski Coil – desirable for flight 
+
+
+
+• Low mass
+• Small footprint
+• Trade-off: significant reduction in sensitivity compared to 
+
+
+
+magnetic cores
+• Rogowski coil generates di/dt value of the sensed 
+
+
+
+current scaled by a factor of the mutual inductance
+• Large magnitude current derivative of fault events 
+
+
+
+mitigates need for CT with large inductance
+M. El-Shahat, E. Tag Eldin, N. A. Mohamed, A. EL-Morshedy, 
+and M. E. Ibrahim, “Measurement of Power Frequency Current 
+including Low- and High-Order Harmonics Using a Rogowski 
+Coil,” Sensors, vol. 22, no. 11, p. 4220, Jan. 2022, doi: 
+https://doi.org/10.3390/s22114220.
+
+
+
+
+
+
+
+
+
+
+
+Prototype Rogowski Coil Based 
+Fault Detection
+
+
+
+
+
+
+
+
+
+
+
+Prototype Design
+
+
+
+• Power Circuit
+• DC bus – Vbus
+• Load inductance – Lload
+• Parasitic power loop inductance – Lpar
+• Switching device – S1
+
+
+
+• Rogowski Coil – represented by coupled inductor
+• Primary inductance – Lp
+• Secondary inductance –Ls
+• Coupling coefficient – k
+
+
+
+• Filtered by RC network
+• R1
+• R2
+• C
+
+
+
+• Comparator w/ threshold voltage – Vth
+• Output of comparator used to activate latching shutdown circuit - Vo
+
+
+
+
+
+
+
+
+
+
+
+Design Considerations
+
+
+
+• RC filter must provide filtering to ensure circuit does not trip 
+during normal switching
+
+
+
+• Circuit must be sensitive enough to detect low-frequency faults
+• Must have overlap between spectrum of faults that Rogowski based 
+
+
+
+and Desat based methods can detect
+• The actual device needed to be small enough to fit in a 2.54 cm 
+
+
+
+space due to the space constraints on the converter
+
+
+
+
+
+
+
+
+
+
+
+Electrical Simulation
+
+
+
+• Model was created in LT Spice
+• Parameters chosen to correspond with values in experimental 
+
+
+
+test set up Electrical
+
+
+
+Parameter Value
+
+
+
+Lpar 10 [nH]
+
+
+
+Lload 500 [nH]
+
+
+
+Lp 5 [nH]
+
+
+
+Ls 10.7 [μH]
+
+
+
+k 25.9%
+
+
+
+R1 2 [kΩ]
+
+
+
+R2 1 [kΩ]
+
+
+
+C 10 [nF]
+
+
+
+Vth 2.5 [V]
+
+
+
+
+
+
+
+
+
+
+
+Die Thermal Simulation
+• Model used to determine temperature at 
+
+
+
+junction of device
+• Goal of protection circuit: shut down fault before 
+
+
+
+junction temperature reaches datasheet 
+specified limit (typ. 175 degrees C)
+
+
+
+• Due to low thermal mass, hard-fault events 
+cause junction to reach rated temp faster than 
+larger module w/ higher junction heat capacity
+
+
+
+*Derived from a 4 gram copper lead frame in a TO-247 package
+
+
+
+**T_Global XL-25W TO-247 package (22x17x1.0 mm)
+
+
+
+***Ohmite R2V-CT4-38E
+
+
+
+Parameter Definition Derivation Value
+
+
+
+Pj
+Power 
+
+
+
+dissipated at 
+junction
+
+
+
+Voltage and current 
+data
+
+
+
+Tj
+Device 
+
+
+
+junction 
+temperature
+
+
+
+Result of simulation or 
+analysis
+
+
+
+Cj
+Device 
+
+
+
+junction heat 
+capacity
+
+
+
+Datasheet transient 
+thermal impedance 
+
+
+
+chart
+0.0017
+
+
+
+J
+°C
+
+
+
+Rj,c
+
+
+
+Thermal 
+resistance 
+between 
+
+
+
+junction and 
+case
+
+
+
+Datasheet transient 
+thermal impedance 
+
+
+
+chart (or listed 
+explicitly)
+
+
+
+0.15
+°C
+W
+
+
+
+Cc
+Case heat 
+capacity
+
+
+
+Case material and 
+geometry 1.54 J
+
+
+
+°C
+*
+
+
+
+Rc_hs
+
+
+
+Thermal 
+resistance 
+
+
+
+between case 
+and heatsink
+
+
+
+Thermal grease, gap 
+pad, etc. datasheet 0.11 °C
+
+
+
+W
+**
+
+
+
+Chs
+Heatsink heat 
+
+
+
+capacity
+Heatsink material and 
+
+
+
+geometry
+26.1
+
+
+
+J
+°C
+
+
+
+***
+
+
+
+Rhs,a
+
+
+
+Thermal 
+resistance 
+between 
+
+
+
+heatsink and 
+ambient
+
+
+
+Thermal analysis 
+(analytically or 
+
+
+
+experimentally derived)
+9.8 °C
+
+
+
+W
+**
+
+
+
+Ta
+Ambient 
+
+
+
+temperature
+Operational parameter 25 [°C]
+
+
+
+
+
+
+
+
+
+
+
+Bond Wire Thermal Simulation
+
+
+
+• Additional concern is for bond wires to fuse 
+• Large magnitude of fault current
+
+
+
+• Analysis completed to determine limiting factor 
+• Die or bond wires reaching max allowable temp
+
+
+
+• Thermal energy balance equation 
+• Qin = Qstored + Qout
+
+
+
+• Qin: heat energy injected 
+• Qstored: heat energy held
+• Qout: heat dissipated
+• Can be expanded into: ∫0
+
+
+
+tf I t 2R dt = Alρ c Tm − To + Hf +
+8k
+l
+
+
+
+A Tm − To tf
+
+
+
+• Assumed only heat loss due to conduction
+• Short time period -> heat loss from conduction is negligible
+
+
+
+• Fault current profile I(t) used in die and bond wire models 
+to determine short circuit withstand time
+
+
+
+Parameter Definition Value
+
+
+
+𝑡𝑡𝑓𝑓
+Time at which bond 
+
+
+
+wire
+
+
+
+reaches liquid state
+
+
+
+𝐼𝐼 𝑡𝑡
+Fault Current Profile
+
+
+
+𝑅𝑅
+Bond wire Resistance 1.71 [mΩ]
+
+
+
+𝐴𝐴 Bond wire cross-
+
+
+
+sectional area
+
+
+
+1.14 �
+
+
+
+10−7 m3 ****
+
+
+
+𝑙𝑙
+Bond wire length 7.09 [mm]
+
+
+
+𝜌𝜌
+Bond wire density 2.7 � 106
+
+
+
+g
+m3
+
+
+
+𝑐𝑐 Bond wire specific heat 
+
+
+
+capacity
+0.9 J
+
+
+
+g�°K
+
+
+
+𝑇𝑇𝑚𝑚 Bond wire melting 
+
+
+
+temperature
+933.15 [*K]
+
+
+
+𝑇𝑇𝑜𝑜 Bond wire initial 
+
+
+
+temperature
+298.15 [*K]
+
+
+
+𝐻𝐻𝑓𝑓 Bond wire heat of 
+
+
+
+fusion
+376 J
+
+
+
+g
+
+
+
+𝑘𝑘 Bond wire thermal 
+
+
+
+conductivity
+0.237 W
+
+
+
+°K
+
+
+
+****There are 4 parallel bond wires in the device
+****Corresponds to a 15 mil diameter bond wire
+
+
+
+
+
+
+
+
+
+
+
+Simulation Results
+
+
+
+• Fault detection circuit’s threshold 
+voltage exceeded within 500 ns
+
+
+
+• Before junction temperature is reached 
+• Datasheet says rated for 175 degrees C
+
+
+
+• Bond wire thermal model evaluated 
+with melting time of 9.79 μs
+
+
+
+• Performance indicates success in 
+mitigating harsher hard-fault events
+
+
+
+• Higher voltage 
+• Lower inductance 
+
+
+
+0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+
+
+
+10 -6
+
+
+
+0
+
+
+
+500
+
+
+
+1000
+
+
+
+Fa
+ul
+
+
+
+t C
+ur
+
+
+
+re
+nt
+
+
+
+ [A
+m
+
+
+
+ps
+]
+
+
+
+0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+
+
+
+10 -6
+
+
+
+0
+
+
+
+1
+
+
+
+2
+
+
+
+3
+
+
+
+Se
+ns
+
+
+
+or
+ V
+
+
+
+ol
+ta
+
+
+
+ge
+ [V
+
+
+
+ol
+ts
+
+
+
+]
+
+
+
+Sensor
+
+
+
+Threshold
+
+
+
+0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+
+
+
+Time [s] 10 -6
+
+
+
+25
+
+
+
+25.5
+
+
+
+26
+
+
+
+Te
+m
+
+
+
+pe
+ra
+
+
+
+tu
+re
+
+
+
+ [C
+]
+
+
+
+
+
+
+
+
+
+
+
+Test Results
+
+
+
+
+
+
+
+
+
+
+
+Prototype Implementation
+
+
+
+• Prototype 1 kV, 250 kW inverter w/ 
+logic circuitry to latch fault
+
+
+
+• Rogowski coil fabricated using: 
+• Adjustable plastic ring
+• 200 turns of 0.45 mm diameter 
+
+
+
+magnet wire
+• Entire assembly sealed w/ shrink 
+
+
+
+tubing
+• Rogowski Coil weighs 7.2 grams 
+
+
+
+and has coil length of 9.398 cm
+
+
+
+
+
+
+
+
+
+
+
+Prototype Implementation Continued
+
+
+
+• In test configuration coil 
+resulted: 
+
+
+
+• Self inductance – 10.7 μH
+• Mutual inductance – approx. 60 
+
+
+
+nH
+• Inverter configured with a 
+
+
+
+shorted load to induce low-
+inductance fault
+
+
+
+• Approx 500 nH
+• Set by parasitic inductance of 
+
+
+
+shorted load wire
+
+
+
+Rogowski 
+CoilDC Link 
+
+
+
+Capacitors
+
+
+
+Fault Latching 
+Circuitry
+
+
+
+
+
+
+
+
+
+
+
+Test Results
+
+
+
+• DC bus varied starting at 50 V, 
+stepped up by 50 V to 1 kV
+
+
+
+• Fault current waveforms captured in 
+intervals of 200 V
+
+
+
+• System prevented damage to all 
+devices and responded to all fault 
+events in 500 ns
+
+
+
+• System kept fault current low to 
+prevent excessive voltage 
+overshoot
+
+
+
+• Additional ringing past device 
+shutdown attributed to resonant 
+current – does not contribute to 
+device heating 
+
+
+
+
+
+
+
+
+
+
+
+Additional Findings
+
+
+
+• Need for fault latch signal to be isolated from noisy signals to 
+prevent false tripping and proper latching
+
+
+
+• Propagation delay imposed by fault latch circuity needed to be 
+small to ensure efficient shut down time 
+
+
+
+
+
+
+
+
+
+
+
+Conclusion
+
+
+
+
+
+
+
+
+
+
+
+Conclusion
+
+
+
+• Investigated hard fault protection method for 1 kV SiC MOSFET 
+utilizing a Rogowski coil
+
+
+
+• Electrical and thermal model used to verify functionality of 
+circuit
+
+
+
+• Experimentally gathered low-inductance fault data collected on 
+prototype 1 kV SiC based inverter
+
+
+
+• Combining Desat with this method can protect from the most 
+common methods of FET failure, saving time and money when 
+working with experimental SiC MOSFET converters
+
+
+
+
+
+
+
+
+
+
+
+Thank you! Questions?
+
+
+
+
+
+
+ 
+Slide Number 1
+
+ 
+Agenda
+
+ 
+Background
+
+ 
+Silicon Carbide MOSFETS
+
+ 
+Common Short Circuit Detection Methods
+
+ 
+Problems With Common Methods
+
+ 
+Current Based Fault Detection
+
+ 
+Prototype Rogowski Coil Based Fault Detection
+
+ 
+Prototype Design
+
+ 
+Design Considerations
+
+ 
+Electrical Simulation
+
+ 
+Die Thermal Simulation
+
+ 
+Bond Wire Thermal Simulation
+
+ 
+Simulation Results
+
+ 
+Test Results
+
+ 
+Prototype Implementation
+
+ 
+Prototype Implementation Continued
+
+ 
+Test Results
+
+ 
+Additional Findings
+
+ 
+Conclusion
+
+ 
+Conclusion
+
+ 
+Thank you! Questions?

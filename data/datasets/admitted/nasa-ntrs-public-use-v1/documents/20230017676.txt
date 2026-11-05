@@ -1,0 +1,655 @@
+Post-Flight Aerodynamics Assessment of the Artemis-I Booster
+Separation Event
+
+
+
+Michael W. Lee∗
+NASA Langley Research Center, Hampton, VA
+
+
+
+Derek J. Dalle†, Jamie G. Meeroff‡, Stuart E. Rogers†, and Aaron C. Burkhead§
+NASA Ames Research Center, Moffett Field, CA
+
+
+
+D. Guy Schauerhamer¶ and Joshua F. Diaz¶
+Science & Technology Corp., Moffett Field, CA
+
+
+
+Rekesh Ali‖
+JSEG/McLaurin Aerospace, Huntsville, AL
+
+
+
+Peter McDonough∗∗ and Carole J. Addona††
+JSEG/Jacobs, Huntsville, AL
+
+
+
+The successful launch of the Artemis-I mission in November 2022 was made possible, in part,
+by years of rigorous vehicle simulation and scaled testing. Correctly anticipating the complex
+physics of the booster separation event was one of many necessary challenges. The successful
+booster separation of Artemis-I yielded flight data with which the fidelity of these predictions
+could be assessed. In this paper, the flight data and flight simulations are reconciled to present a
+unified assessment of the booster separation event. With this assessment, predictive confidence
+can be reinforced in support of the crewed Artemis-II mission.
+
+
+
+Nomenclature
+
+
+
+𝐶𝑃 = pressure coefficient
+𝑒1,2,3 = unit vectors defining one axis of a local coordinate system
+®𝑝01 = position vector of point 1 relative to point 0
+𝑢 = constant position vector between two points on a rigid body, in the 𝑒1 axis
+𝑣 = constant position vector between two points on a rigid body, in the 𝑒2 axis
+𝑤 = constant position vector between two points on a rigid body, in the 𝑒3 axis
+Δ𝑋 = preseparation core-relative booster nose distance in the core stage x-axis
+Δ𝑌 = preseparation core-relative booster nose distance in the core stage y-axis
+Δ𝑍 = preseparation core-relative booster nose distance in the core stage z-axis
+BET = Best Estimated Trajectory
+BSM = Booster Separation Motor
+DFI = Developmental Flight Instrumentation
+GNC = Guidance, Navigation, and Control
+LSRB = Left Solid Rocket Booster
+MET = Mission-elapsed Time
+
+
+
+∗Research Aerospace Engineer, Configuration Aerodynamics Branch, NASA Langley Research Center, AIAA Member.
+†Research Aerospace Engineer, Computational Aerosciences Branch, NASA Ames Research Center
+‡Supervisory Aerospace Engineer, Computational Aerosciences Branch, NASA Ames Research Center
+§Intern Aerospace Engineer, Computational Aerosciences Branch, NASA Ames Research Center
+¶Research Aerospace Engineer, Computational Aerosciences Branch, Science & Technology Corp.
+‖Modeling and Simulation Engineer, EV42 Guidance, Navigation, and Mission Analysis Branch, JSEG/McLaurin Aerospace
+
+
+
+∗∗Liftoff/Separation Technical Lead, EV42 Guidance, Navigation, and Mission Analysis Branch, JSEG/Jacobs
+††Booster Separation Analyst, EV42 Guidance, Navigation, and Mission Analysis Branch, JSEG/Jacobs
+
+
+
+1
+
+
+
+
+
+
+
+
+
+
+
+PMBT = Propellant Mean Bulk Temperature
+RSRB = Right Solid Rocket Booster
+SLS = Space Launch System
+SRB = Solid Rocket Booster
+TPS = Thermal Protection System
+
+
+
+I. Background and Motivation
+
+
+
+THE Space Launch System (SLS) launched for the first time as part of the Artemis I mission on November 16, 2022
+(Figure 1). The success of the first launch of this new vehicle is testament to a decade of effort across several NASA
+
+
+
+centers and contractors. Although the vehicle behavior was nominal throughout the flight, its preflight conditioning
+was not. Just six days prior to the successful launch, the vehicle sat on the launch pad while Tropical Storm Nicole
+blew through the launch complex. Prior to their integration into the final launch vehicle, the core stage RS-25 engines
+underwent two full burn tests at NASA Stennis Space Center, after individual engine tests had already been conducted.
+The consistent performance of the SLS through these planned and unplanned stress tests was only possible because of
+the rigor with which the vehicle was designed. Indeed, the launch vehicle fidelity is derived from the vehicle design
+and analysis fidelity.
+
+
+
+Fig. 1 Images from the November 16, 2023 Artemis I SLS launch, taken from Ref. [1].
+
+
+
+One aspect of the launch vehicle is its use of solid rocket boosters (SRBs) to augment the liftoff and initial ascent
+mission stages. Inherited from the Space Shuttle Program, these boosters provide nearly 80% of the vehicle thrust
+at liftoff. Once their solid fuel is nearly spent, the boosters are jettisoned from the core stage, which then continues
+its ascent as the boosters fall into the ocean below. This booster separation event is aerodynamically complex: several
+engine plumes interact, including those of the core stage engines and the separation motors that propel the boosters away
+from the core stage. The three bodies move in close proximity, independently of one another, at supersonic speeds. A
+great deal of effort goes into ensuring, to a high degree of confidence, that the boosters and core stage will not recontact
+during the separation event. The aerodynamic aspect of this prediction effort is detailed in Ref. [2].
+
+
+
+However much effort went into the Artemis I launch vehicle design and analysis, it was not until after the November
+2022 launch that those methods could be validated with real flight data. This paper details these post-flight analyses
+
+
+
+2
+
+
+
+
+
+
+
+
+
+
+
+of the booster separation event. In particular, integrated separation trajectory simulations and computational fluid
+dynamics plume modeling are shown to agree with Artemis I flight data.
+
+
+
+II. Preflight Trajectory Simulations
+CLVTOPS [3] is a multibody dynamics simulation tool that was developed specifically to model high-fidelity clear-
+
+
+
+ances during various flight events, such as liftoff and booster separation. CLVTOPS serves as a multifunctional wrapper
+around the TREETOPS [4] dynamics engine and provides capabilities such as the ability to run Monte Carlo analyses
+with hundreds of dispersed variables, a robust post-processing capability, and generation of output files compatible
+with the NASA-developed Tree3D [5] visualization software package.
+
+
+
+Preflight booster separation analyses for Artemis I were conducted using CLVTOPS and included several day-of-
+launch specific inputs to best represent the expected vehicle configuration and trajectory on launch day. Examples of
+the most influential models are the SRB flight day performance prediction, SRB pyro timing model, SLS guidance,
+navigation, and control (GNC) model, SLS integrated vehicle mass properties, SRB propellant mean bulk temperature
+(PMBT), and booster separation aerodynamics.
+
+
+
+PMBT of the solid rocket motor propellant of both the SRBs and Booster Separation Motors (BSMs) is a major
+performance driver and is used as a key input parameter to scale the thrust and burn rate. The PMBTs of the boosters
+impact the vehicle states, such as dynamic pressure and Mach number at booster separation, essentially setting the initial
+conditions for the separation event. Hot booster PMBTs cause an increase in burn rate, resulting in earlier separation,
+which tends to cause lower-altitude separations with higher dynamic pressure and, therefore, larger aerodynamic loads.
+Due to the earlier separation, hot PMBTs are also correlated with higher core propellants mass, resulting in a lower core
+axial acceleration at separation. The PMBTs of the BSMs then largely govern the vehicle dynamics after separation has
+occurred. Hot BSMs separate the boosters from the core more quickly, generally allowing for more clearance of the
+external components of the SRBs and core. However, this increased lateral acceleration also tends to reduce clearances
+in the forward core-booster attach hardware. Thus, the hottest and coldest BSM PMBTs drive worst-case clearances
+for different areas of the hardware.
+
+
+
+In order to bound expected vehicle performance across the entire year, drive worst-case clearances across all launch
+months, and to obviate the need for a more exhaustive set of simulation cases, four booster separation cases (Figure 2)
+were designed that encompassed all possible combinations of SRB and booster BSM PMBTs across the entire year of
+launch windows.
+
+
+
+Fig. 2 Artemis I booster separation analysis PMBT design box.
+
+
+
+Other than PMBT, the model input that varied per specific launch day was the GNC input that guided the vehicle
+
+
+
+3
+
+
+
+
+
+
+
+
+
+
+
+trajectory. Artemis I booster separation analysis showed that booster separation clearance results had low sensitivity to
+launch day differences based on these GNC inputs, so PMBT was used as the overarching design input to drive worst-
+case clearances. The other inputs noted above such as mass properties, separation aerodynamics, and pyro timing do
+not vary with vehicle configuration/launch day.
+
+
+
+Four primary clearance metrics were used for booster separation analysis to determine the amount of margin with
+respect to booster-to-core recontacts that is predicted for the Artemis I vehicle:
+
+
+
+1) minimum forward attach ball/socket clearance when the ball passes the socket exit plane;
+2) minimum clearance between an aft attach strut to the opposite body (generally the aft end of the core-to-booster-
+
+
+
+side diagonal strut stub);
+3) minimum macro clearance between a booster and the core stage when the nose of the booster crosses the exit
+
+
+
+plane of the core stage engines axially; and
+4) forward attach TPS clearance, defined by the clearance between the TPS-coated crossover fairing geometry on
+
+
+
+the core side and the TPS-coated “outer” forward attach hardware on the booster side.
+The four plots in Figure 3 show the worst-case clearances for each of these four metrics and the plot title describes
+the specific PMBT combination that resulted in this clearance result. Note that even though these are “worst-case”
+clearances, each plot shows that the clearance continuously increases after separation, indicating no recontacts were
+expected.
+
+
+
+Fig. 3 Plots of dispersed trajectory sets yielding bounded estimates of critical core-booster clearances for
+Artemis I launch windows that together account for all expected extremes within the launch year. Note that one
+plot is a function of axial booster separation Δ𝑋 and the others are functions of mission-elapsed time (MET).
+
+
+
+The Artemis I booster separation analysis showed positive clearances between the boosters and core stage; the use
+of bounding PMBTs as well as low sensitivity of clearances to variations in launch date indicate that these positive
+
+
+
+4
+
+
+
+
+
+
+
+
+
+
+
+results should hold for all potential launch periods.
+
+
+
+III. Post-Flight Analyses
+Prior to the moment that the boosters separate from the core stage, all flight instrumentation on the boosters is sent
+
+
+
+through the attach hardware to data acquisition units on the core stage, and core stage hardware is also responsible for
+transmitting that data to the ground. As a result, once separation occurs, there are no data from the boosters themselves.
+This means that no surface pressures, combustion chamber pressures, heat fluxes, acceleration data, etc. are available
+to help validate predictions about the trajectory and flow fields during booster separation. However, this did not disable
+all efforts to validate the vehicle predictions with flight data. Two analyses were performed on the Artemis I booster
+separation event: a simplified trajectory comparison and a core stage pressure sensor investigation. This section presents
+the details of and the findings from both of these assessments.
+
+
+
+A. Trajectory Comparisons
+The night launch of the Artemis I mission limited ground-based visibility during booster separation. However,
+
+
+
+due to the light emitted from the booster separation motors and the core stage engines, a small amount of points were
+illuminated for enough of the separation event, from the perspective of on-board cameras, that a simple trajectory
+reconstruction could occur. Two examples of this are presented in Figure 4.
+
+
+
+(a) RSRB (b) LSRB
+
+
+
+Fig. 4 Images captured by core stage cameras of the Artemis I booster separation event. Light from the engines
+illuminates a small number of photogrammetry points (e.g., black strips) on both boosters [photo: NASA].
+
+
+
+Given the known preseparation locations of the photogrammetry points on the boosters, frame-by-frame image
+analysis was performed on these onboard videos, which resulted in position estimates of these surface markings as
+functions of time. The procedure of performing this image analysis is out of the scope of this paper; readers are directed
+to Ref. [6] for an introduction to the governing principles and to Ref. [7] for a summary of the photogrammetry effort
+as it pertains to the SLS.
+
+
+
+Once the positions of these photogrammetry points are estimated as functions of time, they can be reconciled into
+booster nose position estimates. This procedure is straightforward as long as it is assumed that the boosters remain rigid
+bodies during the separation event. Given any three booster surface point positions 1, 2, 3 relative to a global reference
+point 0, ®𝑝01,02,03, a local coordinate system 𝑒 can be defined based on the vectors connecting these points and their
+cross product:
+
+
+
+𝑒1 = ®𝑝12 | ®𝑝12 |−1 (1)
+
+
+
+𝑒2 = ®𝑝13 | ®𝑝13 |−1
+
+
+
+𝑒3 = 𝑒1 × 𝑒2
+
+
+
+where the | · | brackets denote a vector magnitude and the × operator denotes a vector cross product. The position vector
+between this local axis system locus (in this example point 01) and any other point on the rigid body, ®𝑝1𝑛, is constant
+
+
+
+5
+
+
+
+
+
+
+
+
+
+
+
+as long as the body remains rigid. In the local coordinate system, this is represented as
+
+
+
+®𝑝1𝑛 = ®𝑝0𝑛 − ®𝑝01 (2)
+= 𝑢𝑒1 + 𝑣𝑒2 + 𝑤𝑒3 (3)
+
+
+
+where Equation 2 can be computed once with preseparation, known booster position measurements and Equation 3 can
+be computed at subsequent post-separation instances where ®𝑝01 is measured and 𝑢, 𝑣, 𝑤 have not changed. In this way,
+given the photogrammetry point positional estimates, the booster nose position can be computed at any time at which
+at least three photogrammetry points are visible.
+
+
+
+Figure 5 presents booster nose positions as functions of both mission-elapsed time (MET) and axial preseparation
+relative distance, Δ𝑋 . Nose positions as computed from a trajectory simulation with all nominal conditions are plotted
+as solid lines; nose positions as computed from flight data are plotted as points. The large gaps between points are
+where fewer than three photogrammetry points were visible at any given video frame.
+
+
+
+Fig. 5 Booster nose positions plotted as functions of mission-elapsed time (top) and as functions of the axial
+separation distanceΔ𝑋 (bottom), as computed from both trajectory simulations and Artemis I flight data. Where
+both lines are not visible, the black line directly overlaps the red line due to the simulated symmetry of the booster
+physics with no uncertainties applied.
+
+
+
+Given the uncertainties in both the flight data and the trajectory simulation, the general agreement between the tra-
+jectory simulations and the flight data estimates is encouraging. It was understood during their creation that photogram-
+metry estimates after the first moments of separation were less accurate; this is reflected in the increased dispersion of
+
+
+
+6
+
+
+
+
+
+
+
+
+
+
+
+flight data at higher separation distances. The jagged trends drawn by the flight data are clearly measurement errors
+and not physically infeasible booster dynamics. Where the photogrammetry estimates are most confident, there is a
+strong agreement between the two data sources. Where the photogrammetry estimates are less confident, the nominal
+separation trajectory traces a path directly through the cloud of point estimates.
+
+
+
+B. Fluid Dynamics Simulations
+Despite the absence of flight data from the boosters post-separation, some of the core stage pressure sensors are
+
+
+
+still active in this portion of the flight. Fortunately, two of the approximately two dozen core stage pressure sensors
+are significantly impacted by the exhaust from the Booster Separation Motors (BSMs), and as a result there is a small
+amount of flight data to help validate the flow fields predicted by CFD.
+
+
+
+New FUN3D simulations, following the same techniques used for Artemis II booster separation described in Ref.
+[8], were run at every 0.2 ft of axial SRB translation. Due to the limited photogrammetry in the first second after booster
+separation, only a crude SRB trajectory could be assembled for this study. The sources for this small run matrix are:
+
+
+
+• the Artemis I Best Estimated Trajectory (BET), for atmospheric conditions (dynamic pressure, temperature);
+• Artemis I preflight booster separation simulations, for mean SRB positions and angles; and
+• Artemis II booster separation simulations, for thrust profiles.
+
+
+
+These FUN3D simulations used 130.9 s MET as the time of separation, but the best current estimate is 130.818 s MET.
+The FUN3D results should be shifted slightly to the left for a more accurate comparison.
+
+
+
+Figure 6 shows the comparison between flight data and the post-flight FUN3D simulations for the AD-P012 sensor,
+which is the only sensor on the left side of the core stage that presented evidence of BSM plume impingement. Figure
+7 does the same for the IV-AT-P003-C sensor, which is the only sensor on the right side of the core stage observed to
+experience BSM plumes. Despite the differences between flight and simulation data, these results have been interpreted
+as a positive outcome. Several factors prevent the expectation of a close match:
+
+
+
+• the simulations use only a very rough approximation of SRB trajectories, and the point pressures are highly
+sensitive to SRB position and orientation;
+
+
+
+• the developmental flight instrumentation (DFI) is not well-calibrated at this point in flight;
+• the point pressures would also be sensitive to the installation orientation of the BSMs such that even small angle
+
+
+
+differences within the design tolerances are important.
+A concrete positive result is that of the pressure sensors on the core stage formatted to collect data during this phase of
+flight, only these two measured a significant pressure rise during booster separation, and only these two had a simulated
+pressure rise of significance in the FUN3D simulations.
+
+
+
+(a) Time history of 𝐶𝑃 for sensor AD-P012 (b) Location of sensor AD-P012
+
+
+
+Fig. 6 Booster separation 𝐶𝑃 history for sensor AD-P012 on the left side of the core stage.
+
+
+
+Of note in the flight data for both sensors is the prominent two-peak nature. To explain this result, Figure 8 shows a
+
+
+
+7
+
+
+
+
+
+
+
+
+
+
+
+(a) Time history of 𝐶𝑃 for sensor IV-AT-P003-C (b) Location of sensor IV-AT-P003-C
+
+
+
+Fig. 7 Booster separation 𝐶𝑃 history for IV-AT-P003-C sensor on the right side of the core stage.
+
+
+
+close-in look at the core stage surface pressures around IV-AT-P003-C for a FUN3D simulation with a small amount
+of axial SRB translation. The plume impingement on the sensor location is apparent. The structure of this plume
+indicates that the pressure tap was indeed impinged upon, directly, by the booster separation motors. The fact that each
+separation motor is in fact four motors placed close to one another explains the two-peak nature of Figures 6 and 7: the
+sensor experienced plume impingement from more than one of the neighboring separation motors within a short period
+of time. Furthermore, Figure 8 shows that the peak 𝐶𝑃 values in the impingement region are near the same magnitude
+as the flight data, assuming a near-direct hit did indeed occur.
+
+
+
+Fig. 8 Surface 𝐶𝑃 of BSM plume impingement on the core stage with a low Δ𝑋 .
+
+
+
+The timing of the AD-P012 pressure rise is the main unexplained difference, but the expectation is that a precise
+SRB trajectory reconstruction would improve the comparison there. It is also possible that the precise timing of when
+booster separation occurred could be significant in understanding this rapid pressure rise.
+
+
+
+8
+
+
+
+
+
+
+
+
+
+
+
+IV. Conclusion
+The successful Artemis I booster separation event has been studied as a basis for validation of the design procedures
+
+
+
+that enabled the SLS vehicle. Prior to launch, many sets of Monte Carlo trajectory simulations integrated a spectrum
+of physics models to anticipate a likely separation path envelope. This envelope was used to assert, with a high degree
+of confidence, that the three vehicle components would not contact one another after the initial separation event.
+
+
+
+These trajectory estimates were validated at an integrated level with flight data booster position reconstructions.
+Photogrammetry markers on the boosters enabled such reconstructions to occur, though the uncertainty in these re-
+constructions increased as the boosters moved further from the core stage. Despite this high uncertainty, the nominal
+separation trajectory was observed to trace the middle of the flight data cloud.
+
+
+
+Fluid flow simulations along the estimated booster separation trajectory enabled a reconstruction of recorded surface
+pressure measurements. Although, due to flight hardware constraints, no flight data were recorded from the boosters
+after separation, two core stage pressure taps directly experienced the booster separation motor plumes. Comparison
+of these pressure tap records to the simulated core stage pressures yielded promising comparisons as well: that the
+modeled plumes only impinged on two tap locations, and that the flight data agreed with this assessment.
+
+
+
+The encouraging results presented in this paper serve to validate the processes developed to model this extremely
+complicated launch event. It is important to remember, however, that the flight data defines just one separation event
+out of many viable events. The inherent complexity of the system means that this one success does not indicate that less
+prudence is necessary for the next mission. Rather, the vehicle design infrastructure can now be further refined with
+confidence that, at an integrated level, the collective effort appears to adequately represent the most apparent system
+physics.
+
+
+
+Acknowledgments
+Appreciation is extended to H. Houlden (ViGYAN Inc.) and D. Chan (NASA LaRC) for their development of previ-
+
+
+
+ous SLS booster separation databases. Thanks are given to D. Osborne (NASA MSFC), M. Cisse (NASA MSFC), and
+B. Nazeri (Bevilacqua Research Corporation) for their efforts in reconstructing the photogrammetry marker positions
+from flight videos.
+
+
+
+References
+[1] Kraft, R. H., “View the Best Images from NASA’s Artemis I Mission,” , 2022. URL https://www.nasa.gov/humans-in-
+
+
+
+space/view-the-best-images-from-nasas-artemis-i-mission/.
+
+
+
+[2] Lee, M., Dalle, D., Sanders, M., and Addona, C., “Development of Aerodynamic Loads Databases for the Space Launch System
+Booster Separation Event,” AIAA SCITECH 2024 Forum, 2024.
+
+
+
+[3] Burger, B. S., Addona, C., Diedrich, B., Harlin, W., McDonough, P., Muscha, Z., Sells, H., and Tyler, D., “Space Launch System
+Liftoff and Separation Dynamics Analysis Tool Chain,” AIAA Scitech 2021 Forum, 2021, p. 0822.
+
+
+
+[4] “TREETOPS,” , MFS-33566-1. URL https://software.nasa.gov/software/MFS-33566-1.
+
+
+
+[5] “Tree3D Dynamics Visualization Tool,” , MFS-34076-1. URL https://software.nasa.gov/software/MFS-34076-1.
+
+
+
+[6] Schenk, T., “Introduction to Photogrammetry,” The Ohio State University, 2005.
+
+
+
+[7] Ali, R., Burger, B., Addona, C., and Mcdonough, P., “Post Flight Clearance Analysis by Photogrammetric Reconstruction,”
+Aerospace Control and Guidance Systems Committee Meeting# 127, 2021.
+
+
+
+[8] Meeroff, J. G., Dalle, D. J., Rogers, S. E., Burkhead, A. C., Schauerhamer, D. G., and Diaz, J. F., “Advances in Space Launch
+System Booster Separation CFD,” AIAA SCITECH 2023 Forum, 2003. https://doi.org/10.2514/6.2023-0238, aIAA Paper 2023-
+0238.
+
+
+
+9
+
+
+
+
+
+https://www.nasa.gov/humans-in-space/view-the-best-images-from-nasas-artemis-i-mission/
+
+
+https://www.nasa.gov/humans-in-space/view-the-best-images-from-nasas-artemis-i-mission/
+
+
+https://software.nasa.gov/software/MFS-33566-1
+
+
+https://software.nasa.gov/software/MFS-34076-1
+
+
+https://doi.org/10.2514/6.2023-0238
+
+
+
+ 
+Background and Motivation
+
+ 
+Preflight Trajectory Simulations
+
+ 
+Post-Flight Analyses
+
+ 
+Trajectory Comparisons
+
+ 
+Fluid Dynamics Simulations
+
+
+ 
+Conclusion

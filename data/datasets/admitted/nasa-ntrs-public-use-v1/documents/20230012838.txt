@@ -1,0 +1,2105 @@
+1 
+
+
+
+ 
+
+
+
+Navigation Sensor Technology Assessment 
+
+
+
+Capability for Data-Driven Systems Analysis 
+
+
+
+Esther Lee1, Paul V. Tartabini2, Brett R. Starr3, Paul D. Friz4, 
+
+
+
+Christopher D. Karlgaard5 and Jamshid Samareh6 
+NASA Langley Research Center, Hampton, Virginia, 23681, USA 
+
+
+
+ The capability to assess the mission performance of novel navigation technologies from a 
+
+
+
+systems-level approach and to provide quantitative results is crucial. With growing interest 
+
+
+
+and innovations from NASA’s commercial partners, data-driven results that quantify the 
+
+
+
+technological impact will guide research developments and facilitate stakeholder decision-
+
+
+
+making while requiring less time and resources. This paper presents a method to evaluate 
+
+
+
+various sensor combinations and their impact on the overall system performance using an 
+
+
+
+existing six degrees-of-freedom, physics-based engineering simulation for a government 
+
+
+
+reference lunar lander as a testbed. Selected navigation technologies over various technology 
+
+
+
+readiness levels, including Inertial Measurement Units, Navigation Doppler Lidar, and radar 
+
+
+
+altimeter-radar velocimeter, were studied in this paper. Results using this testbed to perform 
+
+
+
+sensitivity studies and to provide quantitative assessments are reported. One key finding is 
+
+
+
+that there are diminishing returns for reducing sensor errors. The most influential sensor 
+
+
+
+parameter to landing success are vehicle configuration and mission dependent. Results from 
+
+
+
+this method could be used by stakeholders to make data-driven systems-based decisions and 
+
+
+
+by technology developers as guidance for the specific parameter improvements that will have 
+
+
+
+the most significant impact on mission success. This capability could be further used to assess 
+
+
+
+alternative scenarios should one type of technology become unavailable or to re-assess initial 
+
+
+
+assumptions and identify appropriate requirements from a system perspective. 
+
+
+
+I. Introduction 
+
+
+
+NASA is planning to return to the Moon through the Artemis program, with goals of landing the first woman and 
+
+
+
+first person of color on the Moon and establishing the first long-term presence on the Moon. NASA will use the 
+
+
+
+Human Landing System (HLS) as a mode of transportation to land astronauts on the lunar surface. Ultimately, the 
+
+
+
+lessons learned on and around the Moon will support future human deep space missions to Mars. 
+
+
+
+Landing humans or payloads on the Moon, and subsequently Mars, will require collaborating with commercial 
+
+
+
+and international partners to develop and build a lander with novel technologies. The capability to quantitatively 
+
+
+
+assess the mission performance of these novel technologies from a systems-level approach is crucial, especially as 
+
+
+
+more commercial partners innovate new technologies. These quantitative results can identify specific areas of 
+
+
+
+research that will have the most impact on mission success and facilitate stakeholder decision-making. This 
+
+
+
+capability to perform a technology assessment that considers mission performance metrics as success criteria is an 
+
+
+
+important tool in characterizing the impact of different technology parameters. 
+
+
+
+NASA has surveyed and identified ten groups of technologies that could benefit HLS [1-10]. The Position 
+
+
+
+Navigation and Timing (PNT) technology group is one of the critical groups that could have significant impact on 
+
+
+
+the landing system. The focus of this study was to identify, assess, and quantify the impact of PNT technologies on 
+
+
+
+ 
+1 Aerospace Engineer, Vehicle Analysis Branch. 
+2 Aerospace Engineer, Vehicle Analysis Branch, Senior Member. 
+3 Aerospace Engineer, Vehicle Analysis Branch. 
+4 Aerospace Engineer, Vehicle Analysis Branch. 
+5 Aerospace Engineer, Analytical Mechanics Associates, Inc., AIAA Associate Fellow. 
+6 Aerospace Engineer, Vehicle Analysis Branch, AIAA Associate Fellow. 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+2 
+
+
+
+ 
+
+
+
+HLS system design, risks, and operations. Through this study, PNT critical parameters, trends in performance, and 
+
+
+
+their potential improvements have been identified and quantified. The outcome of this study provides guidance to 
+
+
+
+stakeholders (NASA & HLS providers) and informs technology companies on ways to improve their PNT 
+
+
+
+technologies. Short-term benefits of this capability are the evaluations of individual technologies. Long-term 
+
+
+
+impacts of this capability are the ability to identify ways to use the technologies for specific mission requirements 
+
+
+
+and the ability to pinpoint ways to improve the technologies for better mission success outcomes. 
+
+
+
+II. Method 
+
+
+
+A technology survey was performed to identify a variety of navigation sensors and related parameters for the 
+
+
+
+assessment. In order to perform assessments, a testbed is needed. To that end, the team has leveraged an existing six 
+
+
+
+degrees-of-freedom (6-DOF) lunar lander simulation developed by the Safe and Precise Landing Integrated 
+
+
+
+Capabilities Evolution (SPLICE) Project [11]. This physics-based engineering simulation is used to evaluate the 
+
+
+
+sensor suite from an integrated performance perspective and to determine its effect on the overall system 
+
+
+
+performance. A rapid assessment capability was also developed and used to quickly evaluate sensor trade studies 
+
+
+
+and to explore navigation filter sensitivities. 
+
+
+
+A. Overview of Simulation Model 
+
+
+
+ The vehicle configuration modeled in this lunar lander simulation is a government reference design from the 
+
+
+
+abbreviated NASA Design Analysis Cycle (mini-DAC) [12] that uses a storable propellant system and does not rely 
+
+
+
+on cryogenics. The vehicle consists of two elements: a Descent Element and an Ascent Element. Figure 1 shows an 
+
+
+
+overview of the trajectory concept of operations. The simulation begins with the “Loiter” phase, in which the vehicle 
+
+
+
+loiters in a 100 km circular parking orbit. A De-Orbit Insertion (DOI) burn places the vehicle in an intermediate orbit, 
+
+
+
+representing the “Coast” phase. Power Descent Initiation (PDI) begins at a distance from the landing target. A braking 
+
+
+
+burn signifies the beginning of the “Braking” phase. The burn is initiated at the periapsis of the transfer orbit to reduce 
+
+
+
+the vehicle's velocity and begin its descent toward the landing target. As the vehicle descends, it adjusts its orientation 
+
+
+
+to facilitate the use of onboard navigation sensors and navigates its way to the landing target. As it nears the landing 
+
+
+
+target, the vehicle enters the “Approach” phase and transitions into a terminal descent orientation to safely land on the 
+
+
+
+surface at the last “Vertical Descent.” At each phase during the Deorbit, Descent, and Landing (DDL) trajectory, the 
+
+
+
+vehicle uses a different set of navigation sensors to provide information on the vehicle’s state to its navigation solution. 
+
+
+
+The concept of operations relating to navigation sensors is shown in Fig. 2. The Inertial Measurement Unit (IMU) 
+
+
+
+provides vehicle position, velocity, and attitude measurements throughout the DDL trajectory. The Deep Space 
+
+
+
+Network (DSN) provides measurements in the “Loiter” phase, and the star tracker provides additional vehicle attitude 
+
+
+
+measurements during the “Loiter” and “Coast” phases. Additional vehicle position and velocity measurements during 
+
+
+
+the “Braking” phase and “Approach” phase are provided by the Terrain Relative Navigation (TRN) and Navigation 
+
+
+
+Doppler Lidar (NDL), respectively. Further details on the framework and simulation modelling can be found in Lugo 
+
+
+
+et al. [11]. 
+
+
+
+ 
+
+
+
+ 
+Fig. 1 NASA Design Analysis Cycle (mini-DAC) trajectory [11]. 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+3 
+
+
+
+ 
+
+
+
+ 
+Fig. 2 Navigation sensor suite concept of operations [11]. 
+
+
+
+B. Caveats and Assumptions 
+
+
+
+ A caveat to using a detailed 6-DOF simulation for technology assessments is that the results are only applicable to 
+
+
+
+this simulation and sensor suite. A different vehicle or trajectory design may require a different set of sensors and may 
+
+
+
+have different error sensitivities. The preliminary results presented in this paper will require verification with the 
+
+
+
+trajectory designed for a different sensor suite and landing mission. This paper explains the method used and how it 
+
+
+
+could be used for alternative configurations. Specific results for alternative configurations may differ from this 
+
+
+
+government reference design. 
+
+
+
+ For this study, the focus was on technology hardware and no attempt was made to alter guidance software to 
+
+
+
+account for sensor uncertainties. It is possible to use software to mitigate and compensate for some sensor uncertainties 
+
+
+
+to improve sensor performance, but software cannot eliminate the effects all types of uncertainties. Therefore, it is 
+
+
+
+valuable to consider the impact of hardware technology first when selecting navigation sensors for specific missions. 
+
+
+
+C. Technology Survey 
+
+
+
+ A wide variety of navigation sensors were surveyed in this study, including IMUs, radar velocimeters, radar 
+
+
+
+altimeters, TRN, and NDL. This paper reports results for IMUs, with ongoing progress reported for radar velocimeter, 
+
+
+
+radar altimeters, and NDL. Critical parameters for these sensors were gathered by collecting publicly available data 
+
+
+
+from online sources. Parameters not publicly available were obtained from the vendors who create those products. To 
+
+
+
+avoid sharing any sensitive information about specific products, data has been genericized and anonymized. 
+
+
+
+1) IMUs 
+
+
+
+ One of the focuses of this study is to investigate how IMU error parameters affect the landing performance of a 
+
+
+
+spacecraft landing on the Moon. The three baseline IMUs used in this study were defined by the SPLICE project as 
+
+
+
+high-, medium-, and low-quality, representing the state-of-the-art in current IMU technology based on performance. 
+
+
+
+These were initially compared to the anticipated performance of IMUs in development. IMUs in development were 
+
+
+
+labeled as “technology pull” and represented by creating two IMUs that are representative of the equivalent quality 
+
+
+
+available in the near future. The two sets of composite parameters for the technology pull IMUs are listed in Table 1. 
+
+
+
+The first set uses the best or lowest value of each error parameter from the entire collection of all the IMUs identified 
+
+
+
+in the technology survey. The second uses the median value of each error parameter from the entire collection. The 
+
+
+
+error characteristics of the individual technology pull IMUs were generally between these two bounds. None of the 
+
+
+
+IMUs under development had higher sensor parameters than the high-quality IMU identified as the state-of-the-art. 
+
+
+
+This is because the majority of new IMUs are focused on reducing mass, power, and cost rather than improving 
+
+
+
+performance. 
+
+
+
+ The exception to this is the Quantum Positioning System (QPS). There are two types of QPS, active and passive 
+
+
+
+[13]. The active QPS operates similar to GPS, requiring signals from multiple satellites to determine the location of a 
+
+
+
+spacecraft. The passive form of QPS is similar to an ultra-sensitive IMU. Only the passive form of QPS was included 
+
+
+
+in this study. QPS is a low technology readiness level (TRL) technology and there are no prototypes with published 
+
+
+
+performance parameters. It is theorized that QPS could be 1000 times as sensitive as traditional IMUs [13]. To 
+
+
+
+compare with traditional IMUs, three placeholder QPS units were used with theoretical performance parameters 10, 
+
+
+
+100, and 1000 times better than the high-quality state-of-the-art IMU used in this study. 
+
+
+
+ Table 1 shows a comparison of all the IMUs and error parameters used in this study, including the high-, medium-
+
+
+
+, and low-quality state-of-the-art IMUs, the best and median values of the IMUs currently under development, and the 
+
+
+
+1000, 100, and 10 times QPS units. 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+4 
+
+
+
+ 
+
+
+
+Table 1 IMU Technology Survey Summary 
+
+
+
+ SPLICE Baseline Generic (Tech Pull) Quantum Positioning System 
+
+
+
+Parameter Units High Medium Low Best Median 
+
+
+
+High 
+
+
+
+(1000x) 
+
+
+
+Medium 
+
+
+
+(100x) 
+
+
+
+Low 
+
+
+
+(10x) 
+
+
+
+Accelerometer 
+
+
+
+Misalignment (X,Y,Z) arcsec 17 45 20 61.8 386.25 0.017 0.17 1.7 
+
+
+
+Accelerometer Scale 
+
+
+
+Factor (X,Y,Z) ppm 450 525 900 70 555 0.45 4.5 45 
+
+
+
+Accelerometer Bias* 
+
+
+
+(X,Y,Z) micro-g 84 300 900 30 62.5 0.084 0.84 8.4 
+
+
+
+Accelerometer Velocity 
+
+
+
+Random Walk (X,Y,Z) micro-g 433 150 105 24 347 0.433 4.33 43.3 
+
+
+
+Gyroscope Misalignment 
+
+
+
+(X,Y,Z) arcsec 19 75 60 61.8 386.25 0.019 0.19 1.9 
+
+
+
+Gyroscope Scale Factor 
+
+
+
+(X,Y,Z) ppm 27 15 100 300 630 0.027 0.27 2.7 
+
+
+
+Gyroscope Bias* 
+
+
+
+(X,Y,Z) deg/hr 0.036 0.150 0.300 0.12 0.6 0.000036 0.00036 0.0036 
+
+
+
+Gyroscope Angular 
+Random Walk (X,Y,Z) deg/sqrt(hr) 0.015 0.018 0.210 0.01 0.0275 0.000015 0.00015 0.0015 
+
+
+
+Sample Rate (nominal) Hz 200 200 200 200 200 200 200 200 
+
+
+
+*Reduced by a factor of 10 in the simulation to account for calibration during quiescent on-orbit period prior to deorbit 
+
+
+
+and landing 
+
+
+
+ 
+
+
+
+2) NDL and Radar Altimeter-Radar Velocimeter Combination 
+
+
+
+ A different approach was taken for the NDL and radar altimeter-radar velocimeter combination technology survey. 
+
+
+
+NDL [14] is a technology being developed by NASA Langley Research Center and is not available from multiple 
+
+
+
+commercial manufacturers like other sensors. As a result, this assessment used the currently available third generation 
+
+
+
+(Gen-3) NDL parameters. The Gen-3 NDL parameters are shown in Table 2. There are a variety of radar altimeter 
+
+
+
+and radar velocimeter sensors commercially available with a range of accuracy and precision. They are approximately 
+
+
+
+an order of magnitude less precise than the NDL. Rather than evaluate commercially available altimeter-velocimeter 
+
+
+
+combinations, the altimeter-velocimeter combination was assumed to have measurement errors ranging from 1 to 100 
+
+
+
+times that of the NDL measurement accuracy to facilitate expressing landing performance in terms of the NDL 
+
+
+
+performance. 
+
+
+
+Table 2 NDL Technology Survey Summary 
+
+
+
+ 
+D. Approach 
+
+
+
+ The simulation framework was set up such that the sensor models were parametrized. This enables parametric 
+
+
+
+studies of the sensor parameters. The sensor parameter values identified in the technology survey were input to the 
+
+
+
+simulation framework. Multiple series of Monte Carlo simulations of 8000 runs were used to evaluate sensor 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+5 
+
+
+
+ 
+
+
+
+sensitivities and performance. Performance metrics (e.g., landing accuracy and safe landing velocity) were identified 
+
+
+
+and used to evaluate mission success. The following performance metrics were identified for this study to determine 
+
+
+
+landing success. All requirements must be met to be considered a “success.” 
+
+
+
+1) Landing precision: range to the target at touchdown is 100 m. 
+2) Horizontal velocity at touchdown is less than 1 m/s. 
+3) Vehicle angle is less than 3 degrees off vertical at touchdown. 
+4) Maximum vehicle angular rates about all axes are less than 0.5 deg/s. 
+
+
+
+III. Results 
+
+
+
+ In this section, results using this technology assessment capability are presented. Each assessment example 
+
+
+
+showcases how this capability identifies improvements for low to high TRL technologies. Ongoing progress is also 
+
+
+
+documented. The preliminary results presented will require verification with the trajectory designed for a different 
+
+
+
+sensor suite and landing mission. Specific results for alternative configurations may differ from this government 
+
+
+
+reference design. 
+
+
+
+ 
+
+
+
+A. Evaluating Existing IMUs 
+
+
+
+ In this assessment, a series of Monte Carlo analyses was performed to determine the sensitivity of landing 
+
+
+
+performance to the quality of existing IMUs. Characteristics of the IMUs from the SPLICE project were used as 
+
+
+
+representative values of existing IMUs that have been used in aerospace applications. These sets were categorized as 
+
+
+
+low-, medium-, and high-quality based on the overall performance of each IMU, as shown in Table 1. For this 
+
+
+
+comparison, three separate Monte Carlo analyses were performed using the same vehicle configuration, with the only 
+
+
+
+difference being the IMU sensor model, which was generic in nature and accounted for typical IMU errors in a 
+
+
+
+parametrized fashion. The accelerometer and gyroscope bias errors listed in Table 1 were reduced by a factor of 10 to 
+
+
+
+account for assumed calibration. Each analysis included 8,000 dispersed DDL trajectories beginning at deorbit from 
+
+
+
+the initial 100 x 100 km parking orbit and ending at touchdown. The IMU is active for the entire duration of the DDL 
+
+
+
+trajectory and other sensors are activated depending upon the specific flight phase as shown in Fig. 2. For each Monte 
+
+
+
+Carlo analysis there were 88 dispersed input parameters: 34 parameters related to vehicle design and initial state 
+
+
+
+uncertainties and 54 sensor-related error uncertainties (24 related to IMU and 30 related to the non-inertial sensors). 
+
+
+
+The same dispersions were used in each Monte Carlo analysis, with the exception of the IMU-related error 
+
+
+
+uncertainties. 
+
+
+
+ The landing success metrics from Section II.D were computed for each of the three Monte Carlo analyses and used 
+
+
+
+to quantify the effect that IMU quality had on overall landing performance. For the high-quality IMU, only 0.8% of 
+
+
+
+cases failed to meet the safe landing requirements. There was a moderate decrease in performance for the medium-
+
+
+
+quality IMU (4.5% failure rate) and significant drop-off for the low-quality IMU (15.2% failure rate). 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+6 
+
+
+
+ 
+
+
+
+ 
+
+
+
+Fig. 3 Percent failed case improvement from reducing low-quality IMU accelerometer X-
+
+
+
+bias. 
+
+
+
+ Additional Monte Carlo studies were performed to determine the sensitivity of landing performance to each of the 
+
+
+
+individual accelerometer and gyro error parameters listed in Table 1 (i.e., misalignment, scale factor, bias, and random 
+
+
+
+walk). For the three IMUs considered, the X-accelerometer bias error was the most influential parameter by a 
+
+
+
+significant margin. Figure 3 shows the results of a follow-on study where additional Monte Carlo analyses were 
+
+
+
+performed using all of the low-quality IMU error parameters except for X-accelerometer bias, which was varied from 
+
+
+
+the low-quality level (900 micro-g) to the high-quality level (100 micro-g). The results show that the landing failure 
+
+
+
+rate for this configuration decreased as this one error parameter was lowered. When the error fell below 500 micro-g, 
+
+
+
+the overall landing performance of the configuration with the low-quality IMU actually surpassed the configuration 
+
+
+
+with the medium-quality IMU. When the error was reduced to 100 micro-g, landing performance nearly matched that 
+
+
+
+of the high-quality IMU. This assessment highlights the capability to evaluate how individual error parameters affect 
+
+
+
+specific landing metrics. Results can be relayed to developers to indicate where further investment would be most 
+
+
+
+beneficial 
+
+
+
+B. Evaluating IMUs Currently Under Development 
+
+
+
+Another Monte Carlo study was performed to assess the performance of the “technology pull” IMUs described 
+
+
+
+in Section II.C. Table 1 lists representative values of the error parameters associated with the technology pull IMUs. 
+
+
+
+These IMUs are currently under development at several vendors, with a focus on reducing mass, power, and cost 
+
+
+
+rather than improving performance. The goal of this study was to determine if these future IMUs, which are 
+
+
+
+currently at mid to high TRL, could be used for precision landing on the Moon, and if not, what improvements 
+
+
+
+would make them suitable for this purpose. 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+7 
+
+
+
+ 
+
+
+
+Table 3 Comparison of Landing Performance using Representative IMUs from Technology Pull
+
+
+
+ 
+ 
+
+
+
+To assess performance, two 8000-case Monte Carlo analyses were conducted; one was conducted with each 
+
+
+
+error parameter set to Median and the other with each parameter set to Best. The landing success metrics were 
+
+
+
+computed (see Section II.D). As was done previously, accelerometer and bias terms were reduced by a factor of 10 
+
+
+
+to account for on-orbit calibration. For the representative technology pull IMU composed of median error values, the 
+
+
+
+overall successful landing percentage (shown in Table 3) was only 12.6%, which is not sufficient to support a lunar 
+
+
+
+landing mission. When all of the best (i.e., lowest) error characteristics were assumed, the success rate approached 
+
+
+
+95%, which is comparable to the existing medium-quality IMU considered in Section III.A. Additional Monte Carlo 
+
+
+
+analyses were performed to evaluate sensitivities and identify which specific error parameters were most influential 
+
+
+
+on the overall landing success rate. Initially, individual Monte Carlo analyses were performed by changing one error 
+
+
+
+parameter at a time from the median value to the best value. For example, the “Best Scale Factor” case assumed 
+
+
+
+median values for accelerometer/gyroscope misalignment, random walk, and bias errors but assumed the best value 
+
+
+
+for scale factor errors. Results for each of these sensitivity analyses are shown in Fig. 4, where it is seen that landing 
+
+
+
+performance was most sensitive to misalignment errors and random walk. 
+
+
+
+ 
+
+
+
+Fig. 4 Results of technology pull IMU sensitivity study. 
+
+
+
+ 
+
+
+
+However, even when the best value for misalignment was used, the landing success rate was still under 50%. 
+
+
+
+Additional cases considered using the best values for more than one error parameter and it was found that the largest 
+
+
+
+improvement occurred with best values for misalignment and random walk errors. For that case, the landing success 
+
+
+
+rate exceeded 90%, and the improvement over the baseline median IMU was larger than the sum of the individual 
+
+
+
+improvements when each error was increased one at a time. 
+
+
+
+The high sensitivity to misalignment and random walk errors for the technology pull IMUs differed from the 
+
+
+
+previous study of existing IMUs, where accelerometer bias was found to be most influential error parameter. This 
+
+
+
+difference was likely due to the smaller bias and the much larger misalignment errors associated with the technology 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+8 
+
+
+
+ 
+
+
+
+pull IMUs, underscoring that the results of this type of analysis are vehicle and mission dependent. This assessment 
+
+
+
+showcases the capability to identify sensitive parameters for an IMU with median values and the parameters to 
+
+
+
+improve for better landing success for lunar missions. For vehicles that use a median value IMU, improvements in 
+
+
+
+misalignment and random walk errors have the potential to improve landing success. 
+
+
+
+C. Evaluating QPS 
+
+
+
+ This assessment focused on identifying the level of improvements necessary for a passive QPS that has the 
+
+
+
+characteristics of an ultra-sensitive IMU. Specific parameters tied to a physical prototype were not used because the 
+
+
+
+technology survey did not find prototypes for this specific technology. However, sources claim 1000 times 
+
+
+
+improvement over existing IMUs [12]. Parameters of the high-quality IMU were scaled to represent three quality 
+
+
+
+levels of QPS, shown in Table 1, by reducing the sensor error parameters by 10, 100, and 1000 times, which is 
+
+
+
+equivalent to reducing the parameters by 90%, 99%, and 99.9%, respectively. Three Monte Carlo analyses were 
+
+
+
+performed using the DDL trajectory with the IMU parameters for each QPS quality level. Landing success rates were 
+
+
+
+calculated using the criteria listed in Section II.D and compared. The results showed that the landing success rate for 
+
+
+
+all three exceeded 99%, and that the differences in landing success rate were within 0.1%. 
+
+
+
+ Because the success rates were very high, a follow-on study was performed to explore the threshold where the 
+
+
+
+landing success rate approached 99%. Additional Monte Carlo runs were performed by reducing the error parameters 
+
+
+
+of the high-quality IMU by 50% and 80%. Results in Fig. 5 show that reducing IMU errors by 50% reduces failed 
+
+
+
+landings significantly from the current state-of-the-art high-quality IMU. Results further show that reducing error past 
+
+
+
+50% has diminishing returns. Landing success rates for the representative IMUs with more than 50% error reduction 
+
+
+
+oscillate within 0.1% due to Monte Carlo dispersions. This assessment is an example of the capability’s potential to 
+
+
+
+identify the level of improvements technology companies need to develop in IMUs for successful lunar landing. 
+
+
+
+Instead of improving the parameters to 1000 times better than the current state-of-the-art IMU, equivalent to reducing 
+
+
+
+the errors by 99.9%, resources can be allotted to improving the parameters by 50% for successful lunar landing 
+
+
+
+missions. The level of improvements needed may vary depending on the vehicle and trajectory design. 
+
+
+
+Fig. 5 Percent failed case improvement when reducing IMU errors. 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+9 
+
+
+
+ 
+
+
+
+D. Ongoing Work: Evaluating Radar Altimeter and Radar Velocimeter Combination as an Alternative for 
+
+
+
+NDL 
+
+
+
+In the government reference design, the descent element uses a NDL sensor to measure altitude and velocity during 
+
+
+
+the “Approach” and “Vertical Descent” phases of its descent trajectory shown in Fig. 1. The mini-DAC simulation 
+
+
+
+incorporates a high-fidelity model of the third generation NDL (Gen-3 NDL) that begins measuring altitude and 
+
+
+
+velocity at an altitude of 3 km above ground and continues measurements down to an altitude of approximately 30 m 
+
+
+
+above ground. 
+
+
+
+ 
+
+
+
+ 
+Fig. 6 Gen-3 NDL. 
+
+
+
+ 
+
+
+
+The Gen-3 NDL simulation model accounts for the effects of range to ground and the vehicle’s velocity on its 
+
+
+
+measurements, thus its measurement uncertainty is a function of line-of-sight (LOS) range to ground and the vehicle’s 
+
+
+
+velocity. The Gen-3 NDL hardware is shown in Fig. 6 and its performance specifications are shown in Table 2. A 
+
+
+
+fourth generation NDL (Gen-4 NDL) design has been released that increases the NDL’s maximum line-of-sight range 
+
+
+
+to 7 km and improves the precision of its velocity and altitude measurements. However, the Gen-4 NDL simulation 
+
+
+
+model had not been released for integration into the government reference simulation at the time of this study. 
+
+
+
+Due to the high-fidelity nature of the NDL model, it was not possible to represent the Gen-4 NDL measurement 
+
+
+
+precision in the mini-DAC simulation by adjusting simulation inputs, thus the effect of the Gen-4 NDL advancements 
+
+
+
+on landing performance could not be quantified without the Gen-4 NDL simulation model. However, a qualitative 
+
+
+
+assessment of increasing the NDL’s maximum operational altitude was made by starting NDL measurements in the 
+
+
+
+mini-DAC simulation at an altitude of 5 km above ground, instead of an altitude of 3 km in the original simulation. 
+
+
+
+With the 5 km start altitude, the percentage of fully successful landing cases increased by 5%. An improved estimate 
+
+
+
+of the lander’s altitude and velocity earlier in the descent trajectory has a significant effect on the government reference 
+
+
+
+mini-DAC lander making a successful landing. However, the landing performance improvement using the Gen-4 NDL 
+
+
+
+model may be different than the qualitative 5% estimate. 
+
+
+
+The combination of a radar altimeter and a radar velocimeter as an alternative or redundant system for the NDL 
+
+
+
+was also evaluated to determine the landing performance. The government reference mini-DAC simulation had low-
+
+
+
+fidelity radar altimeter and radar velocimeter models available for use in the navigation filter. The simulation was 
+
+
+
+modified to use a radar altimeter sensor and a radar velocimeter sensor in place of the NDL. Currently available radar 
+
+
+
+altimeter and radar velocimeter sensor measurements are approximately 10 to 25 times less precise than the NDL 
+
+
+
+sensor and radar altimeters have a lower operational altitude than the NDL. Rather than simulate a particular radar 
+
+
+
+altimeter or radar velocimeter sensor, a generic approach was used where the precision of the altitude and velocity 
+
+
+
+measurements were varied from the Gen-3 NDL specifications to 100 times less precise than the Gen-3 NDL 
+
+
+
+specifications. The measurement precision was varied in the simulation by applying 1, 10, 25, 50, and 100 multipliers 
+
+
+
+on the Gen-3 NDL standard deviation of the sensor measurements to simulate an altitude and velocity measurement 
+
+
+
+system over a range of quality. The altitudes above ground at which the radar velocimeter and radar altimeter begin 
+
+
+
+taking measurements were also changed in the simulation to be representative of state-of-the-art radar altimeter and 
+
+
+
+radar velocimeter sensors. This approach quantified the effect on landing performance of using more precise, state-
+
+
+
+of-the-art, and less precise radar altimeter-radar velocimeter sensor combinations. Figure 7 shows the percentage of 
+
+
+
+successful landings normalized to the radar altimeter and radar velocimeter quality equivalent to the Gen-3 NDL 
+
+
+
+measurement precision. The results indicate that there is little degradation in the landing performance for radar 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+10 
+
+
+
+ 
+
+
+
+altimeters and radar velocimeters with up to 10 times less precise measurements. However, the landing performance 
+
+
+
+does begin to degrade nearly linearly as the radar altimeter and radar velocimeter precision decreases more than 10 
+
+
+
+times that of the Gen-3 NDL, with a 3% degradation at 100 times less precise measurements. The altimeter and 
+
+
+
+velocimeter models in the government reference mini-DAC simulation were low fidelity. Thus, the trend in landing 
+
+
+
+performance may change with higher fidelity models. 
+
+
+
+This ongoing assessment evaluates the impact of an altitude and velocity measurement unit and its effects on the 
+
+
+
+overall success of lunar landing missions. The trends revealed an error threshold the altitude and velocity measurement 
+
+
+
+system must meet to ensure landing success. 
+
+
+
+ 
+Fig. 7 Successful landing rate for radar altimeter and velocimeter combination while varying sensor 
+
+
+
+measurement quality (relative to Gen-3 NDL). 
+
+
+
+IV. Enhancing the Technology Assessment Capability using NewSTEP 
+
+
+
+ The Monte Carlo approach of assessing sensor performance can be costly in terms of the time needed to run 
+
+
+
+thousands of high fidelity 6-DOF simulations. New Statistical Trajectory Estimation Program (NewSTEP) is a Kalman 
+
+
+
+filter code specifically formulated for solving trajectory reconstruction problems [15]. NewSTEP can be configured 
+
+
+
+to emulate navigation system performance and can produce uncertainty estimates from linear covariance analysis [16]. 
+
+
+
+Linear covariance analysis enables rapid trade studies as it does not require Monte Carlo techniques for uncertainty 
+
+
+
+quantification. This rapid assessment capability can be used to explore sensor capabilities or other navigation filter 
+
+
+
+assumptions, which includes filter-tuning parameters to ensure filter consistency. Filter consistency is a measure of 
+
+
+
+how well the filter's estimate of its navigation errors match with actual error. Inconsistent filters can cause issues: for 
+
+
+
+instance, if the vehicle cannot make accurate estimation of its position above ground, it could engage its landing 
+
+
+
+sequence too early or too late. However, NewSTEP’s linear covariance analysis mode does not capture dispersions as 
+
+
+
+it uses a nominal trajectory to propagate uncertainty estimates. Therefore, it is complimentary to the Monte Carlo 
+
+
+
+approach. 
+
+
+
+A. NewSTEP Results 
+
+
+
+ The trajectory reconstruction tool was used in its linear covariance analysis mode to assess various IMUs for the 
+
+
+
+government reference vehicle. An initial linear covariance analysis was performed using the SPLICE-defined IMU 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+11 
+
+
+
+ 
+
+
+
+parameters consisting of low-, medium-, and high-quality sensors [17]. The sensor parameters are summarized in 
+
+
+
+Table 1. The results of the linear covariance analysis are shown in Fig. 8, comparing the 3-sigma values of vehicle 
+
+
+
+position error (Fig. 8a), vehicle velocity error (Fig. 8b), and vehicle attitude error (Fig. 8c) measured from the IMUs 
+
+
+
+over the DDL trajectory simulation. These results are for pure inertial navigation based on DSN initialization and do 
+
+
+
+not consider other sensors such as TRN. It is expected that a better IMU quality would lead to smaller measurement 
+
+
+
+errors. The results indicate nearly identical navigation performance between the medium- and high-quality IMUs for 
+
+
+
+the DDL trajectory near touchdown. This type of result is useful for choosing sensor options, showing that there are 
+
+
+
+diminishing returns as sensor quality improves. 
+
+
+
+ 
+
+
+
+a. Vehicle position error. 
+
+
+
+ 
+
+
+
+ 
+
+
+
+b. Vehicle velocity error. 
+
+
+
+ 
+
+
+
+ 
+
+
+
+c. Vehicle attitude error. 
+
+
+
+Fig. 8 SPLICE IMUs linear covariance results. 
+
+
+
+The linear covariance method can also be used to rapidly assess filter consistency. NewSTEP’s linear covariance 
+
+
+
+results are compared with Monte Carlo results, and filter tuning is conducted such that the navigation errors from the 
+
+
+
+two methods are matched, i.e., the filter is consistent. This tuning can be conducted for covariance realism such that 
+
+
+
+the filter predicted uncertainties match with reality, which is often not true due to various assumptions and 
+
+
+
+approximations in the navigation filter design [18]. Two approaches to adjust process noise were investigated. The 
+
+
+
+first approach is Q-tuning, in which a multiplier is placed on the process noise covariance matrix such that filter 
+
+
+
+uncertainty predictions are increased. The second approach is known as Lear’s method [19, 20], which is a form of 
+
+
+
+measurement underweighting in which a term, 𝛽𝐻𝑘�̅�𝑘𝐻𝑘
+𝑇 , is added to the residual covariance, where 𝛽 is a user-
+
+
+
+specified tuning parameter, 𝐻𝑘 is the measurement sensitivity matrix, and �̅�𝑘 is the predicted state covariance matrix. 
+
+
+
+Sample results are shown in Fig. 9. 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+12 
+
+
+
+ 
+
+
+
+ 
+
+
+
+a. “Q-tuning" approach. b. Lear’s method. 
+
+
+
+Fig. 9 Filter tuning sample results. 
+
+
+
+Figure 9 shows the results of the filter tuning approaches applied to a baseline case consisting of all sensor 
+
+
+
+combinations set to high quality. In Fig. 9a, the results include cases for Q-tuning in which multipliers of 10 and 100 
+
+
+
+are placed on the process noise covariance. In each case the filter uncertainty is increased. Figure 9b shows the results 
+
+
+
+of applying Lear’s method to the filter tuning for values of 𝛽 set at 0.1 and 0.2. The goal of adding the multiplier is to 
+
+
+
+get the filter uncertainties to match with the navigation errors predicted in Monte Carlo simulations as the filter’s 
+
+
+
+prediction of uncertainty can tend to be optimistic. Results demonstrate these approaches are possible options for filter 
+
+
+
+tuning purposes. 
+
+
+
+NewSTEP compliments the technology assessment by evaluating various configurations of navigation sensors and 
+
+
+
+providing rapid assessment on filter-tuning parameters. The tool addresses the software requirements to match the 
+
+
+
+hardware uncertainties, which improves the robustness of the overall sensor suite. 
+
+
+
+V. Summary and Future Work 
+
+
+
+ Assessment examples presented in this paper show the short- and long-term impact of the technology assessment 
+
+
+
+capability. Assessment results can be used to evaluate individual technologies and their impact on lunar landing 
+
+
+
+missions and to identify sensitive parameters and the improvements necessary to increase landing success rates. Trends 
+
+
+
+identified can impact technology-to-mission infusion and technology development decisions. It is important to 
+
+
+
+reassess the results for specific mission and vehicle configurations as factors such as sensor coupling may affect 
+
+
+
+results. This capability could be further used to assess alternative scenarios should one type of technology become 
+
+
+
+unavailable or to reassess initial assumptions and identify appropriate requirements from a system perspective. 
+
+
+
+Furthermore, the capability can also be used to assess the impact of a technology to reduce mission risks. 
+
+
+
+ The current study has focused on large landers. Future study will be expanded in four areas. First, the fidelity of 
+
+
+
+the technology assessment will be improved and will include additional figures of merits such as propellant usage, g-
+
+
+
+loads, and ride quality. Second, the simulation model will be expanded to include smaller landers such as Commercial 
+
+
+
+Lunar Payload Services (CLPS) landers. The study will explore the importance of PNT parameters and their thresholds 
+
+
+
+for smaller landers. Third, the simulation will be instrumented to assess the impact of PNT on Human Lander System 
+
+
+
+risk posture. Because the current simulation assessment approach was computationally intensive, the fourth area is to 
+
+
+
+continue the development of the NewSTEP rapid assessment capability to compliment the Monte Carlo analysis 
+
+
+
+approach. 
+
+
+
+Acknowledgments 
+
+
+
+The authors thank Rafael Lugo (NASA Langley) and his team for providing the simulation framework, helpful 
+
+
+
+insights, and discussions to facilitate this work. 
+
+
+
+References 
+
+
+
+[1] Gresham, E., Risdon, D., and Thompson, M., "Human Landing Systems Human Health Monitoring Survey Report," NASA 
+
+
+
+Document ID 20230006768, May 2023, https://ntrs.nasa.gov/citations/20230006768. [retrieved July 11, 2023]. 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+13 
+
+
+
+ 
+
+
+
+[2] Gresham, J., Hay, J. Risdon, D., Burg, A., and Thompson, M., "Human Landing Systems Thermal Control Systems Survey 
+
+
+
+Report," NASA Document ID 20230006758, May 2023, https://ntrs.nasa.gov/citations/20230006758. [retrieved July 11, 
+
+
+
+2023]. 
+
+
+
+[3] Gresham, E., Hay, J., Risdon, D., Burg, A., and Thompson, M., "Human Landing Systems Energy Systems Survey Report," 
+
+
+
+NASA Document ID 20230006767, May 2023, https://ntrs.nasa.gov/citations/20230006767. [retrieved July 11, 2023]. 
+
+
+
+[4] Gresham, E., Risdon, D., and Thompson, M., "Human Landing Systems Communications Survey Report," NASA 
+
+
+
+Document ID 20230008234, May 2023, https://ntrs.nasa.gov/citations/20230008234. [retrieved July 11, 2023]. 
+
+
+
+[5] Gresham, E., Craven, P., Risdon, D., Burg, A., and Thompson, M., "Human Landing Systems Human System Interaction 
+
+
+
+Survey Report," NASA Document ID 20230008240, May 2023, https://ntrs.nasa.gov/citations/20230008240. [retrieved July 
+
+
+
+11, 2023]. 
+
+
+
+[6] Gresham, E., Hay, J., Craven, P., and Wiley, J., "Human Landing Systems Position Navigation and Timing Survey Report," 
+
+
+
+NASA Document ID 20230008242, May 2023, https://ntrs.nasa.gov/citations/20230008242. [retrieved July 11, 2023]. 
+
+
+
+[7] Gresham, E., Hay, J., and Burg, A., "Human Landing Systems Plume Surface Interaction Survey Report," NASA Document 
+
+
+
+ID 20230008260, May 2023, https://ntrs.nasa.gov/citations/20230008260. [retrieved July 11, 2023]. 
+
+
+
+[8] Gresham, E., Hay, J., Burg, A., and Wiley, J., "Human Landing Systems Advanced Cryogenics Survey Report," NASA 
+
+
+
+Document ID 20230008370, May 2023, https://ntrs.nasa.gov/citations/20230008370. [retrieved July 11, 2023]. 
+
+
+
+[9] Gresham, E., Hay, J., and Wiley, J., "Human Landing Systems Radiation Environments Survey Report," NASA Document 
+
+
+
+ID 20230008374, May 2023, https://ntrs.nasa.gov/citations/20230008374. [retrieved July 11, 2023]. 
+
+
+
+[10] Gresham, E., Hay, J., and Burg, A., "Human Landing Systems Trusted Automation Survey Report," NASA Document ID 
+
+
+
+20230008376, May 2023, https://ntrs.nasa.gov/citations/20230008376. [retrieved July 11, 2023]. 
+
+
+
+[11] Lugo, R. A., Dwyer-Cianciolo, A., Dutta, S., Williams, R. A., Green, J.S., Chen, P., and D’Souza, S., “Precision Landing 
+
+
+
+Performance and Technology Assessments of a Human-Scale Lunar Lander Using a Generalized Simulation Framework,” 
+
+
+
+AIAA Paper 2022-0609 https://doi.org/10.2514/6.2022-0609 
+
+
+
+[12] Craig, A. S., Anzalone, E. J., Hannan, M. R., Belanger, B. L.,Burke, L. M., Condon, G. L., Joyce, R. T., Mahajan, B., 
+
+
+
+Summers, A. W., Means, L. L., and Pei, J., “Human Landing System Storable Propellant Architecture: Mission Design, 
+
+
+
+Guidance, Navigation, and Control,” AAS 20-592 
+
+
+
+[13] Feng, D. “Review of Quantum Navigation,” IOP Conference Series: Earth and Environmental Science, Volume 237, Issue 
+
+
+
+3, https://iopscience.iop.org/article/10.1088/1755-1315/237/3/032027 
+
+
+
+[14] Amzajerdian, F., Pierrottet, D., Hines, G. D., Petway, H., Barnes, B., and Carson, J. M., “Development of Navigation 
+
+
+
+Doppler Lidar for Future Landing Missions,” AIAA Paper 2016-5590, September 2016. https://doi.org/10.2514/6.2016-
+
+
+
+5590 
+
+
+
+[15] Lugo, R. A., Dwyer-Cianciolo, A., Dutta, S., Williams, R. A., Pensado, A., and Chen, P. "Integrated Precision Landing 
+
+
+
+Performance Results for a Human-Scale Mars Landing System," AIAA Paper 2022-0607. https://doi.org/10.2514/6.2022-
+
+
+
+0607 
+
+
+
+[16] Karlgaard, C. D., Beck, R. E., Derry, S. D., Brandon, J. M., Starr, B. R., Tartabini, P. V., and Olds, A. D., “Ares I-X 
+
+
+
+Trajectory Reconstruction: Methodology and Results,” Journal of Spacecraft and Rockets, Vol. 50, No. 3, 2013, pp. 641-
+
+
+
+661. https://doi.org/10.2514/1.A32345 
+
+
+
+[17] Dwyer-Cianciolo, A., Striepe, S., Carson, J., Sostaric, R., Woffindon, D., Karlgaard, C., Lugo, R., Powell, R., and Tynis, J., 
+
+
+
+“Defining Navigation Requirements for Future Precision Lander Missions,” AIAA Paper 2019-0661, January 2019. 
+
+
+
+https://doi.org/10.2514/6.2019-0661 
+
+
+
+[18] Lugo, R. A., Dwyer-Cianciolo, A. M., Dutta, S., Williams, R. A., Green, J., Chen, P-T., and D’Souza, S., “Precision 
+
+
+
+Landing Performance and Technology Assessments of a Human-Scale Lunar Lander Using a Generalized Simulation 
+
+
+
+Framework,” AIAA Paper 2022-0609, January 2022. https://doi.org/10.2514/6.2022-0609 
+
+
+
+[19] Lear, W. M., “Multi-Phase Navigation Program for the Space Shuttle Orbiter,” Internal Note 73-FM-132, NASA Johnson 
+
+
+
+Space Center, Houston, TX, 1973. 
+
+
+
+[20] Zanetti, R., DeMars, K. J., and Bishop, R. H., “Underweighting Nonlinear Measurements,” Journal of Guidance, Control, 
+
+
+
+and Dynamics, Vol. 33, No. 5, 2010, pp. 1670-1675. https://doi.org/10.2514/1.50596 
+
+
+
+ 
+
+
+
+
+
+https://ntrs.nasa.gov/citations/20230006758
+
+
+https://ntrs.nasa.gov/citations/20230006767
+
+
+https://ntrs.nasa.gov/citations/20230008234
+
+
+https://ntrs.nasa.gov/citations/20230008240
+
+
+https://ntrs.nasa.gov/citations/20230008242
+
+
+https://ntrs.nasa.gov/citations/20230008260
+
+
+https://ntrs.nasa.gov/citations/20230008370
+
+
+https://ntrs.nasa.gov/citations/20230008374
+
+
+https://ntrs.nasa.gov/citations/20230008376
+
+
+https://doi.org/10.2514/6.2022-0609
+
+
+https://iopscience.iop.org/article/10.1088/1755-1315/237/3/032027
+
+
+https://doi.org/10.2514/6.2016-5590
+
+
+https://doi.org/10.2514/6.2016-5590
+
+
+https://doi.org/10.2514/6.2022-0607
+
+
+https://doi.org/10.2514/6.2022-0607
+
+
+https://doi.org/10.2514/1.A32345
+
+
+https://doi.org/10.2514/6.2019-0661

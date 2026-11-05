@@ -1,0 +1,2511 @@
+This material is declared a work of the U.S. Government and is not subject to copyright protection in the United States. Approved for 
+
+
+
+public release; distribution is unlimited. 
+
+
+
+1 
+
+
+
+Proceedings of ASME Turbo Expo 2023: Turbine Technical Conference and Exposition 
+GT2023 
+
+
+
+June 26 – 30, 2023, Boston, MA 
+
+
+
+GT2023–102024 
+ 
+
+
+
+AERO-ENGINES AI - A MACHINE-LEARNING APP FOR AIRCRAFT ENGINE CONCEPTS 
+ASSESSMENT 
+
+
+
+ 
+ 
+
+
+
+Michael T. Tong 
+National Aeronautics and Space Administration 
+
+
+
+John H. Glenn Research Center 
+Cleveland, Ohio 44135 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ABSTRACT 
+Effective deployment of machine-learning (ML) models 
+
+
+
+could drive a high level of efficiency in aircraft engine 
+
+
+
+conceptual design. Aero-Engines AI is a user-friendly app that 
+
+
+
+has been created to deploy trained machine-learning (ML) 
+
+
+
+models to assess aircraft engine concepts. It was created using 
+
+
+
+tkinter, a GUI (graphical user interface) module that is built into 
+
+
+
+the standard Python library. Employing tkinter greatly 
+
+
+
+facilitates the sharing of ML application as an executable file 
+
+
+
+which can be run on Windows machines (without the need to 
+
+
+
+have Python or any library installed). The app gets user input 
+
+
+
+for a turbofan design, preprocesses the input data, and deploys 
+
+
+
+trained ML models to predict turbofan thrust specific fuel 
+
+
+
+consumption (TSFC), engine weight, core size, and 
+
+
+
+turbomachinery stage-counts. The ML predictive models were 
+
+
+
+built by employing supervised deep-learning and K-nearest 
+
+
+
+neighbor regression algorithms to study patterns in an existing 
+
+
+
+open-source database of production and research turbofan 
+
+
+
+engines. They were trained, cross-validated, and tested in 
+
+
+
+Keras, an open-source neural networks API (application 
+
+
+
+programming interface) written in Python, with TensorFlow 
+
+
+
+(Google open-source artificial intelligence library) serving as 
+
+
+
+the backend engine. The smooth deployment of these ML 
+
+
+
+models using the app shows that Aero-Engines AI is an easy-to-
+
+
+
+use and a time-saving tool for aircraft engine design-space 
+
+
+
+exploration during the conceptual design stage. Current version 
+
+
+
+of the app focuses on the performance prediction of 
+
+
+
+conventional turbofans. However, the scope of the app can 
+
+
+
+easily be expanded to include other engine types (such as 
+
+
+
+turboshaft and hybrid-electric systems) after their ML models 
+
+
+
+are developed. Overall, the use of a machine-learning app for 
+
+
+
+aircraft engine concept assessment represents a promising area 
+
+
+
+of development in aircraft engine conceptual design. 
+ 
+
+
+
+Keywords: aircraft engine, machine learning, tkinter, Python, 
+
+
+
+TensorFlow 
+
+
+
+ 
+
+
+
+INTRODUCTION 
+More and more organizations are adopting a data-driven 
+
+
+
+approach to decision-making. With the vast amounts of data 
+
+
+
+collected and tracked in recent times, machine-learning (ML) 
+
+
+
+applications are gaining popularity across multiple industries. 
+
+
+
+The aircraft engine industry has amassed and stored significant 
+
+
+
+quantities of data over the years. These big data sets, sourced 
+
+
+
+from multiple origins such as the database of currently 
+
+
+
+manufactured engines, ongoing development projects, 
+
+
+
+previously completed development projects, and 
+
+
+
+unmanufactured designs, hold tremendous potential as a 
+
+
+
+knowledge asset for future engine projects. 
+
+
+
+ 
+
+
+
+ Designing an aircraft engine is a complex, 
+
+
+
+interdisciplinary process that requires significant time and 
+
+
+
+effort. Engine designers encounter a formidable challenge 
+
+
+
+during the conceptual design phase - how to rapidly evaluate 
+
+
+
+the performance of a specific engine design given the aircraft's 
+
+
+
+mission requirements and various design parameters. The 
+
+
+
+number of potential engine configurations could be vast, 
+
+
+
+requiring designers to rely on system analysis and simulation to 
+
+
+
+estimate performance. Consequently, designers must conduct a 
+
+
+
+comprehensive propulsion system study for each possible 
+
+
+
+configuration, which can be time-consuming, particularly when 
+
+
+
+dealing with a large design space. 
+
+
+
+ 
+
+
+
+ By leveraging the power of machine learning (ML) 
+
+
+
+algorithms to learn from the existing engine data sets, it is 
+
+
+
+possible to develop ML models that can quickly and accurately 
+
+
+
+assess new aircraft engine concepts, providing valuable insights 
+
+
+
+and reducing the time and resources required for the engine 
+
+
+
+concept assessment process. A ML model can identify patterns 
+
+
+
+and trends that may not be immediately apparent to human 
+
+
+
+analysts, leading to more informed decision-making and 
+
+
+
+ultimately resulting in the development of better aircraft engine 
+
+
+
+concepts. The ability to assess new engine concepts quickly and 
+
+
+
+accurately can be a competitive advantage in aircraft engine 
+
+
+
+development. 
+
+
+
+ 
+
+
+
+ Previously, the author focused on training/developing the 
+
+
+
+ML models that allow for quick estimation of engine TSFC, 
+
+
+
+system weight, and core size during the conceptual design 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+This material is declared a work of the U.S. Government and is not subject to copyright protection in the United States. Approved for 
+
+
+
+public release; distribution is unlimited. 
+
+
+
+2 
+
+
+
+phase. The development process and methodology for these 
+
+
+
+models are described in [1, 2, 3]. Additional ML models were 
+
+
+
+developed for the turbomachinery stage count prediction since 
+
+
+
+then, using the same methodology. This paper zeros in on the 
+
+
+
+deployment of these trained ML models to assess aircraft 
+
+
+
+engine concepts, via an app. The development process of the 
+
+
+
+app, Aero-Engines AI, is described in this paper. 
+
+
+
+ 
+
+
+
+ While the development of ML models is essential for their 
+
+
+
+applications, the models would only be of value if they are 
+
+
+
+actively deployed in a production environment where they can 
+
+
+
+be used to solve practical problems. Thus, effective ML model 
+
+
+
+deployment is just as important as ML model development. ML 
+
+
+
+model deployment involves integrating trained ML models, 
+
+
+
+developed in a R&D environment, into a production 
+
+
+
+environment. It is a critical step that must be done so an 
+
+
+
+organization can use the models to solve problems. Seamless 
+
+
+
+deployment of trained ML models into production is essential 
+
+
+
+for putting the models to practical use. 
+
+
+
+ 
+
+
+
+ Aero-Engines AI, a Windows app, has been created to 
+
+
+
+deploy the trained ML models for aircraft engine concepts 
+
+
+
+assessment. It was created using tkinter, a GUI module that is 
+
+
+
+built into the standard Python library. Employing tkinter greatly 
+
+
+
+facilitates the sharing of ML application as an executable file 
+
+
+
+which can be run on Windows machines (without the need to 
+
+
+
+have Python or any library installed). MS Windows platform 
+
+
+
+was chosen for the deployment to reduce complexity and for 
+
+
+
+ease of access. The structure of the app is shown in Figure 1. 
+
+
+
+ 
+
+
+
+ The app is user-friendly. It is simple to learn, easy to 
+
+
+
+navigate, and its use is intuitive enough that it does not require 
+
+
+
+an instruction manual. The development process of Aero-
+
+
+
+Engines AI consists of five steps: 
+
+
+
+ 
+
+
+
+• Engine data collection, augmentation, and 
+
+
+
+preparation 
+
+
+
+• ML models training 
+
+
+
+• ML models testing and evaluation 
+
+
+
+• App design for ML models deployment 
+
+
+
+• Monitoring and updating 
+
+
+
+ 
+
+
+
+ENGINE DATA COLLECTION, AUGMENTATION, AND 
+PREPARATION 
+
+
+
+• Engine data collection 
+
+
+
+Current version of the app has only turbofan assessment 
+
+
+
+capability (will be expanded to include other engine types such 
+
+
+
+as turboshaft, hybrid-turbofan, etc., in the future versions). The 
+
+
+
+basic engine architecture is an axial-compressor turbofan. The 
+
+
+
+engine database consists of 145 manufactured (commercial) 
+
+
+
+engines [4 to 10] and 39 engines that were studied previously 
+
+
+
+in various NASA aeronautics projects. These commercial 
+
+
+
+engines capture over half-a-century of engine technology 
+
+
+
+improvements and lessons-learned, which would minimize the 
+
+
+
+prediction uncertainties of the ML models. The NASA engine 
+
+
+
+data were the system-study results for various NASA 
+
+
+
+aeronautics projects [11–16]. The engine database is shown in 
+
+
+
+Appendix A. 
+
+
+
+ 
+
+
+
+ 
+ 
+
+
+
+Figure 1 – Structure of Aero-Engines AI app 
+
+
+
+ 
+
+
+
+• Data augmentation 
+
+
+
+Data augmentation is an important technique that is 
+
+
+
+commonly used in ML to improve the performance and 
+
+
+
+generalizability of a training model. The process entails 
+
+
+
+creating additional data points from the existing training data 
+
+
+
+by applying various transformations and modifications to the 
+
+
+
+data. Data augmentation increases the diversity and quantity of 
+
+
+
+training data, improving the model's performance for its task, 
+
+
+
+and making it more adaptable to changes in the data. For this 
+
+
+
+study, the data augmentation was performed by scaling up the 
+
+
+
+current engines by 10%. For example, the sea-level static (SLS) 
+
+
+
+engine thrust and weight were increased by 10%, while keeping 
+
+
+
+the other operating parameters such as bypass ratio (BPR), 
+
+
+
+overall pressure ratio (OPR), Mach No., altitude, and TSFC 
+
+
+
+unchanged, as shown below: 
+ 
+
+
+
+ 
+ 
+
+
+
+With the data augmentation, the size of the database becomes: 
+
+
+
+ 
+
+
+
+Turbofan type No. of engines 
+
+
+
+2-spool direct-drive 273 
+
+
+
+2-spool geared 89 
+
+
+
+3-spool direct-drive 50 
+
+
+
+ 
+
+
+
+• Dataset preparation 
+
+
+
+ The next step was to prepare the data that would be used 
+
+
+
+to train the ML models. It involved cleaning and 
+
+
+
+preprocessing the data to remove errors or inconsistencies and 
+
+
+
+organizing the data into a format that could be used for the 
+
+
+
+training. The engine dataset was normalized and shuffled 
+
+
+
+randomly (using pseudo-random number generator) and 
+
+
+
+divided into two datasets: the training set and the testing set. 
+
+
+
+The training set was used to train, cross-validate, and build 
+
+
+
+predictive models. The testing set consisted of the remaining 
+
+
+
+engines that were unseen by the training models and was 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+This material is declared a work of the U.S. Government and is not subject to copyright protection in the United States. Approved for 
+
+
+
+public release; distribution is unlimited. 
+
+
+
+3 
+
+
+
+retained for the final evaluation of the predictive analytics. 
+
+
+
+The dataset preparation is described in detail in [1, 2, and 3]. 
+
+
+
+ 
+
+
+
+ML MODELS TRAINING 
+Once the data was ready, the next step was to select the 
+
+
+
+appropriate algorithms that would be used to train the ML 
+
+
+
+models. This can involve choosing from a variety of machine 
+
+
+
+learning algorithms and tuning the parameters and 
+
+
+
+hyperparameters of the models to optimize their performance 
+
+
+
+on the specific problem or task. 
+
+
+
+ 
+
+
+
+As reported in [1, 2, 3], the ML models for TSFC, engine 
+
+
+
+weight, and core size predictions were constructed using 
+
+
+
+supervised deep-learning and K-nearest neighbor algorithms 
+
+
+
+[17], which analyzed patterns in an open-source database of 
+
+
+
+research and production turbofan engines. Additional ML 
+
+
+
+models were developed since then for the turbomachinery stage 
+
+
+
+count prediction, using K-nearest neighbor regression 
+
+
+
+algorithm. These models were trained, cross-validated, and 
+
+
+
+tested using Keras, an open-source neural networks API written 
+
+
+
+in Python, with TensorFlow as the backend engine. These 
+
+
+
+models were trained and deployed in Keras [18], an open-
+
+
+
+source neural networks API written in Python, with TensorFlow 
+
+
+
+[19] serving as the backend engine. Keras provided the building 
+
+
+
+blocks for developing the deep-learning models, and 
+
+
+
+TensorFlow handled the tensor computations and 
+
+
+
+manipulations. 
+
+
+
+ 
+
+
+
+Depending on the ML model, either L2 or Dropout 
+
+
+
+regularization technique (where neuron outputs are dropped out 
+
+
+
+randomly) [20 and 21] was applied to prevent the DNN from 
+
+
+
+overfitting the training data. A grid-search routine was used to 
+
+
+
+determine the regularization parameter, dropout rate, number of 
+
+
+
+epochs, batch size, and the number of ‘neurons’ in the hidden 
+
+
+
+layers that give the lowest training error. The Adam 
+
+
+
+optimization algorithm [22] was used to update the network 
+
+
+
+weights during each epoch. 
+
+
+
+ 
+
+
+
+ Totally, nine ML models were trained for engine TSFC, 
+
+
+
+weight, core size (last stage HPC blade height), fan diameter, 
+
+
+
+and turbomachinery stage count predictions, respectively. The 
+
+
+
+training and cross validation of these ML models are described 
+
+
+
+in detail in [1, 2, and 3]. 
+
+
+
+ 
+
+
+
+ML MODELS TESTING 
+ After the ML models were trained, the next step was to test 
+
+
+
+and evaluate their performances. The trained ML models were 
+
+
+
+evaluated using a separate set of data, the testing dataset (that 
+
+
+
+was unseen by the training models). The testing procedures of 
+
+
+
+these ML models are described in detail in [1, 2, 3]. The results 
+
+
+
+showed that these ML models are an effective tool for 
+
+
+
+predicting engine TSFC, engine weight, core size, and 
+
+
+
+turbomachinery stage counts. Their performances were 
+
+
+
+determined, in terms of the means and standard deviations: 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ML model 
+
+
+
+Mean 
+
+
+
+accuracy 
+
+
+
+Uncertainty 
+
+
+
+95% confidence interval 
+
+
+
+(2 standard deviations) 
+
+
+
+TSFC 98% 4% 
+
+
+
+Weight 95% 5% 
+
+
+
+Core size 98% 4% 
+
+
+
+Fan diameter 98% 5% 
+
+
+
+LPC stage count 98% 14% (or 1 stage
+*
+) 
+
+
+
+HPC stage count 98% 8% (or 1 stage
+*
+) 
+
+
+
+HPT stage count 96% 39% (or 1 stage
+*
+) 
+
+
+
+LPT stage count 98% 18% (or 1 stage
+*
+) 
+
+
+
+IPT stage count 90% 44% (or 1 stage
+*
+) 
+
+
+
+Notes: *based on the current database 
+
+
+
+ 1-stage fan is assumed for all the engines 
+
+
+
+ 
+APP DESIGN for ML MODELS DEPLOYMENT 
+
+
+
+After the ML models were developed, trained, and 
+
+
+
+tested, they were integrated into the user-friendly app, Aero-
+
+
+
+Engines AI, that allows for the easy and intuitive assessment 
+
+
+
+of engine concepts. Aero-Engines AI is a Windows app that 
+
+
+
+deploys trained ML models to assess aircraft engine concepts. 
+
+
+
+The app was created using tkinter [23], a GUI (graphical user 
+
+
+
+interface) module that is built into the standard Python library. 
+
+
+
+And pyinstaller [24], a Python package, was used to convert 
+
+
+
+the python scripts into an executable file that can be run on 
+
+
+
+Windows machines. The conversion greatly facilitates the 
+
+
+
+sharing of ML applications with other Windows users (who do 
+
+
+
+not need to have Python, or any library installed in their 
+
+
+
+computers). 
+
+
+
+ 
+
+
+
+The app design aimed to provide a user-friendly 
+
+
+
+experience with a simple point-and-click feature. The input 
+
+
+
+page consists of three elements: 
+
+
+
+• a drop-down menu to select options 
+
+
+
+• data entry fields 
+
+
+
+• a ‘PREDICT’ button to run the app 
+
+
+
+ 
+
+
+
+These three elements are shown in Figure 2. 
+
+
+
+ 
+
+
+
+The drop-down menu allows users to select different 
+
+
+
+options for engine architectures, configurations, and 
+
+
+
+timeframe. When a user selects a tab, the drop-down menu 
+
+
+
+will display the options that are associated with that tab. Based 
+
+
+
+on the user's selection, the app would use the trained ML 
+
+
+
+models to analyze relevant data and make predictions on 
+
+
+
+engine performance, in terms of engine TSFC, weight, core 
+
+
+
+size, and turbomachinery stage counts. 
+
+
+
+The drop-down menu consists of the following tabs: 
+
+
+
+ 
+
+
+
+Engine type – current version of the app only has the 
+
+
+
+conventional turbofans option. Turboshaft and hybrid-electric 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+This material is declared a work of the U.S. Government and is not subject to copyright protection in the United States. Approved for 
+
+
+
+public release; distribution is unlimited. 
+
+
+
+4 
+
+
+
+turbofan are being considered for the future app versions. The 
+
+
+
+engine-type tab is shown in Figure 3. 
+
+
+
+ 
+
+
+
+Drive system – offers two options: direct-drive or geared. This 
+
+
+
+tab is shown in Figure 4. 
+
+
+
+ 
+
+
+
+Engine configuration – offers two options: 2-spool or 3-spool 
+
+
+
+design. This tab is shown in Figure 5. 
+
+
+
+ 
+
+
+
+Engine timeframe – engine certified year. Users can pick a 
+
+
+
+calendar year or NASA timeframe (N+1, N+2, etc.). This tab 
+
+
+
+is shown in Figure 6. 
+
+
+
+ 
+
+
+
+Single engine or Multiple engine designs – offers two options: 
+
+
+
+single engine design or multiple-engine designs analyses. This 
+
+
+
+tab is shown in Figure 7. If “multiple engine designs” is 
+
+
+
+selected, the user inputs for bypass ratio, overall pressure 
+
+
+
+ratio, and engine thrust would be in ranges, as shown in Figure 
+
+
+
+8. 
+
+
+
+ The data entry fields are provided for the users to input 
+
+
+
+the engine design parameters. The default entries for the Mach 
+
+
+
+number and cruise altitude are provided (0.8 and 35000 feet, 
+
+
+
+respectively), as shown in Figure 2. The users can override 
+
+
+
+these numbers. 
+
+
+
+ 
+
+
+
+App Execution - to run the app, one simply clicks the 
+
+
+
+‘PREDICT’ button. 
+
+
+
+ 
+
+
+
+Input Changes – users can return to the input page and modify 
+
+
+
+the inputs by clicking the ‘BACK’ button on the output page. 
+
+
+
+This button is shown in Figure 9. 
+
+
+
+ 
+
+
+
+Example Problems - 
+ 
+
+
+
+• Single engine design: - 
+
+
+
+ input parameters are shown in Figure 7, 
+
+
+
+ outputs are shown in Figure 9. 
+
+
+
+ 
+
+
+
+• Multiple engine designs: - 
+
+
+
+ input parameters are shown in Figure 8, 
+
+
+
+ output spreadsheet is shown in Figure 10 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+ 
+
+
+
+Figure 2 – User input page for single-engine design 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+This material is declared a work of the U.S. Government and is not subject to copyright protection in the United States. Approved for 
+
+
+
+public release; distribution is unlimited. 
+
+
+
+5 
+
+
+
+ 
+Figure 3 – Engine type option 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+Figure 4 – Direct-drive or geared turbofan option 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+Figure 5 – Engine configuration options 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+This material is declared a work of the U.S. Government and is not subject to copyright protection in the United States. Approved for 
+
+
+
+public release; distribution is unlimited. 
+
+
+
+6 
+
+
+
+ 
+Figure 6 – Engine timeframe option 
+
+
+
+ 
+
+
+
+ 
+Figure 7 – Single-engine or multiple-engine design option 
+
+
+
+ 
+
+
+
+ 
+Figure 8 – Input page for multiple-engine designs 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+This material is declared a work of the U.S. Government and is not subject to copyright protection in the United States. Approved for 
+
+
+
+public release; distribution is unlimited. 
+
+
+
+7 
+
+
+
+ 
+Figure 9 – Example output of a single-engine design 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+MONITORING AND UPDATING 
+Monitoring and updates are important aspects of ML app 
+
+
+
+development, as they help ensure that the app continues to 
+
+
+
+perform well and provide accurate predictions or 
+
+
+
+recommendations over time. To ensure optimal performance of 
+
+
+
+the current ML models, it's crucial to keep track of the changing 
+
+
+
+engine data and its effect on their overall functionality. While 
+
+
+
+the commercial engine data in the current database remain 
+
+
+
+static, the NASA engine data are obtained through research on 
+
+
+
+aeronautics studies for three generations of aircraft - near, mid, 
+
+
+
+and far term. Each generation has associated goals for 
+
+
+
+reductions in noise, emissions, fuel burn, and field length 
+
+
+
+relative to present-day aircrafts. These aircraft generations are 
+
+
+
+labeled as 'N+1', 'N+2', and 'N+3', respectively. The research 
+
+
+
+for 'N+2' and 'N+3' is aimed at enabling new vehicle 
+
+
+
+configurations that meet NASA's ambitious technology 
+
+
+
+objectives. As the NASA engine data could be revised over 
+
+
+
+time, the ML models must be updated periodically to consider 
+
+
+
+the impact of such updates. 
+
+
+
+ 
+
+
+
+SUMMARY 
+Aero-Engines AI, a user-friendly Windows app, has been 
+
+
+
+created using tkinter, a GUI module that is built into the 
+
+
+
+standard Python library. This app is designed to deploy trained 
+
+
+
+ML models to assess various aircraft engine concepts. These 
+
+
+
+ML models were trained, cross-validated, and tested in Keras, 
+
+
+
+an open-source neural networks API written in Python, with 
+
+
+
+TensorFlow serving as the backend engine. The assessment 
+
+
+
+results are presented in terms of engine TSFC, weight, core size, 
+
+
+
+and turbomachinery stage counts. The seamless deployment of 
+
+
+
+these ML models through the app demonstrates that Aero-
+
+
+
+Engines AI is an efficient and easy-to-use tool for exploring the 
+
+
+
+design space of aircraft engines during the conceptual design 
+
+
+
+stage. The current version of the app focuses on predicting the 
+
+
+
+performance of conventional turbofans. However, after the 
+
+
+
+development of their ML models, the app's scope can be easily 
+
+
+
+expanded to include other engine types, such as turboshaft and 
+
+
+
+hybrid-electric systems. 
+
+
+
+ 
+
+
+
+The success of the ML application will depend on the 
+
+
+
+quality and quantity of data available for training, as well as the 
+
+
+
+deployment of the ML model itself. Careful consideration of 
+
+
+
+these factors is crucial to ensure the optimal performance of the 
+
+
+
+ML system. Overall, the use of a machine-learning app for 
+
+
+
+aircraft engine concept assessment represents a promising area 
+
+
+
+of development in aircraft engine conceptual design. 
+
+
+
+ 
+
+
+
+ACKNOWLEDGMENT 
+
+
+
+The work presented in this paper was supported by the 
+
+
+
+NASA Advanced Air Transport Technology Project of the 
+
+
+
+Advanced Air Vehicles Program.
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+This material is declared a work of the U.S. Government and is not subject to copyright protection in the United States. Approved for public release; 
+
+
+
+distribution is unlimited. 
+
+
+
+8 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+ 
+
+
+
+ 
+
+
+
+Figure 10 - Example spreadsheet output of multiple-engine designs
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+This material is declared a work of the U.S. Government and is not subject to copyright protection in the United States. Approved for 
+
+
+
+public release; distribution is unlimited. 
+
+
+
+9 
+
+
+
+REFERENCES 
+[1] Tong, M. T., “Using Machine Learning to Predict Core 
+
+
+
+Sizes of High-Efficiency Turbofan Engines,” GTP-19-1338, 
+
+
+
+ASME Journal of Engineering for Gas Turbines and Power, 
+
+
+
+Volume 141, Issue 11, November 2019. 
+
+
+
+ 
+
+
+
+[2] Tong, M. T., “Machine Learning-Based Predictive 
+
+
+
+Analytics for Aircraft Engine Conceptual Design,” NASA 
+
+
+
+TM-20205007448, October 2020. 
+
+
+
+ 
+
+
+
+[3] Tong, M. T., “A Machine-Learning Approach to Assess 
+
+
+
+Aircraft Engine System Performance,” GT–2020–14661, 
+
+
+
+Proceedings of ASME Turbo Expo 2020, September 21–25, 
+
+
+
+2020 (virtual conference). 
+
+
+
+ 
+
+
+
+[4] Daly, M., 2018, “Jane’s Aero-Engine,” IHS, London, UK. 
+
+
+
+ 
+
+
+
+[5] Meier, N., 2018, “Civil Turbojet/Turbofan Specifications,” 
+
+
+
+accessed Aug. 8, 2018, 
+
+
+
+http://www.jet-engine.net/civtfspec.html 
+
+
+
+ 
+
+
+
+[6] GE Aviation, 2018, “GE Aviation,” GE Aviation, 
+
+
+
+Evendale, OH, accessed Aug. 8, 2018, 
+
+
+
+https://www.geaviation.com/commercial 
+
+
+
+ 
+
+
+
+[7] Pratt and Whitney, 2018, “Commercial-Engines,” Pratt and 
+
+
+
+Whitney, East Hartford, CT, accessed Aug. 8, 2018, 
+
+
+
+https://www.pw.utc.com/products-and-
+
+
+
+services/products/commercial-engines 
+
+
+
+ 
+
+
+
+[8] Rolls Royce, 2018, “Rolls Royce,” Rolls Royce, Derby, 
+
+
+
+UK, accessed Aug. 8, 2018, https://www.rolls-
+
+
+
+royce.com/products-and-services/civil-aerospace 
+
+
+
+ 
+
+
+
+[9] CFM International, 2018, “CFM International,” CFM 
+
+
+
+International, Cincinnati, OH, accessed Aug. 8, 2018, 
+
+
+
+https://www.cfmaeroengines.com/ 
+
+
+
+ 
+
+
+
+[10] International Civil Aviation Organization, 2018, “ICAO 
+
+
+
+Aircraft Emissions Databank,” International Civil Aviation 
+
+
+
+Organization, Montreal, Canada. 
+
+
+
+ 
+
+
+
+[11] Guynn, M.D., Berton, J.J., Fisher, K.L., Haller, W.J., 
+
+
+
+Tong, M., Thurman, D.R., “Engine Conceptual Study for an 
+
+
+
+Advanced Single-Aisle Transport,” NASA TM-2009-215784, 
+
+
+
+August 2009. 
+
+
+
+ 
+
+
+
+[12] Guynn, M.D., Berton, J.J., Fisher, K.L., Haller, W.J., 
+
+
+
+Tong, M., Thurman, D.R., “Analysis of Turbofan Design 
+
+
+
+Options for an Advanced Single-Aisle Transport Aircraft,” 
+
+
+
+AIAA 2009-6942, September 2009. 
+
+
+
+ 
+
+
+
+[13] Guynn, M. D., Berton, J.J., Fisher, K.L., Haller, W.J., 
+
+
+
+Tong, M., Thurman, D.R, “Refined Exploration of Turbofan 
+
+
+
+Design Options for an Advanced Single-Aisle Transport,” 
+
+
+
+NASA TM-2011-216883, January 2011. 
+
+
+
+ 
+
+
+
+[14] Guynn, M.D., Berton, J.J., Tong, M.T., Haller, W.J., 
+
+
+
+“Advanced Single-Aisle Transport Propulsion Design Options 
+
+
+
+Revisited,” AIAA 2013-4330, August 2013. 
+
+
+
+ 
+
+
+
+[15] Nickol, C.L. and Haller W.J., “Assessment of the 
+
+
+
+Performance Potential of Advanced Subsonic Transport 
+
+
+
+Concepts for NASA’s Environmentally Responsible Aviation 
+
+
+
+Project,” AIAA 2016-1030, January 2016. 
+
+
+
+ 
+
+
+
+[16] Collier, F., Thomas, R., Burley, C., Nickol, C., Lee, 
+
+
+
+C.M., Tong, M., “Environmentally Responsible Aviation – 
+
+
+
+Real Solutions for Environmental Challenges Facing 
+
+
+
+Aviation,” 27th International Congress of the Aeronautical 
+
+
+
+Sciences, September, 2010. 
+
+
+
+ 
+
+
+
+[17] Geron, A., “Hands-On Machine Learning with Scikit-
+
+
+
+Learn and TensorFlow,” first edition, March 2017. Published 
+
+
+
+by O’Reilly Media, Inc. 
+
+
+
+ 
+
+
+
+[18] Chollet, François and others, “Keras.” accessed February 
+
+
+
+22, 2019, https://keras.io/ 
+
+
+
+ 
+
+
+
+[19] Google, “TensorFlow: Large-Scale Machine Learning on 
+
+
+
+Heterogeneous Distributed Systems.” accessed February 20, 
+
+
+
+2019, https://www.tensorflow.org/ 
+
+
+
+ 
+
+
+
+[20] Ng, A., 2004 “Feature selection, L1 vs. L2 regularization, 
+
+
+
+and rotational invariance,” Proceedings of the twenty-first 
+
+
+
+international conference on Machine learning, July 4, 2004 
+
+
+
+ 
+[21] Hinton, G.E., Krizhevsky, A., Srivastava, N., Sutskever, I., & 
+
+
+
+Salakhutdinov, R., “Dropout: A simple Way to Prevent Neural 
+
+
+
+Networks from Overfitting.” Journal of Machine Learning Research, 
+
+
+
+15, 1929-1958. June, 2014. 
+
+
+
+ 
+
+
+
+[22] Kingma, D. P. and Ba, J., “Adam: A Method for 
+
+
+
+Stochastic Optimization,” International Conference on 
+
+
+
+Learning Representations, May 2015. 
+
+
+
+ 
+
+
+
+[23] Van Rossum, G., et al., “The Python Library Reference, 
+
+
+
+release 3.8.2,” Python Software Foundation, 2020. 
+
+
+
+ 
+
+
+
+[24] Cortesi, D., “PyInstaller 5.7.0,” released on December 4, 
+
+
+
+2022, accessed December 19, 2022. 
+
+
+
+https://pypi.org/project/pyinstaller/ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+http://www.jet-engine.net/civtfspec.html
+
+
+https://www.geaviation.com/commercial
+
+
+https://www.pw.utc.com/products-and-services/products/commercial-engines
+
+
+https://www.pw.utc.com/products-and-services/products/commercial-engines
+
+
+https://www.rolls-royce.com/products-and-services/civil-aerospace
+
+
+https://www.rolls-royce.com/products-and-services/civil-aerospace
+
+
+https://www.cfmaeroengines.com/
+
+
+https://keras.io/
+
+
+https://www.tensorflow.org/
+
+
+https://pypi.org/project/pyinstaller/
+
+
+
+
+
+
+
+
+ 
+
+
+
+This material is declared a work of the U.S. Government and is not subject to copyright protection in the United States. 
+
+
+
+Approved for public release; distribution is unlimited. 
+
+
+
+10 
+
+
+
+Appendix A 
+
+
+
+ 
+
+
+
+Engine database 
+
+
+
+ 
+ 
+
+
+
+System type: DD = direct-drive system 
+
+
+
+ G = geared system 
+
+
+
+ 
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+This material is declared a work of the U.S. Government and is not subject to copyright protection in the United States. 
+
+
+
+Approved for public release; distribution is unlimited. 
+
+
+
+11 
+
+
+
+ Appendix A (cont’d) 
+
+
+
+ 
+
+
+
+Engine database 
+
+
+
+ 
+
+
+
+ 
+ 
+
+
+
+System type: DD = direct-drive system 
+
+
+
+ G = geared system 
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+This material is declared a work of the U.S. Government and is not subject to copyright protection in the United States. 
+
+
+
+Approved for public release; distribution is unlimited. 
+
+
+
+12 
+
+
+
+Appendix A (cont’d) 
+
+
+
+ 
+
+
+
+Engine database 
+
+
+
+ 
+
+
+
+ 
+ 
+
+
+
+ 
+
+
+
+System type: DD = direct-drive system SFW – Subsonic Fixed Wing project 
+
+
+
+ G = geared system ERA – Environmentally Responsible Aviation project
+
+
+
+ AATT – Advanced Air Transport Technology project

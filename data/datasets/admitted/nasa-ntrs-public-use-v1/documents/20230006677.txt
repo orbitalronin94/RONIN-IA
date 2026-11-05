@@ -1,0 +1,3697 @@
+NASA/TM–20230006677
+
+
+
+CALPHAD Models to Guide Refractory 
+Alloys Additive Manufacturing: In-Situ 
+Compounds Formation, Nanoparticles, 
+and Impurities Considerations
+F.N. Michael and J.W. Sowards
+Marshall Space Flight Center, Huntsville, Alabama
+
+
+
+May 2023
+
+
+
+National Aeronautics and
+Space Administration
+IS63
+George C. Marshall Space Flight Center
+Huntsville, Alabama 35812
+
+
+
+
+
+
+
+
+
+
+
+The NASA STI Program…in Profile
+
+
+
+The NASA STI Program collects, organizes, 
+provides for archiving, and disseminates NASA’s 
+STI. The NASA STI program provides access to 
+the NTRS Registered and its public interface, the 
+NASA Technical Reports Server, thus providing 
+one of the largest collections of aeronautical 
+and space science STI in the world. Results are 
+published in both non-NASA channels and by 
+NASA in the NASA STI Report Series, which 
+includes the following report types:
+
+
+
+• TECHNICAL PUBLICATION. Reports
+of completed research or a major significant
+phase of research that present the results of
+NASA programs and include extensive data
+or theoretical analysis. Includes compilations
+of significant scientific and technical data
+and information deemed to be of continuing
+reference value. NASA’s counterpart of peer-
+reviewed formal professional papers but has
+less stringent limitations on manuscript
+length and extent of graphic presentations.
+
+
+
+• TECHNICAL MEMORANDUM. Scientific
+and technical findings that are preliminary or of
+specialized interest, e.g., quick release reports,
+working papers, and bibliographies that contain
+minimal annotation. Does not contain extensive
+analysis.
+
+
+
+• CONTRACTOR REPORT. Scientific and
+technical findings by NASA-sponsored
+contractors and grantees.
+
+
+
+• CONFERENCE PUBLICATION. Collected
+papers from scientific and technical conferences,
+symposia, seminars, or other meetings sponsored
+or cosponsored by NASA.
+
+
+
+• SPECIAL PUBLICATION. Scientific, technical,
+or historical information from NASA programs,
+projects, and mission, often concerned with
+subjects having substantial public interest.
+
+
+
+• TECHNICAL TRANSLATION.
+English-language translations of foreign
+scientific and technical material pertinent to
+NASA’s mission.
+
+
+
+Specialized services also include organizing and 
+publishing research results, distributing specialized 
+research announcements and feeds, providing 
+information desk and personal search support, and 
+enabling data exchange services.
+
+
+
+For more information about the NASA STI 
+program, see the following:
+
+
+
+• Access the NASA STI program home page at
+http://www.sti.nasa.gov
+
+
+
+• Help desk contact information:
+
+
+
+https://www.sti.nasa.gov/sti-contact-form/ and 
+select the “General” help request type.
+
+
+
+
+
+
+
+
+
+
+
+i
+
+
+
+NASA/TM–20230006677
+
+
+
+CALPHAD Models to Guide Refractory 
+Alloys Additive Manufacturing: In-Situ 
+Compounds Formation, Nanoparticles, 
+and Impurities Considerations
+F.N. Michael and J.W. Sowards
+Marshall Space Flight Center, Huntsville, Alabama
+
+
+
+May 2023
+
+
+
+National Aeronautics and
+Space Administration
+
+
+
+Marshall Space Flight Center • Huntsville, Alabama 35812
+
+
+
+
+
+
+
+
+
+
+
+ii
+
+
+
+Available from:
+
+
+
+NASA STI Information Desk
+Mail Stop 148
+
+
+
+NASA Langley Research Center
+Hampton, VA 23681–2199, USA
+
+
+
+757–864–9658
+
+
+
+This report is also available in electronic form at
+<http://www.sti.nasa.gov>
+
+
+
+TRADEMARKS
+
+
+
+Trade names and trademarks are used in this report for identification only. This usage does not constitute an official 
+endorsement, either expressed or implied, by the National Aeronautics and Space Administration.
+
+
+
+
+
+
+
+
+
+
+
+iii
+
+
+
+TABLE OF CONTENTS
+
+
+
+1. INTRODUCTION ............................................................................................................. 1
+
+
+
+2. BACKGROUND ................................................................................................................ 2
+
+
+
+3. DISCUSSION .................................................................................................................... 3
+
+
+
+ 3.1 Recap of the Melt Pool Rosenthal Analytical Model and the Thermo-Calc 
+ Diffusion Module Model .............................................................................................. 6
+ 3.2 Discussion of Models and Results ................................................................................ 7
+
+
+
+4. CONCLUSIONS ................................................................................................................ 20
+
+
+
+REFERENCES ....................................................................................................................... 22
+
+
+
+
+
+
+
+
+
+
+
+iv
+
+
+
+LIST OF FIGURES
+
+
+
+1. Thermo-Calc classical Scheil solidification calculation of the base 
+W-Re system. The Re composition is 5.5 wt.% and all other elemental 
+impurities are <0.01 wt.% ............................................................................................... 7
+
+
+
+ 2. (a) W-Re crack susceptibility coefficient (CSC) for varied Re wt.% 
+compositions without impurities; (b) W-Re-O system CSC with 1,000 ppm 
+or 0.1 wt% O impurity in the melt pool (and not in the build chamber as 
+measured by O sensors) .................................................................................................. 8
+
+
+
+ 3. (a) W-O phase diagram in regions of interest; (b) The ‘full’ W-O diagram, 
+with gas phase and ionic liquid ‘on’ in the Thermo-Calc modeling; (c) Limited 
+W-O phase diagram for comparison ............................................................................... 9
+
+
+
+ 4. Scheil solidification of W-O at various wt.%. Note the emergence of 
+WO2 at the 0.08 wt.% O level ......................................................................................... 10
+
+
+
+ 5. Scheil solidification gradients for (a) W-C-O with various wt.% of C 
+and (b) W-Re-C-O with 5.5 wt.% Re and various wt.% of C and O ................................ 11
+
+
+
+ 6. W-Re-C-O material-to-material calculation evaluated at 1,000 K ................................... 12
+
+
+
+ 7. W-Re-C-O material-to-material calculation with temperature variation 
+from 500–4,000 K ........................................................................................................... 12
+
+
+
+ 8. The W-Re-Ta-C 4-species ‘pyramid’ of stable and unstable interactions ......................... 13
+
+
+
+ 9. W-Re-Ta-C-O at 5.5 wt.% Re, 5 wt.% Ta, 5 wt.% C, and 0.1 wt.% O .............................. 14
+
+
+
+10. W-Re-Ta-C-O at 5.5 wt.% Re, 0.4 wt.% Ta, 0.4 wt.% C, and 0.1 wt.% O ........................ 14
+
+
+
+11. W-Re-Ta-C-O at 5.5 wt.% Re, 8 wt.% Ta, 8 wt.% C and 0.1 wt.% O ............................... 15
+
+
+
+12. W-Re-Ta-C (0.5 wt.%) CSC index calculated via (a) the Thermo-Calc 
+vulnerability time method and (b) the Kou-Scheil gradient method ............................... 16
+
+
+
+13. The effect of C addition to the W-Re(5.5 wt.%)-Ta-C system where 
+the Ta-C susceptibility to cracking during solidification, as shown in 
+(a) Thermo-Calc vulnerability time method and (B) Kou-Scheil gradient 
+method ........................................................................................................................... 17
+
+
+
+
+
+
+
+
+
+
+
+v
+
+
+
+14. The CSC indices for (a) W-Re(5.5 wt.%)-Ta-C with varied wt.% of 
+Ta and C; (b) W-Re-Ta-C(0.3 wt.%)-O(0.075wt. %) with varied wt.% of 
+Re and TA; and(c) W-Re(5.5 wt.%)-Ta-C(0.3wt.%)-O with varied wt.% of 
+Ta and O ......................................................................................................................... 18
+
+
+
+15. The CSC index for varied wt.% of C and O for the W-R(5.5 wt.%)-Ta(5 wt.%) 
+-C-O system .................................................................................................................... 19
+
+
+
+LIST OF FIGURES (Continued)
+
+
+
+
+
+
+
+
+
+
+
+vi
+
+
+
+LIST OF ACRONYMS, ABBREVIATIONS, AND SYMBOLS
+
+
+
+Al aluminum
+
+
+
+AM additive manufacturing
+
+
+
+ARC Ames Research Center
+
+
+
+BCC body-centered cubic
+
+
+
+C carbon
+
+
+
+CALPHAD Calculation of Phase Diagrams
+
+
+
+CSC crack susceptibility coefficient
+
+
+
+DBTT ductile-to-brittle transition temperature
+
+
+
+DED directed energy deposition
+
+
+
+DFT density functional theory
+
+
+
+DICTRA Diffusion Module
+
+
+
+GRC Glenn Research Center
+
+
+
+H hydrogen
+
+
+
+HfC hafnium carbide
+
+
+
+ICME integrated computational materials engineering
+
+
+
+MC metal carbide
+
+
+
+MO metal oxide
+
+
+
+Mo molybdenum
+
+
+
+MSFC Marshall Space Flight Center
+
+
+
+O oxygen
+
+
+
+
+
+
+
+
+
+
+
+vii
+
+
+
+LIST OF ACRONYMS, ABBREVIATIONS, AND SYMBOLS (continued)
+
+
+
+OD oxide dispersoid
+
+
+
+PBF powder bed fusion
+
+
+
+ppm parts per million
+
+
+
+RAAMBO refractory alloy additive manufacturing build optimization
+
+
+
+Re rhenium
+
+
+
+SLM selective laser melting
+
+
+
+SNP Space Nuclear Propulsion
+
+
+
+SLS Space Launch System
+
+
+
+TaC tantalum carbide
+
+
+
+Ta tantalum
+
+
+
+TDB thermodynamic database
+
+
+
+TM technical memorandum
+
+
+
+W tungsten
+
+
+
+wt.% weight percent
+
+
+
+
+
+
+
+
+
+
+
+viii
+
+
+
+NOMENCLATURE
+
+
+
+fs fraction of solid
+
+
+
+T temperature
+
+
+
+
+
+
+
+
+
+
+
+1
+
+
+
+TECHNICAL MEMORANDUM
+
+
+
+CALPHAD MODELS TO GUIDE REFRACTORY ALLOYS ADDITIVE MANUFACTURING: 
+IN-SITU COMPOUNDS FORMATION, NANOPARTICLES, AND IMPURITIES 
+
+
+
+CONSIDERATIONS
+
+
+
+1. INTRODUCTION
+
+
+
+ An as-yet unpublished article from the authors details an integrated computational materi-
+als engineering (ICME) model for Rosenthal analytical melt pool selective laser melting (SLM), as 
+well as Thermo-Calc®’s Diffusion Module (DICTRA)1 diffusion kinetics models for the same laser 
+beam-induced melt pool temperatures and dynamics. These models capture the effects of various 
+temperatures on refractory metals and their alloys and on nanometer-scale particle, or ‘nanopar-
+ticle,’ inclusions of metal carbide (MC). Two conclusions arose from analysis of these models: 
+
+
+
+(1) A static or dynamic feedback control of melt pool temperatures below nanoparticle inclu-
+sion melt temperature, yet above the refractory alloy melt temperature, would assure particle 
+survival and preserve the effectiveness of the inclusions as simultaneous strength and ductility 
+enhancers even after solidification, through grain refinement and thermal stability via Zener pin-
+ning; and
+
+
+
+ 
+ (2) Exceeding such temperatures would melt the nanoparticle inclusions into an equivalent 
+elementally dispersed, or ‘diffused,’ weight percent (wt.%) composition addition to the system. Any 
+subsequent in-situ formation or alloying of precipitated nanoparticle MC and/or metal oxide (MO) 
+inclusions would proceed from there. 
+
+
+
+ Based on these insights, this technical memorandum (TM) seeks to model and discuss 
+aspects of nanoparticle and micrometer-scale particle or ‘microparticle’ inclusions in refractory 
+metal alloy manufacturing, via a currently used additive manufacturing (AM) method that results 
+in equivalent wt.% addition of dissolved elements in the melt pool composition and subsequent 
+formation of nanometer-scale MC and MO inclusions. Additionally, the authors begin to consider 
+the effects of oxygen (O), a ubiquitous impurity, in AM; and seek to understand a combined opti-
+mization of alloying, nano- and micro strengthening and refinement, elemental additions, and even 
+in-situ compounds and alloys species formation. To gain insights, this TM focuses on a pair of 
+refractory alloys currently of interest to NASA: tungsten-rhenium-tantalum carbide (with O impu-
+rities) (W-Re-TaC(-O)) and tungsten-rhenium-tantalum-carbon (with O impurities) (W-Re-Ta-C 
+(-O)), which are processed via powder bed fusion (PBF)-SLM.
+
+
+
+
+
+
+
+
+
+
+
+2
+
+
+
+2. BACKGROUND
+
+
+
+ Ultra-high-temperature operational environments exist for many aerospace applications that 
+NASA has an interest in advancing and deploying. These include hypersonic aircraft, space nuclear 
+propulsion (SNP), chemical propulsion components (e.g., nozzles and liners) such as those found 
+on the Space Launch System (SLS), and re-entry vehicles, to name a few.
+ 
+ Various NASA Centers and external partners are showing great interest in high-temper-
+ature, high-strength propulsion components. NASA and partners are using these components in 
+increasingly cross-disciplinary and coordinated partnerships for multiple projects, including the 
+Refractory Alloy Additive Manufacturing Build Optimization (RAAMBO) multi-Center project 
+led by NASA Marshall Space Flight Center (MSFC) and including NASA Ames Research Center 
+(ARC) and NASA Glenn Research Center (GRC); the SNP project, also led by MSFC in conjunc-
+tion with the U.S. Department of Energy (DOE) laboratories; and the prime SLS/Artemis project.
+
+
+
+ Refractory metals and their alloys are high-temperature-tolerant materials that are of great 
+utility in high-temperature applications, if the manufacturing processes of joining (e.g., welding 
+and AM) can be perfected. Refractory metals and their alloys exhibit several features that make the 
+optimization of manufacturing refractories challenging. These include high ductile-brittle transi-
+tion temperatures (DBTTs);2,3 susceptibility to impurity-derived embrittlement and cracking, such 
+as from hydrogen (H) and O; solidification cracking; and even high neutron absorption cross sec-
+tions for various elemental additions, as well as high cost in creating refractory alloy compositions.4
+
+
+
+ Currently, three routes to refractory metals-based manufacturing are under investigation 
+at NASA Centers. These include sintering approaches, PBF-SLM, and directed energy deposition 
+(DED). In addition, joining built parts and generally refractory components via welding is also 
+under investigation.5–7
+
+
+
+
+
+
+
+
+
+
+
+3
+
+
+
+3. DISCUSSION
+
+
+
+ The focus of this TM is the computational modeling of W-Re-TaC and W-Re-Ta-C (both 
+with and without consideration of O impurities) and the manufacturing thereof via PBF-SLM, 
+with a focus on the melt pool dynamics under two limiting melt temperature regimes.
+
+
+
+ In an SLM process, melt pool temperatures are very high in order to melt the refractory 
+metal and elements used to alloy. These temperatures exceed the base metals’ melt temperatures 
+and often are much higher, with reported temperatures reaching approximately 4,500–6,000 K.8–13 
+
+
+
+The build chamber(s) are mostly operated with an inert gas flow, although vacuum can be utilized. 
+Impurities such as O are continuously removed or reacted, such as by a partial H gas flow in addi-
+tion to the inert gas, in order to react and scavenge O. Note that there are two possible O sources: 
+(1) from the environment, and (2) from the refractory metal and added elements in the form of 
+MOs, which may have embedded O impurities.
+
+
+
+ Various atomic elements are added to the pre-melt, typically in the form of powders. These 
+elements are added to suppress solidification cracking and to cool down hot cracking; and to 
+impart certain properties to the refractory alloy such as increased strength, increased ductility, 
+corrosion resistance, surface roughness, or other thermal and/or mechanical attributes. These usu-
+ally result in some desirable properties; however, for most refractory alloys, a trade-off between 
+enhanced strength and enhanced ductility has been perceived to exist. That is, strength can be 
+increased at the expense of a lowered ductility, and conversely, ductility can be increased at the 
+expense of a lowered strength.
+
+
+
+ However, an additional non-chemistry-based modification approach exists,9,10 ideally result-
+ing in a simultaneous strength and ductility improvement. This approach utilizes the addition of 
+nanometer-scale particles, or ‘nanoparticles,’ to the micrometer-scale particles, or ‘microparticles,’ 
+in the alloy composition. If these nanoparticles remain unmelted, one of three outcomes can occur 
+depending on their size:
+
+
+
+(1) Nanoparticles can be engulfed in the solidifying grain, acting as a strengthener (if below a 
+critical radius, depending on the size of the base materials and the process being used).
+
+
+
+(2) Nanoparticles can be pushed along the solidification front to reside in grain boundaries 
+and grain vertices, acting as Zener grain pinning effectors and potentially imparting strength even 
+under a wide thermal operational range (i.e., thermal stability).
+
+
+
+(3) Nanoparticles can act as nucleation sites during solidification, ensuring fine grains and mov-
+ing the alloy away from columnar and dendritic growth and toward equiaxed grain growth. 
+
+
+
+ Equiaxed grain growth results in a strengthening effect via grain refinement, as well as 
+a ductility enhancement via the creation of fine grain boundaries’ many tortuous paths, which 
+
+
+
+
+
+
+
+
+
+
+
+4
+
+
+
+prevent easy initiated crack propagation. Yet the high temperature of the manufacturing process’s 
+melt pool remains an obstacle to optimally implementing such a strategy to ensure equiaxed grain 
+growth. Note that in the case of lightweight alloys with a low melt temperature, such as aluminum 
+(Al) and its alloys with a ≈940 K melt temperature, additions of nanoparticles such as TaC with a 
+melt temperature of ≈4,100 K allows for an extremely wide temperature window of ≈3,160 K for 
+ensuring the survivability of unmelted nanoparticles. In the case of a refractory base metal such 
+as W with a melt temperature of ≈3,700 K, this window shrinks to merely ≈400 K. As a result, it is 
+more difficult to implement a similar strategy via control of the melt pool temperature. This is by 
+design, because PBF-SLM uses a static dialed-in laser power that generates a consistent volumetric 
+energy density and surface energy density. 
+
+
+
+ Additionally, the selection of higher-melting particle additions such as TaC or hafnium 
+carbide (HfC) with its ≈4,200 K melt temperature, or even carbon nanotubes and graphene flakes 
+with >4,500 K melt temperatures, over other MCs with lower melt temperatures nearer to that of 
+W may theoretically allow for—or even expand—that manufacturing window in conjunction with 
+the W-alloy liquidus depression from pure W;10 even as fine-tuned melt pool temperature control, 
+such as with a two-color pyrometer real-time feedback control, may ensure a tightly stable and con-
+trolled melt pool temperature within a window. While this latter temperature control approach has 
+been demonstrated in the laboratory for PBF-SLM by academia, the technology has not yet been 
+incorporated in the current state of the art equipment utilized by NASA and industry partners for 
+either process development or manufacturing. 
+
+
+
+ Another consideration is relevant then to the melting of nanoparticles. In the example of W, 
+a powder mix of refractory metal and nanoparticles (e.g., W-TaC, comprised of 100 µm powdered 
+W coated with 50 nm TaC nanoparticles) will fully melt if the melt pool is in the reported ranges 
+above and will behave identically to an elemental composition such as W-Ta-C.
+
+
+
+ This issue is still present in the case of elemental additions to the base refractory metal in 
+order to modify chemistry and properties. For example, and as relevant to this TM, the addition of 
+Re to W is a route to enhancing ductility in W.4 The mechanisms for this so-called ‘rhenium effect’ 
+are explained in various ways. On the crystal lattice level, these include the Re-induced formation 
+of an additional <112> slip planes in addition to the body-centered cubic (BCC) <110> primary 
+or base metal’s lattice’s minimal slip planes even at low temperatures. These additional slip planes 
+contribute to the activation of screw dislocation glide transition softening. In addition, alloying a 
+softer (i.e., relatively lower yield strength) elemental material to the harder elemental primary base 
+metal material in this case results in a softening effect in the near equal atomic radius substitutional 
+input into the primary lattice of the harder element (W) by the softer element (Re), with a reduc-
+tion of the stress fields experienced and an overall lowered energy for activation of slip. Thirdly, 
+the chemistry of the melt pool now experiences various undercooling and supercooling effects due 
+to concentration gradients of the Re in W and the dendritic and columnar solidification initiated 
+in pure W. These cooling effects cause changes to granular boundary formation that also cause 
+changes in scale, in temperature ranges for initiation and fragmentation, and even in the resultant 
+grain sizes of formed (final) grains. The change in size of these formed (final) grains then modifies 
+their morphology and, in the specific case of (final) primary grains, their average diameter under 
+various process laser parameters, thus leading to conclusions of a grain refining effect—though 
+
+
+
+
+
+
+
+
+
+
+
+5
+
+
+
+this last effect is only on a small scale. That is, the grain refinement due to elemental (chemical) 
+additions are smaller in scale and are limited to effects on the micrometer scale; while, for example, 
+nanoparticles that remain intact and which act as nucleation sites themselves result in so-called 
+‘ultra’ grain refinement to the sub-micron and even nanometer scales.
+
+
+
+ The melt pool environment itself will drive various in-situ stoichiometric and non-stoichio-
+metric compounds formation, which often are discussed in terms of alloys formation. Given an 
+elemental composition, various species and phases can result, and many will result given the solidi-
+fication environment. An issue here, which has been the subject of previous unpublished research 
+from the authors and from which the insights have been applied in this TM, is that in the case of a 
+fully melted nanoparticle, the diffused particle’s composition will not re-coalesce into a nanopar-
+ticle of a preferred size and shape or one that resembles the initial nanoparticle. If any particle is 
+formed at all, it will form very small-scale dispersoids, typically between 1–10 nm in diameter.13 
+Also, depending on the solubility of the melted elements, some of the dissolved elements of the 
+nanoparticle inclusions will embed interstitially or substitutionally in the base element. The dif-
+fused element will embed substitutionally if the atomic radius ratio is within ≈1.6 of the base ele-
+ment; otherwise, the diffused element will embed interstitially. This is seen in how smaller carbon 
+atoms will embed interstitially in larger iron atoms in the creation of carbon steel. In the case of 
+the alloys discussed in this TM, the Re will incorporate substitutionally into the primary lattice of 
+the base W, as the large Re atoms will simply not electromagnetically ‘fit’ in the spaces between the 
+planes of W atoms.
+
+
+
+ Therefore, in the case of laser-induced high melt pool temperatures, a system with diffused 
+elements from nanoparticles becomes equivalent to a system composed of the individual elements. 
+In the case discussed in this TM, the W-Re-TaC system with fully diffused TaC nanoparticles will 
+behave identically or near-identically to a W-Re-Ta-C system. This ‘near-identical’ caveat depends 
+on the thermal gradient of the melt pool and peak temperature, and even re-scans and hatching, as 
+it can be imagined that some very thin layer of the more viscous melt may contain thermal gradi-
+ents and temperature distributions that may be below the nanoparticle’s melt temperatures, which 
+may then cause nanoparticles to escape full diffusion. However, this ideal situation is unlikely to 
+occur. 
+
+
+
+ Furthermore, new or re-alloying in-situ dynamics will occur depending on the elements 
+present in addition to the nanoparticle’s elements. Moreover, the presence of ubiquitous impuri-
+ties such as oxygen will add further complexity and even create challenges to assuring a crack free 
+solidified part, as in-situ formation of MOs will also occur in addition to MCs and the expected 
+alloys from the base metal plus elements added. Note that O solubility in a solid refractory metal 
+such as W is poor. As the laser source moves away and the melt pool begins to cool and solidify, O 
+will either be ejected or driven toward the remaining melt, eventually resulting in an O concentra-
+tion increase in the remaining melt and the formation of various MO species at grain boundaries. 
+Therefore, potentially embrittling MO species may result exactly where the most heightened vulner-
+ability to cracking and crack propagation can occur (i.e., along grain boundaries). This issue has 
+been discussed in the authors’ unpublished research and is being restated here; the authors include 
+detailed Calculation of Phase Diagrams (CALPHAD)-based computations that attempt to take 
+this issue into account in section 3.2.
+
+
+
+
+
+
+
+
+
+
+
+6
+
+
+
+ Yet even this detrimental outcome via impurities may present opportunities for favorable 
+utilization. A type of particle known as an oxide dispersoid (OD) is known to enhance strength 
+and ductility in AM of various metal alloys.9 Though some ODs may contribute to embrittling 
+depending on their shape and size, ODs added to a high-melt-temperature melt pool will diffuse 
+entirely into their constituent elements. This diffusion destroys the previous sizing and shape of 
+the ODs, and upon solidification of the melt pool, its previous pinning effects. However, in-situ 
+formation of fine-scale dispersed ODs can be a strategy to reduce the embrittling effect of O. 
+Adding certain wt.% of various elements into the alloy allows them to act as so-called ‘getters’ of 
+O impurities, such as the addition of C resulting in carbon monoxide (CO) vapor, which can be 
+expelled and flow-removed by the entraining inert gas mixture. The addition of various elements 
+of metals with a higher affinity than W for binding with O can also result in the in-situ formation 
+of MOs that then will act favorably as ODs in the built part or will form MO regions of cells or 
+grains themselves. Note, however, that as is the case with MCs, there also are temperature limits to 
+these formed ODs. A typical upper limit is near or below the melting temperature of W, indicating 
+that in a refractory such as W, the usual MO particle addition will nearly always melt. With solid 
+state high temperature stability (below solidus temperature), the ODs in the built part will have less 
+thermal stability than the added or in-situ formed (and re-formed at small scale) MCs.
+
+
+
+ In order to characterize and predictively model these effects and considerations, in an effort 
+to overcome some of the primary challenges in the AM builds of refractory alloys, section 3.2 dis-
+cusses various modeling approaches and considerations that have been selected as being relevant. 
+Each problem as been reduced to its components and various aspects have been modeled. The 
+authors utilize these models to both gain insight and to provide guidance for the synergistic ICME 
+approach being applied to RAAMBO, SNP and similar ultra-high temperature aerospace applica-
+tions at NASA.
+
+
+
+3.1 Recap of the Melt Pool Rosenthal Analytical Model and the Thermo-Calc 
+Diffusion Module Model
+
+
+
+ In as-yet unpublished research, the authors utilized a melt pool Rosenthal moving heat 
+source analytical solutions to the heat equation to predict melt pool behavior when a laser tra-
+versed W metal. The melt pool was also modeled via Thermo-Calc DICTRA diffusion kinet-
+ics.1 The examples discussed in the research concluded that a 100-nm diameter TaC dispersoid/
+inoculant nanoparticle is likely to be completely consumed in a 3D print of W with relevant laser 
+processing parameters. The time scales of the full melts at the melt temperatures and laser powers 
+considered for those elements ranged from ≈10-6 s to ≈10-9 s depending on the model and assump-
+tions, even while the typical PBF build parameters showed that the melt region exposure of the 
+particles (i.e., the exposure times above melting points) were on the scale of 0.13 ms or ≈10-4 s. The 
+work provided insight and suggested a methodology for this CALPHAD work that the authors use 
+in this TM to model the refractory alloy systems of interest of W-Re-TaC and W-Re-Ta-C with and 
+without O impurities.
+
+
+
+
+
+
+
+
+
+
+
+7
+
+
+
+3.2 Discussion of Models and Results
+
+
+
+ This section seeks to deconstruct the problem into its component parts and build more com-
+plexity and degrees of freedom via additional elements. The initial model starts with the base W-Re 
+system, as shown in figure 1. The Thermo-Calc Scheil solidification calculation, the property model 
+calculations, and phase diagram calculations are applied to the system. Note the very high gradient 
+at >0.9 fraction of solid (fs), which is indicative of extremely high thermal strains near solidus.
+
+
+
+3,400
+
+
+
+3,300
+
+
+
+3,200
+
+
+
+3,100
+
+
+
+3,000
+
+
+
+2,900
+
+
+
+2,800
+
+
+
+2,700
+0 0.1 0.2 0.3 0.4 0.5
+
+
+
+Mole Fraction of Solid
+
+
+
+Te
+m
+
+
+
+pe
+ra
+
+
+
+tu
+re
+
+
+
+ (°
+C)
+
+
+
+0.6 0.7 0.8 0.9 1
+
+
+
+Equilibrium
+Ionic_Liq
+Ionic_Liq + BCC_B2
+Ionic_Liq + Ionic_Liq#2 + BCC_B2
+
+
+
+Figure 1. Thermo-Calc classical Scheil solidification calculation of the base W-Re system. 
+The Re composition is 5.5 wt.% and all other elemental impurities are <0.01 wt.%. 
+
+
+
+ Figure 2a shows the crack susceptibility coefficient (CSC) according to Thermo-Calc for 
+the W-Re system with varied Re wt.% compositions. The CSC corresponds to the ratio of time 
+spent vulnerable to cracking compared to time spent invulnerable to cracking during solidifica-
+tion. A typical PBF-SLM print as discussed in section 3 has two potential sources of O impuri-
+ties: from the ambient air in the chamber and from the powder feedstock. Assuming that inert gas 
+with H partial pressure and outflow removes the O impurities from the ambient air in the cham-
+ber, the majority of O impurities will be from the powder itself. Various reported sensor data have 
+reported O ranges of 5–250 parts per million (ppm), with one known instance of 750 ppm. The 
+models therefore are adapted to include O in these ranges, calculating the relative amount of O to 
+be ≈0.01–0.2 wt.%. Figure 2b shows the CSC for a W-Re-O system with 1,000 ppm or 0.1 wt.% O 
+impurity in the melt pool (and not in the build chamber, as measured by O sensors). The CSC for 
+the W-Re-O system is at least an order of magnitude higher for the proposed 5.5 wt.% Re than in 
+the W-Re system with no impurities.
+
+
+
+
+
+
+
+
+
+
+
+8
+
+
+
+0.420
+
+
+
+0.400
+
+
+
+0.380
+
+
+
+0.360
+
+
+
+0.340
+
+
+
+0.320
+
+
+
+0.300
+
+
+
+0.280
+
+
+
+0.260
+0 2 4 6 8 10 12 14 16 18 20
+
+
+
+wt.% Re(a)
+
+
+
+(b)
+
+
+
+Cr
+ac
+
+
+
+k 
+Su
+
+
+
+sc
+ep
+
+
+
+tib
+ili
+
+
+
+ty
+ C
+
+
+
+oe
+ffi
+
+
+
+ci
+en
+
+
+
+t
+
+
+
+8
+
+
+
+7.5
+
+
+
+7
+
+
+
+6
+
+
+
+6.5
+
+
+
+5.5
+
+
+
+5
+
+
+
+4.5
+
+
+
+4
+0 2 4 6 8 10 12 14 16 18 20
+
+
+
+wt.% Re
+
+
+
+Cr
+ac
+
+
+
+k 
+Su
+
+
+
+sc
+ep
+
+
+
+tib
+ili
+
+
+
+ty
+ C
+
+
+
+oe
+ffi
+
+
+
+ci
+en
+
+
+
+t
+
+
+
+Crack Susceptibility Coefficient
+
+
+
+Crack Susceptibility Coefficient
+
+
+
+Figure 2. (a) W-Re crack susceptibility coefficient (CSC) for varied Re wt.% compositions 
+without impurities; (b) W-Re-O system CSC with 1,000 ppm or 0.1 wt% oxygen 
+impurity in the melt pool (and not in the build chamber as measured by O sensors). 
+
+
+
+ The Nickel alloy thermodynamic database (TDB) is also utilized, which contains evaluated 
+O interactions.14 The High Entropy Alloys database is applied to check several refractory alloys 
+without O interactions in order to corroborate results.14 The phase diagram for O inclusion as 
+impacting W is utilized to gauge the Nickel TDB’s O inclusion into metals solidification (fig. 3). It 
+was concluded that the refractory-oxygen thermodynamics are sufficiently represented in the Nickel 
+TDB. A W-O phase diagram created by Wendel is included for comparison.15
+
+
+
+
+
+
+
+
+
+
+
+9
+
+
+
+BCC_BC + WO2
+BCC_B2 + IONIC_LIQ#2
+WO2 + IONIC_LIQ#2
+WO2 + WO2_72
+IONIC_LIQ#2 + WO2_72
+IONIC_LIQ#2 + WO2_96
+IONIC_LIQ#2 + DIAMOND_A4
+WO3_HT + WO2_96
+WO3_LT + WO2_96
+WO2_72 + WO2_96
+BCC_B2 + IONIC_LIQ
+
+
+
+BCC_BC + WO2
+BCC_B2 + IONIC_LIQ#2
+WO2 + IONIC_LIQ#2
+WO2 + WO2_72
+IONIC_LIQ#2 + WO2_72
+IONIC_LIQ#2 + WO2_96
+IONIC_LIQ#2 + WO3_HT
+IONIC_LIQ#2 + GAS
+WO3_HT + GAS
+WO3_HT + WO2_LT
+WO3_HT + WO2_96
+WO3_LT + WO2_96
+GAS + WO3_LT
+WO2_72 + WO2_96
+GAS + IONIC_LIQ
+BCC_B2 + IONIC_LIQ
+
+
+
+IONIC_LIQ#2 + BCC_B2
+
+
+
+IONIC_LIQ#2 + BCC_B2
+
+
+
+IONIC_LIQ#2 + WO2_72
+
+
+
+WO2 + WO2_72
+
+
+
+WO2_72 + WO2_96
+
+
+
+IONIC_LIQ
+
+
+
+BCC_B2 + WO2
+
+
+
+100 20
+
+
+
+500
+
+
+
+750
+
+
+
+1,000
+
+
+
+1,250
+
+
+
+1,500
+
+
+
+1,750
+
+
+
+2,000
+
+
+
+2,250
+
+
+
+2,500
+
+
+
+2,750
+
+
+
+3,000
+
+
+
+3,250
+
+
+
+3,500
+
+
+
+3,750
+
+
+
+4,000
+
+
+
+0 10 20 30 40 50
+
+
+
+wt.% O
+
+
+
+wt.% O
+
+
+
+60 70 80 90 100
+
+
+
+5,000
+4,500
+4,000
+3,500
+3,000
+2,500
+2,000
+1,500
+1,000
+
+
+
+500
+0
+
+
+
+0
+
+
+
+0
+20
+
+
+
+40
+50
+
+
+
+60
+65
+
+
+
+73 73.5 74 74.5 75
+
+
+
+4 8 121619 19.5 20 20.5 21
+
+
+
+1,800
+
+
+
+1,600
+
+
+
+1,400
+
+
+
+1,200
+
+
+
+1,000
+
+
+
+800
+
+
+
+600
+
+
+
+400
+484°C
+585°C
+
+
+
+~1,590°C
+1,530°C
+
+
+
+~1,460°C ~1,474°C
+
+
+
+W18O49
+
+
+
+WO2 W24O68
+
+
+
+WO3–A
+
+
+
+L΄
+
+
+
+WO3–B
+
+
+
+WO3–C
+
+
+
+WO3–D
+
+
+
+WnO3n–1
+
+
+
+wt.% Oxygen
+
+
+
+Atomic Percent Oxygen
+
+
+
+Te
+m
+
+
+
+pe
+ra
+
+
+
+tu
+re
+
+
+
+ (°
+C)
+
+
+
+Te
+m
+
+
+
+pe
+ra
+
+
+
+tu
+re
+
+
+
+ (K
+)
+
+
+
+Te
+m
+
+
+
+pe
+ra
+
+
+
+tu
+re
+
+
+
+ (K
+)
+
+
+
+(αW)
+
+
+
+WnO3n–2 series
+
+
+
+(a)
+
+
+
+(b) (c)
+
+
+
+Figure 3. (a) W-O phase diagram in regions of interest; (b) The ‘full’ W-O diagram, with gas 
+phase and ionic liquid ‘on’ in the Thermo-Calc modeling; (c) Limited W-O phase 
+diagram for comparison.15
+
+
+
+
+
+
+
+
+
+
+
+10
+
+
+
+ A Scheil solidification type of calculation with these W-O wt.% shows minimal variations of 
+the solidification range (i.e., the liquidus-to-solidus temperature differential) in these O ranges, and 
+nor does it flatten the >0.95 fs gradient. Note that the steeper the >0.95 fs region slope or gradient 
+is, the higher likelihood of solidification cracking to occur. Figure 4 shows the effect of the addition 
+of O in the wt.% range contemplated, which serves to shift the nearly smooth W solidification prior 
+to the >0.95 fs. However as discussed in section 3, in-situ formation of MOs can occur, especially 
+at the grain boundaries. In figure 4, MOs are shown to emerge beginning at 0.08 wt.% O. However, 
+the formation of MOs such as WO2 will occur even at lower wt.%’s, as shown in the phase diagram 
+in figure 3. It appears that the Scheil simulation omits to render this formation as the phase being 
+too small in amount-of-phase (i.e., cut-off) at lower O wt.%.
+
+
+
+3,500
+
+
+
+3,000
+
+
+
+2,500
+
+
+
+2,000
+
+
+
+1,500
+
+
+
+0.0 0.1 0.2 0.3 0.4 0.5
+
+
+
+Mole Fraction of Solid
+
+
+
+0.6 0.7 0.8 0.9 1.0
+
+
+
+Te
+m
+
+
+
+pe
+ra
+
+
+
+tu
+re
+
+
+
+ (°
+C)
+
+
+
+Equilibrium
+Equilibrium
+Equilibrium
+Equilibrium
+Equilibrium
+Equilibrium
+Ionic_Liq (0.01mwt% O)
+Ionic_Liq + BCC_B2 (0.01 wt% O)
+Ionic_Liq (0.05 wt% O)
+Ionic_Liq + BCC_B2 (0.05 wt% O)
+Ionic_Liq (0.08 wt% O)
+Ionic_Liq + BCC_B2 (0.08 wt% O)
+Ionic_Liq + BCC_B2 + WO2 (0.08 wt% O)
+Ionic_Liq (0.11 wt% O)
+Ionic_Liq + BCC_B2 (0.11 wt% O)
+Ionic_Liq + BCC_B2 + WO2 (0.11 wt% O)
+Ionic_Liq (0.15 wt% O)
+Ionic_Liq + BCC_B2 (0.15 wt% O)
+Ionic_Liq + BCC_B2 + WO2 (0.15 wt% O)
+Ionic_Liq (0.2 wt% O)
+Ionic_Liq + BCC_B2 (0.2 wt% O)
+Ionic_Liq + Bcc_B2 + WO2 (0.2 wt% O)
+
+
+
+Figure 4. Scheil solidification of W-O at various wt.%. Note the emergence of WO2 
+at the 0.08 wt.% O level. 
+
+
+
+ The next stage of modeling shows how the addition of C can affect the interaction between 
+W and O. As previously noted, the O wt.% is assumed to be mostly from the powder feedstock 
+source, although some unremoved amounts from the build chamber may yet remain. The C in these 
+models is assumed to be either from the diffusion of MC nanoparticles or from wt.% additions of 
+getter C. The Scheil solidification gradient for this model is shown in figure 5.
+
+
+
+
+
+
+
+
+
+
+
+11
+
+
+
+3,600
+
+
+
+3,400
+
+
+
+3,200
+
+
+
+3,000
+
+
+
+2,800
+
+
+
+2,600
+
+
+
+2,400
+
+
+
+2,200
+
+
+
+2,000
+
+
+
+1,800
+0 0.1 9.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+
+
+
+Te
+m
+
+
+
+pe
+ra
+
+
+
+tu
+re
+
+
+
+ (°
+C)
+
+
+
+3,400
+
+
+
+3,200
+
+
+
+3,000
+
+
+
+2,800
+
+
+
+2,600
+
+
+
+2,400
+
+
+
+2,200
+
+
+
+2,000
+
+
+
+1,800
+
+
+
+1,600
+
+
+
+1,400
+
+
+
+Te
+mp
+
+
+
+er
+atu
+
+
+
+re
+ (
+
+
+
+°C
+)
+
+
+
+0 0.2 0.4 0.6 0.8 20
+wt.% Re
+
+
+
+wt.% Re(a)
+
+
+
+Equilibrium
+Equilibrium
+Equilibrium
+Ionic_Liq (0.01 C 0.05 O wt.%))
+Ionic_Liq + BCC_B2 (0.01 C 0.05 ) wt.%)
+Ionic_Liq + BCC_B2 + HCP_A3 (0.01 C 0.05 O wt.%)
+Ionic_Liq (0.05 C 0.05 O wt.%)
+Ionic_Liq + BCC_B2(0.05 C 0.05 O wt.%)
+Ionic_Liq + BCC_B2 + HCP_A3 (0.05 C 0.05 O wt.%)
+Ionic_Liq (0.1 C 0.05 O wt.%)
+Ionic_Liq + BCC_B2(0.1 C 0.05 O wt%)
+Ionic_Liq + BCC_B2 + HCP_A3 (0.1 C 0.05 O wt.%)
+
+
+
+Equilibrium
+Equilibrium
+Ionic_Liq (Schell Calculator 1)
+Ionic_Liq + BCC_B2 (Shell Calculator 1)
+Ionic_Liq + BCC_B2 + HCP_A3 (Shell Calculator 1)
+Ionic_Liq + BCC_B2 + HCP_A3 + WO2 (Shell Calculator 1)
+Ionic_Liq (Solute Trapping Re5.5 C0.1 O0.1 wt%)
+Ionic_Liq + BCC_B2(Solute Trapping Re5.5 C0.1 O0.1 wt%)
+Ionic_Liq#2 + BCC_B2 + HCP_A3 (Solute Trapping Re5.5 C0.1 O0.1 wt%)
+Ionic_Liq#2 + BCC_B2 + HCP_HCP_A3 (Solute Trapping Re5.5 C0.1 O0.1 wt%)
+
+
+
+(b)
+
+
+
+Figure 5. Scheil solidification gradients for (a) W-C-O with various wt.% of C 
+and (b) W-Re-C-O with 5.5 wt.% Re and various wt.% of C and O.
+
+
+
+ The Thermo-Calc modules allow for a material-to-material calculation to easily vary wt.% 
+of certain materials in a system. Figures 6 and 7 show a W-Re-C-O system with varying amounts 
+of O from 0.01 wt.% to 0.2 wt.%, while keeping wt.% of C and Re constant at 0.1 wt.% and 
+5.5 wt.%, respectively. The system is evaluated at a stable temperature of 1,000 K in figure 6 and at 
+a temperature range between 500–4,000 K in figure 7. Both figures show stable MC and BCC W 
+formation, with MO formation varying gradually dependent upon the concentration of O.
+
+
+
+
+
+
+
+
+
+
+
+12
+
+
+
+0 0.1 0.2 0.3 0.4 0.5
+
+
+
+Mole Fraction of Solid
+
+
+
+Vo
+lu
+
+
+
+m
+e F
+
+
+
+ra
+ct
+
+
+
+io
+n 
+
+
+
+of
+ al
+
+
+
+l P
+ha
+
+
+
+se
+s
+
+
+
+0.6 0.7 0.8 0.9 1.0
+
+
+
+1
+
+
+
+0.9
+
+
+
+0.8
+
+
+
+0.7
+
+
+
+0.6
+
+
+
+0.5
+
+
+
+0.4
+
+
+
+0.3
+
+
+
+0.2
+
+
+
+0.1
+
+
+
+0
+
+
+
+Material A
+5.5
+0.1
+0.01
+
+
+
+Material B
+5.5
+0.1
+0.2
+
+
+
+Material Name
+Composition Re
+Composition C
+Composition O
+
+
+
+BCC_B2
+MC_SHP
+WO2
+
+
+
+Figure 6. W-Re-C-O material-to-material calculation evaluated at 1,000 K.
+
+
+
+0 0.1 0.2 0.3 0.4 0.5
+
+
+
+Mole Fraction of Solid
+
+
+
+Te
+m
+
+
+
+pe
+ra
+
+
+
+tu
+re
+
+
+
+ (K
+)
+
+
+
+0.6 0.7 0.8 0.9 1.0
+500
+
+
+
+1,000
+
+
+
+1,500
+
+
+
+2,000
+
+
+
+2,500
+
+
+
+3,000
+
+
+
+3,500
+
+
+
+4,000
+
+
+
+SIGMA
+HCP_A3#2
+MC_SHP
+WO2
+Ionic_Liq#2
+BCC_B2
+
+
+
+Figure 7. W-Re-C-O material-to-material calculation with temperature 
+variation from 500–4,000 K.
+
+
+
+
+
+
+
+
+
+
+
+13
+
+
+
+ The final step in increasing complexity of the discussed W alloy involves adding Ta to the 
+system. The following calculations explore various aspects of both W-Re-TaC and W-Re-TaC-O, 
+dependent upon whether O impurities are considered or not. If the nanoparticle TaC, with a melt-
+ing point of ≈4,100 K, is fully melted as a result of high-temperature PBF-SLM, then the calcula-
+tions explore the systems of W-Re-Ta-C and W-Re-Ta-C-O.
+
+
+
+ Tantalum as an elemental addition can act as an alloying or binding species to both Re and 
+W, as well as forming MCs and MOs. To illustrate these species, the stable fundamental phases in 
+a W-Re-Ta-C are system are shown schematically in figure 8.16–18 Note that many of the unstable 
+phases shown in light orange can actually be produced if the environment is such that the forma-
+tion energy is relatively favorable in the solidification process.
+
+
+
+TaW
+
+
+
+Ta
+
+
+
+TaRe
+
+
+
+TaW3Ta5Re24
+
+
+
+Re24W5
+
+
+
+Ta2ReW
+
+
+
+Ta11Re5
+Ta2C
+
+
+
+TaC
+Ta6C5
+
+
+
+Re
+
+
+
+Re2C
+WC
+
+
+
+C
+
+
+
+W
+
+
+
+Unstable
+
+
+
+Stable
+
+
+
+Figure 8. The W-Re-Ta-C 4-species ‘pyramid’ of stable and unstable interactions.16–18 
+
+
+
+ Using density functional theory (DFT), the authors also explore results of interactions 
+of W-Re-Ta-C-O at 0 K to illustrate the potential for Ta to interact with W and Re and not only 
+with C and O. This interaction would not be possible if the TaC nanoparticle inclusion would not 
+have melted, or if the process of AM was within the window between the melting point of W and 
+Re (≈3,600 K) and that of TaC (≈4,100 K). By melting and diffusing TaC into the melt pool, the 
+nanoparticles’ many nucleation sites are lost; therefore, the alloy also loses grain ultra-refinement, 
+grain growth suppression, and volume fraction of nanoparticle-dependent Zener pinning at any 
+temperature below solidus. Additional complexity in various phase formations is also introduced 
+into the solidification process. 
+
+
+
+
+
+
+
+
+
+
+
+14
+
+
+
+ The addition of Ta in the W-Re-Ta-C-O system to account for fully diffused TaC signifi-
+cantly modifies the Scheil solidification curves as compared to the W-Re-C-O case in figure 5, both 
+in terms of liquidus and solidus temperatures and the steepness of the crucial region at >0.95 fs. 
+Figures 9–11 show Scheil solidification curves at varying wt.% ratios of Ta and C in W-Re-Ta-C-O 
+systems.
+
+
+
+3,000
+
+
+
+2,800
+
+
+
+2,600
+
+
+
+2,400
+
+
+
+2,200
+
+
+
+2,000
+
+
+
+1,800
+
+
+
+1,600
+
+
+
+1,400
+0.0 0.1 0.2 0.3 0.4 0.5
+
+
+
+Mole Fraction of Solid
+
+
+
+Te
+m
+
+
+
+pe
+ra
+
+
+
+tu
+re
+
+
+
+ (°
+C)
+
+
+
+0.6 0.7 0.8 0.9 1.0
+
+
+
+Equilibrium
+Ionic_Liq
+Ionic_Liq + Graphite
+Ionic_Liq + FCC_L12 + Graphite
+Ionic_Liq + FCC_L12 + Graphite + MC_SHP
+Ionic_Liq + FCC_L12 + MC_SHP
+Ionic_Liq + Ionic_Liq#2 + DIS_FC_A1+ MC_SHP
+Ionic_Liq + Ionic_Liq#2 + DIS_FCC_A1
+Ionic_Liq#2 + DIS_FCC_A1
+Ionic_Liq#2 + DIS_FCC_A1 + MC+SHP
+Ionic_Liq#2 + HCP_A3 + MC_SHP
+Ionic_Liq + HCP_A3
+Ionic_Liq + HCP_A3 + WO2 
+
+
+
+Figure 9. W-Re-Ta-C-O at 5.5 wt.% Re, 5 wt.% Ta, 5 wt.% C, and 0.1 wt.% O.
+
+
+
+3,000
+
+
+
+2,800
+
+
+
+2,600
+
+
+
+2,400
+
+
+
+2,200
+
+
+
+2,000
+
+
+
+1,800
+
+
+
+1,600
+
+
+
+1,400
+0 0.1 0.2 0.3 0.4 0.5
+
+
+
+Mole Fraction of Solid
+
+
+
+Te
+m
+
+
+
+pe
+ra
+
+
+
+tu
+re
+
+
+
+ (°
+C)
+
+
+
+0.6 0.7 0.8 0.9 1
+
+
+
+3,200
+
+
+
+Equilibrium
+Ionic_Liq
+Ionic_Liq + BCC_B2
+Ionic_Liq + Ionic_Liq#2 + BCC_B2
+Ionic_Liq + Ionic_Liq#2 + BCC_B2 + HCP_A3 
+
+
+
+Figure 10. W-Re-Ta-C-O at 5.5 wt.% Re, 0.4 wt.% Ta, 0.4 wt.% C, and 0.1 wt.% O. 
+
+
+
+
+
+
+
+
+
+
+
+15
+
+
+
+2,200
+
+
+
+2,400
+
+
+
+2,600
+
+
+
+2,800
+
+
+
+3,000
+
+
+
+3,200
+
+
+
+3,400
+
+
+
+3,600
+
+
+
+3,800
+
+
+
+0 0.1 0.2 0.3 0.4 0.5
+
+
+
+Mole Fraction of Solid
+
+
+
+Te
+m
+
+
+
+pe
+ra
+
+
+
+tu
+re
+
+
+
+ (°
+C)
+
+
+
+0.6 0.7 0.8 0.9 1
+
+
+
+Equilibrium
+Ionic_Liq + Graphite
+Ionic_Liq + FCC_L12 + Graphite
+Ionic_Liq + FCC_L12 + Graphite + MC_SHP
+Ionic_Liq + FCC_L12 + MC_SHP
+Ionic_Liq + Ionic_Liq#2 + MC_SHP
+Ionic_Liq + Ionic_Liq#2 + FCC_L12 + MC_SHP
+Ionic_Liq + Ionic_Liq#3 + DIS_FCC_A1
+Ionic_Liq + Ionic_Liq#3 + DIS_FCC_A1 + MC_SHP
+Ionic_Liq#3 + DIS_FCC_A1
+Ionic_Liq#3 + DIS_FCC_A1 + MC_SHP 
+Ionic_Liq#3 + HCP_A3 + MC_SHP 
+
+
+
+Figure 11. W-Re-Ta-C-O at 5.5 wt.% Re, 8 wt.% Ta, 8 wt.% C, and 0.1 wt.% O. 
+
+
+
+ Note the reduction in steepness of the >0.95 fs region of solidification, and the temperature 
+range reduction of time spent in the steep region. However, the goal is ultimately to flatten that 
+region for a very gentle curve, which will enable crack-free solidification of AM built parts. The 
+authors intend to revisit this result in other work toward optimization of a crack-free part build 
+and have already predicted various alloy combinations that do exhibit the flattened curve. In addi-
+tion, the authors are working with NASA partners to further research on PBF-SLM AM manufac-
+turing of such crack-free refractory alloy systems, which will be published in future writings.
+
+
+
+ Despite the narrowing of the solidification range, the steepness of the slope or gradient 
+of temperature (T) at >0.95 fs is still high, which is indicative of a susceptibility to cracking. The 
+>0.95 fs is the hypothetical crucial area for solidification cracking, where the confluence of shrink-
+age, liquid fraction available to feed voids and spaces between grains, and increase/decrease of 
+strain per region as the fs approaches 1 is at its most intense.
+
+
+
+ The authors have investigated the cracking susceptibility via the CSC index available in 
+Thermo-Calc. As before, the research begins with partial components and increases in complexity 
+to the full composition. The amount of Re used in these calculations is centered on 5.5 wt.%, which 
+is added to W in order to impart some grain refinement and mostly to enhance ductility by adding 
+an additional slip system. The CSC index for the system is derived via two methods: the Thermo-
+Calc vulnerability time method and the Kou-Scheil gradient method, which has recently been pub-
+lished in a separate TM by the authors along with release of the Python module for its use.19 Both 
+methods are shown in figure 12.
+
+
+
+
+
+
+
+
+
+
+
+16
+
+
+
+0.24
+
+
+
+0.22
+
+
+
+0.2
+
+
+
+0.18
+
+
+
+0.16
+
+
+
+0.14
+
+
+
+8
+6
+
+
+
+4
+2
+
+
+
+0 0
+
+
+
+5
+
+
+
+10
+
+
+
+0.24
+
+
+
+0.22
+
+
+
+0.2
+
+
+
+0.18
+
+
+
+0.16
+
+
+
+0.14
+
+
+
+Cr
+ac
+
+
+
+k S
+us
+
+
+
+ce
+pt
+
+
+
+ib
+ilit
+
+
+
+y C
+oe
+
+
+
+ffi
+cie
+
+
+
+nt
+
+
+
+wt.% Re wt.% Ta
+
+
+
+12,728
+
+
+
+11,728
+
+
+
+10,728
+
+
+
+9,728
+
+
+
+8,728
+
+
+
+7,728
+
+
+
+6,728
+
+
+
+5,728
+
+
+
+4,728
+
+
+
+3,728
+2
+
+
+
+1
+
+
+
+2
+
+
+
+3
+
+
+
+4
+
+
+
+5
+
+
+
+6
+
+
+
+7
+
+
+
+4
+wt.% Ta
+
+
+
+wt
+.%
+
+
+
+ R
+e
+
+
+
+6 8
+
+
+
+Solidification Cracking Susceptibility of W-Re-Ta
+
+
+
+Tem
+perature (K)
+
+
+
+(a)
+
+
+
+(b)
+
+
+
+Figure 12. W-Re-Ta-C0.5 CSC index calculated via (a) the Thermo-Calc 
+vulnerability time method and (b) the Kou-Scheil gradient method. 
+
+
+
+ The two methods are in excellent agreement. Clearly there are windows of low susceptibil-
+ity, which imply that Re reduction even to the 2 wt.% range imparts ductility while reducing the 
+crack susceptibility.3 The effects of additional Re are somewhat deleterious in solidification, despite 
+a desirable ductility enhancement and some grain refinement. The present investigation suggests 
+reducing Re while adding Ta to achieve improved properties such as in-situ MC formation. In addi-
+tion, Ta is a less expensive component compared to Re, providing additional financial benefit.
+ 
+
+
+
+
+
+
+
+
+
+
+
+17
+
+
+
+ The addition of C while keeping the amount of Re consistent at 5.5 wt.% also has an effect 
+on suppressing crack susceptibility, which is shown in figure 13:
+
+
+
+1.5
+
+
+
+0.5
+
+
+
+1
+
+
+
+0.3
+0.2
+
+
+
+0.1
+0
+
+
+
+10
+
+
+
+1.5
+
+
+
+1
+
+
+
+0.5
+5
+
+
+
+0
+
+
+
+Cr
+ac
+
+
+
+k S
+us
+
+
+
+ce
+pt
+
+
+
+ib
+ilit
+
+
+
+y C
+oe
+
+
+
+ffi
+cie
+
+
+
+nt
+
+
+
+wt.% C
+wt
+
+
+
+.%
+ Ta
+
+
+
+43,255
+0.25
+
+
+
+0.20
+
+
+
+0.15
+
+
+
+0.10
+
+
+
+0.05
+
+
+
+39,255
+35,255
+31,255
+27,255
+23,255
+19,255
+15,255
+11,255
+7,255
+
+
+
+4 5 6 7 8 9
+wt.% Ta
+
+
+
+wt
+.%
+
+
+
+ C
+
+
+
+Solidification Cracking Susceptibility of W-5.5 Re-Ta-C
+
+
+
+Tem
+perature (K)
+
+
+
+(a)
+
+
+
+(b)
+
+
+
+Figure 13. The effect of C addition to the W-Re5.5-Ta-C system where the 
+Ta-C susceptibility to cracking during solidification, as shown in 
+(a) Thermo-Calc vulnerability time method and (B) Kou-Scheil 
+gradient method. 
+
+
+
+
+
+
+
+
+
+
+
+18
+
+
+
+ The two methods are in good agreement even at the uneven scaling. In both instances, a 
+suggested improvement and window for improvement via additional C wt.% is noted. The C alloy-
+ing potential for crack suppression is clearly noticeable in Figs. 12 and 13. In fact, an even higher 
+C wt.% than shown in figure 13 has been found to be a useful addition for crack suppression in 
+refractory alloys AM and in solidification in general, which the authors will discuss in more detail 
+in a follow up TM. Here, it suffices to discuss the effects of Ta-C on the W-Re alloy under investi-
+gation and to gain insight on paths forward. 
+
+
+
+ The Effects of O impurities as impacting the W-Re-Ta-C system is also useful to analyze 
+as well, providing feedback into the insights being gained on C and Ta additions. Figure 14 shows 
+CSC indices for different combinations of wt.% ratios within the W-Re-Ta-C system:
+
+
+
+2
+
+
+
+0.3
+
+
+
+0.2
+
+
+
+0.1
+
+
+
+0
+(a)
+
+
+
+0
+
+
+
+5
+
+
+
+10
+
+
+
+4
+
+
+
+6
+
+
+
+8
+
+
+
+8
+
+
+
+6
+
+
+
+4
+
+
+
+2
+
+
+
+wt.% C wt.% Ta
+
+
+
+Cr
+ac
+
+
+
+k S
+us
+
+
+
+ce
+pt
+
+
+
+ib
+ilit
+
+
+
+y C
+oe
+
+
+
+ffi
+cie
+
+
+
+nt
+
+
+
+4
+3
+2
+1
+
+
+
+8
+
+
+
+6
+
+
+
+4
+
+
+
+2
+
+
+
+0
+0
+
+
+
+5
+
+
+
+10
+
+
+
+(b)
+
+
+
+4
+
+
+
+3
+
+
+
+2
+
+
+
+1wt.% Re
+
+
+
+wt.% Ta
+
+
+
+Cr
+ac
+
+
+
+k S
+us
+
+
+
+ce
+pt
+
+
+
+ib
+ilit
+
+
+
+y C
+oe
+
+
+
+ffi
+cie
+
+
+
+nt
+
+
+
+0
+
+
+
+0.05
+
+
+
+0.1
+0.5
+1
+1.5
+2
+2.5
+
+
+
+0
+
+
+
+5
+
+
+
+10
+
+
+
+(c)
+
+
+
+2.5
+
+
+
+2
+
+
+
+1.5
+
+
+
+1
+
+
+
+0.5
+
+
+
+wt.% O wt.%
+ TaCr
+ac
+
+
+
+k S
+us
+
+
+
+ce
+pt
+
+
+
+ib
+ilit
+
+
+
+y C
+oe
+
+
+
+ffi
+cie
+
+
+
+nt
+
+
+
+Figure 14. The CSC indices for (a) W-Re5.5-Ta-C with varied wt.% of Ta and C; (b) W-Re 
+Ta-C0.3-O0.075 with varied wt.% of Re and TA; and (c) W-Re5.5-Ta-C0.3-O with 
+varied wt.% of Ta and O. 
+
+
+
+
+
+
+
+
+
+
+
+19
+
+
+
+ With O present, the addition of C is clearly reducing the cracking susceptibility, even in 
+models where Re is reduced to smaller amounts (yet still sufficient to enhance ductility) and models 
+with increased wt.% of Ta. The C and O interaction should be examined further. In an upcoming 
+TM, the authors plan to apply Thermo-Calc PRISMA solidification modeling to these issues. 
+
+
+
+ For the purposes of this research, the CSC index for a system of W-R5.5-Ta5-C-O with 
+varying amounts of C and O has been calculated via the Thermo-Calc vulnerability time method 
+in figure 15. Again, it is seen that the assumed O content is being somewhat scavenged by getter C. 
+These figures suggest the increase of additional C can provide realistic O impurity containment, 
+even as C also serves to enhance desirable in-situ MC production with the previously discussed 
+benefits such as grain refinement and ductility enhancement.
+
+
+
+Cr
+ac
+
+
+
+k S
+us
+
+
+
+ce
+pt
+
+
+
+ib
+ilit
+
+
+
+y C
+oe
+
+
+
+ffi
+cie
+
+
+
+nt
+
+
+
+wt.% C
+
+
+
+wt.%
+ O
+
+
+
+6
+
+
+
+4
+
+
+
+2
+
+
+
+0
+
+
+
+0.5
+
+
+
+1
+
+
+
+0.2
+
+
+
+6
+
+
+
+4
+
+
+
+20.15
+
+
+
+0.1
+
+
+
+0.05
+
+
+
+0
+
+
+
+Figure 15. The CSC index for varied wt.% of C and O for the W-R5.5-Ta5-C-O system. 
+
+
+
+
+
+
+
+
+
+
+
+20
+
+
+
+4. CONCLUSIONS
+
+
+
+ This TM has discussed CALPHAD calculations W-based refractory alloys, starting with a 
+basic W-Re alloy and expanding to the more complex W-Re-Ta-C-O system as added nanoparticles 
+are assumed to partially or fully melted. 
+
+
+
+ The addition of these nanoparticles has shown some Scheil cracking suppression advan-
+tages in the >0.95 fs region, as visualized by the Thermo-Calc and CALPHAD models. In the 
+ranges calculated, the slope or gradient is steep throughout, though indications of reduced vulner-
+ability time as well as reduced steepness in certain regions of temperature ranges are noted. There-
+fore, in order to suppress cracking in W-based refractory alloys, a combination of techniques is 
+required. One or more additional elements must be added, the manufacturing processes must be 
+modified, and survivability of added nanoparticles must be assured in order to achieve significant 
+grain refinement even into the >0.95 fs region, because thermal expansion and contraction occurs 
+as liquid alloy is depleted in this critical temperature region. This combination of techniques trans-
+lates to three observed improvements in the refractory alloy AM process: 1) Scheil curve flatten-
+ing at the >0.95 fs region; 2) decreased temperature range in the >0.95 fs region; and 3) pair-wise 
+decrease of the cracking susceptibility via the vulnerability time method in Thermo-Calc.
+
+
+
+ This TM discusses challenges to optimal refractory alloys AM, which are being overcome 
+by NASA and partners via ICME development approaches, both computational and experimental. 
+It is assumed that nanoparticles that are added to a basic refractory alloy such as W-Re will melt 
+near-fully or fully as part of the AM process. The existence of O impurities, which are ubiqui-
+tous in AM, and the addition of a getter such as C, are also assumed as part of this research. The 
+authors therefore conclude the following two points: 
+
+
+
+(1) The nanoparticles will mostly or melt fully under the refractory AM build conditions.
+
+
+
+(2) The disassociated and then fully melted nanoparticles contribute as elemental atomic additions 
+to the melt-pool. That is, an example W-Re-TaC system will behave as a W-Re-Ta-C system.
+
+
+
+ The survivability of nanoparticle additions will depend crucially on static or feedback melt-
+pool temperature control—that is, if within the melt temperature windows between the base metal 
+or so-called ‘parent metal’ and nanoparticle, it will be useful for the nanoparticles to remain intact 
+for simultaneous strength and ductility enhancement. If not, the nanoparticles will melt and then 
+in-situ alloying and nanoparticle inclusion formation will take over, as discussed in this TM. The 
+authors have calculated various compositions’ solidification(s) via CALPHAD as a basis for in-situ 
+alloying and the effects of impurities, nano-additions and even getters towards both MC and MO 
+in-situ formation. This research has provided insight into crack free refractory alloys build optimi-
+zation, both in this work and in other works yet to be published. 
+
+
+
+
+
+
+
+
+
+
+
+21
+
+
+
+• A trend has been seen toward the following desired features for both ideal alloying as well as 
+realistic AM of alloys. When C is added to alloy systems, the C presents a promising way to 
+getter oxygen impurities via the creation of CO. In addition, C provides a source for affine 
+in-situ MC formation, preferentially with the secondary elements rather than the parent metal 
+of W. These in-situ formed MC inclusions will be in the nanometer scale, yet they will provide 
+equiaxed grain refinement as well as potentially grain pinning and thermal stability.
+
+
+
+• Additional ODs as well as cellular structures are formed via MO in-situ formation. These are 
+not survivable in W melts, as the melt temperatures are usually on the order of the melting tem-
+perature of W itself and no process window exists. However, O scavenging toward MO forma-
+tion is possible during the solidification process, which removes O impurities and thus prevents 
+unwanted brittle phases that can lead to cracking. 
+
+
+
+• In a separate independent project, the authors have researched molybdenum (Mo)-C AM 
+alloying and have been able to create crack-free AM parts with 0.3 wt.% of C. An additional 
+project with NASA partners is in writing by the authors, in which a W-X-C-O system is being 
+processed via PBF-SLM AM and is achieving crack-free AM with no base plate or substrate 
+heating. Both of these project reports are currently in writing, but are mentioned here in sup-
+port of this TM, as insights gathered from the modeling being reported here drove some of the 
+insights that have led to such AM results under the ICME efforts of NASA MSFC and various 
+partners.
+
+
+
+• In the near future, the authors will publish the results of the CALPHAD analysis of the inde-
+pendent research into Mo-C0.3 AM of crack free parts, revisiting the experimental results 
+from the point of view of the CALPHAD modeling and will compare those results with the 
+full CALPHAD analysis of the crack free W-X-C-O AM predictive modeling by NASA and 
+its partners. The modeling will further be augmented by Thermo-Calc PRISMA solidification 
+modeling, which helped quantify the solidification production of in-situ compounds. 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+22
+
+
+
+REFERENCES
+
+
+
+ 1. Thermo-Calc Software AB: “Thermo-Calc Diffusion Module (DICTRA) Documentation 
+Set,” No. 2023a, <https://thermocalc.com/wp-content/uploads/Documentation/Current_
+Static/diffusion-module-dictra-documentation-set.pdf>, December 15, 2022.
+
+
+
+ 2 Schwartzberg, F. R.; Ogden, H. R.; and Jaffee, R. I.: “DUCTILE-BRITTLE TRANSI-
+TION IN THE REFRACTORY METALS,” Report Number DMIC-114; AD-216526; 
+PB-151070, Defense Metals Information Center, Columbus, OH, https://catalog.hathitrust.
+org/Record/102326544, December 31, 1959.
+
+
+
+ 3. Nieh, T. G.; and Wadsworth, J.: “RECENT ADVANCES AND DEVELOPMENTS IN 
+REFRACTORY ALLOYS,” UCRL-JC-116U7, Materials Research Society Online Proceed-
+ings Library, https://www.osti.gov/servlets/purl/10131865, November, 1993.
+
+
+
+ 4. El-Genk, M. S.; and Tournier, J-M.: “A review of refractory metal alloys and mechanically 
+alloyed-oxide dispersion strengthened steels for space nuclear power systems,” Journal of 
+Nuclear Materials, Vol. 340, No. 1, pp. 93–112, doi:10.1016/j.jnucmat.2004.10.118, April, 2005.
+
+
+
+ 5. Barnes, M. W.; Tucker, D. S.; Hone, L.; and Cook, S.: “Nuclear Rocket Ceramic Metal Fuel 
+Fabrication Using Tungsten Powder Coating and Spark Plasma Sintering,” NASA/TP-2017-
+218236, https://ntrs.nasa.gov/citations/20170005531, April 1, 2017.
+
+
+
+ 6 Volz, M. P.; Wilkerson, R.; Williams, J.; et al.: “Hot Hydrogen Testing of Carbides Developed 
+for Nuclear Thermal Propulsion,” presented at the 45th International Conference and Exposi-
+tion on Advanced Ceramics, Virtual, https://ntrs.nasa.gov/citations/20210000359, January 12, 
+2021.
+
+
+
+ 7. Mireles, O.: “Additive Manufacture of Refractory Metals for Aerospace Applications,” pre-
+sented at the AIAA Propulsion & Energy 2021 Forum, Virtual, https://ntrs.nasa.gov/cita-
+tions/20210018657, July 14, 2021.
+
+
+
+ 8. Vrancken, B.; King, W. E.; and Matthews, M. J.: “In-situ characterization of tungsten micro-
+cracking in Selective Laser Melting,” in Procedia CIRP, September 3–6, 2018, Vol. 74, Fürth, 
+Germany, pp. 107–110, doi:10.1016/j.procir.2018.08.050, 2018.
+
+
+
+ 9. Hu, Z.; Zhao, Y.; Guan, K.; et al.: “Pure tungsten and oxide dispersion strengthened tungsten 
+manufactured by selective laser melting: Microstructure and cracking mechanism,” Additive 
+Manufacturing, Vol. 36, Article 101579, doi:10.1016/j.addma.2020.101579, December, 2020.
+
+
+
+
+
+
+
+
+
+
+
+23
+
+
+
+10. Chen, J.; Zhao, C.; Li, K.; et al.: “Effect of TaC addition on microstructure and microhard-
+ness of additively manufactured tungsten,” Journal of Alloys and Compounds, Vol. 897, Article 
+162978, doi:10.1016/j.jallcom.2021.162978, March 15, 2022.
+
+
+
+11. Li, K.; Wang, D.; Xing, L.; et al.: “Crack suppression in additively manufactured tungsten by 
+introducing secondary-phase nanoparticles into the matrix,” International Journal of Refrac-
+tory Metals & Hard Materials, Vol. 79, pp. 158–163, doi:10.1016/j.ijrmhm.2018.11.013, Febru-
+ary 2019.
+
+
+
+12. Wei, S.-Y.; Ji, L.-N.; Wu, W.-J..; and Ma, H.-L.: “Selective laser melting of lanthanum oxidere-
+inforced tungsten composites: microstructure and mechanical properties,” Tungsten, Vol. 4, pp. 
+67–78, doi:10.1007/s42864-021-00127-0, December 17, 2021. 
+
+
+
+13. Zhou, Y.; Che, Y.-S.; Wang, C.; et al.: “Selective laser melting high-performance ZrC-rein-
+forced tungsten composites with tailored microstructure and suppressed cracking susceptibil-
+ity,” Tungsten, Vol. 3, pp. 72-88, doi:10.1007/s42864-021-00076-8, March 08, 2021.
+
+
+
+14. Thermo-Calc Software AB: “Thermo-Calc Databases,” No. 2023a, < https://thermocalc.com/
+products/databases/> December 15, 2022.
+
+
+
+15. Wendel, J.: “Thermodynamics and Kinetics of Tungsten Oxidation and Tungsten Oxide Sub-
+limation in the Temperature Interval 200°–1100°C,” Master’s Thesis, Lund University, Lund, 
+Sweden, 105 pp., https://lup.lub.lu.se/luur/download?fileOId=4756159&func=downloadFile&r
+ecordOId=4756155, 2014.
+
+
+
+16. Wolverton, C.: “The Open Quantum Materials Database,” Northwestern University, < https://
+oqmd.org/>, 2019, accessed March 15, 2023.
+
+
+
+17. Saal, J. E.; Kirklin, S.; Aykol, M.; et al.:”Materials Design and Discovery with High-Through-
+put Density Functional Theory: The Open Quantum Materials Database (OQMD)”, JOM 
+Vol. 65, pp. 1501-1509, doi:10.1007/s11837-013-0755-4, September 28, 2013.
+
+
+
+18. Kirklin, S.; Saal, J.E.; Meredig, B.; et al.: “The Open Quantum Materials Database (OQMD): 
+assessing the accuracy of DFT formation energies”, npj Computational Materials, Vol. 1, 
+Article 15010, doi:10.1038/npjcompumats.2015.10, December 11, 2015.
+
+
+
+19. Michael, F. N.; and Sowards, J. W.: “Numerical Study of Solidification Crack Susceptibil-
+ity in Novel Refractory Alloy Systems,” NASA/TM-20230002218, https://ntrs.nasa.gov/cita-
+tions/20230002218, February 1, 2023. 
+
+
+
+
+
+
+
+
+
+
+
+NASA/TM–2023XXXXXXX
+
+
+
+CALPHAD Models to Guide Refractory 
+Alloys Additive Manufacturing: In-Situ 
+Compounds Formation, Nanoparticles, 
+and Impurities Considerations
+F.N. Michael and J.W. Sowards
+Marshall Space Flight Center, Huntsville, Alabama
+
+
+
+March 2023
+
+
+
+National Aeronautics and
+Space Administration
+IS63
+George C. Marshall Space Flight Center
+Huntsville, Alabama 35812

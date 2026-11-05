@@ -1,0 +1,631 @@
+Rapid Lightweight Firmware Architecture of the 
+Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+2023 IEEE Aerospace Conference
+
+
+
+Damiana Catanoso1, Greenfield Trinh2, Olivia Formoso2, In Won Park1, Taiwo 
+Olatunde1, Christine Gregg2, Elizabeth Taylor2, Megan Ochalek3, Kenny Cheung2
+1KBR, Inc., 2NASA Ames Research Center, 3Stanford University
+
+
+
+
+
+
+
+
+
+
+
+PRESENTATION OUTLINE
+
+
+
+● The MMIC-I robot
+
+
+
+● Avionics
+
+
+
+● Firmware Architecture
+
+
+
+● Controller
+
+
+
+● Motion Generation
+
+
+
+● Operating Modes and Autonomous Fault Detection
+
+
+
+● Reliability Data
+
+
+
+● Conclusion and future work
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+
+
+
+
+
+
+
+
+BACKGROUND: ARMADAS
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+Automated Reconfigurable 
+Mission Adaptive Digital
+
+
+
+Assembly Systems 
+ARMADAS
+
+
+
+● Autonomous robotic assembly of large 
+space structures
+
+
+
+● Autonomy module determines build 
+order and motion planning
+
+
+
+● A swarm of robots, each with a 
+specific task, receiving commands 
+from and reporting to a base station 
+
+
+
+(opsUI)
+● Completed ground demonstration in 
+
+
+
+NASA facility
+
+
+
+Coded Structures Lab
+
+
+
+Intelligent System Division
+
+
+
+
+
+
+
+
+
+
+
+ARMADAS
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+
+
+
+
+
+
+
+
+MMIC-I
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+
+
+
+
+
+
+
+
+AVIONICS
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+ESP32-WROOM-32E
+Lithium Polymer Batteries
+IMU
+8-channels ADC with I2C
+4-channel multiplexer
+Magnetic encoder
+
+
+
+
+
+
+
+
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+FIRMWARE ARCHITECTURE
+
+
+
+Server
+
+
+
+Board A
+(Client)
+
+
+
+Serial comm
+
+
+
+Board B
+
+
+
+
+
+
+
+
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+FIRMWARE ARCHITECTURE: Server
+
+
+
+AUTONOMY ALGORITHMS
+● Input: parameters of the desired 
+
+
+
+structure
+● Output: build order and motion 
+
+
+
+planning for robots
+
+
+
+SERVER
+● Sends/receives packets for 
+
+
+
+the opsUI
+
+
+
+OPERATION SOFTWARE & UI (opsUI)
+● Executes motion planning
+● Periodically asks robots for 
+
+
+
+heartbeat packet and displays 
+content on the UI
+
+
+
+● Sends motion commands to the 
+robots
+
+
+
+
+
+
+
+
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+FIRMWARE ARCHITECTURE: Client
+
+
+
+WIFI SERVER
+● Sends/receives 
+
+
+
+packets to/from robot
+
+
+
+WIFI CLIENT
+● Sends/receives 
+
+
+
+packets to/from server
+● Runs on Core 0
+
+
+
+
+
+
+
+
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+FIRMWARE ARCHITECTURE: Boards
+
+
+
+Control Loop A
+● Primary board
+● Responsible for: motion 
+
+
+
+generation, operating mode 
+and autonomous fault 
+detection, actuate motors 
+on A side and hip, 
+
+
+
+● Sends commands to B and 
+reads feedback
+
+
+
+● Runs on Core 1 
+
+
+
+Control Loop B
+● Auxiliary board
+● Responsible for 
+
+
+
+actuating all 
+motors on the B 
+side, when 
+commanded by A
+
+
+
+● Sends heartbeat to 
+A
+
+
+
+
+
+
+
+
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+CONTROLLER
+
+
+
+BOLTERS: 
+State Machine
+
+
+
+GRIPPERS: Open Loop
+
+
+
+ARM: Open Loop
+
+
+
+HIP: PI
+
+
+
+
+
+
+
+
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+CONTROLLER: Bolter State Machine
+
+
+
+
+
+
+
+
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+CONTROLLER: Unbolting
+
+
+
+
+
+
+
+
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+MOTION GENERATION
+
+
+
+State transition command 
+
+
+
+Intermediate states transitions
+
+
+
+Go from state ‘a’ to ‘b’
+
+
+
+Have to do a-c and c-b
+
+
+
+Primitives
+
+
+
+State Machine
+
+
+
+Actuator motion
+
+
+
+FwdExtend and Turn90clock
+
+
+
+Activate FwdExtend state machine
+
+
+
+Send given PWM to servo
+
+
+
+High level
+
+
+
+Low Level
+
+
+
+
+
+
+
+
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+MOTION GENERATION
+
+
+
+fwdContract backContract fwdExtend backExtend 
+fwdTurnCW fwdTurnCCW backTurnCW backTurnCCW
+
+
+
+
+
+
+
+
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+OPERATING MODES & AUTONOMOUS FAULT DETECTION
+
+
+
+
+
+
+
+
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+BOLTER RELIABILITY DATA
+
+
+
+
+
+
+
+
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+WIFI RELIABILITY DATA
+
+
+
+
+
+
+
+
+
+
+
+CONCLUSION
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+● The Mobile Metamaterial Internal Co-Integrator (MMIC-I) is one of the ARMADAS relative robots, responsible 
+for securing, or bolting, to the structure all the contact faces of a voxel that has just been placed by another robot.
+
+
+
+● MMIC-I’s firmware runs on custom designed controller boards to control two symmetric sides: A and B. 
+● Board A hosts the WiFi client, the motion primitives and motion planning, the bolter state machine, operating 
+
+
+
+modes and autonomous fault detection. The WiFi client-server implementation allows the base station to send 
+command packets and receive heartbeat packets containing the overall status of the robot. 
+
+
+
+● Board B only executes commands sent by A through a wired serial connection. B sends a continuous heartbeat to 
+A, sharing the latest current/target angles and the voltage/current measurements. Whenever A sends a command, 
+B acknowledges reception.
+
+
+
+● Experimental data collected during the ARMADAS ground demonstration was presented and discussed.
+
+
+
+FUTURE WORK
+
+
+
+● Space qualify ARMADAS system: build flight-ready versions of MMIC-I’s hardware and firmware
+● Use communication protocols with international standards.
+
+
+
+
+
+
+
+
+
+
+
+ACKNOWLEDGEMENTS
+
+
+
+Rapid Lightweight Firmware Architecture of the Mobile Metamaterial Internal Co-Integrator Robot
+
+
+
+
+
+
+
+
+
+
+
+Questions?

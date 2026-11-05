@@ -1,0 +1,890 @@
+52nd International Conference on Environmental Systems ICES-2023-242 
+16-20 July 2023, Calgary, Canada 
+
+
+
+This material is declared a work of the U.S. Government and is not subject to copyright protection in the United States. 
+
+
+
+Supporting Exploration Missions by Enabling Exploration 
+Mission System Software 
+
+
+
+Matthew J. Miller1, David Charney2, Ben Feist3, Cameron Pittman4, David Rynearson5, Jackie Vu6 
+Jacobs/NASA JSC, Houston, TX, 77058 
+
+
+
+James Montalvo7, Katie Heinemann8, Trey Davis9, Stephen Lin10, Omar Baig11 
+KBR Wyle/NASA JSC, Houston, TX, 77058 
+
+
+
+Future exploration missions will consist of a multitude of data sources, systems, and operators collaborating 
+to complete mission objectives. Presently, NASA is instantiating the contractual mechanisms, such as the 
+Exploration Extravehicular Activity Services (xEVAS) and Human Landing System (HLS) contracts, to 
+produce these mission assets. Architectural planning is also underway to establish the networking protocols 
+and infrastructure to digitally create and connect mission elements, such as LunaNET. However, without new 
+horizontally integrated data systems, these advancements will be limited in their ability to get mission data 
+appropriately integrated into the plan, train, fly, explore workflow of the flight operations workforce. Here we 
+describe several mission system software development efforts underway that are designed to support human 
+spaceflight missions. This paper describes the current iterations of a suite of tools to support EVA procedure 
+authoring and execution, and mission context creation for both International Space Station (ISS) and Artemis 
+missions. These tools have been developed iteratively and continue to be used in present-day ISS operations on 
+orbit and in several NASA facilities such as the Neutral Buoyancy Lab (NBL) and Artemis field testing. These 
+solutions demonstrate how software development can be aligned with ongoing operations development 
+activities to discover the features that best support both current and future human spaceflight missions. 
+
+
+
+Nomenclature 
+AEGIS = Artemis EVA Geographic Information System 
+AiRT = Apollo in Real Time 
+CLPS = Commercial Lunar Payload Services 
+CODA = Collaborative Operations Data Activation 
+EHP = EVA and Human Surface Mobility Program 
+EMSS = EVA Mission Systems Software 
+EVA = Extravehicular Activity 
+FOD = Flight Operations Directorate 
+ISS = International Space Station 
+IV = Intravehicular 
+LunaNET = Lunar Network 
+NASA = National Aeronautics and Space Administration 
+NBL = Neutral Buoyancy Laboratory 
+NSTGRO = NASA Space Technology Graduate Research Opportunities 
+NSTRF = NASA Space Technology Research Fellowship 
+
+
+
+ 
+1 Exploration Engineer, Jacobs/NASA JSC, 2101 E. NASA PKWY/JSC-XI4, Houston, TX 
+2 User Experience Designer, Jacobs/NASA JSC, 2101 E. NASA PKWY/JSC-XI4, Houston, TX 
+3 Software Engineer, Jacobs/NASA JSC, 2101 E. NASA PKWY/JSC-XI4, Houston, TX 
+4 Software Engineer, Jacobs/NASA JSC, 2101 E. NASA PKWY/JSC-XI4, Houston, TX 
+5 Sr. Software Developer, Jacobs/NASA JSC, 2101 E. NASA PKWY/JSC-XI4, Houston, TX 
+6 Software Engineer, Jacobs/NASA JSC, 2101 E. NASA PKWY/JSC-XI4, Houston, TX 
+7 EVA flight controller/Software Engineer, KBR Wiley/NASA JSC, 2101 E. NASA PKWY/JSC-CX3, Houston, TX 
+8 Software Engineer , KBR Wiley/NASA JSC, 2101 E. NASA PKWY/JSC-SK3, Houston, TX 
+9 Software Engineer , KBR Wiley/NASA JSC, 2101 E. NASA PKWY/JSC-CX3, Houston, TX 
+10 Software Engineer , KBR Wiley/NASA JSC, 2101 E. NASA PKWY/JSC-SK3, Houston, TX 
+11 Software Engineer , KBR Wiley/NASA JSC, 2101 E. NASA PKWY/JSC-CX3, Houston, TX 
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+2 
+International Conference on Environmental Systems 
+
+
+
+ 
+ 
+
+
+
+PET = Phased Elapsed Time 
+SMD = Science Mission Directorate 
+xEVAS = Exploration Extravehicular Activity Services 
+
+
+
+I. Introduction 
+ASA is embarking on 21st century space exploration via Artemis to establish a sustained lunar presence using 
+innovative technologies to explore the lunar surface.1 Artemis will involve the construction of lunar surface and 
+orbital assets as well as a multitude of mission assets and capabilities (e.g. lander, rovers, payloads, etc.) which 
+
+
+
+are being incrementally realized via contractual mechanisms solicited by NASA to industry vendors such as: Human 
+Landing System (HLS) services development2, Exploration Extravehicular Activity Services (xEVAS)3, Commercial 
+Lunar Payload Services (CLPS)4, Lunar Network (LunaNET).5,6 These systems will produce a wealth of data which 
+will need to be manipulated, interrogated, and analyzed by mission support and crew to make informed decisions to 
+cope with the demands of future missions. At present, there is a noticeable absence of contractual mechanisms in place 
+to ensure seamless interoperability of data sets from a myriad of mission assets with the purpose of supporting mission 
+operations personnel. Therefore, we assert in this paper that mission data are at risk for becoming siloed, being in 
+inconsistent and incompatible formats, and requiring custom tooling to manipulate. These risks will result in limiting 
+mission data utility and delaying the acquisition of actionable information within mission operations workforce unless 
+there is a deliberate effort to create temporally and spatially integrated data management systems. 
+ Mission operation personnel for human spaceflight have historically divided their work scope into plan, train, and 
+fly mission phases.7 Each phase involves an integrated choreography of multiple specialized teams and their flight 
+products all dedicated to preparation and execution of specific mission aspects.8,9 Artemis, and its envisioned 
+innovative technologies, offers the opportunity to expand this work scope to support a fourth phase, explore, which 
+we define here as the repeated, continual, and incremental learning and expansion of mission knowledge that lasts 
+well beyond the duration of any particular moment of a mission. The most relevant example of explore is exhibited in 
+the continued scientific discoveries spurred by the exploration and sample collection during Apollo.10,11 Another 
+example that currently occurs during International Space Station (ISS) operations is the creation of anomaly reports 
+(see ISS EVA Suit Water Intrusion Mishap Report12 as an example) that serve to rectify unanticipated events that may 
+occur throughout the mission. Both examples necessitate operations personnel to interrogate a multi-dimensional array 
+of mission data at specific moments (e.g. photography, video, crew reports, samples, system telemetry) in unique and 
+unpredictable ways to reconstruct mission moments to both interpretate what happened and derive insights to inform 
+future discussions and decisions. 
+ This paper describes a specific set of tools, known collectively as the Extravehicular Activity (EVA) Mission 
+System Software (EMSS), to transform the EVA plan, train, fly, explore work processes. This transformation is taking 
+place by helping real users perform real mission operations job duties within ISS and Artemis. These tools and 
+concepts could one day be extended into other facets of the future missions; however, a central tenant of the current 
+EMSS effort is to align specific software capabilities with a specific set of users and their needs within the mission 
+team that adds mission value right now. EMSS supports EVA-specific flight controllers who work together among 
+the broader flight team to achieve EVA success, from EVA planning to post-execution analysis.8,13 The remainder of 
+this paper first provides a brief overview of the EMSS initiative. Second, a summary of each core EMSS tool is 
+provided that describes the interface and capabilities. Finally, these tools are described within on-going ISS and 
+Artemis EVA operations to ensure system capabilities align with users’ needs and the demands of their work. 
+
+
+
+II. EVA Mission System Software 
+A. EMSS Initiative Overview 
+
+
+
+The origins of EMSS span a once diverse set of individual efforts led by a number of the co-authors of this paper 
+who were tackling orthogonal mission operations data creation, capture, manipulation, and curation challenges 
+associated with advancing EVA operations using modern software tools. In 2015, the https://apolloinrealtime.org/ 
+(AiRT) website was launched by co-author Feist which horizontally integrated thousands of disparate data products 
+across the entire Apollo 17 mission.14 In doing so, these once isolated and disjointed moments in history were aligned 
+in time and thereby brought back to life in a seamless experience that allowed the general public to re-live any moment 
+of the mission in a never before experienced integrated mission context. Co-author Charney joined the development 
+efforts for Apollo 11 and 13 in Real Time which have also been horizontally aligned. AiRT provides a glimpse of what 
+might be possible if mission data and systems were intentionally designed to be coalesced and interacted with in 
+temporal synchronicity, while minimizing the burden placed on the user to be aware of, access, and retrieve the data. 
+
+
+
+N 
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+3 
+International Conference on Environmental Systems 
+
+
+
+ 
+ 
+
+
+
+In 2013, the NASA Space Technology Research Fellowship (NSTRF), known today as NASA Space Technology 
+Graduate Research Opportunities (NSTGRO) funded co-author Miller to apply cognitive systems engineering 
+methods to the spaceflight work domain to design and develop novel decision support systems for EVA operations.15 
+Throughout this research, the ISS EVA and planetary analog work domains were studied and modelled to discover 
+underlying cognitive and information relationship requirements that were then used to prototype, design, and test 
+hypothesized future EVA operations with new support systems. In collaboration with co-author Pittman, novel 
+decision support systems that integrated timeline and system constraints were designed and tested in simulated future 
+Mars surface EVA operation contexts.9,16–18 This effort provided evidence that the construction of new technologies 
+to support future work domains by studying existing work domains can be realized, as long as there was a dedicated 
+alignment with the work domain development process itself. 
+
+
+
+In 2013, co-author Montalvo, who is a certified ISS EVA flight controller, began to reimagine the existing ISS 
+EVA procedure authoring and execution process, via the creation of the tool: Maestro. ISS EVA procedure authoring 
+and execution involves creating and maintaining a detailed choregraphed sequence of events for crew who work in 
+parallel.8,13 During EVA plan authoring, a detailed procedure serves as the centerpoint of collaboration between a 
+multitude of flight operations personnel. During EVA execution, the procedure keeps the broader flight team aligned 
+on overall progress of the EVA during execution and provides contingency procedure on-demand to cope with 
+difficulties as they arise. However, this coordination and detailed tracking has been largely a labor-intensive effort 
+using commercial tools such as Microsoft Office products which lack many domain-specific functionalities to support 
+flight controller job duties. Initial Maestro efforts focused on preliminary user research, specifications definition, and 
+design efforts that produced early prototypes. The concept continued to gain momentum, briefly involved university 
+student capstone involvement, and then in 2019, dedicated development started on the Maestro software package. This 
+effort demonstrated that the existing ISS EVA work domain could be improved with modern software capabilities and 
+that the mission risks incurred by introducing new ISS workflows were outweighed by the benefits. 
+
+
+
+In 2018, these individual efforts united under one common effort, first known as EVA Operations System, and 
+then formalized as EMSS in 2019. Concurrently, human health and performance personnel joined the initiative with 
+a specific interest in aligning mission activity data with crew health and performance related data.19 Each of these 
+individual efforts brought necessary components together into what today is known the EVA Mission System Software 
+(EMSS) initiative. In summary, co-authors Feist and Charney showed what could be possible with having a multi-
+dimensional array of mission data horizontally aligned in time to create mission context; co-author’s Miller and 
+Pittman demonstrated how work domain construction could be aligned with support system development and co-
+author Montalvo proved there was an appetite for mission system software changes within the existing ISS EVA work 
+domain. 
+
+
+
+Since 2019, the EMSS initiative has been incrementally building three core software solutions as shown in Figure 
+1. Collaborative Operations Data Activation (CODA) exists for the purpose of putting mission data into horizontally 
+integrated mission context to enable current and future NASA missions, as inspired by AiRT capabilities. Maestro 
+aims to digitize EVA procedure authoring and execution. In doing so, coordinated EVA activity can be associated, 
+recorded, and shared in never before ways among the flight team. Artemis EVA Geographic Information System 
+
+
+
+ 
+ 
+Figure 1. EMSS core software products: CODA, Maestro, AEGIS. 
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+4 
+International Conference on Environmental Systems 
+
+
+
+ 
+ 
+
+
+
+(AEGIS) strives to enable spatiotemporal awareness for EVA procedure authoring and execution. The EMSS suite of 
+applications leverage a common architecture. React.js is used as the front-end framework for creating dynamic user 
+interfaces. The back-end consists of Node applications that communicate with data sources and provide data to the 
+front-end. The applications are deployed into the Flight Operations Directorate's secure server environment using 
+Docker containers, which are like lightweight and portable virtual machines that isolate the application from the host 
+environment. The suite also leverages continuous integration and continuous delivery (CI/CD) tools to automate the 
+testing, building, and deployment of code changes. This enables ongoing rapid development and deployment of new 
+features and ensures that the systems are always up-to-date. Collectively, these software development and deployment 
+efforts bring modern software capabilities to EVA plan, train, fly, explore for both ISS and future Artemis missions. 
+
+
+
+B. Collaborative Operations Data Activation (CODA) 
+CODA consolidates all data temporally from mission, training, and testing data into an exploratory web-based 
+
+
+
+platform that enables users to re-live and analyze each moment. Mission context is created by introducing a new way 
+to navigate large amounts of cross-disciplinary data which are traditionally siloed by abstracting away the concept of 
+the individual data file and allows users to move fluidly through an event. In doing so, users are enabled to pick the 
+moments and data (if available) that might matter to them which enables users to more fully understand what happened 
+and what was learned. Figure 2 shows a view of this abstraction process so that the user can spend less time searching 
+for individual files and more time on viewing a unified experience. Important to note here is CODA does not serve as 
+the data repository, but rather seamlessly connects to wherever the source data might exist so that data can be viewed 
+in context with other data. As discussed in the introduction, if data formatting consistency and availability is not 
+established, then the ability to coalesce disparate data sets becomes challenging. CODA also introduces a new way to 
+index post-event content by linking it back to key moments during the event of interest. This new ability to play back 
+moments in history with everything in sync, including media that was not yet available during real-time operations, 
+saves time, reduces costs, and improves the quality of research inquiries and outcomes. Until CODA, flight controllers 
+manually had to sift through disjointed and separated data sources related to EVA or other mission activity, making 
+data exploration costly and burdensome. 
+
+
+
+ 
+Figure 2. Simplified diagram of CODA consolidating a multi-dimentional array of disperate data sources 
+and creating a unified experience in time for the user to explore the mission context. 
+ 
+
+
+
+Figure 3 shows the CODA interface for a particular moment during US EVA 76.20 The bottom banner shows a 24-
+hour period of time on a moveable timeline. Each horizontal feature on the timeline indicates the availability of a 
+particular data stream and the Play/Pause button allows a user to seamlessly scan throughout the timeline at their own 
+pace. All data is temporally synchronized so each moment and corresponding data in the timeline can be immediately 
+accessed. By clicking and viewing one individual data product, the system pulls all other available data available at 
+that moment in time forward thereby establishing mission context. Each data type is contained within a dedicated 
+frame that the user can control. Each frame is specifically designed to accommodate that data stream, thereby 
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+5 
+International Conference on Environmental Systems 
+
+
+
+ 
+ 
+
+
+
+streamlining user needs to accommodate disparate data types (e.g. ISS orbital telemetry is automatically placed on a 
+map with ground track in the ‘ISS Position’ frame, instead of simply providing source telemetry ephemeris). The 
+overall layout of the web browser is also customizable and can be saved so that each user can tailor their experience 
+with CODA to meet their particular data exploration needs. At present, CODA can display various data sources that 
+span: 13+ years of ISS mission data, recent NBL training data, and Artemis field testing data, and Artemis I mission 
+data. 
+
+
+
+Three additional features currently demonstrated by CODA is the integration of as-performed EVA timeline 
+content, the addition of handheld photography, and audio loop transcription. The “EVA INFO” frame displays an 
+interactive sequence of as-performed EVA activities placed correctly in time so users can quickly access segments of 
+the EVA they might be interested in reviewing. CODA also offers two different photography frames (CURRENT or 
+ALL) that pulls data based on time from a NASA internal imagery archival system which substantially streamlines 
+imagery access. If users want the full resolution photography or to learn more detailed metadata information, CODA 
+offers direct links to the underlying archival system for additional data interrogation. Finally, automated transcription 
+services are now being applied to space to ground audio communication. CODA can ingest these timestamped audio 
+transcripts and display that information in a dedicated “COMMUNICATION” frame so that users can search and 
+review exact phrases or conversations that may pertain to their inquiry. The transcript is also hyperlinked in time so 
+that the user can select the phrase of interest and the rest of the data snaps to that moment in time. 
+
+
+
+ 
+
+
+
+Figure 3. CODA annotated interface that highlights the disparate data sources arranged in frames optimized 
+for that particular data source. 
+
+
+
+C. Maestro 
+Maestro consolidates the authoring and execution process within a dedicated tool that can handle the 
+
+
+
+interconnected and unique constraints of EVA procedures. Maestro enables custom capabilities that are different from 
+existing ISS planning and execution tools such as Optimis21,22 and PRIDE.23,24 EVA requires the choreography of at 
+least two EVA crew members and support personnel, therefore necessitating the need to handle in parallel the sequence 
+of events for two or more agents at a granular level of detail. Crew work both in tandem and independently, depending 
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+6 
+International Conference on Environmental Systems 
+
+
+
+ 
+ 
+
+
+
+on the needs of the EVA tasks. In either case, their respective procedures must be inherently associated and tracked 
+to ensure overall EVA objectives are effectively managed and achieved. In addition to simultaneously handling the 
+planning of at least two agents, EVA procedures for ISS are highly proceduralized, demarcating minute details that 
+must be accomplished at specific moments. Therefore, Maestro enables users to coordinate activities with minute 
+precision while also fully describing the necessary actions with dependencies to be accomplished for two crew 
+members who need to perform hours of work. 
+
+
+
+Figure 4 shows a moment of time during the execution of an example EVA that has progressed approximately 
+3:25 phased elapsed time (PET) into a 6:30 hour planned EVA. PET is a reference time in hours:minutes:seconds with 
+zero indicating the start of the EVA. Across the top of the interface is the procedure tab which allows users to handle 
+multiple procedures all at once thereby reducing the data sprawl of EVA products living in separate, static files. At 
+the far right of the Maestro interface exists an overall summary timeline that is interactive to allow viewers to quickly 
+navigate hours worth of procedure content instantly by simply clicking on the portion of the EVA they might be 
+interested in reviewing. The procedure columns to the left of the overall timeline provide the detailed procedures for 
+each crew member, as well as the intravehicular (IV) and other mission control users. These portions of the application 
+allow the user to either independently scroll/interrogate each column of procedure steps or lock them together in time 
+to review their choreographed sequence of events. Because all moments of the EVA are aligned in time, the progress 
+of the EVA can easily be reviewed by seeing what has been accomplished (tan), what tasks might currently be in 
+progress (green) and what still remains to be performed (white). The red dotted line across the summary timeline 
+provides that current position in time overlaid on the actual progress of each crew member. Given the highly 
+customized nature of the tasks on ISS, Maestro enables users to template and streamline the application of discrete 
+steps throughout the timeline. For example, pistol-grip tool (PGT) operations can occur many times throughout the 
+installation of a device on ISS, and follows a standard procedure format with data input fields. PGT operations, for 
+example, requires crew to report turn count of the drill which the flight controller then records. Maestro offers the 
+opportunity for users to directly input expected values provided by the crew in-line with the procedure itself. As a 
+result, Maestro enables the direct association of data at each moment during the procedure execution, thereby 
+improving the accurate record keeping of the as-performed procedure for archiving and post-hoc analysis. 
+
+
+
+ 
+
+
+
+Figure 4. Maestro execution interface for two crew members. 
+
+
+
+ EVA execution rarely follows the plan exactly, so therefore there is a need to accommodate changes to the plan in 
+a quick and efficient manner. Maestro enables functionality that has previously never been accomplished during EVA: 
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+7 
+International Conference on Environmental Systems 
+
+
+
+ 
+ 
+
+
+
+the instant rearrangement of EVA tasks and the production of a new integrated timeline. Prior to Maestro, the 
+rearrangement of EVA procedures to cope with as-executed demands was performed in isolation and in static formats 
+such as paper documents. The individual procedure elements shown in Figure 4 can be edited during execution. The 
+time math, the associated numbering and formatting of steps, and the verification of step sequences are all handled by 
+Maestro so the user can spend more time reconciling whether the proposed changes are correct and necessary versus 
+worrying about formatting or performing basic time-math calculations. In effect, making a change to the procedure in 
+Maestro relieves the user of manually tracking and calculating tedious details and streamlines the production of a 
+change. Furthermore, once a change is made, the procedure is published so that any viewing user can see the new plan 
+instantly, thereby reducing coordination costs among hundreds of flight controllers who need to be appraised of EVA 
+progress and understanding the current plan. 
+
+
+
+D. Artemis EVA Geographic Information System (AEGIS) 
+NASA mission operations has not dealt with the spatiotemporal demands of surface mission operations since 
+
+
+
+Apollo. In recent decades, there have been a number of planetary analog efforts that have attempted to understand 
+how modern technologies might enable scientific planetary exploration, particularly in Mars-forward concept of 
+operations.25,26 For a more complete historical account of these previous analog efforts, see Table 1 of Ref [27]. 
+However, these efforts have had limited impact in activating modern capabilities within the Flight Operations 
+Directorate (FOD), particularly as it relates to effecting work practices and data handling expectations of the flight 
+controllers who will ultimately be responsible for Artemis mission success. The opportunity now exists to support the 
+actual flight controllers who will be charged with supporting Artemis planetary surface exploration.28 
+
+
+
+Figure 5 shows an abstracted view of what the AEGIS tool aims to unite. Lunar surface exploration will be 
+scientifically motivated and one primary mechanism that will drive that prioritization will be in the form of a science 
+traceability matrix (STM) (See an example in the Artemis III Science Definition Report29). AEGIS unites STM details 
+to spatial map data to establish locations where planed EVA tasks will contribute to scientific objectives defined in 
+the STM. Furthermore, AEGIS enables the opportunity to build task expectations at those locations and support the 
+sequential arrangement of those locations and tasks to support building spatiotemporal EVA plans that inextricably 
+link scientific value within the context of mission and safety rules. In a similar manner to CODA and Maestro, AEGIS 
+aims to reduce the overall burden of the user to manually track and connect disparate data sources to maintain an 
+integrated understanding of EVA plan, train, fly activities. 
+
+
+
+ 
+
+
+
+Figure 5. Simplified diagram of AEGIS consolidating science traceability matrix details, spatial locations, 
+tasks, and timing information to support EVA plan, train, fly activities. 
+ 
+
+
+
+ AEGIS accommodates the import and/or creation of Points of Interest (POI) that are of scientific or operational 
+interest. POI elements also allow for the initial proposition of tasks, such as collecting samples, observations, or 
+measurements to be accomplished at that location that might satisfy particular scientific questions identified in the 
+STM. As a result, the science teams supporting Artemis missions can be comprehensive in their coverage of potential 
+landing sites with specific points that potentially yield scientific value. As the flight teams begin to synthesize 
+scientific rational for reaching specific targets, AEGIS supports the creation of EVA stations in the Station 
+Composition. This portion of the tool enables the deliberate discussion and synthesis of POI’s into proposed stations. 
+Stations represent consolidated, detailed tasks at a particular location to support the drafting of EVA plans and includes 
+contingency details such as get-ahead tasks and safety-related walkback constraints. Details created in the POI such 
+as tasks and STM relationships can be seamlessly promoted to Station definition details which maintains underlying 
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+8 
+International Conference on Environmental Systems 
+
+
+
+ 
+ 
+
+
+
+traceability to the scientific details. Station composition also enables strategic consolidation of POIs pending their 
+spatial or STM similarities. 
+ As shown in Figure 6, the EVA Composition enables the connection of proposed stations with traverse to and from 
+stations. Traverses take into consideration detail associated with spatial map products such as slope and terrain 
+roughness in addition to estimated crew walking speeds. Together, stations and traverses allow users to immediately 
+see the integrated EVA plan. AEGIS provides estimated EVA times, total STM coverage and the ability to create 
+alterative plans so users can objectively compare similar and contingency EVA plans. Additionally, EVA sequence 
+diagrams, first pioneered during Apollo, provide an instant spatiotemporal view of the planned EVA. The y-axis is 
+the linear distance from lander and the x-axis is the PET of the EVA. The user can also plot underlying pertinent map 
+data along the EVA traverse such as elevation, surface roughness or any other raster data affiliated with the map 
+products as data profiles. These capabilities result in users not burdened by performing any local calculations such as 
+traverse times or cumulative time spent at a series of stations. 
+
+
+
+ 
+
+
+
+Figure 6. AEGIS EVA Composition interface with annotations. 
+
+
+
+III. Integrating EMSS into Current and Future Human Spaceflight Operations 
+ The EMSS team is actively supporting ISS operations, NBL training, and Artemis related testing events. Maestro 
+has successfully been deployed in 6 ISS EVAs to-date and is now actively used in the support of planning and training 
+activities at the NBL. CODA is routinely used in support of anomaly reporting for on-going ISS operations and there 
+is active development underway to align NBL data streams to bring similar CODA capabilities to review all NBL 
+EVA training activities. These on-going activities provide a wealth of user feedback and discussions that inform 
+subsequent software tool capabilities. CODA was awarded the JSC Software Excellence Award and subsequently 
+received the NASA agency-wide Major Space Act award in 2022. Maestro has received numerous acknowledgements 
+within the FOD for helping pave a modern way of enabling the flight team to conduct EVAs. 
+ In addition to supporting current mission operations, the EMSS team is integrated into Artemis development. Co-
+author Miller has been named the NASA Science Mission Directorate - Artemis Internal Science Team Software 
+Systems Lead; the EMSS team is also an integrated component of the NASA EVA and Human Surface Mobility 
+Program (EHP)30 and leverages NASA Joint EVA Test Team (JETT) events to inform Artemis functionality across 
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+9 
+International Conference on Environmental Systems 
+
+
+
+ 
+ 
+
+
+
+the EMSS tools. Most recently, the EMSS team supported the JETT3 field test in October 2022, that included the most 
+complete Artemis flight team surface EVA planning and execution activities performed to-date.28,31 These activities 
+serve to help distill and design functionality for EMSS tools that meet the needs of the various work groups as those 
+work groups define their anticipated work needs. This iterative alignment of work discovery and corresponding 
+software capability will be vital to yielding meaningful work support. One additional alignment of capabilities is 
+engaging with the Artemis Geospatial Data Team32 so that EMSS tools can leverage the most relevant lunar surface 
+map data for EVA FOD utilization. Together the EMSS toolsets will evolve as more and more data streams and 
+sources become available as Artemis build capacity to perform more ambitious mission objectives. 
+
+
+
+IV. Conclusion 
+Artemis missions will involve a wealth of mission data that must be handled and shaped to support mission 
+
+
+
+operators make mission decisions. Figure 7 shows how the Apollo EVA support team manually managed the real-
+time execution of spatial and temporal details during Apollo 17 to track and inform EVA execution progress. These 
+discrete work functions will still exist for Artemis; however, the means by which this work can be performed today 
+can be designed into modern mission support system capabilities. EMSS tools aim to seamlessly integrate 
+spatiotemporal details to support the creation of EVA flight products and support EVA decision-making to incorporate 
+exploration and scientific priorities into flight team decisions during execution of Artemis missions on the lunar 
+surface. 
+
+
+
+ 
+
+
+
+Figure 7. Snapshots taken from 16mm film shot during Apollo 17 EVA. Video feed from the lunar surface 
+(A) was transferred to Polaroid still photography (B) and collated into panoramas (C) that were overlaid 
+with precursor imagery to estimate crew location and facilitate scientific interpretation (D). These images 
+were compared with other map products (E) to synthesize and articulate real-time science priorities that 
+were passed along the chain of command to impact crew behavior (F). Additionally, estimates of crew 
+location were indicated using icons moved manually on a map alongside operations relevant data such as 
+clock time and event markers (G), which were all shared among the flight team via overhead projector (H). 
+
+
+
+EVA operations is a prime mission phase where every moment matters and offers an opportunity to demonstrate 
+the transformation of ISS EVA operations towards Artemis lunar surface EVA operations. EMSS is dedicated to 
+building software tools that enable the EVA flight team to successfully perform their job duties. EMSS consists of 
+three core software systems: Maestro supports the digital creation and execution of EVA procedures, AEGIS supports 
+the EVA composition and execution of lunar surface operations by aligning temporal and spatial data with EVA flight 
+products, and CODA pulls together disparate datasets to create mission context that lasts well beyond the execution 
+phase of the mission. Artemis intends to apply novel technologies to the exploration of the Moon and eventually Mars. 
+With this ambitious goal comes the dedicated need to think deliberately about the software systems required to support 
+mission operators successfully conduct the mission. 
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+10 
+International Conference on Environmental Systems 
+
+
+
+ 
+ 
+
+
+
+Acknowledgments 
+The authors of would like to acknowledge the continued support of a number of advocates and stakeholders within 
+
+
+
+the NASA community: Alex Kanelakos, Scott Wenger, Sarah Korona, Costa Mavridis, Andrew Abercromby Ph.D., 
+Cindy Evans Ph.D., Trevor Graff, Dan Garrison, Andrea Wenzel, Les Padilla, David Coan, Daren Welsh, Jordan 
+Lindsey. We would also like to acknowledge our primary users within the FOD xEVA flight control team and SMD 
+Artemis science teams. 
+
+
+
+References 
+1NASA. Artemis Accords [Internet]. NASA. 2017. Available from: https://www.nasa.gov/specials/artemis-accords/index.html 
+2Mahoney E. NextSTEP Appendix P: Human Landing System Sustaining Lunar Development. NASA. 2021. Available from: 
+
+
+
+http://www.nasa.gov/nextstep/humanlander4 
+3NASA. Exploration Extravehicular Activity Services (xEVAS). 2021. Available from: 
+
+
+
+https://sam.gov/opp/cbf17a8bb3954f33a0e70a6dc2b7754c/view 
+4Daines G. Commercial Lunar Payload Services. NASA. 2019. Available from: http://www.nasa.gov/content/commercial-
+
+
+
+lunar-payload-services 
+5Baird D. LunaNet: Empowering Artemis with Comm and Nav Interoperability. NASA. 2021. Available from: 
+
+
+
+http://www.nasa.gov/feature/goddard/2021/lunanet-empowering-artemis-with-communications-and-navigation-interoperability 
+6Esper J. Draft LunaNet Interoperability Specification. 2022. Available from: https://ntrs.nasa.gov/citations/20220004317 
+7O’Neill J. Plan, Train, and Fly: Mission Operations From Apollo To Shuttle. Ask Magazine. 2009;(34):13–6. 
+8Bell E, Coan D, Oswald D. A Discussion on the Making of an EVA: What it Really Takes to Walk in Space. In: SpaceOps 
+
+
+
+2006 Conference. American Institute of Aeronautics and Astronautics; 2006. (SpaceOps Conferences). Available from: 
+https://arc.aiaa.org/doi/10.2514/6.2006-5570 
+
+
+
+9Miller MJ, McGuire KM, Feigh KM. Decision Support System Requirements Definition for Human Extravehicular Activity 
+Based on Cognitive Work Analysis. Journal of Cognitive Engineering and Decision Making. 2017 Jun 1;11(2):136–65. 
+
+
+
+10Apollo Next Generation Sample Analysis Program (ANGSA). Apollo Next Generation Sample Analysis Program (ANGSA).. 
+Available from: https://www.lpi.usra.edu/ANGSA 
+
+
+
+11Pernet-Fisher JF, McDonald FE, Zeigler RA, Joy KH. 50 years on: legacies of the Apollo programme. Astronomy & 
+Geophysics. 2019 Aug 1;60(4):4.22-4.28. 
+
+
+
+12International Space Station (ISS) EVA Suit Water Intrusion - High Visibility Close Call. NASA; Available from: 
+https://www.nasa.gov/sites/default/files/files/Suit_Water_Intrusion_Mishap_Investigation_Report.pdf 
+
+
+
+13Miller MJ, McGuire KM, Feigh KM. Information flow model of human extravehicular activity operations. In: 2015 IEEE 
+Aerospace Conference. 2015. p. 1–15. 
+
+
+
+14Apollo in Real Time [Internet]. Apollo in Real Time. Available from: https://apolloinrealtime.org/ 
+15Hall L. Decision Support Tool Development for Human Extraterrestrial Extravehicular Activity. NASA. 2013. Available 
+
+
+
+from: http://www.nasa.gov/spacetech/strg/2013_nstrf_miller.html 
+16Miller MJ. Decision support system development for human extravehicular activity. Georgia Institute of Technology; 2017. 
+
+
+
+Available from: https://smartech.gatech.edu/handle/1853/59210 
+17Miller MJ, Feigh KM. Addressing the envisioned world problem: a case study in human spaceflight operations. Des Sci. 
+
+
+
+2019;5:e3. 
+18Miller MJ, Feigh KM. Assessment of Decision Support Systems for Envisioned Human Extravehicular Activity Operations: 
+
+
+
+From Requirements to Validation and Verification. Journal of Cognitive Engineering and Decision Making. 2020 Mar 1;14(1):54–
+74. 
+
+
+
+19Abercromby AFJ, Alpert BK, Cupples JS, Dillon EL, Garbino A, Hernandez Y, et al. Integrated Extravehicular Activity 
+Human Research & Testing Plan: 2019. 2019. Available from: https://www.nasa.gov/sites/default/files/atoms/files/nasa-tp-2019-
+220232.pdf 
+
+
+
+20Gebhardt C. Pesquet & Kimbrough complete new solar array installation on ISS. NASASpaceFlight.com. 2021. Available 
+from: https://www.nasaspaceflight.com/2021/06/usa-eva-76/ 
+
+
+
+21Smith EE, Korsmeyer DJ, Hall V. Exploration Technologies for Operations. In: SpaceOps 2014 Conference. Pasadena, CA: 
+American Institute of Aeronautics and Astronautics; 2014. Available from: https://arc.aiaa.org/doi/10.2514/6.2014-1619 
+
+
+
+22Marquez JJ, Hillenius S, Healy M, Silva-Martinez J. Lessons Learned from International Space Station Crew Autonomous 
+Scheduling Test. In 2019. Available from: https://ntrs.nasa.gov/citations/20190027148 
+
+
+
+23PRIDE. TRACLabs. Available from: https://traclabs.com/projects/pride/ 
+24Hudson M, Molin A, Kortenkamp D. Electronic Procedures for Medical Operations in Space. In: AIAA SPACE 2011 
+
+
+
+Conference & Exposition. Long Beach, California: American Institute of Aeronautics and Astronautics; 2011. Available from: 
+https://arc.aiaa.org/doi/10.2514/6.2011-7175 
+
+
+
+25Cohen TE, Lees DS, Deans MC, Lim DSS, Lee YJG. Integrating time-synchronized video with other geospatial and temporal 
+data for remote science operations. In: 2018 IEEE Aerospace Conference. 2018. p. 1–10. 
+
+
+
+26Marquez JJ, Miller MJ, Cohen T, Deliz I, Lees DS, Zheng J, et al. Future Needs for Science-Driven Geospatial and Temporal 
+Extravehicular Activity Planning and Execution. Astrobiology. 2019 Mar;19(3):440–61. 
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+11 
+International Conference on Environmental Systems 
+
+
+
+ 
+ 
+
+
+
+27Miller MJ, Coan DA, Abercromby AF, Feigh KM. Design and Development of Support Systems for Future Human 
+Extravehicular Activity. In: 55th AIAA Aerospace Sciences Meeting. American Institute of Aeronautics and Astronautics; 2017. 
+(AIAA SciTech Forum). Available from: https://arc.aiaa.org/doi/10.2514/6.2017-1444 
+
+
+
+28Caswell E, Young KE, Coan D, Graff TG, Lindsey T, Tejral Z, et al. JETT3: A Holistic, Integrated Analog For Artemis Lunar 
+Surface Exploration. LPSC. 2023;(2700). Available from: https://www.hou.usra.edu/meetings/lpsc2023/pdf/2700.pdf 
+
+
+
+29Artemis III Science Definition Report. Report No.: NASA/SP-20205009602. Available from: 
+https://www.nasa.gov/sites/default/files/atoms/files/artemis-iii-science-definition-report-12042020c.pdf 
+
+
+
+30Mahoney E. Exploration Systems Development Mission Directorate. NASA. 2019. Available from: 
+http://www.nasa.gov/directorates/exploration-systems-development 
+
+
+
+31Young KE, Britton AW, Cohen BA, Edgar LA, Fagan AL, Garry WB, et al. The Integration Of Science Into Artemis Surface 
+Mission Planning: Lessons. LPSC. 2023;(2179). Available from: https://www.hou.usra.edu/meetings/lpsc2023/pdf/2179.pdf 
+
+
+
+32Miller MJ, Lawrence SJ, Petro NE. Artemis Internal Science Team Update: Data And Software Development. LPSC. 
+2023;(1362). Available from: https://www.hou.usra.edu/meetings/lpsc2023/pdf/1362.pdf
