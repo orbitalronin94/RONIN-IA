@@ -103,7 +103,7 @@ def extract_article_text(xml_payload: bytes, fallback_language: Any = None) -> t
     return text, language
 
 
-def request_bytes(url: str, *, attempts: int = 4) -> tuple[bytes, dict[str, str]]:
+def request_bytes(url: str, *, attempts: int = 7) -> tuple[bytes, dict[str, str]]:
     last_error: Exception | None = None
     for attempt in range(attempts):
         try:
@@ -114,8 +114,13 @@ def request_bytes(url: str, *, attempts: int = 4) -> tuple[bytes, dict[str, str]
             last_error = exc
             if isinstance(exc, urllib.error.HTTPError) and exc.code not in {429, 500, 502, 503, 504}:
                 raise
-            time.sleep(min(2 ** attempt, 12))
-    raise RuntimeError(f"request failed after retries: {url}") from last_error
+            retry_after = getattr(exc, "headers", {}).get("Retry-After")
+            try:
+                delay = float(retry_after) if retry_after else min(2 ** attempt, 60)
+            except (TypeError, ValueError):
+                delay = min(2 ** attempt, 60)
+            time.sleep(min(max(delay, 1), 120))
+    raise RuntimeError(f"request failed after {attempts} retries: {url}") from last_error
 
 
 def search_page(domain: str, cursor_mark: str, page_size: int) -> dict[str, Any]:

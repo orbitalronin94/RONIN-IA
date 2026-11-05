@@ -105,7 +105,7 @@ def test_manifest_rejects_modified_or_unverified_files(tmp_path):
     manifest_path = tmp_path / "ronin-teacher-manifest.json"
     manifest_path.write_text(json.dumps(manifest))
     weights.write_bytes(b"modified")
-    with pytest.raises(ValueError, match="Hash incorrecto"):
+    with pytest.raises(ValueError, match="Hash.*incorrecto"):
         verify_manifest(tmp_path, "4bit")
     manifest["license_verified"] = False
     manifest_path.write_text(json.dumps(manifest))

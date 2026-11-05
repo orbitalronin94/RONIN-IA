@@ -72,7 +72,7 @@ def request_search(query: str, page_size: int) -> dict[str, Any]:
 
 def _http_json(url: str) -> tuple[dict[str, Any], str | None]:
     last_error: Exception | None = None
-    for attempt in range(6):
+    for attempt in range(8):
         request = urllib.request.Request(
             url,
             headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
@@ -85,8 +85,13 @@ def _http_json(url: str) -> tuple[dict[str, Any], str | None]:
             last_error = exc
             if isinstance(exc, urllib.error.HTTPError) and exc.code not in {429, 500, 502, 503, 504}:
                 raise
-            time.sleep(min(2 ** attempt, 30))
-    raise RuntimeError(f"PMC metadata request failed after retries: {url}") from last_error
+            retry_after = getattr(exc, "headers", {}).get("Retry-After")
+            try:
+                delay = float(retry_after) if retry_after else min(2 ** attempt, 60)
+            except (TypeError, ValueError):
+                delay = min(2 ** attempt, 60)
+            time.sleep(min(max(delay, 1), 120))
+    raise RuntimeError(f"PMC metadata request failed after 8 retries: {url}") from last_error
 
 
 def parse_s3_version_prefixes(xml_payload: bytes) -> list[str]:

@@ -80,3 +80,27 @@ jobs:
             git pull --rebase origin main
             git push origin HEAD:main
           fi
+
+      - name: Enforce complete domain coverage and the 3,040-document target
+        if: always()
+        run: |
+          if [ "${{ steps.download.outcome }}" != "success" ]; then
+            echo "::error::No se descargaron artefactos de candidato PMC."
+            exit 1
+          fi
+          if [ "${{ steps.aggregate.outcome }}" != "success" ]; then
+            echo "::error::No se pudo verificar el manifiesto agregado PMC."
+            exit 1
+          fi
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("data/datasets/candidates/pmc-oa-expansion-${{ github.event.workflow_run.id }}/manifest.json")
+          report = json.loads(path.read_text(encoding="utf-8"))
+          assert report["all_expected_domains_present"], report["missing_expected_domains"]
+          assert report["complete_general_hkd_pairing"], "Falta una biblioteca General/HKD"
+          assert report["minimum_target_met"], "No se alcanzaron 3.040 textos únicos sin duplicados"
+          assert report["cross_domain_or_library_exact_duplicates"] == 0
+          print("Cobertura y objetivo mínimo verificados; sigue siendo candidato, no admitido.")
+          PY
