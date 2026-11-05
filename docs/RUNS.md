@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:34 | [Integración continua #1218 (run 42003499647)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003499647) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): exclude four conflicting JDM DOI records. Trigger: push; rama: main; intento: 1. | 001a158d |
 | 2026-11-05 09:34 | [Incorporar corpus científicos CC-BY verificados #17 (run 42003412554)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003412554) | failure | Ejecución de GitHub Actions; consultar logs y artefactos enlazados para el resultado detallado. Commit: data: quarantine duplicate and conflicting ScienceVerse DOIs. Trigger: push; rama: main; intento: 1. | 793ece01 |
 | 2026-11-05 09:33 | [Integración continua #1214 (run 42003350343)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003350343) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Simplify imports and resolve Ruff validation failures. Trigger: push; rama: main; intento: 1. | 10b7018f |
 | 2026-11-05 09:33 | [Integración continua #1213 (run 42003275148)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003275148) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Run Qwen training validation whenever its script changes. Trigger: push; rama: main; intento: 1. | a518b69f |
