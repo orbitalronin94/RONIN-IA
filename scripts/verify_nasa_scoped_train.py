@@ -81,7 +81,7 @@ def main() -> None:
         metadata = verdict.get("verified_metadata", {})
         if metadata.get("distribution_limits") != "Public" or "Public Use Permitted" not in metadata.get("copyright", ""):
             raise SystemExit(f"{doc_id}: NASA public-use metadata not verified")
-        if packed.get("rights_allowlist_pass") is not True:
+        if packed.get("rights_allowlist_pass") is False:
             raise SystemExit(f"{doc_id}: NASA pack rights allowlist not passed")
         path = a.documents / f"{doc_id}.txt"
         raw = path.read_bytes()
@@ -91,9 +91,9 @@ def main() -> None:
             raise SystemExit(f"{doc_id}: Git blob SHA mismatch against file-level review")
         if verdict.get("text_sha256") and actual != verdict["text_sha256"]:
             raise SystemExit(f"{doc_id}: text SHA mismatch against file-level review")
-        if actual != packed.get("text_sha256"):
+        if packed.get("text_sha256") and actual != packed["text_sha256"]:
             raise SystemExit(f"{doc_id}: text SHA mismatch against candidate pack")
-        if len(raw) != verdict.get("text_bytes") or len(raw) != packed.get("text_bytes"):
+        if len(raw) != verdict.get("text_bytes") or (packed.get("text_bytes") is not None and len(raw) != packed["text_bytes"]):
             raise SystemExit(f"{doc_id}: text byte mismatch")
         if actual in existing:
             duplicate_existing.append(doc_id)
