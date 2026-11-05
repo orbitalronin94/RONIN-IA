@@ -1,0 +1,663 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="pdf:PDFVersion" content="1.7">
+<meta name="xmp:CreatorTool" content="LaTeX with hyperref">
+<meta name="pdf:hasXFA" content="false">
+<meta name="access_permission:modify_annotations" content="true">
+<meta name="access_permission:can_print_degraded" content="true">
+<meta name="dcterms:created" content="2023-05-24T23:41:52Z">
+<meta name="dcterms:modified" content="2023-05-24T23:41:52Z">
+<meta name="dc:format" content="application/pdf; version=1.7">
+<meta name="pdf:docinfo:creator_tool" content="LaTeX with hyperref">
+<meta name="access_permission:fill_in_form" content="true">
+<meta name="pdf:docinfo:modified" content="2023-05-24T23:41:52Z">
+<meta name="pdf:hasCollection" content="false">
+<meta name="pdf:encrypted" content="false">
+<meta name="pdf:docinfo:custom:PTEX.Fullbanner" content="This is MiKTeX-pdfTeX 4.11.0 (1.40.24)">
+<meta name="pdf:hasMarkedContent" content="false">
+<meta name="Content-Type-Override" content="application/pdf">
+<meta name="Content-Type" content="application/pdf">
+<meta name="PTEX.Fullbanner" content="This is MiKTeX-pdfTeX 4.11.0 (1.40.24)">
+<meta name="pdf:producer" content="MiKTeX pdfTeX-1.40.24">
+<meta name="access_permission:extract_for_accessibility" content="true">
+<meta name="access_permission:assemble_document" content="true">
+<meta name="xmpTPg:NPages" content="8">
+<meta name="pdf:hasXMP" content="false">
+<meta name="access_permission:extract_content" content="true">
+<meta name="access_permission:can_print" content="true">
+<meta name="pdf:docinfo:trapped" content="False">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.DefaultParser">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.pdf.PDFParser">
+<meta name="access_permission:can_modify" content="true">
+<meta name="pdf:docinfo:producer" content="MiKTeX pdfTeX-1.40.24">
+<meta name="pdf:docinfo:created" content="2023-05-24T23:41:52Z">
+<title></title>
+</head>
+<body><div class="page"><p></p>
+<p>Ground-Based Vision Tracker for Advanced Air Mobility and
+Urban Air Mobility
+</p>
+<p>Evan Kawamura ∗1, Keerthana Kannan †1, Thomas Lombaerts ‡1, Vahram Stepanyan§1, Chester Dolph ¶2, and Corey
+Ippolito �1
+</p>
+<p>1NASA Ames Research Center, Moffett Field, Mountain View, CA 94035
+2NASA Langley Research Center, 1 Nasa Dr, Hampton, VA 23666
+</p>
+<p>Advanced Air Mobility (AAM) Air Mobility and Urban Air Mobility (UAM) require aircraft
+surveillance and monitoring for safety and security. Persistent tracking of flying objects
+provides Air Traffic Control (ATC) and Air Traffic Management (ATM) continuous coverage
+and knowledge of the national airspace system (NAS). Given the significant disparity in the
+number of AAM and UAM aircraft compared to commercial aircraft in the NAS, coupled with
+the dense AAM/UAM operations in urban environments, employing the existing ATC/ATM
+architectures poses considerable challenges. A first step in creating a similar ATC/ATM
+architecture for AAM/UAM will require ground-based and airborne-based sensors to provide
+monitoring, which will be difficult in urban environments due to GPS degradation. This paper
+proposes a vision-based tracking method with static cameras by utilizing image subtraction and
+blob detection, which avoids adding additional electromagnetic interferences in the environment
+with sensors such as radar. The ground-based vision tracker (GBVT) outputs the detected
+objects’ azimuth and elevation angles from unmanned aerial system (UAS) flight tests. Future
+and ongoing work includes sending the detected objects’ azimuth and elevation angles as inputs
+for an extended Kalman filter (EKF) to estimate the position and velocity of the detected object.
+</p>
+<p>I. Introduction
+</p>
+<p>Advanced Air Mobility (AAM) and Urban Air Mobility (UAM) require aircraft surveillance and monitoring for
+safety and security purposes. Since there will be numerous more AAM/UAM aircraft than commercial airplanes
+</p>
+<p>flying in the airspace, it will be difficult to scale conventional Air Traffic Control (ATC) and Air Traffic Management
+(ATM) procedures and protocol for AAM/UAM concepts of operation. One way to reduce scaling complexities and
+increase efficiency is to implement distributed sensors in the enivronment for passively monitoring the airspace. Then,
+the distributed sensors can provide aircraft tracking information to the modified ATC/ATM architectures by leverging
+automatic and passive tracking capabilities. Therefore, these modified ATC/ATM architectures will have an efficient
+and scalable solution for monitoring the airspace by having increased awareness, path planning, and contingency
+management. This paper focuses on vision-based tracking with ground-based distributed sensors in the envrironment.
+</p>
+<p>There are research efforts for vision-based tracking. A real-time, adaptive visual algorithm with Multiple-Instance
+(MI) learning approach, Multiple-Classifier (MC) voting mechanism, and Multiple-Resolution (MR) representation
+strategy solves online learning and tracking arbitrary aircraft and intruders in the air with experimental results [1].
+Combining a vision-based target tracker with a neural network and a Kalman filter creates an adaptive target state
+estimator [2]. A survey of on-road vision-based vehicle detectors shows a wide variety of monocular and stereo
+vision-based trackers [3]. An Incremental Focus of Attention (IFA) hierarchical architecture provides robust, adaptive,
+and real-time vision-based tracking [4]. Combining onboard inertial navigation system (INS) telemetry data and a
+ground-based monocular camera running optical flow into an Extended Kalman Filter (EKF) leads to robust and accurate
+state estimation of the tracked unmanned aerial vehicle (UAV) [5].
+</p>
+<p>∗Computer/GNC Engineer, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View, CA 94035, USA.
+†Software Engineer, KBR Wyle Services, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View, CA 94035,
+</p>
+<p>USA.
+‡Aerospace Research Engineer, KBR Wyle Services, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View,
+</p>
+<p>CA 94035, USA.
+§Aerospace Research Engineer, KBR Wyle Services, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View,
+</p>
+<p>CA 94035, USA.
+¶Aerospace Engineer, Aeronautics Systems Engineering Branch, NASA Langley Research Center, 1 Nasa Dr, Hampton, VA 23666.
+�Aerospace Scientist, Intelligent Systems Division, NASA Ames Research Center, Moffett Field, Mountain View, CA 94035, USA
+</p>
+<p>1</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>The proposed research in this paper demonstrates a ground-based vision tracker for distributed cameras in an urban
+environment to simulate future AAM/UAM operations for monitoring the airspace. Post-processing a ground-based
+camera’s video of a UAV flight shows preliminary image subtraction results of capturing a moving UAV across the
+camera’s field of view. This extended abstract provides the preliminary results and next steps for the ground-based
+vision tracker (GBVT).
+</p>
+<p>II. Proposed Solution
+There are two proposed methods for GBVT: MATLAB and OpenCV (C++), and both utilize image subtraction and
+</p>
+<p>blob detection. Figure 1 shows the MATLAB image subtraction flowchart, while Figure 2 shows the OpenCV image
+subtraction flowchart. There are similar steps in the procedure but with differences due to programming language and
+data storage.
+</p>
+<p>Fig. 1 MATLAB Image Subtraction Flowchart
+</p>
+<p>III. Preliminary Results
+A preliminary distributed sensing test involved one ground-based and fixed-angle camera to obtain flight test data
+</p>
+<p>for testing the GBVT. The UAS flew horizontally from left to right across the camera’s field of view, and the camera
+specs for this preliminary flight test are given in Table 1. Figure 3 shows the sensor locations (yellow circles), and their
+</p>
+<p>Table 1 Camera Specs for Preliminary Flight Test
+</p>
+<p>Spec Value
+Horizontal Field of View (◦) 110
+</p>
+<p>Vertical Field of View (◦) 57.6
+Aspect Ratio 1.91
+</p>
+<p>px 1920
+py 1080
+</p>
+<p>FPS 60
+</p>
+<p>locations are given in Table 2 [6, 7]. Here are the tentative UAS flight test plans with the same trajectories but with
+different distributed sensing hardware and software:
+</p>
+<p>2</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Fig. 2 OpenCV Image Subtraction Flowchart
+</p>
+<p>1) May 2023: GoPro Hero10 Black cameras at each ground-based sensor node
+2) June 2023: FLIR BlackFly cameras with Fujinon lens at each ground-based sensor node
+3) July 2023: obtain real-time image tracker and connect to Ref. [8]’s vision-based EKF tracker for real-time
+</p>
+<p>estimation
+4) August 2023: run image tracker in the larger DS system
+</p>
+<p>Table 2 NASA Ames Build 1 Scenario Sensor Locations
+</p>
+<p>Location Latitude (◦) Longitude (◦)
+1 37.429540 -122.067712
+2 37.425155 -122.059832
+3 37.423476 -122.061238
+4 37.426551 -122.067970
+O 37.426861 -122.066015
+</p>
+<p>Different GoPro Hero10 Black camera lens and modes will be selected and optimized to have the UAV within at
+least two camera fields of view throughout most of the UAV’s flight path (see Figure 3), and the estimated horizontal
+field of view per camera is 40◦. ∗
+</p>
+<p>Table 3 shows the FLIR BlackFly camera specs. † Ideally, the BlackFly camera fields of view will resemble the
+GoPro Hero10 Black fields of view to keep the experimental setup as consistent as possible. Since lens selection and
+procurement for the FLIR BlackFly cameras are ongoing, the first UAS flight test will use the GoPro Hero10 Black
+cameras as mentioned earlier.
+</p>
+<p>Figure 4 shows the architecture diagram for the four image trackers for the Ames Build 1 scenario. Each image
+tracker will run at some TBD frequency and receive RGB images. Then, each image tracker will compute the azimuth
+and elevation angles for detected and tracked objects within their fields of view, which feeds into the data assocation
+problem of keeping track of many objects [9]. Finally, the associated object’s azimuth and elevation angles from multiple
+views will be sent to the vision-based tracker EKF presented in Ref. [8].
+</p>
+<p>Figure 5 shows the intermediate steps during image subtraction with the original and masked image after applying
+image subtraction. Figure 5a shows the current image, and Figure 5b shows the subtracted image after applying the
+</p>
+<p>∗https://community.gopro.com/s/article/HERO10-Black-Digital-Lenses-FOV-Informations?language=en_US
+†https://www.flir.com/products/blackfly-s-usb3/?model=BFS-U3-123S6C-C&amp;vertical=machine+vision&amp;segment=iis
+</p>
+<p>3</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Fig. 3 Ames Research Center Flight Test - Build 1: sensor stations (yellow)
+</p>
+<p>Table 3 BlackFly Camera Specs
+</p>
+<p>Name Value
+FLIR BlackFly Part number: BFS-U3-123S6C-C
+</p>
+<p>Pixel width 4096
+Pixel height 3000
+Aspect ratio 1.365
+</p>
+<p>FPS 30
+Megapixels 12.3
+Pixel size 3.45
+</p>
+<p>Dimensions in mm (W x H x L) 29 x 29 x 30
+</p>
+<p>4</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Fig. 4 Ames Research Center Flight Test - Build 1: sensor stations (yellow) and computing units (green)
+</p>
+<p>steps shown earlier in Figure 1: the intensity factor is 5, and the threshold pixel value is 240 such that all pixels below
+240 will be eliminated.
+</p>
+<p>(a) Original Image (b) Mask after Image Subtraction
+</p>
+<p>Fig. 5 Image Subtraction Results: Frame 2480
+</p>
+<p>Preliminary tests in MATLAB include tracking five objects with image subtraction and blob detection (bwareafilt) ‡.
+Objects (centroids) 2-4 might be cars since they have relatively low and flat elevation angles between approximately 40
+and 55 seconds, which corresponds to cars in the video (see Figure 6). The fifth detection has random outliers and not
+shown for brevity. The average runtime per iteration is 0.2675 seconds, which demonstrates near real-time capabilities.
+The video was recorded at 60 frames per second, and the frame subtraction step is 55 frames to provide sufficient time
+and difference to detect the UAV motion. Preliminary tuning shows that the frame subtraction can be reduced down to
+30 frames (0.5 seconds for a 60 fps camera), but there are multiple non-UAV detections, i.e., false positives.
+</p>
+<p>The OpenCV C++ image tracker also utilizes image subtraction § and blob detection ¶. It currently has a calibration
+phase where it takes the first 150 frames to learn the background model and uses the OpenCV MOG2 Background
+Subtractor. For rendering and tracking, none of the detections, matching, or plotting occur until after the calibration
+phase. Two drawbacks for the current implementation of the OpenCV image tracker are: 1) the image tracker does
+</p>
+<p>‡https://www.mathworks.com/help/images/ref/bwareafilt.html
+§https://docs.opencv.org/3.4/d1/dc5/tutorial_background_subtraction.html
+¶https://learnopencv.com/blob-detection-using-opencv-python-c/
+</p>
+<p>5</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Centroid 1: Azimuth and Elevation Angles
+</p>
+<p>0 50 100 150
+</p>
+<p>Time (s)
+</p>
+<p>-50
+</p>
+<p>0
+</p>
+<p>50
+</p>
+<p>A
+z
+im
+</p>
+<p>u
+th
+</p>
+<p> A
+n
+g
+le
+</p>
+<p> (
+d
+e
+g
+)
+</p>
+<p>0 50 100 150
+</p>
+<p>Time (s)
+</p>
+<p>-5
+</p>
+<p>0
+</p>
+<p>5
+</p>
+<p>10
+</p>
+<p>15
+</p>
+<p>E
+le
+</p>
+<p>v
+a
+ti
+o
+n
+ A
+</p>
+<p>n
+g
+le
+</p>
+<p> (
+d
+e
+g
+)
+</p>
+<p>(a) Object 1 (UAV)
+</p>
+<p>Centroid 2: Azimuth and Elevation Angles
+</p>
+<p>0 20 40 60 80 100 120
+</p>
+<p>Time (s)
+</p>
+<p>-50
+</p>
+<p>0
+</p>
+<p>50
+</p>
+<p>A
+z
+im
+</p>
+<p>u
+th
+</p>
+<p> A
+n
+g
+le
+</p>
+<p> (
+d
+e
+g
+)
+</p>
+<p>0 20 40 60 80 100 120
+</p>
+<p>Time (s)
+</p>
+<p>-15
+</p>
+<p>-10
+</p>
+<p>-5
+</p>
+<p>0
+</p>
+<p>E
+le
+</p>
+<p>v
+a
+ti
+o
+n
+ A
+</p>
+<p>n
+g
+le
+</p>
+<p> (
+d
+e
+g
+)
+</p>
+<p>(b) Object 2 (car)
+Centroid 3: Azimuth and Elevation Angles
+</p>
+<p>0 20 40 60 80 100 120
+</p>
+<p>Time (s)
+</p>
+<p>-50
+</p>
+<p>0
+</p>
+<p>50
+</p>
+<p>A
+z
+im
+</p>
+<p>u
+th
+</p>
+<p> A
+n
+g
+le
+</p>
+<p> (
+d
+e
+g
+)
+</p>
+<p>0 20 40 60 80 100 120
+</p>
+<p>Time (s)
+</p>
+<p>-20
+</p>
+<p>-10
+</p>
+<p>0
+</p>
+<p>10
+</p>
+<p>20
+</p>
+<p>E
+le
+</p>
+<p>v
+a
+ti
+o
+n
+ A
+</p>
+<p>n
+g
+le
+</p>
+<p> (
+d
+e
+g
+)
+</p>
+<p>(c) Object 3 (car)
+</p>
+<p>Centroid 4: Azimuth and Elevation Angles
+</p>
+<p>0 10 20 30 40 50 60
+</p>
+<p>Time (s)
+</p>
+<p>-60
+</p>
+<p>-40
+</p>
+<p>-20
+</p>
+<p>0
+</p>
+<p>20
+</p>
+<p>A
+z
+im
+</p>
+<p>u
+th
+</p>
+<p> A
+n
+g
+le
+</p>
+<p> (
+d
+e
+g
+)
+</p>
+<p>0 10 20 30 40 50 60
+</p>
+<p>Time (s)
+</p>
+<p>-15
+</p>
+<p>-10
+</p>
+<p>-5
+</p>
+<p>0
+</p>
+<p>E
+le
+</p>
+<p>v
+a
+ti
+o
+n
+ A
+</p>
+<p>n
+g
+le
+</p>
+<p> (
+d
+e
+g
+)
+</p>
+<p>(d) Object 4 (car)
+</p>
+<p>Fig. 6 MATLAB Image Tracker Azimuth and Elevation Angles per Detection
+</p>
+<p>6</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>not track the UAV for the frames during the calibration phase, and 2) it must find the UAV in the first frame after the
+calibration phase, i.e., frame 151 in this preliminary test. The number of frames during the calibration phase is arbitrary,
+and future work may consider a more robust and flexible image tracker framework to avoid needing to detect the UAV in
+the first frame immediately after the calibration phase. For simplicity, the tracker currently detects the UAV and only
+considers future detections that are within an overlap distance of:
+</p>
+<p>overlap = 𝑑 − 2 · overlap radius (1)
+</p>
+<p>Figure 7 shows a diagram of the distance between two detections and the overlap radius. Future work for the OpenCV
+</p>
+<p>Fig. 7 Overlap Radius Diagram
+</p>
+<p>image tracker may include new detections such as cars, birds, etc. like the MATLAB version. Figure 8 shows the
+azimuth and elevation angles of the tracked UAV for the OpenCV C++ implementation shown earlier in Figure 2. The
+goal is to run GBVT in real-time, so whatever method works accurately and quickly will be selected for implementation
+during the July and August 2023 flight tests.
+</p>
+<p>0 50 100 150
+</p>
+<p>time (seconds)
+</p>
+<p>-60
+</p>
+<p>-40
+</p>
+<p>-20
+</p>
+<p>0
+</p>
+<p>20
+</p>
+<p>40
+</p>
+<p>60
+</p>
+<p>a
+z
+im
+</p>
+<p>u
+th
+</p>
+<p> a
+n
+</p>
+<p>g
+le
+</p>
+<p> (
+°
+</p>
+<p>)
+</p>
+<p>Azimuth Angle vs. Time
+</p>
+<p>(a) Azimuth Angle
+</p>
+<p>0 50 100 150
+</p>
+<p>time (seconds)
+</p>
+<p>-7
+</p>
+<p>-6.5
+</p>
+<p>-6
+</p>
+<p>-5.5
+</p>
+<p>e
+le
+</p>
+<p>v
+a
+</p>
+<p>ti
+o
+</p>
+<p>n
+ a
+</p>
+<p>n
+g
+</p>
+<p>le
+ (
+</p>
+<p>°
+)
+</p>
+<p>Elevation Angle vs. Time
+</p>
+<p>(b) Elevation Angle
+</p>
+<p>Fig. 8 Tracked UAV Azimuth and Elevation Angles
+</p>
+<p>IV. Significance
+The UAV flight test video shows promising results for ground-based distributed sensing of the airspace for tracking
+</p>
+<p>and monitoring AAM/UAM aircraft in scenarios such as corridor surveillance. Future AAM/UAM operations will require
+</p>
+<p>7</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>ground-based and airborne-based sensors for monitoring the airspace, and it will be complex in urban environments
+due to GPS degradation. Ultimately, experiments with UAS flight tests and real-time GBVT will lead towards initial
+attempts in creating AAM/UAM distributed sensing architecture that resembles ATC/ATM.
+</p>
+<p>Acknowledgments
+The authors would like to thank the Transformative Tools and Technologies (TTT) Project under the NASA
+</p>
+<p>Aeronautics Research Mission Directorate (ARMD) for funding this research. The authors would also like to thank Loc
+Tran for his expertise in image processing and computer vision.
+</p>
+<p>References
+[1] Fu, C., Carrio, A., Olivares-Mendez, M. A., Suarez-Fernandez, R., and Campoy, P., “Robust real-time vision-based aircraft
+</p>
+<p>tracking from unmanned aerial vehicles,” 2014 ieee international conference on robotics and automation (ICRA), IEEE, 2014,
+pp. 5441–5446.
+</p>
+<p>[2] Sattigeri, R., Johnson, E., Calise, A., and Ha, J., “Vision-based target tracking with adaptive target state estimator,” AIAA
+Guidance, Navigation and Control Conference and Exhibit, 2007, p. 6828.
+</p>
+<p>[3] Sivaraman, S., and Trivedi, M. M., “Looking at vehicles on the road: A survey of vision-based vehicle detection, tracking, and
+behavior analysis,” IEEE transactions on intelligent transportation systems, Vol. 14, No. 4, 2013, pp. 1773–1795.
+</p>
+<p>[4] Toyama, K., and Hager, G. D., “Incremental focus of attention for robust vision-based tracking,” International Journal of
+Computer Vision, Vol. 35, 1999, pp. 45–63.
+</p>
+<p>[5] Joo, S., Ippolito, C., Al-Ali, K., and Yeh, Y.-H., “Vision aided inertial navigation with measurement delay for fixed-wing
+unmanned aerial vehicle landing,” 2008 IEEE aerospace conference, IEEE, 2008, pp. 1–9.
+</p>
+<p>[6] Kannan, K., Baculi, J., Lombaerts, T., Kawamura, E., Gorospe, G., Holforty, W., Ippolito, C., Stepanyan, V., Dolph, C., and
+Brown, N., “A Simulation Architecture for Air Traffic Over Urban Environments Supporting Autonomy Research in Advanced
+Air Mobility,” AIAA SciTech 2023 Forum, AIAA-2023-0895, 2023. https://doi.org/10.2514/6.2023-0895.
+</p>
+<p>[7] Stepanyan, V., Kannan, K., Kawamura, E., Lombaerts, T., and Ippolito, C., “Target Tracking with Distributed Sensing and
+Optimal Data Migration,” AIAA SciTech 2023 Forum, AIAA-2023-2194, 2023. https://doi.org/10.2514/6.2023-2194.
+</p>
+<p>[8] Lombaerts, T., Kannan, K., Kawamura, E., Dolph, C., Stepanyan, V., George, G., and Ippolito, C., “Distributed Ground Sensor
+Fusion Based Object Tracking for Autonomous Advanced Air Mobility Operations,” AIAA SciTech 2023 Forum, AIAA-2023-0896,
+2023. https://doi.org/10.2514/6.2023-0896.
+</p>
+<p>[9] Russell, S. J., and Norvig, P., Artificial Intelligence A Modern Approach, 3rd ed., Pearson Education, Inc., 2010.
+</p>
+<p>8</p>
+<p></p>
+<div class="annotation"><a href="https://doi.org/10.2514/6.2023-0895">https://doi.org/10.2514/6.2023-0895</a></div>
+<div class="annotation"><a href="https://doi.org/10.2514/6.2023-2194">https://doi.org/10.2514/6.2023-2194</a></div>
+<div class="annotation"><a href="https://doi.org/10.2514/6.2023-0896">https://doi.org/10.2514/6.2023-0896</a></div>
+</div>
+<ul>	<li>Introduction</li>
+	<li>Proposed Solution</li>
+	<li>Preliminary Results</li>
+	<li>Significance</li>
+</ul>
+</body></html>

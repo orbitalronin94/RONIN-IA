@@ -1,0 +1,519 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Development of a Test Article to Demonstrate the Long Duration Storage of Liquid Hydrogen via a Two-Stage Active Cooling Approach
+Travis W. Belcher1, Patrick A. Giddens2, Brian D. Hamill3, Sarah Nguyen4, Kevin W. Pedersen5, James W. Smith6, Jonathan R. Stephens7, Juan G. Valenzuela8, Robert M. Witbrodt9 and 
+NASA Marshall Space Flight Center, Huntsville, Alabama, 35812, USA
+
+Ryan J. Grotenrath10
+NASA Glenn Research Center, Cleveland, Ohio, 44135, USA
+
+A NASA team is developing a test article for the purpose of demonstrating the long duration storage of liquid hydrogen utilizing passive Cryogenic Fluid Management and cryocoolers via a two-stage active cooling approach. Funded by NASA’s Technology Demonstration Mission Program and managed by the Cryogenic Fluid Management Portfolio Project, the team is leveraging demonstrations conducted under pervious NASA activities to develop a fully integrated test article that will demonstrate the zero boil-off storage of liquid hydrogen. This paper discusses the previous activities being leveraged from NASA’s Cryogenic Propellant Storage and Transfer project, the test article design and build, hardware and instrumentation selections, control methodology, and the planned primary and secondary test objectives. The test article assembly and demonstration are both to be conducted in the East Test Area at NASA Marshall Space Flight Center and are currently scheduled for Fiscal Year 2024.    
+
+Nomenclature
+150W/90K	=	150W Cooling at 90K
+15W/77K	=	15W Cooling at 77K
+20W/20K	=	20W Cooling at 20K
+20W/90K	=	20W Cooling at 90K
+300W/90K	=	300W Cooling at 90K
+2-SC		=	Two-Stage Cooling
+A/L		=	Area to Length Ratio
+ACFM		=	Actual Cubic Feet Per Minute
+ASME		=	American Society of Mechanical Engineers
+BAC		=	Broad Area Cooling
+CFM		=	Cryogenic Fluid Management
+cm		=	centimeter
+CPST		=	Cryogenic Propellant Storage and Transfer
+DAQ		=	Data Acquisition
+Estar		=	Effective Emissivity
+ESTF		=	Exploration Systems Test Facility
+g/s		=	grams/second
+GFSSP		=	Generalized Fluid System Simulation Program
+GHe		=	Gaseous Helium
+GRC		=	Glenn Research Center
+GTO		=	Ground Test Objective
+IMLI		=	Integrated Multi-Layer Insulation
+IP		=	Internet Protocol address
+K		=	Kelvin
+Kg 		=	Kilogram
+kW		=	Kilowatt
+LBMLI		=	Load Bearing Multi-Layer Insulation
+LCH4		=	Liquid Methane
+LH2		=	Liquid Hydrogen
+LN2		=	Liquid Nitrogen
+LNG		=	Liquid Natural Gas
+LOx		=	Liquid Oxygen
+m		=	Meters
+micro-g		=	Micro Gravity
+MLI		=	Multi-Layer Insulation
+MSFC		=	Marshall Space Flight Center
+NI-PXI		=	National Instruments PCI eXtensions for Instrumentation
+NRHO		=	Near Rectilinear Halo Orbit
+OS		=	Operating System
+PCI		=	Peripheral Component Interconnect
+PID		=	Proportional Integral Derivative
+PSID		=	Pounds Per Square Inch Differential
+PSIG		=	Pounds Per Square Inch Gage
+RBO		=	Reduced Boil-Off
+RTB		=	Reverse Turbo-Brayton
+SBIR		=	Small Business Innovation Research
+SMiRF		=	Small Multi-Purpose Research Facility
+SOFI		=	Spray On Foam Insulation
+TCP		=	Transmission Control Protocol
+TDM		=	Technology Demonstration Missions
+tMLI		=	Traditional MLI
+TOT		=	Tube-On-Tank
+TRL		=	Technology Readiness Level
+TOS		=	Tube-On-Shield
+TVAC		=	Thermal Vacuum
+UHP		=	Ultra High Purity
+VATA		=	Vibro-Acoustic Test Article
+W		=	Watts
+ZBO		=	Zero Boil-Off
+
+Introduction
+NASA is emphasizing the development of cryogenic systems as the agency pursues the goal of returning astronauts to the lunar surface, and then eventually on to Mars. Cryogenic propellants offer high energy densities which enable high performing propulsion systems to be used on in-space transportation vehicles as well as lunar and Martian surface ascent/decent vehicles. The potential use of in-situ resources is a possibility with cryogenics, where propellant gas is to be produced, liquefied, and stored on the lunar or Martian surface and available when needed for replenishment. However, NASA’s planned missions are long duration and the storage of cryogenic propellant for extended periods of time imposes some challenges. When subjected to environmental heat loads, cryogens have a propensity to boil-off, resulting in excessive propellant tank pressures which must then be controlled by venting, or by heat removal via active cooling (cryocoolers). Propellant tank venting is undesirable for long duration missions as it results in propellant loss, which over an extended period of time, can be significant. Active cooling is undesirable for short duration missions as cryocoolers are a significant source of dry mass that must be carried throughout the mission. For any cryogenic vehicle and mission, a mass and power trade must be conducted to determine if active cooling is feasible, or if additional propellant mass should be carried to accommodate the losses associated with boil-off and venting. 
+NASA is making significant investments in the advancement of Cryogenic Fluid Management (CFM) technologies to enable extended duration storage. The current State of the Art for storage of Liquid Hydrogen (LH2) on orbit is on the order of hours while NASA’s future missions require storage for months or even years. To maintain propellant for such an extended period of time, “near zero” propellant loss, or Zero Boil-Off (ZBO), must be achieved. This may be accomplished with the implementation of “near zero” leakage components, a high performing suite of passive CFM technologies to minimize the environmental heat loads, and active cooling via cryocoolers to intercept and remove heat from the propellant tanks.
+Cryocoolers operating at 20 Kelvin (20K units) are required to achieve ZBO conditions for LH2 storage, while their 90 Kelvin counterparts (90K units) are used for soft cryogens such as Liquid Oxygen (LOx), Liquid Methane (LCH4), or Liquid Natural Gas (LNG). Since cryocoolers are a source of dry mass and require electrical power, it is desirable to minimize the refrigeration required to achieve ZBO conditions which can be done by including a suite of passive CFM technologies such as low conductivity structures and high performing insulation. Less refrigeration requirements lead to fewer or smaller cryocoolers, hence mass and power savings. With active cooling and a suite of passive CFM technologies, ZBO conditions for LH2 storage can be achieved with 20K cryocoolers alone, however 20K units have a significantly larger Specific Mass (kg/W) and Specific Power (W/W) relative to their 90K counterparts, meaning larger mass and greater electrical power required per watt of refrigeration.
+This paper focuses on the development of a ground test article to investigate a two-stage active cooling approach which can potentially lead to mass and power savings when active cooling is implemented for long duration LH2 storage. Since the Specific Mass and Specific Power associated with the 20K cryocoolers is high relative to 90K cryocoolers, the objective is to intercept and reject as much heat as possible with a 90K cryocooler, then use the 20K cryocooler for tank heat removal and pressure control. Previous studies have shown via analysis and testing, that this two-stage approach trades well against a single-stage approach in terms of mass and power savings.
+Background
+A NASA team is leveraging previous efforts conducted under the Cryogenic Propellant Storage and Transfer (CPST) project to develop a two-stage active cooling ground test article. Many of the technologies included have been demonstrated, but never assembled and tested as a fully integrated system. Among these demonstrations were three cryogenic test series: the Zero Boil-Off (ZBO) series, the Reduced Boil-Off (RBO) series, and the Vibro-Acoustic Test Article (VATA) series. The intention of CPST was to mature cryogenic technologies and establish a foundation for a technology demonstration mission but was later reformulated to a ground technology demonstration due to budget constraints. The 2-Stage Cooling (2-SC) project is the culmination of these efforts.
+  
+Figure 1: Single Stage Cooling Approach – Baseline	Figure 2: 2-SC Approach to be Demonstrated
+The ZBO test series was performed at Glenn Research Center (GRC) using the Small Multi-Purpose Research Facility (SMiRF), which can create a "simulated space" thermal vacuum environment. This test series was designed to demonstrate the effectiveness of using a Broad Area Cooling (BAC) tube network, also known as a Tube-On-Tank (TOT) heat exchanger, to achieve ZBO of propellant and maintain constant tank pressure for long durations. Liquid nitrogen (LN2) was used as a propellant simulant due to the safety concerns and cost restrictions of testing with liquid oxygen (LOX). The tank itself was constructed with stainless steel and features ten tubes (five supply and five return) attached vertically to the tank wall using a combination of welding and epoxy [1]. The cooling source for these tubes was a 15W/77K Reverse Turbo-Brayton (RTB) cycle cryocooler using neon as the working fluid. The tank was insulated with two traditional Multi-Layer Insulation (tMLI) blankets for a total of 75 reflector layers. The test series ultimately proved to be successful with the cryocooler running continuously for seven tests over the course of a 19-day period, during which the tank was not vented. An 88% reduction in stratification compared to other unvented and unmixed cryogenic tanks was also observed over the course of this test series [1].
+The RBO test series was also performed at GRC using SMiRF to create a simulated space thermal vacuum environment. The primary purpose of this test was to demonstrate a flight-like active thermal control system called a Tube-On-Shield (TOS) BAC shield in addition to passive thermal control systems, such as tMLI and Spray-On Foam Insulation (SOFI) for a LH2 tank [2]. The BAC shield consists of a thin aluminum sheet, which surrounds the tank and is attached to coolant tubes similar to ZBO’s TOT cooling system. A BAC shield nestled between two MLI blankets in this fashion allows for heat to be intercepted before it encounters the tank, lessening the load on the cryocooler. The coolant running through these tubes was supplied by a 20W/90K RTB cycle cryocooler, which also cooled the support struts and plumbing via thermal straps. As previously mentioned, the BAC shield was mounted between two tMLI blankets and supported by low conductance polymer standoffs. The inner MLI blanket between the BAC shield and the SOFI consisted of a low-density (8-layer/cm) 30-layer blanket, and the outer MLI was a standard density (20-layer/cm) 30-layer blanket, as well as 15 layers of MLI on the tank struts and plumbing. A visual representation of the heat shield stack-up can be seen below in Figure 3.
+ Figure 3: RBO Test Article Diagram [3]
+Two primary tests were performed with this system, a "Cooler Off" test to assess the baseline performance using only passive thermal control, and a "Cooler On" test to demonstrate the active cooling ability. LH2 was used as the fluid in the tank for these tests, and neon was the working fluid in the cryocooler for the Cooler On test. When comparing the results of these two tests, a boil-off reduction of 48% was seen, as well reductions in heat leak through the tank penetrations and inner MLI [3].
+Lastly, the VATA series of tests were designed to test the structural integrity of the MLI/BAC shield assembly when subjected to simulated launch loads [4]. The tank, outer MLI, and BAC shield used for this test series were physically similar to the apparatus used in the RBO testing, however LN2 was used as the cryogenic test fluid due to safety concerns with LH2. Additionally, two different types of MLI were tested for the inner MLI; a tMLI blanket, similar to the one used on RBO, as well as a Load Bearing MLI (LBMLI), which was capable of supporting the weight of the BAC shield without the use of standoffs. These tests were performed at Marshall Space Flight Center (MSFC) using an Acoustic Chamber to simulate launch loads, as well as the Exploration Systems Test Facility (ESTF) for thermal testing. Testing was performed in groups of three tests for each configuration of MLI. First, a thermal test was performed to determine the baseline thermal performance, followed by the acoustic test, and finally another thermal test to observe any variations that may have occurred due to the acoustic test. These tests were successful, with no degradation in thermal performance as a result of the acoustic testing and increased thermal performance of the LBMLI compared to tMLI [4].
+The test article for 2-SC will be comprised of an ASME rated aluminum propellant tank with approximately 360 gallons internal volume built similarly to the ZBO, RBO, and VATA test articles. Like ZBO, the propellant tank will be outfitted with a Tube-On-Tank BAC heat exchanger which is to be integrated with a 20K cryocooler. This configuration makes use of the tank surface area to remove heat from the propellant tank liquid and ullage space. The tank will be insulated with LBMLI underneath a custom designed Tube-On-Shield BAC shield integrated with a 90K cryocooler. This allows for the heat load through the tank acreage to be intercepted within the MLI blankets before reaching the propellant tank outer surface, hence easing the burden on the 20K cryocooler. An outer blanket MLI is then to be installed over the Tube-On-Shield BAC heat exchanger. The tank is to be supported by six low conductivity, titanium support struts thermally strapped to the Tube-On-Shield BAC heat exchanger, which will enable further heat interception with the 90K cryocooler. 
+A two-stage industrial cryocooler (cryogenerator) was sized and procured for this application. Potential use of engineering model “flight like” cryocooler is being discussed, but will be the focus of a future effort. The CFM community has long considered high efficiency, high capacity cryocoolers to be a technology “long pole” in need of development to fulfil NASA’s long term cryogenic storage needs. Currently, NASA has development efforts underway via SBIR contracts for the design, fabrication, and testing of two “flight like” engineering model cryocoolers, both based on a the RTB cycle. For LH2 storage applications, one unit (20W/20K) is designed to remove up to 20W when operating at 20K. Then for soft cryogens such as LOX, LCH4, and LNG, a second unit (150W/90K) is in development which can remove up to 150W when operating at 90K. The 150W/90K unit is also applicable to LH2 storage if only RBO is required, or if 2-SC is implemented to achieve ZBO. When the contracts were initiated, the Technology Readiness Levels (TRLs) associated with each unit was TRL 4. When both efforts conclude, the technology will be advanced to TRL 6 and both units will be delivered to NASA where further risk reduction testing will be conducted including a 2-SC demonstration utilizing this test article. 
+ Test Article Requirements 
+The team developed a set of top-level requirements to guide the test article design as well as instrumentation and other hardware procurements. In an attempt to minimize cost and expand the versatility of the test article, the team implemented a requirement that the propellant tank exterior be sized to match the existing ZBO, RBO, and VATA tanks. A common tank size will enable the activity to make use of existing hardware such as mounting struts and support structure, as well as allowing the test article to be installed in smaller vacuum chambers at both GRC and MSFC for future test programs. Although the initial demonstration utilizes a two-stage industrial cryogenerator, the Tube-On-Tank and Tube-On-Shield BAC heat exchangers are to be designed for use with the engineering model RTB Cryocoolers currently in development since those units have greater limitations on heat removal, refrigerant flowrates, and pressure drops than the industrial cryogenerator. The test article shall be designed to demonstrate ZBO of LH2 using the baseline single-stage approach (20K Tube-On-Tank only), and the two-stage cooling approach (20K Tube-On-Tank, 90K Tube-On-Shield BAC shield). The BAC shield heat exchanger shall be thermally coupled via high conductivity thermal straps to the six titanium support struts to enable further heat interception. The test article shall be instrumented such that direct measurements of heat removal can be taken across both the Tube-On-Tank and Tube-On-Shield heat exchangers. The cryogenerator will be two-stage, the first stage being at 80K and the second stage at 20K. Each stage will have its own independent recirculation loop which can be controlled remotely from the test control center. The insulation system shall consist of a high performing MLI inner and outer blanket separated by a thin foil Tube-On-Shield BAC shield. The inner blanket must be capable of supporting the load associated with the Tube-On-Shield BAC shield heat exchanger and outer MLI blanket. All testing will be conducted at vacuum conditions and at least two different environmental temperatures to simulate a space environment.  
+The test article design is guided by the Ground Test Objectives (GTOs), which are shown and discussed in the Demonstration Plan section later in this document.  
+
+Test Article Analysis
+Fluid and thermal analysis was performed throughout development to guide the final design of the tank integrated with active and passive cooling systems that meet the GTOs. Over time the fidelity of the test article analysis was increased to further prove out the final design and will be revisited upon compiling test data in the future. The following subsections encompass important parameters that were considered for analysis and some of the early results from designing the test article. The data contained below is preliminary and is continually being reassessed to ensure the outlined test objectives can be met with what can be manufactured.
+A.   Insulation Blanket Configuration
+Before sizing the TOT and TOS BAC heat exchangers for the test article, it was important to quantify the heat loads the tank could experience with active cooling from just the second stage (20K) and without active cooling from the first stage (90K). Having both stages off just results in boil-off. Insulation configurations were first assessed by evaluating areal heat loads through various lay-ups of MLI. Additional heat loads via structural and blanket assembly are being accounted for in higher fidelity models like Thermal Desktop. A cold boundary temperature of 20K was assumed for the tank being actively cooled by the second stage. This is roughly the normal boiling point of LH2 and ideally the temperature that the second stage of the cryogenerator loop will maintain when active. The normal boiling point of LH2 can be considered conservative as the cryogen will likely be stored at a higher pressure resulting in a higher saturation temperature. A pair of environmental temperatures exposed to the exterior of the insulation were considered in the thermal analysis of the MLI configurations. A warm case at 300K and a colder case at 220K. LBMLI or similarly Integrated MLI (IMLI) were primarily considered as the candidates directly insulating the tank while being capable of structurally supporting a TOS BAC shield containing additional MLI on its exterior. Applying a TOS BAC shield location mass optimization tool developed from the RBO test data at GRC, trades for the exterior MLI were evaluated for IMLI and tMLI to identify potential locations for the BAC shield between the insulation blankets. Any IMLI thermal performance was modeled using a GRC nodal model and tMLI thermal performance was modeled using a modified Lockheed equation. IMLI was assumed to have a layer density of 5.5 layers/cm and tMLI was assumed to have a layer density of 15 layer/cm. It was assumed for any thermal analysis of an MLI configuration with active cooling that the thin BAC shield was held at a constant temperature of 90K from the first stage loop of the cryogenerator. The active second stage loop of the cryogenerator was assumed to be held at 20K. The colder environmental temperature of 220K was used for the initial insulation analysis because the 300K environment could result in over insulation when switching to the 220K environment. A range of blanket layers were analyzed using GRC’s BAC shield locator tool and a total blanket thickness was determined from the number of layers of MLI output on either side of the shield. This was done to compare equivalent blanket thickness as some configurations may have different layer counts depending on the type of MLI chosen on the exterior. Figure 4 contains the expected heat loads to the LH2 tank passively without active cooling and with two stage 20K and 90K cooling. Hybrid refers to a combination of an IMLI blanket between the LH2 tank and interior of the BAC shield and a tMLI blanket between the exterior of the BAC shield and the surrounding environment.	Comment by Grotenrath, Ryan (GRC-LTF0): RBO ref	Comment by Grotenrath, Ryan (GRC-LTF0): ref Wes's NewQ equation paper
+
+Figure 4: Passive and active cooling heat load comparison of blanket thickness for various MLI configurations optimized using GRC’s BAC shield locator tool
+Figure 5 shows the heat load the first stage, 90K loop, must remove to achieve the active heat load with both stages of cooling active on the tank as seen in Figure 4.
+
+Figure 5: The estimated heat loads the first stage must remove at 90K for the two-stage active cooling heat loads shown in Figure 4 to be true
+These trades served as a basis for further investigating the thermal performance of a hybrid configuration with a IMLI blanket on the interior and a tMLI blanket on the exterior of the BAC shield. Additional analysis is being performed to verify if the evaluated blanket thicknesses are accounting for mass and are also optimized for RBO when just the first stage of 90K cooling is active in addition to two stage active cooling investigated above. Example trades of hybrid insulation configurations for passive (20K-220K) and two stage active cooling (20K-90K-220K) can be seen in Figures 6 and 7 respectively.
+
+Figure 6: Passive heat flux sensitivity for a fixed hybrid blanket thickness with various layers of IMLI in the interior BAC shield blanket and the residual thickness made up of an exterior tMLI blanket
+
+Figure 7: Two stage active cooling heat flux sensitivity for additional interior blanket layers of IMLI between 20K and 90K and additional exterior blanket layers of tMLI between 90K and 220K
+Combining aspects from all the previous trades a detailed data comparison of the hybrid blanket steady-state thermal performance is documented in Table 1. Both environmental temperatures are accounted for here. The passive heat load column refers to the heat load just the second stage (20K) TOT heat exchanger will have to remove. The active inner heat load column is the heat load the second stage (20K) will have to remove if the first stage (90K) TOS heat exchanger is maintaining a 90K shield temperature while removing the heat loads within the active heat removal required column. This initial analysis served as a guide when iterating designs with the contractor constructing the test article’s insulation and BAC shield. The various heat loads into the test article should remain relatively constant between tests with similar boundary conditions. Variations to the system response depending on the cryocoolers attached to the cooling loops and how they are controlled during testing.
+
+
+
+
+Table 1: Thermal performance of hybrid blankets surrounding a 90K BAC shield passively and with two stage active cooling
+	Thickness (cm)
+	# of IMLI Layers
+	# of tMLI Layers
+	WBT (K)
+	Passive Heat Load (W)
+	Active Inner Heat Load (W)
+	Active Heat Removal Required (W)
+
+	3
+	10
+	18
+	220
+	1.87
+	1.28
+	1.18
+
+	3
+	17
+	0
+	220
+	2.40
+	1.28
+	5.14
+
+	3
+	10
+	18
+	300
+	3.49
+	1.28
+	4.60
+
+	3
+	17
+	0
+	300
+	4.63
+	1.28
+	10.74
+
+	3.5
+	10
+	25
+	220
+	1.57
+	1.28
+	0.54
+
+	3.5
+	19
+	0
+	220
+	2.16
+	1.28
+	4.02
+
+	3.5
+	10
+	25
+	300
+	2.92
+	1.28
+	3.06
+
+	3.5
+	19
+	0
+	300
+	4.16
+	1.28
+	8.39
+
+	4
+	10
+	33
+	220
+	1.37
+	1.28
+	0.13
+
+	4
+	22
+	0
+	220
+	1.88
+	1.28
+	3.04
+
+	4
+	10
+	33
+	300
+	2.47
+	1.28
+	2.20
+
+	4
+	22
+	0
+	300
+	3.63
+	1.28
+	6.35
+
+
+
+B.   Tube-On-Shield Broad Area Cooling Heat Exchanger Sizing
+A simplified nodal fluid and thermal model was developed with visual basic in Excel at GRC to evaluate the expected lift and associated pressure drop of a mass flow across the test article’s BAC shield. The model was developed to quickly run trades of BAC performance for a range of mass flowrates, BAC tube dimensions, and BAC shield thicknesses. The Excel model was verified with ZBO and RBO test data. The fluid properties from the model were updated with REFPROP between nodes. Assuming steady state flow conditions across the BAC tubes, the model requires a cooling fluid, entry temperature, entry pressure, and a mass flow rate. A thermal resistance network between the cooling fluid, BAC tube, any welds, and BAC shield were used to evaluate the heat transfer. The thermal resistance network accounts for forced convection within the BAC tubes, conduction across the BAC tubes, welds, and across the BAC shield. Helium is the circulating fluid for the cryogenerator but neon was also considered as that is the working fluid of a RTB Cycle cryocooler that could be integrated in the future for a flight like 2-SC demonstration. The difference in fluid properties between helium and neon were important to consider while designing as they impact the pressure differential required to maintain flow within the cryocooler loop. Figure 8 shows an example of the TOS BAC performance analysis with the cryogenerator using helium. Figure 9 contains results when a RTB cryocooler with neon as the working fluid is attached to the 1st stage (90K).	Comment by Grotenrath, Ryan (GRC-LTF0): ZBO/RBO ref
+
+
+Figure 8: TOS Cryogenerator Heat Exchanger Performance Sensitivity for BAC Lift and Pressure Drop	Comment by Grotenrath, Ryan (GRC-LTF0): TOS dP graphs are place holders. I need to update those
+
+
+Figure 9: TOS RTB Heat Exchanger Performance Sensitivity for BAC Lift and Pressure Drop
+
+C.   Tube-on-Tank Heat Exchanger Sizing
+The TOT heat exchanger size sensitivity analysis applied a modified version of the TOS tool described in Section B. The main difference between these models is that the thermal resistance network for the TOT heat exchanger removes the conduction term for the BAC shield and instead includes a natural convection term between the LH2 and tank wall depending on fill level. Example results in blue for the sensitivity analysis performed on the 2nd stage (20K) TOT heat exchanger cooled with helium from the cryogenerator are in Figure 10, and it also shows the same TOT heat exchanger sensitivity of how a RTB cryocooler developed with helium as the working fluid would perform in red.
+
+
+Figure 10: TOT Heat Exchanger Performance Sensitivity for BAC Lift and Pressure Drop
+
+Narrowing down the sizing of the TOT and TOS heat exchanger is a matter of balancing the heat leak entering the insulated test article and the amount of lift each cryocooler loop can provide to result in ZBO conditions for the stored LH2.
+D.   Fluids System Modelling
+Multiple iterations of the separate flow loops containing the TOT and the TOS heat exchangers were modeled with the Generalized Fluid System Simulation Program (GFSSP) to better understand the pressure differential required by each stage’s cryofan to achieve the range of helium flow rates evaluated when sizing the heat exchangers for the cooling loops. In both models, cryofan performance was modelled as a positive displacement pump and any other process equipment was modelled using a flow coefficient (Cv) depending on the desired system flow rate. The TOT GFSSP model included 9 BAC tubes, a Coriolis flowmeter, a turbine flowmeter, a cryofan, a heat exchanger, tubes between the listed process equipment, and any fittings on the flow loop. Figure 11 contains the TOT flow diagram in GFSSP, while Figure 12 shows the predicted mass flow variation between the TOT BAC tubes. 
+
+Figure 11: GFSSP TOT Flow Model
+
+Figure 12: GFSSP TOT Flow Variation between the 9 BAC Branches
+The TOS model included the same process equipment as the TOT model. The only changes for the TOS model were 6 BAC tubes that are longer than the TOT BAC tubes and some variations in tube diameters. Figures 13 and 14 contain the model and BAC mass flow variance results for the TOS. These GFSSP models further refined the pressure drop calculations performed during the TOT and TOS BAC heat exchanger sizing. This modelling also supported the BAC tubes would have essentially uniform mass flow when splitting across the tank or shield. The GFSSP flow model predicted the 2nd stage (20K) loop cryofan would have enough pressure margin to achieve its goal mass flow rate range, but the 1st stage (90K) loop model indicated the cryofan would need to be upsized to achieve its goal mass flow range for future testing.
+
+Figure 13: GFSSP TOS Flow Model
+
+Figure 14: GFSSP TO Flow Variation between the 6 BAC Loops
+
+E.   Thermal Desktop Modelling
+Test Article System Level Thermal Model
+A system level thermal and fluids model of the 2-Stage Active cooling test article is being built with Thermal Desktop.  This model was used to verify the initial MLI and cryocooler tube sizing analysis predictions.  The model currently includes geometric representations of the tank, BAC shield, attach brackets and struts, and both 20K and 90K cryocooling tubing attached to the tank and BAC.  Both the LBMLI and tMLI layers of insulation are included between the tank and BAC, and BAC and environment, respectively.  An environment sink temperature (radiant and conductive) of 220K represents the controlled Thermal Vacuum (TVAC) shroud temperature.  Previous tests, such as RBO and ZBO, also used TVAC shroud temperatures of 220K, allowing for baselining and comparison of results.  This temperature is also characteristic of an orbital average environment at 1AU with an a/e of 0.4.  Figure 15 shows a cutaway and bottom view of the geometric thermal math model.  
+
+Figure 15: 2-Stage Thermal Desktop Model
+
+The 2-SC tank is represented using a Thermal Desktop compartment element.  This feature links a fixed volume to twined fluid lumps representing the liquid and ullage within the tank.  The compartment element also supports calculations for heat and mass transfer between the fluid volumes and convective heat transfer between the wall surfaces and each fluid volume dependent on liquid level. The tank is enveloped by a BAC shield.  
+The tank and BAC have LBMLI and tMLI insulation applied to their outer surfaces.  The outer layer of the tank LBMLI is contacted to the inner surface of the BAC.  The LBMLI and tMLI layers use warm and cold boundary temperature dependent estar values provided by GRC and solved for during model transients.  The number of individual layers in each MLI blanket and corresponding estar values can be varied helping to define the design trade space for the test article.  Figures 16 and 17 show the predicted BAC temperature and heat load through the MLI for a variety of MLI configurations without active cooling.
+
+Figure 16: Passive BAC Shield Temperature for Varied IMLI and tMLI Layups
+
+Figure 17: Passive Heat Load Through insulation for Varied IMLI and tMLI Layups
+
+
+
+
+
+
+
+The 20K and 90K cryocooling loops are modeled to include the entrance and exit manifolds and branching of each system but otherwise operate as open loops with fixed entrance conditions. The working fluid can be varied but is assumed to be GHe.  These model elements predict the cooling effectiveness of each loop across of range of flow conditions. Figure 18 shows the flowrates through the 20K cryocooler entrance and exit manifolds and tank mounted tubes.   
+
+Figure 18: 20K Cryocooler Tube on Tank Flowrates
+
+The stainless-steel tank mounting brackets and titanium struts are geometrically represented to predict the conductive heat load to the tank.  Other conductive paths such as fill/drain lines and other tank penetrations are being added to the model. The struts are like those used on the ZBO test article. Figure 19 shows the predicted strut temperatures with an assumed attachment to the TVAC ambient temperature of 220K.
+
+Figure 19: Tank Bracket and Strut Temperatures
+As the 2-stage Active cooling project continues, the model will be improved with the inclusion of additional test article components and updated designs. 
+Thermal Strap Sizing and Placement Analysis
+The cryogenic tank will be supported by six titanium struts with the addition of thermally conductive straps attached to the 90K cryocooler loop after exiting the BAC shield. Thermal strap options are assessed to design the optimum configuration for the location and sizing of the strap. To design the optimum configuration, two considerations must be considered: (1) maximizing heat load intercepted from struts to tank (2) minimizing the additional heat load to the 90K cryocooler loop. A steady-state model was developed to assess various thermal strap conductance’s and strap mounting locations along the strut.  
+
+ 
+Figure 20: A Thermal Desktop model of a single titanium strut with the depiction of thermal conduction paths to appropriate boundary conditions.
+To simplify modeling aspects, the cold end of the strut is set to a fixed boundary temperature of the strut to bracket interface from the full-scale tank system model at 28K. On the truss structure end of the strut, the temperature boundary condition is set to the TVAC environment of 220K. The variable conductance of the thermal strap is connected to a 90K boundary temperature representing the cryocooler tubing after exiting the BAC and prior to the cryo-generator/cryocooler. As shown in Figure 20, the strap collar is varied along the x-location beginning at the center of the strut to the truss end of the strut. The tank side of the strut is assumed to be within the MLI envelope and not accessible for thermal strap attachment.
+The team considered the thermal conductance of a variety of strap lengths and number of cables. Due to a driving factor of conductance being directly related to the size of the straps, the team focused on parameterizing the area to length (A/L) ratios of the different strap lengths and number of cable options. To gain a better understanding of the heat leak associated with strap conductance, a range of A/L values were modeled from the table below.
+Table 2:  Thermal strap conductance as a function of area to length ratio for a variety of strap lengths and number of cables.
+
+
+
+Figure 21: Resulting heat leak into the tank with range of thermally conductive straps attached at different displacements along the strut. Red line indicates heat leak if no cooling strap is attached.
+As shown in Figure 21, a potential reduction of heat leak into the tank of approximately 0.6W (0.1W per 6 struts) is introduced when utilizing thermal straps to intercept heat with the 90K cryocooler. It can be seen that the minimum heat leak to the tank through the strut is at a strap displacement of 0.027m towards the truss from the center of the strut. Heat intercept is less effective as the strap attachment is shifted towards either end of the strut. It should be noted that there is very little variance between the 0.02m and 0.04m strap displacement. Selecting a strap placement location near this region will be the optimum choice.
+ 
+Figure 22: Heat lifted by the 90K cryocooler loop with range of thermally conductive straps attached at different displacements along the strut.
+As shown in Figure 22, at the strap location of minimal heat into the tank (0.027m), the expected additional load to the 90K loop is about 2.1W (0.35W per 6 struts). Moving the attachment closer the tank reduces the heat load to the 90K while moving closer to the truss increases that heat load.
+The data in Table 3 shows the predicted heat load to the tank through each strut at the optimum attachment location for a variety of strap lengths and number of cables. Values within 5% of the minimum predicted value are highlighted green. The number of cables in the strap design required will increase with strap length to maintain allowable heat loads to the tank. The distance between the strut and 90K cryocooler loop will also be in consideration when deciding the optimum strap size.
+Table 3: Resulting heat leak into the tank. Green colored cells indicate the heat leak is within 5% of the minimum heat leak through the strut.
+
+
+Test Article Design
+A.   Propellant Tank
+The original plan for this activity was to utilize all existing hardware which included the ZBO propellant tank. However, due to some conflicting needs, this activity decided to procure a new tank. The tank is built to the same exterior dimensions as the ZBO, RBO and VATA tanks so the existing support structure and support struts could be utilized. There were some changes to the design. The tank is ASME rated to 35 PSID at -432F. It is constructed of Al 5083 and the TOT tubes are made from Al 1100 which has extremely high thermal conductivity at LH2 temperatures. There are a total of nine tubes, each having a flow diameter of 0.18”. However, the tubing is D-shaped, thick-walled tubing which is desirable to minimize the risk associated with welding and maximize the contact area between the tube and the tank surface. Unlike ZBO, the tube-on-tank heat exchanger will have a supply/return manifold on both the forward and aft ends of the tank to enable the helium loops to be configured for flow in either direction. To satisfy the pressure drop requirements and utilize full lift capability of the 20W/20K RTB, the team determined by analysis that the TOT heat exchanger needed to be constructed of 9 tubes, each having a 0.180” flow diameter. The tank will stand on three removable legs which attach to a pallet for instrumentation and insulation installation, and transport. Tank will be installed in an existing support frame and hung by six titanium struts; legs will then be removed, and insulation closed out. The tank is outfitted with large access ports to enable easier access for future activities. An image of the 2-SC propellant tank is shown below in Figure 23.
+
+
+Figure 23: 2-SC Propellant with Tube-On-Tank Heat Exchanger, Courtesy of PHPK
+
+B.   Insulation System and Tube-On-Shield Broad Area Cooling 	
+The demonstration will be conducted at high vacuum conditions and at two environmental temperatures, 220K and 300K. The eventual use of the RTB Cycle cryocoolers imposes constraints on the insulation system design. To enable a LH2 ZBO demonstration with the 20W/20K RTB cryocooler, not only did the allowable pressure drop and helium flow capacity drive the sizing of the TOT heat exchanger, but there are limitations on heat lift which drives the design of the insulation system as well. A heat load budget was created assuming 20W as the cryocooler cooling limit. Allowing for parasitic heat loads associated with cryocooler integration and including some conservative margin, the result is 11W limit to the total propellant tank heat load, of which 3W is through the tank acreage while the remaining is associated with support structure, penetrations, and instrumentation. To achieve this low heat flux (~0.52 W/m2), a high performing insulation system must be implemented. 
+The NASA team is initiating an SBIR contract with a private company for the design, build and installation of this insulation system which includes an inner multi-layer insulation blanket, a thin foil tube-on-tank heat exchanger, an outer multi-layer insulation blanket, and a wrapped multi-layer insulation system to be applied to the struts, refrigeration lines, as well as penetrations for filling, draining, pressurizing and venting the test article. The inner blanket will be required to have the load bearing capability needed to support the weigh associated with the TOS BAC shield and the outer blanket. Based on the most recent analysis, the inner blanket configuration is 10 reflective layers, while the outer blanket is 24 layers, both being constructed of Kapton. The NASA team has requested that as part of the design process, that the company conduct an independent thermal analysis given the requirements and constraints provided and give a recommendation as to the number of layers associated with each blanket at the Design Review prior to fabrication. The team provided a conceptual design of the TOS BAC shield, however the final design will be left to the private company. The conceptual design has the heat exchanger divided into three sections for ease of installation. Each section has two refrigeration loops sized to meet the pressure drop, flowrate, and lift restrictions associated with the 15W/90K RTB Cryocooler. 
+
+Figure 24: 2-SC Propellant in Support Structure: a) BAC shield not shown, b) TOS BAC shield coolant loops shown Legs and removable feet not shown
+
+C.   Cryogenerator
+The cryogenerator system is intended to simulate the operation of the flight like RTB Cycle cryocoolers which are still in development. Recent work at GRC included a custom designed and built three-head cryocooler unit with cryofans. This team found a similar two-stage cryocooler with two separate heat exchangers and gas flow loops, including the cryofans which circulate the gas, on the market that would do the job with extra margin to spare for future research: the Stirling Cryogenics SPC-1T (see Figure 25 and Reference 7). NASA has the procurement of this unit under contract with expected delivery early 2023.  
+The SPC-1T is capable of maintaining 20K on the second stage and 80K on the first stage while removing up to 300W/90K of heat from the respective stages, at maximum helium pressure.  It is a water cooled, electric motor driven unit that uses about 11 kW of electric power.  The loops are rated to 440 psig of internal pressure; we expect to operate between 300 and 350 psig using helium gas as a cooling medium, with mass flowrates between 2 and 5 g/s.  
+To confirm that this unit would the requirements, the team conducted an analysis of the thermal fluid performance of the loops using inputs from heat load and insulation models, cryogenerator temperature vs. flow maps (see Figure 26 and Reference 7), cryofan maps, heat exchanger and flowmeter pressure drop data from the manufacturers, and GFSSP flow models of the loops including all instrumentation and fittings.  As these analyses evolved over time, it was determined that the stock cryofan on the first stage loop would have insufficient margin to provide the required flowrates, so the procurement was modified to upsize that cryofan with no impact to schedule.  The schematic layout of the loops is shown in Figure 27.  
+To connect the cryogenerator to the vacuum chamber and test tank, insulated flex hoses for each loop’s inlet and outlet will run through a pipe from the cryogenerator’s location through the chamber wall to the tank’s cooling tube manifolds.  The pipe will be open to chamber vacuum and will connect to a “can” attached to the cryogenerator, which will contain the flowmeters, pressure taps, temperature sensors, and loop heaters.  This arrangement will allow easy access to the instrumentation should it need adjustment or replacement and will also enable pre-test characterization of the cryogenerator’s operation in the lab before delivery to the test stand. Performance maps similar to Figure 26, will be generated for each operating point expected in testing, and validation of the control algorithms and instrumentation performance simultaneously.  
+
+Figure 25: Two-Stage Cryogenerator, Courtesy Stirling Cryogenics 
+
+Figure 26: SPC-1T performance map, 440 psig GHe, 20K and 80K outlet temperatures, from manufacturer 
+
+Figure 27: Test article schematic 
+
+
+A proposed design for the “can” is shown in Figure 28; in this cutaway, only one of the two loops is shown.  The can will be able to slide away from the internal components for easy access, and all pressure taps and electrical feedthroughs will be on the end cap which is fixed to the cryogenerator.  The can is currently part of the chamber vacuum boundary, but it has been proposed to design a gate valve scheme which would allow closing off the chamber without breaking the pressure boundary in the loops; with this design, the cryogenerator and can could be isolated and aired up, enabling maintenance without the need to repressurize the main chamber.  During characterization testing in the lab, the interface to the chamber pipe will be capped, and the loops will be closed off with a thick-walled tube chosen to simulate the pressure drop of the full system.  A turbomolecular vacuum pump will be installed to evacuate the can.  
+The loops will be filled with Ultra High Purity (UHP) helium from bottles, after a purging and drying process.  The cryogenerator includes a filling and venting system, and a connection which will allow a K-bottle to be attached that will provide protection against overpressurization when the unit is shut down.  Each loop will have a relief valve for safety, and an electric heater to set the output lift to desired levels (the cryocooler stages are not powered independently and have excess cooling capacity).  
+
+Figure 28: Cryogenerator with “the can” installed  
+
+
+Demonstration Plan
+Once the build of the test article is complete and cryogenerator characterization testing is done, these components will be integrated into the TS300 20’ vacuum chamber facility at NASA Marshall Space Flight Center and undergo approximately sixteen weeks of continuous testing with liquid hydrogen. A detailed test plan will first determine the steady-state heat load associated with the environment followed by active cooling using both a single-stage and two-stage cooling approach.  The test objectives are as follows: 
+Primary Objectives
+GTO 1: Conduct “cold shock” test with LN2 at hard vacuum 
+GTO 2: Fill 2-SC Tank to 90% liquid level with LH2 
+GTO 3: Allow to reach thermal steady-state conditions, and measure heat load at 300K environmental temperature 
+GTO 4: Demonstrate ZBO using a single stage approach, 20K loop only, 300K  
+GTO 5: Demonstrate ZBO using a two-stage cooling approach, 20K and 90K loops, 300K
+GTO 6: Demonstrate ZBO using a two-stage cooling approach, 20K and <80K, 300K 
+GTO 7: Allow to reach thermal steady-state conditions, and measure heat load at 220K environmental temperature 
+GTO 8: Demonstrate ZBO using a single stage approach, 20K loop only, 220K
+GTO 9: Demonstrate ZBO using a two-stage cooling approach, 20K and 90K loops, 220K
+Stretch Goals   
+GTO 10: Demonstrate ZBO using a two-stage cooling approach, 20K and >90K, 300K
+GTO 11: Demonstrate GTO-3, 4 and 5 at lower liquid level  
+GTO 12: Using the 90K loop only, demonstrate RBO of liquid hydrogen  
+GTO 13: Evaluate the presence of non-condensable gas (helium) 
+GTO 14: Simulate solar flux on one side of tank 
+GTO 15: Demonstrate the Liquefaction of Gaseous Hydrogen
+GTO 16: Hydrogen Densification (densify, rapid pumpdown, storage)
+For each of these GTOs, more detail of the test operation is given below: 
+GTO 1:  Cold shock with LN2 
+· Monitor chamber vacuum for indication of leaks 
+· Monitor internal tank rake for fill level 
+· Lock up and pressurize tank with GN2 and monitor for leaks again 
+· Verify operation of temperature, pressure, and flow measurements 
+· Verify brief operation of cryogenerator 
+· Check load cell balance 
+· Fix any leaks and issues with critical instrumentation before proceeding
+GTO 2:  Successful LH2 fill 
+· Monitor chamber vacuum for indication of leaks 
+· Monitor internal tank rake for fill level 
+· Lock up and pressurize tank with GH2 and monitor for leaks again
+· Verify load cell operation  
+· Fix any leaks and issues with critical instrumentation before proceeding
+GTO 3, GTO 7:  Steady state heat load   
+· Set environmental panels to temperature to simulate warm (300K) or orbital (220K) conditions 
+· Design panels with heaters to provide an intermediate radiative background between the tank and LN2 cold walls 
+· Warm condition setpoint determined by lowest and highest temperature chamber walls would reach on their own during test dates daily cycle, without cold walls, and using heater panels to maintain a constant temperature under those conditions 
+· Orbital condition setpoint is an educated guess at an average NRHO environment. Cold walls on and heater panels maintaining 220K  
+· Monitor internal MLI temperatures until 0.5K/6 hours “steady state” is reached. 
+· Monitor vent flowrate and vent fluid state near tank to get boiloff and sensible heat measurements
+· Monitor temperatures on tank supports and plumbing to estimate conductive heat leak 
+· Verify good data 
+· Top off tank back to 90% and allow to settle
+GTO 4, GTO 8:  Single stage 20K cooling
+· Keep environmental panels at temperature 
+· Set vent to back pressure control at 18.5 psia 
+· Start cryogenerator and set controls to expected levels based on models 
+· Add helium to maintain desired loop pressure as required until loop is cool. 
+· Engage PID temperature control to maintain tank pressure at 18 psia
+· Disengage PID temperature control
+· Engage PID flow control to maintain tank pressure at 18 psia
+· Disengage PID flow control
+· Engage PID temperature control to maintain desired temperature at tank tube inlet manifold and allow to stabilize
+· Engage PID flow control to maintain tank pressure at 18 psia and allow to stabilize
+· Monitor internal MLI temperatures until 0.5 K/6 hours “steady state” is reached. 
+· Tank pressure should now be 18 psia and tank tube inlet temperature, mass flowrate, and heater power should now be at the correct levels for ZBO. 
+· Verify good data
+GTO 5, GTO 6, GTO 9:  Two stage cooling
+· Keep environmental panels at temperature 
+· Set vent to back pressure control at 18.5 psia 
+· Start cryogenerator and set controls to expected levels based on models 
+· Set 90K loop heater to expected power level required to maintain desired BAC shield inlet fluid temperature 
+· Set 20K loop heater to expected power level required to maintain desired tank tube manifold inlet fluid temperature   
+· Manually adjust loop cryofan speeds to obtain desired mass flowrates 
+· Add helium as required to maintain desired loop pressures until loops are cool
+· Engage PID temperature control to maintain 90K loop temperature and allow to stabilize
+· Disengage PID temperature control
+· Engage PID flow control to maintain 90K loop flow and allow to stabilize
+· Disengage PID flow control 
+· Engage PID control to maintain 20K and 90K loop temperatures and allow to stabilize 
+· Engage PID control of mass flowrate(s) to maintain tank pressure at 18 psia and allow to stabilize 
+· Monitor internal MLI temperatures until 0.5 K/6 hours “steady state” is reached 
+· Tank pressure should now be 18 psia and tank tube/BAC shield inlet temperatures, mass flowrates, and heater powers should now be at the correct levels for ZBO. 
+· Verify good data.
+GTO 10 – GTO 16:  Stretch goals 
+· For GTO12, tank vent flowrate must be monitored as in steady state heat leak measurement, but a smaller flowmeter may be required depending on level of RBO.  Test stand has the capability to switch between flowmeters of various ranges as required. 
+· For GTO13, a known amount of helium must be added to the tank.  This can be done by locking up the tank and injecting helium until a given pressure rise is reached (known volume, partial pressure) or until a mass flow controller adds a known mass. 
+· For GTO14, heater power in one zone may be very high, could require different construction 
+· For GTO15, GH2 must be added to the tank at a known rate.  This can be done with bang-bang pressurization through an orifice (calculated mass flowrate, dependent on supply pressure and timing) or using a mass flow controller.   
+· For GTO16, note that densification of hydrogen to a vapor pressure below atmospheric requires additional facility safety measures to avoid air ingress to the tank through the vent stack. 
+
+Control Scheme
+Being able to precisely control the lift on first and second stage cooling will be an integral part of validating the model and the validity of the two-stage active cooling approach.  Maintaining the system as close as possible to the set point for an extended period of time will help in validating the steady state models that were discussed earlier.  The control approach will be slightly different from GTO to GTO due to the fact that different cooling loops will be active based on what GTO is currently being demonstrated.  GTO 1, 2, 3, 7 will have no active control scheme.  GTO 4 and 8 will use a control scheme to control the tank heater, cryofan speed and line heater for the TOT loop to achieve zero-boiloff condition.  GTO 5,6 and 9 will use a control scheme that controls both loops’ cryofans, line heaters, and tank heaters to achieve zero-boiloff conditions using the 2-SC approach.  
+The control system will use an NI-PXI system running Real-Time OS.  The inputs that will be required for the PID control logic go into MSFC Test Area 300 DAQ system and get converted to analog voltage output that will be fed into the NI-PXI system.  The NI-PXI system will control the cryocooler directly through TCP/IP or Microbus.  The heaters will be controlled by an analog output that feeds into the MSFC Test Area 300 DAQ system which then controls the heater’s output.  The current scheme involves the ability to use PID loop on both cryofans and both line heaters.  The controller will also be able to control the heaters located on the tank.  The heater located on the tank can be used for two purposes: to introduce a small heat load to prevent the tank pressure from dropping below the targeted range of the test, and to simulate a large, unexpected heat load if time for such a test presents itself.  Future work is to look at a model-based control scheme like the one found in the Liquid Hydrogen Zero-Boiloff. [5]
+The control system has four modes when it is setup to utilize just the TOT loop for GTO 4 and 8, the constant pressure ZBO demonstration.  The first mode will manually control both the heaters and the cryofan.  The first auto mode will use a PID to control the cryofan and manually controlled heater.  The second mode will utilize a PID loop to control the line heater and manually controlled cryofan.  Once the first two modes are tuned during the test then the PID values can be used as the starting point for the third auto mode that utilizes a PID control on both the cryofan and line heater.  The third loop will work by setting the line heater PID to control for the TOT inlet temperature and the cryofan PID to control the tank pressure. The starting values for the third loop will be the tuned values from the first and second auto modes.
+The control system will have four independent modes per cooling loop when controlling both simultaneously for the 2-SC demonstrations, GTOs 5, 6, and 9. The first loop modes match the ones utilized for the TOT loop only control scheme described previously.  For the second loop the BAC shield control differs slightly since it is not tied directly to the tank pressure. The first mode is manual control.  The first auto mode is a PID loop used to control the BAC shield inlet temperature while the cryofan is manually controlled. The second auto mode is a PID loop used to control the second cooling loop’s flow rate by varying the cryofan speed to maintain a mass flowrate while the loop heater is being manually controlled.  The third auto mode for the BAC shield will utilize both of the previous PID controller tuned values to maintain the lift across the cooling loop.  The following would be a possible start up process for activating all the PID loop at one time.  Start with everything needed to get the third auto mode for the BAC shield control scheme running.  The next step would be while the BAC shield third auto mode is running find and tune the PID values for TOT first and second auto modes.  Those values will then be used when starting the TOT loop third auto mode.
+
+Conclusions
+Analysis to date and previous test programs indicate that the implementation of the 2-SC approach can potentially lead to significant mass and power savings when active cooling is used to enable the long duration storage of LH2. The NASA team is leveraging lessons learned from the CPST program to design and build a test article which will demonstrate the 2-SC approach using the fully integrated suite of required technologies which includes a propellant tank equipped with a TOT heat exchanger, an IMLI inner insulation blanket, a TOS BAC shield thermally strapped to the support struts, and an IMLI outer insulation blanket. The TOS BAC shield will be connected to the 1-stage cooling loop of an industrial cryogenerator and will be operating at temperatures of 90K and below, while the 2-stage loop will be connected to the TOT heat exchanger and operating at approximately 20K. The team plans to conduct a detailed test series which includes demonstrating ZBO utilizing a single stage cooling approach (baseline with 20K unit only), and the 2-SC approach at different BAC shield temperatures. When the effort concludes, this approach and integrated suite of CFM technologies will advance to TRL 6 for surface applications. However, due to the gravitational sensitivity associated with the TOT heat exchanger in a micro-g environment, the application will remain at TRL 5 until a flight demonstration can be achieved. Testing is currently planned for late 2024.
+
+Future Work
+In the second phase of this activity, the two-stage industrial cryocooler will be disconnected from the test article, and the engineering model RTB Cycle cryocoolers will be integrated into the facility and connected to the test article for a follow-on test series. This phase of testing is not yet defined and is currently being planned, however the primary objective will be to once again demonstrate the two-stage cooling methodology, while demonstrating extended operation of the engineering model cryocoolers as a risk reduction effort.
+
+Acknowledgments
+The authors would like to acknowledge our friends and colleagues Mr. Wesley L. Johnson and Ms. Monica C. Guzik from GRC for their assistance in the modeling of the insulation blankets, and investigating options for thermally coupling the TOS BAC shield to the tank support struts. From MSFC, the authors would also like to acknowledge Mr. Clark M. Teems and Ms. Hannah E. Cherry for their thermal and fluids analysis support in preparation for the Initial Design Review. 
+
+References
+[1] D.W. Plachta, W.L. Johnson, and J.R. Feller, “Zero Boil-Off System Testing”, Cryogenics, Volume 74, 2016, Pages 88-94, ISSN 0011-2275, https://www.sciencedirect.com/science/article/abs/pii/S0011227515001265
+[2] “Cryogenic Propellant Storage and Transfer (CPST) Technology Maturation: Establishing a Foundation for a Technology Demonstration Mission (TDM)”, Michael P. Doherty, Michael L. Meyer, Susan M. Motil, and Carol A. Ginty, 2013 AIAA Space Conference and Exposition, San Diego, CA., https://ntrs.nasa.gov/citations/20140002511
+[3] D.W. Plachta, W.L. Johnson, and J.R. Feller, “Cryogenic Boil-Off Reduction System Testing”, AIAA/ASME/SAE/ASEE Join Propulsion Conference, July 28th, 2014, Cleveland, OH. https://ntrs.nasa.gov/api/citations/20150000134/downloads/20150000134.pdf
+[4] “Vibro-Acoustic Test Article (VATA) Test Series”, Noah o. Rhys, Lee W. Foster, Jessica J. Wood, Juan G. Valenzuela, and Jim J. Martin, NASA Marshall Space Flight Center, Huntsville, AL. https://ntrs.nasa.gov/citations/20190031823
+[5] Hastings, L. J., Hedayat, A., Bryant, C. B., and Flachbart, R. H., “Liquid Hydrogen Zero-Boiloff Testing and Analysis for Long-Term Orbital Storage,” AIP Conference Proceeding 710, 1163 (2004),  https://doi.org/10.1063/1.1774802  
+[6] Fesmire J, Johnson W, Meneghelli B and Coffman B 2015 Cylindrical boiloff calorimeters for testing of thermal insulations Adv. in Cryo. Eng. IOP 012056, https://doi.org/10.1016/j.cryogenics.2017.11.004 
+[7] Stirling Cryogenics, “SPC-1T Cryogenerator”, https://stirlingcryogenics.eu/wp-content/uploads/2022/09/Stirling-Cryogenics_DS-SPC-1T-ENG-13-09-2022.pdf
+
+image1.png
+
+image2.png
+
+image3.png
+
+image4.png
+
+image5.png
+
+image6.png
+
+image7.png
+
+image8.png
+
+image9.png
+
+image10.png
+
+image11.png
+
+image12.png
+
+image13.png
+
+image14.png
+
+image15.emf
+
+image16.emf
+
+image17.emf
+
+image18.png
+
+image19.png
+
+image20.png
+
+image21.png
+
+image22.png
+
+image23.png
+
+image24.png
+
+image25.png
+
+image26.png
+
+image27.png
+
+image28.png
+
+image29.png
+
+image30.jpeg
+

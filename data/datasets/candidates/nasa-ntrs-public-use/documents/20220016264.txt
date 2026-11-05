@@ -1,0 +1,312 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Cart3D-Mphys 
+Integration
+
+Jonathan Chiew
+Computational Aerosciences Branch (NASA-ARC)
+
+Mphys Workshop, NASA-GRC 
+
+October 26, 2022Collaborators:
+Michael Aftosmis (NASA-ARC)
+Marian Nemec (NASA-ARC)
+David Rodriguez (STC)
+
+
+
+Outline
+Cart3D Introduction
+
+Design Framework
+
+Historical Examples
+
+Mphys Integration
+
+Development Outlook
+
+Summary
+
+10/26/2022 Mphys Workshop - Cart3D 2
+
+
+
+Cart3D Overview
+Fully-automated Cartesian cut-cell grid
+generation for complex geometries
+
+2nd order accurate finite-volume method
+
+Multi-grid 3D Euler solver with RK smoother
+
+Dual time-stepping for unsteady simulations
+
+Output-based adaptive mesh refinement 
+
+Nearly 1000 users across government,
+industry, and academia
+
+10/26/2022 Mphys Workshop - Cart3D 3
+
+
+
+Cart3D Design Framework
+Discrete adjoint approach for design gradients
+
+Extensible Design Description Markup problem specification
+• Symbolic objectives and constraints with error tracking
+• General multipoint design: operating conditions with 
+
+independent geometry instances and multidisciplinary analysis 
+• Agnostic of geometry modelers, analysis solvers, and optimizers
+• C-library using XML syntax (open-source release Dec 2022)
+
+Component-based geometry for automated modeling
+
+*.trix in Design
+
+Configuration: Wing ∪ Body
+
+Parameter: “Sweep” defined on all 
+components in Configuration
+Sensitivity: SweepX, non-zero on wing, zero 
+on fuselage
+
+Wetted-Surface: Wing + Body
+
+Parameter: “Sweep” defined on all 
+components. 
+Sensitivity: SweepX, Non-zero 
+sensitivities propagate to the set of 
+triangles bounding the wing-body 
+intersection
+
+(wing) + (fuselage)
+% intersect
+
+Performs boolean sum to 
+extract wetted surface 
+
+Component: Wing 
+
+Parameter: “Sweep”
+
+Sensitivity: SweepX, i.e The sensitivity 
+to sweep angle in streamwise direction
+
+Component: Fuselage 
+
+Parameter: “Sweep” is undefined for 
+this component group
+
+*.trix in Design
+
+10/26/2022 Mphys Workshop - Cart3D 4
+
+
+
+Design Ex. 1: Wing-Body-Nacelle (AIAA 2013-0543)
+
+Aerodynamic shape optimization of integrated wing-body-
+pylon-nacelle configuration
+
+Drag minimization at multiple freestream conditions with 
+lift, rolling moment, and thickness constraints
+
+Component-based parametric geometry: fixed fuselage 
+triangulation, customer-developed nacelle-pylon modeler, 
+and separate in-house wing modeler
+
+10/26/2022 Mphys Workshop - Cart3D 5
+
+
+
+Design Ex. 2: Trailing Edge Flaps (AIAA 2015-1409)
+
+Optimization of wing and trailing edge flap system
+• Drag minimization with lift constraint
+• Individual flap deflection and wing twist DVs
+
+Aeroelastic analysis with in-house 1D BEAM code
+
+Optimized flaps reduce ~90% of off-design drag
+
+Geometry deformation with Blender
+
+10/26/2022 Mphys Workshop - Cart3D 6
+
+
+
+Design Ex. 3: Coupled Adjoints (AIAA 2022-4085)
+
+Sonic boom noise prediction is typically done in two steps
+• Nearfield CFD pressure signature
+• Farfield propagation for ground noise
+
+Optimization of control surfaces for ground noise
+
+Sequential, coupled adjoint solution process
+
+10/26/2022 Mphys Workshop - Cart3D 7
+
+
+
+Cart3D/Mphys Integration
+Significant internal & external interest in designing 
+aircraft with highly flexible or low aspect ratio wings
+
+Requires fully-coupled aeroelastic design gradients
+
+Leverage the Mphys package for coupling multiple 
+physics disciplines - also interested in other scenarios 
+beyond aerostructural
+
+Integration effort funded by NASA ARMD Transformational 
+Tools & Technologies (T^3) MDAO Project 
+
+10/26/2022 Mphys Workshop - Cart3D 8
+
+
+
+Cart3D/Mphys Integration
+Coupled aerostructural analysis with MELD-TACS
+
+Drive XDDM optimization problem with OpenMDAO
+optimizers, verified with canonical problems and 2-D aero, 
+easing transition for existing design framework users
+
+Supporting Advanced Air Transport Technology (AATT) 
+project’s Model Based Systems Analysis & Engineering 
+effort (MBSA&E) with Cart3D Python package and 
+OpenMDAO components
+
+10/26/2022 Mphys Workshop - Cart3D 9
+
+
+
+Development Outlook
+Mphys uses surface coordinates for displacement and 
+load transfer scheme
+
+Utilizing the triangulation instead of volume mesh cut-
+cells for structural displacements works for some cases
+
+Cart3D’s component-based design paradigm has variable
+# nodes  per design iteration ( e.g. fuselage-wing junction 
+varying root twist )
+
+Possibility for state vectors of variable size in OpenMDAO
+and Mphys builder paradigm?
+
+Structural modeling with multiple components?
+
+10/26/2022 Mphys Workshop - Cart3D 10
+
+
+
+Development Outlook
+Exposing partial derivatives of the Cart3D mesh with 
+respect to the triangulation (“mesh sensitivities”) requires 
+significant code refactorization and I/O changes
+
+Assess best path forward with lower-dimensional model 
+problem (pure Python) before diving into full code refactor
+
+Continue development and support of Cart3D Python 
+package with pure OpenMDAO components for AATT 
+MBSA&E milestones
+
+10/26/2022 Mphys Workshop - Cart3D 11
+
+
+
+Cart3D Python Package
+
+10/26/2022 Mphys Workshop - Cart3D 12
+
+Mach # 
+
+Alpha 
+
+Ref Length
+
+Cart3D OM Component
+(om.ExternalCodeComp)
+
+Flow 
+solver 
+input 
+
+manager
+
+Adaptive 
+mesh 
+CFD 
+
+solution
+
+CL
+
+CD
+
+CM
+
+Surface Triangulation
+
+variable size data passed external to OpenMDAO
+
+Need a better solution for Mphys since surface data 
+needs to be passed to other physics disciplines
+
+
+
+Summary
+Continuing historical efforts to enable aerostructural
+design and optimization
+
+Sizable interest from internal and external customers for 
+multi-physics analysis and design via OpenMDAO
+
+Potential limitations with fixed length state vectors? Mphys
+scenario as a sub-problem?
+
+Significant code refactorization effort to integrate 
+sensitivities over the next two years
+
+10/26/2022 Mphys Workshop - Cart3D 13
+
+
+
+Questions?
+
+

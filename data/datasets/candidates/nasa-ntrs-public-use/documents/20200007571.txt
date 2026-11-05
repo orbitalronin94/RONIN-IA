@@ -1,0 +1,896 @@
+FUN3D v12.4 Training
+Session 14:
+Adjoint-Based Design
+for Unsteady Flows
+Eric Nielsen
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+1
+
+Learning Goals
+•
+•
+•
+•
+
+The challenges of unsteady adjoint-based design
+Additional inputs for unsteady design
+Example problem: Maximize L/D for a pitching wing
+Application examples
+
+What we will not cover
+• Extensive details on setting up the most general problems
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+2
+
+The Challenges of Unsteady Adjoint-Based Design
+Sheer Expense
+
+•
+
+•
+•
+
+The adjoint approach still provides all of the sensitivities at the same
+cost as analysis, and the 20x estimate still applies for the expense
+of an optimization
+But every simulation is now an unsteady problem
+Where the steady adjoint solver linearized about a single solution
+(the steady-state), the unsteady adjoint solver must essentially do
+this at every physical time step
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+3
+
+The Challenges of Unsteady Adjoint-Based Design
+Big Data
+
+•
+
+Since the adjoint must be integrated backwards in time, this implies
+that we have the forward solution available at every time plane
+– Brute force it: Store the entire forward solution
+– Recompute it: Store the forward solution periodically and recompute
+intermediate time steps as needed
+– Approximate it: Store the forward solution periodically and interpolate
+intermediate time planes somehow
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+4
+
+The Challenges of Unsteady Adjoint-Based Design
+Big Data
+
+In FUN3D, we store all of the forward data to disk
+•
+
+The amount of data adds up fast – consider an example:
+– 50,000,000 grid points and 10,000 physical time steps
+– Using a 1-equation turbulence model (6 unknowns per grid point)
+– Dynamic grids (3 additional unknowns per grid point)
+→ 50,000,000 x 10,000 x (6+3) x 8 bytes = 36 Terabytes
+
+• So far, this amount of data has not been prohibitively large for our
+resources, but it is a lot (and we need to go bigger)
+– Will need to tackle this in the long-term
+
+• So far, the challenge has been efficiently getting the data to/from
+the disk at every single time step
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+5
+
+The Challenges of Unsteady Adjoint-Based Design
+Big Data
+
+•
+
+•
+•
+
+Conventional approaches used to
+write restart files are prohibitively
+expensive
+System should have a parallel file
+system
+FUN3D uses parallel, asynchronous,
+unformatted direct access read/writes
+from every rank
+– Flow solver is writing the previous time
+plane while the current time step is
+computing
+– Adjoint solver is pre-fetching earlier time planes while the current time step is
+computing
+
+•
+
+This strategy performs well for the problems we have run, but is
+not infinitely scalable
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+6
+
+The Challenges of Unsteady Adjoint-Based Design
+Other Factors
+
+•
+•
+
+•
+
+•
+
+If dynamic grids are involved, all of the unsteady metrics and mesh
+motion/deformations must be differentiated at each time step
+If overset dynamic grids are involved, the relationship between the
+component grids must also be differentiated at each time step –
+both motion and interpolants
+If another disciplinary model impacts the CFD model, then that other
+discipline must also be differentiated, as well as the coupling
+procedure between the two
+Finally, if the flowfield is chaotic, traditional discrete sensitivity
+analysis may not produce the sensitivities you desire
+– Critical for LES; have seen evidence of the problem even for URANS
+– Very new research topic in the sensitivity analysis community
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+7
+
+Additional Inputs For Unsteady Design
+Design Variables
+
+•
+•
+•
+
+All design variables available for steady flows are also available for
+unsteady flows
+Design variables for a body may now also include FUN3D’s rigid
+motion parameters
+Also have infrastructure for other variables such as boundary
+condition parameters (e.g., blowing/suction rates), pilot inputs
+(collective, cyclics) for rotor trimming, etc
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+8
+
+Additional Inputs For Unsteady Design
+Custom Kinematics
+
+•
+
+Design of custom kinematics: users may provide their own routine
+with a time-dependent T(D) matrix governing an individual body’s
+motion
+– Written in complex-variable form, FUN3D will determine its Jacobians
+automatically
+!================================ USER_SUPPLIED_T ============================80
+!
+! Provides route for user to supply a custom T matrix as a function of time
+! and design variables. Complex-valued variables enable automated jacobian
+! evaluation.
+!
+!=============================================================================80
+subroutine user_supplied_t(ndv,current_time,dvs,t,xcg,ycg,zcg)
+use kinddefs, only : dp
+integer, intent(in) :: ndv
+complex(dp), intent(in) :: current_time
+complex(dp), intent(out) :: xcg, ycg, zcg
+complex(dp), dimension(ndv), intent(in) :: dvs
+complex(dp), dimension(4,4), intent(out) :: t
+continue
+end subroutine user_supplied_t
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+9
+
+Additional Inputs For Unsteady Design
+Objective/Constraint Functions
+
+•
+•
+
+The unsteady implementation supports two forms of
+objective/constraint functions
+The first is based on an integral of the functional form f introduced
+for steady flows:
+Ni2
+
+fi =
+
+∑
+
+f i n ∆t
+
+n = Ni1
+
+•
+
+The second form is similar, but is based on time-averaged
+quantities:
+N i2
+
+
+
+1
+n
+*
+f i =  2
+C − Ci 
+ ( N − N 1 + 1) n∑1 i 
+
+= Ni
+i
+ i
+
+
+
+
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+pi
+
+10
+
+Additional Inputs For Unsteady Design
+Objective/Constraint Functions
+
+•
+
+The sign of the cost function/constraint input toggles between the
+two unsteady function forms
+– Positive sign indicates form #1, negative sign indicates form #2
+
+•
+
+In addition to the inputs required for steady simulations, the user
+must now also provide the time interval over which to accumulate
+the cost function
+##############################################################################
+############################ Function Information ############################
+##############################################################################
+Number of composite functions for design problem statement
+1
+##############################################################################
+Cost function (1) or constraint (2)
+1
+If constraint, lower and upper bounds
+0.0 0.0
+Number of components for function
+1
+1
+Physical timestep interval where function is defined
+1 1
+Composite function weight, target, and power
+1.0 0.0 1.0
+Components of function
+1: boundary id (0=all)/name/value/weight/target/power
+0 clcd
+0.000000000000000
+1.000
+20.00000 2.000
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+11
+
+Maximize Time-Averaged L/D for a Pitching Wing
+
+•
+•
+
+FUN3D’s design driver and the optimization packages themselves
+don’t distinguish between steady and unsteady CFD problems –
+they just see f and ∇f
+The problem setup is very similar to steady design cases; will only
+highlight the differences here
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+12
+
+Maximize Time-Averaged L/D for a Pitching Wing
+command_line.options
+2
+2 flow
+‘--moving_grid’
+‘--timedep_adj_frozen’
+2 adjoint
+‘--moving_grid’
+‘--timedep_adj_frozen’
+
+•
+•
+
+Tell the solvers that it is a moving grid case
+Also specify that we want to do a time-dependent adjoint
+– This kicks in the I/O mechanisms, among other things
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+13
+
+Maximize Time-Averaged L/D for a Pitching Wing
+moving_body.input
+&body_definitions
+n_moving_bodies = 1,
+!
+body_name(1) = 'domain',
+!
+parent_name(1) = '',
+!
+n_defining_bndry(1) = -1,
+!
+defining_bndry(1,1) = 1,
+!
+motion_driver(1) = 'forced', !
+mesh_movement(1) = 'rigid', !
+x_mc(1) = 0.25,
+!
+y_mc(1) = 0.0,
+!
+z_mc(1) = 0.0,
+!
+move_mc(1) = 1
+!
+/
+&forced_motion
+rotate(1) = 2,
+rotation_freq(1) = 0.009000,
+rotation_amplitude(1) = 5.00,
+rotation_origin_x(1) = 0.25,
+rotation_origin_y(1) = 0.0,
+rotation_origin_z(1) = 0.0,
+rotation_vector_x(1) = 0.0,
+rotation_vector_y(1) = 1.0,
+rotation_vector_z(1) = 0.0,
+/
+
+•
+
+number of bodies in motion
+name must be in quotes
+'' means motion relative to inertial ref frame
+shortcut to specify all solid surfaces
+index 1: boundary number 2: body number; use any number for shortcut
+'forced', '6dof', 'file', 'aeroelastic'
+'rigid', 'deform'
+x-coordinate of moment_center
+y-coordinate of moment_center
+z-coordinate of moment_center
+move mom. cntr with body/grid: 0=no, 1=yes
+
+!
+!
+!
+!
+!
+!
+!
+!
+!
+
+rotation type: 1=constant rate 2=sinusoidal
+reduced rotation frequency
+max rotational displacement
+x-coordinate of rotation origin
+y-coordinate of rotation origin
+z-coordinate of rotation origin
+unit vector x-component along rotation axis
+unit vector y-component along rotation axis
+unit vector z-component along rotation axis
+
+Body names must match those specified in rubber.data
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+14
+
+Maximize Time-Averaged L/D for a Pitching Wing
+rubber.data
+################################################################################
+######################## Design Variable Information ###########################
+################################################################################
+Global design variables (Mach number / angle of attack)
+Index Active
+Value
+Lower Bound
+Upper Bound
+Mach
+0
+0.000000000000000E+00 0.000000000000000E+00 0.000000000000000E+01
+AOA
+0
+0.000000000000000E+00 0.000000000000000E+00 0.000000000000000E+01
+Number of bodies
+1
+Rigid motion design variables for 'domain'
+Var Active
+Value
+Lower Bound
+Upper Bound
+RotRate 0
+0.000000000000000E+00 0.000000000000000E+00 0.500000000000000E+01
+RotFreq 0
+0.000000000000000E+00 0.000000000000000E+00 0.500000000000000E+01
+.
+.
+TrnVecy 0
+0.000000000000000E+00 0.000000000000000E+00 0.500000000000000E+01
+TrnVecz 0
+0.000000000000000E+00 0.000000000000000E+00 0.500000000000000E+01
+Parameterization Scheme (Massoud=1 Bandaids=2 Sculptor=4)
+1
+Number of shape variables for 'domain'
+166
+Index Active
+Value
+Lower Bound
+Upper Bound
+1
+0
+0.000000000000000E+00 0.000000000000000E+00 0.500000000000000E+01
+2
+0
+0.000000000000000E+00 0.000000000000000E+00 0.500000000000000E+01
+.
+.
+164
+0
+0.000000000000000E+00 0.000000000000000E+00 0.500000000000000E+01
+165
+0
+0.000000000000000E+00 0.000000000000000E+00 0.500000000000000E+01
+166
+0
+0.000000000000000E+00 0.000000000000000E+00 0.500000000000000E+01
+
+•
+
+Body names must match those specified in moving_body.data
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+15
+
+Maximize Time-Averaged L/D for a Pitching Wing
+rubber.data
+################################################################################
+############################ Function Information ##############################
+################################################################################
+Number of composite functions for design problem statement
+1
+################################################################################
+Cost function (1) or constraint (2)
+-1
+If constraint, lower and upper bounds
+0.0 0.0
+Number of components for function
+1
+1
+Physical timestep interval where function is defined
+51
+100
+Composite function weight, target, and power
+1.0 0.0 1.0
+Components of function
+1: boundary id (0=all)/name/value/weight/target/power
+0 clcd
+0.000000000000000
+1.000
+20.00000 2.000
+
+•
+•
+
+Negative sign on function/constraint selection indicates timeaveraging form is to be used
+Time step interval for function is also specified
+
+ 1 100
+
+n
+f =  ∑ ( L / D )  − 20 
+
+ 50 n =51
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+2
+
+16
+
+Maximize Time-Averaged L/D for a Pitching Wing
+•
+•
+
+The optimization is executed
+just as in the steady flow case
+Here, the time-averaged value
+of L/D has been raised from its
+nominal baseline value of 0 to
+an optimized value of 6.8
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+17
+
+Unsteady Design Applications
+•
+•
+•
+
+This capability is very advanced and can require extensive problem setup for
+more general, complex applications
+Willing to work closely with someone interested in using it, but fire-hosing you
+with the intimate details at this point is probably not productive
+Instead, consider some of these prior applications to perhaps spur some ideas
+on future uses...
+
+Adjoint Propagating Upstream
+of Wind Turbine
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+Design of Tilt Rotor
+During Pitch-Up
+18
+
+F-15 Configuration
+Modify Shape to Maximize L/D Subject to Prescribed Oscillations
+
+3
+Baseline
+Design
+
+Lift-to-Drag Ratio
+
+2.5
+
+2
+
+1.5
+
+1
+
+50
+
+100
+
+150
+
+200
+
+250
+
+300
+
+Time Step
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+19
+
+Active Flow Control Study
+•
+•
+
+Objective: Maximize lift using all
+available parameters
+Design variables include
+–
+–
+–
+–
+
+•
+•
+•
+
+Jet Incidence
+
+Shape Deformation
+
+Jet Sliding
+
+Relative Translation
+And Rotation
+
+External wing shape
+Jet blowing parameters
+Jet incidence and location
+Relative location of slat/main/flap
+
+Scaling study also performed for very
+frequent massively parallel I/O
+Designs performed using 2,048 cores
+for ~5 days per run
+Mean value of lift increased by 27%
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+20
+
+Active Flow Control Study
+6
+C: CL=5.50
+
+Baseline
+Case A
+Case B
+Case C
+
+5.5
+
+Slat
+
+5
+A: CL=5.27
+
+Baseline
+Case C
+
+CL
+
+B: CL=4.42
+
+4.5
+
+Baseline: CL=4.33
+
+4
+
+Objective
+Function
+Interval
+
+3.5
+
+Main
+
+3
+
+1000
+
+2000
+
+3000
+
+4000
+
+5000
+
+Time Step
+1100
+
+3.5
+
+1050
+
+Case A
+Case C
+
+3
+
+Objective Function
+
+Reduced Frequency, F+
+
+1000
+Case A
+Case B
+Case C
+
+2.5
+
+2
+Baseline=1.52
+
+1.5
+
+1
+
+950
+
+Flap
+
+900
+850
+800
+750
+
+0.5
+
+700
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+Jet Index
+http://fun3d.larc.nasa.gov
+
+9
+
+10
+
+650
+
+0
+
+FUN3D Training Workshop
+2
+4
+6
+Design Cycle
+March 24-25, 2014
+
+8
+
+21
+
+Flapping Wing Shape & Kinematics
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+22
+
+UH-60 Black Hawk
+Maximize Lift Subject to Trimming Constraints
+
+View of Blade Articulation from
+Blade Reference Frame
+
+θ = θ c + θ1c cosψ + θ1s sinψ
+Blade
+pitch
+
+Collective
+
+Lateral cyclic
+
+Longitudinal cyclic
+
+Design variables include blade shape and collective/cyclics
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+23
+
+UH-60 Black Hawk
+Maximize Lift Subject to Trimming Constraints
+
+•
+•
+
+Adjoint shows sensitivity of objective function to local disturbances in space and time
+May also be used to perform rigorous error estimation and mesh adaptation
+– Traditional feature-based techniques do not identify such regions
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+24
+
+List of Key Input/Output Files
+Input
+• Same as for steady flows, plus
+• moving_body.input
+Output
+• Same as for steady flows
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+25
+
+What We Learned
+•
+•
+•
+•
+
+Challenges involved with adjoint-based unsteady design
+Additional inputs required for unsteady design
+Simple design example for pitching wing
+Previous applications
+
+Many aspects of this capability are “researchy” and
+applications of it would benefit from close collaboration
+
+http://fun3d.larc.nasa.gov
+
+FUN3D Training Workshop
+March 24-25, 2014
+
+26
+
