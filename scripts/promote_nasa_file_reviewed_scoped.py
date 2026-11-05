@@ -131,7 +131,7 @@ def main():
       "utf8_bytes":sum(len(x[1]) for x in selected),
       "partitions":{"train":{"documents":len(selected),"bytes":len(train_payload),"sha256":sha(train_payload),"training_eligible":True},"validation":{"documents":0,"training_eligible":False},"test":{"documents":0,"training_eligible":False}},
       "global_gates":{"cross_source_exact_and_near_duplicate":"PASS_AGAINST_CURRENT_LEGACY_TRAIN_608","nasa_redistribution_recheck":"PASS","partition_isolation":"PASS_TRAIN_ONLY","global_g0":"FAIL"},
-      "promotion_checks":{"legacy_train_documents_compared":len(chunks),"exact_duplicates":0,"near_duplicate_hamming_le_3":0,"sensitive_patterns":0,"individually_reviewed_documents":len(selected),"review_payload_mismatches_held":len(held_review_payload_mismatch),"nasa_live_recheck":recheck},
+      "promotion_checks":{"legacy_train_documents_compared":len(sidecar),"exact_duplicates":0,"near_duplicate_hamming_le_3":0,"sensitive_patterns":0,"individually_reviewed_documents":len(selected),"review_payload_mismatches_held":len(held_review_payload_mismatch),"nasa_live_recheck":recheck},
       "scope_note":"Source-scoped train partition. This does not claim global G-0, does not enter the 64-library Level A inventory, and does not supersede NASA citation URLs."
     })
     (args.root/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
