@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 11:37 | [Integración continua #1375 (run 42020244786)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42020244786) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): reconcile dataset README with current audited corpus. Trigger: push; rama: main; intento: 1. | 1226476b |
 | 2026-11-05 11:36 | [Integración continua #1376 (run 42020300008)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42020300008) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): honor assistant content-review pass dispositions. Trigger: push; rama: main; intento: 1. | 1885e59c |
 | 2026-11-05 11:33 | [Integración continua #1371 (run 42019678587)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42019678587) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: improve HTML body extraction and retain concise readable NASA reports. Trigger: push; rama: main; intento: 1. | e3834730 |
 | 2026-11-05 11:32 | [Integración continua #1373 (run 42019731971)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42019731971) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: support explicitly labelled assistant content-review passes. Trigger: push; rama: main; intento: 1. | 15e3c2fc |
