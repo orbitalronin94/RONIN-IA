@@ -34,3 +34,9 @@ El ensamblador asigna únicamente documentos con señal temática suficiente. Lo
 - BMC Medicine (1.000) y eLife (1.000): candidatos ScienceVerse declarados CC BY 4.0 en el catálogo upstream; falta auditoría DOI/artículo y extracción.
 - El catálogo declara 15.179 artículos en 18 corpus y conserva manifiestos por DOI y procedencia. Estos documentos aún no están admitidos ni son entrenables.
 - Expediente: `data/datasets/candidates/scienceverse-expanded-corpora/README.md`.
+
+## Adquisición ScienceVerse
+
+- BMC Medicine: **1.000 artículos esperados** en el manifiesto upstream, todos declarados CC-BY 4.0 en el catálogo.
+- RONIN descarga el paperlist completo y conserva manifiesto DOI/licencia y SHA-256 en `data/datasets/admitted/scienceverse/bmcmed/`.
+- Estado: adquisición automatizada añadida; no contabilizar como admitido hasta que el workflow complete y se compruebe el payload. Pendientes privacidad clínica, retractaciones, deduplicación y particionado.
