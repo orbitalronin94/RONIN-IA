@@ -157,11 +157,11 @@ def main() -> None:
         parser.error("--eval-limit debe estar entre 1 y 500")
 
     import torch
+    import trl
+    import unsloth
     from datasets import Dataset
     from huggingface_hub import model_info
     from transformers import __version__ as transformers_version, set_seed
-    import trl
-    import unsloth
     from trl import SFTConfig, SFTTrainer
     from unsloth import FastLanguageModel
 
