@@ -95,24 +95,21 @@ def esearch_ids(term: str, limit: int) -> list[str]:
     return found
 
 
-def metadata_for(pmcid: str) -> dict | None:
-    # Most versions are .1. Fall back to S3's documented object listing if needed.
-    direct = f"{BASE}/metadata/PMC{pmcid}.1.json"
-    try:
-        return json.loads(request_bytes(direct))
-    except urllib.error.HTTPError as exc:
-        if exc.code != 404:
-            raise
+def metadata_for(pmcid: str) -> list[dict]:
+    """Return every currently listed version; version 1 is not guaranteed to exist."""
     query = urllib.parse.urlencode({"list-type": "2", "prefix": f"metadata/PMC{pmcid}."})
     root = ET.fromstring(request_bytes(BASE + "/?" + query))
     keys = [node.text for node in root.findall(".//{*}Key") if node.text and node.text.endswith(".json")]
+    records: list[dict] = []
     for key in keys:
         try:
-            return json.loads(request_bytes(BASE + "/" + urllib.parse.quote(key, safe="/")))
-        except urllib.error.HTTPError:
-            continue
-    return None
-
+            value = json.loads(request_bytes(BASE + "/" + urllib.parse.quote(key, safe="/")))
+            if isinstance(value, dict):
+                records.append(value)
+        except urllib.error.HTTPError as exc:
+            if exc.code != 404:
+                raise
+    return records
 
 def eligible_license(value: str) -> bool:
     normalized = " ".join((value or "").upper().replace("-", " ").split())
@@ -148,21 +145,24 @@ def license_url(value: str) -> str:
 
 def fetch_record(pmcid: str, min_text_bytes: int) -> dict | None:
     try:
-        meta = metadata_for(pmcid)
-        if not meta or not meta.get("is_pmc_openaccess"):
+        versions = metadata_for(pmcid)
+        eligible = [
+            item for item in versions
+            if item.get("is_pmc_openaccess")
+            and eligible_license(str(item.get("license_code") or ""))
+            and item.get("is_retracted") is not True
+        ]
+        if not eligible:
             return None
+        eligible.sort(key=lambda item: (str(item.get("is_manuscript", "")).lower() == "yes",
+                                        -int(item.get("version") or 0)))
+        meta = eligible[0]
         license_code = str(meta.get("license_code") or "").strip()
-        if not eligible_license(license_code):
-            return None
-        if meta.get("is_retracted") is True:
-            return None
         text_url = meta.get("text_url")
         if not isinstance(text_url, str) or not text_url.startswith(BASE + "/"):
             return None
         raw = request_bytes(text_url)
-        card_match = CARD_RE.search(raw)
-        card_digits = re.sub(rb"\\D", b"", card_match.group(0)) if card_match else b""
-        if len(raw) < min_text_bytes or EMAIL_RE.search(raw) or SSN_RE.search(raw) or (13 <= len(card_digits) <= 19):
+        if len(raw) < min_text_bytes or EMAIL_RE.search(raw) or SSN_RE.search(raw) or has_payment_card(raw):
             return None
         text = raw.decode("utf-8", errors="replace").strip()
         if len(text) < 1500 or text.count("\ufffd") > max(3, len(text) // 10000):
