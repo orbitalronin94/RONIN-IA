@@ -117,18 +117,6 @@ def choose_domain(text: str) -> tuple[str | None, float, dict[str, Any]]:
     }
 
 
-def choose_domain(text: str) -> tuple[str | None, float, dict[str, float]]:
-    unique_words = set(tokens(text))
-    if not unique_words:
-        return None, 0.0, {}
-    matches = {domain: len(unique_words & DOMAIN_TERM_SETS[domain]) for domain in DOMAINS}
-    best = max(DOMAINS, key=lambda domain: (matches[domain], domain))
-    if matches[best] == 0:
-        return None, 0.0, {}
-    details = score_record(text, best, Counter(), 1)
-    return best, details["semantic_density"], details
-
-
 def add_unique_record(
     buckets: dict[str, list[dict[str, Any]]],
     seen_hashes: set[str],
