@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 11:08 | [Integración continua #1329 (run 42016511975)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42016511975) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: distinguish NASA OCR holds from rights-and-quality holds. Trigger: push; rama: main; intento: 1. | ab31f18a |
 | 2026-11-05 11:07 | [Integración continua #1325 (run 42016402354)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42016402354) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: feat\(training\): fine-tune main checkpoint against full MMLU-Pro holdout. Trigger: push; rama: main; intento: 1. | 3fa81129 |
 | 2026-11-05 11:07 | [Integración continua #1321 (run 42016271884)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42016271884) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data\(review\): expand NASA file-level audit to eight records. Trigger: push; rama: main; intento: 1. | 231cc56d |
 | 2026-11-05 11:06 | [Integración continua #1318 (run 42015994562)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42015994562) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: index owner-authored paper corpus in 64-library manifest. Trigger: push; rama: main; intento: 1. | 78a226c0 |
