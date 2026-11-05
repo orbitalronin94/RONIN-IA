@@ -135,5 +135,5 @@ def main():
       "scope_note":"Source-scoped train partition. This does not claim global G-0, does not enter the 64-library Level A inventory, and does not supersede NASA citation URLs."
     })
     (args.root/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-    print(json.dumps({"training_eligible_documents_added":len(selected),"utf8_bytes":sum(len(x[1]) for x in selected),"legacy_train_compared":len(chunks),"nasa_live_recheck":"PASS","global_g0":"FAIL"},indent=2))
+    print(json.dumps({"training_eligible_documents_added":len(selected),"utf8_bytes":sum(len(x[1]) for x in selected),"legacy_train_compared":len(sidecar),"nasa_live_recheck":"PASS","global_g0":"FAIL"},indent=2))
 if __name__=="__main__": main()
