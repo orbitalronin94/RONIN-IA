@@ -122,3 +122,61 @@ jobs:
       - name: Enlazar libro de runs
         if: always()
         uses: ./.github/actions/run-ledger-link
+
+
+  assemble-32-libraries:
+    name: Ensamblar 32 bibliotecas parciales
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Probar inventario y reglas de reparto
+        run: |
+          python -m pip install pytest
+          pytest -q tests/test_32_library_inventory.py tests/test_assemble_32_libraries.py
+      - name: Descargar artefactos auditados fijados
+        env:
+          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          download_artifact() {
+            artifact_id="$1"
+            output="$2"
+            expected="$3"
+            curl --fail --location --retry 3 \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id/zip" \
+              --output "$output"
+            echo "$expected  $output" | sha256sum --check
+          }
+          download_artifact 13398675118 /tmp/covost.zip 59508d9c67951c08b36d3ff860666ee5aab714d64c24003a1ae2c694d3f7142b
+          download_artifact 13371639293 /tmp/common-corpus.zip 01f444f753bbce6f586e955a105890ab61555236495e068f8471643c46fe4d89
+          download_artifact 13373282757 /tmp/gplsi.zip 73877daf39b1742341da8499541cfc064ff353b83ca98b01732aa39939b304e0
+          download_artifact 13368542769 /tmp/literature.zip 86d1eac6a46f6b798d1057defa7aa09c3ac017edb3ba82f8dda7d2cdc50ebd92
+          download_artifact 13398842442 /tmp/collabra.zip 6b49103b5c9f5525784f41c0edafd1a54b3847647e1bfe770045685de1864aa2
+      - name: Ensamblar las 32 bibliotecas sin promover candidatos
+        run: |
+          python scripts/assemble_32_libraries.py \
+            --covost-zip /tmp/covost.zip \
+            --common-corpus-zip /tmp/common-corpus.zip \
+            --gplsi-zip /tmp/gplsi.zip \
+            --literature-zip /tmp/literature.zip \
+            --collabra-zip /tmp/collabra.zip \
+            --out artifacts/ronin-32-libraries
+      - name: Publicar paquete parcial con hashes
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-32-libraries-partial-candidates
+          path: artifacts/ronin-32-libraries/
+          if-no-files-found: error
+          retention-days: 90
+      - name: Enlazar libro de runs
+        if: always()
+        uses: ./.github/actions/run-ledger-link
