@@ -50,7 +50,7 @@ G-0 es independiente. Ningún registro local de nivel A puede anular un G-0 fall
 
 ## Estado del libro (2026-11-05)
 
-- **8 registros de nivel A**: CoVoST 2 translation-only y exportaciones de metadatos OpenAlex, ROR, Crossref, DataCite y OpenCitations, además de versiones exactas ya registradas.
+- **9 registros de nivel A**: tres payloads/versiones exactas de CoVoST 2 translation-only y exportaciones de metadatos OpenAlex, ROR, Crossref, DataCite y OpenCitations. Cada registro cubre únicamente el hash y la versión indicados; la licencia del registro no admite otros assets ni variantes.
 - **2 registros de nivel B**: Estatuto de Autonomía de la Comunidad de Madrid (BOE-A-1983-6317) y Estatuto de los Trabajadores (BOE-A-2015-11430). El artículo 13 de la Ley de Propiedad Intelectual excluye las disposiciones legales o reglamentarias, pero falta la firma jurídica humana exigida por nuestra política y los textos extraídos necesitan limpieza de cabeceras/índices.
 
 Los registros de nivel A certifican únicamente el alcance exacto descrito; no convierten automáticamente una fuente en corpus admitido. Los registros de nivel B tampoco permiten admisión. G-0 sigue en FAIL.
