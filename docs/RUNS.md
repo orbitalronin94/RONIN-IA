@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:16 | [Integración continua #1171 (run 42000827224)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000827224) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(data\): cover exact literature reconstruction and level-A holdback. Trigger: push; rama: main; intento: 1. | ebc5cfa7 |
 | 2026-11-05 09:16 | [Integración continua #1172 (run 42001024788)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001024788) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: add safe ScienceVerse RDS structure inspector. Trigger: push; rama: main; intento: 1. | 9080bfb9 |
 | 2026-11-05 09:15 | [Integración continua #1168 (run 42000618641)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000618641) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Fix final llama.cpp import ordering. Trigger: push; rama: main; intento: 1. | f3dd14c6 |
 | 2026-11-05 09:15 | [Integración continua #1170 (run 42000796229)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000796229) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): preserve exact admitted literature fragment bytes. Trigger: push; rama: main; intento: 1. | 2a49aa12 |
