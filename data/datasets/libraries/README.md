@@ -1,21 +1,55 @@
-# Inventario de las 32 bibliotecas
+# Inventario canónico de las 64 bibliotecas
 
-El inventario operativo se compone de 16 dominios y dos bibliotecas por dominio: `General` y `HKD` (alta densidad de conocimiento). Cada directorio contiene su estado, fuentes localizadas y controles pendientes. Todos parten como **implementados parcialmente**; el manifiesto del artefacto de ensamblado aporta los recuentos y hashes exactos de cada ejecución.
+El objetivo de RONIN es **32 dominios × General/HKD = 64 bibliotecas**. El inventario canónico está en manifest-64.json y se valida con scripts/validate_64_library_inventory.py. El manifiesto manifest-32.json y sus 32 directorios describen el pipeline parcial legado RUN5 de 16 dominios; no son el objetivo final.
 
-La selección HKD prioriza densidad semántica y la separación General/HKD es disjunta, equilibrada por peso textual. No se fuerza material sin señal temática a una biblioteca: permanece en el pool transversal.
+## Estado verificable a 5 de noviembre de 2026
 
-El estado de cada biblioteca se actualiza en su README y en `manifest-32.json`. Ninguna biblioteca de este inventario queda habilitada para entrenamiento hasta superar G-0.
+- Dominios catalogados: **32**.
+- Slots General/HKD: **64**.
+- Documentos Level A admitidos en las 64 bibliotecas: **0**.
+- Bytes de texto Level A admitidos: **0**.
+- Bibliotecas que alcanzan el mínimo de 1 MiB Level A: **0/64**.
+- Bibliotecas training-eligible: **0/64**.
+- G-0 global: **FAIL**.
 
+El catálogo no es una descarga y una descarga no es una admisión. Los contadores de manifest-64.json se mantienen a cero hasta que existan payloads de texto exactos, derechos por ítem/versión, calidad, privacidad, deduplicación, atribución, splits y hashes aprobados.
 
-## Nuevos bloques de fuentes revisadas (2026-11-05)
+## Umbrales y reparto
 
-- **Naciones Unidas v1.0:** alcance de derechos de la colección verificado por el proveedor; pool transversal pendiente de descarga, hashes, clasificación temática, privacidad y deduplicación. Expediente: `../candidates/un-parallel-corpus-v1/README.md`.
-- **ScienceVerse / papers:** siete corpus científicos declarados CC BY 4.0 por el catálogo upstream, 5.091 artículos de catálogo en total; falta auditoría DOI/artículo y descarga de payload. Expediente: `../candidates/scienceverse-expanded-corpora/README.md`.
+- Mínimo operativo: **1 MiB de texto Level A por biblioteca**.
+- Objetivo posterior: **10 GiB por biblioteca** cuando las fuentes y capacidad lo permitan.
+- Mínimo total de 64 bibliotecas: **64 MiB**; objetivo de escala total: **640 GiB**.
+- General/HKD: particiones disjuntas por documento y clúster near-duplicate.
+- HKD: ranking RONIN por densidad semántica, descendente, con desempate estable por identificador documental.
+- Balance: bytes UTF-8, no solo número de documentos.
+- Deduplicación exacta y near-duplicate global entre las 64 bibliotecas, corpus admitidos y conjuntos de evaluación.
+- Train/validation/test se separan de forma determinista y agrupada por documento/DOI; validation/test/holdout nunca pasan a train.
 
-Estos bloques amplían las fuentes localizadas, no el contador de bibliotecas admitidas. Las 32 siguen en implementación parcial y G-0 continúa bloqueado hasta completar los controles y la distribución equilibrada.
+## Pool legacy que no se cuenta como Level A
 
+El corpus admitted/literature-es-v1 conserva 608 documentos train y 140.295.523 bytes, con SHA-256 9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78. Sus 18 validation y 18 test permanecen aislados. Sigue admitido bajo su manifiesto scoped original, pero no se cuenta en el mínimo Level A de ninguna de las 64 bibliotecas hasta reconciliar por obra/edición la base de dominio público y las jurisdicciones ES/EU/US.
 
-- **NASA NTRS:** candidato técnico-científico con más de 200.000 documentos completos en catálogo; solo pasan registros con copyright público explícito y sin partes de terceros no autorizadas. Expediente: `../candidates/nasa-ntrs-public-use/README.md`.
-- **NIST Technical Series/PDR:** candidato para informes y datos propios de NIST con política oficial de reutilización y atribución; se excluyen trabajos de terceros y se exige revisión por registro. Expediente: `../candidates/nist-technical-series/README.md`.
+La reconstrucción de esos 608 fragmentos se valida por character_count y SHA-256 individual en scripts/assemble_32_libraries.py. Los fragmentos se conservan exactamente; el ensamblador los marca como candidatos pendientes de reconciliación Level A, sin alterar el estado del corpus legacy original.
 
-- **BNE / Biblioteca Digital Hispánica:** metadatos de catálogo CC BY 4.0; OCR condicionado a derechos por obra y edición. **Project Gutenberg:** revisión territorial e individual, sin admisión global. Expedientes en `../candidates/bne-bdh-ocr/README.md` y `../candidates/project-gutenberg/README.md`.
+## Candidatos de volumen relevantes
+
+- ScienceVerse: cuatro RDS con 2.595 filas DOI elegibles y 83.524.872 bytes comprimidos. No son bytes de texto. Falta inspección RDS, extracción textual, verificación de derechos del editor, privacidad, retractaciones, deduplicación y splits. Expediente: ../candidates/scienceverse-expanded-corpora/README.md.
+- Naciones Unidas Parallel Corpus: fuente con declaración de dominio público del proveedor; falta descarga, validación de payload/alineaciones, privacidad y revisión por documento. Expediente: ../candidates/un-parallel-corpus-v1/README.md.
+- PMC OA: candidatos de texto completo condicionados a licencia por versión y a la consolidación/hash de shards. Nunca se promueven automáticamente.
+- arXiv: metadatos CC0 no equivalen a licencia del artículo; el texto completo requiere licencia por versión CC BY 4.0/CC0 y comprobación de terceros.
+- NASA NTRS / NIST: solo documentos o datos propios con declaración de reutilización inequívoca; excluir trabajos de terceros.
+- BNE / Project Gutenberg: metadatos no transfieren derechos al OCR; dominio público estadounidense no prueba dominio público en España/UE.
+
+## Derechos Level A
+
+rights_registry/records.jsonl contiene 10 registros (8 A, 2 B). Los registros Level A incluyen seis exportaciones de metadatos y dos payloads candidatos CoVoST; ninguno se ha admitido como texto en las 64 bibliotecas. Los dos registros BOE están en Level B y no cuentan para el mínimo Level A. La evidencia de un proveedor, SPDX, Crossref, AWS Open Data Registry o una etiqueta genérica no sustituye la comprobación de derechos exactos y terceros.
+
+## G-0 y entrenamiento
+
+G-0 permanece independiente. Mientras sea FAIL, ninguna biblioteca puede ser training-eligible aunque supere el mínimo Level A. No se entrenará con candidatos, con datos de permisos privados, con chain-of-thought privado de tutores ni con validation/test/holdout.
+
+Ejecutar:
+- python scripts/validate_64_library_inventory.py
+- pytest -q tests/test_64_library_inventory.py
+
+El workflow .github/workflows/validate-64-library-inventory.yml publica los recuentos estructurales. Un PASS del inventario solo demuestra que los 32 pares General/HKD están bien catalogados y que no se ha habilitado entrenamiento; no demuestra que las bibliotecas estén completas.
