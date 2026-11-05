@@ -24,13 +24,18 @@ jobs:
     env:
       TUTOR_REPO: Qwen/Qwen3-30B-A3B-GGUF
       TUTOR_FILE: Qwen3-30B-A3B-Q4_K_M.gguf
-      TUTOR_DIR: ${{ runner.tool_cache }}/ronin-checkpoints/qwen3-30b-a3b-q4km
-      LLAMA_CPP_DIR: ${{ runner.tool_cache }}/llama.cpp
       MAX_TUTOR_STEPS: "100"
       HF_HUB_DISABLE_TELEMETRY: "1"
       PYTHONUNBUFFERED: "1"
     steps:
       - uses: actions/checkout@v4
+      - name: Set persistent runner cache paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${RUNNER_TOOL_CACHE:?Self-hosted runner must expose RUNNER_TOOL_CACHE}"
+          echo "TUTOR_DIR=$RUNNER_TOOL_CACHE/ronin-checkpoints/qwen3-30b-a3b-q4km" >> "$GITHUB_ENV"
+          echo "LLAMA_CPP_DIR=$RUNNER_TOOL_CACHE/llama.cpp" >> "$GITHUB_ENV"
       - name: Check CPU runner memory and disk budget
         shell: bash
         run: |
