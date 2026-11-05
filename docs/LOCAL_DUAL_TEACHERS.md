@@ -58,17 +58,19 @@ Para Q8_0, repite con `--quantization 8bit`. Los modelos quedan en `models/teach
 
 ## Generar ejemplos verificados y entrenar RONIN
 
-Primera ejecución recomendada:
+Una sola orden descarga los dos modelos, comprueba sus licencias/revisiones/hashes, genera el diálogo socrático, entrena RONIN y ejecuta la evaluación holdout:
 
 ```bash
-python scripts/train_from_local_dual_tutors.py --count 48 --quantization 4bit --steps 250 --device auto
+python scripts/prepare_and_train_local_dual_tutors.py --count 48 --quantization 4bit --steps 250 --device auto
 ```
 
 Para comparar 8 bits sin sobrescribir resultados:
 
 ```bash
-python scripts/train_from_local_dual_tutors.py --count 48 --quantization 8bit --steps 250 --device cuda --output-dir artifacts/dual-distillation-8bit --checkpoints checkpoints/dual-teacher-8bit
+python scripts/prepare_and_train_local_dual_tutors.py --count 48 --quantization 8bit --steps 250 --device auto --output-dir artifacts/dual-distillation-8bit --checkpoints checkpoints/dual-teacher-8bit
 ```
+
+Si ya descargaste los pesos, puedes saltarte el bootstrap y ejecutar directamente `scripts/train_from_local_dual_tutors.py`.
 
 Los dos tutores se ejecutan **secuencialmente**, nunca a la vez. El proceso levanta llama.cpp en loopback para Qwen, guarda sus respuestas, apaga el servidor y después repite con DeepSeek. En la segunda ronda, RONIN pregunta «¿por qué?» y cada tutor recibe su respuesta inicial y la propuesta del otro; debe contrastar premisas, regla decisiva y un contraejemplo, y puede corregirse. Después se libera y vuelve a cargar cada modelo para su turno de contraste. El puerto local se asigna dinámicamente y el servidor se cierra al terminar cada turno.
 
@@ -80,7 +82,7 @@ El JSONL de auditoría y `train.txt` permanecen locales. RONIN se inicializa des
 
 ```bash
 pytest -q tests/test_local_dual_teachers.py
-ruff check ronin/data/local_dual_teacher.py scripts/download_dual_teachers.py scripts/distill_mmlu_pro_dual_tutor.py scripts/train_from_local_dual_tutors.py tests/test_local_dual_teachers.py
+ruff check ronin/data/local_dual_teacher.py scripts/download_dual_teachers.py scripts/distill_mmlu_pro_dual_tutor.py scripts/train_from_local_dual_tutors.py scripts/prepare_and_train_local_dual_tutors.py tests/test_local_dual_teachers.py
 ```
 
 ## Fuentes oficiales y cuantizaciones
