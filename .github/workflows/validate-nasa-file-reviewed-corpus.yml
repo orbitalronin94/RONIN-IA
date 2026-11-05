@@ -1,0 +1,23 @@
+name: Validate six file-reviewed NASA corpus documents
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/datasets/admitted/nasa-ntrs-file-reviewed-v1/**"
+      - "data/datasets/candidates/nasa-ntrs-public-use/documents/**"
+      - "data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json"
+      - "scripts/validate_nasa_file_reviewed_corpus.py"
+      - ".github/workflows/validate-nasa-file-reviewed-corpus.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Verify exact payload copies, SHA-256, byte lengths and positive file reviews
+        run: python scripts/validate_nasa_file_reviewed_corpus.py
