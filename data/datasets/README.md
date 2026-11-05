@@ -94,13 +94,31 @@ El manifiesto `libraries/manifest-64.json` cuenta únicamente el corpus legacy L
 
 ## Candidatos y líneas de adquisición
 
-- **ScienceVerse:** 13 colecciones con payloads de texto y manifiestos por artículo. El filtro de calidad automática no resuelve derechos editoriales, titularidad, material de terceros ni privacidad. Admisiones actuales: cero.
-- **NASA NTRS candidate packs:** cuatro bibliotecas General (astronomía/ciencias de la Tierra, química/materiales, ingeniería/robótica y física) fueron generadas como paquetes candidatos. No confundir estos paquetes con los 807 documentos ya admitidos scoped del manifiesto NASA; verificar hashes/solapamientos antes de consolidar.
-- **CoVoST 2:** exportación limitada al campo `translation`; 337.973 traducciones únicas tras filtros (270.244 train, 34.051 validation, 33.678 test). Sigue como candidato; revisión humana final de muestras pendiente.
-- **Common Corpus:** muestra acotada de 20.000 filas; derechos por documento, privacidad multilingüe, procedencia y calidad siguen pendientes. No promocionar automáticamente datos estructurados ni voz/transcripciones a prosa.
-- **GPLSI ClearText:** documentos CAS/VAL candidatos. La licencia de la colección no resuelve derechos de los documentos originales; dos textos BOE permanecen en nivel B y un documento NC-ND en cuarentena.
-- **ParlaIbero-ES, DReaM-es-open, VoxPopuli, BNE/BDH y Project Gutenberg:** líneas de preflight/adquisición; ninguna añade documentos Level A hasta verificar derechos del texto/edición, privacidad, calidad, hashes y particiones.
-- **UN Parallel Corpus:** fuente oficial de interés y candidata a ingestión; todavía sin admisión documental completa, hashes de payload y controles finales.
+Los números siguientes son **inventarios de candidatos**, no admisiones. Hay snapshots y exportaciones que pueden solaparse; no se suman entre sí sin deduplicación por hash/DOI.
+
+### Payloads adquiridos y pendientes de revisión
+
+| Línea | Adquisición comprobada | Estado y límites |
+|---|---:|---|
+| ScienceVerse / papers (RDS) | 3.087 DOI elegibles en cinco assets RDS; 95.948.088 bytes comprimidos | Exportación textual, derechos por artículo/versión, terceros, privacidad y calidad pendientes. No son bytes de texto admitido. |
+| ScienceVerse (exportaciones de texto) | 9.153 documentos en 13 colecciones; 9.129 pases automáticos y 24 holds | Auditoría separada del lote RDS; posible solapamiento. 0 admitidos por derechos editoriales/terceros y revisión final pendientes. No sumar 3.087 + 9.153. |
+| NASA NTRS | 824 textos completos; 39.262.382 bytes | 807 admitidos scoped en su manifiesto, 17 retenidos; además, seis revisados en un manifiesto separado. Los paquetes por biblioteca son candidatos y no deben sumarse de nuevo. |
+| NASA NTRS — snapshot de expansión | 189 textos completos; 15.417.212 bytes | Lote candidato adicional registrado en el README de adquisición; reconciliar IDs/hashes contra los 824 antes de contarlo como incremento neto. |
+| CoVoST 2 | Run posterior: 432.475 filas de traducción, 86.874.752 bytes | Solo campo `translation`; excluir audio, rutas, IDs de cliente y fuentes de oración. Un snapshot anterior registró 337.973 traducciones únicas repartidas en train/validation/test; reconciliar ambos snapshots antes de declarar un total único. |
+| PleIAs Common Corpus | 2.159 filas, 5.971.320 bytes | 2.149 CC0, 4 CC BY 3.0 y 6 CC BY 4.0; 17.472 filas con licencias no permitidas, 311 con patrones básicos de email/teléfono y 8 inválidas/sobredimensionadas excluidas. Revisión humana, privacidad, calidad y splits pendientes. |
+| GPLSI ClearText CAS/VAL | 17 documentos candidatos (11 CAS y 6 VAL) | Derechos de los documentos originales pendientes; un documento NC-ND en cuarentena. |
+| UN Parallel Corpus | Workflow de ingestión en-es y validador incorporados | No atribuir un recuento de textos hasta que exista un run/artefacto verificado. La fuente declara dominio público para UN Parallel Corpus v1.0; siguen pendientes hashes, calidad, privacidad, deduplicación y particiones. |
+
+**No existe un total global fiable de candidatos únicos.** El ledger de ingestión registra runs, artefactos y hashes por fuente; el número de filas de un snapshot no debe sumarse con otra exportación de la misma familia sin reconciliación.
+
+### Fuentes adicionales de alta prioridad
+
+- **NIST Technical Series / Public Data Repository:** línea favorable para informes y datos creados por NIST cuando el registro identifica autoría/titularidad NIST y se conserva la atribución. NIST advierte de material de terceros; no se admite el catálogo completo. Preflight por registro y payload pendiente.
+- **USGS Publications Warehouse:** fuente de alto valor para geología, geografía, agua, riesgos naturales y ciencias de la Tierra. USGS confirma que sus informes publicados son generalmente de dominio público, pero advierte que algunas imágenes, ilustraciones y fotografías son de terceros. Seleccionar solo publicaciones USGS propias y excluir material mixto no aclarado.
+- **NOAA Institutional Repository:** repositorio científico con texto completo; su política distingue obras gubernamentales CC0 de artículos y proceedings cuyos titulares conservan derechos. No usar el repositorio entero como corpus libre: selección por documento y revisión de copyright obligatorias.
+- **BNE/BDH y Project Gutenberg:** continúan como fuentes de descubrimiento. Las licencias de metadatos o la presencia en un catálogo no autorizan automáticamente el texto, la traducción ni la edición concreta; revisar obra/edición y situación en España/UE.
+- **ParlaIbero-ES, DReaM-es-open, VoxPopuli y otras colecciones lingüísticas:** mantener en preflight hasta resolver licencia de cada documento/segmento, derechos de voz, privacidad y condiciones de redistribución.
+
 
 ## Controles obligatorios antes de admitir y entrenar
 
