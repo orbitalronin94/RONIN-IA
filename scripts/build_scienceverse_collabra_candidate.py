@@ -7,12 +7,15 @@ import csv
 import hashlib
 import json
 import re
+import sys
 import unicodedata
 from collections import Counter
 from pathlib import Path
 
 EMAIL = re.compile(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}")
 URL = re.compile(r"(?:https?://|www\.)", re.IGNORECASE)
+csv.field_size_limit(sys.maxsize)
+
 MIN_CHARS = 1000
 NAMESPACE = b"RONIN-SCIENCEVERSE-COLLABRA-v1\0"
 EXCLUDED_DOI = {"10.1525/collabra.18032"}
