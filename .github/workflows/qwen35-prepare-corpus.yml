@@ -5,13 +5,8 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/qwen35-prepare-corpus.yml"
+      - "docs/QWEN35_TRAINING_PIPELINE.md"
   workflow_dispatch:
-    inputs:
-      source_run_id:
-        description: "Run que publicó el corpus de literatura española admitido"
-        required: true
-        default: "41926088900"
-        type: string
 
 permissions:
   actions: read
@@ -26,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      SOURCE_RUN_ID: \${{ inputs.source_run_id || '41926088900' }}
+      SOURCE_RUN_ID: 41926088900
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -43,14 +38,15 @@ jobs:
         with:
           name: ronin-admitted-literature-es-v1-train
           path: /tmp/ronin-admitted-literature
-          github-token: \${{ github.token }}
-          repository: \${{ github.repository }}
-          run-id: \${{ env.SOURCE_RUN_ID }}
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
       - name: Localizar, validar y empaquetar train.txt
         run: |
           python - <<'PY'
           import hashlib
           import json
+          import os
           import shutil
           from pathlib import Path
 
@@ -66,7 +62,7 @@ jobs:
           shutil.copy2(source, target)
           manifest = {
               "schema": "ronin-qwen35-corpus-v1",
-              "source_run_id": "\${{ env.SOURCE_RUN_ID }}",
+              "source_run_id": os.environ["SOURCE_RUN_ID"],
               "source_artifact": "ronin-admitted-literature-es-v1-train",
               "source_corpus": "admitted/literature-es-v1",
               "admission_status": "admitted",
