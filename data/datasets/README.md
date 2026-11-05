@@ -340,3 +340,12 @@ The exact workflow IDs, artifact IDs, row counts, payload byte counts, SHA-256 v
 
 
 The expanded 32-domain / 64-library catalogue now maps 21 audited candidate source IDs to their relevant domain libraries through `candidate_source_links`. The mapping is traceability only: it includes metadata-only, preflight-only and quarantined sources with explicit roles; no source link promotes a library to admitted or training-eligible. CI validates that every mapped ID exists in the source audit register.
+
+
+## CoVoST 2 split-integrity correction (2026-11-05)
+
+The earlier CoVoST candidate artifacts (41931759338 and 41932647180) are **not admissible for training**: the first adapter exported raw translation TSV rows before applying the upstream train/dev/test partitioning. The official CoVoST 2 split procedure distinguishes train and train_covost from dev and test; the previous export discarded that field.
+
+The adapter has therefore been corrected to require the upstream split column and export only train plus train_covost. It fails closed if the column is missing, records counts for all observed split labels, and never exports dev/test. The pull-request workflow now runs this acquisition path so the new train-only payload can be inspected before any admission decision.
+
+**Current decision:** CoVoST remains candidate-only until the corrected artifact is generated and its payload hash, language/quality sample, privacy scan, duplicate checks against admitted corpora and evaluation holdouts, and attribution/provenance bundle are reviewed. Existing rights-level-A records certify their exact earlier payloads only; they do not transfer to the corrected payload hash.
