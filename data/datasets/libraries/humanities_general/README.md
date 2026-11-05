@@ -36,3 +36,10 @@ El ensamblador asigna únicamente documentos con señal temática suficiente. Lo
 - Se conserva en el pool transversal de candidatos; **no se asigna todavía a esta biblioteca** hasta clasificar cada documento por tema y densidad.
 - Payload, hashes, controles de privacidad/calidad, deduplicación, particiones y revisión humana pendientes. No entrenable.
 - Expediente: `data/datasets/candidates/un-parallel-corpus-v1/README.md`.
+
+
+## Candidatos de patrimonio textual
+
+- **Biblioteca Digital Hispánica (BNE):** catálogo CC BY 4.0 verificado; el OCR solo se incorpora cuando los derechos de la obra, traducción y edición concretas estén verificados. Expediente: `data/datasets/candidates/bne-bdh-ocr/README.md`.
+- **Project Gutenberg:** fuente de descubrimiento con revisión individual por obra y jurisdicción; no se presume que el dominio público estadounidense aplique en España/UE. Expediente: `data/datasets/candidates/project-gutenberg/README.md`.
+- Ninguna de estas dos fuentes añade todavía textos admitidos; el OCR/ebook pendiente de derechos queda fuera de entrenamiento.
