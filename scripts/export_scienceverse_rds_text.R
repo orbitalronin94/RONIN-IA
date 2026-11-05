@@ -170,8 +170,12 @@ for (rds in files) {
     authors <- character()
     author_df <- paper$author
     if (is.data.frame(author_df) && all(c("given", "family") %in% names(author_df))) {
-      authors <- unique(trimws(paste(as.character(author_df$given), as.character(author_df$family))))
-      authors <- authors[!is.na(authors) & nzchar(authors)]
+      given <- as.character(author_df$given)
+      family <- as.character(author_df$family)
+      given[is.na(given)] <- ""
+      family[is.na(family)] <- ""
+      authors <- unique(trimws(paste(given, family)))
+      authors <- authors[nzchar(authors)]
     }
     license_url <- if (grepl("/publicdomain/zero/1.0", license_value, ignore.case = TRUE)) {
       "https://creativecommons.org/publicdomain/zero/1.0/"
