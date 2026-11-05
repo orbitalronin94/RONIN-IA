@@ -254,10 +254,10 @@ def main() -> None:
         json.dumps({"held": held, "external_exact_duplicates": duplicate_external, "email_hits": email_hits, "ssn_hits": ssn_hits}, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+    (args.output_dir / "audit.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    print(json.dumps(report, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
