@@ -1,40 +1,33 @@
-# Gobernanza y canalización de datos
+# Datos de entrenamiento
 
-Los corpus completos no se versionan en Git: se preparan localmente o como artefactos temporales de GitHub Actions y deben tener manifiesto, procedencia, licencia, particiones y SHA-256. El inventario actual está en [Inventario de corpus y materiales](INVENTARIO_CORPUS_Y_MATERIALES.md). La PR #39 integra en revisión Portfolio/Papers y las tres fuentes literarias abiertas; no asumir que la integración está fusionada en main hasta que se cierre esa PR.
+## Única raíz de datos
 
-## Corpus inicial: español financiero CC0 de Mozilla
+`data/datasets/` es la ubicación canónica de todos los corpus, bibliotecas, manifiestos, particiones y registros de derechos. No existe una segunda carpeta de datasets en la raíz del repositorio.
 
-Se ha seleccionado **Finance Sentences - North American Spanish**, conjunto cmm3gntdp00jymn07zjetwkyy, publicado bajo licencia CC0-1.0. La ficha informa de 79.655 frases limpias (1.325.013 tokens) procedentes de nueve dominios federales estadounidenses, además de una variante sin limpiar. Es un corpus pequeño y especializado: no representa el español general.
+La estructura separa:
 
-La ficha advierte que no se hizo análisis sintáctico y que puede contener títulos o fragmentos. La procedencia se registra mediante file_hash, que el publicador define como MD5 del nombre de archivo; no es un hash del contenido. El script calcula SHA-256 del archivo comprimido y de cada partición.
+- `admitted/`: fuentes y particiones admitidas con procedencia y manifiestos.
+- `candidates/`: material adquirido pendiente de revisión o consolidación.
+- `libraries/`: bibliotecas temáticas y sus inventarios.
+- `quarantine/`: material retenido fuera del entrenamiento.
+- `rights_registry/`: política, esquema y registros de derechos.
+- `reviews/`: evidencias de revisión de fuentes y documentos.
 
-Antes de descargar, el operador debe entrar en la ficha de Mozilla y aceptar las condiciones aplicables, y crear una clave de API. La API exige credenciales y aceptación previa de términos en la web; no se debe eludir ese paso. Después, define MDC_API_KEY en el entorno e instala el extra opcional:
+## Corpus usado por el ciclo principal
 
-    python -m pip install -e '.[corpus]'
-    export MDC_API_KEY='clave-de-api'
-    python scripts/download_mozilla_corpus.py
+La mezcla no-tutor fijada actualmente utiliza solo estas particiones train:
 
-Si ya tienes el archivo comprimido, puedes omitir la descarga y preparar directamente las particiones:
+| Fuente | Documentos | Bytes de origen |
+|---|---:|---:|
+| Literatura española | 608 | 140.295.523 |
+| Mathlib4 | 8.498 | 97.629.252 |
+| NASA NTRS revisado individualmente | 2 | 32.409 |
+| **Total** | **9.108** | **237.957.184** |
 
-    python scripts/prepare_mozilla_corpus.py --archive /ruta/finance-sentences-north-american-spanish.tar.gz --output data/processed/mozilla-spanish-finance
+Las particiones validation y test permanecen excluidas. El resto de NASA NTRS, ScienceVerse y los documentos propios del propietario no se incorporan a esta mezcla mientras no completen sus revisiones y particiones correspondientes.
 
-El preparador lee corpus.tsv directamente del archivo, conserva frases con puntuación no negativa, elimina duplicados exactos por documento y frase, y separa por file_hash de forma determinista (80/10/10). Genera train.txt, validation.txt, test.txt y manifest.json. Falla si no puede producir las tres particiones o si detecta fuga de documentos. Los datos quedan fuera de Git.
+## Condiciones de entrenamiento
 
-El corpus no debe usarse como benchmark general: su dominio, geografía y calidad limitan las conclusiones posibles.
+Un documento solo puede entrar en train si su origen y derechos permiten el uso previsto, el payload está presente e íntegro, su hash está verificado y el manifiesto lo asigna explícitamente a train. La adquisición o la presencia bajo `admitted/` no bastan por sí solas para incluirlo en una ejecución concreta.
 
-## Etapas obligatorias
-
-1. Incorporar solo fuentes aprobadas; rechazar licencias desconocidas o incompatibles.
-2. Normalizar el texto de forma determinista conservando la procedencia.
-3. Eliminar registros mal formados, vacíos o no permitidos.
-4. Aplicar deduplicación exacta y aproximada, documentando umbrales.
-5. Detectar idioma y calcular estadísticas de calidad.
-6. Separar por documento u origen para evitar filtraciones.
-7. Crear fragmentos deterministas y un manifiesto de mezcla.
-8. Tokenizar con un tokenizador versionado y guardar recuentos y SHA-256.
-
-Los corpus originales y procesados son artefactos locales. No se deben subir a Git datos privados ni corpus sujetos a licencias.
-
-## Texto generado por tutores
-
-Los modelos auxiliares se descargan desde repositorios públicos cuya ficha declare licencia MIT. El descargador fija la revisión y calcula SHA-256 de los archivos. La licencia del modelo no concede derechos sobre sus datos de entrenamiento ni sobre cualquier texto generado. La procedencia y los permisos del corpus resultante se deben revisar por separado. La revisión humana y la deduplicación siguen siendo obligatorias.
+Los workflows verifican manifiestos y hashes antes de ensamblar la mezcla. La separación entre train, validation y test debe mantenerse a nivel de documento o fuente para evitar filtraciones. No se versionan credenciales ni se requiere acceso a datasets privados o restringidos.
