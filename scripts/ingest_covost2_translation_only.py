@@ -82,7 +82,7 @@ def main() -> int:
             archive = fetch(url, args.max_archive_mib * 1024 * 1024)
             archive_sha = digest(archive)
             if archive_sha != EXPECTED_ARCHIVE_SHA256[filename]:
-                raise ValueError(f\"{filename}: pinned archive SHA-256 mismatch: {archive_sha}\")
+                raise ValueError(f"{filename}: pinned archive SHA-256 mismatch: {archive_sha}")
             with tarfile.open(fileobj=io.BytesIO(archive), mode="r:gz") as tf:
                 members = [m for m in tf.getmembers() if m.isfile() and m.name.endswith(".tsv")]
                 if len(members) != 1:
