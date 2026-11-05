@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:28 | [Integración continua #1189 (run 42002692850)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002692850) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add single-model Qwen3.5-4B Unsloth training pipeline. Trigger: push; rama: main; intento: 1. | a9600e5a |
 | 2026-11-05 09:28 | [Integración continua #1188 (run 42002690626)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002690626) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: include i-Perception CC-BY 4.0 full-text candidates. Trigger: push; rama: main; intento: 1. | c474fcb1 |
 | 2026-11-05 09:28 | [Integración continua #1186 (run 42002314082)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002314082) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(ci\): install R inspection dependencies from Ubuntu packages. Trigger: push; rama: main; intento: 1. | fd61d259 |
 | 2026-11-05 09:27 | [Integración continua #1185 (run 42002286102)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002286102) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): bound ScienceVerse RDS structure sampling. Trigger: push; rama: main; intento: 1. | 1df303a5 |
