@@ -109,14 +109,44 @@ ROUTING_TERMS = {
     domain: tuple(dict.fromkeys(tuple(terms) + ROUTING_EXTRA_TERMS.get(domain, ())))
     for domain, terms in ROUTING_TERMS.items()
 }
-ROUTING_SINGLE_TERMS = {
-    domain: {tokens(term)[0] for term in terms if len(tokens(term)) == 1}
-    for domain, terms in ROUTING_TERMS.items()
-}
-ROUTING_PHRASES = {
-    domain: tuple(" ".join(tokens(term)) for term in terms if len(tokens(term)) > 1)
-    for domain, terms in ROUTING_TERMS.items()
-}
+ROUTING_SINGLE_INDEX: dict[str, set[str]] = {}
+ROUTING_PHRASE_INDEX: dict[str, set[str]] = {}
+for routing_domain, routing_terms in ROUTING_TERMS.items():
+    for routing_term in routing_terms:
+        term_tokens = tokens(routing_term)
+        if len(term_tokens) == 1:
+            ROUTING_SINGLE_INDEX.setdefault(term_tokens[0], set()).add(routing_domain)
+        elif 1 < len(term_tokens) <= 5:
+            ROUTING_PHRASE_INDEX.setdefault(" ".join(term_tokens), set()).add(routing_domain)
+
+
+def density_for_domain(text: str, domain: str) -> float:
+    return score_record(text, domain, Counter(), 1)
+
+
+def choose_domain(text: str) -> tuple[str | None, float, dict[str, Any]]:
+    words = tokens(text)
+    if not words:
+        return None, 0.0, {}
+    matches: dict[str, set[str]] = {domain: set() for domain in DOMAINS}
+    for word in set(words):
+        for domain in ROUTING_SINGLE_INDEX.get(word, ()):
+            matches[domain].add(word)
+    for width in range(2, 6):
+        for index in range(len(words) - width + 1):
+            phrase = " ".join(words[index:index + width])
+            for domain in ROUTING_PHRASE_INDEX.get(phrase, ()):
+                matches[domain].add(phrase)
+    best = max(DOMAINS, key=lambda domain: (len(matches[domain]), domain))
+    # Require two independent, distinctive terms; generic one-word hits are not enough.
+    if len(matches[best]) < 2:
+        return None, 0.0, {}
+    details = score_record(text, best, Counter(), 1)
+    return best, details["semantic_density"], {
+        **details,
+        "routing_hit_count": len(matches[best]),
+        "routing_hits": sorted(matches[best]),
+    }
 
 
 def density_for_domain(text: str, domain: str) -> float:
