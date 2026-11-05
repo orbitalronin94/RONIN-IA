@@ -13,6 +13,18 @@
 
 La ficha de Hugging Face declara MIT y documenta 12.032 elementos de test y 70 de validation. El conjunto incluye preguntas originales MMLU filtradas y preguntas procedentes de STEM, TheoremQA y SciBench. La licencia de la ficha se aplica al dataset distribuido; no debe inferirse que cada fuente subyacente tiene condiciones idénticas sin revisar su procedencia.
 
+## Estrategia de evaluación por etapas (selección de semillas)
+
+El coste dominante del ciclo no es el entrenamiento: es evaluar repetidamente MMLU-Pro. Por ello se separan tres niveles, sin cambiar el protocolo de puntuación:
+
+1. **Cribado de semillas:** 64 preguntas del split `test`, seleccionadas por round-robin estratificado con semilla fija `2026`. Ejecuta el workflow varias veces cambiando solo la semilla de entrenamiento (`seed`). Esta muestra sirve para descartar regresiones claras y detectar candidatos; no basta para proclamar una mejora.
+2. **Confirmación compacta:** repetir las semillas prometedoras con `eval_limit=128` o `256`, manteniendo la misma selección determinista para cada tamaño y el mismo checkpoint base.
+3. **Auditoría final:** solo la mejor candidata pasa a `eval_limit=0` (las 12.032 preguntas del test, si todas caben en contexto). Esta evaluación grande decide si la mejora resiste; el cribado no autoriza promoción.
+
+La semilla de entrenamiento (`seed`) y la semilla de selección externa (`2026`) son independientes. **Nunca se cambia la muestra para favorecer una semilla de entrenamiento.** Todos los informes deben conservar revisión, SHA-256, IDs, cobertura y tamaño evaluado. Un candidato que gane en 64 preguntas pero pierda en 128/256 no pasa a auditoría completa.
+
+La comparación base/candidato dentro de cada ejecución mantiene exactamente los mismos IDs. El protocolo de siguiente byte A–J sigue siendo propio de RONIN y no es comparable con el leaderboard oficial de MMLU-Pro. Las cifras de cribado se etiquetan como muestra compacta, no como test completo.
+
 ## Protocolo RONIN
 
 Se fija la revisión y se calcula un SHA-256 determinista de los registros normalizados. Se seleccionan 140 preguntas mediante round-robin estratificado por categoría, con semilla 2026. El modelo responde zero-shot mediante la log-probabilidad del siguiente byte de la etiqueta A–J tras el enunciado y las opciones. No se suministran ejemplos, cadenas de razonamiento ni respuestas correctas al modelo.
