@@ -38,6 +38,7 @@ files <- unlist(lapply(roots, function(r) {
 }), use.names = FALSE)
 if (!length(files)) stop("No RDS packages found")
 global_hashes <- new.env(parent = emptyenv())
+global_dois <- new.env(parent = emptyenv())
 summary <- list()
 for (rds in files) {
   dataset_dir <- dirname(rds)
@@ -79,7 +80,12 @@ for (rds in files) {
     doi <- if (is.data.frame(info) && "doi" %in% names(info) && nrow(info)) {
       normalise_doi(info$doi[[1L]])
     } else ""
-    paper_id <- if (!is.null(paper$paper_id) && length(paper$paper_id)) as.character(paper$paper_id[[1L]]) else names(object)[[idx]]
+    object_names <- names(object)
+    paper_id <- if (!is.null(paper$paper_id) && length(paper$paper_id)) {
+      as.character(paper$paper_id[[1L]])
+    } else if (!is.null(object_names) && length(object_names) >= idx && nzchar(object_names[[idx]])) {
+      object_names[[idx]]
+    } else as.character(idx)
     row_index <- match(doi, eligible_doi)
     if (is.na(row_index)) {
       stats$excluded_not_eligible <- stats$excluded_not_eligible + 1L
@@ -161,6 +167,14 @@ for (rds in files) {
                             text_sha256 = text_sha)), excluded_con)
       next
     }
+    if (exists(doi, envir = global_dois, inherits = FALSE)) {
+      stats$excluded_duplicate_doi <- stats$excluded_duplicate_doi + 1L
+      write_jsonl(list(list(dataset = dataset, paper_id = paper_id, doi = doi,
+                            reason = "duplicate_doi_across_scienceverse_packages",
+                            duplicate_of = get(doi, envir = global_dois))), excluded_con)
+      next
+    }
+    assign(doi, paste(dataset, doi, sep = ":"), envir = global_dois)
     assign(text_sha, paste(dataset, doi, sep = ":"), envir = global_hashes)
     license_value <- if ("crossref_verified_license" %in% names(eligible)) {
       as.character(eligible$crossref_verified_license[[row_index]])
