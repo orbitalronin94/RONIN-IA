@@ -140,7 +140,6 @@ def main() -> None:
     parser.add_argument("--dataset", type=Path, default=Path("benchmarks/domains_v1.jsonl"))
     parser.add_argument("--profile", choices=["tiny"], default="tiny")
     parser.add_argument("--device", default="cpu")
-    parser.add_argument("--identity-gated-ninth-layer", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--identity-gated-ninth-layer", action="store_true")
     args = parser.parse_args()
