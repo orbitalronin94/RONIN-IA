@@ -61,9 +61,11 @@ class VisibleHTML(HTMLParser):
 def visible_text(raw: str) -> str:
     if "<html" not in raw[:2000].lower() and "<body" not in raw[:2000].lower():
         return raw
+    body=re.search(r"<body\\b[^>]*>(.*?)</body\\s*>",raw,flags=re.I|re.S)
+    source=body.group(1) if body else re.sub(r"<head\\b[^>]*>.*?</head\\s*>","",raw,flags=re.I|re.S)
     parser=VisibleHTML()
-    parser.feed(raw)
-    return re.sub(r"[ \t]+", " ", "".join(parser.parts)).strip()
+    parser.feed(source)
+    return re.sub(r"[ \\t]+", " ", "".join(parser.parts)).strip()
 
 def quality(text: str) -> dict:
     n=max(1,len(text))
@@ -85,9 +87,9 @@ def quality(text: str) -> dict:
     }
 
 def quality_pass(q: dict) -> bool:
-    return (q["characters"] >= 3500 and q["words_2plus_letters"] >= 300
+    return (q["characters"] >= 1500 and q["words_2plus_letters"] >= 150
             and q["letter_ratio"] >= 0.25
-            and q["replacement_char_ratio"] <= 0.001
+            and q["replacement_char_ratio"] <= 0.002
             and q["control_char_ratio"] <= 0.001
             and q["alpha_token_ratio"] >= 0.35
             and not q["email_pattern"] and not q["ssn_pattern"])
