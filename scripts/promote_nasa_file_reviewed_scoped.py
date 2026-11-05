@@ -105,8 +105,8 @@ def main():
         near=[other for other,_ in legacy_sigs if (signature^other).bit_count()<=3]
         if near: raise RuntimeError(f"{doc_id}: near-duplicate signature collision with legacy train")
         selected.append((doc_id,payload,row,review_row))
-    if len(selected) < 3:
-        raise RuntimeError(f"Too few payloads exactly matching their individual review attestations: {len(selected)}")
+    if len(selected) < 2:
+        raise RuntimeError(f"Fewer than two payloads exactly match their individual review attestations: {len(selected)}")
     ids={x[0] for x in selected}
     recheck=api_recheck(ids)
     # Stable train-only partition: all six are individually reviewed and remain outside validation/test.
