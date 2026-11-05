@@ -9,12 +9,12 @@ Este directorio es el registro operativo de adquisición, revisión, admisión y
 | Fuente / corpus | Documentos | Estado documental | ¿Entrenable ahora? |
 |---|---:|---|---|
 | Literatura española legacy (`literature-es-v1`) | 608 train (+18 validation y 18 test aislados) | Admitido Level A scoped; 140.295.523 bytes train | Sí, bajo su alcance de corpus y controles; G-0 global sigue bloqueando la elegibilidad de las 64 bibliotecas |
-| NASA NTRS public-use | 807 de 824 | Admisión scoped con revisión del propietario; 17 retenidos; 32.211.588 bytes | No: recheck de redistribución, deduplicación cruzada y controles globales pendientes |
+| NASA NTRS public-use | 809 de 824 | Admisión scoped con revisión del propietario; 15 retenidos; 32.259.432 bytes | No: recheck de redistribución, deduplicación cruzada y controles globales pendientes |
 | Papers propios | 9 Markdown (README excluido) | Incorporados con autorización del propietario; 750.857 bytes, 93.499 palabras | No: deduplicación global y gates de calidad/privacidad/particionado pendientes |
 | NASA file-reviewed | 6 | Revisión documental acotada; 701.871 bytes | No; no sumar a NASA NTRS sin resolver posible solapamiento |
 | ScienceVerse | 9.153 textos en 13 colecciones auditadas | Candidatos; filtros automáticos de calidad ejecutados | No: 0 admitidos; derechos editoriales, terceros y revisión final pendientes |
 
-**Cómo leer el total:** 608 + 807 + 9 = **1.424 registros en los tres corpus principales con admisión documental registrada**. No es un recuento global de documentos únicos: la deduplicación entre fuentes todavía no está cerrada. Los seis NASA file-reviewed se muestran aparte y no se añaden al total por posible solapamiento. Tampoco se cuentan los 9.153 textos de ScienceVerse como admitidos.
+**Cómo leer el total:** 608 + 809 + 9 = **1.426 registros en los tres corpus principales con admisión documental registrada**. No es un recuento global de documentos únicos: la deduplicación entre fuentes todavía no está cerrada. Los seis NASA file-reviewed se muestran aparte y no se añaden al total por posible solapamiento. Tampoco se cuentan los 9.153 textos de ScienceVerse como admitidos.
 
 ### ScienceVerse: calidad automática no equivale a permiso
 
@@ -73,8 +73,8 @@ El manifiesto `libraries/manifest-64.json` cuenta únicamente el corpus legacy L
 
 ### NASA NTRS — `admitted/nasa-ntrs-public-use-v1/`
 
-- 824 textos completos en la adquisición original; 807 admitidos scoped y 17 retenidos.
-- 32.211.588 bytes de texto admitido; SHA-256 único dentro de la fuente.
+- 824 textos completos en la adquisición original; el manifiesto vigente registra 809 admitidos scoped y 15 retenidos.
+- 32.259.432 bytes de texto admitido; SHA-256 único dentro de la fuente.
 - Se exige evidencia por documento de public-use, ausencia de material de terceros no autorizado, controles de exportación y revisión de información sensible.
 - No entrenable todavía: falta recheck de redistribución en el snapshot de entrenamiento, deduplicación exacta/aproximada contra otras fuentes, revisión final y particionado General/HKD con train/validation/test disjuntos.
 
@@ -119,6 +119,16 @@ Los números siguientes son **inventarios de candidatos**, no admisiones. Hay sn
 - **BNE/BDH y Project Gutenberg:** continúan como fuentes de descubrimiento. Las licencias de metadatos o la presencia en un catálogo no autorizan automáticamente el texto, la traducción ni la edición concreta; revisar obra/edición y situación en España/UE.
 - **ParlaIbero-ES, DReaM-es-open, VoxPopuli y otras colecciones lingüísticas:** mantener en preflight hasta resolver licencia de cada documento/segmento, derechos de voz, privacidad y condiciones de redistribución.
 
+
+
+## Objetivo operativo inmediato: ampliar el corpus realmente entrenable
+
+No se considerará progreso el crecimiento de `candidates/`, el número de filas con licencia aparente ni los pases de filtros automáticos. El contador que importa es el de documentos con `training_eligible=true` en una partición `train` reproducible y con hashes comprobados.
+
+- **Único corpus con partición train actualmente habilitada:** `literature-es-v1`, 608 documentos / 140.295.523 bytes. Sus 18 validation y 18 test permanecen excluidos.
+- **NASA NTRS (809 scoped) y Papers propios (9):** no se contabilizan como entrenables mientras sus manifiestos mantengan `training_eligible=false`.
+- **Siguiente fuente prioritaria:** conjunto oficial BNE *Biblioteca Digital. Documentos en dominio público*, que ofrece distribución TXT/XML de obras declaradas en dominio público y reutilización CC BY 4.0. Se debe adquirir el snapshot, fijar hashes, comprobar cada obra/edición y OCR, retirar aparato editorial/terceros dudosos, deduplicar globalmente y generar splits antes de promover. No se contará ni entrenará hasta superar esos controles.
+- La política de adquisición queda así: primero fuentes con texto completo y permiso explícito sobre la obra, luego calidad verificable, y solo entonces admisión y entrenamiento. Los candidatos que no puedan cerrar los gates no desplazan este objetivo.
 
 ## Controles obligatorios antes de admitir y entrenar
 
