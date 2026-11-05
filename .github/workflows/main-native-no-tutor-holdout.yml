@@ -39,6 +39,16 @@ jobs:
       EVAL_LIMIT: ${{ inputs.eval_limit || '512' }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github
+            LICENSE
+            pyproject.toml
+            weights
+            benchmarks
+            configs
+            ronin
+            scripts
       - name: Validate budget
         run: |
           [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -ge 100 ] && [ "$STEPS" -le 1000 ]
