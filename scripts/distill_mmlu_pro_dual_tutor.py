@@ -51,6 +51,26 @@ def tutor_prompt(row: dict[str, Any]) -> str:
     )
 
 
+def challenge_prompt(
+    row: dict[str, Any],
+    own_initial: dict[str, str | None],
+    peer_initial: dict[str, str | None],
+) -> str:
+    return (
+        tutor_prompt(row)
+        + "\nRONIN pregunta: ¿por qué es correcta tu respuesta? Haz una revisión crítica en una "
+        "segunda ronda.\n"
+        + f"Tu respuesta provisional: {own_initial.get('answer')}\n"
+        + f"Tu explicación provisional: {own_initial.get('rationale') or 'No disponible'}\n"
+        + f"Respuesta independiente del otro tutor: {peer_initial.get('answer')}\n"
+        + f"Explicación del otro tutor: {peer_initial.get('rationale') or 'No disponible'}\n"
+        + "Contrasta premisas, regla decisiva y un posible contraejemplo. No aceptes ni rechaces "
+        "la respuesta ajena por autoridad. Si detectas un error, corrígelo; si mantienes tu "
+        "respuesta, justifícala con una explicación breve y comprobable. Devuelve de nuevo "
+        "ANSWER: una letra A-J y RATIONALE: 2-5 frases. No muestres deliberación privada."
+    )
+
+
 def parse_response(raw: str) -> tuple[str | None, str | None]:
     answer_match = ANSWER_RE.search(raw)
     rationale_match = RATIONALE_RE.search(raw)
@@ -72,15 +92,25 @@ def collect_teacher(
     quantization: str,
     seed: int,
     max_new_tokens: int,
+    peer_results: list[dict[str, str | None]] | None = None,
+    own_initial: list[dict[str, str | None]] | None = None,
 ) -> tuple[list[dict[str, str | None]], dict]:
     model, tokenizer, manifest = load_local_teacher(model_dir, quantization)
+    if (peer_results is None) != (own_initial is None):
+        model.close()
+        raise ValueError("peer_results y own_initial deben proporcionarse juntos")
     results = []
     try:
         for index, row in enumerate(rows):
+            prompt = (
+                challenge_prompt(row, own_initial[index], peer_results[index])
+                if peer_results is not None and own_initial is not None
+                else tutor_prompt(row)
+            )
             raw = generate_completion(
                 model,
                 tokenizer,
-                tutor_prompt(row),
+                prompt,
                 seed=seed + index,
                 max_new_tokens=max_new_tokens,
                 temperature=0.2,
@@ -112,31 +142,50 @@ def generate(
     rows = select(load_dataset(revision, split="validation"), count, seed)
 
     # Se ejecutan de uno en uno: nunca se mantienen ambos modelos en VRAM a la vez.
-    qwen_results, qwen_manifest = collect_teacher(
+    qwen_initial, qwen_manifest = collect_teacher(
         qwen_dir, rows, quantization=quantization, seed=seed, max_new_tokens=max_new_tokens
     )
-    deepseek_results, deepseek_manifest = collect_teacher(
+    deepseek_initial, deepseek_manifest = collect_teacher(
         deepseek_dir, rows, quantization=quantization, seed=seed + 100_000,
         max_new_tokens=max_new_tokens,
+    )
+    # RONIN plantea un porqué y cada tutor contrasta su respuesta con la del otro.
+    qwen_results, _ = collect_teacher(
+        qwen_dir, rows, quantization=quantization, seed=seed + 200_000,
+        max_new_tokens=max_new_tokens, peer_results=deepseek_initial,
+        own_initial=qwen_initial,
+    )
+    deepseek_results, _ = collect_teacher(
+        deepseek_dir, rows, quantization=quantization, seed=seed + 300_000,
+        max_new_tokens=max_new_tokens, peer_results=qwen_initial,
+        own_initial=deepseek_initial,
     )
 
     accepted = []
     audit = []
     correct_qwen = 0
     correct_deepseek = 0
+    initial_correct_qwen = 0
+    initial_correct_deepseek = 0
     agreements = 0
-    for row, qwen, deepseek in zip(rows, qwen_results, deepseek_results, strict=True):
+    for row, qwen, deepseek, qwen_first, deepseek_first in zip(
+        rows, qwen_results, deepseek_results, qwen_initial, deepseek_initial, strict=True
+    ):
         gold = chr(ord("A") + row["correct_index"])
         qwen_correct = qwen["answer"] == gold
         deepseek_correct = deepseek["answer"] == gold
         agreement = qwen["answer"] is not None and qwen["answer"] == deepseek["answer"]
         correct_qwen += int(qwen_correct)
         correct_deepseek += int(deepseek_correct)
+        initial_correct_qwen += int(qwen_first["answer"] == gold)
+        initial_correct_deepseek += int(deepseek_first["answer"] == gold)
         agreements += int(agreement)
         audit_record = {
             "question_id": row["id"],
             "domain": row["category"],
             "gold_answer": gold,
+            "qwen_initial_answer": qwen_first["answer"],
+            "deepseek_initial_answer": deepseek_first["answer"],
             "qwen_answer": qwen["answer"],
             "deepseek_answer": deepseek["answer"],
             "qwen_correct": qwen_correct,
@@ -190,7 +239,7 @@ def generate(
             "source_dataset": "TIGER-Lab/MMLU-Pro",
             "source_split": "validation",
             "source_revision": revision,
-            "verification": "both_teacher_answers_match_independent_gold_label",
+            "verification": "both_final_answers_after_cross_examination_match_independent_gold_label",
         })
 
     minimum = max(2, math.ceil(count / 6))
@@ -214,7 +263,7 @@ def generate(
         encoding="utf-8",
     )
     summary = {
-        "experiment": "ronin-local-dual-teacher-mmlu-pro-v1",
+        "experiment": "ronin-local-dual-teacher-socratic-mmlu-pro-v2",
         "source_dataset": "TIGER-Lab/MMLU-Pro",
         "source_split": "validation",
         "source_revision": revision,
@@ -224,18 +273,22 @@ def generate(
             "model_id": qwen_manifest["model_id"],
             "revision": qwen_manifest["base_revision"],
             "license": qwen_manifest["license"],
-            "accuracy": correct_qwen / count,
+            "initial_accuracy": initial_correct_qwen / count,
+            "accuracy_after_challenge": correct_qwen / count,
         },
         "deepseek": {
             "model_id": deepseek_manifest["model_id"],
             "revision": deepseek_manifest["base_revision"],
             "license": deepseek_manifest["license"],
-            "accuracy": correct_deepseek / count,
+            "initial_accuracy": initial_correct_deepseek / count,
+            "accuracy_after_challenge": correct_deepseek / count,
         },
         "agreement_rate": agreements / count,
         "sampled": count,
         "accepted": len(accepted),
-        "acceptance_rule": "both tutors agree, both match validation gold, both provide rationale",
+        "dialogue_rounds": 2,
+        "dialogue": "independent answer followed by a RONIN why-question and cross-examination",
+        "acceptance_rule": "after cross-examination both tutors agree, both match validation gold, both provide rationale",
         "student_initialization": "random",
         "teacher_weights_imported_into_student": False,
         "generated_output_license": "not_asserted",
