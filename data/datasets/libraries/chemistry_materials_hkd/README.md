@@ -27,3 +27,10 @@ El ensamblador asigna únicamente documentos con señal temática suficiente. Lo
 - Superar el gate global G-0.
 
 **Estado de entrenamiento: bloqueado.** La presencia de un texto en un artefacto candidato no lo convierte en material admitido. Los recuentos y hashes de cada ejecución se conservan en `library-pack-manifest.json`.
+
+
+## Candidatos de documentación técnica pública
+
+- NIST Technical Series/PDR: candidato de alta prioridad para documentos y datos propios de NIST, con atribución; se excluye material de terceros y se verifica autoría por registro.
+- No se admite el catálogo completo. Payload, hashes, revisión de PII/calidad, deduplicación y particiones siguen pendientes.
+- Expedientes: `data/datasets/candidates/nasa-ntrs-public-use/README.md` y `data/datasets/candidates/nist-technical-series/README.md`.
