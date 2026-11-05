@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 11:55 | [Integración continua #1401 (run 42022695288)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42022695288) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: perf\(ci\): use pinned prebuilt llama.cpp runtime. Trigger: push; rama: main; intento: 1. | 244431aa |
 | 2026-11-05 11:54 | [Integración continua #1403 (run 42022757702)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42022757702) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: perf\(data\): cache verified Qwen distillation artifacts. Trigger: push; rama: main; intento: 1. | 74f58a68 |
 | 2026-11-05 11:54 | [Integración continua #1400 (run 42022685508)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42022685508) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): recompute exact SHA-256 hashes for owner Papers payloads. Trigger: push; rama: main; intento: 1. | 71f52fe1 |
 | 2026-11-05 11:54 | [Integración continua #1399 (run 42022552977)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42022552977) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): reconcile final scoped admission counts and G0 status. Trigger: push; rama: main; intento: 1. | c7b49b01 |
