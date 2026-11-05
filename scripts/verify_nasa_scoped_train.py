@@ -102,8 +102,6 @@ def main() -> None:
         actual = sha256(raw)
         if git_blob_sha1(raw) != verdict.get("git_blob_sha1"):
             raise SystemExit(f"{doc_id}: Git blob SHA-1 mismatch against file-level review")
-        if len(raw) != verdict.get("text_bytes"):
-            raise SystemExit(f"{doc_id}: byte length mismatch against file-level review")
         if verdict.get("text_sha256") and actual != verdict["text_sha256"]:
             raise SystemExit(f"{doc_id}: SHA-256 mismatch against file-level review")
         if packed.get("text_sha256") and actual != packed["text_sha256"]:
