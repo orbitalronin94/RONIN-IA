@@ -31,7 +31,6 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OMP_NUM_THREADS: "2"
       MKL_NUM_THREADS: "2"
-      BASE_RUN_ID: "42017319862"
       LITERATURE_RUN_ID: "41926088900"
       MATHLIB_RUN_ID: "42026633643"
       NASA_FILE_REVIEWED_RUN_ID: "42028138060"
@@ -54,14 +53,6 @@ jobs:
           python -m pip install -e . --no-deps
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "dill==0.3.8" "multiprocess==0.70.16" "huggingface_hub==0.36.0"
           python -m compileall -q scripts/prepare_legacy_training_split.py scripts/train_text.py scripts/evaluate_mmlu_pro.py
-      - name: Download pinned native RONIN main checkpoint
-        uses: actions/download-artifact@v6
-        with:
-          name: ronin-main-cycle2-mmlu-pro-full
-          path: incoming/main
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ env.BASE_RUN_ID }}
       - name: Download admitted literature train partition
         uses: actions/download-artifact@v6
         with:
@@ -93,7 +84,8 @@ jobs:
           from pathlib import Path
           import torch
           def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
-          base=Path("incoming/main/checkpoints/main.pt")
+          base=Path("weights/ronin-main.pt")
+          model_manifest=json.loads(Path("weights/main-model.json").read_text(encoding="utf-8"))
           lit=Path("incoming/literature/train.txt")
           lm=Path("incoming/literature/dataset-manifest.json")
           math=Path("incoming/mathlib4/train.txt")
@@ -102,7 +94,8 @@ jobs:
           nmf=Path("incoming/nasa-file-reviewed/manifest.json")
           ndocs=Path("incoming/nasa-file-reviewed/documents.train.jsonl")
           assert all(p.is_file() for p in (base,lit,lm,math,mmf,nasa,nmf,ndocs))
-          assert sha(base)=="a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
+          assert sha(base)==model_manifest["weights_sha256"]
+          assert model_manifest["checkpoint_sha256"]=="a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
           assert sha(lit)=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
           l=json.loads(lm.read_text())
           assert l.get("dataset_id")=="ronin-spanish-public-domain-literature-v2"
