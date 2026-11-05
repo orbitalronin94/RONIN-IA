@@ -20,7 +20,7 @@ Este directorio es el registro operativo de adquisición, revisión, admisión y
 
 ### ScienceVerse: 7.103 documentos train scoped; 262 retenidos
 
-La auditoría por documento registra 13 colecciones y 7.365 documentos admitidos scoped. De ellos, 7.103 documentos (426.975.945 bytes UTF-8) pasan integridad de payload, SHA-256/bytes, CC BY/CC0 por DOI, atribución, mínimos de calidad, filtros de email/SSN y deduplicación exacta interna y contra el train actual. Se retienen 724: 262 por exceso de caracteres de reemplazo; no se retuvieron títulos no sustantivos en el artefacto verificado. La promoción es train scoped; near-duplicates globales, contaminación de benchmarks/holdouts y G-0 siguen pendientes.
+La auditoría por documento registra 13 colecciones y 7.365 documentos admitidos scoped. De ellos, 7.103 documentos (426.975.945 bytes UTF-8) pasan integridad de payload, SHA-256/bytes, CC BY/CC0 por DOI, atribución, mínimos de calidad, filtros de email/SSN y deduplicación exacta interna y contra el train actual. Se retienen 262 por exceso de caracteres de reemplazo; no se retuvieron títulos no sustantivos en el artefacto verificado. La promoción es train scoped; near-duplicates globales, contaminación de benchmarks/holdouts y G-0 siguen pendientes.
 
 | Colección | Textos examinados | Admitidos scoped | Retenidos |
 |---|---:|---:|---:|
@@ -49,7 +49,7 @@ Fuente de la admisión scoped: `admitted/scienceverse-ccby-v1/manifest.json`. La
 - Train: **270.244 documentos / 18.385.485 bytes UTF-8 de texto** (77.509.998 bytes JSONL; gzip persistido tras el workflow). Inglés: 88.916; catalán: 181.328. Pares: es→en 48.998, ca→en 39.918, en→ca 181.328.
 - Validation: 34.051; test: 33.678. Ambos permanecen fuera de entrenamiento.
 - Revisión humana estratificada: 36/36 muestras (12 por par); texto interpretable y coherente con el idioma; se registró ruido de traducción en tres ejemplos. Los tres falsos positivos del detector de teléfono son rangos de años, no teléfonos.
-- Deduplicación exacta: 0 duplicados internos y 0 frente a ScienceVerse, Mathlib4, NASA file-reviewed y Papers; 0 coincidencias de línea frente a las 449.939 líneas del train literario español. El chequeo de ScienceVerse usó un artefacto conservador de 7.103 documentos, coincidente con los 7.103 del manifiesto reconciliado.
+- Deduplicación exacta: 0 duplicados internos y 0 frente a ScienceVerse, Mathlib4, NASA file-reviewed y Papers; 0 coincidencias de línea frente a las 449.939 líneas del train literario español. El chequeo de ScienceVerse y su manifiesto train se han reconciliado: ambos registran 7.103 documentos y los mismos hashes de payload.
 - **Límites explícitos:** train scoped interno; G-0 global sigue FAIL; near-duplicates globales y contaminación de benchmarks/holdouts siguen PENDING. No presentar el corpus como gold-standard de traducción.
 
 Manifiesto de materialización: [CoVoST 2 train scoped](admitted/covost2-cc0-translation-only/manifest.json). Revisión: [muestra manual y deduplicación](reviews/covost2-manual-review-2026-11-05.json).
@@ -209,7 +209,7 @@ El corpus legacy de **608 documentos** continúa siendo la única fuente contabi
 
 Los 7.365 ScienceVerse admitidos scoped tienen DOI único, SHA-256 de texto único dentro de las 13 exportaciones, licencia por documento CC-BY-4.0 o CC0 y atribución presente. La auditoría train posterior promovió 7.103 documentos (426.975.945 bytes) tras integridad, mínimos de calidad, filtros de email/SSN y deduplicación exacta contra los train actuales; retuvo 262 por exceso de caracteres de reemplazo. La attestation del propietario cubre la revisión humana de las fuentes mapeadas; el manifiesto mantiene trazabilidad por documento.
 
-**Entrenamiento scoped:** el mix incorpora 608 literatura, 8.498 Mathlib4, 6 NASA file-reviewed, 9 Papers propios, 7.103 ScienceVerse y 270.244 CoVoST 2. NASA restante (807), los 724 ScienceVerse retenidos, CoVoST validation/test y otros candidatos siguen fuera. Near-duplicates globales, contaminación de benchmarks/holdouts, emparejamiento General/HKD global y G-0 siguen pendientes.
+**Entrenamiento scoped:** el mix incorpora 608 literatura, 8.498 Mathlib4, 6 NASA file-reviewed, 9 Papers propios, 7.103 ScienceVerse y 270.244 CoVoST 2. NASA restante (807), los 262 ScienceVerse retenidos, CoVoST validation/test y otros candidatos siguen fuera. Near-duplicates globales, contaminación de benchmarks/holdouts, emparejamiento General/HKD global y G-0 siguen pendientes.
 
 ## Auditoría integral de candidatos (2026-11-05)
 
