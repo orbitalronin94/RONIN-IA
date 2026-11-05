@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 10:21 | [Integración continua #1267 (run 42009859954)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42009859954) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: feat\(teachers\): add verified Qwen3-8B GGUF tutor. Trigger: push; rama: main; intento: 1. | 2335789a |
 | 2026-11-05 10:21 | [Integración continua #1273 (run 42010039600)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42010039600) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: revert: remove premature MMLU-Pro single-tutor trainer. Trigger: push; rama: main; intento: 1. | bf861b27 |
 | 2026-11-05 10:20 | [Integración continua #1269 (run 42009900756)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42009900756) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: feat\(training\): add Qwen3 single-tutor RoninLM iteration. Trigger: push; rama: main; intento: 1. | 599d0608 |
 | 2026-11-05 10:20 | [Integración continua #1268 (run 42009883519)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42009883519) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: feat\(distillation\): add single Qwen tutor with gold-filtered train split. Trigger: push; rama: main; intento: 1. | 1f8562df |
