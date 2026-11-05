@@ -9,7 +9,7 @@ Checkpoint de partida (ganador del screening):
 - Resultado de referencia: 6/50 (12 %) en MMLU-Pro validation, muestra estratificada seed 2026.
 - Su continuación de 500 pasos obtuvo 5/50 (10 %) y no se considera ganadora.
 
-## Pregunta experimental
+## Nuevo experimento B/C — 10.000 pasos (2026-11-05)\n\nSe amplía la comparación a dos candidatos exclusivamente: B (replay equilibrado) y C (replay equilibrado + anclaje L2), con 10.000 pasos completos por candidato, ejecutados secuencialmente desde el mismo checkpoint 6/50 y con la misma semilla. El workflow evalúa el checkpoint inicial antes de entrenar y cada resultado después sobre los mismos 50 IDs, revisión y hash del split validation; exige 50/50, cero skips y cobertura 100 %. Se guardan los checkpoints finales, hashes, métricas y diferencias por pregunta. No hay promoción automática. Este validation de 50 preguntas es screening de desarrollo, no confirmación independiente.\n\n## Pregunta experimental
 
 ¿Podemos obtener mejoras de predicción del corpus sin perder el comportamiento que produjo el 6/50? Los cuatro candidatos deben partir exactamente del mismo checkpoint, corpus, partición interna, contexto, semilla de muestreo y holdout pareado.
 
@@ -58,6 +58,6 @@ Un candidato no gana por mejorar BPB/PPL únicamente.
 
 ## Presupuesto y ejecución
 
-El máximo son 300 pasos de entrenamiento (A/B/C: 100 cada uno); D no entrena. La interpolación produce tres variantes sin consumir pasos. Las variantes no se ejecutan en paralelo si compiten por CPU; se ejecutan secuencialmente para mantener throughput y memoria predecibles.
+El torneo inicial usó 300 pasos de entrenamiento (A/B/C: 100 cada uno); D no entrenó. El nuevo experimento B/C usa 20.000 pasos totales (10.000 por candidato). La interpolación produce tres variantes sin consumir pasos. Las variantes no se ejecutan en paralelo si compiten por CPU; se ejecutan secuencialmente para mantener throughput y memoria predecibles.
 
 La implementación está disponible en `scripts/run_checkpoint_tournament.py`, `ronin/data/source_batches.py` y `ronin/training/loop.py`. El workflow manual está en `.github/workflows/checkpoint-tournament-6of50.yml`. Antes de lanzar el workflow, deben pasar los checks de la PR y verificarse los artefactos de origen. El workflow no promueve pesos automáticamente.
