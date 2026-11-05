@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 10:47 | [Integración continua #1294 (run 42013526849)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42013526849) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Link owner-attested dataset review coverage in 64-library manifest. Trigger: push; rama: main; intento: 1. | 4da1bcb8 |
 | 2026-11-05 10:46 | [Integración continua #1293 (run 42013507836)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42013507836) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Record completed owner-attested human review for NASA candidate packs. Trigger: push; rama: main; intento: 1. | d9834ce5 |
 | 2026-11-05 10:46 | [Integración continua #1291 (run 42013118689)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42013118689) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: safety: disable legacy training while global G-0 fails. Trigger: push; rama: main; intento: 1. | 5273ee28 |
 | 2026-11-05 10:44 | [Integración continua #1288 (run 42012903324)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42012903324) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs: correct NASA candidate inventory and library routing. Trigger: push; rama: main; intento: 1. | 1af154e5 |
