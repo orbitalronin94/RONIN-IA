@@ -127,87 +127,91 @@ def main() -> None:
              "pii_rejected": 0, "download_failures": 0}
 
     for domain, categories in CATEGORIES.items():
-        for category in categories:
-            params = urllib.parse.urlencode({
-                "subjectCategory": category,
-                "disseminated": "DOCUMENT_AND_METADATA",
-                "page.size": "100",
-                "page.from": "0",
-                "sort.field": "id",
-                "sort.order": "asc",
-            })
-            url = f"{API}/citations/search?{params}"
-            payload = request_json(url)
-            stats["queries"] += 1
-            results = payload.get("results") or []
-            stats["records_seen"] += len(results)
-            taken = 0
-            for meta in results:
-                doc_id = str(meta.get("id", "")).strip()
-                if not doc_id or doc_id in seen_ids:
-                    stats["duplicate_ids"] += 1
-                    continue
-                seen_ids.add(doc_id)
-                ok, reason = eligible(meta)
-                if not ok:
-                    excluded.append({"id": doc_id, "title": meta.get("title"), "domain": domain,
-                                     "category": category, "reason": reason})
-                    continue
-                stats["metadata_eligible"] += 1
-                if taken >= MAX_PER_CATEGORY:
-                    continue
-                fulltext_url = find_fulltext(meta)
-                try:
-                    raw = request_bytes(fulltext_url)
-                    text = raw.decode("utf-8-sig", errors="replace").replace("\x00", "")
-                except Exception as exc:
-                    stats["download_failures"] += 1
-                    excluded.append({"id": doc_id, "title": meta.get("title"), "domain": domain,
-                                     "category": category, "reason": "download_error",
-                                     "detail": type(exc).__name__})
-                    continue
-                encoded = text.encode("utf-8")
-                if len(encoded) < MIN_TEXT_BYTES or text.count("\ufffd") > max(10, len(text) // 1000):
-                    excluded.append({"id": doc_id, "title": meta.get("title"), "domain": domain,
-                                     "category": category, "reason": "text_too_short_or_bad_encoding"})
-                    continue
-                if EMAIL_RE.search(text) or SSN_RE.search(text):
-                    stats["pii_rejected"] += 1
-                    excluded.append({"id": doc_id, "title": meta.get("title"), "domain": domain,
-                                     "category": category, "reason": "email_or_ssn_pattern"})
-                    continue
-                digest = sha256(encoded)
-                if digest in seen_hashes:
-                    stats["duplicate_texts"] += 1
-                    excluded.append({"id": doc_id, "title": meta.get("title"), "domain": domain,
-                                     "category": category, "reason": "duplicate_text_sha256"})
-                    continue
-                seen_hashes.add(digest)
-                target = docs_dir / f"{doc_id}.txt"
-                target.write_bytes(encoded)
-                record = {
-                    "id": doc_id, "title": meta.get("title"), "abstract": meta.get("abstract"),
-                    "domain": domain, "subject_categories": meta.get("subjectCategories"),
-                    "sti_type": meta.get("stiType"), "publication_date": meta.get("distributionDate"),
-                    "doi": next((p.get("doi") for p in (meta.get("publications") or []) if p.get("doi")), None),
-                    "source_url": f"https://ntrs.nasa.gov/citations/{doc_id}",
-                    "fulltext_url": fulltext_url, "source": "NASA STI/NTRS",
-                    "rights": {
-                        "determination_type": (meta.get("copyright") or {}).get("determinationType"),
-                        "license_type": (meta.get("copyright") or {}).get("licenseType"),
-                        "contains_third_party_material": (meta.get("copyright") or {}).get("containsThirdPartyMaterial"),
-                        "third_party_content_condition": (meta.get("copyright") or {}).get("thirdPartyContentCondition"),
-                    },
-                    "sensitive_information": meta.get("sensitiveInformation"),
-                    "export_control": meta.get("exportControl"),
-                    "text_file": f"documents/{doc_id}.txt", "text_bytes": len(encoded),
-                    "text_sha256": digest, "status": "candidate_pending_global_validation",
-                    "training_eligible": False,
-                }
-                accepted[doc_id] = record
-                stats["downloaded"] += 1
-                taken += 1
-                time.sleep(0.15)
+        for category in categories:            taken = 0
+            for page_from in range(0, 600, 100):
+                params = urllib.parse.urlencode({
+                    "subjectCategory": category,
+                    "disseminated": "DOCUMENT_AND_METADATA",
+                    "page.size": "100",
+                    "page.from": str(page_from),
+                    "sort.field": "id",
+                    "sort.order": "asc",
+                })
+                url = f"{API}/citations/search?{params}"
+                payload = request_json(url)
+                stats["queries"] += 1
+                results = payload.get("results") or []
+                stats["records_seen"] += len(results)
+                taken = 0
+                for meta in results:
+                    doc_id = str(meta.get("id", "")).strip()
+                    if not doc_id or doc_id in seen_ids:
+                        stats["duplicate_ids"] += 1
+                        continue
+                    seen_ids.add(doc_id)
+                    ok, reason = eligible(meta)
+                    if not ok:
+                        excluded.append({"id": doc_id, "title": meta.get("title"), "domain": domain,
+                                         "category": category, "reason": reason})
+                        continue
+                    stats["metadata_eligible"] += 1
+                    if taken >= MAX_PER_CATEGORY:
+                        continue
+                    fulltext_url = find_fulltext(meta)
+                    try:
+                        raw = request_bytes(fulltext_url)
+                        text = raw.decode("utf-8-sig", errors="replace").replace("\x00", "")
+                    except Exception as exc:
+                        stats["download_failures"] += 1
+                        excluded.append({"id": doc_id, "title": meta.get("title"), "domain": domain,
+                                         "category": category, "reason": "download_error",
+                                         "detail": type(exc).__name__})
+                        continue
+                    encoded = text.encode("utf-8")
+                    if len(encoded) < MIN_TEXT_BYTES or text.count("\ufffd") > max(10, len(text) // 1000):
+                        excluded.append({"id": doc_id, "title": meta.get("title"), "domain": domain,
+                                         "category": category, "reason": "text_too_short_or_bad_encoding"})
+                        continue
+                    if EMAIL_RE.search(text) or SSN_RE.search(text):
+                        stats["pii_rejected"] += 1
+                        excluded.append({"id": doc_id, "title": meta.get("title"), "domain": domain,
+                                         "category": category, "reason": "email_or_ssn_pattern"})
+                        continue
+                    digest = sha256(encoded)
+                    if digest in seen_hashes:
+                        stats["duplicate_texts"] += 1
+                        excluded.append({"id": doc_id, "title": meta.get("title"), "domain": domain,
+                                         "category": category, "reason": "duplicate_text_sha256"})
+                        continue
+                    seen_hashes.add(digest)
+                    target = docs_dir / f"{doc_id}.txt"
+                    target.write_bytes(encoded)
+                    record = {
+                        "id": doc_id, "title": meta.get("title"), "abstract": meta.get("abstract"),
+                        "domain": domain, "subject_categories": meta.get("subjectCategories"),
+                        "sti_type": meta.get("stiType"), "publication_date": meta.get("distributionDate"),
+                        "doi": next((p.get("doi") for p in (meta.get("publications") or []) if p.get("doi")), None),
+                        "source_url": f"https://ntrs.nasa.gov/citations/{doc_id}",
+                        "fulltext_url": fulltext_url, "source": "NASA STI/NTRS",
+                        "rights": {
+                            "determination_type": (meta.get("copyright") or {}).get("determinationType"),
+                            "license_type": (meta.get("copyright") or {}).get("licenseType"),
+                            "contains_third_party_material": (meta.get("copyright") or {}).get("containsThirdPartyMaterial"),
+                            "third_party_content_condition": (meta.get("copyright") or {}).get("thirdPartyContentCondition"),
+                        },
+                        "sensitive_information": meta.get("sensitiveInformation"),
+                        "export_control": meta.get("exportControl"),
+                        "text_file": f"documents/{doc_id}.txt", "text_bytes": len(encoded),
+                        "text_sha256": digest, "status": "candidate_pending_global_validation",
+                        "training_eligible": False,
+                    }
+                    accepted[doc_id] = record
+                    stats["downloaded"] += 1
+                    taken += 1
+                    time.sleep(0.15)
+    
+                if len(results) < 100 or taken >= MAX_PER_CATEGORY:
+                    break
 
     with manifest_path.open("w", encoding="utf-8") as out:
         for doc_id in sorted(accepted, key=int):
