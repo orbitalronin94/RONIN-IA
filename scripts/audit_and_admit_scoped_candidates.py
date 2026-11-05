@@ -147,12 +147,13 @@ def audit_nasa() -> dict:
             status="admitted_scoped_training_blocked"
             reason="Per-record NASA public-use allowlist, payload integrity, source dedup and full-document machine-quality screen passed; global gates still pending"
             admitted+=1
-            total_bytes+=len(payload)
+            total_bytes+=len(text.encode("utf-8"))
             target=docs/f"{doc_id}.txt"
             target.write_text(text,encoding="utf-8")
         decisions.append({
             "document_id":doc_id,"title":row.get("title"),"source_path":str(rel),
-            "source_url":row.get("source_url"),"source_sha256":digest,"source_bytes":len(payload),\n            "admitted_text_sha256":sha(text.encode("utf-8")) if status == "admitted_scoped_training_blocked" else None,\n            "admitted_text_bytes":len(text.encode("utf-8")) if status == "admitted_scoped_training_blocked" else None,
+            "source_url":row.get("source_url"),"source_sha256":digest,"source_bytes":len(payload),
+            "admitted_text_sha256":sha(text.encode("utf-8")) if status == "admitted_scoped_training_blocked" else None,\n            "admitted_text_bytes":len(text.encode("utf-8")) if status == "admitted_scoped_training_blocked" else None,
             "domain":row.get("domain"),"target_library":row.get("domain"),
             "rights_allowlist_pass":rights_ok,"quality":q,
             "prior_individual_review":override.get("disposition") if override else "not_individually_reviewed",
