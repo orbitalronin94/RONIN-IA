@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 11:04 | [Integración continua #1316 (run 42015832264)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42015832264) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data\(dataset\): add owner-authorized paper 9/9. Trigger: push; rama: main; intento: 1. | 2be4a48e |
 | 2026-11-05 11:03 | [Integración continua #1307 (run 42015474068)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42015474068) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: record ScienceVerse candidate inventory alongside file review. Trigger: push; rama: main; intento: 1. | 71af2b6f |
 | 2026-11-05 11:03 | [Integración continua #1308 (run 42015723866)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42015723866) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data\(dataset\): add owner-authorized paper 1/9. Trigger: push; rama: main; intento: 1. | 06abc008 |
 | 2026-11-05 11:01 | [Integración continua #1304 (run 42015186825)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42015186825) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: propagate file-level review decisions into NASA library packs. Trigger: push; rama: main; intento: 1. | 1739ce03 |
