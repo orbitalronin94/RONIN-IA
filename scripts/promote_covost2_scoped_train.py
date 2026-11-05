@@ -20,6 +20,10 @@ EXPECTED = {
     "train_characters": 18011159,
     "validation_documents": 34051,
     "test_documents": 33678,
+    "validation_jsonl_bytes": 9761627,
+    "validation_jsonl_sha256": "3396f46f6667970aebb9039eb891b762fc11b30a6a046d5aa3a968b770fcb138",
+    "test_jsonl_bytes": 9660748,
+    "test_jsonl_sha256": "5304b7fd2e312cddbed7fa76479c35997bad7abcce9c52b9281d2ac67a822991",
     "rights_record_id": "covost2-cc0-translation-only-d3a235f41906e78d",
     "review_path": "data/datasets/reviews/covost2-manual-review-2026-11-05.json",
     "rights_registry_path": "data/datasets/rights_registry/records.jsonl",
@@ -72,7 +76,11 @@ def validate_inputs(root: Path) -> tuple[dict[str, Any], dict[str, Any], dict[st
         "train_sha256": train.get("sha256") == EXPECTED["train_jsonl_sha256"],
         "train_characters": train.get("text_characters") == EXPECTED["train_characters"],
         "validation_documents": validation.get("documents") == EXPECTED["validation_documents"],
+        "validation_bytes": validation.get("bytes") == EXPECTED["validation_jsonl_bytes"],
+        "validation_sha256": validation.get("sha256") == EXPECTED["validation_jsonl_sha256"],
         "test_documents": test.get("documents") == EXPECTED["test_documents"],
+        "test_bytes": test.get("bytes") == EXPECTED["test_jsonl_bytes"],
+        "test_sha256": test.get("sha256") == EXPECTED["test_jsonl_sha256"],
         "all_quality_partitions_candidate_only": all(
             part.get("training_eligible") is False for part in partitions.values()
         ),
