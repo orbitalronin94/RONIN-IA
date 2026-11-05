@@ -10,8 +10,17 @@ on:
       - "scripts/preflight_pmc_oa.py"
       - "data/manifests/knowledge_dense_sources.json"
       - "reports/license_audit.json"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/prepare-pmc-oa-candidates.yml"
+      - "scripts/prepare_pmc_oa_candidates.py"
+      - "scripts/pmc_oa_source.py"
+      - "scripts/preflight_pmc_oa.py"
+      - "data/manifests/knowledge_dense_sources.json"
+      - "reports/license_audit.json"
   schedule:
-    - cron: "29 3 * * 0"
+    - cron: "29 3 * * *"
   workflow_dispatch:
     inputs:
       max_documents:
@@ -22,7 +31,7 @@ on:
       max_text_mib:
         description: Maximum accepted text inspected per domain (MiB)
         required: true
-        default: "512"
+        default: "2048"
         type: string
 
 permissions:
@@ -45,7 +54,7 @@ jobs:
     env:
       DOMAIN: ${{ matrix.domain }}
       MAX_DOCUMENTS: ${{ inputs.max_documents || '10000' }}
-      MAX_TEXT_MIB: ${{ inputs.max_text_mib || '512' }}
+      MAX_TEXT_MIB: ${{ inputs.max_text_mib || '2048' }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -54,7 +63,7 @@ jobs:
       - name: Validate safe bounded parameters
         run: |
           [[ "$MAX_DOCUMENTS" =~ ^[0-9]+$ ]] && [ "$MAX_DOCUMENTS" -ge 2 ] && [ "$MAX_DOCUMENTS" -le 10000 ]
-          [[ "$MAX_TEXT_MIB" =~ ^[0-9]+$ ]] && [ "$MAX_TEXT_MIB" -ge 16 ] && [ "$MAX_TEXT_MIB" -le 512 ]
+          [[ "$MAX_TEXT_MIB" =~ ^[0-9]+$ ]] && [ "$MAX_TEXT_MIB" -ge 16 ] && [ "$MAX_TEXT_MIB" -le 2048 ]
       - name: Verify exact scoped authorization and source manifest
         run: |
           python - <<'PY'
