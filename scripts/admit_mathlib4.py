@@ -78,7 +78,7 @@ def existing_text_hashes(root: Path, literature_train_dir: Path | None = None) -
                 raise SystemExit(f"Legacy literature payload integrity mismatch: {row.get('record_id')}")
             hashes.add(digest)
             cursor += count
-            if train_text[cursor:cursor + 2] == "\\n\\n":
+            if train_text[cursor:cursor + 2] == "\n\n":
                 cursor += 2
         if cursor not in {len(train_text), len(train_text) - 1}:
             raise SystemExit("Legacy literature train artifact has unindexed trailing content")
