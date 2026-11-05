@@ -19,22 +19,26 @@ def test_manifest_has_32_domains_and_64_disjoint_library_slots() -> None:
         }
 
 
-def test_catalog_inventory_passes_without_claiming_any_admission() -> None:
+def test_catalog_inventory_matches_scoped_legacy_admission_without_enabling_training() -> None:
     data = json.loads(DEFAULT_PATH.read_text(encoding="utf-8"))
     assert validate(DEFAULT_PATH) == []
-    assert data["inventory_counts"]["level_a_admitted_documents"] == 0
-    assert data["inventory_counts"]["level_a_admitted_text_bytes"] == 0
-    assert data["inventory_counts"]["libraries_meeting_minimum"] == 0
+    assert data["inventory_counts"]["level_a_admitted_documents"] == 608
+    assert data["inventory_counts"]["level_a_admitted_text_bytes"] == 140295523
+    assert data["inventory_counts"]["libraries_meeting_minimum"] == 1
     assert all(item["training_eligible"] is False for item in data["libraries"])
     assert data["policy"]["global_g0"] == "FAIL"
 
 
-def test_legacy_608_document_corpus_is_not_silently_counted_as_level_a() -> None:
+def test_legacy_608_document_corpus_is_counted_only_in_humanities_general() -> None:
     data = json.loads(DEFAULT_PATH.read_text(encoding="utf-8"))
     legacy = data["legacy_scoped_corpus"]
+    library = next(item for item in data["libraries"] if item["id"] == "humanities_general")
     assert legacy["train_documents"] == 608
     assert legacy["train_text_bytes"] == 140295523
-    assert legacy["counted_toward_level_a_library_minimum"] is False
+    assert legacy["counted_toward_level_a_library_minimum"] is True
+    assert library["level_a_admitted_documents"] == legacy["train_documents"]
+    assert library["level_a_admitted_text_bytes"] == legacy["train_text_bytes"]
+    assert library["training_eligible"] is False
 
 
 def test_validator_rejects_false_minimum_claim_and_g0_bypass(tmp_path: Path) -> None:
