@@ -15,7 +15,14 @@ MANIFEST_BLOB_SHA1 = "05497e33fe60dd9a557abbc4f178f4bdceef7545"
 MANIFEST_URL = f"https://raw.githubusercontent.com/scienceverse/papers/{REPO_COMMIT}/collabra/manifest.csv"
 CROSSREF_URL = "https://api.crossref.org/works"
 ISSN = "2474-7394"
-USER_AGENT = "RONIN-IA-Collabra-rights-audit/1.1"
+USER_AGENT = "RONIN-IA-Collabra-rights-audit/1.2"
+MANUAL_RESTRICTIONS = {
+    "10.1525/collabra.18032": {
+        "decision": "reject_or_quarantine_restrictive_license",
+        "evidence": "https://knowledge.lancashire.ac.uk/id/eprint/35556/",
+        "license": "CC-BY-NC",
+    }
+}
 def normalize_license_url(url: str) -> str:
     return url.strip().lower().replace("http://", "https://").rstrip("/")
 
@@ -82,12 +89,16 @@ def main() -> int:
         licenses = item.get("license", []) if item else []
         urls = sorted({str(x.get("URL", "")) for x in licenses if x.get("URL")})
         status = classify_license_urls(urls, item_found=item is not None)
+        manual = MANUAL_RESTRICTIONS.get(doi)
+        if manual:
+            status = manual["decision"]
         decisions.append({
             "doi": row["doi"],
             "title": row["title"],
             "year": row["year"],
             "in_rds": row["in_rds"],
             "crossref_license_urls": urls,
+            "manual_rights_evidence": manual if manual else None,
             "decision": status,
         })
 
