@@ -66,7 +66,7 @@ describe <- function(x, depth = 0L, max_depth = 5L) {
   result
 }
 
-collect_data_frames <- function(x, path = "root", depth = 0L, max_depth = 6L) {
+collect_data_frames <- function(x, path = "root", depth = 0L, max_depth = 6L, budget = 250L) {
   if (is.data.frame(x)) {
     columns <- names(x)
     return(list(list(
@@ -77,17 +77,22 @@ collect_data_frames <- function(x, path = "root", depth = 0L, max_depth = 6L) {
       text_candidate_columns = columns[grepl("text|full.?text|body|content|xml|abstract|article", columns, ignore.case = TRUE)]
     )))
   }
-  if (!is.list(x) || depth >= max_depth || length(x) == 0L) {
+  if (!is.list(x) || depth >= max_depth || length(x) == 0L || budget <= 0L) {
     return(list())
   }
   nms <- names(x)
+  indices <- unique(c(seq_len(min(length(x), 5L)), if (length(x) > 5L) length(x)))
   result <- list()
-  for (i in seq_along(x)) {
+  for (i in indices) {
+    if (length(result) >= budget) break
     child_name <- if (!is.null(nms) && length(nms) >= i && nzchar(nms[[i]])) nms[[i]] else as.character(i)
-    result <- c(result, collect_data_frames(x[[i]], paste0(path, "/", child_name), depth + 1L, max_depth))
-    if (length(result) > 5000L) {
-      stop("RDS structure contains more than 5,000 nested data-frame nodes")
-    }
+    result <- c(result, collect_data_frames(
+      x[[i]],
+      paste0(path, "/", child_name),
+      depth + 1L,
+      max_depth,
+      budget - length(result)
+    ))
   }
   result
 }
@@ -168,9 +173,15 @@ for (f in files) {
     local_errors <<- c(local_errors, paste("readRDS failed:", conditionMessage(e)))
     NULL
   })
-  structure <- if (is.null(object)) NULL else list(
-    top_level = describe(object),
-    data_frames = collect_data_frames(object)
+  structure <- if (is.null(object)) NULL else tryCatch(
+    list(
+      top_level = describe(object),
+      data_frames = collect_data_frames(object)
+    ),
+    error = function(e) {
+      local_errors <<- c(local_errors, paste("structure inspection failed:", conditionMessage(e)))
+      NULL
+    }
   )
   report_id <- basename(base)
   reports[[report_id]] <- list(
