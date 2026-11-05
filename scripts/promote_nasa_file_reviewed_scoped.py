@@ -83,7 +83,7 @@ def main():
         legacy_hashes.add(digest)
         legacy_sigs.append((simhash(chunk),row.get("record_id")))
         cursor += count
-        if train[cursor:cursor+2]=="\\n\\n": cursor += 2
+        if train[cursor:cursor+2]=="\n\n": cursor += 2
     if cursor not in {len(train),len(train)-1}: raise RuntimeError("Legacy train payload has unindexed trailing content")
     selected=[]
     for row in records:
