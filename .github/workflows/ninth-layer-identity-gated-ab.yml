@@ -165,6 +165,7 @@ jobs:
             return json.loads(f.read_text()) if f.is_file() else None
           b,a=load("mmlu-holdout-before.json"),load("mmlu-holdout-after.json")
           l0,l1=load("language-before.json"),load("language-after.json")
+          d0,d1=load("domains-before.json"),load("domains-after.json")
           result={"experiment":"ronin-ninth-layer-identity-gated-v1","tutor_used":False,"automatic_promotion":False,"global_g0_pass":False,"decision":"INCOMPLETE","metrics":{}}
           for n in ("native-mixture.json","domains-before.json","domains-after.json","training-throughput.json"):
             v=load(n)
@@ -176,9 +177,14 @@ jobs:
             delta=(a["overall"]["accuracy"]-b["overall"]["accuracy"])*100
             result["mmlu_pro_full_holdout"]={"revision":a["dataset_revision"],"dataset_sha256":a["dataset_sha256"],"selected_items":a["selected_items"],"evaluated_before":b["evaluated_items"],"evaluated_after":a["evaluated_items"],"coverage_before":b["coverage"],"coverage_after":a["coverage"],"before_correct":b["overall"]["correct"],"after_correct":a["overall"]["correct"],"before_accuracy":b["overall"]["accuracy"],"after_accuracy":a["overall"]["accuracy"],"delta_percentage_points":delta,"same_full_holdout_before_after":same,"complete_test_set_before":b.get("complete_test_set"),"complete_test_set_after":a.get("complete_test_set")}
             if l0 and l1:
-              nonreg=l1["bits_per_byte"]<=l0["bits_per_byte"]
-              result["language_validation_non_regression"]=nonreg
-              result["decision"]="CANDIDATE_READY_FOR_REVIEW" if same and delta>0 and nonreg else "DO_NOT_PROMOTE"
+              language_nonreg=l1["bits_per_byte"]<=l0["bits_per_byte"]
+              result["language_validation_non_regression"]=language_nonreg
+              domain_keys=set(d0.get("by_domain",{})) if d0 else set()
+              domain_same=bool(d0 and d1 and d0.get("dataset_sha256")==d1.get("dataset_sha256") and d0.get("items")==d1.get("items") and domain_keys==set(d1.get("by_domain",{})) and all(d0["by_domain"][key].get("total")==d1["by_domain"][key].get("total") for key in domain_keys))
+              domain_nonreg=domain_same and all(d1["by_domain"][key]["accuracy"]>=d0["by_domain"][key]["accuracy"] for key in domain_keys)
+              result["domain_holdout_same"]=domain_same
+              result["domain_non_regression"]=domain_nonreg
+              result["decision"]="CANDIDATE_READY_FOR_REVIEW" if same and delta>0 and language_nonreg and domain_nonreg else "DO_NOT_PROMOTE"
           for n in ("language-before.json","language-after.json"):
             v=load(n)
             if v is not None: result["metrics"][n]=v
