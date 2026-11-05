@@ -59,3 +59,16 @@ La auditoría por archivo cubre ahora **10 textos**:
 Los seis pases suman **701.871 bytes UTF-8**. Sus copias coinciden byte por byte con los originales (Git blob SHA-1 idéntico); el SHA-256, tamaño, título, fuente y destino constan en el manifiesto documental del corpus acotado. Los cuatro retenidos no se copiaron y los **814 textos restantes siguen sin revisión individual**.
 
 La colección completa de 824 sigue siendo candidata. Los seis documentos aceptados permanecen sin habilitación de entrenamiento ni cómputo Level A hasta completar deduplicación exacta/aproximada global, revalidación de restricciones y particionado. La comprobación de integridad se ejecuta en `.github/workflows/validate-nasa-file-reviewed-corpus.yml`.
+
+
+## Estado actualizado tras auditoría integral (2026-11-05)
+
+La revisión integral posterior ha procesado los **824/824 textos** del snapshot. No confundir los conteos históricos de revisión por muestreo anteriores con el resultado actual:
+
+- **813 documentos admitidos en alcance acotado**, con **32.313.859 bytes** de texto legible/normalizado.
+- **11 retenidos**: cuatro por decisiones de revisión previas (OCR o derechos no resueltos) y siete por calidad de extracción insuficiente.
+- Se han verificado los 824 hashes/tamaños fuente, los 824 registros de derechos contra la allowlist NASA y cero duplicados exactos dentro del propio conjunto.
+- Para archivos Tika/HTML se conserva el hash del original y se extrae el cuerpo visible, sin metadatos HTML, al corpus admitido.
+- Los seis pases anteriores y seis revisiones asistidas adicionales están trazados; estas últimas están etiquetadas explícitamente como revisión asistida, no como firma humana.
+
+Los 813 son **admisiones acotadas**, no elegibilidad de entrenamiento. Siguen bloqueados por revalidación semanal de redistribución NASA, deduplicación exacta/aproximada contra las demás fuentes y holdouts, auditoría global final y particionado. El detalle por documento está en `data/datasets/admitted/nasa-ntrs-public-use-v1/manifest.json`.
