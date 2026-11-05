@@ -1,6 +1,19 @@
 # RONIN-IA
 
 
+## Admisión legacy compatible y entrenamiento documental (5 de noviembre de 2026)
+
+Se habilita una vía **scoped legacy** para entrenar con el corpus histórico ya auditado, sin esperar al G-0 global de las 64 bibliotecas. No se rebajan los requisitos legales o de privacidad para fuentes nuevas: se reutiliza exactamente el perímetro probado del manifiesto legacy (tres repositorios fijados, derechos de texto declarados como dominio público, revisiones inmutables, procedencia y hashes por documento, 608 registros train y cero duplicados exactos). Esta excepción no convierte el corpus en Level A ni lo contabiliza en el inventario de las 64 bibliotecas.
+
+- Corpus: 608 documentos / 140.295.523 bytes; SHA-256 train `9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78`.
+- Fuentes fijadas: CLiGS Textbox (355), CLiGS CONSSA (165) y ELTeC español (88).
+- Entrenamiento: workflow [legacy-document-training.yml](.github/workflows/legacy-document-training.yml), perfil RoninLM `tiny`, CPU GitHub Actions, 500 pasos por defecto.
+- La validación interna se deriva determinísticamente del train legacy. Los 18 documentos legacy de validation y los 18 de test no se descargan ni se leen en esta run.
+- El workflow verifica manifiesto, estado scoped, número de documentos, bytes y SHA-256 antes de entrenar. Publica métricas, throughput, split manifest y checkpoint.
+- La run no declara G-0 global, no promueve el checkpoint automáticamente y no autoriza mezclar candidatos de las otras bibliotecas.
+
+La política de las 64 bibliotecas sigue exigiendo verificación de derechos por documento, payload, privacidad, calidad, deduplicación y particiones. El ajuste es de **alcance y proporcionalidad de evidencia**, no una autorización general para aceptar candidatos.
+
 ## Estado documental verificado — 5 de noviembre de 2026, 11:20 CET
 
 Este corte corrige y amplía los resúmenes históricos que aparecen más abajo. El inventario canónico vigente es de **32 dominios × General/HKD = 64 bibliotecas** (\`data/datasets/libraries/manifest-64.json\`):
