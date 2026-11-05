@@ -40,7 +40,8 @@ def main() -> None:
     parser.add_argument("--base-checkpoint", type=Path, required=True)
     parser.add_argument("--seeds", required=True, help="Semillas separadas por comas")
     parser.add_argument("--steps", type=int, default=500)
-    parser.add_argument("--eval-limit", type=int, default=64, help="0 evalúa el test completo")
+    parser.add_argument("--eval-limit", type=int, default=64, help="0 evalúa el split completo; en screening usar validation")
+    parser.add_argument("--eval-split", choices=["validation", "test"], default="test", help="validation para selección; test solo para auditoría final")
     parser.add_argument("--revision", default=DATASET_REVISION)
     parser.add_argument("--context-length", type=int, default=4096)
     parser.add_argument("--batch-token-budget", type=int, default=8192)
@@ -70,7 +71,7 @@ def main() -> None:
         shutil.copy2(args.base_checkpoint, base_checkpoint)
 
     # Load and select once: the training seed never changes holdout membership.
-    all_rows = load_external_dataset(args.revision, split="test")
+    all_rows = load_external_dataset(args.revision, split=args.eval_split)
     selected_rows = select_stratified(
         all_rows, None if args.eval_limit == 0 else args.eval_limit, seed=2026
     )
@@ -83,9 +84,8 @@ def main() -> None:
         context_length=args.context_length,
         device=args.device,
         batch_token_budget=args.batch_token_budget,
-        dataset_split="test",
-        dataset_split_size=len(all_rows),
-    )
+        dataset_split=args.eval_split,
+        dataset_split_size=len(all_rows),    )
     base_mmlu["dataset_revision"] = args.revision
     base_mmlu["sampling"] = {
         "method": "deterministic round-robin stratified by category",
@@ -149,9 +149,8 @@ def main() -> None:
             context_length=args.context_length,
             device=args.device,
             batch_token_budget=args.batch_token_budget,
-            dataset_split="test",
-            dataset_split_size=len(all_rows),
-        )
+            dataset_split=args.eval_split,
+            dataset_split_size=len(all_rows),        )
         mmlu_after["dataset_revision"] = args.revision
         mmlu_after["sampling"] = base_mmlu["sampling"]
 
@@ -160,7 +159,7 @@ def main() -> None:
         same_holdout = (
             base_mmlu["dataset_sha256"] == mmlu_after["dataset_sha256"]
             and base_mmlu["dataset_revision"] == mmlu_after["dataset_revision"]
-            and base_mmlu["dataset_split"] == mmlu_after["dataset_split"] == "test"
+            and base_mmlu["dataset_split"] == mmlu_after["dataset_split"] == args.eval_split
             and base_mmlu["selected_items"] == mmlu_after["selected_items"]
             and base_mmlu["evaluated_items"] == mmlu_after["evaluated_items"]
             and before_ids == after_ids
@@ -210,7 +209,8 @@ def main() -> None:
     )
     summary = {
         "experiment": "ronin-native-no-tutor-multi-seed-screen-v1",
-        "evaluation_tier": "full_test_audit" if args.eval_limit == 0 else "compact_seed_screen",
+        "evaluation_tier": ("full_test_audit" if args.eval_split == "test" and args.eval_limit == 0 else "compact_seed_screen"),
+        "evaluation_split": args.eval_split,
         "tutor_used": False,
         "automatic_promotion": False,
         "training_seeds": seeds,
@@ -226,8 +226,8 @@ def main() -> None:
         "decision": ("FULL_AUDIT_REVIEW_REQUIRED" if args.eval_limit == 0 else "SCREENING_ONLY"),
         "note": (
             "Auditoría completa del split test; resultado sujeto a revisión y sin promoción automática."
-            if args.eval_limit == 0 else
-            "Una mejora en el holdout compacto solo prioriza una semilla para confirmación; no autoriza promoción."
+            if args.eval_split == "test" and args.eval_limit == 0 else
+            "Screening fijo sobre validation; prioriza una semilla para auditoría test independiente y no autoriza promoción."
         ),
     }
     mixture_path = reports / "native-mixture.json"

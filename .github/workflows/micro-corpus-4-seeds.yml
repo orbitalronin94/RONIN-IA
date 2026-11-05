@@ -1,0 +1,223 @@
+name: RONIN — microentrenamiento corpus 4 semillas × 50 pasos
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: Pasos de entrenamiento (fijado en 50 para este experimento)
+        required: true
+        default: "50"
+        type: string
+      eval_limit:
+        description: Preguntas de screening del split validation
+        required: true
+        default: "50"
+        type: choice
+        options: ["50"]
+      seeds:
+        description: Exactamente cuatro semillas distintas separadas por comas
+        required: true
+        default: "101,202,303,404"
+        type: string
+permissions:
+  actions: read
+  contents: read
+concurrency:
+  group: ronin-micro-corpus-4-seeds-50-steps
+  cancel-in-progress: false
+jobs:
+  native-cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      LITERATURE_RUN_ID: "41926088900"
+      MATHLIB_RUN_ID: "42026633643"
+      NASA_FILE_REVIEWED_RUN_ID: "42028138060"
+      MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+      STEPS: ${{ inputs.steps || '50' }}
+      EVAL_LIMIT: ${{ inputs.eval_limit || '50' }}
+      TRAIN_SEEDS: ${{ inputs.seeds || '101,202,303,404' }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github
+            LICENSE
+            pyproject.toml
+            weights
+            benchmarks
+            configs
+            ronin
+            scripts
+      - name: Validate budget
+        run: |
+          [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -eq 50 ]
+          IFS=',' read -ra SEED_LIST <<< "$TRAIN_SEEDS"
+          [ "${#SEED_LIST[@]}" -eq 4 ]
+          declare -A SEEN=()
+          for raw in "${SEED_LIST[@]}"; do
+            seed="$(echo "$raw" | xargs)"
+            [[ "$seed" =~ ^[0-9]+$ ]] && [ "$seed" -le 2147483647 ]
+            [ -z "${SEEN[$seed]+x}" ] || { echo "Semilla duplicada: $seed"; exit 1; }
+            SEEN[$seed]=1
+          done
+          if [ "$EVAL_LIMIT" = "0" ]; then [ "${#SEED_LIST[@]}" -eq 1 ]; fi
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install CPU training dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "dill==0.3.8" "multiprocess==0.70.16" "huggingface_hub==0.36.0"
+          python -m compileall -q scripts/prepare_legacy_training_split.py scripts/train_text.py scripts/evaluate_mmlu_pro.py scripts/evaluate_text.py scripts/screen_training_seeds.py
+      - name: Download admitted literature train partition
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-admitted-literature-es-v1-train
+          path: incoming/literature
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.LITERATURE_RUN_ID }}
+      - name: Download admitted Mathlib4 train partition
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-admitted-mathlib4-v1
+          path: incoming/mathlib4
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.MATHLIB_RUN_ID }}
+      - name: Download individually reviewed NASA train partition
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-nasa-ntrs-file-reviewed-train
+          path: incoming/nasa-file-reviewed
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.NASA_FILE_REVIEWED_RUN_ID }}
+      - name: Verify checkpoint and every admitted training partition
+        run: |
+          python - <<'PY'
+          import hashlib, json, shutil
+          from pathlib import Path
+          import torch
+          def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+          base=Path("weights/ronin-main.pt")
+          model_manifest=json.loads(Path("weights/main-model.json").read_text(encoding="utf-8"))
+          lit=Path("incoming/literature/train.txt")
+          lm=Path("incoming/literature/dataset-manifest.json")
+          math=Path("incoming/mathlib4/train.txt")
+          mmf=Path("incoming/mathlib4/manifest.json")
+          nasa=Path("incoming/nasa-file-reviewed/train.txt")
+          nmf=Path("incoming/nasa-file-reviewed/manifest.json")
+          ndocs=Path("incoming/nasa-file-reviewed/documents.train.jsonl")
+          assert all(p.is_file() for p in (base,lit,lm,math,mmf,nasa,nmf,ndocs))
+          assert sha(base)==model_manifest["weights_sha256"]
+          assert model_manifest["checkpoint_sha256"]=="a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
+          assert sha(lit)=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
+          l=json.loads(lm.read_text())
+          assert l.get("dataset_id")=="ronin-spanish-public-domain-literature-v2"
+          assert l.get("status")=="admitted_scoped_training_partition" and l.get("training_eligible") is True
+          assert l.get("document_count")==608
+          assert l.get("train_bytes")==140295523 and l.get("validation_test_included") is False
+          m=json.loads(mmf.read_text())
+          assert m.get("dataset_id")=="mathlib4-lean-proof-corpus-v1"
+          assert m.get("status")=="admitted_scoped_training_partition"
+          part=m["aggregate"]["partitions"]["train"]
+          assert part["training_eligible"] is True and part["documents"]==8498
+          expected="7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"
+          assert part["text_sha256"]==expected and sha(math)==expected
+          n=json.loads(nmf.read_text())
+          npart=n["partitions"]["train"]
+          assert n.get("dataset_id")=="nasa-ntrs-file-reviewed-v1"
+          assert n.get("status")=="admitted_scoped_training_partition" and n.get("training_eligible") is True
+          assert npart.get("training_eligible") is True and npart.get("documents")==2
+          assert sha(nasa)==npart["sha256"]=="874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"
+          nasa_rows=[json.loads(line) for line in ndocs.read_text(encoding="utf-8").splitlines() if line.strip()]
+          assert len(nasa_rows)==2 and all(row.get("partition")=="train" for row in nasa_rows)
+          assert {row.get("document_id") for row in nasa_rows}=={"19620002819","19630000935"}
+          assert all(row.get("content_review")=="PASS_WITH_OCR_NOISE" and row.get("rights")=="NASA NTRS record-level Public Use Permitted" for row in nasa_rows)
+          assert {row.get("text_sha256") for row in nasa_rows}=={"039f1edab34becc04e9a367814acc3a5ec08ba510d7913813468ca2d9598aebe","d3177bef2b74f196f125e55bb928f751e41d1e16e7063805c502aa96d380cc24"}
+          ck=torch.load(base,map_location="cpu",weights_only=False)
+          assert isinstance(ck,dict)
+          state_dict=ck.get("model",ck)
+          assert isinstance(state_dict,dict) and state_dict
+          assert all(isinstance(t,torch.Tensor) for t in state_dict.values())
+          from ronin.config import get_profile
+          from ronin.models.transformer import RoninLM
+          model_config,_=get_profile("tiny")
+          model=RoninLM(model_config)
+          model.load_state_dict(state_dict,strict=True)
+          parameter_count=sum(p.numel() for p in model.parameters())
+          assert ck.get("step",model_manifest["checkpoint_step"])==model_manifest["checkpoint_step"]==1000
+          assert parameter_count==model_manifest["parameters"]==9922880
+          print("Modelo verificado:", model_manifest["model_name"], "| parámetros=", parameter_count, "| pesos_sha256=", model_manifest["weights_sha256"])
+          Path("checkpoints").mkdir(exist_ok=True)
+          shutil.copy2(base,"checkpoints/main.pt")
+          print("Integrity checks OK: 608 literature + 8498 Mathlib4 + 2 NASA file-reviewed = 9108 scoped train docs; 237957184 source bytes. No tutor data. Validation/test partitions excluded.")
+          PY
+      - name: Assemble all and only train-eligible admitted documents
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          lit=Path("incoming/literature/train.txt").read_bytes()
+          math=Path("incoming/mathlib4/train.txt").read_bytes()
+          nasa=Path("incoming/nasa-file-reviewed/train.txt").read_bytes()
+          out=Path("/tmp/ronin-native-train.txt")
+          out.write_bytes(lit+b"\n\n"+math+b"\n\n"+nasa)
+          report={
+            "experiment":"ronin-native-no-tutor-v1",
+            "tutor_used":False,
+            "sources":[
+              {"dataset_id":"ronin-spanish-public-domain-literature-v2","documents":608,"bytes":140295523,"sha256":"9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"},
+              {"dataset_id":"mathlib4-lean-proof-corpus-v1","documents":8498,"bytes":97629252,"sha256":"7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"},
+              {"dataset_id":"nasa-ntrs-file-reviewed-v1","documents":2,"bytes":32409,"sha256":"874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"}
+            ],
+            "train_documents":9108,
+            "source_train_bytes":237957184,
+            "combined_bytes":out.stat().st_size,
+            "combined_sha256":hashlib.sha256(out.read_bytes()).hexdigest(),
+            "validation_test_partitions_in_training":False,
+            "excluded_not_training_eligible":["NASA NTRS public-use unreviewed remainder (811 scoped records; only 2 individually promoted)","ScienceVerse (7365 scoped)","owner Papers (9 Markdown)"],
+          }
+          Path("reports").mkdir(exist_ok=True)
+          Path("reports/native-mixture.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+      - name: Create internal validation split from train only
+        run: |
+          python scripts/prepare_legacy_training_split.py --input /tmp/ronin-native-train.txt --output-dir /tmp/ronin-native-split --validation-fraction 0.05 --seed 42006
+      - name: Screen multiple seeds against one cached compact holdout
+        run: |
+          python scripts/screen_training_seeds.py \
+            --text /tmp/ronin-native-split/train-internal.txt \
+            --validation-text /tmp/ronin-native-split/validation-internal.txt \
+            --base-checkpoint checkpoints/main.pt \
+            --seeds "$TRAIN_SEEDS" \
+            --steps "$STEPS" \
+            --eval-limit "$EVAL_LIMIT" \
+            --eval-split validation \
+            --revision "$MMLU_REVISION" \
+            --context-length 4096 \
+            --batch-token-budget 8192 \
+            --device cpu \
+            --num-threads 2 \
+            --output-dir reports/seed-screen
+      - name: Upload paired benchmark, corpus manifest and candidate
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-micro-corpus-4seeds-${{ github.run_id }}
+          path: |
+            reports/
+            checkpoints/seed-*/step-00000050.pt
+          if-no-files-found: warn
+          retention-days: 90
+          compression-level: 6
