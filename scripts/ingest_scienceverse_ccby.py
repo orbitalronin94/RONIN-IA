@@ -65,8 +65,31 @@ def main():
                 })
             else:
                 converted.append(row)
+        # DOI is the document identity. Collapse exact duplicate rows and
+        # quarantine every row when one DOI maps to conflicting titles.
+        doi_groups={}
+        for row in converted:
+            doi=(row.get("doi") or "").strip().casefold()
+            doi_groups.setdefault(doi,[]).append(row)
+        unique_converted=[]
+        for doi, group in doi_groups.items():
+            titles={((item.get("title") or "").strip().casefold()) for item in group}
+            if not doi:
+                for item in group:
+                    excluded.append({"doi":None,"title":item.get("title"),"license":item.get("license"),
+                                     "reasons":["missing_doi"]})
+            elif len(titles)>1:
+                for item in group:
+                    excluded.append({"doi":item.get("doi"),"title":item.get("title"),"license":item.get("license"),
+                                     "reasons":["doi_maps_to_conflicting_titles"]})
+            else:
+                unique_converted.append(group[0])
+                for duplicate in group[1:]:
+                    excluded.append({"doi":duplicate.get("doi"),"title":duplicate.get("title"),
+                                     "license":duplicate.get("license"),"reasons":["duplicate_manifest_row_same_doi_title"]})
+        converted=unique_converted
         if len(converted)!=meta["expected"]:
-            raise SystemExit(f"{name}: expected {meta['expected']} converted CC-BY 4.0 papers, got {len(converted)} from {len(rows)} manifest rows")
+            raise SystemExit(f"{name}: expected {meta['expected']} unique DOI documents with CC-BY 4.0 and full conversion, got {len(converted)} from {len(rows)} manifest rows")
         eligible=dest/"eligible-manifest.csv"
         with eligible.open("w",encoding="utf-8",newline="") as out:
             writer=csv.DictWriter(out,fieldnames=list(converted[0].keys()))
