@@ -15,14 +15,14 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from scripts.evaluate_mmlu_pro import (
+from evaluate_mmlu_pro import (
     DATASET_REVISION,
     evaluate_rows,
     load_external_dataset,
     rows_sha256,
     select_stratified,
 )
-from scripts.evaluate_text import evaluate_checkpoint
+from evaluate_text import evaluate_checkpoint
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
