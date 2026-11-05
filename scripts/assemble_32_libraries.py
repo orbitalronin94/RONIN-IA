@@ -78,8 +78,8 @@ ROUTING_TERMS = {
     "computer_science": ("algorithm", "compiler", "database", "protocol", "concurrency", "cryptography", "runtime", "kernel", "CPU", "operating system", "data structure", "type system", "programming language", "network protocol", "memory management"),
     "software_engineering": ("codebase", "repository", "debugging", "refactoring", "unit test", "continuous integration", "deployment", "version control", "code review", "software architecture", "API", "test suite", "build system", "dependency management"),
     "law": ("statute", "regulation", "jurisdiction", "jurisprudence", "legislation", "constitutional", "tribunal", "appeal", "contract", "liability", "court ruling", "judgment", "legal framework"),
-    "economics": ("econometrics", "inflation", "monetary policy", "fiscal policy", "GDP", "elasticity", "supply", "demand", "interest rate", "capital", "international trade", "finance", "market", "production", "consumption"),
-    "social_sciences": ("sociology", "anthropology", "psychology", "demography", "political science", "social policy", "survey", "cognition", "behavioral", "culture", "institution", "social group", "social inequality"),
+    "economics": ("econometrics", "inflation", "monetary policy", "fiscal policy", "GDP", "elasticity", "interest rate", "international trade", "gross domestic product", "capital markets"),
+    "social_sciences": ("sociology", "anthropology", "psychology", "demography", "political science", "social policy", "survey", "cognition", "behavioral", "social group", "social inequality", "collective behavior"),
     "statistics_probability": ("stochastic", "distribution", "estimator", "hypothesis", "variance", "regression", "sampling", "p-value", "confidence interval", "standard deviation", "random variable", "statistical inference"),
     "astronomy_earth_science": ("astrophysics", "cosmology", "planet", "galaxy", "nebula", "exoplanet", "orbit", "geology", "climate", "meteorology", "oceanography", "tectonic", "atmosphere", "star formation"),
     "engineering_robotics": ("robotics", "control system", "circuit", "actuator", "sensor", "manufacturing", "automation", "mechanical engineering", "electrical engineering", "robot", "motor", "embedded system", "industrial engineering"),
@@ -115,10 +115,6 @@ def choose_domain(text: str) -> tuple[str | None, float, dict[str, Any]]:
         "routing_hit_count": len(matches[best]),
         "routing_hits": matches[best],
     }
-
-
-def density_for_domain(text: str, domain: str) -> float:
-    return score_record(text, domain, Counter(), 1)["semantic_density"]
 
 
 def choose_domain(text: str) -> tuple[str | None, float, dict[str, float]]:
