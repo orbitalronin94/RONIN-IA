@@ -1,0 +1,240 @@
+name: RONIN main → ciclo 2 con MMLU-Pro externo completo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/main-cycle2-mmlu-pro.yml"
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: Pasos adicionales de fine-tuning (1-1000)
+        required: true
+        default: "1000"
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: ronin-main-cycle2-mmlu-pro
+  cancel-in-progress: false
+
+jobs:
+  train-and-evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      BASE_RUN_ID: "42014728700"
+      TRAIN_RUN_ID: "41926088900"
+      BASE_CHECKPOINT_SHA256: "a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
+      STEPS: ${{ inputs.steps || '1000' }}
+      MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v5
+
+      - name: Validar presupuesto
+        run: |
+          if ! [[ "$STEPS" =~ ^[0-9]+$ ]] || [ "$STEPS" -lt 1 ] || [ "$STEPS" -gt 1000 ]; then
+            echo "::error::STEPS debe estar entre 1 y 1000."
+            exit 1
+          fi
+
+      - name: Descargar artefacto del modelo main anterior
+        uses: actions/download-artifact@v6
+        with:
+          name: ronin-legacy-1000-holdout-comparison
+          path: incoming/base
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.BASE_RUN_ID }}
+
+      - name: Descargar exclusivamente train admitido
+        uses: actions/download-artifact@v6
+        with:
+          name: ronin-admitted-literature-es-v1-train
+          path: incoming/train
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.TRAIN_RUN_ID }}
+
+      - name: Fijar y verificar checkpoint main y corpus
+        run: |
+          python - <<'PY'
+          import hashlib, json, shutil
+          from pathlib import Path
+          root = Path("incoming/base")
+          matches = list(root.rglob("step-00001000.pt"))
+          if len(matches) != 1:
+              raise SystemExit(f"Se esperaba un checkpoint final único; encontrados: {matches}")
+          source = matches[0]
+          digest = hashlib.sha256(source.read_bytes()).hexdigest()
+          expected = __import__("os").environ["BASE_CHECKPOINT_SHA256"]
+          if digest != expected:
+              raise SystemExit(f"Checkpoint main SHA-256 incorrecto: {digest}")
+          import torch
+          payload = torch.load(source, map_location="cpu", weights_only=False)
+          if not isinstance(payload, dict) or not isinstance(payload.get("model"), dict):
+              raise SystemExit("Checkpoint main sin state_dict válido")
+          if payload.get("step") != 1000:
+              raise SystemExit(f"Paso inesperado en checkpoint main: {payload.get('step')}")
+          Path("checkpoints").mkdir(exist_ok=True)
+          shutil.copy2(source, "checkpoints/main.pt")
+          train_root = Path("incoming/train")
+          train_files = list(train_root.rglob("train.txt"))
+          manifests = list(train_root.rglob("dataset-manifest.json"))
+          if len(train_files) != 1 or len(manifests) != 1:
+              raise SystemExit("El artefacto train debe contener un train.txt y un manifiesto")
+          train_file = train_files[0]
+          train_sha = hashlib.sha256(train_file.read_bytes()).hexdigest()
+          expected_train = "9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
+          if train_sha != expected_train:
+              raise SystemExit(f"SHA-256 train incorrecto: {train_sha}")
+          manifest = json.loads(manifests[0].read_text(encoding="utf-8"))
+          if manifest.get("training_eligible") is not True or manifest.get("document_count") != 608:
+              raise SystemExit("El manifiesto legacy no supera la verificación")
+          shutil.copy2(train_file, "incoming/train.txt")
+          print(json.dumps({
+              "base_run_id": __import__("os").environ["BASE_RUN_ID"],
+              "base_checkpoint": "checkpoints/main.pt",
+              "base_checkpoint_sha256": digest,
+              "base_checkpoint_step": payload["step"],
+              "parameters": sum(t.numel() for t in payload["model"].values()),
+              "training_corpus": "ronin-spanish-public-domain-literature-v2",
+              "training_documents": 608,
+              "training_bytes": train_file.stat().st_size,
+              "training_sha256": train_sha,
+              "holdout_in_training": False
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Instalar PyTorch CPU y dependencias de benchmark
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "huggingface_hub==0.36.0"
+
+      - name: Evaluación externa inicial — MMLU-Pro test completo, 14 dominios
+        run: |
+          mkdir -p reports
+          python scripts/evaluate_mmlu_pro.py \
+            --checkpoint checkpoints/main.pt --profile tiny \
+            --context-length 4096 --limit 0 --seed 2026 \
+            --revision "$MMLU_REVISION" --split test --device cpu \
+            --batch-token-budget 8192 --require-full-coverage \
+            --output reports/mmlu-pro-before.json
+          python scripts/evaluate_domains.py \
+            --checkpoint checkpoints/main.pt --dataset benchmarks/domains_v1.jsonl \
+            --profile tiny --device cpu --output reports/domains-before.json
+
+      - name: Fine-tuning conservador desde el checkpoint main
+        run: |
+          python scripts/train_text.py \
+            --text incoming/train.txt --profile tiny --steps "$STEPS" \
+            --seed 2026 --init-checkpoint checkpoints/main.pt \
+            --learning-rate 0.00003 --min-learning-rate 0.000003 \
+            --device cpu --num-threads 2 \
+            --checkpoints checkpoints/cycle2 \
+            --metrics-out reports/training-throughput.json
+          test -s "checkpoints/cycle2/step-$(printf '%08d' "$STEPS").pt"
+          cp "checkpoints/cycle2/step-$(printf '%08d' "$STEPS").pt" checkpoints/candidate.pt
+          sha256sum checkpoints/candidate.pt
+
+      - name: Evaluación externa final — exactamente el mismo MMLU-Pro test
+        run: |
+          python scripts/evaluate_mmlu_pro.py \
+            --checkpoint checkpoints/candidate.pt --profile tiny \
+            --context-length 4096 --limit 0 --seed 2026 \
+            --revision "$MMLU_REVISION" --split test --device cpu \
+            --batch-token-budget 8192 --require-full-coverage \
+            --output reports/mmlu-pro-after.json
+          python scripts/evaluate_domains.py \
+            --checkpoint checkpoints/candidate.pt --dataset benchmarks/domains_v1.jsonl \
+            --profile tiny --device cpu --output reports/domains-after.json
+
+      - name: Consolidar comparación, cobertura y decisión sin promoción automática
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path("reports")
+          before_path, after_path = p / "mmlu-pro-before.json", p / "mmlu-pro-after.json"
+          result = {
+              "experiment": "ronin-main-cycle2-mmlu-pro-full-v1",
+              "base_run_id": os.environ["BASE_RUN_ID"],
+              "base_checkpoint_sha256": os.environ["BASE_CHECKPOINT_SHA256"],
+              "steps": int(os.environ["STEPS"]),
+              "training": {
+                  "initialization": "previous RONIN main checkpoint; weights only",
+                  "dataset": "ronin-spanish-public-domain-literature-v2",
+                  "documents": 608,
+                  "train_sha256": "9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78",
+                  "learning_rate": 0.00003,
+                  "min_learning_rate": 0.000003,
+                  "external_benchmark_used_for_gradients": False
+              },
+              "benchmark": {
+                  "dataset": "TIGER-Lab/MMLU-Pro",
+                  "license": "MIT",
+                  "revision": os.environ["MMLU_REVISION"],
+                  "split": "test",
+                  "expected_items": 12032,
+                  "domains": 14,
+                  "same_revision_before_after": True,
+                  "promotion_automatic": False
+              },
+              "metrics": {},
+              "decision": "INCOMPLETE"
+          }
+          for name in ("mmlu-pro-before.json", "mmlu-pro-after.json",
+                       "domains-before.json", "domains-after.json",
+                       "training-throughput.json"):
+              f = p / name
+              if f.is_file():
+                  result["metrics"][name] = json.loads(f.read_text(encoding="utf-8"))
+          before = result["metrics"].get("mmlu-pro-before.json")
+          after = result["metrics"].get("mmlu-pro-after.json")
+          if before and after:
+              checks = {
+                  "same_dataset_sha256": before.get("dataset_sha256") == after.get("dataset_sha256"),
+                  "same_revision": before.get("dataset_revision") == after.get("dataset_revision") == os.environ["MMLU_REVISION"],
+                  "same_split": before.get("dataset_split") == after.get("dataset_split") == "test",
+                  "full_coverage_before": before.get("complete_test_set") is True and before.get("skipped_context_items") == 0,
+                  "full_coverage_after": after.get("complete_test_set") is True and after.get("skipped_context_items") == 0,
+                  "same_evaluated_items": before.get("overall", {}).get("total") == after.get("overall", {}).get("total") == 12032
+              }
+              result["benchmark"]["integrity_checks"] = checks
+              result["benchmark"]["before_accuracy"] = before["overall"]["accuracy"]
+              result["benchmark"]["after_accuracy"] = after["overall"]["accuracy"]
+              result["benchmark"]["delta_percentage_points"] = (
+                  after["overall"]["accuracy"] - before["overall"]["accuracy"]
+              ) * 100
+              if all(checks.values()):
+                  result["decision"] = "CANDIDATE_READY_FOR_REVIEW"
+              else:
+                  result["decision"] = "REJECT_INCOMPLETE_EVALUATION"
+                  raise SystemExit("La comparación externa no supera todos los controles de integridad/cobertura.")
+          (p / "cycle2-comparison.json").write_text(
+              json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+          )
+          print(json.dumps(result, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Publicar candidato y métricas (main no se sobrescribe automáticamente)
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-main-cycle2-mmlu-pro-full
+          path: |
+            reports/
+            checkpoints/main.pt
+            checkpoints/candidate.pt
+          if-no-files-found: warn
+          retention-days: 90
