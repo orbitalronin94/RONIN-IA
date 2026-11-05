@@ -78,3 +78,13 @@ Ejecutar \`python scripts/validate_rights_registry.py\` para validar el registro
 ## Decisión actual
 
 **No se inicia entrenamiento.** El gate global G-0 sigue en FAIL y la única biblioteca/corpus admitido continúa siendo la literatura española de 608 documentos. El objetivo inmediato es convertir candidatos verificables en contenido admitido y completar, de forma equilibrada y trazable, las 32 bibliotecas.
+
+
+## Nuevo bloque revisado — Corpus paralelo de Naciones Unidas v1.0 (2026-11-05)
+
+- **Resultado:** fuente oficial y alcance de derechos verificados para la colección UN Parallel Corpus v1.0; apta para iniciar ingestión técnica, pero todavía no admitida ni entrenable.
+- Contiene documentos oficiales y parlamentarios de Naciones Unidas redactados y traducidos manualmente entre 1990 y 2014, en seis idiomas, incluido español, con alineación por frases. El proveedor declara que los documentos de esta colección están en dominio público.
+- Se ha creado el expediente `candidates/un-parallel-corpus-v1/README.md` con fuentes oficiales, alcance, atribución, exclusiones y controles pendientes.
+- Los conjuntos oficiales de desarrollo/prueba de 2015 quedan fuera de train. El corpus se mantendrá en un pool transversal hasta clasificar cada documento por temática; no se asignará todo en bloque a Derecho o Ciencias Sociales.
+- **Pendiente antes de Grado A:** descarga completa de los fragmentos, SHA-256, validación TEI/bitext y alineaciones, privacidad, calidad, deduplicación global, asignación General/HKD y revisión humana.
+- Fuentes: https://www.un.org/dgacm/es/content/uncorpus/es · https://www.un.org/dgacm/en/content/uncorpus/download · https://www.un.org/dgacm/sites/www.un.org.dgacm/files/files/UNCORPUS/un.pdf
