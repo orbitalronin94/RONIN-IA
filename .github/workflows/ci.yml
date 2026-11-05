@@ -22,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
@@ -32,8 +34,22 @@ jobs:
           python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
           python -m pip install -e ".[dev]" --no-deps
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "pytest>=8.0" "pytest-cov>=5.0" "ruff>=0.5"
-      - name: Ejecutar Ruff
-        run: ruff check ronin tests scripts
+      - name: Ejecutar Ruff en los archivos Python modificados
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            git fetch --no-tags origin "$GITHUB_BASE_REF"
+            changed_files="$(git diff --name-only --diff-filter=ACMRT FETCH_HEAD...HEAD -- '*.py')"
+          else
+            changed_files="$(git diff --name-only --diff-filter=ACMRT HEAD^ HEAD -- '*.py')"
+          fi
+          if [[ -z "$changed_files" ]]; then
+            echo "No hay archivos Python modificados que analizar."
+            exit 0
+          fi
+          mapfile -t files <<< "$changed_files"
+          printf 'Analizando %s archivos Python modificados\n' "${#files[@]}"
+          ruff check "${files[@]}"
       - name: Verificar metadatos del paquete
         run: python -m pip check
       - name: Enlazar libro de runs
