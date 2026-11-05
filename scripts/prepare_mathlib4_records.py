@@ -29,6 +29,9 @@ def build_record(path: Path, repo_root: Path, revision: str) -> dict[str, Any]:
                 raise ValueError(f"conflicting SPDX license in {relative}: {declared}")
     source_sha = hashlib.sha256(raw).hexdigest()
     document_id = hashlib.sha256(f"{revision}\0{relative}".encode()).hexdigest()
+    license_sha = hashlib.sha256((repo_root / "LICENSE").read_bytes()).hexdigest()
+    notice_path = repo_root / "NOTICE"
+    notice_sha = hashlib.sha256(notice_path.read_bytes()).hexdigest() if notice_path.is_file() else None
     return {
         "document_id": document_id,
         "domain": classify_path(relative),
@@ -38,6 +41,8 @@ def build_record(path: Path, repo_root: Path, revision: str) -> dict[str, Any]:
         "source_revision": revision,
         "provenance": f"https://github.com/{SOURCE_DATASET}/blob/{revision}/{relative}",
         "source_file_sha256": source_sha,
+        "repository_license_file_sha256": license_sha,
+        "repository_notice_file_sha256": notice_sha,
         "language": "en",
         "format": "lean4",
     }
