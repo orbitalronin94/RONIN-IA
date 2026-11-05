@@ -41,7 +41,7 @@ def assert_gate(before, after):
 
 def train_candidate(name, base_path, batches, args, anchor_lambda=0.0):
     cfg_model,cfg_train=get_profile("tiny")
-    cfg_train=replace(cfg_train,max_steps=100,warmup_steps=10,checkpoint_every=100,learning_rate=2.5e-6,min_learning_rate=2.5e-7,weight_decay=0.0,seed=2026)
+    cfg_train=replace(cfg_train,max_steps=args.training_steps,warmup_steps=max(10,min(100,args.training_steps//10)),checkpoint_every=args.training_steps,learning_rate=2.5e-6,min_learning_rate=2.5e-7,weight_decay=0.0,seed=2026)
     seed_everything(2026)
     model=RoninLM(cfg_model)
     load_checkpoint(base_path,model,map_location="cpu",restore_rng=False)
@@ -49,7 +49,7 @@ def train_candidate(name, base_path, batches, args, anchor_lambda=0.0):
     out=Path(args.output_dir)/name
     metrics=out/"training.json"
     train(model,batches,cfg_train,device="cpu",checkpoint_dir=out/"checkpoints",metrics_path=metrics,anchor_reference=anchor,anchor_lambda=anchor_lambda)
-    ckpt=out/"checkpoints"/"step-00000100.pt"
+    ckpt=out/"checkpoints"/f"step-{args.training_steps:08d}.pt"
     if not ckpt.is_file(): raise RuntimeError(f"missing checkpoint for {name}")
     return ckpt, json.loads(metrics.read_text(encoding="utf-8"))
 
@@ -77,7 +77,7 @@ def interpolate(base_path, other_path, alpha, destination):
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     for name in ("base-checkpoint","second-checkpoint","combined-text","literature-text","mathlib-text","nasa-text","validation-text"): p.add_argument("--"+name,type=Path,required=True)
-    p.add_argument("--output-dir",type=Path,default=Path("tournament-results"))
+    p.add_argument("--output-dir",type=Path,default=Path("tournament-results")); p.add_argument("--training-steps",type=int,default=10000)
     p.add_argument("--revision",default=DATASET_REVISION); p.add_argument("--context-length",type=int,default=4096); p.add_argument("--batch-token-budget",type=int,default=8192); p.add_argument("--num-threads",type=int,default=2)
     args=p.parse_args(); torch.set_num_threads(args.num_threads)
     for path in (args.base_checkpoint,args.second_checkpoint,args.combined_text,args.literature_text,args.mathlib_text,args.nasa_text,args.validation_text):
@@ -94,7 +94,7 @@ def main():
     natural=NextTokenBatches(encode_text_file(args.combined_text),2,cfg.context_length,seed=2026)
     balanced=lambda seed: SourceBalancedBatches([("literature",source_tensors[0],0.50),("mathlib4",source_tensors[1],0.495),("nasa-reviewed",source_tensors[2],0.005)],2,cfg.context_length,seed=seed)
     candidates=[]
-    for name,batches,lam in (("A-conservative-anchor",natural,1e-3),("B-balanced-replay",balanced(2026),0.0),("C-balanced-anchor",balanced(2026),1e-3)):
+    for name,batches,lam in (("B-balanced-replay",balanced(2026),0.0),("C-balanced-anchor",balanced(2026),1e-3)):
         ckpt,training=train_candidate(name,args.base_checkpoint,batches,args,lam)
         after=evaluate(ckpt,rows,all_hash,args); assert_gate(base_mmlu,after)
         language=evaluate_checkpoint(ckpt,args.validation_text,"tiny",batches=128,batch_size=2,seed=2026,device="cpu")
@@ -107,6 +107,6 @@ def main():
         write(args.output_dir/name/"mmlu-after.json",after); write(args.output_dir/name/"language-after.json",language)
         candidates.append({"name":name,"checkpoint":str(ckpt),"checkpoint_sha256":sha(ckpt),"alpha":alpha,"before_correct":base_mmlu["overall"]["correct"],"after_correct":after["overall"]["correct"],"delta_pp":100*(after["overall"]["accuracy"]-base_mmlu["overall"]["accuracy"]),"new_correct":sum(x["correct"] and not y["correct"] for x,y in zip(after["details"],base_mmlu["details"])),"regressions":sum(y["correct"] and not x["correct"] for x,y in zip(after["details"],base_mmlu["details"])),"coverage":after["coverage"],"language_before_bpb":base_language["bits_per_byte"],"language_after_bpb":language["bits_per_byte"]})
     candidates.sort(key=lambda x:(x["regressions"]==0,x["after_correct"],-x["language_after_bpb"]),reverse=True)
-    write(args.output_dir/"tournament-summary.json",{"experiment":"checkpoint-strategy-tournament-6of50","base_checkpoint_sha256":base_sha,"holdout_split":"validation","holdout_revision":args.revision,"holdout_dataset_sha256":all_hash,"holdout_ids":[x["id"] for x in base_mmlu["details"]],"coverage":1.0,"training_steps_per_trained_candidate":100,"automatic_promotion":False,"confirmation_required":"independent MMLU-Pro test split; validation sample is development-only","candidates_ranked":candidates})
+    write(args.output_dir/"tournament-summary.json",{"experiment":"checkpoint-strategy-tournament-6of50","base_checkpoint_sha256":base_sha,"holdout_split":"validation","holdout_revision":args.revision,"holdout_dataset_sha256":all_hash,"holdout_ids":[x["id"] for x in base_mmlu["details"]],"coverage":1.0,"training_steps_per_trained_candidate":args.training_steps,"automatic_promotion":False,"confirmation_required":"independent MMLU-Pro test split; validation sample is development-only","candidates_ranked":candidates})
     print(json.dumps(candidates,ensure_ascii=False,indent=2))
 if __name__=="__main__": main()
