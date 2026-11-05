@@ -1,0 +1,479 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AMS.20230110_Moguo
+
+
+1
+
+Flux Improvement based on Machine 
+Learning for the CERES FluxByCldTyp Data 
+
+Product
+
+Moguo Sun1, David Doelling2, Benjamin Scarino1
+
+1: Science Systems and Applications, Inc, Hampton, VA
+2: NASA Langley Research Center, Hampton, VA
+
+103rd AMS Annual Meeting/22nd Conference on Artificial 
+Intelligence for Environmental Science
+
+Denver, Colorado 
+January 8-12, 2023
+
+
+
+Outline
+
+• Motivation
+
+• CERES project and CERES FluxByCldTyp
+Ed4 Data Product
+
+• SW and LW fluxes improvement based on 
+Deep Neural Network
+§ Input Data and Algorithm Setting
+§ Preliminary results and validation
+
+§ Summary and future work
+
+2
+
+
+
+Motivation
+
+3
+
+The NASA CERES project provides over 22 years of observed TOA
+fluxes and a suite of datasets that include surface fluxes and cloud
+properties on different spatial and temporal scales. The Ed4
+FluxByCldTyp data product is a new dataset that provide ISCCP-like
+cloud types and their associated radiative fluxes for climate studies
+which requires accurate and consistent dataset over time. As part of
+the effort to improve accuracy of the fluxes of FluxByCldTyp, we used
+machine learning technique to calculate fluxes within mixed scene
+satellite footprints. I will present preliminary results which show
+improvement over the current algorithm.
+
+
+
+The CERES Project
+
+4
+
+I. The Clouds and the Earth Radiant
+Energy System (CERES) instruments were
+first aboard TRMM satellite launched in
+December 1997 and currently on Terra,
+Aqua, and NPP polar orbiters.
+
+I. CERES produces flux data products
+based on radiances measured in three
+bands.
+
+• SW (0.3-5μm)
+• IR Window (8-12μm)
+• Total channel (0.3-200μm)
+
+LW = Total Channel – SW
+
+II. Cloud property are produced based on
+imagers like MODIS and VIIRS
+measurements on the same satellite.
+
+
+
+5
+
+CERES Data Product 
+Flow Chart
+• Level 1: instantaneous 
+
+footprint-level (20km 
+nominal) ephemeris and 
+instrument level data.
+
+• Level 2: footprint-level 
+(20km nominal) fluxes and 
+cloud properties. (SSF)
+
+• Level 3: Spatially (1°x1°
+lat/lon regional (zonal, 
+global) and temporally (daily, 
+monthly, etc.) averaged 
+fluxes and clouds.
+
+• Level 4:  gridded, averaged 
+fluxes where the TOA net 
+flux has been energy 
+balanced. (EBAF)
+
+
+
+6
+
+
+
+SW and LW flux improvement based on 
+Deep Neural Network (DNN)
+
+• Input Data: CERES Ed4 SSF 
+§ SSF footprint structure
+§ Data sampling
+§ Selected variables
+
+• DNN set-up
+
+7
+
+
+
+Input CERES SSF Data Structure
+
+8
+
+• Size: 20km nadir
+• Clear, CloudLow, CloudHigh
+• Parameters: 
+
+§ time, position, viewing 
+geometry
+§ surface maps, scene types
+§ meteorological data
+§ radiances (Imager NB 
+radiances and CERES BB 
+radiances), fluxes
+§ cloud properties: cloud 
+fraction, TempEff, TempTop, 
+PressEff, PressTop, LWP, IWP, 
+Cloud Radius, Emissivity, Optical 
+Depth,etc.
+
+Aim:  To obtain corresponding 
+flux for each of the three 
+sub-footprint areas: clear, 
+cloudLow and cloudHigh.
+
+
+
+Data Samples
+
+• Time: 5 Januarys (2007-2011)
+• Daytime only
+• Clear sky and Overcast
+• Sampling: 80% train, 18% dev, 2% test
+
+9
+
+Total Number of 
+Samples
+
+Overcast SW 11,273,554
+Overcast LW 10,384,468
+Clear sky SW 7,825,328
+Clear sky LW 6,455,850
+
+
+
+Input Variables
+
+10
+
+Input Variables Total 
+
+Clear
+1. 5 MODIS Bands: 0.48, 0.65, 0.86, 
+
+11, 12 (µm)
+2. 3 Angles: solar zenith, viewing 
+
+zenith, relative azimuth angle
+3. Longitude and latitude
+4. Total precipitable water (PW)
+5. Surface type (Ocean, Forests, 
+
+Savannas, Grass/Crop, Dark 
+Deserts, Bright Deserts, snow/ice)
+
+Tskin 13
+
+Over-
+cast 12
+
+
+
+DNN Set-up
+
+6 hidden layers with varying number of neurons
+
+
+
+DNN set-up
+
+• Activation Function: rectified linear unit 
+(or ReLU):   
+
+f(x) = max(0,x)
+
+• Step Decay Learning Rate: 
+lr = lr0 * drop^floor(epoch / epochs_drop) 
+lr0 = 0.01 
+drop = 0.5
+epochs_drop = 50
+
+12
+
+
+
+Validation: Footprint Level 
+
+13
+
+For each footprint: calculated flux vs. observed flux
+
+Perfectly, Derived Flux == Observed Flux
+
+𝐹!" = 𝑓#$%*𝐹#$% + 𝑓#$&'*𝐹#$&' + 𝑓#$&(*𝐹#$&(
+
+𝑓: 𝑐𝑙𝑒𝑎𝑟/𝑐𝑙𝑜𝑢𝑑 𝑓𝑟𝑎𝑐𝑡𝑖𝑜𝑛
+
+𝐹: 𝐹𝑙𝑢𝑥
+clr
+
+cldL
+cldH
+
+Derived F Obs. F~
+
+
+
+Two Methods
+
+• Method A: Two Steps (Ed4)
+§ Step 1: MODIS NB radiances -> BB radiance 
+
+through DNN
+§ step 2: BB Rad -> BB flux (ADM)
+
+• Method B: One Step
+§ MODIS NB radiances -> BB flux through 
+
+DNN
+
+14
+
+
+
+SW Bias and RMS (Jan 2019) 
+
+15
+
+Regional bias and global mean RMS
+All cases are compared to the CERES observed SW flux
+
+DNN_A DNN_B Ed4.1
+
+Bias = 0.85
+RMS = 3.21
+
+Bias = 0.42
+RMS = 3.99
+
+Bias = 0.60
+RMS = 3.15
+
+
+
+LW Bias and RMS (Jan 2019) 
+
+16
+
+Regional bias and global mean RMS (W/m2)
+All cases are compared to the CERES observed SW flux
+
+DNN_A DNN_B Ed4.1
+
+Bias = 1.14
+RMS = 2.45
+
+Bias = 0.70
+RMS = 3.03
+
+Bias = 0.97
+RMS = 2.33
+
+
+
+SW Bias and stdev (Jan 2019) 
+
+17
+
+Bi
+as
+
+, s
+td
+
+ev
+(%
+
+)
+
+DNN_A DNN_B Ed4.1
+
+Fr
+eq
+
+ (%
+x1
+
+0)
+
+SW Bias and stdev dependency over parameters
+
+
+
+LW Bias and stdev (Jan 2019) 
+
+18
+
+Bi
+as
+
+, s
+td
+
+ev
+(%
+
+)
+
+DNN_A DNN_B Ed4.1
+
+Fr
+eq
+
+ (%
+x1
+
+0)
+
+LW Bias and stdev dependency over parameters
+
+
+
+Hyperparameter Tuning
+
+19
+
+Control Hyper1 Hyper4 Hyper5 hyper6 hyper7
+
+Layers
+And
+Neurons
+
+n_h1 = 100
+n_h2 = 50 
+n_h3 = 30 
+n_h4 = 20 
+n_h5 = 10
+
+n_h1 = 50
+n_h2 = 40 
+n_h3 = 30 
+n_h4 = 20 
+n_h5 = 10
+
+n_h1 = 20
+n_h2 = 20 
+n_h3 = 20
+n_h4 = 20 
+n_h5 = 20
+
+n_h1 = 10
+n_h2 = 10
+n_h3 = 10
+n_h4 = 10
+n_h5 = 10
+
+n_h1 = 5
+n_h2 = 5 
+n_h3 = 5 
+n_h4 = 5 
+n_h5 = 5 
+
+n_h1 = 200
+n_h2 = 100
+n_h3 = 60
+n_h4 = 40 
+n_h5 = 20
+
+SW Bias 0.598 0.369 0.509 0.629 1.953 0.414
+
+SW RMS 3.150 3.066 3.483 3.819 4.385 3.218
+
+LW Bias 0.965 0.981 0.853 1.062 0.916 1.043
+
+LW RMS 2.335 2.489 2.58 2.734 3.102 2.391
+
+
+
+20
+
+Summary and Future work
+
+• Two methods based on DNN are developed to 
+improve fluxes in FluxByCldTyp product. They both 
+show improvement over Ed4.1
+
+• The two methods give about the same results and 
+ADM is not required in that future FluxByCldTyp, 
+thus greatly reduce code complexity
+
+• DNN will be incorporated in to FluxByCldTyp Ed5. 
+further improvement involves more MODIS NB 
+channels. 
+
+
+
+21
+
+Thank you!
+
+Fore more information:
+https://ceres.larc.nasa.gov/ 
+
+

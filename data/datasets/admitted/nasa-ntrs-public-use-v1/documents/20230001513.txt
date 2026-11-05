@@ -1,0 +1,284 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AAS SFMC Manuscript Format Template
+
+
+
+
+Artemis I orion imu flight performanceAAS 23-052
+
+Robert Earl[footnoteRef:2], Kyle Smith[footnoteRef:3] and John McGregor° [2:  Guidance Nav & Ctrl Eng Sr, Orion GNC, Lockheed Martin]  [3:  Technical Engineer, GCD, Draper
+° Aerospace Engineer, GN&C Development and Testing Branch, NASA JSC] 
+
+The Orion flight software’s parity algorithm runs onboard to verify all three OIMUs (Orion Inertial Measurement Units) are sensing relatively uniform rate and acceleration and to quickly identify any unit which is in significant disagreement with the other two units. During the Artemis-I Wet Dress Rehearsal tests and Launch Countdowns, one of the three OIMUs regularly reported an anomalous parity signature for a brief period of time during sensor warm up. This paper will review this anomalous performance on the pad and review flight data with the intent to supplement the findings of the initial root cause investigation. Outside of this start up behavior, initial investigation into Artemis I flight data did not reveal any behavior of the OIMUs outside of preflight expectations. Flight data from any significant parity events and relevant IMU calibrations will be presented. A brief discussion of impacts to future Artemis mission operations strategy will be provided.	Comment by Author: Added to state up front that the IMUs actually did great. Open to workshopping the particular phrasing. 
+INTRODUCTION
+The Orion Crew Module (CM) Capsule uses 3 Orion Inertial Measurement Units (OIMU), developed by Honeywell to continuously propagate navigation states during flight. Each OIMU is bolted to a structural member of the capsule and operates independently of the others. Notably, OIMUs 2 and 3 are roughly co-located while OIMU1 is on the opposite side of the vehicle.
+This configuration is known to be non-ideal for uniform sensing between OIMUs, however it was necessary for the CM to meet vehicle redundancy requirements. This paper will explore operational observations of the OIMU mounting locations during the Artemis I mission, as well as implications associated with Orion’s Fault Detection, Isolation, and Response (FDIR) flight-software algorithm.
+Orion IMU (OIMU) Hardware
+Each OIMU is a strap-down sensor containing three accelerometers and three ring-laser gyroscopes (RLG) with associated hardware and software. The center of computation (CC) for each OIMU is defined by the intersection of the 3 accelerometer sensing axes. The mounting locations within the Orion Crew Module (CM) for each OIMU are shown in Figure 1. The accelerometer and gyroscope sensor components of each OIMU are housed within an Inertial Sensor Assembly (ISA), shown in Figure 2.
+
+
+Figure 1: OIMU Mounting Locations in Orion Crew Module
+
+
+
+Figure 2: Orion OIMU Exploded View
+
+ORION CAPSULE BALLOONING
+The distance between each OIMU, particularly for OIMU1, results in rotations and translations unique to each unit when the crew module experiences structural flexing. Structural flexing induced from a variety of sources:
+· Cabin pressurization
+· Thermal expansion/contraction
+· Forces imparted from dynamic events (burns, maneuvers, atmospheric drag, etc)
+
+Although the magnitude of deformation experienced by the OIMU mounting plates during flight is relatively small, it is large enough to drive variance between ΔV and Δθ measurements from each independent sensor. Figure 3 demonstrates the deformation results from a Finite Element Analysis (FEA) simulation scaled 1000x. The purple region on the bottom of the capsule signifies large deformation along the middle strut of the vehicle where the OIMUs are mounted.
+
+Figure 3: Orion Crew Module Capsule Finite Element Analysis, Crew Module
+Pressurization (1000x Exaggerated Deformation) ]
+
+
+OIMU PARITY DETECTION FLIGHT SOFTWARE
+Orion’s flight software runs Fault Detection, Isolation, and Recovery (FDIR) algorithms to detect and react to any navigation sensor anomalies during flight. A subset of Orion’s FDIR algorithm called “parity” is tasked with verifying that each OIMU is producing ΔV and Δθ measurements that are within family with the other OIMUs. Separate parity checks are performed on the acceleration and rotation measurements from the OIMUs. 
+The parameters that are used in these parity checks were tuned to prevent FDIR from incorrectly “failing” a healthy sensor due to different motion being sensed by the OIMUs during vehicle ballooning. That is, when the vehicle is ballooning the sensors truly are experiencing distinct motion and will produce distinct measurements when performing nominally. The parity checks were tuned to not falsely identify ballooning as a sensor failure, while still retaining sensitivity to potential anomalies during flight. This tuning analysis and details of the parity check algorithm are explained in detail in Reference 1, but a brief discussion is provided to enable the understanding of data provided in the following sections. 	Comment by Author: I didn't check the conference standards, so feel free to adjust the reference to whatever makes sense.
+A buffer of OIMU measurements from each sensor in the form of ΔVs, and Δθs are first preprocessed by synchronizing them to the same time step, transforming them to a common reference frame that sits between all three OIMUs, converting them to real engineering units by multiplying by the measurement time step Δt, and finally by passing the data through a low pass filter. After preprocessing, three parity fault values (η) are computed from the comparisons of OIMUs 1-to-2, 1-to-3, and 2-to-3. This comparison includes the state x, and the noise, bias, and error terms ϵ.
+	
+	(1)
+
+	
+	(2)
+
+	
+	(3)
+
+
+The error, η, is then compared against a detection threshold that is computed as a function of the squared magnitude of the IMU acceleration and angular rates combined with the expected 1-sigma performance reported for this sensor. The end result is a dynamic error threshold that is correlated to the overall dynamics of the sensor. Note that the gyro parity and accel parity errors and thresholds are independent computations. In some plots reported here the parity fault values are normalized to the the dynamic threshold value, while in others, both values are reported in their original units. 
+ARTEMIS I MISSORION PARITY PERFORMANCE REVIEW
+The following sections detail parity telemetry during various phases of the Artemis I mission. 
+Pre-launch Parity Performance
+The parity algorithm running onboard the Orion Capsule consistently reported variance between the OIMUs shortly after OIMU startup on the pad (5-20 minutes after powerup), which seems to be correlated to warming temperatures in the OIMUs or crew module itself.
+The signature presented in a similar manner a single time during each rehearsal or countdown attempt. Shortly afterwards, the detected variance between sensors returned to a nominal level and remained there for the duration of the test or flight. The parity limit exceedances that were seen during all Artemis-I events did not meet persistence thresholds that would result in the sensor or navigation state being declared “failed” by the onboard FDIR algorithms.
+Table 1 summarizes the prelaunch parity trip events that occurred during the Artemis-I pad launch count down events. The Wet Dress Rehearsal (WDR) events were essentially tanking tests for the SLS rocket but they did include a full Orion powerup and prelaunch sequence. These tests were intended to refine mission tanking and prelaunch procedures for the flight hardware and launch teams. WDR2 is not included in this table because it was conducted 24hr after WDR1, with no vehicle power- down between the two events. The OIMUs therefore remained powered overnight prior to WDR2 and did not experience a thermal warmup or associated gyro parity elevation.
+
+
+
+	 
+	OIMU1 
+Temperature (°C)
+at Power-on
+	Peak-parity
+Time After
+Power-on (minutes)
+	Threshold
+Exceedance
+Duration (seconds)
+	OIMU1 Peak-parity Magnitude vs limit
+
+	WDR 1
+	14.5
+	19
+	16
+	118
+
+	WDR 3
+	15.5
+	22
+	13
+	109
+
+	WDR 4
+	15.9
+	16
+	4
+	109
+
+	LCD 1
+	17.4
+	5
+	0
+	60
+
+	LDC 2
+	17.1
+	9
+	0
+	75
+
+	LDC 3
+	15.3
+	14
+	9
+	110
+
+
+Table 1: Tabular Summary of Prelaunch Parity Trip Events
+
+Figure 4 demonstrates a normalized version of Orion’s gyro parity telemetry for several of the prelaunch events. OIMUs were powered on approximately 6 hours prior to launch (or simulated launch) for all events. OIMU performance was nominal following the brief elevated parity vector values after power-on. The presentation of the elevated parity signature was relatively short in duration, with parity threshold exceedances lasting only a few seconds for specific events. The presence of an elevated gyro parity signature is apparent for approximately 5 minutes for each event, returning to nominal levels for the remainder of recorded telemetry. 
+
+Figure 4: Pre-launch OIMU Parity Event Telemetry
+
+Figure 5 demonstrates a reasonably strong relationship between the OIMU1 turn on temperature and the onset and magnitude of the parity trip for each event. A straight line fit is included which matches the data reasonably well, although due to the lack of data points it should not be assumed that these relationships are actually linear. Clearly there is some kind of thermally related rate or orientation change that happens as the OIMUs warm to their typical operating temperature of around 30-35° C. The gyros are temperature compensated, so it should not be assumed that this behavior is due to any effect in the sensors themselves; the elevated parity detection could very well be due to a poorly understood structural change that occurs during this portion of the prelaunch timeline. 
+	Comment by Author: The % peak numbers are off – should be 0,50,100,150%. Or just change the range to 0-1.5 with 1.0 as the limit
+Figure 5: Pre-launch Parity Trip Temperature Correlations
+
+Detailed analysis of the OIMU sensor high-rate data and health status by NASA, Lockheed Martin and Honeywell subject matter experts did not find anything anomalous in any of the OIMUs or gyros. The investigation did reveal a subtle accelerometer response accompanying the gyro event visible in filtered raw sensor data where the parity trip occurred. This time correlated response from the dissimilar accelerometer and gyro sensors strongly hints at the event being actual sensed motion on OIMU1 that is not observable by OIMU2 or 3. This accelerometer response seen in the processed raw sensor data was not visible to the accelerometer parity algorithm. It is thought that these very subtle accelerations were swamped by the relatively large 1-g baseline acceleration compared to the small baseline Earth rotation rate being sensed by the gyros.
+The current leading root cause theory is a therefore a poorly understood structural response of the warming vehicle combined with the non-ideal OIMU1 mounting location and orientation relative to OIMU2 & 3. The fact the all three OIMUs performed flawlessly during the 26-day mission (detailed in the next section) following the successful 11/16 launch countdown further strengthens the theory that the prelaunch parity trip was likely due to a physical vehicle structural response rather than an actual issue with one of the sensors.
+For the Artemis-II mission, the same OIMU hardware will be re-flown after re-calibration. The current plan is to install the OIMU hardware in different slots in order to gain further insight into the prelaunch parity issue. If the current theory of actual structural response localized to the OIMU1 location is true, the “new” OIMU1 will still show a similar response as the Artemis-1 OIMU1.
+In-flight Parity Performance
+In flight, the OIMU performance was excellent overall. There were no examples of elevated gyro or accelerometer parity outside of expected structural “ballooning” responses seen during ascent and entry. Figure 9 shows the full 26 day mission history of the accelerometer and gyro parity, along with OIMU inertial block temperatures in Figure 7. For the vast majority of the flight, parity levels remained very low, <20% of the limit. Notably, OIMU temperatures remained very stable, varying by only approximately 2°C. The very stable parity and temperatures fit with the theory of a temperature dependent structural response causing the prelaunch parity trips. It will be interesting to see if a significant temperature change in future flights results in a noticeable gyro parity response. Seeing a large temperature change in flight is unlikely, however, as the OIMUs are located within the pressurized Crew Module and are attached to cooling plates, so any temperature deviations would probably be a result of a significant vehicle cooling issue affecting the crew and many other systems.
+
+
+
+Figure 7: Artemis I Temperature Telemetry – Full-mission OIMU Temperature
+
+In-flight Parity Performance: Ascent
+Ascent OIMU parity is detailed in Figure 8. Parity limits are shown with a red dashed line, and each OIMU’s parity value is shown by the three gray lines. It is evident from this plot that there was almost no response in the acceleration parity- even at the maximum acceleration levels in second stage flight. This indicates very good agreement between the OIMUs during powered flight.
+
+	Comment by Author: Units for acceleration must be wrong (we should be around 3g, ~100 ft/s^2) – should this be g’s?
+No unit numbers on body rate (lower right side axis)
+Figure 8: Artemis 1 Parity Telemetry – Ascent
+
+The gyro parity data in Figure 8 is somewhat more interesting. Early in the flight, there is a high-rate roll maneuver which does not elicit much of a gyro parity response. This indicates that at this point in the highly dynamic first stage flight, the OIMU sensed rotation rates are in very close agreement. However, beginning at about the 1-minute point, there is a notable rise in gyro parity, with OIMU1 being the outlier unit. This response was actually expected, and it is almost certainly due to the “ballooning” effect described in Section “Orion Capsule Ballooning”. During this portion of the ascent, the vehicle was flying rapidly though the thinning upper atmosphere and experiencing structural deformation due to pressure changes and g-loading. These dynamic effects combined with the OIMU’s physical offset results in small but noticeable differences in sensed rate. 
+The ballooning effect was initially recognized in 2020 during full vehicle thermal vacuum testing; OIMU parity trips during this test led to an investigation of vehicle structural responses to changing pressures and ascent loading. This study resulted in a modification to the parity “persistence” value so that a parity violation in ascent or entry would have to persist for a relatively long duration prior to being used to remove an OIMU from consideration for navigation state selection. During flight, the ascent parity violation was not of sufficient duration to “fail” OIMU1 so there were no actions required by the operations team to reconfigure or recover from the event.
+In-flight Parity Performance: Orbit
+During orbital flight, OIMU parity was extremely well behaved and there were no times at which the parity for any OIMU exceeded 20% of the limit; Figure 9 shows a zoomed-out view of the accelerometer and gyro parity for the entire 26-day mission, with extremely stable behavior. 
+
+Figure 9: Artemis I Parity Telemetry – Full Mission Duration
+Figure 10 shows zoomed-in parity responses during two orbital burns, Outbound Translational Correction 5 (OTC-5), which was a short +X Auxiliary thruster (AUX) burn and Return Powered Flyby (RPF), a long Orbital Maneuvering Engine (OME) burn. As in the zoomed-out views, the grey parity values for all three OIMUs are extremely stable, even during the relatively dynamic Orbital Maneuvering Engine burns and maneuvers to and from burn attitude.
+
+	Comment by Author: “OPF” in the plot seems to be actually OTC5 burn. We were in blackout for OPF so probably don’t have data easily accessible anyway. Accel level is also consistent with an AUX burn
+Figure 10: Artemis I Parity Telemetry – OPF and RPF Burn 
+
+Orbit OIMU Stability
+One on-orbit finding concerning OIMU performance was extremely stable accelerometer bias and misalignment angles with respect to the star trackers. The onboard navigation system maintains three filtered navigation states (one for each OIMU), with each filtered state’s errors estimated and compensated for by a dedicated Extended Kalman Filter (EKF). During quiescent orbital flight the vehicle is periodically moved into free drift, so that estimates of the OIMU accelerometer biases can be computed by the EKFs, free of any propulsive disturbances. The EKF bias states contain a time constant so that they decay from these free drift estimates to zero over time. This design was selected under the assumption that the actual hardware biases may change throughout the mission, and the decay therefore ensures that a stale estimate of accelerometer bias is not used to propagate the navigation state during propulsive events which could quickly degrade the state’s accuracy.
+Similar to the accelerometer bias stability, OIMU-to-Star Tracker misalignment was a preflight concern. The OIMUs are mounted within the Crew Module pressure vessel, and the star trackers are mounted externally on the Crew Module Adapter (CMA). Because these portions of the vehicle are not rigidly linked, there was a concern that relative orientations between the sensors would vary throughout the flight. For this reason, the EKFs maintain an estimate of the misalignment between each OIMU and star tracker pair. To maintain the accuracy of these estimates, periodic multi-axis maneuvers are performed to gain observability into the misalignments.
+Both the accelerometer bias and the OIMU-to-Star Tracker misalignment estimates proved to be extremely stable throughout the flight. In future missions, the EKFs will be returned to greatly lengthen time constants on these states. The stability of the sensor physical parameters is also a very welcome finding for mission planning, and will allow for significant timeline, thermal clock and propellant savings by avoiding having to perform frequent free drift bias estimation and starfield alignment maneuvers.
+In-flight Parity Performance: Entry
+Figure 11 shows the accelerometer and gyro parity responses during the entry phase of the Artemis I mission. The large gaps in data presented in these figures are due to the entry communication blackout. Data during these portions of entry were recorded onboard and recovered, however were not yet available at the time of this writing. A brief shot of data between the gaps occurred during the skip portion of the entry where the vehicle re-emerged above the atmosphere. 
+A gyro parity response, mainly in OIMU1, is visible due to capsule ballooning as the vehicle descends back into the atmosphere. This was an expected response, and it was benign, remaining below the threshold. As with all other phases of flight, the accelerometer parity demonstrated very little response to any entry dynamics.
+Figure 11: Artemis I Parity Telemetry – Entry
+
+CONCLUSION
+The OIMUs and associated FDIR software performed as expected to fulfill mission requirements during the Artemis I mission. Parity telemetry does show expected disagreement between OIMU1 and it’s family during capsule ballooning events, however the magnitude and persistence of was never significant enough for fight-software to incorrectly detect the disagreement as a hardware failure.
+
+
+
+
+REFERENCES
+	[ 1 ]
+	“IMUFDIR Tuning In Response To Structural Deformation Of The Orion Capsule”, Nicholas Rahaim and Brandon Wood
+
+	[ 2 ]
+	LM-ORN-0985 EM Simulation Data Book Rev008: “OIMU Inertial Sensor Assembly in Exploded View”
+
+	[ 3 ]
+	Nick Rahaim presentation 8/3/22: “WDR OIMU1 Gyro Parity Spike Anomaly – Orion”
+
+	[ 4 ]
+	AR-1 OIMU WDR4 Analysis Status, 8/22/2022, Y. Zeng and A. Killips, Honeywell Aerospace
+
+
+ACRONYMS
+	ONFD
+	Orion GN&C Flight-software’s “Optical Navigation Free Drift” control mode
+
+	FSW
+	Flight Software
+
+	OIMU
+	Orion Crew-module Inertial Measurement Unit
+
+	CM
+	Orion Crew-module
+
+	RLG
+	Ring-laser Gyroscope
+
+	FDIR
+	Fault Detection, Isolation, and Response
+
+	CMA
+	Orion Crew Module Adapter 
+
+
+
+
+
+
+1
+
+image1.png
+
+image14.png
+
+image2.png
+
+image20.png
+
+image3.png
+
+image30.png
+
+image4.png
+
+image40.png
+
+image5.png
+
+image50.png
+
+image6.png
+
+image8.png
+
+image7.png
+
+image90.png
+
+image9.png
+
+image10.png
+
+image11.png
+
+image120.png
+
+image12.png
+
+image130.png
+

@@ -1,0 +1,680 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="pdf:PDFVersion" content="1.5">
+<meta name="pdf:docinfo:title" content="Analog Quantum Algorithms">
+<meta name="xmp:CreatorTool" content="LaTeX with Beamer class">
+<meta name="pdf:hasXFA" content="false">
+<meta name="access_permission:modify_annotations" content="true">
+<meta name="access_permission:can_print_degraded" content="true">
+<meta name="dc:creator" content="Lucas T. Brady">
+<meta name="dcterms:created" content="2023-03-15T22:20:48Z">
+<meta name="dcterms:modified" content="2023-03-15T22:20:48Z">
+<meta name="dc:format" content="application/pdf; version=1.5">
+<meta name="pdf:docinfo:creator_tool" content="LaTeX with Beamer class">
+<meta name="access_permission:fill_in_form" content="true">
+<meta name="pdf:docinfo:modified" content="2023-03-15T22:20:48Z">
+<meta name="pdf:hasCollection" content="false">
+<meta name="pdf:encrypted" content="false">
+<meta name="dc:title" content="Analog Quantum Algorithms">
+<meta name="pdf:docinfo:custom:PTEX.Fullbanner" content="This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2021) kpathsea version 6.3.3">
+<meta name="pdf:hasMarkedContent" content="false">
+<meta name="Content-Type-Override" content="application/pdf">
+<meta name="Content-Type" content="application/pdf">
+<meta name="pdf:docinfo:creator" content="Lucas T. Brady">
+<meta name="PTEX.Fullbanner" content="This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2021) kpathsea version 6.3.3">
+<meta name="pdf:producer" content="pdfTeX-1.40.22">
+<meta name="access_permission:extract_for_accessibility" content="true">
+<meta name="access_permission:assemble_document" content="true">
+<meta name="xmpTPg:NPages" content="20">
+<meta name="pdf:hasXMP" content="false">
+<meta name="access_permission:extract_content" content="true">
+<meta name="access_permission:can_print" content="true">
+<meta name="pdf:docinfo:trapped" content="False">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.DefaultParser">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.pdf.PDFParser">
+<meta name="access_permission:can_modify" content="true">
+<meta name="pdf:docinfo:producer" content="pdfTeX-1.40.22">
+<meta name="pdf:docinfo:created" content="2023-03-15T22:20:48Z">
+<title>Analog Quantum Algorithms</title>
+</head>
+<body><div class="page"><p></p>
+<p>Analog Quantum Algorithms
+</p>
+<p>Lucas T. Brady
+</p>
+<p>NASA Quantum Artificial Intelligence Lab (QuAIL)/ KBR Inc.
+</p>
+<p>March 27, 2023
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 1 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Classical Optimization Problems
+</p>
+<p>Classical Optimization
+</p>
+<p>Given some constraints, find a configuration that minimizes your
+function: Find x such that f(x) is minimized
+</p>
+<p>Often we just want a better heuristic for
+NP-complete (i.e. exponentially hard) problems
+</p>
+<p>Quantum will probably not solve NP-complete
+problems efficiently
+</p>
+<p>Often an approximate solution is good enough
+</p>
+<p>Given a fixed amount of time, how good of a
+solution can you get
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 2 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Quantum Algorithms
+</p>
+<p>Quantum Adiabatic Optimization
+d
+</p>
+<p>dt
+|x(t)〉 = −iĤ(t) |x(t)〉
+</p>
+<p>Ĥ (t) =
+</p>
+<p>(
+1 −
+</p>
+<p>t
+</p>
+<p>τ
+</p>
+<p>)
+B̂+
+</p>
+<p>t
+</p>
+<p>τ
+Ĉ
+</p>
+<p>B̂: Simple (Driver) Hamiltonian
+</p>
+<p>Ĉ: Complicated (Problem) Hamiltonian
+</p>
+<p>τ: Total Runtime
+</p>
+<p>0
+</p>
+<p>0.2
+</p>
+<p>0.4
+</p>
+<p>0.6
+</p>
+<p>0.8
+</p>
+<p>1
+</p>
+<p>1.2
+</p>
+<p>0 0.2 0.4 0.6 0.8 1
+</p>
+<p>St
+re
+</p>
+<p>ng
+th
+</p>
+<p>of
+H
+</p>
+<p>am
+ilt
+</p>
+<p>on
+ia
+</p>
+<p>n
+</p>
+<p>t/τ
+</p>
+<p>Problem Hamiltonian, Ĉ
+Driver Hamiltonian, B̂
+</p>
+<p>Algorithm
+</p>
+<p>1 Start in the ground state of B̂
+2 Slowly change the system in total time τ
+3 At t = τ, measure to get ground state of Ĉ.
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 3 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Quantum Algorithms
+</p>
+<p>Quantum Adiabatic Theorem
+</p>
+<p>Adiabatic Theorem
+If a system starts in the ground state and evolves slowly enough, it will
+remain in the instantaneous ground state
+</p>
+<p>τAC �
+</p>
+<p>∣∣∣∣∣∣ dĤ
+d(t/τ)
+</p>
+<p>∣∣∣∣∣∣
+∆2
+min
+</p>
+<p>∆min = mint∈[0,τ]∆(t) is minimum of the energy gap from the
+ground state to the first excited state
+</p>
+<p>If this condition is met, adiabaticity is guaranteed*
+</p>
+<p>0
+</p>
+<p>0.5
+</p>
+<p>1
+</p>
+<p>0 0.2 0.4 0.6 0.8 1
+</p>
+<p>E
+ne
+</p>
+<p>rg
+y
+</p>
+<p>t/τ
+</p>
+<p>∆min
+</p>
+<p>Excited State Ground State
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 4 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Quantum Algorithms
+</p>
+<p>Quantum Annealing
+</p>
+<p>What happens if you go faster than adiabatic or have a lot of noise?
+</p>
+<p>Quantum Annealing is non-ideal QAO
+</p>
+<p>Often there are no/fewer guarantees of success
+</p>
+<p>Often works partially and justifies the tradeoff of quality for speed
+</p>
+<p>Leads to weird, complicated dynamics
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 5 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Quantum Algorithms
+</p>
+<p>More General Problem
+</p>
+<p>What if we allow more general evolutions
+</p>
+<p>Ĥ (t) = u(t)B̂+ (1 − u(t))Ĉ
+</p>
+<p>Can we find a u(t) that works well
+Previously u(t) = t/τ
+</p>
+<p>Analytically optimized
+annealing paths
+</p>
+<p>Variational Optimization
+</p>
+<p>Shortcuts to Adiabaticity
+</p>
+<p>Quantum speed-limits arXiv:1904.08448
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 6 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Quantum Algorithms
+</p>
+<p>Quantum Approximate Optimization Algorithm
+</p>
+<p>0
+</p>
+<p>0.2
+</p>
+<p>0.4
+</p>
+<p>0.6
+</p>
+<p>0.8
+</p>
+<p>1
+</p>
+<p>1.2
+</p>
+<p>0 0.2 0.4 0.6 0.8 1
+</p>
+<p>St
+re
+</p>
+<p>ng
+th
+</p>
+<p>of
+H
+</p>
+<p>am
+ilt
+</p>
+<p>on
+ia
+</p>
+<p>n
+</p>
+<p>t/τ
+</p>
+<p>QAOA
+</p>
+<p>γ1 β1 γ2 β2 γ3 β3 γ4 β4
+</p>
+<p>Problem Hamiltonian, Ĉ
+Driver Hamiltonian, B̂
+</p>
+<p>|x(τ)〉 =
+</p>
+<p> p∏
+j=1
+</p>
+<p>e−iβjB̂e−iγjĈ
+</p>
+<p> |ϕ〉
+</p>
+<p>Treat the quantum computer as a black-box
+E(~γ, ~β) =
+</p>
+<p>〈
+x(τ)|Ĉ|x(τ)
+</p>
+<p>〉
+Use a classical optimizer to search for the lowest energy by
+varying γs and βs
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 7 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Analytic Optimization
+</p>
+<p>Analytic Optimization
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 8 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Analytic Optimization
+</p>
+<p>Roland &amp; Cerf Schedule
+</p>
+<p>Quantum Advantage is linked to the annealing schedule
+</p>
+<p>0
+</p>
+<p>0.2
+</p>
+<p>0.4
+</p>
+<p>0.6
+</p>
+<p>0.8
+</p>
+<p>1
+</p>
+<p>0 0.2 0.4 0.6 0.8 1
+</p>
+<p>A
+nn
+</p>
+<p>ea
+lin
+</p>
+<p>g
+Sc
+</p>
+<p>he
+du
+</p>
+<p>le
+</p>
+<p>t/τ
+</p>
+<p>Roland &amp; Cerf
+Linear Ramp
+</p>
+<p>J. Roland, N. J. Cerf, arXiv:quant-ph/0107015
+</p>
+<p>R&amp; C focuses on solving the
+unstructured search problem
+</p>
+<p>With a linear schedule, this
+takes O(N) time recovering the
+classical scaling
+</p>
+<p>In order to get the square root
+Grover speed-up in an analog
+setting, you need a schedule
+optimized based off the local
+adiabatic condition.
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 9 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Analytic Optimization
+</p>
+<p>Non-Adiabatic Optimization
+</p>
+<p>Your schedule doesn’t need to
+be adiabatic
+</p>
+<p>Diabatic quantum annealing
+permits evolution in excited
+states
+</p>
+<p>Diabatic annealing is quantum
+universal even with simple
+Hamiltonians (adiabatic
+annealing has more
+restrictions)
+</p>
+<p>S. Muthukrishnan, T. Albash, D. A. Lidar, arXiv:1505.01249
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 10 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Variational Optimization
+</p>
+<p>Variational Optimization
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 11 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Variational Optimization
+</p>
+<p>What is Best
+</p>
+<p>QAO QA QAOA
+</p>
+<p>The core question we will ask is which of these is best
+</p>
+<p>What form of u(t) is optimal for a given τ
+</p>
+<p>For now, we ignore the difficulty in finding this procedure
+</p>
+<p>”Best” is the state with the lowest energy at the end
+(Alternative would be highest overlap with ground state)
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 12 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Variational Optimization
+</p>
+<p>Trotterization of QAO
+</p>
+<p>Trotterization makes smooth adiabatic look like bang-bang
+</p>
+<p>0
+</p>
+<p>0.2
+</p>
+<p>0.4
+</p>
+<p>0.6
+</p>
+<p>0.8
+</p>
+<p>1
+</p>
+<p>1.2
+</p>
+<p>0 0.2 0.4 0.6 0.8 1
+</p>
+<p>St
+re
+</p>
+<p>ng
+th
+</p>
+<p>of
+H
+</p>
+<p>am
+ilt
+</p>
+<p>on
+ia
+</p>
+<p>n
+</p>
+<p>t/τ
+</p>
+<p>Adiabatic
+</p>
+<p>Problem Hamiltonian, Ĉ
+Driver Hamiltonian, B̂
+</p>
+<p>⇒
+</p>
+<p>0
+</p>
+<p>0.2
+</p>
+<p>0.4
+</p>
+<p>0.6
+</p>
+<p>0.8
+</p>
+<p>1
+</p>
+<p>1.2
+</p>
+<p>0 0.2 0.4 0.6 0.8 1
+</p>
+<p>St
+re
+</p>
+<p>ng
+th
+</p>
+<p>of
+H
+</p>
+<p>am
+ilt
+</p>
+<p>on
+ia
+</p>
+<p>n
+</p>
+<p>t/τ
+</p>
+<p>Trotterized Adiabatic
+</p>
+<p>The bang-bang form of QAOA can approximate Adiabatic
+</p>
+<p>Since Adiabatic is Quantum Universal, QAOA is as well
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 13 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Variational Optimization
+</p>
+<p>Bang-Anneal-Bang
+</p>
+<p>Ĥ (t) = u(t)B̂+ (1 − u(t))Ĉ
+</p>
+<p>We can also ask for the optimal form of u(t) ∈ [0, 1]1
+</p>
+<p>Optimal procedure has bangs at
+the beginning and end
+</p>
+<p>In the middle, there is a smooth
+annealing region
+</p>
+<p>The initial and final bangs
+decrease in length as time
+increases
+</p>
+<p>-0.2
+</p>
+<p>0
+</p>
+<p>0.2
+</p>
+<p>0.4
+</p>
+<p>0.6
+</p>
+<p>0.8
+</p>
+<p>1
+</p>
+<p>1.2
+</p>
+<p>0 0.5 1 1.5 2 2.5 3 3.5 4
+C
+</p>
+<p>on
+tr
+</p>
+<p>ol
+Fu
+</p>
+<p>nc
+tio
+</p>
+<p>n
+t
+</p>
+<p>uGD(t) ΦGD(t)
+</p>
+<p>This is Diabatic Annealing
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 14 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Variational Optimization
+</p>
+<p>Connections Between QAOA and Optimal
+</p>
+<p>L. T. B., Lucas Kocia, Przemyslaw Bienias, Aniruddha Bapat, Yaroslav Kharkov, Alexey V.
+</p>
+<p>Gorshkov, arXiv:2107.01218
+Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 15 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Shortcuts to Adiabaticity
+</p>
+<p>Shortcuts to Adiabaticity
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 16 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Shortcuts to Adiabaticity
+</p>
+<p>Goals of Shortcuts
+</p>
+<p>Take an adiabatic evolution and
+run it faster
+</p>
+<p>Use an additional Hamiltonian
+</p>
+<p>Exactly follows adiabatic frame arXiv:1904.08448
+</p>
+<p>Ĥ(t) = u(t)B̂+ (1 − u(t))Ĉ+ ĤCD(t)
+</p>
+<p>If ĤCD is unbounded, this works for any tf
+</p>
+<p>Mimics Adiabaticity, not Annealing
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 17 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Shortcuts to Adiabaticity
+</p>
+<p>Counter Diabatic Formulation
+</p>
+<p>Ĥ(t) =
+</p>
+<p>N∑
+j=1
+</p>
+<p>Ej(t) |j(t)〉 〈j(t)|
+</p>
+<p>The CD Hamiltonian is derived to keep us in the adiabatic frame
+</p>
+<p>ĤCD(t) = i h
+∑
+j
+</p>
+<p>|∂tj(t)〉 〈j(t)|
+</p>
+<p>ĤCD(t) can act alone
+</p>
+<p>The original Hamiltonian
+determines phase
+</p>
+<p>Eigenstate phases determined by
+adiabatic frame.
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 18 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Open Questions
+</p>
+<p>Open Questions
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 19 / 20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Open Questions
+</p>
+<p>Areas of Active Research
+</p>
+<p>How do we engineer diabatic evolution
+</p>
+<p>Do QAOA or the optimal curve mimic counter-diabaticity (in the
+limit of short QAOA steps, the answer is yes)
+</p>
+<p>How can we scale up QAOA to larger systems and more
+variational parameters (This is Quantum Machine Learning)
+</p>
+<p>Can we consistently recover the speed-ups of QAOA without
+relying on variational approaches
+</p>
+<p>Lucas T. Brady (NASA/KBR) Analog Quantum Algorithms March 27, 2023 20 / 20</p>
+<p></p>
+</div>
+<ul>	<li>Quantum Algorithms</li>
+	<li>Analytic Optimization</li>
+	<li>Variational Optimization</li>
+	<li>Shortcuts to Adiabaticity</li>
+	<li>Open Questions</li>
+</ul>
+</body></html>

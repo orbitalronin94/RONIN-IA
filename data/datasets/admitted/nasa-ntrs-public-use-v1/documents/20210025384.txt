@@ -1,0 +1,2627 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Microsoft Word - Nelson Thesis draft-final.docx
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Local Ultrasonic Resonance Spectroscopy of Lithium Metal Batteries for Aerospace 
+
+Applications 
+
+ 
+
+ 
+
+ 
+
+ 
+
+A Thesis presented to the Graduate Faculty of the  
+
+Department of Electrical and Computer Engineering 
+
+University of Virginia 
+
+ 
+
+in partial fulfillment for the degree 
+
+ Master of Science 
+
+By: William Charles Nelson 
+
+ 
+
+ 
+
+ 
+
+December 2021 
+
+
+
+ 
+
+Committee 
+
+This thesis is submitted in partial fulfillment of the requirements for the degree of  
+
+Master of Science 
+
+Author: William Nelson 
+
+ 
+
+This Thesis has been read and approved by the examining committee: 
+
+ 
+
+Advisor: Dr.  Mool Gupta 
+
+ 
+
+Committee Chair: Dr. Zongli Lin 
+
+ 
+
+Committee Member: Dr. Gary Koenig 
+
+ 
+
+Committee Member: Dr. Erik Frankforter 
+
+ 
+
+ 
+
+ 
+
+Accepted for the School of Engineering and Applied Science: 
+
+ 
+
+Jennifer L. West, School of Engineering and Applied Science 
+
+December 2021  
+
+
+
+ 
+
+Acknowledgments 
+
+Firstly, I would like to thank my advisor, Dr. Mool Gupta, for all of his guidance and for allowing 
+
+me this opportunity to work with the National Institute of Aerospace (NIA) and at NASA Langley 
+
+Research Center (LaRC) where this work was performed.  
+
+ I would like to extend my deepest thanks to Erik Frankforter for serving as a technical 
+
+advisor for my work and for his constant support. With his direct guidance on my work and our 
+
+weekly one-on-one meetings, almost everything that I have learned and accomplished over these 
+
+past two years has been a great part, thanks to Erik. I would also like to thank Daniel Perey for 
+
+allowing me on the Sensors-based Prognostics to Avoid Runaway Reactions and Catastrophic 
+
+Ignitions (SPARRCI)  team and for his constant advice and support throughout my time at LaRC. 
+
+Also, Pat Johnston has been essential for providing feedback on my work with his vast expertise. 
+
+Many thanks to Peter Juarez for training me on the lab equipment I needed to perform my work as 
+
+well.  
+
+In addition, I would like to thank the rest of the members of the NASA LaRC 
+
+Nondestructive Evaluation Sciences Branch (NESB). While the mandatory teleworking made 
+
+interacting with everybody a little unusual, I really enjoyed their joyous attitude and kindness every 
+
+day. I would also like to extend my thanks to the rest of the SPARRCI team with whom I performed 
+
+this work.  
+
+ 
+
+ 
+
+ 
+
+ 
+
+  
+
+
+
+ 
+
+Abstract 
+
+As next-generation aircraft and vehicles continue to develop, so do their associated energy 
+
+demands. Lithium metal batteries are a leading candidate to fulfill this energy requirement, but 
+
+these batteries are prone to internal dendrite defects that can lead to catastrophic thermal runaway 
+
+events. Current battery management systems are capable of mitigating such risks, but are unable 
+
+to detect such defects until thermal runaway has already begun. Various nondestructive evaluation 
+
+(NDE) techniques, particularly ultrasonic NDE, can directly monitor internal battery parameters 
+
+giving them the potential to detect critical defects prior to catastrophic failure. However, most of 
+
+the current battery NDE research has focused on improved battery state-of-charge (SOC) and state-
+
+of-health (SOH) monitoring with little emphasis on critical defect detection. Thus, a measurement 
+
+technique sensitive to subtle battery defects is needed. In addition, the complex mechanics of 
+
+ultrasound in porous, thin, multilayered batteries prompt the use of physics-based simulation to 
+
+guide inspections. 
+
+In this work, an ultrasonic NDE technique has been developed utilizing frequency domain 
+
+analysis of local battery resonances to detect the presence of battery defects. This technique is a 
+
+practical extension of local ultrasonic resonance spectroscopy (LURS) – which previously required 
+
+non-contact laser ultrasonics – to measurements with piezoelectric contact and immersion scan 
+
+transducers. To extend the technique to work with piezoelectric transducers, ultrasonic battery 
+
+measurements were compared to a sans-battery calibration measurement. Then, a linear systems 
+
+deconvolution was used to eliminate the transfer functions of extraneous factors such as the 
+
+transducer and electronics, leaving only the frequency-dependent battery reflection coefficient.  
+
+ The LURS technique was first validated on stainless steel and aluminum plates, producing 
+
+reflection coefficients in line with analytical and numerical finite element modeling (FEM) results. 
+
+
+
+ 
+
+Functioning Li-metal pouch cells were then seeded with lithium chip defects prior to LURS 
+
+measurements. The presence of these defects is shown to cause a measurable shift in the battery’s 
+
+through-thickness local resonances. 2D, frequency-domain poroelastic models of ultrasonic 
+
+propagation in a single-cell lithium metal pouch battery were created and corroborated these 
+
+findings. Thus, this work has both extended and proven the feasibility of the LURS technique in 
+
+the detection of local battery defects.  
+
+ 
+
+  
+
+
+
+ 
+
+ 
+
+Table of Contents 
+
+Chapter 1: - Background and Motivation .................................................................................. 1 
+
+ Lithium Metal Batteries .............................................................................................................. 2 
+
+ Current Battery Monitoring Techniques .................................................................................... 4 
+
+1.2.1 Battery Management Systems ................................................................................................................4 
+
+1.2.2 Battery NDE Review .............................................................................................................................5 
+
+Chapter 2: Local Ultrasound Resonance Spectroscopy Technique ............................................ 8 
+
+ Measurement and Modeling Approach ...................................................................................... 8 
+
+ Analytical Modeling ................................................................................................................... 10 
+
+ Numerical Modeling .................................................................................................................. 14 
+
+ Pulse Echo Measurements ......................................................................................................... 18 
+
+2.4.1 Experimental Setup ............................................................................................................................. 18 
+
+2.4.2 Reflection Coefficient Extraction - Linear Systems Deconvolution....................................................... 19 
+
+ Results: Model Validation ......................................................................................................... 22 
+
+2.5.1 Delay Line Experiments ...................................................................................................................... 22 
+
+2.5.2 Submerged Water Tank Inspections ..................................................................................................... 27 
+
+Chapter 3: Local Ultrasound Spectroscopy of Lithium Metal Batteries ................................... 32 
+
+ Experimental Approach and Setup ........................................................................................... 32 
+
+ Experimental Results ................................................................................................................. 34 
+
+3.2.1 Statistical Analysis of Resonance Shifts ............................................................................................... 36 
+
+ Numerical Modeling of Lithium Batteries ................................................................................ 38 
+
+3.3.1 Model Setup ........................................................................................................................................ 38 
+
+
+
+ 
+
+3.3.2 Comparison with Experimental Results ............................................................................................... 42 
+
+Chapter 4: Conclusion and Future Work................................................................................. 43 
+
+ Research Conclusions – Key Findings ...................................................................................... 43 
+
+ Impact and Future Work .......................................................................................................... 44 
+
+References ................................................................................................................................ 46 
+
+ 
+
+
+
+ 1 
+
+Chapter 1: - Background and Motivation 
+
+With the constantly evolving landscape of electric vehicles and devices, there has been a parallel 
+
+growth in demand for an efficient, lightweight energy storage solution for these systems. This has 
+
+brought great interest to lithium metal batteries for their high energy densities and reusability [1]. 
+
+However, lithium metal batteries are prone to failure and have limited lifetimes due to various 
+
+aging phenomena [2]. Thus, these batteries need to be constantly monitored to ensure safe and 
+
+efficient operation. Conventional battery management systems, however, are unable to detect 
+
+certain catastrophic defects that greatly increase the associated safety risks in using lithium metal 
+
+batteries.  
+
+In particular, these batteries are prone to defects in which lithium dendrites grow across the 
+
+battery from one electrode to the other, causing an internal short circuit. This ultimately leads to a 
+
+thermal runaway reaction in which the heating and ignition of one battery cell can cascade into the 
+
+ignition of neighboring cells. In recent years, a large percentage of fires in electric vehicles has 
+
+been due to this thermal runaway effect in lithium batteries [3]. The current solution to this has 
+
+been to engineer around such reactions and place the batteries in bulky containment systems to 
+
+isolate them from other cells [4]. This only passively prevents thermal runaway from occurring 
+
+and adds significant weight to the batteries, which is very undesirable in aerospace applications. 
+
+This issue has caused a large amount of research to go into minimizing parasitic mass and volume 
+
+in battery component designs [5].  
+
+Nondestructive evaluation (NDE) techniques have the potential to detect precursors and 
+
+development of critical defects prior to the occurrence of a catastrophic failure due to their ability 
+
+to probe internal features of materials. For battery health monitoring, these techniques would need 
+
+to be field-deployable and the physical mechanisms of the inspection would need to be understood 
+
+
+
+ 2 
+
+well to provide confidence in the inspection technique. This work seeks to accomplish this through 
+
+physics-based modeling and the development of an ultrasonic frequency domain technique 
+
+sensitive to embedded battery defects. In the next sections, the basic working principles and critical 
+
+defects of lithium metal batteries are discussed, in addition to current battery health monitoring 
+
+techniques.  
+
+Lithium Metal Batteries 
+
+Li-metal batteries are complex, multilayered structures comprised of solid, liquid, and 
+
+porous layers. The fundamental unit cell of a Li-metal battery is composed of two active electrodes, 
+
+each with an attached current collector. The battery chemistry of interest in this work is comprised 
+
+of a solid lithium anode with a copper current collector and a porous LiCoO2 cathode with an 
+
+aluminum current collector. Figure 1 shows the unit cell of such a single cell battery. A porous 
+
+separator material is placed between the anode and cathode to prevent internal short circuits, and 
+
+it is filled with a liquid electrolyte which allows ions to transfer between the electrodes.  In practice, 
+
+there are multiple cells comprised of this single-cell structure stacked many times [6]. 
+
+ 
+
+Figure 1: Layout of a single cell lithium metal battery 
+
+In operation, lithium ions exchange between the two electrodes, depositing onto the surface 
+
+of the lithium anode during charging and intercalating into the pores of the LiCoO2 cathode during 
+
+Co
+pp
+
+er
+ C
+
+ol
+le
+
+ct
+or
+
+ 
+
+Lithium 
+
+Anode 
+
+ S
+ep
+
+ar
+at
+
+or
+ 
+
+LiCoO2 
+
+Cathode 
+
+A
+lu
+
+m
+in
+
+um
+ C
+
+ol
+le
+
+ct
+or
+
+ 
+
+
+
+ 3 
+
+discharging. This results in various mechanical property changes in density, modulus, and porosity 
+
+[7].  
+
+During the fabrication of the battery, the electrolyte and lithium anode oxidizes, forming a 
+
+thin layer known as the solid electrolyte interface (SEI). In this layer, lithium plating can occur in 
+
+which lithium ions are reduced to metallic lithium and build up at the interface. This lithium is no 
+
+longer usable in standard battery operation and will thus result in an overall loss of charge capacity. 
+
+This is a normal aging phenomenon in lithium-based batteries and is generally why these types of 
+
+batteries have a limited lifetime. However, under various cycling conditions, such as low 
+
+temperature or high charge/discharge rates, this plating can occur non-uniformly and form needle-
+
+like structures known as dendrites. Dendrites can penetrate the battery separator, short circuit the 
+
+electrodes, and cause a thermal runaway reaction to occur [8]. This process is further emphasized 
+
+in Figure 2. 
+
+ 
+
+ 
+
+Figure 2: Conceptual sketch of how lithium plating can lead to dendrite growth 
+
+Dendrites have received lots of attention due to their common occurrence, their potential 
+
+for catastrophic failure, and their difficulty of detection. However, there are other important battery 
+
+defects that can occur [2]. Gas generation from the decomposition of the electrolyte solvent can 
+
+Lithium 
+
+Anode 
+
+Separator/
+
+Electrolyte 
+
+Li
++
+ 
+
+Li
++
+ 
+
+Separator/
+
+Electrolyte 
+Lithium 
+
+Anode 
+
+Li 
+
+SEI SEI 
+
+Dendrites 
+
+Lithium 
+
+Anode 
+
+Separator/
+
+Electrolyte 
+
+Li
++
+ 
+
+Li
++
+ 
+
+Li
++
+ 
+
+SEI 
+
+e-
+ 
+
+
+
+ 4 
+
+lead to increased cell temperatures and thus thermal runaway. Continued reduction of lithium ions 
+
+can cause further thickening of the SEI layer and an overall loss in charge capacity and 
+
+performance of the battery. From an ultrasonic NDE perspective, there are local changes in 
+
+geometry and material properties associated with each of these defect mechanisms and thus the 
+
+potential for detection based on the amount of influence they have on wave propagation and wave-
+
+defect interaction within the battery.  
+
+Current Battery Monitoring Techniques 
+
+1.2.1 Battery Management Systems 
+
+As mentioned before, the current solution to prevent dendrites from causing thermal 
+
+runaway is to engineer safe containment systems and constantly monitor the batteries. These tasks 
+
+are accomplished with a battery management system (BMS) which is used to ensure maximum 
+
+operating efficiency and mitigate battery failure. The most basic way in which a BMS does this is 
+
+through the state of charge (SOC) and state of health (SOH) monitoring. The SOC of a battery is 
+
+the ratio of the battery’s current charge to its maximum capacity and is the most important of these 
+
+parameters as it is essentially the ‘fuel gauge’ that can determine how much energy is left in the 
+
+battery. The battery’s SOH is representative of the battery’s deterioration from aging and is usually 
+
+tracked by monitoring changes in maximum SOC over time.  
+
+There are various different SOC and SOH estimation algorithms and models, but they 
+
+mostly all involve using external cell parameters such as voltage, current, and temperature as 
+
+inputs for lookup tables and computational models that then predict the overall SOC [9]. As these 
+
+methods all lack information about internal battery changes, there is a degree of inaccuracy to their 
+
+predictions that can accumulate in error over time. For this same reason, these methods are not 
+
+
+
+ 5 
+
+sensitive to the development of some critical battery defects [2]. Ultrasonic nondestructive 
+
+evaluation (NDE) techniques, however, have the advantage of directly monitoring internal battery 
+
+changes, thus making them effective at SOC/SOH monitoring and also sensitive to defects, and is 
+
+why they have been of great interest recently [7].  
+
+1.2.2 Battery NDE Review 
+
+NDE techniques have become a large research area for battery health monitoring due to 
+
+their ability to probe the internal mechanics of a battery with little interference. This allows the 
+
+acquisition of internal battery information that modern BMS’s cannot normally acquire. Nuclear 
+
+magnetic resonance spectroscopy has been shown capable of detecting lithium dendrite growth 
+
+and various battery aging/degradation phenomena during in-situ battery operation [10-11]. These 
+
+techniques have given great insight into these phenomena; however, they suffer from requiring 
+
+extensive lab equipment, making them undesirable for a real battery application. Thermography 
+
+techniques have been used to detect gas pocket defects and analyze the thermal behavior of 
+
+batteries under abuse scenarios [12-13]. Thermography techniques have not been shown capable 
+
+of obtaining any information about battery SOC independently, however. While these various 
+
+NDE techniques have proven applicable for battery inspections in some form, the vast majority of 
+
+research thus far has focused on ultrasonic techniques due to their promise for a field-deployable 
+
+inspection technique capable of improved SOC/SOH and defect monitoring [7].  
+
+Much of this ultrasonic NDE work has been in the realm of SOC and SOH determination. 
+
+The feasibility of these techniques was initially demonstrated in a study by Hsieh et al., which 
+
+showcased how the relationships between battery SOC and mechanical properties can be used to 
+
+accurately predict  SOC via acoustic measurements and modeling [14].  
+
+
+
+ 6 
+
+  Since then, this area has been expanded on greatly, with various other applicable 
+
+techniques being developed [7]. Ladpli et al. have demonstrated methods of using ultrasonic 
+
+guided waves to reliably track a battery’s SOC and SOH [15]–[18]. The time of flight and signal 
+
+amplitude of pitch-catch guided waves were shown to have direct correlations to the battery’s SOC 
+
+due to the changes in modulus and density associated with the charging and discharging process. 
+
+An analytical model of this process was constructed and was able to reliably validate the 
+
+experimental results.  
+
+Gold et al., related ultrasonic measurements to poroelastic properties of internal battery 
+
+components [19]. Because of the intercalation of ions into the porous electrodes, there are porosity 
+
+changes associated with changing battery SOC. This relationship was mapped using Biot 
+
+poroelastic waves theory and through-transmission ultrasonic inspections.  
+
+ At the time of writing this, the majority of current research has been focusing on 
+
+determining battery SOC via ultrasound, with only a few studies done on using these techniques 
+
+to directly detect battery defects or failure conditions. Bommier et al. used through-transmission 
+
+ultrasound to relate changes in time of flight to lithium plating from uneven charge rates [20]. The 
+
+extent of lithium plating was then confirmed by postmortem electrochemical analysis of the battery 
+
+electrodes. Another study was done by Robinson et al. in which portions of a battery’s electrodes 
+
+were removed, which was detectable via ultrasonic inspection [21]. These studies show promising 
+
+results in using ultrasound to detect coarse battery defects, however, their time-domain analysis 
+
+methods are not generally suitable for handling idiosyncrasies of layered media, so further 
+
+technique development and analysis is required to demonstrate that ultrasonic NDE is generally 
+
+suitable for battery defect detection.  
+
+
+
+ 7 
+
+In addition, there has also been very little work on ultrasound battery simulations, 
+
+especially with battery defect conditions. In the works discussed previously by Ladpli et al. and 
+
+for SOC/SOH estimation, analytical models were built from 1D elastic wave assumptions that 
+
+were capable of accurately describing acoustic velocity changes associated with 
+
+charging/discharging [15 – 18]. Gold et al. did a similar study except included poroelastic theory 
+
+to better represent the physics of the electrolyte-filled porous cathode [19]. One recent study by Li 
+
+and Zhou simulated an air-coupled ultrasonic inspection of an entire battery system with embedded 
+
+stomata defects at various layers [22]. These defects were able to be detected through analyzing 
+
+the attenuation of signal amplitude in both the time and frequency domains. These studies have 
+
+laid the groundwork for ultrasound battery simulation and determined important considerations 
+
+for accurate representation of the internal physics of a battery. However, there are still gaps in 
+
+modeling defect conditions, especially with those seen in typical battery operation.  
+
+To expand on these studies, this thesis seeks to investigate the feasibility of a normal 
+
+incidence frequency domain ultrasound inspection technique in the detection of internal battery 
+
+defects. A contact technique was chosen due to the simple setup and ease in which a field-
+
+deployable technique could be realized from it, with further possibility for direct extension via 
+
+embedded sensors on the surface or inside the battery. The complex, layered media was handled 
+
+by frequency-domain post-processing and deconvolution to isolate the battery’s local through-
+
+thickness spectral response. In the next sections, a simple single-layer case will be investigated to 
+
+establish the technique, and then it will be applied to a full battery inspection.  
+
+  
+
+
+
+ 8 
+
+Chapter 2: Local Ultrasound Resonance Spectroscopy Technique 
+
+Measurement and Modeling Approach 
+
+In a pulse-echo ultrasound inspection setup, an incident ultrasound wave excited from a 
+
+transducer propagates through the specimen being inspected. These waves reflect off the 
+
+specimen’s internal features and interfaces, propagate back through the specimen, and then are 
+
+picked up by the same excitation transducer. In sufficiently thick specimens, these reflections show 
+
+up as distinct waveforms in the received time-domain signal. Then, by looking at the time that 
+
+these signals are received, the corresponding location/thickness of features in the specimen can be 
+
+determined by using the material’s wave speed. This is known as the time of flight and is a key 
+
+parameter for ultrasound inspections [23]. If the specimen being inspected has very thin layers, as 
+
+with a lithium metal battery, the time of flight will be very short, and reflections will overlap with 
+
+the original signal in time. This makes time-domain analysis very difficult as there will be no 
+
+distinct reflections in the signal to measure. In some cases, this might be mitigated by inspecting 
+
+at high frequencies, but this still leaves significant challenges in interpreting waveforms with many 
+
+transmissions/reflections between layered battery materials. In these cases, a different approach 
+
+must be taken to reliably extract information about the specimen.  
+
+The most common method to resolve this issue is to look at the frequency domain 
+
+information of the reflected waveforms. This is common in applications in which measuring the 
+
+thickness of a thin adhesive or lubricant layer is desired [24], [25]. At the through-thickness 
+
+resonances of this layer, the incident wave predominantly transmits through the specimen, and the 
+
+frequency-dependent reflection coefficient reaches a minimum value. The resonance frequency in 
+
+which this phenomenon occurs is then used to calculate the thickness and material property 
+
+information of the specimen. If measuring below the first through-thickness resonance, the 
+
+
+
+ 9 
+
+reflections will be dominated by the stiffness of the specimen, and thus a mass-spring model can 
+
+be used to calculate the material properties [24].  
+
+Resonant Ultrasound Spectroscopy (RUS) is another frequency domain NDE technique 
+
+that measures the free mechanical vibrations of an entire specimen [26]. As with the previous 
+
+technique, resonant frequencies are measured and used to gain information about the specimen’s 
+
+mechanical properties. Local Ultrasonic Resonance Spectroscopy (LURS) is a very similar 
+
+technique except that it focuses on measuring resonances in localized regions of the specimen 
+
+rather than across the entire specimen [27]. Defects that are present in those regions create different 
+
+resonance behaviors than in pristine regions, which can then be used as a method of defect 
+
+detection. The LURS technique requires a broadband frequency range and so far has required a 
+
+non-contact method such as laser or air-coupled ultrasound to get the free, mechanical resonances 
+
+of the system.  
+
+In this work, the reflection coefficient measurement approach is used to extend the LURS 
+
+technique to be applicable for contact transducers. This gives a localized, frequency-dependent 
+
+reflection signal that contains information about local mechanical resonances in a lithium metal 
+
+battery. Since these resonances depend on local material properties and thicknesses, this reflection 
+
+signal can be used to detect the presence of defects. To do this, a linear systems deconvolution 
+
+approach is applied to the measurement system to isolate the battery’s mechanical resonances and 
+
+makes this method applicable for use with a contact setup. This is described in more detail in 
+
+Section 2.4.2. To better understand how this technique will work, a simple model of a single layer 
+
+inspection is built in the next section and will serve as a lens for validating and interpreting this 
+
+contact transducer extension of the LURS technique.  
+
+
+
+ 10 
+
+Analytical Modeling  
+
+A 1D model layout of a pulse-echo inspection on a single layer material submerged in 
+
+water is shown below in Figure 3. Assuming infinite surrounding water domains, the system can 
+
+be explained by looking at the incident, reflected, and transmitted pressure waves. This is a 
+
+derivation of a classical acoustics problem and follows the analysis used by Kinsler et al. [28], but 
+
+is presented here for the necessary context of this work. The equations for the incident, reflected, 
+
+and transmitted pressure waves can be seen in Equations (2.1 - 2.5). Because of the infinite water 
+
+boundaries, there is no reflected wave from the second water domain back into the system. This 
+
+also means that the pressure waves are in the far-field away from any interfaces where evanescent 
+
+wave modes may interfere.  
+
+ 
+
+Figure 3 Diagram showing the layout of the 1D analytical model 
+
+ 𝑃1#(𝑥,𝑡;𝜔) = 𝑃1,#𝑒#(./0123) 
+(2.1) 
+
+ 𝑃14(𝑥,𝑡;𝜔) = 𝑃1,4𝑒#(./5123) (2.2) 
+
+ 𝑃2/(𝑥,𝑡;𝜔) = 𝑃2,/𝑒#(./0173) 
+(2.3) 
+
+ 𝑃24(𝑥,𝑡;𝜔) = 𝑃2,4𝑒#(./5173) 
+(2.4) 
+
+ 𝑃3/(𝑥,𝑡;𝜔) = 𝑃3,/𝑒#(./0193) 
+(2.5) 
+
+
+
+ 11 
+
+𝑃1#(𝑥,𝑡;𝜔),𝑃14(𝑥,𝑡;𝜔),𝑃2/(𝑥,𝑡;𝜔),𝑃24(𝑥,𝑡;𝜔),𝑃3/(𝑥,𝑡;𝜔)  represent each incident, 
+
+reflected, and transmitted wave in each domain. 𝑃1,#, 𝑃1,4, 𝑃2,/, 𝑃2,4, 𝑃3,/ represent the complex 
+
+pressure amplitudes for each wave. The same holds for particle velocities 
+
+𝑈1#(𝑥,𝑡;𝜔),𝑈14(𝑥,𝑡;𝜔),𝑈2/(𝑥,𝑡;𝜔),𝑈24(𝑥,𝑡;𝜔),𝑈3/(𝑥,𝑡;𝜔)  and their corresponding 
+
+complex amplitudes 𝑈1,#, 𝑈1,4, 𝑈2,/, 𝑈2,4, 𝑈3,/ (which otherwise have the same form as Equations 
+
+(2.1 - (2.5). The variable 𝜔 is the angular frequency, 𝑘 = .
+<
+= =>?
+
+<
+  is the wavenumber of each 
+
+wave in its respective domain, and c is the pressure wavespeed in each respective media. The 
+
+interface conditions at x = 0 and x = L require the pressure P and particle velocity U to be equal 
+
+on both sides of the interface. For x = 0, the interface condition equations are: 
+
+ 𝑃1# +	𝑃14 = 𝑃2/ +	𝑃24 (2.6) 
+
+ 𝑈1# +	𝑈14 = 𝑈2/ +	𝑈24 (2.7) 
+
+Substituting Equations (2.1 - (2.5) into (2.6 - (2.7) applying 𝑥 = 0, and combining like terms gives: 
+
+ 𝑃1,# +	𝑃1,4 = 𝑃2,/ + 𝑃2,4 (2.8) 
+
+ 𝑈1,# +	𝑈1,4 = 𝑈2,/ +	𝑈2,4 (2.9) 
+
+At x = L, the interface condition equations are: 
+
+𝑃2/ +	𝑃24 = 𝑃3/ (2.10) 
+
+𝑈2/ +	𝑈24 = 𝑈3/ (2.11) 
+
+Similarly, substituting Equations (2.1 - (2.5) into (2.10 (2.11), applying 𝑥 = 𝐿, and combining like 
+
+terms gives: 
+
+ 𝑃2,/𝑒#(017D) +	𝑃2,4𝑒#(17D) = 𝑃3,/𝑒#(019D) (2.12) 
+
+ 𝑈2,/𝑒#(017D) +	𝑈2,4𝑒#(17D) = 𝑈3,/𝑒#(019D)	 (2.13) 
+
+
+
+ 12 
+
+The specific acoustic impedance 𝑧 = ± G
+H
+
+ is substituted into these equations where the positive and 
+
+negative sign indicates a forward and backward traveling wave, respectively. This gives Equations 
+
+(2.14 (2.15): 
+
+ 𝑃1,# +	𝑃1,4	
+𝑃1,# −	𝑃1,4
+
+𝑧J =
+𝑃2,/ + 𝑃2,4	
+𝑃2,/ −	𝑃2,4
+
+𝑧= (2.14) 
+
+ 𝑃2,/𝑒#(017D) +	𝑃2,4𝑒#(17D)
+
+𝑃2,/𝑒#(017D) −	𝑃2,4𝑒#(17D)
+𝑧= = 𝑧K (2.15) 
+
+Combining equations (2.14 -(2.15) gives the reflection coefficient as the ratio between reflected 
+
+and incident waves in the first media: 
+
+𝑹 =
+𝑃1,4
+𝑃1,#
+
+=
+M1 − 𝑧J𝑧K
+
+N𝑐𝑜𝑠𝑘=𝐿 + 𝑖 M
+𝑧=
+𝑧K
+− 𝑧J𝑧=
+
+N𝑠𝑖𝑛𝑘=𝐿
+
+M1 + 𝑧J𝑧K
+N𝑐𝑜𝑠𝑘=𝐿 + 𝑖 M
+
+𝑧=
+𝑧K
++ 𝑧J𝑧=
+
+N𝑠𝑖𝑛𝑘=𝐿
+ (2.16) 
+
+  
+
+It can be seen from this equation that the reflection coefficient is dependent on the 
+
+wavenumber k2 which gives the reflection coefficient a frequency-dependent behavior. It is worth 
+
+noting here that the surrounding layers also influence this calculation with the inclusion of  the 𝑧J 
+
+and 𝑧K terms, however, they do not impart a frequency-dependent characteristic and thus only 
+
+affect the amplitude of 𝑹. In Figure 4, the reflection coefficient was calculated for 1 mm thick 
+
+aluminum 2024 and stainless-steel 321 plates across a frequency range spanning the first two 
+
+through-thickness resonances. The material properties used in this calculation are seen in Table 1. 
+
+It should be noted that this has assumed fluid media, where a solid media would use stresses instead 
+
+of pressure. This analysis is identical for solid media and results in the same reflection coefficient 
+
+equation. 
+
+
+
+ 13 
+
+ 
+
+Figure 4: (a) Analytical reflection coefficient for 1mm thick aluminum 2024. (b) Analytical reflection coefficient for 
+
+1mm thick stainless steel 321 
+
+ 
+
+Table 1: Material properties used in the single-layer analytical  
+
+Material Aluminum 2024 Stainless Steel 321 Water 
+Density (kg/m3) 2780 8000 1000 
+
+Pressure Wave Speed (m/s) 6237 5553 1480 
+Characteristic Acoustic 
+
+Impedance (Pa·s/m3) 17.33 x 10
+9 44.42 x 109 1.480 x 109 
+
+  
+
+From these plots, sharp minima are seen at 2.78 and 5.55 MHz in aluminum and at 3.12 
+
+and 6.24 MHz in stainless steel. These frequencies are the first and second through-thickness 
+
+resonances for each material, respectively. At these frequencies, the wavelength of the incident 
+
+pressure wave is a half-integer multiple of the thickness of the plate, causing it to transmit fully 
+
+through the material, giving the reflection coefficient a minimum value. This relationship between 
+
+thickness and incident wavelength can be used to calculate which frequencies that a resonance is 
+
+expected for a single layer material, seen in Equation (2.17), where c is the wave speed of the 
+
+material, L is the layer thickness, and n is an integer number. Using the pressure wave speed values 
+
+a b 
+
+
+
+ 14 
+
+in Table 1, Equation (2.17) will give the same resonance frequencies as predicted by the analytical 
+
+model in (2.16). 
+
+𝑓4UVWXYX<U =
+𝑛 ∗ 𝑐
+2𝐿
+
+ (2.17) 
+
+ 
+
+Changes in thickness or material properties will change this characteristic wavelength and 
+
+thus the location of these through-thickness resonance frequencies. This can be seen in how the 
+
+aluminum and stainless-steel specimens have different resonance frequencies despite being the 
+
+same thickness. The aluminum, with a higher c than stainless steel, has its first resonance at a 
+
+higher frequency than in the stainless steel. Observing changes in these resonances can thus 
+
+provide insight into changes within the specimen itself. A downward shift in resonance location 
+
+would indicate either an increase in thickness L or a decrease in wave speed c.  
+
+This is the basic concept that will be used in the inspection of lithium metal batteries; by 
+
+measuring through-thickness resonances of the battery, we can infer internal changes within the 
+
+battery. As mentioned before, lithium metal batteries are complex multi-layer systems in which 
+
+there is no nontrivial analytical solution and thus no one-to-one correspondence between layer 
+
+properties and resonance frequencies, such as in this single layer case. Another solution method is 
+
+required. For this work, a numerical FEM model was used. As shown in the next section, a single 
+
+layer numerical model was created and verified using COMSOL, prior to extension to multilayer 
+
+models. 
+
+Numerical Modeling 
+
+Using the same layout seen in the previous section and seen in Figure 5, a 2D plane strain 
+
+COMSOL model was constructed for a pulse-echo frequency domain inspection. It is worth 
+
+
+
+ 15 
+
+mentioning that this model was based on a well-validated model in the COMSOL Application’s 
+
+Library to measure the poroelastic reflection coefficient of an ocean seabed [29-30], although 
+
+significant changes were made to fit the needs of this inspection approach. 
+
+ 
+
+ 
+
+𝑃#X<#[UX/ 
+𝑃4U?\U</U[  = 𝑃/W/Y\ 
+
+𝑃/4YXV]#//U[ 
+
+𝑃𝑀𝐿 
+
+𝑃𝑀𝐿 
+
+𝑀𝑎𝑡𝑒𝑟𝑖𝑎𝑙 
+
+𝐹𝑙𝑜𝑞𝑢𝑒𝑡	𝑝𝑒𝑟𝑖𝑜𝑑𝑖𝑐𝑖𝑡𝑦 
+
+1	𝑚𝑚 
+
+2𝜆j 
+
+2𝜆j 
+
+𝜆j 
+
+𝑊𝑎𝑡𝑒𝑟 
+
+𝑊𝑎𝑡𝑒𝑟 
+
+Figure 5: Layout for single layer COMSOL models. Floquet periodic conditions are used on the left and right 
+
+boundaries, and perfectly matched layer (PML) boundary conditions were used on the top and bottom boundaries 
+
+
+
+ 16 
+
+In this model, a pressure wave of the form 𝑃#X<#[UX/ = 𝑷m𝒊𝑒0#(𝐤⋅𝒙) is incident from the water 
+
+domain onto a 1 mm thick material (in this case aluminum 2024 and stainless-steel 321) submerged 
+
+in water where	𝐤 =	𝑘j(𝑠𝑖𝑛𝜃j,𝑐𝑜𝑠𝜃j), 𝑘j =	
+.
+<
+, and 𝐱 = (𝑥,𝑦). The incident angle, 𝜃j, is zero in 
+
+this case. The model sweeps over a specified frequency range, with the frequency of the incident 
+
+wave changing each iteration, and the reflected waves are measured to obtain a reflection spectrum 
+
+for the system.  
+
+This model calculates the reflection coefficient using a scattered field formulation in which 
+
+the incident wave (𝑃#X<#[UX/) is a background pressure field and the total pressure measured 
+
+(𝑃/W/Y\) is a superposition of this background field and any reflections (𝑃4U?\U</U[). This total 
+
+pressure is measured and averaged across a line in the far-field indicated by 𝑃/W/Y\ in Figure 5, 
+
+which is sufficiently far away from any interfaces to avoid evanescent wave interference. The 
+
+reflected pressure wave is calculated by subtracting the incident pressure wave from the measured 
+
+total as seen in (2.18). 
+
+ 
+
+𝑃4U?\U</U[ = 𝑃/W/Y\ − 𝑃#X<#[UX/ (2.18) 
+
+ 
+
+The reflection coefficient is then calculated using Equation (2.16). Plots of reflection 
+
+coefficients for 1 mm thick aluminum 2024 and stainless steel 321can be seen in Figure 6. 
+
+The left and right boundary conditions are modeled using Floquet periodicity, which 
+
+simulates the observed unit cell repeating periodically in the x-direction [31-32]. Perfectly matched 
+
+layer (PML) boundary conditions were used for the top and bottom boundaries, which simulate 
+
+absorbing boundaries in which incident waves will not reflect [33]. The x-dimensional width was 
+
+set to be equal to one wavelength of the incident pressure wave, which will change for each 
+
+
+
+ 17 
+
+iteration of the model. The height of the water domains was set to be double this wavelength to 
+
+ensure that one entire wavelength at minimum could propagate through this domain. In addition, 
+
+the mesh size of the water domains was set to have ten elements per wavelength in both the x and 
+
+y-directions, scaling with the frequency of the incident wave. The plate domain was set to have 5 
+
+quadratic elements per thickness in the y-direction and the same discretization as the water domain 
+
+in the x-direction. This ensures sufficient spatial discretization at all frequencies across the entire 
+
+model.  
+
+This model uses a 2D plane-strain assumption, and is solved in the frequency domain. 
+
+Acoustic-structure multiphysics coupling is used at the interfaces between the plate and water 
+
+domains. The material properties used as inputs for this model can be seen in Table 2.  
+
+ 
+
+Table 2: Material properties used for single layer plate models 
+
+Material Aluminum 2024 Stainless Steel 321 
+Density (kg/m3) 2780 8000 
+
+Elastic Modulus (GPa) 73.0 193 
+Poisson Ratio 0.33 0.28 
+
+Pressure Wave Speed (m/s) 6237 5553 
+ 
+
+ 
+
+Figure 6: Numerical reflection coefficients for (a) aluminum 2024 and (b) stainless steel 321 
+
+a b 
+
+
+
+ 18 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Table 3: Results from analytical and numerical models 
+
+Material 
+Analytical Numerical 
+
+First Resonance Second Resonance First Resonance Second Resonance 
+Stainless 
+Steel 321 2.78 MHz 5.55 MHz 2.78 MHz 5.55 MHz 
+
+Aluminum 
+2024 3.12 MHz 6.24 MHz 3.12 MHz 6.24 MHz 
+
+ 
+
+From these plots, the numerical simulation matches the analytical model’s predicted 
+
+resonance frequencies for both materials. This gives confidence in the model implementation and 
+
+setup for building up into cases with multiple layers. In the next section, an experimental setup is 
+
+used to validate the results from both models.  
+
+Pulse Echo Measurements  
+
+2.4.1 Experimental Setup 
+
+To validate the results from these models, pulse-echo measurements were performed to 
+
+calculate the reflection coefficient for 1mm thick plates of aluminum 2024 and stainless steel 321. 
+
+A 3.5 MHz Panametrics V682 delay line transducer is used with a Panametrics 5072 Pulser-
+
+Receiver to perform the inspections. The delay line is required to isolate the excitation signal from 
+
+the specimen’s reflections. Soundsafe® ultrasonic couplant was used to couple the surface of the 
+
+delay line to the surface of the metal plate, and a 2 kg weight was placed on top of the transducer 
+
+
+
+ 19 
+
+to apply constant pressure and ensure a flat coupling interface. A picture of the experimental setup 
+
+can be seen in Figure 7.  
+
+ 
+
+Figure 7: Delay Line transducer coupled to stainless steel plate 
+
+2.4.2 Reflection Coefficient Extraction - Linear Systems Deconvolution 
+
+To calculate the reflection coefficient with this setup, the signal from the inspected 
+
+specimen must be isolated from the other contributing responses of the setup (delay line, 
+
+
+
+ 20 
+
+electronics, etc.). This can be done by taking a linear systems approach and assigning transfer 
+
+functions to the components in the system. A diagram of this is seen in Figure 8.  
+
+ 
+
+Figure 8: Pulse echo delay line inspection setup 
+
+ In this setup, Hel, Htr, HFF, HNF, and HR account for the transfer functions of the electronics, 
+
+transducer, delay line, and the inspected specimen, respectively. The subscript in HR is for 
+
+reflection, emphasizing that this setup provides a reflection coefficient for the entire specimen. 
+
+The delay line has been split up into two separate transfer functions HFF, and HNF representing the 
+
+far-field and near-field portions of the delay line, respectively. This distinction is made to isolate 
+
+the near field effects at the specimen/delay line interface (i.e., influence of evanescent modes), and 
+
+because reflection coefficients are by definition measured in the far-field. If not accounted for, 
+
+near-field effects can contribute spurious artifacts to the post-processed battery response. An input 
+
+voltage is used for the system input, which excites a pressure wave on the transducer’s face (Htr) 
+
+that travels through the delay line (HFF, HNF). The ultrasonic wave resonates locally within the 
+
+specimen (HR) via a multitude of transmissions and reflections, then propagates back through the 
+
+delay line, is converted back to an electrical signal by the transducer and receiving electronics, and 
+
+then is recorded as Vout. The transfer function relationship for this output voltage can be described 
+
+by Equation (2.19) below. 
+
+𝐻/4 𝐻uu 
+
+ 
+
+𝐻U\ 
+
+ 
+
+𝐻∗vu 𝐻w 
+
+
+
+ 21 
+
+ 
+
+(𝑉Wy/)w = 𝑉#X × 𝐻U\ × 𝐻/4 × 𝐻uu × 𝐻∗vu × 𝐻w × 𝐻∗vu × 𝐻uu × 𝐻/4 × 𝐻U\ (2.19) 
+
+ 
+
+ The specimen’s reflected transfer function, HR, is the variable that needs to be isolated. By 
+
+taking a measurement with the specimen (HR) removed, we get a similar expression to (2.19). 𝐻′vu 
+
+here represents a different interface condition from 𝐻∗vu when no specimen is coupled. Figure 9 
+
+shows this setup and its associated transfer function relationship is in Equation (2.20).  
+
+ 
+
+(𝑉Wy/)<Y\ = 𝑉#X × 𝐻U\ × 𝐻/4 × 𝐻uu × 𝐻′vu × 𝐻′vu × 𝐻uu × 𝐻/4 × 𝐻U\ (2.20) 
+
+ 
+
+With these two relationships, the calculation 
+(|}~�)�
+(|}~�)���
+
+ can be taken will give the reflection 
+
+coefficient 𝑹(𝜔): 
+
+|𝑹(𝜔)| =
+|(𝑉Wy/)w|
+|(𝑉Wy/)<Y\|
+
+= |𝐻vu| × |𝐻w| × |𝐻vu| (2.21) 
+
+ 
+
+Two 𝐻vu are left after this calculation, which is associated with any near field effects at the edge 
+
+of the 𝐻vu  interface. These terms are the ratio of the two near field terms  
+�∗��	
+����	
+
+, and were 
+
+combined into 𝐻vu for simplicity of analysis. This will influence the amplitude of the reflection 
+
+	𝐻U\ 
+
+ 
+	𝐻/4 𝐻uu 𝐻′vu 
+
+Figure 9: Delay line ultrasound inspection calibration setup 
+
+
+
+ 22 
+
+coefficient but won’t alter the location of any resonance frequencies. This is demonstrated in 
+
+Figure 4, where the two different materials have different amplitude characteristics in addition to 
+
+resonances. The aluminum reflection coefficient is lower in amplitude and wider resonance 
+
+minima, while the stainless-steel reflection coefficient has a higher amplitude and sharper minima. 
+
+These differences are attributed to these near-field contributions from the differing acoustic 
+
+impedances. Also, the different boundary conditions at the end of the delay line in the calibration 
+
+setup will create a phase difference in the 𝐻vu term. Thus, the absolute value of the two 𝑉Wy/ terms 
+
+must be taken so that only the magnitudes are incorporated in the calculation. 
+
+ For this linear systems approach to work, each individual component must be behaving 
+
+linearly. The electronics and transducer used throughout this work were checked for linearity by 
+
+performing the described deconvolution approach at different energy/amplitude settings on the 
+
+pulser-receiver. The scaling of input voltage produced a corresponding scaling of the output 
+
+voltage across the entire frequency spectrum used in these measurements, confirming that these 
+
+components are behaving linearly.  
+
+ Results: Model Validation 
+
+2.5.1 Delay Line Experiments 
+
+With this method established, it can be validated with an inspection of the metal plates used 
+
+in the modeling. Figure 10 Figure 11 show the reflected waveforms for the metal plates and free 
+
+transducer. Because the use of a delay line causes multiple reflections within itself, these figures 
+
+have been windowed to only include the delay line’s first reflection. 
+
+
+
+ 23 
+
+ 
+
+Figure 10: Time-domain data from 1mm thick (a) aluminum 2024 and (b) stainless steel 321 delay line inspections 
+
+ 
+
+Figure 11: Time-domain data for the free delay line transducer in air 
+
+The Fast-Fourier Transform (FFT) was then performed on each of these signals to get data 
+
+in the frequency domain. To prevent spectral leakage when computing the Fourier transform, it is 
+
+important to let the reflections decay down to zero. In this case, the second delay line reflection 
+
+occurred before this ringdown could completely finish, so a Tukey window with a cosine fraction 
+
+of 0.1 was applied to the waveforms before performing the FFT. The magnitudes of the FFT can 
+
+be seen in Figure 12 and Figure 13. Resonances can be seen in these plots already, but this data 
+
+still includes the transducer response, so it is not isolated yet. Figure 12 and Figure 13 represent 
+
+a b 
+
+
+
+ 24 
+
+Equations (2.19) and (2.20), respectively, in this sense. Using Equation (2.21), we can calculate 
+
+the reflection coefficients for each of the metal plate specimens, which is shown in Figure 14. 
+
+  
+
+Figure 12: FFT data from 1mm thick (a) aluminum 2024 and (b) stainless steel 321 delay line inspections 
+
+ 
+
+Figure 13:  Frequency domain data from the free 3.5 MHz delay line transducer 
+
+a b 
+
+
+
+ 25 
+
+ 
+
+Figure 14:Frequency domain data from 1mm thick (a) aluminum 2024 and (b) stainless steel 321 delay line 
+
+inspections 
+
+ 
+
+Table 4: Predicted resonance frequencies versus measured resonance 
+
+Material Predicted Resonance Measured Resonance 
+
+Stainless Steel 321 2.78 MHz 2.83 MHz, 3.11 MHz 
+
+Aluminum 2024 3.12 MHz 3.14 MHz 
+
+ 
+
+From the plots in Figure 14 and data in Table 4, resonances can be seen at 2.83 and 3.11 
+
+MHz for the stainless steel and at 3.14 MHz for the aluminum. The model predicted resonance is 
+
+present, however, there are unexpectedly extra resonances in the results. The stainless-steel shows 
+
+two separate resonances around 3 MHz, and even a small resonance is present around 1.5MHz in 
+
+both specimens. 
+
+These extra resonances are hypothesized to be due to shear wave mode conversion from a 
+
+slight tilt in the specimens/setup. Mode conversion such as this will occur whenever a pressure 
+
+wave is incident on an interface at an oblique angle. This is demonstrated in Figure 15. The angle 
+
+a b 
+
+
+
+ 26 
+
+of refraction for each of these wave modes can be explained by Snell’s Law in Equation (2.22). If 
+
+the incident pressure wave is incident at a slight angle, a small amount of shear wave modes will 
+
+be generated, and every subsequent internal reflection will cause more accumulation of shear 
+
+modes. Since time windows are taken for these signals, there are many opportunities for this mode 
+
+conversion to occur.  
+
+ 
+
+Figure 15: Shear wave mode conversion will occur from an incident pressure wave at a slight angle 
+
+𝑆𝑛𝑒𝑙𝑙�𝑠	𝐿𝑎𝑤 =
+sinθ#
+𝑉#
+
+=
+sinθ�J
+𝑉�J
+
+=
+sinθGJ
+𝑉GJ
+
+ (2.22)  
+
+In addition, Equation (2.17) can be used to calculate shear mode resonances by using the 
+
+shear wave speed as c instead of the pressure wave speed. For aluminum 2024, this speed is 3141 
+
+m/s and gives shear wave resonances at 1.57 and 3.14 MHz. This lines up very well with Figure 
+
+14, and indicates that the 3.14 MHz is most likely a superposition of shear and pressure resonances. 
+
+For stainless-steel 321, the shear wave speed is 3069 m/s and gives shear resonances at 1.53 and 
+
+
+
+ 27 
+
+3.07 MHz. This indicates that the extra resonance observed at 3.11 MHz in the experimental data 
+
+is due to a shear wave resonance.  
+
+To confirm that this is what is happening, submerged water tank inspections were 
+
+performed on each specimen. Since shear waves cannot travel through fluid media, observing these 
+
+resonances in a submerged inspection will corroborate this explanation.  
+
+2.5.2 Submerged Water Tank Inspections 
+
+Submerged water tank inspections were performed for both the 1mm aluminum 2024 and 
+
+stainless steel 321 specimens using a 5 MHz Panametrics V309 transducer and a Panametrics 5072 
+
+Pulser-Receiver. These inspections were performed as scans, so multiple data points were aligned 
+
+via their maximum cross-correlation, then averaged together to get the reflection spectra. The 
+
+deconvolution approach for these scans is similar to that of the contact transducer inspections, 
+
+except that the transducer calibration data was taken from the front surface reflections from a flat 
+
+stainless-steel block. To account for the reflection off the stainless-steel block, there is also a scalar 
+
+factor of 0.87 multiplied to the measured reflection spectra. This factor is the analytical reflection 
+
+coefficient for a water/stainless-steel interface. The results from these inspections can be seen in 
+
+Figure 17 and in Table 5. 
+
+
+
+ 28 
+
+ 
+
+Figure 16: Submerged water tank inspection on stainless steel and aluminum plates 
+
+ 
+
+Figure 17: Reflection coefficients for (a) aluminum 2024 and (b) stainless steel 321 in a submerged water tank 
+
+inspection 
+
+Table 5: Results from water tank inspections 
+
+Material 
+Water Tank 
+
+Pressure Resonance Shear Resonance 
+
+Stainless Steel 321 2.81 MHz 3.23 MHz 
+
+Aluminum 2024 3.01 MHz 3.45 MHz 
+
+a b 
+
+
+
+ 29 
+
+  
+
+Multiple resonances can once again be seen in these plots, where only one is expected. The 
+
+stainless-steel reflection coefficient shows a pressure and shear resonance, as seen before in the 
+
+experimental results. The pressure resonance is still in the same location, while the shear resonance 
+
+has shifted upward slightly. The aluminum reflection coefficient shows two separate resonances 
+
+around 3 MHz, which was not seen in the previous results. Checking the time of flight across the 
+
+entire scan showed that the specimens were at approximately a 1-degree angle, most likely due to 
+
+slightly uneven supports. This angle is probably greater than what was present in the previous 
+
+contact inspections, which could explain why there are two separate resonances in the aluminum, 
+
+as the two wave modes will experience slightly different thicknesses and thus resonances at 
+
+different angles. This could also explain the slight shift in stainless-steel resonances.  
+
+These extra resonances were not seen in the previous modeling results, since the incident 
+
+wave was modeled as entirely perpendicular to the specimen. To determine whether the model can 
+
+accurately predict the experimentally observed mode conversion, the model from Section 2.2.2 
+
+was run again with the incident wave tilted by one-degree. Figure 18 shows the reflection 
+
+coefficients for aluminum and stainless steel from the model with this adjustment. Table 6 shows 
+
+
+
+ 30 
+
+the locations of the resonances and compares them with the experimental results. Table 7 shows 
+
+the percent error in resonance location between the two results. 
+
+ 
+
+ 
+
+Figure 18: Numerical reflection coefficients for (a) aluminum 2024 and (b) stainless steel 321 at a 1-degree tilt 
+
+ 
+
+Table 6: Comparison between experimental and simulated results  
+
+Material 
+Numerical – 1-degree tilt Experimental Water Tank 
+
+Pressure 
+Resonance Shear Resonance 
+
+Pressure 
+Resonance Shear Resonance 
+
+Stainless 
+Steel 321 2.75 MHz 3.15 MHz 2.81 MHz 3.23 MHz 
+
+Aluminum 
+2024 3.05 MHz 3.2 MHz 3.01 MHz 3.45 MHz 
+
+ 
+
+Table 7: Percent error in resonance location between experimental and modeling results 
+
+Material Percent Error between Modeling and Experiments 
+Pressure Resonance Shear Resonance 
+
+Stainless Steel 321 2.18% 2.54% 
+Aluminum 2024 -1.31% 7.81% 
+
+  
+
+ 
+
+a b 
+
+
+
+ 31 
+
+The two results match very well, with a maximum error of 7.81% between modeling and 
+
+experiment for aluminum shear resonance, and the other resonances all under 3% error. With this, 
+
+the basic workings of the pulse-echo inspection technique have been demonstrated. The reflection 
+
+coefficient will exhibit minima at the resonance frequencies of the inspected specimen. These 
+
+resonances are dependent on the material properties of the specimen, as shown with the reflection 
+
+spectra changing between the two different materials.  
+
+In addition, shear wave mode resonances were seen due to internal mode conversion in the 
+
+specimen. This finding added significant challenges to the interpretation, prompting reassessment 
+
+of the experimental techniques, as well as the need to cross-validate in simulation. After the 
+
+appropriate checks were performed, the work of Guyott and Cawley [34] was found which 
+
+demonstrated the phenomena of pressure-to-shear mode conversion in through-thickness 
+
+resonance inspection of metal plates. Although they proved the existence of this phenomena, their 
+
+results still included the response of the measurement system (transducer, electronics, etc.). In the 
+
+present work, by isolating the specimen’s response, a more detailed assessment of the magnitude 
+
+and impact of this phenomena is obtained. Furthermore, the FEM modeling provides a robust 
+
+foundation for exploring this behavior – which to date has received little note – in more complex 
+
+systems. In the next section, this technique is used to inspect lithium metal batteries. 
+
+  
+
+
+
+ 32 
+
+Chapter 3: Local Ultrasound Spectroscopy of Lithium Metal Batteries 
+
+Experimental Approach and Setup 
+
+With this technique established, it was then applied for the inspection of a lithium metal battery. 
+
+The goal of these inspections is to identify signal features pertaining to battery defects. Thus, 
+
+inspecting both clean and defective batteries is necessary to establish this correlation. To mimic 
+
+lithium plating defects, ~80µm thick lithium chips of varying diameters were embedded onto the 
+
+battery anode, as seen in Figure 19. These defects are very coarse, but this is desirable for 
+
+establishing the efficacy of the technique with a battery inspection. These batteries were 
+
+manufactured and provided by Cornerstone Research Group. 
+
+With this, the reflection coefficient can be measured at a defect region on the battery and 
+
+compared with the reflection coefficient from a clean region. The same experimental setup and 
+
+reflection measurement procedure seen in Section 2.1 was used for this, which is shown in Figure 
+
+20. The results of the experiments are discussed next.  
+
+ 
+
+
+
+ 33 
+
+ 
+
+Figure 19: Image of single-cell battery. The right image shows a lithium chip defect embedded on the lithium anode 
+
+ 
+
+Figure 20: Lab photo of inspection on lithium metal battery 
+
+ 
+
+
+
+ 34 
+
+Experimental Results 
+
+The collected waveforms from these inspections can be seen in Figure 21. As expected, the 
+
+time domain reflections from the thin layers all overlap. The clean and defective reflection 
+
+coefficients were calculated with the procedure described in Section 2.3.2. Three resonances 
+
+appear in the frequency range examined, with their exact values shown in Table 8. Comparing the 
+
+locations of these resonances between the clean and defective regions, there is a significant 
+
+downward shift in frequency when a defect is present. For a single-layered case, Equation (2.17) 
+
+implies a downward resonance shift when there is an increase in layer thickness. Using this as a 
+
+guideline towards the multilayered battery case, the presence of a lithium chip defect creates a 
+
+local increase in thickness, so a downward shift in resonance location is expected.  
+
+ 
+
+Figure 21: Time-domain plots from battery inspections. (a) shows results from a clean region, (b) show results from 
+
+a defect region  
+
+a b 
+
+
+
+ 35 
+
+ 
+
+ 
+
+Figure 22: Reflection Coefficients for (a) clean region, and (b) defective region. (c) Shows both reflection 
+
+coefficients overlaid  
+
+Table 8: Resonance frequencies determined via battery reflection coefficients 
+
+Battery Region First Resonance Second Resonance Third Resonance 
+
+Clean 2.189 MHz 4.377 MHz 5.76 MHz 
+
+Defect 1.712 MHz 3.433 MHz 4.997 MHz 
+ 
+
+These inspections were performed several times, and some variance in shape and 
+
+amplitudes of the measured reflection coefficient was observed. This is due to various aspects of 
+
+the contact transducer technique. The thickness of the ultrasonic couplant used can vary from 
+
+a b 
+
+c 
+
+
+
+ 36 
+
+measurement to measurement, which would have an effect on the resonances seen. A weight was 
+
+placed on top of the transducer to try and minimize this, but it is still possible that slight variations 
+
+occurred. In addition, the electrolyte inside the battery can disperse with the added force, adding 
+
+to the experimental variance. Despite this, the resonance frequencies seemed mostly stable. Figure 
+
+23 shows the variance in measurements from the same pristine regions on the battery after 
+
+recoupling to the battery.  
+
+ 
+
+Figure 23: Variance in reflection coefficients from the same pristine battery region after coupling and recoupling 
+
+From these plots, slight variations in amplitude across the spectra can be seen. This is 
+
+emphasized when looking at the y-axis scaling between plots. Further comparison with Figure 22a 
+
+also emphasizes the variance observed. To quantify this variance and to also determine whether 
+
+the measured resonance frequencies are stable despite amplitude variations, these measurements 
+
+were repeated multiple times. The results of this are discussed in the next section.  
+
+3.2.1 Statistical Analysis of Resonance Shifts 
+
+Ten different inspections were performed on pristine regions of the battery, and ten more 
+
+were performed on regions with an embedded defect. The transducer was decoupled and recoupled 
+
+
+
+ 37 
+
+to the battery before and after each measurement to re-introduce sources of experimental error, so 
+
+that each measurement could be treated as independent.  
+
+Each of the three present resonances were treated as separate datasets, which can be seen 
+
+in Table 9. A series of two-mean Student’s t-tests were performed, comparing frequencies for the 
+
+pristine and defect data for each of the first three resonances. The associated standard deviation 
+
+with each resonance was very low. The p-values for each t-test were very small, each lower than 
+
+10-12, indicating a statistically significant difference in mean resonance frequency for each 
+
+resonance assessed.  
+
+Table 9: Results and statistics from 10 sets of reflection coefficient measurements 
+
+Trial Resonance 1 Resonance 2 Resonance 3 
+Clean Defect Clean Defect Clean Defect 
+
+1 2.141 1.750 4.244 3.476 5.755 5.016 
+2 2.132 1.693 4.268 3.438 5.617 5.007 
+3 2.146 1.807 4.301 3.481 5.693 5.059 
+4 2.146 1.779 4.292 3.529 5.732 5.069 
+5 2.255 1.793 4.358 3.462 5.808 5.069 
+6 2.155 1.750 4.310 3.429 5.808 5.045 
+7 2.255 1.726 4.396 3.471 5.827 5.130 
+8 2.222 1.769 4.392 3.471 5.746 5.050 
+9 2.284 1.826 4.354 3.533 5.722 5.1070 
+
+10 2.294 1.783 4.349 3.533 5.832 5.102 
+Mean 2.203 1.768 4.326 3.482 5.754 5.065 
+Std 
+Dev 0.06532 0.03938 0.05140 0.03789 0.06765 0.03934 
+
+p-value 5.619 x 10-13 2.224 x 10-19 3.023 x 10-16 
+    
+
+From these results, the proposed inspection technique proves to be reliable in detecting 
+
+resonance shifts associated with the presence of an embedded defect representative of lithium 
+
+plating in single-cell lithium metal batteries.  
+
+
+
+ 38 
+
+Numerical Modeling of Lithium Batteries 
+
+3.3.1 Model Setup 
+
+A frequency-domain model of a lithium metal battery undergoing a pulse-echo inspection 
+
+was then constructed. Validating this model is important for future work in which various other 
+
+defect conditions or inspection techniques could be performed.  
+
+The setup of the model is the same as with the single-layer model used in Section 2.2.2, 
+
+but the battery layout is seen in Figure 24, replacing the metal plate. The full battery layout is seen 
+
+in Figure 25. It can be seen from this that each battery component is comprised of three sublayers. 
+
+The surrounding pouch material has a structure of oriented nylon on top, aluminum in the middle, 
+
+and polypropylene on the bottom. The Celgard 2325 separator is a porous stack of 
+
+polypropylene/polyethylene/polypropylene. The anode is composed of a copper current collector 
+
+in between two solid lithium electrodes. Similarly, the cathode is composed of an aluminum 
+
+current collector in between two porous LiCoO2 electrodes. In addition, this model incorporates 
+
+Biot poroelasticity, so the porous materials are filled with a LiPF6 in EC:DEC:DMC electrolyte. 
+
+The elastic material properties used are defined in Table 10, and the poroelastic material properties 
+
+are defined in Table 11. To reduce artifacts from overly sharp resonance frequencies, a damping 
+
+factor of 0.05 was implemented as an isotropic loss factor to the solid materials. This was sufficient 
+
+to smooth the frequency-domain response to better identify resonance frequencies, while not being 
+
+large enough to impact quantitative comparisons. 
+
+  Each individual layer was set to have 5 quadratic elements per thickness along the y-
+
+direction, and scales with the wavelength in the x-direction as in the model setup for the metal 
+
+plate resonance. A nominally pristine model was run, and also a model with an 80 µm lithium 
+
+
+
+ 39 
+
+defect embedded on the anode to emulate the defect conditions from the experiments. The normal 
+
+incidence reflection coefficients for clean and defect conditions are seen in Figure 26.  
+
+ 
+
+   
+
+Figure 24: Single cell battery layout used for modeling. Left shows battery without defect. Right shows embedded 
+
+defect on battery anode 
+
+Pouch 
+
+Anode 
+
+Separator 
+
+Separator 
+
+Separator 
+
+Cathode 
+
+Pouch 
+
+Pouch 
+
+Anode 
+
+Separator 
+
+Separator 
+
+Separator 
+
+Cathode 
+
+Pouch 
+
+Defect 
+
+
+
+ 40 
+
+ 
+
+Figure 25: Model layout used for the battery model inspections 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+𝑃#X<#[UX/ 𝑃4U?\U</U[  
+= 𝑃/W/Y\ 
+
+𝑃/4YXV]#//U[ 
+
+𝑃𝑀𝐿 
+
+𝑃𝑀𝐿 
+
+𝐵𝑎𝑡𝑡𝑒𝑟𝑦 
+
+𝐹𝑙𝑜𝑞𝑢𝑒𝑡	𝑝𝑒𝑟𝑖𝑜𝑑𝑖𝑐𝑖𝑡𝑦 
+
+2𝜆 
+
+2𝜆 
+
+𝜆 
+
+𝐴𝑖𝑟 
+
+𝑊𝑎𝑡𝑒𝑟 
+
+
+
+ 41 
+
+ 
+
+Table 10: Elastic properties used in the models 
+
+Component Material Thickness 
+(µm) 
+
+Density 
+(kg/m3) 
+
+Young’s 
+Modulus 
+
+(GPa) 
+
+Poisson 
+Ratio 
+
+Pouch Nylon 15 1140  2.87 [34] 0.3 [34] 
+ Aluminum 35 2700  70.3 0.33 
+ Polypropylene 36 880  4.5 [35] 0.2 [35] 
+Separator Polypropylene 8.33 [36] 880  4.5 [35] 0.2 [35] 
+ Polyethylene 8.33 [36] 930 [37] 1.37 [37] 0.437 [37] 
+Anode Lithium 50 530 7.82 [38] 0.381 [38] 
+ Copper 50 8940 70 0.347 
+Cathode LCO 76 4790 191 [39] 0.24 [39] 
+ Aluminum 17 2819 70.3  0.33 
+
+ 
+
+Table 11: Poroelastic material properties used in the models 
+
+Component Material Porosity Tortuosity Permeability Biot-Willis 
+Coefficient 
+
+Separator Polypropylene 0.39 [36]  2.27 [36] 7.22 x 10-7 [19] 1 
+ Polyethylene 0.44 [36] 2 [36] 7.22 x 10-7 [19] 1 
+Cathode LCO 0.36 [40] 2.5 [41] 7.22 x 10-7 [19] 1 
+
+ 
+
+Table 12: Poroelastic material properties used in the models 
+
+Component Material Density 
+(kg/m3) 
+
+Bulk 
+Modulus 
+(GPa) 
+
+Dynamic 
+Viscosity 
+(Pa·s) 
+
+Electrolyte LiPF6 in 
+EC:DEC:
+DMC 
+
+1270 [19]  1 [19] 0.042 [19] 
+
+ 
+
+
+
+ 42 
+
+ 
+
+Figure 26: Reflection Coefficient from battery model. (a) shows clean battery condition and (b) shows a battery with 
+
+embedded defect 
+
+Table 13: Resonance locations compared between modeling and experimental results 
+
+ 
+ Pristine Battery  Defect Battery 
+
+First 
+Resonance 
+
+Second 
+Resonance 
+
+Third 
+Resonance 
+
+First 
+Resonance 
+
+Second 
+Resonance 
+
+Third 
+Resonance 
+
+Modeling 3.2 MHz 4.71 MHz 5.93 MHz 2.65 MHz 4.68 MHz 5.81 MHz 
+
+Experimental 2.189 MHz 4.377 MHz 5.76 MHz 1.712 MHz 3.433 MHz 4.997 MHz 
+
+Error 46.19 % 7.61 % 2.95 % 54.79 % 36.32 % 18.67 % 
+
+3.3.2 Comparison with Experimental Results 
+
+Table 13 shows the numerical values of the observed resonance frequencies in Figure 26. 
+
+For the pristine battery case, the second and third resonances show very low errors in terms of 
+
+frequency location while the first resonance shows an appreciable amount of error. This is most 
+
+likely due to error in exact material property values as they were all obtained from various sources 
+
+in the literature and not directly measured. In particular, the electrolyte bulk modulus was hard to 
+
+find a source for, so an order of magnitude sweep was performed for this value. This first resonance 
+
+was seen to change the most. This indicates that further model calibration of certain material 
+
+properties – in this case, the bulk modulus – can help hone in on sources of error in the model. 
+
+a b 
+
+
+
+ 43 
+
+ For the defective case, there is an observable downward shift in resonance location when 
+
+compared with the pristine results. However, there is a significant error for all three resonances. 
+
+This is also most likely attributed to errors in material properties, but the much larger error than 
+
+with the pristine case implies that the error is more attributed to the defect case itself. In particular, 
+
+this suggests that the embedded lithium defects may be thicker than 80 µm, as the experimental 
+
+results show a larger shift in resonance location. X-Ray CT or laser metrology scans could be 
+
+performed to confirm the inner structure and layer thicknesses of the batteries, and this information 
+
+could then be used to properly inform the modeling. Overall, there is a good qualitative agreement 
+
+between experimental and modeling results, which gives confidence in the model implementation. 
+
+Further work as discussed, can be done to increase the quantitative results and eliminate sources 
+
+of model error.  
+
+Chapter 4: Conclusion and Future Work 
+
+Research Conclusions – Key Findings  
+
+In this work, the local ultrasonic resonance spectroscopy (LURS) technique has been extended for 
+
+immersion scans and contact transducer setups and is shown applicable for detecting defects in 
+
+lithium metal batteries. The technique operates with a pulse-echo ultrasound setup and relies on a 
+
+linear systems frequency-domain post-processing method to isolate the battery’s reflection spectra 
+
+from the measurement equipment.  
+
+The LURS technique was initially demonstrated for a single layer plate specimen case in 
+
+which the through-thickness resonance frequencies appear as minima in the reflection spectra. 
+
+These resonance frequencies are dependent on the plate’s material properties and thickness. Slight 
+
+angular offsets in the incident wave can cause significant shear mode conversion, which was seen 
+
+
+
+ 44 
+
+to influence LURS results on thicker plate specimens. These findings were corroborated by 
+
+analytical modeling and 2D numerical modeling in COMSOL. 
+
+LURS feasibility was demonstrated for a functioning lithium metal battery. Significant 
+
+shifts in resonance frequencies were observed with the introduction of embedded lithium chip 
+
+defects. These shifts were significant in magnitude compared to the observed variance from repeat 
+
+measurements. 2D plane strain COMSOL simulations of elastic and poroelastic wave propagation 
+
+in full lithium metal battery systems agree qualitatively with these findings. Numerical error is still 
+
+present in the results from these models due to uncertainty in material properties.  
+
+Impact and Future Work 
+
+ This work has shown the proof-of-concept for a battery inspection method via the LURS 
+
+technique. This technique is unique in that it isolates the specimen’s local frequency response and 
+
+is sensitive to battery defects, whereas previous techniques in the literature focused on SOC and 
+
+SOH estimation via time-domain analysis. The presence of local lithium chip defects causes a 
+
+downward shift in local resonance frequencies. Statistical analysis shows the low variance of the 
+
+technique and multiphysics modeling agrees with the downward resonance shifts observed in the 
+
+experimental measurements. Additional model calibration to better estimate the electrolyte and 
+
+electrode material properties is expected to significantly improve the quantitative validation 
+
+between experimental and simulated results.  
+
+So far, this work has assumed a constant SOC for the battery, so further experimental 
+
+efforts can be made on tracking battery resonances through charge/discharge cycles. Furthermore, 
+
+the embedded defects used in this work were coarse to test the efficacy of the technique, so testing 
+
+more subtle defect conditions can help determine the sensitivity of the technique. Such defect cases 
+
+could be with smaller embedded chips or lab-grown dendrites and lithium plating. This work 
+
+
+
+ 45 
+
+focused on single-point measurements, so extending this technique into full battery scans could 
+
+give insight into resonance changes across the entire battery.  
+
+In addition, this work was done as a part of the NASA Convergent Aeronautics Solutions 
+
+(CAS) project entitled Sensors based Prognostics to Avoid Runaway Reactions and Catastrophic 
+
+Ignition (SPARRCI), which seeks to apply these types of inspection techniques to battery health 
+
+monitoring with embedded sensors, machine learning, and prognostics tools. The multiphysics 
+
+simulations have also laid the groundwork to support further inspection approaches of interest to 
+
+the team, such as with bonded structural health monitoring (SHM) sensors or with guided wave 
+
+approaches. This work will be continued through the end of 2022 by other NASA researchers 
+
+working on the SPARRCI project.  
+
+ 
+
+  
+
+
+
+ 46 
+
+References 
+
+[1] B. Liu, J. G. Zhang, and W. Xu, “Advancing Lithium Metal Batteries,” Joule, vol. 2, no. 5, 
+
+pp. 833–845, 2018, doi: 10.1016/j.joule.2018.03.008. 
+
+[2] C. Hendricks, N. Williard, S. Mathew, and M. Pecht, “A failure modes, mechanisms, and 
+
+effects analysis (FMMEA) of lithium-ion batteries,” J. Power Sources, vol. 297, pp. 113–
+
+120, 2015, doi: 10.1016/j.jpowsour.2015.07.100. 
+
+[3] P. Sun, R. Bisschop, H. Niu, and X. Huang, A Review of Battery Fires in Electric Vehicles, 
+
+no. May. 2020. 
+
+[4] S. Sripad, A. Bills, and V. Viswanathan, “A review of safety considerations for batteries in 
+
+aircraft with electric propulsion,” MRS Bull., vol. 46, no. 5, pp. 435–442, 2021, doi: 
+
+10.1557/s43577-021-00097-1. 
+
+[5] J. Darst, J. C. Thomas, D. P. Finegan, and E. Darcy, “Guidelines for Safe, High Performing 
+
+Li-ion Battery Designs for Manned Vehicles,” 2018. 
+
+[6] L. Cai and R. E. White, “Mathematical modeling of a lithium ion battery with thermal 
+
+effects in COMSOL Inc. Multiphysics (MP) software,” J. Power Sources, vol. 196, no. 14, 
+
+pp. 5985–5989, 2011, doi: 10.1016/j.jpowsour.2011.03.017. 
+
+[7] H. Popp, M. Koller, M. Jahn, and A. Bergmann, “Mechanical methods for state 
+
+determination of Lithium-Ion secondary batteries: A review,” J. Energy Storage, vol. 32, 
+
+no. September, p. 101859, 2020, doi: 10.1016/j.est.2020.101859. 
+
+[8] Z. Liu, Y. Qi, Y. X. Lin, L. Chen, P. Lu, and L. Q. Chen, “Interfacial Study on Solid 
+
+Electrolyte Interphase at Li Metal Anode: Implication for Li Dendrite Growth,” J. 
+
+Electrochem. Soc., vol. 163, no. 3, pp. A592–A598, 2016, doi: 10.1149/2.0151605jes. 
+
+[9] W. Waag, C. Fleischer, and D. U. Sauer, “Critical review of the methods for monitoring of 
+
+
+
+ 47 
+
+lithium-ion batteries in electric and hybrid vehicles,” J. Power Sources, vol. 258, pp. 321–
+
+339, 2014, doi: 10.1016/j.jpowsour.2014.02.064. 
+
+[10] R. Bhattacharyya, B. Key, H. Chen, A. S. Best, A. F. Hollenkamp, and C. P. Grey, “In situ 
+
+NMR observation of the formation of metallic lithium microstructures in lithium batteries,” 
+
+Nat. Mater., vol. 9, no. 6, pp. 504–510, 2010, doi: 10.1038/nmat2764. 
+
+[11] S. A. Kayser, A. Mester, A. Mertens, P. Jakes, R. A. Eichel, and J. Granwehr, “Long-run: 
+
+In operando NMR to investigate the evolution and degradation of battery cells,” Phys. 
+
+Chem. Chem. Phys., vol. 20, no. 20, pp. 13765–13776, 2018, doi: 10.1039/c8cp01067f. 
+
+[12] Z. Wang, Z. Li, and Q. Liu, “Infrared thermography non-destructive evaluation of lithium-
+
+ion battery,” Int. Symp. Photoelectron. Detect. Imaging 2011 Adv. Infrared Imaging Appl., 
+
+vol. 8193, no. September 2011, p. 81934I, 2011, doi: 10.1117/12.901592. 
+
+[13] J. B. Robinson et al., “Detection of internal defects in lithium-ion batteries using lock-in 
+
+thermography,” ECS Electrochem. Lett., vol. 4, no. 9, pp. A106–A109, 2015, doi: 
+
+10.1149/2.0071509eel. 
+
+[14] J. W. F. and D. A. S. A.G. Hsieh, S. Bhadra, B.J. Hertzberg, P.J. Gjeltema, A. Goy, 
+
+“Environmental Science,” Energy Environ. Sci., 2012, doi: 10.4135/9781412975704.n47. 
+
+[15] P. Ladpli, F. Kopsaftopoulos, R. Nardari, and F.-K. Chang, “Battery charge and health state 
+
+monitoring via ultrasonic guided-wave-based methods using built-in piezoelectric 
+
+transducers,” Smart Mater. Nondestruct. Eval. Energy Syst. 2017, vol. 10171, no. April 
+
+2017, p. 1017108, 2017, doi: 10.1117/12.2260107. 
+
+[16] P. Ladpli, F. Kopsaftopoulos, and F. K. Chang, “Battery state of charge estimation using 
+
+guided waves - Numerical validation and statistical analysis,” Struct. Heal. Monit. 2017 
+
+Real-Time Mater. State Aware. Data-Driven Saf. Assur. - Proc. 11th Int. Work. Struct. Heal. 
+
+
+
+ 48 
+
+Monit. IWSHM 2017, vol. 2, pp. 1839–1849, 2017, doi: 10.12783/shm2017/14066. 
+
+[17] P. Ladpli, C. Liu, F. Kopsaftopoulos, and F. K. Chang, “Estimating lithium-ion battery state 
+
+of charge and health with ultrasonic guided waves using an efficient matching pursuit 
+
+technique,” 9th Eur. Work. Struct. Heal. Monit. EWSHM 2018, 2018. 
+
+[18] P. Ladpli, F. Kopsaftopoulos, and F. K. Chang, “Estimating state of charge and health of 
+
+lithium-ion batteries with guided waves using built-in piezoelectric sensors/actuators,” J. 
+
+Power Sources, vol. 384, no. October 2017, pp. 342–354, 2018, doi: 
+
+10.1016/j.jpowsour.2018.02.056. 
+
+[19] L. Gold et al., “Probing lithium-ion batteries’ state-of-charge using ultrasonic transmission 
+
+– Concept and laboratory testing,” J. Power Sources, vol. 343, pp. 536–544, 2017, doi: 
+
+10.1016/j.jpowsour.2017.01.090. 
+
+[20] C. Bommier et al., “In Operando Acoustic Detection of Lithium Metal Plating in 
+
+Commercial LiCoO2/Graphite Pouch Cells,” Cell Reports Phys. Sci., vol. 1, no. 4, p. 
+
+100035, 2020, doi: 10.1016/j.xcrp.2020.100035. 
+
+[21] J. B. Robinson et al., “Identifying Defects in Li-Ion Cells Using Ultrasound Acoustic 
+
+Measurements,” J. Electrochem. Soc., vol. 167, no. 12, p. 120530, 2020, doi: 10.1149/1945-
+
+7111/abb174. 
+
+[22] H. Li and Z. Zhou, “Numerical simulation and experimental study of fluid-solid coupling-
+
+based air-coupled ultrasonic detection of stomata defect of lithium-ion battery,” Sensors 
+
+(Switzerland), vol. 19, no. 10, 2019, doi: 10.3390/s19102391. 
+
+[23] NDT Resource Center, “Nondestructive Evaluation Techniques (Normal Beam 
+
+Inspections),” The Collaboration for NDT, Iowa State University. https://www.nde-
+
+ed.org/NDETechniques/Ultrasonics/MeasurementTech/beaminspection.xhtml. 
+
+
+
+ 49 
+
+[24] R. S. Dwyer-Joyce, B. W. Drinkwater, and C. J. Donohoe, “The measurement of lubricant-
+
+film thickness using ultrasound,” Proc. R. Soc. A Math. Phys. Eng. Sci., vol. 459, no. 2032, 
+
+pp. 957–976, 2003, doi: 10.1098/rspa.2002.1018. 
+
+[25] J. M. Allin, P. Cawley, and M. J. S. Lowe, “Adhesive disbond detection of automotive 
+
+components using first mode ultrasonic resonance,” NDT E Int., vol. 36, no. 7, pp. 503–514, 
+
+2003, doi: 10.1016/S0963-8695(03)00045-8. 
+
+[26] J. Maynard, “Resonant ultrasound spectroscopy,” Phys. Today, vol. 49, no. 1, pp. 26–31, 
+
+1996, doi: 10.1063/1.881483. 
+
+[27] J. Rus and C. U. Grosse, “Local Ultrasonic Resonance Spectroscopy: A Demonstration on 
+
+Plate Inspection,” J. Nondestruct. Eval., vol. 39, no. 2, pp. 1–12, 2020, doi: 10.1007/s10921-
+
+020-00674-5. 
+
+[28] L. Kinsler, Fundamentals of Acoustics, 4th edition. 2000. 
+
+[29] Comsol, “Acoustic Reflections off a Water-Sediment Interface,” pp. 1–32, 2013. 
+
+[30] B. Parker, “Comparison of sound propagation in water-saturated sediment using different 
+
+sediments in an Effective Density and Fluid model By Comparison of sound propagation in 
+
+water-saturated sediment using 5 different sediments in an Effective Density and Fluid 
+
+mode,” no. February, 2006. 
+
+[31] C. Hakoda, J. Rose, P. Shokouhi, and C. Lissenden, “Using Floquet periodicity to easily 
+
+calculate dispersion curves and wave structures of homogeneous waveguides,” AIP Conf. 
+
+Proc., vol. 1949, no. April, 2018, doi: 10.1063/1.5031513. 
+
+[32] COMSOL Multiphysics, “Structural Mechanics Module,” Manual, p. 454, 2018, [Online]. 
+
+Available: www.comsol.de. 
+
+[33] S. G. Johnson, “Notes on Perfectly Matched Layers (PMLs),” no. August 2007, pp. 1–18, 
+
+
+
+ 50 
+
+2021, [Online]. Available: http://arxiv.org/abs/2108.05348. 
+
+[34] M. Krumova, A. Flores, F. J. Baltá Calleja, and S. Fakirov, “Elastic properties of oriented 
+
+polymers, blends and reinforced composites using the microindentation technique,” Colloid 
+
+Polym. Sci., vol. 280, no. 7, pp. 591–598, 2002, doi: 10.1007/s00396-001-0646-z. 
+
+[35] B. Pal and M. Riyazuddin Haseebuddin, “Analytical Estimation of Elastic Properties of 
+
+Polypropylene Fiber Matrix Composite by Finite Element Analysis,” Adv. Mater. Phys. 
+
+Chem., vol. 02, no. 01, pp. 23–30, 2012, doi: 10.4236/ampc.2012.21004. 
+
+[36] D. P. Finegan et al., “Characterising the structural properties of polymer separators for 
+
+lithium-ion batteries in 3D using phase contrast X-ray microscopy,” J. Power Sources, vol. 
+
+333, pp. 184–192, 2016, doi: 10.1016/j.jpowsour.2016.09.132. 
+
+[37] J. L. Jordan et al., “Elastic properties of polyethylene from high pressure sound speed 
+
+measurements,” Polymer (Guildf)., vol. 212, no. July 2020, p. 123164, 2021, doi: 
+
+10.1016/j.polymer.2020.123164. 
+
+[38] A. Masias, N. Felten, R. Garcia-Mendez, J. Wolfenstine, and J. Sakamoto, “Elastic, plastic, 
+
+and creep mechanical properties of lithium metal,” J. Mater. Sci., vol. 54, no. 3, pp. 2585–
+
+2600, 2019, doi: 10.1007/s10853-018-2971-3. 
+
+[39] E. J. Cheng, N. J. Taylor, J. Wolfenstine, and J. Sakamoto, “Elastic properties of lithium 
+
+cobalt oxide (LiCoO 2 ),” J. Asian Ceram. Soc., vol. 5, no. 2, pp. 113–117, 2017, doi: 
+
+10.1016/j.jascer.2017.03.001. 
+
+[40] C. Huang and P. S. Grant, “Coral-like directional porosity lithium ion battery cathodes by 
+
+ice templating,” J. Mater. Chem. A, vol. 6, no. 30, pp. 14689–14699, 2018, doi: 
+
+10.1039/c8ta05049j. 
+
+[41] F. Pouraghajan et al., “Quantifying Tortuosity of Porous Li-Ion Battery Electrodes: 
+
+
+
+ 51 
+
+Comparing Polarization-Interrupt and Blocking-Electrolyte Methods,” J. Electrochem. 
+
+Soc., vol. 165, no. 11, pp. A2644–A2653, 2018, doi: 10.1149/2.0611811jes. 
+
+ 
+
+ 
+
+ 
+
+

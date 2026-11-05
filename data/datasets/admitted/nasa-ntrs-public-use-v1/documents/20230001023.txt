@@ -1,0 +1,516 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AAS SFMC Manuscript Format Template
+
+
+ 1 
+
+OVERVIEW OF THE SLS CORE STAGE THRUST VECTOR 
+CONTROL SYSTEM DESIGN 
+
+Blake Stuart and Jesse McEnulty* 
+
+The Space Launch System (SLS) Core Stage (CS) Thrust Vector Control (TVC) 
+consists of four independent hydraulic systems.  The SLS CS TVC system is com-
+prised of 8 mechanical feedback Shuttle heritage Type III TVC actuators and four 
+RS-25 engines, each attached to a Shuttle heritage gimbal block/bearing.  Each 
+hydraulic system nominally provides hydraulic power to one RS-25 engine and 
+two actuators.  Additionally, each system provides redundant control capability 
+to one actuator on each of its neighboring systems.  The RS-25 uses hydraulic 
+power to control propellant valves, and the TVC actuators are used to move the 
+engine in the pitch and yaw gimbal planes.  The TVC system design leverages 
+hardware from the Space Shuttle program as well as new hardware designed spe-
+cifically for the Core Stage.  The Space Shuttle heritage hardware directly reused 
+on SLS includes the Orbiter TVC hydraulic servo-actuators (with two slight de-
+sign modifications), the Orbiter hydraulic circulation pumps, the Orbiter gimbal 
+block/bearing, and the Solid Rocket Booster hydraulic pumps.  The Solid Rocket 
+Booster APU turbines are powered by hot gas produced by a catalyzed hydrazine 
+decomposition.  The SLS Core Auxiliary Power Unit (CAPU) is derived from the 
+Space Shuttle Orbiter Auxiliary Power Unit (APU); on the SLS Core Stage, the 
+CAPU turbine is spun using cold gas tapped-off from the RS-25 to CS liquid hy-
+drogen autogenous pressurization line.  The remaining hardware in the TVC sys-
+tem (hydraulic Filter Manifold (FM), hydraulic Supply Accumulator (SA), hy-
+draulic Return Accumulator (RA), Hydraulic Reservoir, Exhaust Gas Heat Ex-
+changer (EGHE)) as well as the avionics providing control and telemetry (TVC 
+Actuator Controller (TAC) and CAPU Controller (CAPUC) are new components 
+developed for SLS.  This paper is the first installment in a seven-paper series sur-
+veying the design, engineering, test validation, and flight performance of the Core 
+Stage Thrust Vector Control system.  In this paper, the overall design architecture 
+of the CS TVC is presented, with a focus on the interfaces between the TVC ac-
+tuators, the engines, their hydraulic power systems, and the avionics that provide 
+commands from the SLS Vehicle Management (VM) software to effect stable and 
+robust flight control for the integrated SLS launch vehicle. 
+
+INTRODUCTION 
+
+The Space Launch System (SLS) Core Stage (CS) Thrust Vector Control (TVC)) system pro-
+vides the capability to position the SLS RS-25 Core Stage Engines (CSE) thrust vector as well as 
+provide hydraulic power to the CSE hydraulic actuation system (HAS) propellant control valves.   
+
+ 
+* NASA Marshall Space Flight Center / ER63, Huntsville, AL 
+
+AAS 23-152 
+
+
+
+ 2 
+
+TVC SYSTEM OVERVIEW 
+
+The CS TVC system consists of four main assemblies: the TVC Actuators (TVCA) and TVC 
+Actuator Controllers (TAC) which provide thrust vector control, the Core Auxiliary Power Units 
+(CAPU) and CAPU Controller (CAPUC) which provide hydraulic power, the hydraulic system 
+components which support the operation of the TVC system, and the pre-launch thermal condition-
+ing components which maintain acceptable hydraulic fluid temperature prior to launch.   
+
+There are two thrust vector control actuators for each of the four RS-25 engines, one located in 
+the pitch axis, and one located in the yaw axis.  The actuators provide the force and control capa-
+bility to position the engine nozzles for vehicle steering.  All eight actuators communicate to four 
+actuator controllers.  The gas system includes check valves, filters, flex hoses, CAPU, exhaust flex 
+duct, and CAPU controller.  The hydraulic system components consist of a main pump, circulation 
+pump. reservoir, filter manifold, supply accumulator, return accumulator, quick disconnects, flex 
+hoses, exhaust gas heat exchanger, and check valves.  The system also includes line wrap heaters 
+for thermal conditioning during tanking.  The CS TVC system is designed to be single fault tolerant 
+at the system level, although select sub-components require additional redundancy as defined 
+within the component specifications.  The TVC subsystem also includes electrical cabling from the 
+TAC and CAPUC to the TVC components, hydrogen, helium, and hydraulic tubing, and secondary 
+structure for mounting components.    
+
+Hydraulic Supply System 
+
+The hydraulic supply circuit provides supply pressure (nominally 3,000 psi) to the TVCAs and 
+the RS-25 engine.  The RS-25 engine uses hydraulic supply pressure to operate the engine HAS 
+valves which are used to start, throttle, and shutdown the engines.  Two hydraulic supply circuits 
+(two independent systems) connect to each actuator to provide redundant hydraulic pressure to the 
+actuators, referred to as cross-strapping.  Only a single supply circuit is connected to the engine, 
+therefore, redundant hydraulic pressure is not provided to the engine.  Each engine can use pneu-
+matic pressure from the MPS system in the event of a hydraulic pressure loss.   
+
+The hydraulic supply circuit begins at the main hydraulic pump where the hydraulic fluid is 
+pressurized to the nominal 3,000 psi required for operation.  The hydraulic fluid exits the pump to 
+a hydraulic flex hose, which enables the shock mounted CAPU/main pump assembly to connect 
+with the hard mounted vehicle tubing.  Vehicle tubing carries the hydraulic fluid to the filter man-
+ifold.  The filter manifold includes a high-pressure relief valve (HPRV) that will divert supply 
+circuit flow directly to the reservoir in case of a system overpressure.  Upon exiting the filter man-
+ifold, the hydraulic fluid is routed to the supply accumulator.  From the supply accumulator the 
+vehicle tubing separates the supply flow between the engine and four actuators.  Nominally, flow 
+only goes to two actuators. However, if the neighboring CAPUs fail the system in question will 
+pick up control of two additional actuators.  Therefore, a single TVC system can power up to four 
+TVCAs and one engine HAS.   
+
+When the CAPU/main pump is not operating, the circulation pump is utilized to push flow 
+through the TVC system at a much lower supply pressure.  The main pump discharge and case 
+drain are isolated with check valves located in the filter manifold.   
+
+Hydraulic Return Circuit 
+
+The hydraulic return circuit begins within the actuator and engine where the hydraulic fluid 
+from the supply circuit is returned to the TVC system at a significantly lower pressure.  The return 
+flow from the engine is routed to the return accumulator.  The flow out of the return accumulators 
+is combined with the return flow from the three actuators and is routed through vehicle tubing to 
+the Exhaust Gas Heat Exchanger (EGHE).  After cooling, the flow is routed through vehicle tubing 
+
+
+
+ 3 
+
+and combined with any flow diverted by the high-pressure relief valve and filtered main pump case 
+drain flow from the filter manifold to the reservoir.  Lastly, flow leaves the reservoir and goes to 
+the main pump suction line via a flex hose if the main pump is operating. If the circulation pump 
+is operating, flow goes to the filter manifold then the circulation pump suction. 
+
+Hydraulic Case Drain Circuit 
+
+The hydraulic case drain circuit begins at the hydraulic main pump.  While the main pump is 
+operating, fluid flows through the pump for lubrication and cooling of the rotating machinery com-
+ponents and exits the pump at the case drain port.  The hydraulic fluid exits the pump to a hydraulic 
+flex hose and routes through vehicle tubing to the filter manifold.  The filter manifold case drain 
+circuit is protected by a check valve which prevents flow back into the main pump case drain.  It 
+also includes a filter.  Flow exits the manifold and connects with return flow from the EGHE.   
+
+Hydraulic Fluid 
+
+The SLS TVC Hydraulic fluid is MIL-PRF-83282D “Hydraulic Fluid, Fire Resistant, Synthetic 
+Hydrocarbon Base.”  This is the same fluid that was used on the Space Shuttle Program in both the 
+Orbiter and SRB.  The hydraulic fluid used for this application is MIL-PRF-83282 (tested to NASA 
+Micronic 882 requirements).  TVC Hydraulic fluid system components are designed with proof 
+and burst factors of safety per AS5440, Class 3000.   
+
+Gas System 
+
+Each SLS CS has four separate but identical gas systems.  Each gas system incorporates a CAPU 
+powered by gaseous hydrogen from the Core Stage Main Propulsion System (MPS) while the RS-
+25 engines are firing, or gaseous helium supplied from the ground system for pre-launch operations 
+prior to CSE start.  Speed control, including over-speed and under-speed protection, of the CAPU 
+is provided by the CAPUC.  The cold gases are used to spin a turbine which, in turn, drives the 
+main pump (see Main Pump component section for more details).  The EGHE is used to transfer 
+heat from the hydraulic fluid to the CAPU exhaust gas thereby cooling the hydraulic fluid during 
+system operation.  A small portion of the GH2 / GHe flow to the CAPU is diverted directly to the 
+EGHE to maintain positive pressure within the exhaust duct to ensure the exhaust flow is not re-
+ingested into the vehicle during flight.   
+
+Actuators and Controllers Assembly 
+
+The CS TVC system consists of eight hydraulic actuators (two per engine) and four TACs.  
+These actuators are reused from the Space Shuttle Orbiter.  The Orbiter used Type I, II, and III 
+actuators, but the SLS CS only uses the Type III actuators.  The TACs are new and were developed 
+specifically for the SLS CS TVC system.   
+
+Actuator Hydraulic Supply Cross-Strapping 
+
+There is one independent hydraulic system for each of the four engines.  The four hydraulic 
+systems are cross strapped at the actuators such that a failure in a single hydraulic system or power 
+string allows for the availability of hydraulic power for thrust vector control from the remaining 
+hydraulic systems.  Two systems provide hydraulic power, one to each actuator of the failed system.  
+To accommodate the additional loading, the CAPU controllers of the affected systems will be com-
+manded to high-speed mode by the flight computers.  This cross-strapping provides the required 
+redundancy for a single fault tolerant TVC system but does not provide redundant hydraulic power 
+to the engine HAS.  Should a TVC system failure occur resulting in loss of hydraulic power to the 
+main engine, the engine will continue to operate, but in fixed-throttle mode, and when commanded 
+to shut down, will shut down pneumatically.   
+
+
+
+ 4 
+
+TVC System Pre-launch Thermal Management 
+
+The circulation pump is used to circulate the hydraulic fluid in each hydraulic circuit to maintain 
+an acceptable pre-launch temperature of the hydraulic fluid while the liquid oxygen and liquid hy-
+drogen are being loaded into the CS MPS tanks (the circulation pumps are not operational during 
+launch or flight).  The TVC system uses the heritage Orbiter Circulation Pumps, an electric-motor-
+driven, two stage positive displacement gear pump.  The filter manifold assembly contains a check 
+valve which prevents hydraulic flow back to the circulation pump outlets when the main pump is 
+operating.  Within the filter manifold assembly, the circulation pump flow is connected to the hy-
+draulic supply circuit and routed to the four actuators and the engine for that system.  Similarly, the 
+hydraulic fluid circulates through both the actuator and engine hydraulic return circuits to the filter 
+manifold, where it is again routed to the circulation pump.   
+
+Line wrap heaters are installed to supplement the circulation pumps during propellant tanking. 
+Additionally, the main pump discharge, suction, and case drain lines are isolated from circulation 
+pump flow by check valves in the filter manifold, so heaters are also located on those lines.  The 
+line heaters are ground powered, and ground controlled. The ground controllers receive feedback 
+from surface mounted resistance thermal detector (RTD) temperature sensors installed on the lines.   
+
+Prior to CAPU start, the EGHE does not remove significant heat from the hydraulic fluid as 
+there is no cold gas exhaust flow to accept the heat.  Just prior to CAPU start, the circulation pumps 
+will be shut off and left off for the flight.  As the hydraulic fluid would be circulating under the 
+main pump power, the line wrap heaters will also be shut off and left off for the duration of the 
+flight.   
+
+Once the CAPUs are started on GHe from the ground, the hydraulic fluid temperature will begin 
+to rise due to the heat energy input by the main pumps.  The cold gas flow in the CAPU exhaust 
+duct flows through the EGHE to cool the hydraulic fluid.  A more detailed discussion of EGHE 
+design considerations is contained in the component discussion section.   
+
+COMPONENT DESCRIPTIONS 
+
+The components of the TVC system are assembled into four separate hydraulic systems.  The 
+four hydraulic systems are composed of identical primary components, although tubing and cable 
+lengths slightly vary due to the vehicle layout.  The functionality of each component adds to an 
+aspect of the overall system performance and response.  This section describes the purpose and 
+functionality of each component of the TVC system.   
+
+TVC Actuator 
+
+Each actuator has a locking valve, a switching valve, four servo valves, and a power valve. Each 
+servo is connected to one TAC which sends current to said servo valve. The servo valves meter 
+flow to the power valve to create a pressure differential across the power valve. The power valve 
+meters flow to the actuator piston. Flow metering by the power valve and the servo valves is dic-
+tated by the TAC commands and feedback from the internal workings of the actuator which include 
+the piston position, the power valve position, the servo dynamic pressure feedback assembly and 
+the servo flapper position.  This servo-valve combination is called Passive Majority Voting and can 
+overcome faulty contributions from one of the servo-valves, either a null or a full extend/retract 
+input.  Feedback from each servo valve is provided back to the TAC showing the secondary pres-
+sure delta for that valve.  This allows the TAC to determine if a single control string is in a fault 
+condition, and the TAC can activate a bypass valve to remove that string from the force sum.   
+
+
+
+ 5 
+
+The actuator position control loop is closed by mechanical feedback from the piston to each 
+servo-valve torque motor.  In addition, a double nozzle dynamic pressure feedback (DPF) device 
+provides load feedback to each servo-valve.   
+
+A switching valve automatically switches external hydraulic power sources from primary to 
+secondary when the primary pressure drops below a certain value.  This enables the redundant 
+hydraulic power supply of the cross-strapped hydraulic system.  A Linear Variable Differential 
+Transformer (LVDT) type transducer is utilized to provide an indication of switching valve posi-
+tion.  Also contained in the switching valve flow circuit is a flow cut-off which allows low press 
+fluid circulation for thermal conditioning but does not flow when the system is at operating pres-
+sure.   
+
+Each actuator has an internal lock valve that actuates to the unlocked position when system 
+pressure is greater than a threshold and actuates to the locked position to isolate the main power 
+spool from the piston if hydraulic pressure drops below a low threshold value.  This will prevent 
+engine gimbal movement when hydraulic pressure is too low to control the engine position.   
+
+TVC Actuator Controller 
+
+The heritage orbiter actuator controllers were not compatible with the 1553 SLS avionics archi-
+tecture.  As such, new actuator controllers, known as TACs adapted from the Constellation Program 
+Ares I Upper Stage TVC actuator controllers, were designed to interface with the heritage orbiter 
+actuators required for SLS.  Four TACs receive digital position commands from the SLS Core 
+Stage Flight Computers over a 1553 bus, process those commands, convert them into appropriate 
+positioning servo drive current signals, and then output the drive current signals to the servo-valves 
+in the TVCAs.  Sensor data from the TVC hydraulic system is also collected by the TACs and 
+passed through to the Flight Computers.   
+
+Each of the four TACs provides one drive channel to each of the eight Orbiter actuators.  Each 
+TAC monitors the feedback from its respective servo-valve (secondary delta pressure) and can 
+bypass that servo based on the data received.  The TACs have redundant connectivity with one of 
+the three flight computers through the 1553 bus for actuator position commands and health and 
+status data.  The health and status data includes actuator position, servo-valve current, and servo-
+valve delta pressure telemetry.   
+
+TVC Core Auxiliary Power Unit and Controller 
+
+The CAPU and CAPUC are part of the Core Stage TVC subsystem on the SLS Core Stage.  
+Each CAPU contains a supply valve, a speed control valve, a gearbox, a gearbox heat exchanger, 
+and a turbine wheel.  The turbine is driven by GH2 from the CSE as well GHe from the ground 
+prior to CSE start.  The CAPUC is a separate component that interfaces with the CS avionics.   
+
+The turbine rotational shaft speed is reduced through a gearbox which in turn provides mechan-
+ical shaft power to drive the attached hydraulic pump.  The hydraulic pump is referred to as the 
+Hydraulic Main Pump and is not part of the CAPU assembly.  The CAPU provides power during 
+prelaunch and ascent phases for the SLS Core Stage.  The CAPUC performs CAPU speed control, 
+sends instrumentation data and health and status data to the flight computers, and controls the elec-
+tro-depressurization valve (EDV) on the main pump.  A single coil solenoid Propellant Supply 
+Valve (PSV) integrated into the CAPU assembly provides GHe and GH2 on/off functionality.  The 
+SLS CAPU-CAPUC design utilizes a single solenoid actuated 2-stage Speed Control Valve (SCV) 
+and a Magnetic Pickup Unit (MPU) (speed measurement).  The primary function of the CAPUC is 
+to maintain the CAPU turbine speed by cycling the speed control valve open/closed thus controlling 
+the flow of propellant to the CAPU turbine (GHe prelaunch and GH2 after CSE start).  The CAPUC 
+commands the PSV open when the start command is received from the flight computer and 
+
+
+
+ 6 
+
+thereafter commands the SCV open/closed to maintain turbine speed based on the MPU sensor 
+inputs to the controller.  The Flight Computer has the capability to command the CAPUC to operate 
+in high-speed mode and command the CAPUC to shut down the CAPU.  The CAPUC provides 
+turbine over-speed protection by shutting down the CAPU if the over-speed threshold limit is 
+reached.  An MPU reading below the low turbine speed is considered an MPU failure.  If both MPU 
+are considered failed (i.e., both reading below the low-speed limit), the CAPUC will shut down the 
+CAPU.   
+
+During pre-launch, GHe is supplied from the ground system to the CAPU to power the turbine 
+until the CSEs are started.  The pressure of the GHe is lower than the GH2 from the CS engines so 
+when the engines start, the pressure of the GH2 rises above the GHe pressure from the ground 
+system and closes a check valve that isolates the GHe feed from the GH2 feed.   
+
+Hydraulic Main Pump 
+
+The SLS CS TVC hydraulic main pump is a direct reuse of the Shuttle SRB hydraulic pump 
+manufactured by Parker Abex.  The main pump is an AP27V series hydraulic pump that was orig-
+inally developed by Abex for the F-14 and then developed, fully qualified, and utilized on the 
+Shuttle SRB and Orbiter hydraulic systems.  The pump is a variable flow, pressure compensated, 
+axial piston hydraulic pump that is shaft driven by the CAPU.  The EDV, when energized, causes 
+the pumps variable displacement mechanism to reduce the pump displacement, thereby reducing 
+CAPU torque at startup.  After the CAPU reaches operating speed, the EDV is de-energized for the 
+remainder of the mission.  During flight operations, the main pump provides hydraulic fluid flow 
+at a nominal operational pressure of 3000 psig for engine throttling and thrust vector control from 
+engine start to engine shutdown.  The main pump does not include any instrumentation.   
+
+Filter Manifold 
+
+The filter manifold assembly acts as a collector and distributor of hydraulic fluid.  The TVC 
+hydraulic system contains four hydraulic circuits, with each circuit containing an identical filter 
+manifold assembly.  The filter manifold is a new build component; leveraging design work per-
+formed during the Constellation Program Ares I Upper Stage TVC hydraulic system design.   
+
+The filter manifold assembly performs the following functions and incorporates the following 
+interfaces and instrumentation for the TVC hydraulic system:  pressure relief, filtration, flow/pres-
+sure isolation, instrumentation including two pressure transducers for the hydraulic fluid supply 
+pressure (one transducer upstream of the filter and the other downstream) and a pressure transducer 
+for main pump and circulation pump suction pressure, fluid interfaces for the main pump case drain 
+line, HPRV outlet flow, circulation pump suction port, main pump and circulation pump high pres-
+sure supply ports, high pressure supply and low pressure return hydraulic fluid flow to the hydraulic 
+service panel, (ground support equipment or (GSE)) and standard test equipment (STE), and elec-
+trical interfaces for instrumentation and grounding.   
+
+Reservoir 
+
+The SLS CS TVC reservoir is a maintenance free bellows style reservoir.  The reservoir is new 
+build hardware for SLS.  It provides capacity for volumetric changes in the system fluid resulting 
+from temperature changes and variations in system operating conditions, and from system bleeding 
+of entrained air.  It also stores the hydraulic fluid from the supply accumulator while the main pump 
+is not operating.  The reservoir gas volume is charged with gaseous nitrogen (GN2) pre-charge 
+pressure selected to provide sufficient inlet fluid pressure to the main pump and circulation pump.  
+Finally, the reservoir fluid acts as a heat sink for the hydraulic system during TVC operation.   
+
+
+
+ 7 
+
+A GN2 service valve located on the gas side of the reservoir is provides the ability to charge, 
+drain and re-charge using GSE, if needed.  Pre-charge levels of the reservoir and return accumulator 
+are chosen to optimize system pressure balance both during CAPU/main pump operations and dur-
+ing non-operating conditions.  Unlike the Shuttle hydraulic system which used a boot-strap reser-
+voir, SLS TVC employs a bellows reservoir as discussed above.  As such, the supply system and 
+return system pressures are closely coupled.  The return and supply pressures will balance by fluid 
+flow between the systems (from supply to return) when the main pumps are off.  When the main 
+pump (or GSE pump) is not operating, the fluid volume of the supply accumulator is emptied into 
+the return system.  This raises the return system pressure to balance with the supply system, result-
+ing in higher pressures in the return system.  A pressure balance is required to meet the two extreme 
+system conditions:  maintaining main pump minimum inlet pressures (with the pump running) 
+while the system hydraulic fluid is cold and avoiding excessively high return system pressures at 
+elevated fluid temperatures (which can occur after MECO) when the main pump is off.   
+
+The reservoir includes a bleed valve at the high point of the system to facilitate hydraulic fill 
+operations.  This bleed valve is opened during initial fill to allow free air to be removed from the 
+TVC system.  The valve has provisions to capture any expelled hydraulic fluid during fill & bleed 
+operations.  In addition, this valve can be opened during contingency drain operations (if required 
+for a system break-in/component change-out) to ensure that fluid is expelled from the reservoir.   
+
+The reservoir incorporates two identical RTD sensors used for measuring the fluid temperature 
+inside the reservoir (two sensors provide redundancy).  The reservoir also incorporates an LVDT 
+to measure the fluid volume inside the reservoir by correlation of the position of the bellows to the 
+amount of fluid inside the reservoir fluid volume.   
+
+Supply Accumulator 
+
+The supply accumulator is a maintenance free bellows design consisting of a container that 
+houses a chamber of compressed GN2 and GHe, a chamber for hydraulic fluid, a metal bellows 
+separator between the gas and fluid chambers, and a mounting provision to attach the unit to SLS 
+structure.  The supply accumulator is a COPV design for to reduce weight.  The supply accumulator 
+is a new design component for SLS.  The supply accumulator leverages the accumulator design 
+developed for the Constellation Program Ares I Upper Stage TVC hydraulic system. Each hydraulic 
+system has a single supply accumulator.  The accumulator is charged by the supplier and the valve 
+is sealed post charging.  The primary purpose of the accumulator is to damp out pressure transients 
+in the supply side of the TVC hydraulic system and supply hydraulic power to the CSE HAS actu-
+ators during MECO. The supply accumulator does not include any instrumentation.   
+
+Return Accumulator 
+
+The primary purpose of the return accumulator is to dampen-out return pressure transients cre-
+ated by the TVC actuators and prevent them from reaching the return side of the CSE HAS.  It also 
+provides some limited hydraulic fluid storage capacity.  There is one return accumulator in each of 
+the four hydraulic systems.  The return accumulator is new build hardware for SLS.   
+
+The return accumulator assembly is a maintenance free bellows design, consisting of a container 
+and mounting that houses a chamber of compressed GN2 and GHe, a chamber for hydraulic fluid, 
+and a metal bellows separator between the gas and fluid chambers.  The accumulator is charged by 
+the supplier then sealed.   
+
+Circulation Pump 
+
+The SLS program Core Stage TVC system hydraulic circulation pumps are direct reuse hard-
+ware from the Space Shuttle Program.  The circulation pumps provide the necessary means to 
+
+
+
+ 8 
+
+circulate fluid through each TVC system, including the engine HAS and the TVC actuators.  The 
+circulation pump is a dual-element gear pump driven by an electric motor.  The motor, inverter, 
+and supporting electronic components are immersed in hydraulic fluid to simultaneously dissipate 
+waste heat and warm the circulating hydraulic fluid.  The circulation pump is operated during cry-
+ogenic propellant loading and is shut down prior to CAPU start.  During propellant loading, the 
+pump operates continuously to maintain hydraulic fluid temperatures within the acceptable limits 
+prior to launch.  The circulation pump is powered through the ground umbilical, so it has no way 
+to inadvertently power on during flight.   
+
+TVC Exhaust Gas Heat Exchanger (EGHE) 
+
+The EGHE is new hardware for SLS.  There is one EGHE per TVC system.  The EGHE is 
+designed to remove heat from the hydraulic system fluid.  The CAPU exhaust gas is quite cold as 
+it exits the turbine exhaust housing.  The EGHE design utilizes this cold exhaust to cool the hy-
+draulic fluid in each TVC system.  The EGHE is designed to remove sufficient heat energy from 
+the hydraulic fluid to maintain the bulk fluid temperature below 220°F to protect the MIL-PRF-
+83282 fluid from thermal breakdown and hydraulic seals from leaking.  The heat exchanger is 
+located on the return leg of the hydraulic system on the upstream side of the reservoir.   
+
+To avoid increasing back pressure at the CAPU turbine exhaust gas exit and introducing addi-
+tional potential GH2 leak paths, the heat exchanger design does not penetrate the CAPU exhaust 
+flow.  The ID of the EGHE exhaust flow path is identical to the CAPU exhaust, and the fluid heat 
+exchange is accomplished by flowing through a finned external jacket.  An increase in back pres-
+sure at the CAPU exhaust could lead to reduced turbine performance or an inability to generate 
+required horsepower to spin the main pump.  No isolation capability is included (or necessary) to 
+prevent flow (hydraulic fluid or CAPU exhaust) through the EGHE.  As such, there is no active 
+control mechanism for the EGHE.  Since the EGHE is not an effective heat exchanger until the 
+CAPU is running, the heat added to the system by the main pump exceeds the total heat removed 
+by the EGHE.  This design approach prevents the heat exchanger from over-cooling the hydraulic 
+system fluid.   
+
+The CAPU cold gas exhaust flow, which serves as the coolant medium for the EGHE, consists 
+of GHe and GH2, depending on mission phase.  The flow is not steady; it is a pulsed flow due to 
+SCV cycling in controlling the CAPU turbine speed.  The frequency and pulse width depend on 
+hydraulic load, source pressure, and exhaust exit conditions.   
+
+ACKNOWLEDGEMENTS 
+
+The authors would like to acknowledge the efforts of the entire TVC team from NASA, the 
+prime contractor, and all the sub tier vendors who worked many hours to get Artemis 1 to the launch 
+pad and into space.  Of particular significance in the review of this paper are Don Varanauski and 
+Chris Foreman both from The Boeing Company, Houston, TX.   
+
+REFERENCES 
+1. Orr, et al., “Advanced Modeling of Control-Structure Interaction in Thrust Vector Control Systems,” AAS 23-
+
+153, American Astronautical Society Guidance, Navigation, and Control Conference, February 2023. 
+2. Stuart, B., et al., “Core Stage TVC Systems Engineering Challenges in Reusing Heritage Hardware,” AAS 23-
+
+154, American Astronautical Society Guidance, Navigation, and Control Conference, February 2023. 
+3. Russell, C., et al., “Gimbal Bearing Friction in the SLS Core Stage Thrust Vector Control System,” AAS 23-
+
+155, American Astronautical Society Guidance, Navigation, and Control Conference, February 2023. 
+4. Wall, J., et al., “Design, Instrumentation, and Data Analysis for the SLS Core Stage Green Run Test Series,” 
+
+AAS 23-156, American Astronautical Society Guidance, Navigation, and Control Conference, February 2023. 
+
+
+
+ 9 
+
+5. Moore, R., et al., “Structural Dynamics Observations in Space Launch System Green Run Hot Fire Testing,” 
+AAS 23-157, American Astronautical Society Guidance, Navigation, and Control Conference, February 2023. 
+
+6. Wall, J., et al., “Flight Performance and Stability of Space Launch System Core Stage Thrust Vector Control,” 
+AAS 23-158, American Astronautical Society Guidance, Navigation, and Control Conference, February 2023. 
+
+
+	Overview of the SLS Core Stage Thrust Vector Control System Design
+

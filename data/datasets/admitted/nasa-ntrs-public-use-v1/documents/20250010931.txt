@@ -1,0 +1,1194 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="pdf:PDFVersion" content="1.5">
+<meta name="xmp:CreatorTool" content="LaTeX with hyperref">
+<meta name="pdf:hasXFA" content="false">
+<meta name="access_permission:modify_annotations" content="true">
+<meta name="access_permission:can_print_degraded" content="true">
+<meta name="dcterms:created" content="2025-12-09T21:27:21Z">
+<meta name="dcterms:modified" content="2025-12-09T21:27:21Z">
+<meta name="dc:format" content="application/pdf; version=1.5">
+<meta name="pdf:docinfo:creator_tool" content="LaTeX with hyperref">
+<meta name="access_permission:fill_in_form" content="true">
+<meta name="pdf:docinfo:modified" content="2025-12-09T21:27:21Z">
+<meta name="pdf:hasCollection" content="false">
+<meta name="pdf:encrypted" content="false">
+<meta name="pdf:docinfo:custom:PTEX.Fullbanner" content="This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) kpathsea version 6.4.0">
+<meta name="pdf:hasMarkedContent" content="false">
+<meta name="Content-Type-Override" content="application/pdf">
+<meta name="Content-Type" content="application/pdf">
+<meta name="PTEX.Fullbanner" content="This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) kpathsea version 6.4.0">
+<meta name="pdf:producer" content="pdfTeX-1.40.26">
+<meta name="access_permission:extract_for_accessibility" content="true">
+<meta name="access_permission:assemble_document" content="true">
+<meta name="xmpTPg:NPages" content="24">
+<meta name="pdf:hasXMP" content="false">
+<meta name="access_permission:extract_content" content="true">
+<meta name="access_permission:can_print" content="true">
+<meta name="pdf:docinfo:trapped" content="False">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.DefaultParser">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.pdf.PDFParser">
+<meta name="access_permission:can_modify" content="true">
+<meta name="pdf:docinfo:producer" content="pdfTeX-1.40.26">
+<meta name="pdf:docinfo:created" content="2025-12-09T21:27:21Z">
+<title></title>
+</head>
+<body><div class="page"><p></p>
+<p>Validation of Computational Fluid Dynamics Model of
+Self-pressurization in a Flight-scale Liquid Hydrogen Tank
+</p>
+<p>Chintan S. Patel ∗
+</p>
+<p>Qualis LLC (Amentum Space Exploration Division), NASA Marshall Space Flight Center, Huntsville, AL
+</p>
+<p>A computational fluid dynamics (CFD) methodology, developed and demonstrated to
+satisfactorily model multiple cryogenic fluid management (CFM) operations, is applied to predict
+self-pressurization of a flight-scale liquid hydrogen tank in four ground tests. Axisymmetric
+two-phase CFD analyses are performed using the Loci-Stream-VOF CFD solver with the frozen
+gas-liquid interface method. Conjugate heat transfer modeling accounts for thermal transport
+between the tank walls and propellant fluids. Turbulent natural convection flow is modeled with
+three turbulence closures of differing fidelity — Menter’s shear stress transport (SST), improved
+delayed detached eddy simulation (IDDES), and wall-adapted local-eddy-viscosity (WALE) —
+which show similar predictive capabilities. The asymmetric interface turbulence transport model
+ensures accurate phase change and thermal gradient predictions at the two-phase interface.
+Phase change is modeled with gas-kinetic-theory-based Hertz-Knudsen-Schrage formulation.
+The 50% fill-level test is validated for the CFM Modeling Portfolio with relative pressure-change
+error of -2.2% and satisfactory temperature predictions. Predictions are independent of
+the spatial and temporal resolution, and phase change model’s accommodation factor. The
+predictions for 25% and 90% fill-level tests were unsatisfactory, prompting a CFD sensitivity
+analysis of pressurization rate on spatial distributions of heat leak rates reveals that the tank
+wall redistributes most heat leakage to the liquid. However, the heat leak rate through the tank
+wall to the vapor phase governs the pressurization rate. The sensitivity analysis also produced
+spatial distributions of heat leak that accurately predict tank pressure and temperature for
+25% and 90% fill-level tests; however, the findings warrant further investigations on spatial
+distribution. This study provides insights into self-pressurization mechanisms and along with
+the sensitivity analysis technique provide a way to improve self-pressurization predictions for
+NASA’s spaceflight missions.
+</p>
+<p>I. Nomenclature
+</p>
+<p>𝑓𝑑 = Blending parameter in improved delayed detached eddy simulation model
+𝐺 = Body force in the momentum equation
+𝑔 = Gravitational acceleration vector
+𝑘 = Thermal conductivity of fluid
+𝐿 = Latent Heat of vaporization
+¤𝑚 = Phase change rate
+𝑝 = Static pressure of fluid
+¤𝑄 = Heat transfer rate
+𝑇 = Temperature of fluid
+𝑡 = Time
+</p>
+<p>Greek letters
+𝛼𝑙 = Thermal expansion coefficient of the liquid
+𝛽 = Constant in Menter’s SST model
+𝛽𝑙 = Isothermal compressibility of the liquid
+Δ𝑥 = Interface normal distance from the cell face center on the interface to liquid/vapor cell center
+</p>
+<p>∗Computational Fluid Dynamicist, Propulsion Engineering Fluid Dynamics Branch (ER42), NASA MSFC
+</p>
+<p>1</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>𝜇 = Dynamic viscosity
+Φ = Heat dissipation through shear stress in total energy equation
+𝜌 = Density
+𝜎 = Surface tension
+𝜏 = Shear stress
+</p>
+<p>Subscripts
+𝑔 = Gas/vapor
+𝑙 = Liquid
+𝑖 = Interface
+𝑗 , 𝑘 = Einstein index notation for conservation equations
+𝑟𝑒 𝑓 = Reference condition for Boussinesq term
+𝑠 = Solid — tank wall
+𝑒 𝑓 𝑓 = Designate effective thermal conductivity accounting for eddy conductivity
+</p>
+<p>Superscripts
+𝑡 = Vector component tangential to the gas-liquid interface
+𝑛 = Vector component normal to the gas-liquid interface
+</p>
+<p>II. Introduction
+</p>
+<p>Cryogenic fluid management (CFM) is a critical enabling technology for the National Aeronautics and Space
+Administration’s (NASA) Moon and Mars human-landing missions. CFM addresses the challenges of safe, low-cost,
+</p>
+<p>and reliable in-space and on-surface long-term propellant storage; pressure control and propellant positioning within
+tanks for safe engine operations; and in-space and on-surface propellant transfer.
+</p>
+<p>NASA’s Space Technology Mission Directorate (STMD) has established the CFM Portfolio Project (CFMPP) to
+advance CFM technologies to enable future spaceflight missions. In addition to advanced hardware development and
+demonstration, there is a need for reliable predictive modeling of CFM systems and their operations to support rapid,
+reliable, and low-cost spacecraft design and operation. The CFM Modeling Portfolio within the CFMPP improves the
+modeling capabilities.
+</p>
+<p>CFD modeling is indispensable for high-fidelity predictions and for providing insight into flow phenomena that are
+difficult or impossible to measure or test. Under the CFM Modeling Portfolio, the Propulsion Fluid Dynamics Branch
+(ER42) within the Engineering Directorate at NASA Marshall Space Flight Center (MSFC) is assessing, improving,
+developing and validating the Loci-Stream-VOF CFD solver to predict CFM operations in support of current and future
+flight projects such as the Human Landing System and Commercial Lunar Payload Services.
+</p>
+<p>One of the key CFM challenges is self-pressurization of the cryogenic tanks. The cryogenic propellant tanks in
+space are exposed to incident solar radiation and heat leakages due to engine operations. These heat leakages pressurize
+the tank over time by providing thermal energy to evaporate the liquid propellant and to warm the ullage gas. A reliable
+method to predict tank pressurization in time accurate manner is needed to determine structural stresses, determine
+venting requirements, plan for propellant management operations, predict a need for pressurant requirements, and plan
+mission’s propellant requirements. The extent of liquid temperature rise, separate from its effect on the tank pressure,
+is also needed to determine the impact on pump performance. Excessive temperatures can result in cavitation due to
+a reduction in Net Positive Suction Head (NPSH), thus either damaging the pump or adversely affecting the pump
+performance.
+</p>
+<p>Long simulation durations, the fine mesh resolution required to capture the thin thermal boundary layer and interface
+thermal gradients, two-phase turbulence modeling, and sensitivity to small heat leaks make self-pressurization of a
+cryogenic flight-scale tank a deceptively challenging computational problem.
+</p>
+<p>Several studies [1–13] have been carried out in the past for this purpose including experimental, analytical, and
+numerical studies of various fidelity. Due to the existence of a sharp thermal gradient near the tank walls and gas-liquid
+interface, CFD analyses are the most accurate in their predictions of both time-accurate tank pressure and temperatures
+due to the ability to model the complex flow dynamics that is typical to this problem.
+</p>
+<p>2</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>NASA STMD’s CFM Modeling Portfolio defines the highest validation rating (4/4) when validation metric agreement
+is within 10% and a 3/4 rating when the agreement is within 10–20%. The validation claims in this study refer to these
+criteria.
+</p>
+<p>The present work applies a CFD modeling methodology — previously demonstrated to successfully predict
+self-pressurization [12, 13], autogenous pressurization [14], pressure control using an axial jet [14] and spray bar
+[15], and non-condensable pressurization (planned publication) — to predict self-pressurization of a flight-scale liquid
+hydrogen tank. The present goal is to develop modeling capabilities and insights to enable analysis and design of CFM
+systems with improved reliability.
+</p>
+<p>III. Test Descriptions
+</p>
+<p>A. Testing Facilities
+Flight-scale ground tests of self-pressurization were conducted at NASA MSFC’s test stand 300 during 1996-1998
+</p>
+<p>with the multipurpose hydrogen test bed (MHTB) tank (Figure 1a). The 5083 aluminum tank was a double domed
+cylindrical tank of diameter 3.05𝑚 with 3.05𝑚 total height including two 2:1 oblate hemispheres. The test tank with
+cryogenic insulation and supporting equipment was enclosed in a cylindrical environmental shroud (Figure 1b). The
+tank was equipped with a thermal venting system (TVS) and a recirculation pump near the bottom of the tank and a
+spray bar/heat exchanger along the major axis of the tank. Two vertical rakes in the tank housed 24 temperature probes
+for characterizing the fluid temperatures. Entire assembly was housed in a vacuum chamber with liquid nitrogen cold
+walls. [16]
+</p>
+<p>(a) Tank with support structure [16] (b) Cross-section illustrating tank configuration [16]
+</p>
+<p>Fig. 1 MHTB tank test set-up
+</p>
+<p>B. Experimental Procedure
+The tank was filled with liquid hydrogen to a desired fill level and then vented to within a set pressure range for
+</p>
+<p>several hours to cool the tank structure. The ambient heat leaks to the tank were calculated from boil-off measurements
+using a thermodynamic model. Boil-off testing also set-up consistent initial condition for tank self-pressurization
+and TVS tests. Two heat leak conditions were tested. For low heat leak set-up, the walls of the vacuum chamber
+containing the tank were cooled with liquid nitrogen to minimize the heat leakage. The high heat leak set-up consisted
+of additional venting and recirculation hardware at the bottom of the tank which introduced more conductive heat
+leakage. Additionally, the liquid nitrogen was not circulated through the vacuum chamber walls. [16]
+</p>
+<p>After a desired conditioning of the hardware was achieved, the tank was sealed, and the self-pressurization test
+began. When the set upper pressure limit of 137.9𝑘𝑃𝑎 was reached, the self-pressurization test concluded. Then the
+</p>
+<p>3</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>pressure control test began with spray bar activation.
+Four tests were selected for the present validation effort (see Table 1): (1) 50% fill level with high heat leak rate, (2)
+</p>
+<p>90% fill level with high heat leak rate, (3) 90% fill level with low heat leak rate, and (4) 25% fill level with low heat leak
+rate.
+</p>
+<p>IV. Computational Model
+The governing equations and models described below are implemented in Loci-Stream CFD solver — a pressure-
+</p>
+<p>based, all-speed CFD solver for generalized meshes in the rule-based programming framework Loci [17, 18]. Loci [19]
+is a rule-based declarative framework that automatically assembles the numerical solution components of an arbitrary
+set of partial differential equations and enables solution on large parallel computing systems for efficient parallelization
+across thousands of CPU processes. This technique enhances the flexibility of simulation tools, reducing the complexity
+of CFD software that includes various boundary conditions, complex geometries, and different physical models.
+</p>
+<p>A. Governing Equations
+The conservation equations, gas-liquid phase change model, stationary two-phase interface model, and interface
+</p>
+<p>turbulence transport models are described in this section.
+The conservation equations for mass, momentum, and energy are given in the Equation 1, 2 and 3 in Einstein
+</p>
+<p>notations. These equations are for single-phase fluids. The two-phase model is described in the subsections below.
+</p>
+<p>𝜕𝜌
+</p>
+<p>𝜕𝑡
++
+𝜕𝜌𝑢 𝑗
+</p>
+<p>𝜕𝑥 𝑗
+</p>
+<p>= 0 (1)
+</p>
+<p>𝜕𝜌𝑢 𝑗
+</p>
+<p>𝜕𝑡
++
+𝜕𝜌𝑢𝑘𝑢 𝑗
+</p>
+<p>𝜕𝑥𝑘
+= − 𝜕𝑝
+</p>
+<p>𝜕𝑥 𝑗
+</p>
+<p>+
+𝜕𝜏𝑗𝑘
+</p>
+<p>𝜕𝑥𝑘
++ 𝐺 𝑗 (2)
+</p>
+<p>𝜌𝑐𝑝
+𝐷𝑇
+</p>
+<p>𝐷𝑡
+= 𝛽𝑙𝑇
+</p>
+<p>𝐷𝑝
+</p>
+<p>𝐷𝑡
++ 𝜕
+</p>
+<p>𝜕𝑥 𝑗
+</p>
+<p>(𝑘 𝜕𝑇
+</p>
+<p>𝜕𝑥 𝑗
+</p>
+<p>) +Φ (3)
+</p>
+<p>The liquid is modeled as an incompressible fluid, but the buoyancy effect is modeled using Boussinesq approximation,
+i.e., the liquid density is assumed to be constant except for calculating the buoyancy force, where the liquid density
+is considered a linear function of temperature. Equation 4 defines the contribution to the body force in momentum
+equation, where 𝜌𝑟𝑒 𝑓 is liquid density at the reference temperature 𝑇𝑟𝑒 𝑓 .
+</p>
+<p>𝐺 𝑗 = −𝛼𝑙 𝜌𝑟𝑒 𝑓 (𝑇 − 𝑇𝑟𝑒 𝑓 ) 𝑔 𝑗 (4)
+</p>
+<p>To account for the effect of the tank walls in the thermal transport, conjugate heat transfer modeling between the
+tank walls and the tank fluids is performed.
+</p>
+<p>Standard Fourier heat-conduction equations in the solid, coupled with these fluid governing equations, are used for
+the conjugate heat-transfer model.
+</p>
+<p>1. Frozen Two-phase Interface Model
+The frozen or stationary gas-liquid interface model, also referred to as sharp interface, takes advantage of a
+</p>
+<p>stationary/quasi-stationary interface. The frozen-interface method enforces a sharp, mesh-defined phase boundary,
+eliminating volume of fluid (VOF) advection and geometric reconstruction. An order of magnitude larger timestep is
+afforded by time-implicit frozen-interface method compared to typical time-explicit VOF methods with strict Courant
+number based stability criteria. The spurious/parasitic interfacial velocities commonly observed in VOF advection are
+also avoided, allowing careful resolution of thermal gradients in interfacial region without the stability and affordability
+problems faces by VOF transport.
+</p>
+<p>Velocity is continuous at the interface/phase boundary. Tangential velocities on the gas and liquid sides of the
+interface are equal(Equation 5)and so is tangential shear stress (Equation 6). Interface normal velocity is assumed to
+be zero (Equation 7) — even when phase change occurs because the phase change mass transfer and corresponding
+velocities are very small.
+</p>
+<p>𝑢𝑡𝑖,𝑙 = 𝑢𝑡𝑖,𝑔 (5)
+</p>
+<p>4</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>𝜏𝑡𝑖,𝑙 = 𝜏𝑡𝑖,𝑔 (6)
+</p>
+<p>𝑢𝑛𝑖,𝑙 = 𝑢𝑛𝑖,𝑔 = 0 (7)
+</p>
+<p>2. Phase Change Mass Transfer
+The mass transfer rate due to phase change between the gas and liquid phases ( ¤𝑚) is based on the model described
+</p>
+<p>by Hertz-Knudsen-Schrage (HKS) (Equation 8) [20] based on kinetic gas theory, where all quantities are represented in
+SI units. At equilibrium, evaporation and condensation rates are the same, so 𝐶𝑒𝑣𝑎𝑝 must be equal to 𝐶𝑐𝑜𝑛𝑑 . Therefore,
+near-equilibrium flows, like the ones encountered here, are simplified to Equation 9 and referred to as HKS equation for
+brevity. Saturation pressure is obtained using the Antoine equation (Equation 10), where the constants for a given fluid
+are sourced from NIST thermodynamic data [21].
+</p>
+<p>¤𝑚 =
+</p>
+<p>√︄
+1
+</p>
+<p>2𝜋𝑅𝑔
+</p>
+<p>(
+𝐶𝑒𝑣𝑎𝑝
+</p>
+<p>𝑝𝑠𝑎𝑡 (𝑇𝑙)√
+𝑇𝑙
+</p>
+<p>− 𝐶𝑐𝑜𝑛𝑑
+</p>
+<p>𝑝𝑔√︁
+𝑇𝑔
+</p>
+<p>)
+𝐴𝑖 (8)
+</p>
+<p>¤𝑚 = 𝐶𝑚
+</p>
+<p>√︄
+1
+</p>
+<p>2𝜋𝑅𝑔𝑇𝑖𝑛
+(𝑝𝑠𝑎𝑡 − 𝑝𝑔) 𝐴𝑖𝑛 (9)
+</p>
+<p>𝑙𝑜𝑔10 𝑝𝑠𝑎𝑡 = 𝑎 − 𝑏
+</p>
+<p>𝑐 + 𝑇𝑠𝑎𝑡
+(10)
+</p>
+<p>Phase change is modeled using a mass source term and corresponding heat source term, with two modeling options,
+as described by Kassemi, et al. [9] In the thermal balance method, the difference in heat transfer on gas and liquid side
+of the interface is assumed to supply latent heat of evaporation or condensation (Equation 11) to calculate phase change
+mass transfer rate, ¤𝑚. In the iterative method, the HKS equation (Equation 9) and thermal balance equations (Equation
+12) are iteratively solved to calculate interface temperature, 𝑇𝑖 .
+</p>
+<p>¤𝑚𝐿 = ¤𝑄𝑔𝑖 − ¤𝑄𝑙𝑖 (11)
+</p>
+<p>¤𝑚𝐿 = −𝑘𝑔,𝑒 𝑓 𝑓 𝐴𝑖
+</p>
+<p>(𝑇𝑔 − 𝑇𝑖)
+Δ𝑥𝑔
+</p>
+<p>+ 𝑘𝑙,𝑒 𝑓 𝑓 𝐴𝑖
+</p>
+<p>(𝑇𝑙 − 𝑇𝑖)
+Δ𝑥𝑙
+</p>
+<p>(12)
+</p>
+<p>3. Turbulence Modeling
+Menter’s 2003 shear stress transport (SST) [22] is used for Reynolds-averaged Navier-Stokes (RANS) turbulence
+</p>
+<p>closure. An improved delayed detached eddy simulation (IDDES) approach [23] is also utilized for turbulence modeling.
+IDDES is a hybrid RANS/LES (Large Eddy Simulation) approach: near-wall regions and unresolved scales — high-shear
+or high-vorticity regions where mesh refinement for LES is impractical — are modeled with RANS equations and
+resolved scales are modeled with sub-grid scale (SGS) modeling. An implicit LES approach is employed where
+grid-induced dissipation provides the sub-grid scales. A blending/shielding function 𝑓𝑑 distinguishes the resolved (LES)
+and unresolved (RANS) regions: RANS mode is indicated by 𝑓𝑑 = 1 and SGS mode is indicated by 𝑓𝑑 = 0.
+</p>
+<p>A wall modeled LES (WMLES) approach using wall-adapting local eddy-viscosity (WALE) model [24] is also
+investigated and compared with the IDDES and SST predictions.
+</p>
+<p>4. Interface Turbulence Transport
+Menter (1994), Wilcox (1998) and others have shown that eddy-viscosity based turbulence models predict non-
+</p>
+<p>physically high turbulence near the interface compared to the experimental observations [25]. A review of the two-phase
+literature [14] shows that, near the gas-liquid interface, turbulence on the gas side resembles a wall viscous boundary
+layer, whereas the liquid side has either slightly enhanced or unchanged turbulence kinetic energy. [26–30] RANS,
+hybrid RANS, and WMLES models must therefore be modified near the interface to capture these altered turbulence
+characteristics.
+</p>
+<p>A common approach proposed by Egorov [31] modifies the 𝜔-equation with a source term that adds a wall-like
+treatment to reduce turbulence kinetic energy at the interface. This approach has shown to be effective in wide-ranging
+</p>
+<p>5</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>applications [32]. The physical rationale is that, for two-phase flows with high density ratios, the lower-density fluid
+effectively "sees" the higher-density fluid as a wall. However, Egorov’s method is typically applied symmetrically to
+both phases. An asymmetric treatment in which the near wall turbulence characteristics on the heavier fluid side are free
+of boundary layer effect (i.e., slip-wall-like turbulence) is more appropriate [25].
+</p>
+<p>These observations are encapsulated in our simple but highly effective interface turbulence model for frozen interface
+method [14, 33], in which the gas side of the interface is treated as wall-like while the liquid side is unaffected and
+has no boundary influence on the turbulence characteristics. This asymmetric turbulence-damping technique has been
+instrumental in accurate predictions in multiple tests [14, 15], including the present work and a separate study planned
+for future publication.
+</p>
+<p>B. Geometry
+MHTB tank’s internal structure is not expected appreciably affect the self-pressurization and was therefore removed
+</p>
+<p>from the computational domain. An axisymmetric sector of 1-degree is modeled because no significant circumferential
+flow features are expected. All the circumferential velocities are zeroed out in the governing equations.
+</p>
+<p>A uniform tank thickness of 0.5 in was modeled for conjugate heat transfer modeling. Insulation layers are not
+modeled. The heat leak rates obtained from boil-off calculations are applied to the external tank wall.
+</p>
+<p>C. Mesh
+Three hexahedral unstructured mesh refinements are created to ensure mesh insensitive predictions. Nominal cell
+</p>
+<p>edge length, outside the wall boundary layer and interface refinement regions, varied from 4 cm to 1 cm. All meshes
+have refinement near the gas-liquid interface to resolve velocity and thermal gradients arising due to altered turbulent
+transport and phase change. A representative set of meshes are shown in Figures 2 and 3. Based on previous validations
+[14, 33], interface normal first-cell height of 1 × 10−4 m was enforced for all meshes. Baseline mesh has 4 cm nominal
+mesh size and wall-normal height of 1 × 10−4 m. Baseline mesh showed that median 𝑦+ ≤ 1 can be obtained with
+1 × 10−3 m first-cell height albeit with maximum 𝑦+ ≈ 7, so a 2 cm nominal cell size mesh was created with 1 × 10−3 m
+wall first-cell height and referred to as a ’Coarse Boundary Layer (BL)’ mesh. Refined mesh had 4 times smaller
+nominal cell size of 1 cm. A mesh independent solution is obtained and discussed in the Results section.
+</p>
+<p>(a) Refined (b) Baseline (c) Coarse BL (refined nominal cells)
+</p>
+<p>Fig. 2 Meshes for 50% fill-level tests
+</p>
+<p>6</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>(a) 90% fill level (b) 25% fill level
+</p>
+<p>Fig. 3 Baseline meshes for 90% and 25% fill levels
+</p>
+<p>Fig. 4 25% fill level 18.8 W heat leakage test — initial temperature condition
+</p>
+<p>D. Initial Conditions
+Initial tank pressure and temperatures from the test data are used to initialize the fluid domains. The tank wall
+</p>
+<p>temperatures were assumed to match the adjacent fluid temperature. The initialized temperature in 25% fill level low
+heat leakage test is shown in Figure 4. The temperature hotspot near the top of the tank is suspected to be due to
+erroneous sensor data, which showed no impact on the prediction. To ensure that such data was not polluting the solution
+and to establish a thermal gradient akin to the tests, a boiloff simulation was conducted. No appreciable difference
+between the raw initial condition and boiloff solution was found, therefore raw data is used for initializations. Unsteady
+animation of the solution shows that such small hotspots smooth out quite quickly without any appreciable impact on
+the tank pressurization rate.
+</p>
+<p>Effect of initial condition is discussed in Results section.
+</p>
+<p>7</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>E. Boundary Conditions
+A boil-off and conduction calculation based total heat leakage rates shown in Table 1 were imposed on the external
+</p>
+<p>surface of the modeled tank wall [16].
+Thermal calculations from Hasting et al. for MHTB tank from a steady-state orbit-hold tests [34] estimated a total
+</p>
+<p>penetration heat leak of 1.18 W (out of a total of 12.11 W at about 85% fill level) in one test, and a total penetration heat
+leak of 2.39 W (out of a total of 13.10 W at about 90% fill level) in another test. Stewart [35] noted total penetration heat
+leak estimate of 1.61 W (out of a total of 51 W heat leak for the 50% fill-level test with higher heat leak rate). Some
+uncertainties in the heat distribution exist.
+</p>
+<p>These penetration heat leaks (from legs, fill/drain, vent, rake, etc.) were indicated to be relatively small but with
+some uncertainty and were lumped together with the insulation heat leaks reported in Table 1.
+</p>
+<p>The present study analyzed sensitivity of the pressurization rate on spatial distribution of heat leakages between
+wetted and unwetted tank regions. The Results section discusses these analyses.
+</p>
+<p>Table 1 MHTB tank heat leakages calculated from measurements
+</p>
+<p>Fill Level (%) Low Heat Leak Test (Series 1) [W] High Heat Leak Test (Series 2) [W]
+90 20.2 54.1
+50 18.7 51.0
+25 18.8 -
+</p>
+<p>F. Fluid Properties
+Fluid properties are evaluated from the current National Institute of Standards and Technology (NIST) databases [21].
+</p>
+<p>Liquid hydrogen predominantly converts to the para-hydrogen isomeric state after sufficiently long storage; therefore,
+liquid hydrogen is assumed to be in the para-hydrogen state. The liquid is assumed to be a Boussinesq fluid to model the
+buoyancy effect. Constant thermal and transport properties are assumed because the liquid temperature does not vary
+considerably during the test.
+</p>
+<p>Sutherland’s law models temperature-dependent vapor viscosity and conductivity. Gaseous hydrogen deviates
+modestly from the ideal gas behavior [36], so in a previous validation effort [14] real gas was modeled using tabular
+equation of state. However, it had negligible influence on the pressurization prediction compared to the ideal gas
+equation of state. Consequently, the vapor is modeled as an ideal gas in the present study. The properties of liquid
+(Table 2), hydrogen vapor (Table 3), and aluminum 5083 (table 4) are listed in the tables below.
+</p>
+<p>Table 2 Thermodynamic properties of liquid hydrogen
+</p>
+<p>Parameters Description Value
+𝜌𝑙 Liquid density 69.40 kg/m3
+</p>
+<p>𝑐𝑝𝑙 Liquid specific heat at constant pressure 10 502.46 J/Kg/K
+𝑘𝑙 Liquid thermal conductivity 0.101 281 3 W/m/K
+𝜇𝑙 Liquid dynamic viscosity 1.223 693 5 × 10−5 kg/m/s
+𝛼𝑙 Liquid volume expansion coefficient 0.018 608 41 K
+𝐿 Latent heat 436 480.0 J/kg
+𝜎 Surface tension 0.001 665 055 N/m
+</p>
+<p>G. Discretization and Solver Set-up
+SIMPLEC pressure-velocity coupling is used for solving the Navier-Stokes equations. Second order upwind (SOU)
+</p>
+<p>flux scheme is used for all but turbulence transport equations which use first order upwind scheme for increased stability.
+Second order backward difference formula is used for time integration. The pressure-correction equation and energy
+equation convergence criteria are set to four orders of magnitude residual drop during each timestep, and all simulations
+are well-converged.
+</p>
+<p>8</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Table 3 Thermodynamic properties of hydrogen vapor
+</p>
+<p>Parameters Description Value
+𝜌 Density Ideal gas EOS or Tabulated real gas
+𝑐𝑝𝑔 Specific heat at constant pressure Function of temperature
+𝑘𝑔 Thermal conductivity Function of temperature
+𝜇𝑔 Liquid dynamic viscosity Function of temperature
+</p>
+<p>Table 4 Thermodynamic properties of Aluminum 5083
+</p>
+<p>Parameters Description Value
+𝜌 Density 2660 kg/m3
+</p>
+<p>𝑐𝑝𝑔 Specific heat at constant pressure Function of temperature
+𝑘𝑔 Thermal conductivity Function of temperature
+</p>
+<p>Spatial and temporal resolution insensitivities are discussed in the Results section. Timestep size of 0.1𝑠 is sufficient
+for temporal-resolution-invariant predictions. Baseline mesh described above is sufficient for spatial-resolution-invariant
+predictions. Sensitivities to spatial and temporal resolution are discussed in the Results section.
+</p>
+<p>V. Results
+</p>
+<p>A. 50% Fill Level, 51 W Heat Leak Test
+</p>
+<p>1. Pressure Prediction
+Time-accurate tank pressure prediction is the primary validation objective. The average pressurization rate is defined
+</p>
+<p>in Equation 13. The relative error in CFD prediction is defined in Equation 14.
+</p>
+<p>𝑑𝑝
+</p>
+<p>𝑑𝑡
+=
+</p>
+<p>(𝑃 𝑓 𝑖𝑛𝑎𝑙 − 𝑃𝑖𝑛𝑖𝑡𝑖𝑎𝑙)
+(𝑡𝑖𝑛𝑖𝑡𝑖𝑎𝑙 − 𝑡𝑖𝑛𝑖𝑡𝑖𝑎𝑙)
+</p>
+<p>(13)
+</p>
+<p>Fig. 5 Pressure prediction over time compared with the test data
+</p>
+<p>9</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>𝑒 =
+( 𝑑𝑝
+𝑑𝑡
+)𝐶𝐹𝐷 − ( 𝑑𝑝
+</p>
+<p>𝑑𝑡
+)𝑡𝑒𝑠𝑡
+</p>
+<p>( 𝑑𝑝
+𝑑𝑡
+)𝑡𝑒𝑠𝑡
+</p>
+<p>(14)
+</p>
+<p>The heat leakages are evenly distributed along the external surface of the tank wall. Pressurization is predicted with
+−2.2% relative error (Figure 5).
+</p>
+<p>(a) Ullage Temperatures over time (b) Probe locations
+</p>
+<p>Fig. 6 Temperature over time compared with the test probe temperatures on the first rake
+</p>
+<p>Fig. 7 Liquid Temperatures over time Fig. 8 Thermal gradient near the gas-liquid interface
+at t=40000 s
+</p>
+<p>10</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>2. Temperature Prediction
+The probe temperatures (Figure 6b) are also satisfactorily predicted for near the interface; however, away from the
+</p>
+<p>interface the deviations from test data increase (Figure 6a and 7). Typically, such problem is attributed to excessive
+turbulent mixing caused by RANS turbulence modeling, but IDDES turbulence closure is used, and Figure 9 shows
+</p>
+<p>(a) t = 1000 s
+</p>
+<p>(b) t = 9500 s
+</p>
+<p>(c) t = 14000 s
+</p>
+<p>Fig. 9 Vorticity, velocity magnitude with streamlines, turbulence viscosity ratio, and temperature over time
+</p>
+<p>11</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>that IDDES model is effective in shielding ullage from excess turbulent mixing. The deviations are attributed to the
+simplified spatial heat flux distribution, which does not account for penetration heat leaks. Additionally, thermal mass of
+tank structures in the top and bottom of the tanks is also not modeled for simplicity which may result in underprediction
+of temperature field in those regions.
+</p>
+<p>3. Interface Mesh Resolution
+The wall-like turbulence treatment on the gas side of the interface requires sufficient resolution to accurately capture
+</p>
+<p>turbulence transport — akin to a boundary layer. The high temperature gradient near the interface also must be resolved
+for reliable heat transfer and phase change prediction because the phase change model (Equation 12) is highly sensitive
+to the local saturation condition and therefore to the interface temperature (Equation 10).
+</p>
+<p>A first-cell height of at least 1× 10−4 m normal to the interface has been found to be necessary to resolve temperature
+gradient on the gas side of the interface (Figure 8). The self-pressurization rate is directly affected by resolution of this
+thermal gradient. This finding is consistent across two-phase CFD modeling of CFM operations. [14, 15, 33]
+</p>
+<p>4. Natural Convection Currents
+The wall heat leakage forms natural convection currents in the liquid phase. At Rayleigh number of 1.2𝑒15, the
+</p>
+<p>natural convection currents in liquid are turbulent. The characteristics of convective vortices depend on fluid properties,
+tank shape and the intensity of the heat flux. These currents transport warmer liquid to the gas-liquid interface and
+increase the interface temperature which increases the tank pressure through interfacial heat and mass transfer. Resolving
+these convecting cells — larger eddies at the minimum — is therefore essential for accurate pressure prediction and
+requires wall integrated boundary layer modeling, i.e., wall 𝑦+ ≤ 1 to resolve sharp thermal and velocity gradients, and
+sufficient interior mesh refinement in the liquid region to resolve flow vorticity, and turbulence transport independent
+of mesh. The development and eventual stabilization of the large convective cells is demonstrated in Figure 9. The
+sharp 90-degree turning of the liquid at the gas-liquid interface (for 50% fill-level test) also produces high vorticity and
+periodic elliptical vortices which must also be resolved well with refined interface normal mesh.
+</p>
+<p>B. Mesh Sensitivity
+Mesh sensitivity is assessed for the 51 W heat flux at 50% fill-level test (Figure 10) and shows a mesh independent
+</p>
+<p>solution with the baseline mesh. The coarse boundary layer mesh underpredicts pressurization by a small margin,
+highlighting the importance of fully wall-integrated boundary layer to capture thermal transport from the tank wall to
+the fluid and the sensitivity of the pressure prediction on first cell wall height. The refined mesh with one quarter the cell
+</p>
+<p>Fig. 10 Mesh Sensitivity Fig. 11 Timestep Sensitivity
+</p>
+<p>12</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>edge length of the baseline mesh predicts a pressurization trend that is essentially identical to the baseline mesh solution.
+</p>
+<p>C. Timestep Sensitivity
+Predictions are timestep independent up to the timestep value of 0.1 s (Figure 11). Negligible reduction in
+</p>
+<p>pressurization is observed for 0.5 s and 1 s timesteps.
+</p>
+<p>D. Accommodation Factor Sensitivity
+</p>
+<p>Fig. 12 Accommodation Factor Sensitivity Fig. 13 Turbulence Model Sensitivity
+</p>
+<p>(a) Pressure (b) Temperature probe
+</p>
+<p>Fig. 14 90% fill level, 54.1 W heat leakage — unsatisfactory prediction with uniform heat flux
+</p>
+<p>The accommodation factor in the Hertz-Knudsen-Schrage equation (Equation 9) linearly scales the evapora-
+</p>
+<p>13</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>tion/condensation mass flow rate. Its value is expected to be a function of fluid properties, and thermodynamic state.
+Some experimentally calculated values of the accommodation factor are available in literature for certain fluids but tend
+to vary widely, which raises a greater concern for thermodynamically open systems where mass exchange occurs with the
+environment. For closed systems, however, predictions have historically been insensitive to the accommodation factor
+for values above 1𝑒 − 4 when sufficient interfacial mesh resolution exist [13, 14]. The sensitivity analyses presented
+here (Figure 12) agree with those observations.
+</p>
+<p>E. Turbulence Modeling Sensitivity
+A widely used unsteady RANS turbulence model — Menter’s SST turbulence model, a hybrid RANS/LES model —
+</p>
+<p>IDDES, and an LES model — WALE are simulated and found to have little difference in their predictive capabilities.
+(Figure 13)
+</p>
+<p>F. 90% Fill Level, 54.1 W Heat Leak Test
+CFD simulation with uniform heat flux applied to the external tank wall did not yield a satisfactory prediction.
+</p>
+<p>Pressure (Figure 14a) and temperature (Figure 14b) are both underpredicted. The observation prompted the sensitivity
+analysis in the next section. The calibrated pressure prediction for this test is revisited in a subsequent section.
+</p>
+<p>G. Spatial Heat Leak Distribution Sensitivity Analysis and Mechanisms of Self-Pressurization
+The pressure underprediction in the 90% fill level, 54.1 W heat-leak test was suspected to arise from the modeling
+</p>
+<p>assumption of uniform distribution of heat leakage to the tank’s external wall. However, detailed spatial distribution of
+heat flux is not available from the test data. To investigate, the sensitivity of pressurization rate to the distribution of
+wetted and unwetted heat leaks is examined by varying the unwetted wall heat leaks. Note that all heat leak rates are
+applied to the external tank wall with conjugate heat transfer analysis, and total heat leak rate in each case is fixed to the
+values in Table 1. The pressurization rate predictions show strong sensitivity to the spatial distribution of the heat leaks.
+(Figures 15a and 15b)
+</p>
+<p>These analyses provide powerful insights into the physical processes that drive tank self-pressurization.
+</p>
+<p>(a) Pressure (b) Temperature probe
+</p>
+<p>Fig. 15 Pressure prediction sensitivity to percentage of unwetted heat leakage (90% fill level, 54.1 W total heat
+leak)
+</p>
+<p>14</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>1. Phasic Heat Leak Absorption Rates
+The rate of heat leak absorbed by the liquid ¤𝑄𝑠𝑙 is shown in Figure 16a for the 90% fill level, 54.1 W heat leak test.
+</p>
+<p>The liquid propellant absorbs most of the heat leakage to the tank wall irrespective of the spatial distribution of the heat
+flux.
+</p>
+<p>A typical heat transfer distribution is shown in Figure 17.
+</p>
+<p>(a) Liquid heat leak rate (b) Cumulative evaporated mass
+</p>
+<p>Fig. 16 Liquid heat leak rate and cumulative evaporated mass sensitivity to percentage of unwetted heat leakage
+(90% fill level, 54.1 W total heat leak)
+</p>
+<p>Fig. 17 Heat rate distributions — 50% fill level, 51 W total heat leak
+</p>
+<p>Contour plots in Figure 18 show the evolution of thermal gradients near the intersection of the gas-liquid interface
+and the tank wall. Heat flows in the direction orthogonal to the temperature contour lines and illustrates phasic
+heat exchange among vapor, liquid and tank wall. Aluminum 5083, at ≈ 20 W/m/K, has ≈ 1200 times the thermal
+</p>
+<p>15</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>conductivity of hydrogen vapor and ≈ 200 times that of liquid hydrogen at the 20.6 K saturation condition. Thus, even
+with tank thickness of 0.5 in, a large fraction of heat entering the tank wall in the vapor region is conducted along the
+tank wall instead of across the wall to the vapor (Figure 18d). This behavior was found independently in this study and
+later corroborated by Stewart et al. [35].
+</p>
+<p>Liquid hydrogen has a volumetric heat capacity of 699.488 kJ/m3/K at saturation condition of 20.6 K, while the
+vapor has nearly 40 times lower volumetric heat capacity at 17.762 kJ/m2/K. At the 20.6 K saturation condition,
+liquid’s laminar conductivity is almost six times that of the vapor. Turbulent natural convection in the liquid increases
+the effective thermal transport severalfold. Consequently, most of the wall heat leakage is directed to the liquid.
+This trend holds across fill levels and heat leak cases studied. Because the liquid absorbs most of the heat leakage,
+self-pressurization analyses performed without conjugate heat transfer modeling with the tank wall should not assume
+</p>
+<p>(a) t = 3000 s (b) t = 12000 s
+</p>
+<p>(c) t = 21000 s (d) t = 30000 s
+</p>
+<p>Fig. 18 Temperature contours at the intersection of the wall and gas-liquid interface, 50% fill level, 51 W total
+heat leak test
+</p>
+<p>16</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>equal heat flux to the wetted and unwetted surfaces.
+</p>
+<p>2. Vapor Heat Leak Absorption Rate ¤𝑄𝑠𝑔 and Pressurization Rates
+Once the liquid heat leak absorption rate reaches steady-state, simulations with large variation in applied heat flux
+</p>
+<p>distributions predict similar steady-state liquid heat absorption rates (Figure 16a). However, the pressurization rates
+(Figure 15a) show large variation among these simulations.
+</p>
+<p>(a) Vapor heat leak rate - Close-up (b) Pressurization Rate - Close-up
+</p>
+<p>Fig. 19 Vapor heat leak rate and pressurization rate sensitivity to percentage of unwetted heat leakage (90% fill
+level, 54.1 W heat leakage)
+</p>
+<p>Fig. 20 Pressurization rate vs Vapor heat leak rate (at the conclusion of 90% fill level, 54.1 W heat leak rate
+sensitivities)
+</p>
+<p>Careful inspection reveals that the pressurization rate is governed primarily by the heat absorbed by the vapor phase
+</p>
+<p>17</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>(Figure 19a and 19b) and scales nearly linearly with it (Figure 20). This is due to the fact that any heat transferred
+to the vapor phase increases the tank pressure through the thermodynamic process of isochoric compression. The
+pressure increase — per the ideal gas relation (provided any existing vapor thermal stratification is not disrupted) — is
+proportional to the heat transfer to the vapor.
+</p>
+<p>3. Interfacial Thermal Transport
+The vapor phase, which is typically warmer than the liquid, transfers a fraction of the absorbed heat leak ( ¤𝑄𝑠𝑔)
+</p>
+<p>to the liquid interface, denoted as ¤𝑄𝑔𝑖 . In the liquid phase, natural convection (in presence of gravity/acceleration)
+transports thermal energy from the gas to liquid (𝑄𝑙𝑖) via buoyant warm liquid; in microgravity, thermal conduction
+transfers thermal energy. If heat transport from the liquid to the interface exceeds than that from the vapor, evaporation
+occurs (Equation 12).
+</p>
+<p>Gravity and turbulence strongly affect interfacial thermal transport. Gas-side interface is wall-like, i.e., no eddy
+viscosity, owing to the presence of the high density liquid, while the liquid-side turbulence transport is unaffected by
+presence of low-density vapor (see Interface Turbulence Transport). Due to this asymmetric turbulence transport, liquid
+has almost 145 times higher effective conductivity 𝑘𝑒 𝑓 𝑓 ,𝑙 , which results in evaporation at the interface (Equation 12).
+</p>
+<p>Because the heat leakage rate to the vapor ¤𝑄𝑠𝑔 is larger and more time-varying than the vapor-to-interface heat rate
+¤𝑄𝑔𝑖 , (Figure 17), ¤𝑄𝑠𝑔 primarily governs change in the pressurization rate.
+</p>
+<p>H. Initial Condition Effect on Pressurization Rate
+Incongruent initial conditions were also suspected to cause the CFD prediction mismatch with 25% and 90% fill-level
+</p>
+<p>tests. Two temperature initializations are tested for investigation. Method 1 uses the temperature probe data from the
+tests to initialize fluid temperature, and the wall temperature is set equal to the adjacent fluid. Uniform stationary
+velocity field was initialized.
+</p>
+<p>After identifying the importance of heat leak distribution, Method 2 was tested: starting with Method 1 initialization,
+boiloff is simulated until the ullage temperatures attain a steady state. In Method 2, solid temperatures differ from the
+adjacent fluid. Velocity field is initialized from the end of the boiloff simulation. Method 2 improves initial pressure
+prediction but does not affect the long term pressurization rate. (Figure 21)
+</p>
+<p>Fig. 21 Initial condition effect on pressurization (90% fill level, 54.1 W heat leak rate)
+</p>
+<p>However, increasing heat absorption rate from the wall to the vapor phase ¤𝑄𝑠𝑔 predicted both initial pressure
+transience and long term pressurization trends as well as temperature trends. (Figures 22a, 24a, and 26a) Therefore,
+localized heating from tank penetrations or radiation is suspected in the tests and warrants further investigation.
+</p>
+<p>18</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>I. 90% Fill Level, 54.1 W Heat Leak Test — Calibrated from Sensitivity Analysis of Spatial Heat Leak Distribution
+When 50% of the total heat leak is applied to the unwetted external tank walls, the CFD prediction of tank
+</p>
+<p>pressurization agrees well with the tests (Figure 22a). The temperature prediction also agrees well with the temperature
+rake measurements. The ullage probe temperature history (Figure 6b) is also satisfactorily predicted (Figure 22b).
+Relative errors and test summaries for all cases are listed in Table 5.
+</p>
+<p>(a) Pressure (b) Temperature probe
+</p>
+<p>Fig. 22 90% fill level, 54.1 W heat leakage - predictions compared to the test
+</p>
+<p>(a) Pressure (b) Temperature
+</p>
+<p>Fig. 23 90% fill level, 20.2 W heat leakage - prediction sensitivity to percentage of unwetted heat leakage
+</p>
+<p>19</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>J. 90% Fill Level, 20.2 W Heat Leak Test — Calibrated from Sensitivity Analysis of Spatial Heat Leak Distribution
+Sensitivity to the distribution of external tank wall heat leak between wetted and unwetted areas is shown in Figures
+</p>
+<p>23a and 23b. For 75% of the total heat leak is applied to the unwetted external tank walls, the CFD prediction of
+tank pressurization agrees well with the tests (Figure 24a). The ullage probe temperature history (Figure 6b) is also
+satisfactorily predicted (Figure 24b). Relative errors and test summaries for all cases are listed in Table 5.
+</p>
+<p>(a) Pressure (b) Temperature probes
+</p>
+<p>Fig. 24 90% fill level, 20.2 W heat leakage - predictions compared to the test
+</p>
+<p>K. 25% Fill Level, 18.8 W Heat Leak Test — Calibrated from Sensitivity Analysis of Spatial Heat Leak
+Distribution
+Sensitivity to the distribution of external tank wall heat leak between wetted and unwetted areas is shown in Figures
+</p>
+<p>25a and 25b. For 25% of the total heat leak is applied to the unwetted external tank walls, the CFD prediction of tank
+pressurization agrees well with the tests (Figure 26a). The ullage probe temperatures (Figure 6b) are also satisfactorily
+predicted near the interface; however, away from the interface the deviations from test data increase (Figure 26b). See
+Section V.A.2 for the causes. Relative errors and test summaries for all cases are listed in Table 5.
+</p>
+<p>Table 5 MHTB tank self-pressurization prediction summary (* = calibrated cases)
+</p>
+<p>Fill
+Level
+(%)
+</p>
+<p>Total heat
+leak [W]
+</p>
+<p>Unwetted external
+tank wall heat
+</p>
+<p>leak [%]
+</p>
+<p>Vapor heat leak at
+steady state ( ¤𝑄𝑠𝑔)
+</p>
+<p>[W]
+</p>
+<p>% Vapor heat leak
+at steady state (
+</p>
+<p>¤𝑄𝑠𝑔
+</p>
+<p>¤𝑄𝑠
+)
+</p>
+<p>[%]
+</p>
+<p>Prediction error [%]
+(Equation 14)
+</p>
+<p>90* 54.1 50 2.7 4.9 2.6
+90* 20.2 75 1.4 6.9 13.1
+50 51.0 50 3.1 6.1 -2.2
+25* 18.8 25 2.0 3.1 -5.9
+</p>
+<p>20</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>(a) Pressure (b) Temperature
+</p>
+<p>Fig. 25 25% fill level, 18.8 W heat leakage - prediction sensitivity to percentage of unwetted heat leakage
+</p>
+<p>(a) Pressure (b) Temperature probes
+</p>
+<p>Fig. 26 25% fill level, 18.8 W heat leakage - predictions compared to the test
+</p>
+<p>21</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>VI. Conclusion
+A two-phase frozen gas-liquid interface CFD methodology — previously applied to successfully validate multiple
+</p>
+<p>CFM tests for the CFM Modeling Portfolio — is applied to four MHTB self-pressurization tests. With application of
+asymmetric interface turbulence transport, SST, IDDES, and WALE turbulence closure models are found to be similarly
+effective at predicting time-accurate pressures and temperatures.
+</p>
+<p>The 50% fill-level test is validated with high accuracy for the CFM Modeling Portfolio: the relative average
+pressurization rate prediction error is −2.2% and temperature predictions are satisfactory. Deviation in temperature
+prediction near the top and bottom regions on the tank is attributed to simplified model that does not include detailed
+tank structures and localized penetration heat leaks. Predictions are independent of the spatial and temporal resolution
+and insensitive to the phase change accommodation factor in the HKS equation.
+</p>
+<p>A first-cell height of 0.1 mm at the gas-liquid interface accurately resolves the turbulent characteristics and,
+consequently, thermal gradients and phase change. The same resolution is also found to be necessary to ensure 𝑦+ ≤ 1
+at the tank walls for accurate thermal transport in the tank boundary layer.
+</p>
+<p>The 25% and 90% fill-level tests were not well predicted, which prompted a detailed investigation, including
+a sensitivity study of spatial distribution of heat leak. To the author’s knowledge, this is the first application of a
+previously validated CFD methodology to perform such sensitivity analysis; historically, these distributions were
+obtained from thermal/multi-nodal models. The CFD sensitivity analysis provides detailed insights into the mechanisms
+of self-pressurization process.
+</p>
+<p>The analyses revealed that, owing to the thermal properties of the fluids and the tank wall, most of the heat leak
+from the tank wall is distributed to the liquid. However, tank pressurization rate is primarily governed by the rate of heat
+leak to the gas phase. The vapor heat leak sources — insulation/wall leak, penetration leaks, and radiation leaks —
+should be measured with high accuracy in tests designed for developing and validating analytical models.
+</p>
+<p>For minimizing self-pressurization during future spaceflight missions, the study indicates that the primary focus
+should be on reducing heat leakage to the vapor phase.
+</p>
+<p>The sensitivity analyses also produced calibrated spatial distributions of heat leak that accurately predict tank
+pressure and temperature. However, further investigation of the identified spatial heat leak distributions is warranted.
+A 3-D CFD model with more detailed tank structure and penetrations could also be used for exploratory sensitivity
+analyses.
+</p>
+<p>The study highlights the need for conducting high-fidelity sensitivity analyses when predicting self-pressurization
+for flight vehicles in operating conditions that have not been well-characterized. Such analyses could help: (1) increase
+conservatism/margins where previous analyses may underpredict pressurization rates, and (2) permit narrower design
+margins where higher-fidelity CFD analyses results reduce uncertainties of lower-fidelity predictions. This study serves
+as an important step toward improved understanding and modeling of self-pressurization for supporting long-term deep
+space exploration missions.
+</p>
+<p>Acknowledgments
+The NASA High-End Computing (HEC) Program, through the NASA Advanced Supercomputing (NAS) Division
+</p>
+<p>at Ames Research Center provided the computational resources for these simulations. I am thankful to Jacob Brodnick
+(NASA MSFC) and H. Q. Yang (CFDRC / NASA MSFC) for support through questions and discussions. Robin
+Flachbart (Amentum/NASA MSFC) and Ali Hedayat (NASA MSFC, retired) provided access to the MHTB test data. I
+am also thankful to Robin Flachbart for discussing the test and sharing previous thermal analysis report. Alok Majumdar
+(NASA MSFC) and Andre LeClair (NASA MSFC) helped identify the missing tank thickness.
+</p>
+<p>References
+[1] Barsi, S., and Kassemi, M., “Investigation of tank pressurization and pressure control part ii: numerical modelling,” ASME J
+</p>
+<p>Therm Sci Eng Appl, Vol. 5, No. 2 [041006], 2013, pp. 1–9.
+</p>
+<p>[2] Barsi, S., and M., K., “Numerical and experimental comparisons of the self-pressurization behavior of an LH2 tank in normal
+gravity,” Cryogenics, Vol. 48, No. 3-4, 2008, pp. 122–129.
+</p>
+<p>[3] Grayson, G., Lopez, A., Chandler, F., Hastings, L., and Tucker, S., “Cryogenic tank modeling for the Saturn AS-203 experiment,”
+42nd AIAA/ASME/SAE/ASEE Joint Propulsion Conference and Exhibit, 2006.
+</p>
+<p>22</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>[4] Panzarella, C. H., and Kassemi, M., “On the validity of purely thermodynamic description of two-phase cryogenic storage tank,”
+J Fluid Mech, Vol. 484, 2003, pp. 136–48.
+</p>
+<p>[5] Kassemi, M., and Chato, D., “The zero boil-off tank experiment, Cold Facts,” Cryogenic Society of America, Vol. 33, 2017, p. 3.
+</p>
+<p>[6] Kartuzova, O., and Kassemi, M., “Modeling ullage dynamics of tank pressure control experiment during jet mixing in
+microgravity,” AIAA 52nd joint propulsion conference. Salt Lake City, UT, 2016.
+</p>
+<p>[7] Kassemi, M., and Olga, K., “Effect of interfacial turbulence and accommodation coefficient on CFD predictions of pressurization
+and pressure control in cryogenic storage tank,” J Cryogenics, Vol. 74, 2016, pp. 138–53.
+</p>
+<p>[8] Doherty, M., Gaby, J., Salerno, L., and Sutherlin, S., “Cryogenic Fluid Management Technology for Moon and Mars Missions,”
+AIAA 2009-6532, 2009.
+</p>
+<p>[9] Kassemi, M., Kartuzova, O., and Hylton, S., “Validation of two-phase CFD models for propellant tank self-pressurization:
+Crossing fluid types, scales, and gravity levels,” Cryogenics, Vol. 89, 2018, pp. 1–15. https://doi.org/https://doi.org/10.1016/j.
+cryogenics.2017.10.019, URL https://www.sciencedirect.com/science/article/pii/S0011227517302576.
+</p>
+<p>[10] Moran, M. E., “Cryogenic Fluid Storage Technology Development: Recent and Planned Efforts at NASA,” NASA TM
+2009-215514, 2009.
+</p>
+<p>[11] Ferrín, J. L., and Pérez-Pérez, L. J., “Numerical simulation of natural convection and boil-off in a small size pressurized LNG
+storage tank,” Comput. Chem. Res., Vol. 138, 2020, p. 10684.
+</p>
+<p>[12] Yang, H. Q., Patel, C. S., and Williams, B. R., “Validation of Cryogenic Propellant Tank Self-Pressurization,” AIAA SCITECH
+2023 Forum, 2023. https://doi.org/10.2514/6.2023-1411, URL https://arc.aiaa.org/doi/abs/10.2514/6.2023-1411.
+</p>
+<p>[13] Patel, C., Yang, H. Q., and Williams, B., “Validation of Gas-Liquid Sharp Interface Model in Loci-Stream for Propellant Tank
+Self-pressurization under Normal Gravity,” AIAA SCITECH 2024 Forum, 2024. https://doi.org/10.2514/6.2024-0543, URL
+https://arc.aiaa.org/doi/abs/10.2514/6.2024-0543.
+</p>
+<p>[14] Patel, C., “Validation of Two Phase Flow Modeling Techniques in Loci-Stream Using Axial Jet Pressure Control and
+Autogenous Pressurization Experiments,” AIAA SCITECH 2025 Forum, 2025. https://doi.org/10.2514/6.2025-1358, URL
+https://arc.aiaa.org/doi/abs/10.2514/6.2025-1358.
+</p>
+<p>[15] Patel, C., “Validation of Computational Fluid Dynamics Model of Pressure Control in a Flight-scale Liquid Hydrogen Tank
+using a Spray Bar,” AIAA SCITECH 2026 Forum, 2026.
+</p>
+<p>[16] Hastings, L. J., Flachbart, R. H., Martin, J. J., Hedayat, A., M., F., Lak, T., H., N., and W., B. J., “Spray Bar Zero-
+Gravity Vent System for On-Orbit Liquid Hydrogen Storage,” NTRS - NASA Technical Reports Server, 2003. URL
+https://ntrs.nasa.gov/citations/20040000092.
+</p>
+<p>[17] Thakur, S., Wright, J., and Shyy, J. W., “An Algorithm for Chemically Reacting Flows on Generalized Grids Using a Rule-Based
+Framework,” 43rd AIAA Conference, 2005, p. 0875.
+</p>
+<p>[18] Kamakoti, R., Thakur, S., Wright, J., and Shyy, W., “Validation of a new parallel all-speed CFD code in a rule-based framework
+for multidisciplinary applications,” 36th AIAA Fluid Dynamics Conference and Exhibit, AIAA 2006–3063, San Francisco, CA,
+2006.
+</p>
+<p>[19] LUKE, E. A., and GEORGE, T., “Loci: a rule-based framework for parallel multi-disciplinary simulation synthesis,” Journal of
+Functional Programming, Special Issue on Functional Approaches to High-Performance Parallel Programming, Vol. 15, No. 3,
+2005, p. 477–502. https://doi.org/10.1017/S0956796805005514, URL https://doi.org/10.1017/S0956796805005514.
+</p>
+<p>[20] Schrage, R. W., A Theoretical Study of Interphase Mass Transfer, Columbia University Press, 1953, p. 27.
+</p>
+<p>[21] Linstrom, P., and Mallard, W., “Editors,” NIST Chemistry WebBook, NIST Std. Ref. Database Number 69, NIST, 2005. URL
+http://webbook.nist.gov.
+</p>
+<p>[22] Menter, F., Kuntz, M., and Langtry, R., “Ten years of industrial experience with the SST turbulence model,” Heat and Mass
+Transfer, Vol. 4, 2003.
+</p>
+<p>[23] Gritskevich, M. S., Garbaruk, A. V., Schütze, J., and Menter, F. R., “Development of DDES and IDDES Formulations
+for the k-w Shear Stress Transport Model,” Flow, Turbulence and Combustion, Vol. 88, No. 3, 2012, pp. 431–449.
+https://doi.org/10.1007/s10494-011-9378-4, URL https://doi.org/10.1007/s10494-011-9378-4.
+</p>
+<p>23</p>
+<p></p>
+<div class="annotation"><a href="https://doi.org/https://doi.org/10.1016/j.cryogenics.2017.10.019">https://doi.org/https://doi.org/10.1016/j.cryogenics.2017.10.019</a></div>
+<div class="annotation"><a href="https://doi.org/https://doi.org/10.1016/j.cryogenics.2017.10.019">https://doi.org/https://doi.org/10.1016/j.cryogenics.2017.10.019</a></div>
+<div class="annotation"><a href="https://www.sciencedirect.com/science/article/pii/S0011227517302576">https://www.sciencedirect.com/science/article/pii/S0011227517302576</a></div>
+<div class="annotation"><a href="https://doi.org/10.2514/6.2023-1411">https://doi.org/10.2514/6.2023-1411</a></div>
+<div class="annotation"><a href="https://arc.aiaa.org/doi/abs/10.2514/6.2023-1411">https://arc.aiaa.org/doi/abs/10.2514/6.2023-1411</a></div>
+<div class="annotation"><a href="https://doi.org/10.2514/6.2024-0543">https://doi.org/10.2514/6.2024-0543</a></div>
+<div class="annotation"><a href="https://arc.aiaa.org/doi/abs/10.2514/6.2024-0543">https://arc.aiaa.org/doi/abs/10.2514/6.2024-0543</a></div>
+<div class="annotation"><a href="https://doi.org/10.2514/6.2025-1358">https://doi.org/10.2514/6.2025-1358</a></div>
+<div class="annotation"><a href="https://arc.aiaa.org/doi/abs/10.2514/6.2025-1358">https://arc.aiaa.org/doi/abs/10.2514/6.2025-1358</a></div>
+<div class="annotation"><a href="https://ntrs.nasa.gov/citations/20040000092">https://ntrs.nasa.gov/citations/20040000092</a></div>
+<div class="annotation"><a href="https://doi.org/10.1017/S0956796805005514">https://doi.org/10.1017/S0956796805005514</a></div>
+<div class="annotation"><a href="https://doi.org/10.1017/S0956796805005514">https://doi.org/10.1017/S0956796805005514</a></div>
+<div class="annotation"><a href="http://webbook.nist.gov">http://webbook.nist.gov</a></div>
+<div class="annotation"><a href="https://doi.org/10.1007/s10494-011-9378-4">https://doi.org/10.1007/s10494-011-9378-4</a></div>
+<div class="annotation"><a href="https://doi.org/10.1007/s10494-011-9378-4">https://doi.org/10.1007/s10494-011-9378-4</a></div>
+</div>
+<div class="page"><p></p>
+<p>[24] Nicoud, F., and Ducros, F., “Subgrid-scale stress modelling based on the square of the velocity gradient tensor,” Flow, Turbulence
+and Combustion, Vol. 62, No. 3, 1999, pp. 183–200. https://doi.org/10.1023/A:1009995426001, URL https://doi.org/10.1023/A:
+1009995426001.
+</p>
+<p>[25] Frederix, E., Mathur, A., Dovizio, D., Geurts, B., and Komen, E., “Reynolds-averaged modeling of turbulence damping near a
+large-scale interface in two-phase flow,” Nuclear Engineering and Design, Vol. 333, 2018, pp. 122–130. https://doi.org/https:
+//doi.org/10.1016/j.nucengdes.2018.04.010, URL https://www.sciencedirect.com/science/article/pii/S0029549318304266.
+</p>
+<p>[26] Fabre, J., Suzanne, C., and Masbernat, L., “EXPERIMENTAL DATA SET NO. 7: STRATIFIED FLOW, PART I: LOCAL
+STRUCTURE,” Multiphase Science and Technology, Vol. 3, No. 1-4, 1987, pp. 285–301.
+</p>
+<p>[27] Rashidi, M., and Banerjee, S., “The effect of boundary conditions and shear rate on streak formation and breakdown in turbulent
+channel flows,” Physics of Fluids A: Fluid Dynamics, Vol. 2, No. 10, 1990, pp. 1827–1838. https://doi.org/10.1063/1.857656,
+URL https://doi.org/10.1063/1.857656.
+</p>
+<p>[28] Lombardi, P., De Angelis, V., and Banerjee, S., “Direct numerical simulation of near-interface turbulence in coupled
+gas-liquid flow,” Physics of Fluids, Vol. 8, No. 6, 1996, pp. 1643–1665. https://doi.org/10.1063/1.868937, URL https:
+//doi.org/10.1063/1.868937.
+</p>
+<p>[29] Fulgosi, M., Lakehal, D., Banerjee, S., and Angelis, V. D., “Direct numerical simulation of turbulence in a sheared
+air–water flow with a deformable interface,” Journal of Fluid Mechanics, Vol. 482, 2003, pp. 319 – 345. URL https:
+//api.semanticscholar.org/CorpusID:120893786.
+</p>
+<p>[30] Jofre, L., Dodd, M. S., Grau, J., and Torres, R., “Near-interface flow modeling in large-eddy simulation of two-phase turbulence,”
+International Journal of Multiphase Flow, Vol. 132, 2020, p. 103406. https://doi.org/https://doi.org/10.1016/j.ijmultiphaseflow.
+2020.103406, URL https://www.sciencedirect.com/science/article/pii/S0301932220305152.
+</p>
+<p>[31] Egorov, Y., Boucker, M., Martin, A., Pigny, S., Scheuerer, M., and Willemsen, S., “Validation of CFD codes with PTS-relevant
+test cases,” 5th Euratom Framework Programme ECORA project, Vol. 2004, 2004, pp. 91–116.
+</p>
+<p>[32] Fan, W., and Anglart, H., “Progress in Phenomenological Modeling of Turbulence Damping around a Two-Phase Interface,”
+Fluids, Vol. 4, No. 3, 2019. https://doi.org/10.3390/fluids4030136, URL https://www.mdpi.com/2311-5521/4/3/136.
+</p>
+<p>[33] Patel, C., and Williams, B., “Validation of Loci-Stream for Autogenous Pressurization of Cryogenic Propellant Tank,” AIAA
+SCITECH 2024 Forum, 2024. https://doi.org/10.2514/6.2024-0544, URL https://arc.aiaa.org/doi/abs/10.2514/6.2024-0544.
+</p>
+<p>[34] Hastings, L. J., and Martin, J. J., “Experimental testing of a foam/multilayer insulation (FMLI) thermal control system
+(TCS) for use on a cryogenic upper stage,” AIP Conference Proceedings, Vol. 420, No. 1, 1998, pp. 331–341. https:
+//doi.org/10.1063/1.54927, URL https://doi.org/10.1063/1.54927.
+</p>
+<p>[35] Stewart, M., and Moder, J. P., “Self-Pressurization of a Flightweight, Liquid Hydrogen Tank: Simulation and Comparison
+with Experiments,” 52nd AIAA/SAE/ASEE Joint Propulsion Conference, ???? https://doi.org/10.2514/6.2016-4674, URL
+https://arc.aiaa.org/doi/abs/10.2514/6.2016-4674.
+</p>
+<p>[36] Stewart, M., “Pressurization of a Flightweight, Liquid Hydrogen Tank: Evaporation &amp; Condensation at the Liquid/Vapor
+Interface,” 53rd AIAA/SAE/ASEE Joint Propulsion Conference, 2017. https://doi.org/10.2514/6.2017-4916, URL https:
+//arc.aiaa.org/doi/abs/10.2514/6.2017-4916.
+</p>
+<p>24</p>
+<p></p>
+<div class="annotation"><a href="https://doi.org/10.1023/A:1009995426001">https://doi.org/10.1023/A:1009995426001</a></div>
+<div class="annotation"><a href="https://doi.org/10.1023/A:1009995426001">https://doi.org/10.1023/A:1009995426001</a></div>
+<div class="annotation"><a href="https://doi.org/10.1023/A:1009995426001">https://doi.org/10.1023/A:1009995426001</a></div>
+<div class="annotation"><a href="https://doi.org/https://doi.org/10.1016/j.nucengdes.2018.04.010">https://doi.org/https://doi.org/10.1016/j.nucengdes.2018.04.010</a></div>
+<div class="annotation"><a href="https://doi.org/https://doi.org/10.1016/j.nucengdes.2018.04.010">https://doi.org/https://doi.org/10.1016/j.nucengdes.2018.04.010</a></div>
+<div class="annotation"><a href="https://www.sciencedirect.com/science/article/pii/S0029549318304266">https://www.sciencedirect.com/science/article/pii/S0029549318304266</a></div>
+<div class="annotation"><a href="https://doi.org/10.1063/1.857656">https://doi.org/10.1063/1.857656</a></div>
+<div class="annotation"><a href="https://doi.org/10.1063/1.857656">https://doi.org/10.1063/1.857656</a></div>
+<div class="annotation"><a href="https://doi.org/10.1063/1.868937">https://doi.org/10.1063/1.868937</a></div>
+<div class="annotation"><a href="https://doi.org/10.1063/1.868937">https://doi.org/10.1063/1.868937</a></div>
+<div class="annotation"><a href="https://doi.org/10.1063/1.868937">https://doi.org/10.1063/1.868937</a></div>
+<div class="annotation"><a href="https://api.semanticscholar.org/CorpusID:120893786">https://api.semanticscholar.org/CorpusID:120893786</a></div>
+<div class="annotation"><a href="https://api.semanticscholar.org/CorpusID:120893786">https://api.semanticscholar.org/CorpusID:120893786</a></div>
+<div class="annotation"><a href="https://doi.org/https://doi.org/10.1016/j.ijmultiphaseflow.2020.103406">https://doi.org/https://doi.org/10.1016/j.ijmultiphaseflow.2020.103406</a></div>
+<div class="annotation"><a href="https://doi.org/https://doi.org/10.1016/j.ijmultiphaseflow.2020.103406">https://doi.org/https://doi.org/10.1016/j.ijmultiphaseflow.2020.103406</a></div>
+<div class="annotation"><a href="https://www.sciencedirect.com/science/article/pii/S0301932220305152">https://www.sciencedirect.com/science/article/pii/S0301932220305152</a></div>
+<div class="annotation"><a href="https://doi.org/10.3390/fluids4030136">https://doi.org/10.3390/fluids4030136</a></div>
+<div class="annotation"><a href="https://www.mdpi.com/2311-5521/4/3/136">https://www.mdpi.com/2311-5521/4/3/136</a></div>
+<div class="annotation"><a href="https://doi.org/10.2514/6.2024-0544">https://doi.org/10.2514/6.2024-0544</a></div>
+<div class="annotation"><a href="https://arc.aiaa.org/doi/abs/10.2514/6.2024-0544">https://arc.aiaa.org/doi/abs/10.2514/6.2024-0544</a></div>
+<div class="annotation"><a href="https://doi.org/10.1063/1.54927">https://doi.org/10.1063/1.54927</a></div>
+<div class="annotation"><a href="https://doi.org/10.1063/1.54927">https://doi.org/10.1063/1.54927</a></div>
+<div class="annotation"><a href="https://doi.org/10.1063/1.54927">https://doi.org/10.1063/1.54927</a></div>
+<div class="annotation"><a href="https://doi.org/10.2514/6.2016-4674">https://doi.org/10.2514/6.2016-4674</a></div>
+<div class="annotation"><a href="https://arc.aiaa.org/doi/abs/10.2514/6.2016-4674">https://arc.aiaa.org/doi/abs/10.2514/6.2016-4674</a></div>
+<div class="annotation"><a href="https://doi.org/10.2514/6.2017-4916">https://doi.org/10.2514/6.2017-4916</a></div>
+<div class="annotation"><a href="https://arc.aiaa.org/doi/abs/10.2514/6.2017-4916">https://arc.aiaa.org/doi/abs/10.2514/6.2017-4916</a></div>
+<div class="annotation"><a href="https://arc.aiaa.org/doi/abs/10.2514/6.2017-4916">https://arc.aiaa.org/doi/abs/10.2514/6.2017-4916</a></div>
+</div>
+<ul>	<li>Nomenclature</li>
+	<li>Introduction</li>
+	<li>Test Descriptions</li>
+<ul>	<li>Testing Facilities</li>
+	<li>Experimental Procedure</li>
+</ul>
+	<li>Computational Model</li>
+<ul>	<li>Governing Equations</li>
+<ul>	<li>Frozen Two-phase Interface Model</li>
+	<li>Phase Change Mass Transfer</li>
+	<li>Turbulence Modeling</li>
+	<li>Interface Turbulence Transport</li>
+</ul>
+	<li>Geometry</li>
+	<li>Mesh</li>
+	<li>Initial Conditions</li>
+	<li>Boundary Conditions</li>
+	<li>Fluid Properties</li>
+	<li>Discretization and Solver Set-up</li>
+</ul>
+	<li>Results</li>
+<ul>	<li>50% Fill Level, 51 W Heat Leak Test</li>
+<ul>	<li>Pressure Prediction</li>
+	<li>Temperature Prediction</li>
+	<li>Interface Mesh Resolution</li>
+	<li>Natural Convection Currents</li>
+</ul>
+	<li>Mesh Sensitivity</li>
+	<li>Timestep Sensitivity</li>
+	<li>Accommodation Factor Sensitivity</li>
+	<li>Turbulence Modeling Sensitivity</li>
+	<li>90% Fill Level, 54.1 W Heat Leak Test</li>
+	<li>Spatial Heat Leak Distribution Sensitivity Analysis and Mechanisms of Self-Pressurization</li>
+<ul>	<li>Phasic Heat Leak Absorption Rates</li>
+	<li>Vapor Heat Leak Absorption Rate sg and Pressurization Rates</li>
+	<li>Interfacial Thermal Transport</li>
+</ul>
+	<li>Initial Condition Effect on Pressurization Rate</li>
+	<li>90% Fill Level, 54.1 W Heat Leak Test — Calibrated from Sensitivity Analysis of Spatial Heat Leak Distribution</li>
+	<li>90% Fill Level, 20.2 W Heat Leak Test — Calibrated from Sensitivity Analysis of Spatial Heat Leak Distribution</li>
+	<li>25% Fill Level, 18.8 W Heat Leak Test — Calibrated from Sensitivity Analysis of Spatial Heat Leak Distribution</li>
+</ul>
+	<li>Conclusion</li>
+</ul>
+</body></html>

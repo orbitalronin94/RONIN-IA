@@ -1,0 +1,801 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+NASA White Paper - Terramechanics for LTV
+
+Modeling and Simulation
+
+Zu Qun Li and Lee K. Bingham
+
+Simulating the interaction between wheel and soil is critical to the overall
+rover dynamics. This paper presented simple models for wheel soil interaction
+including the rolling resistances on the wheel due to soil compression and bull-
+dozing and the maximum tractive force between wheel and soil. Summary of
+typical lunar soil properties were presented in this paper and the wheel resis-
+tance model implementation and integration were also discussed. Integrating
+the wheel resistance model with the rover simulation will improve its dynamics
+and wheel slip models and enable the capability simulate the situation where
+wheel got stuck in the soil.
+
+I. Lunar Regolith
+
+The thick fragmental and unconsolidated layer of debris that covers the lunar surface is
+referred to regolith. This regolith can range in size from small dust like particles to large
+boulders and is between five to fifteen meters thick. Understanding how it is created and its
+composition allows us to characterize its properties and its affects in the operation of a lunar
+rover.
+
+A. Major Constituents
+
+Lunar regolith consists primarily of larger pieces that have been broken down over time. These
+major constituents include rock fragments, mineral fragments, and glassy particles. The pri-
+mary elements that compose the lunar dust are oxygen, silicon, iron, calcium, aluminum, and
+magnesium in addition to various other trace compounds.
+
+B. Creation Process
+
+Due to the fact that the Moon lacks an atmosphere, the only ”weathering” phenomenon that
+exists is the exposure to the harsh space environment. This ”space weathering” involves mi-
+crometeorite bombardment, the irradiation of cosmic and solar rays, and solar wind. The impact
+of micrometeorites causes vaporization, melting, and the formation of agglutinates, which are
+mineral fragments that are fused together with glass. As the lunar soil matures over time it
+becomes finer grained with more agglutinates and the finer particles contain mostly iron-bearing
+glass.
+
+II. Soil Mechanics1
+
+When a rover wheel is in contact with the soil, there are two basic stress acting on the soil:
+
+Shear Stress: τ =
+T
+
+A
+(1)
+
+Normal Stress: σ =
+W
+
+A
+(2)
+
+1
+
+
+
+Where T is the shear force produce by the wheel propulsion motor, W is the weight of the
+vehicle on that wheel, and A is the contact surface between the wheel and soil.
+
+The maximum shear stress τ is linearly proportion to the normal stress apply on the soil as
+illustrated in Eq. (3) and Fig. 1. Where angle of internal friction, φ, and cohesion, c, are soil
+properties that define the resistance of the soil again shear stree.
+
+τ = c + σ tan φ (3)
+
+c = Cohesion
+
+ɸ = angle of internal friction
+
+Normal Stress σ
+
+Shear Stress 𝜏
+
+Figure 1: Relationship Between Shear Stress and Normal Stress
+
+Modeling the soil reaction as a nonlinear spring:
+
+P =
+W
+
+A
+= kzn (4)
+
+Where, k =
+kc
+b
+
++ kφ (5)
+
+Therefore: P =
+
+(
+kc
+b
+
++ kφ
+
+)
+zn (6)
+
+Where P is the applied pressure, z is the soil compression depth, kc is modulus of cohesion,
+kφ is modulus of friction, and n is the exponent of sinkage for the soil. These basic properties
+of the soil mechanics are important for understanding the wheel-soil interaction in the later
+sections.
+
+III. Wheel-Soil Interactions
+
+The total rolling resistance of a vehicle are sum of the following resistance:1
+
+• Compression Resistance, Rc, on all the wheels
+
+• Rolling Resistance, Rr, on the vehicle
+
+• Bulldozing Resistance, Rb, on the front wheels
+
+• Gravitational Resistance, Rg, on the vehicle
+
+2
+
+
+
+A. Compression Resistance1
+
+Akin derived the compression resistance of a wheel on soil based on the nonlinear spring soil
+model:
+
+Rc = (kc + kφb)
+zn+1
+
+n + 1
+(7)
+
+z =
+
+(
+3
+
+3 −n
+W
+
+(kc + bkφ)
+√
+D
+
+) 2
+2n+1
+
+(8)
+
+Rc =
+1
+
+n + 1
+
+(
+3
+
+3 −n
+W
+√
+D
+
+)2(n+1)
+2n+1
+
+(
+1
+
+kc + bkφ
+
+) 1
+2n+1
+
+(9)
+
+Where Rc is the compression resistance, D is the wheel diameter, b is the wheel width, and
+W is the weight of the vehicle on the wheel. For Lunar soil with n = 1.0, the equation become:
+
+Rc ≈0.85854
+(
+
+W4
+
+(kc + bkφ) D
+2
+
+)1
+3
+
+(10)
+
+The soil bearing capacity can be determine using the Terzaghi’s Theory. The safe wheel
+weight on the soil can be define as:
+
+Ws =A
+
+(
+cNc + γzNq +
+
+1
+
+2
+γbNγ
+
+)
+(11)
+
+Where c is the soil cohesion that has unit of N/m2 and γ is weight density of the soil that
+has unit of N/m3. Nc,Nq, and Nγ are the Terzaghi bearing capacity factors and they are define
+as:
+
+Nq =
+exp
+
+[(
+3π
+2
+−φ
+
+)
+tan φ
+
+]
+2 cos2
+
+(
+π
+4
+
++
+φ
+2
+
+) (12)
+Nc =
+
+Nq − 1
+tan φ
+
+(13)
+
+Nγ =
+2 (Nq + 1) tan φ
+
+1 + 0.4 sin (4φ)
+(14)
+
+1. Modeling Compression Resistance in Simulation
+
+Based on Equation (9) the following vehicle design parameter are needed, which will be define
+in the simulation configuration file:
+
+• D: vehicle wheel diameter
+
+• b: vehicle wheel width
+
+The following soil parameter are needed, which are define by the simulation user for the
+soil. In reality these parameters various from one location to another as the vehicle traverse
+through different terrains. These parameters will be variables in the sim so that we can drive
+these soil parameters with some soil data or model in the future. However, they are currently
+set as constant in the simulation configuration file.
+
+• n: exponent of sinkage of the soil (n = 1 for lunar soil)
+
+• kc: modulus of cohesion of soil (kc = 1400N/m2 for lunar soil)
+
+• kφ: modulus of friction of soil (kφ = 830000N/m3 for lunar soil)
+
+3
+
+
+
+The following dynamic variable is needed. This variable is changing during the simulation
+as vehicle traverser through the surface.
+
+• W : Weight of the vehicle on each wheel. (already calculating in the simulation)
+
+Equation (11) can be use to determine the safe wheel weight on the soil. This can be add
+to the simulation to provide an indication on wether the wheel weight excess this safe weight
+value although the consequence on the soil are not currently modeled in the simulation. The
+following vehicle design and performance parameters are needed and they are defined in the
+simulation configuration file:
+
+• A: wheel contact surface with the soil.
+
+• b: wheel width.
+
+• z: wheel sinkage depth.
+
+The following soil parameters are needed for Ws, which will be define in the simulation con-
+figuration file. Again, in reality these parameters various across the surface. These parameters
+will be variables in the sim so that they can be drive with soil data or model in the future, but
+for now they are set as constant.
+
+• c: soil cohesion (c = 170N/m2 for lunar soil)
+
+• γ: weight density of the soil (γ = 2470N/m3 for lunar soil)
+
+• Nc: Terzaghi’s bearing capacity cohesion factor (Nc = 48.09 for lunar soil)
+
+• Nq: Terzaghi’s bearing capacity friction factor (Nq = 32.23 for lunar soil)
+
+• Nγ: Terzaghi’s bearing capacity density factor (Nc = 33.27 for lunar soil)
+
+Nc,Nq,Nγ can also be calculate using the angle of inertial resistance of the soil, φ.
+
+B. Rolling Resistance1
+
+Akin defines rolling resistance due to other factors including tire compression, bearing friction,
+and motor friction using a simple linear function with coefficient of friction:
+
+Rr =Wvcf (15)
+
+Where Wv is weight of the vehicle on a level surface and cf is coefficient of friction.
+
+1. Modeling Rolling Resistance in Simulation
+
+The rolling resistance in Eq. (15) is currently modeled in the rover simulation. Both Wv and cf
+are defined in the simulation configuration file. There are two different values of cf currently
+used in the sim depending on whether or not the rover’s brakes are engaged.
+
+C. Gravitational Resistance1
+
+When vehicle is on an incline, the gravitational resistance can be model using the following
+equation:
+
+Rg =Wv sin θslope (16)
+
+Where θslope is the angle of the incline (positive for uphill and negative for downhill)
+
+4
+
+
+
+1. Modeling Gravitational Resistance in Simulation
+
+The gravitational resistance is currently modeled in the rover simulation as part of the rover
+dynamics. In rover simulation, the gravitational effect is classified as an external force from
+the environment instead of a resistance. Resistances are in the opposite direction of the motion
+and do not actually accelerate the vehicle when there is no motion, which is not the case for
+gravitational effect.
+
+D. Bulldozing Resistance1
+
+Akin derived the Bulldozing resistance of a wheel as it roll over a distance on a soil as:
+
+Rb =
+b sin (α + φ)
+
+2 sin α cos φ
+
+(
+2zcKc + γz
+
+2Kγ
+)
+
++
+l30γ
+
+3
+
+(π
+2
+−φ
+
+)
++ cl20
+
+[
+1 + tan
+
+(
+π
+
+4
++
+φ
+
+2
+
+)]
+(17)
+
+Where α is the angle of attack of the wheel on soil, l0 is the length of soil ruptured by
+compression, and Kc and Kγ are cohesive and density modulus of soil deformation. These
+parameters are defined as:
+
+α = cos−1
+(
+
+1 −
+2z
+
+D
+
+)
+(18)
+
+l0 =z tan
+2
+
+(
+π
+
+4
+−
+φ
+
+2
+
+)
+(19)
+
+Kc = (Nc − tan φ) cos2 φ (20)
+
+Kγ =
+
+(
+2Nγ
+tan φ
+
++ 1
+
+)
+cos2 φ (21)
+
+1. Modeling Bulldozing Resistance in Simulation
+
+Starting from the parameters for compression resistance calculation, the additional parameters
+needed to calculate the Bulldozing resistance are:
+
+• Kc: cohesive modulus of soil deformation (Kc = 33.37 for lunar soil)
+
+• Kγ: density modulus of soil deformation (Kγ = 72.77 for lunar soil)
+
+These parameters can also be calculate using the basic soil properties.
+
+E. Wheel Slip and Tractive Force of Wheel2
+
+Wheel slip occurs when wheel circumferential speed wr does not equal to the wheel translational
+speed Vw. wheel slip can be describe by slip factor:
+
+s =1 −
+Vw
+wr
+
+(22)
+
+Where Vw is the wheel translational speed, w is the wheel rotational rate, and r is wheel radius.
+Relationship between s,Vw, and wr are described below:
+
+• If wr = Vw then s = 0
+
+• if wr > Vw then 0 < s < 1
+
+• if wr � Vw (or V = 0) then s = 1
+
+• if wr < Vw (slipping while deceleration) then −1 < s < 0
+
+5
+
+
+
+When slip occurred (s 6= 0), tractive force for smooth wheel can be determine using following
+equation:
+
+Hsmooth = (Ac + W tan φ)
+
+[
+1 −
+
+K
+
+sl
+
+(
+1 −e
+
+−sl
+K
+
+)]
+(23)
+
+Where A is the area of contact (A ∼= bl), c is soil cohesion, φ is soil angle of internal friction, K
+is coefficient of soil slip, and l is the length of contact patch. Where l can be determine using
+equation below:
+
+l =
+D
+
+2
+cos−1
+
+(
+1 −
+
+2z
+
+D
+
+)
+(24)
+
+Note that when wheel is not rotating, Eq. (23) become ideal soil thrust:
+
+Hsmooth,ideal =Ac + W tan φ (25)
+
+Grouser on the wheel will provide additional traction. Akin derived the tractive force of
+grouser wheel as:
+
+Hgrouser =
+
+[
+Ac
+
+(
+1 +
+
+2hg
+b
+Ng
+
+)
++ W tan φ
+
+(
+1 + 0.64
+
+hg
+b
+
+tan−1
+b
+
+hg
+
+)][
+1 −
+
+K
+
+sl
+
+(
+1 −e−
+
+sl
+K
+
+)]
+(26)
+
+Where hg is the height of the grouser and Ng is the number of grouser in contact with the
+ground, which can be determine using following equation:
+
+Ng =
+Nl
+
+Dπ
+(27)
+
+Where N is the total number of grousers on the wheel.
+
+1. Modeling Tractive Force
+
+Starting from the parameters for compression and Bulldozing resistances, the additional pa-
+rameters needed to calculate the tractive force of a smooth wheel is, K, coefficient of soil slip.
+Typical value of K for lunar soil is about 1.78 cm.3
+
+Additional vehicle parameters needed to calculate tractive force of grouser wheel are:
+
+• hg grouser height of the wheel
+
+• N total number of the grousers of the wheel
+The maximum tractive force for the wheel can replace the current frictional resistance model in
+the contact dynamics to better simulate the wheel slip and potentially simulate situation where
+wheel got stuck in the soil.
+
+IV. Modeling the Soil Interaction in Simulation in General
+
+With wheel resistance torque, maximum traction torque, and motor torque, the following
+situation can be simulated in the rover simulation:
+
+• if Tmotor < Ttraction and Tnet > Tresistance, then the wheel will rotate without slipping and
+propel the vehicle forward
+
+• if Tmotor < Ttraction and Tnet < Tresistance, then the wheel will not propel the vehicle and
+vehicle will remains at rest
+
+• if Tmotor > Ttraction and Tnet > Tresistance, then the wheel will rotate (slip) and propel the
+vehicle forward
+
+• if Tmotor > Ttraction and Tnet < Tresistance, then the wheel will spin while V = 0 and the
+vehicle will remains at rest
+
+Where Tnet is the net torque from wheel motor and gravitational effect.
+
+6
+
+
+
+A. Parameters for wheel-soil resistance and tractive force
+
+The following tables summarize the soil parameters, wheel parameters, and simulation input
+for wheel-soil parameters and tractive force calculation along with typical lunar soil property
+values.
+
+Table 1: Soil Parameters
+
+Symbol Description Lunar Soil Value Used in
+
+n Exponent of sinkage 1.0 Everything
+
+kc Cohesive modulus 1400N/m
+2 Rc,Rb,H
+
+kφ Frictional modulus 820, 000N/m
+3 Rc,Rb,H
+
+φ Angle of inertial friction 30 − 40degree Nq,Nc,Nγ,Kc,Kγ,Rb,H
+c Cohesive strength of soil 170N/m2 Rb,Ws,H
+
+γ Soil weight density 2470N/m3 Rb,Ws,H
+
+K Coefficient of soil slip 0.018m H
+
+Nq Terzaghi’s bearing capacity factor 32.23 Ws
+
+Nc Cohesive bearing capacity factor 48.09 Ws,Kc
+
+Nγ Density bearing capacity factor 33.27 Ws,Kγ
+
+Kc Cohesive modulus of soil deformation 33.37 Rb
+
+Kγ Density modulus of soil deformation 72.77 Rb
+
+Table 2: Wheel Parameters
+
+Symbol Description Used in
+
+b Wheel width Rc,Rb,H
+
+D Wheel diameter Rc,Rb,H
+
+cf Coefficient of rolling friction Rr
+
+r Wheel radius s,H
+
+N Number of wheel grouser H
+
+hg Grouser height H
+
+Table 3: Simulation Inputs
+
+Symbol Description Availability Used in
+
+W Normal force on the wheel Contact and dynamics model Everything
+
+V Wheel velocity in rolling direction Dynamics model H
+
+w Wheel angular velocity Dynamics model H
+
+B. Wheel Resistance Model
+
+A wheel resistance model was implemented using the equations defined in this paper to calculate
+the basic parameters for wheel-soil contact, resistance due to wheel soil interaction, and max-
+imum tractive force. The model did not implement the gravitational resistance defined in the
+reference since it is classified differently in the rover simulation and is automatically simulated
+as part of the rover dynamics model. Fig. 2 provides an overview of the wheel-soil resistance
+model implemented for the rover simulation.
+
+7
+
+
+
+SoilParameter
+• Basic parameters
+
+• Constant in config file
+• Drive by external model
+
+• Derived parameters
+• Calculate derived parameters
+
+WheelParameter
+• Contains wheel parameter
+
+WheelSoilContact
+• soil_parameter
+• wheel_parameter
+• Calculate basic attributes for 
+
+wheel soil contact: 
+• Sinkage
+• Contact length
+• Contact surface
+• Rupture length
+• Angle of attach
+• Safe wheel weight
+
+WheelResistance
+• wheel_soil_contact
+• Simulation inputs (W, V, w)
+• Calculate desired resistance 
+
+for one wheel
+• Flag for each resistance
+• Compression
+• Bulldozing
+• Rolling 
+
+• Calculate tractive force on the 
+wheel
+
+Figure 2: Wheel-Soil Resistance Model Overview
+
+Where SoilParameter class defines basic soil properties and calculates the drived properties
+and WheelParameter class contains all the wheel parameters needed for the calculation. Wheel-
+SoilContact class contains instances of SoilParameter and WheelParameter, and it calculates
+basic parameter for wheel-soil interaction including sinkage, contact length, angle of attack, and
+safe wheel weight. The WheelResistance class contains an instance of WheelSoilContact, and it
+calculates compression, bulldozing, and rolling resistance as well as tractive force on the wheel.
+
+C. Simulation Integration
+
+To integrate the wheel resistance model with rover simulation, the simulation developer need to
+create WheelResistance instance for each rover wheel to model one contact point between the
+wheel and soil. Force on each wheel along with linear and angular wheel velocity are needed
+from the simulation. The output from the model are maximum resistant force and maximum
+tractive force, which can be use to simulate different situation including accelerating without
+slip, not accelerating due to insufficient drive torque, accelerating with slip, and slip but not
+accelerating (when wheel got stuck in the soil). The integration will require updates to the
+current rover controller class, torque collection for the rover dynamic model, and a new class
+that will handle the interactions between all the associated torques.
+
+References
+
+1 Akin, D., “Planetary Surface Robotics: Terramechanics 1,” https://spacecraft.
+ssl.umd.edu/academics/788XF20/788XF20L06.terramechanics1x.pdf, 2020, Accessed:
+10/05/2020.
+
+2 Akin, D., “Planetary Surface Robotics: Terramechanics 2,” https://spacecraft.
+ssl.umd.edu/academics/788XF20/788XF20L07.terramechanics2x.pdf, 2020, Accessed:
+10/05/2020.
+
+3 III, W. D. C., Olhoeft, G. R., and Mendell, W., Lunar Sourcebook, Cambridge University
+Press, 1991.
+
+8
+
+

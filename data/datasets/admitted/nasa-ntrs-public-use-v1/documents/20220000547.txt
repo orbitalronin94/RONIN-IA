@@ -1,0 +1,1323 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ams2022_wmc_amc_v8
+
+
+1
+
+RECENT DEVELOPMENTS ON AUTOMATION OF OVERSET 
+STRUCTURED MESH GENERATION
+
+Advanced Modeling & Simulation (AMS) Seminar Series
+NASA Ames Research Center, January 27, 2022 
+
+NASA Ames Research Center
+
+William M. Chan, Andrew M. Chuen, Shishir A. Pandya 
+
+Computational Aerosciences Branch
+
+
+
+2
+
+OUTLINE
+
+• Motivation, objectives, challenges
+
+• Automation procedure
+…
+
+• Software modules
+
+• Test cases
+
+• Concluding remarks
+
+Loosely-Coupled Boundary Conditions
+
+
+
+3
+
+MOTIVATION AND OBJECTIVES
+
+• Develop tools to reduce expertise and effort needed 
+for overset mesh generation
+
+• Goal: 100% automation
+
+• Significant time saving with 80 - 99% automation
+
+• Structured overset viscous flow solvers are 
+highly accurate and efficient compared to 
+other methods
+
+• High-fidelity overset mesh generation 
+requires significant user expertise and effort
+(weeks/months, surface grids ~80% time)
+
+
+
+4
+
+CHALLENGES (1, 2, 3)
+
+1. Surface domain decomposition *
+
+2. Grid point distribution *
+• Geometry
+• Flow solution
+• Controlled by global parameters
+
+(max grid spacing, max turning angle,
+max stretching ratio)
+
+3. Marching scheme *
+• Method selection (hyperbolic / algebraic)
+• Marching distance estimate
+
+* Addressed in current work and in following paper
+Chan, W. M., Pandya, S. A., Haimes, R., Automation of Overset Structured Surface Mesh Generation 
+on Complex Geometries, AIAA Paper 2019-3671, AIAA Aviation Forum, Dallas, Texas, June, 2019.
+
+
+
+5
+
+CHALLENGES (4, 5)
+
+5. Hyperbolic mesh with
+concave regions **
+
+• Negative cell areas (surface)
+• Negative Jacobians (volume)
+• Eliminate manual iterations 
+
+on smoothing parameters
+
+4. Mesh overlap * 
+• 2 x Nf cells 
+
+Nf = # fringe point layers
+• Adjacent mesh side boundaries
+• Outer boundaries
+• Hole boundaries
+
+Surface 
+mesh
+
+Volume 
+mesh
+
+Side boundaries
+
+Outer boundary
+
+** To be addressed in future work
+
+Hole 
+boundary
+
+
+
+6
+
+GEOMETRIC COMPONENTS SPECIFICATION
+Geometric Components Data File• Text file: component name + list of face numbers
+
+• Information usually not available from geometry file (STEP/IGES)
+• Manual construction with OVERGRID + Text Editor
+
+(< 10 minutes for example below)
+• Enables:
+
+- Local component characteristic length -> local max grid spacing
+- Auto construction of input file for component aero loads computation
+- Enables single component meshing option
+
+8 37
+
+2
+3 10
+
+11
+
+15
+16
+
+13
+14
+
+38
+34
+
+21
+2220
+
+18
+1719
+
+4 12
+
+Right_LandGear
+1,23:27
+
+Rotor_1_Cowling
+2:4
+
+Main_Fuselage
+5:6,8,37
+
+Fuselage_Fairing
+7,9
+
+Rotor_2_Cowling
+10:12
+
+Left_Wing
+13:14
+
+Right_Wing
+15:16
+
+Left_Tail
+17:19
+
+Right_Tail
+20:22
+
+Left_LandGear
+28:33
+
+Front_LandGear
+34:36,38:40
+
+
+
+7
+
+SURFACE DOMAIN DECOMPOSITION
+
+Input Geometry
+• Boundary Representation (BRep) solid
+• Basic entity types: Faces, Edges, and Nodes
+• Topological relationship between Faces, Edges, Nodes
+• Interface: Engineering Sketch Pad (ESP) from MIT
+
+Strategy
+• Construct meshes based on Faces, Edges and Nodes
+• Total number of meshes bounded by 
+
+( # Faces + # Edges + # Nodes )
+• Actual number is less from
+
+- Face mesh elimination if completely covered by
+Edge & Node meshes
+
+- Merging of thin Face meshes with neighboring meshes
+
+Edges
+
+Nodes
+
+Faces
+
+
+
+8
+
+AUTOMATION FLOW CHART
+
+Edges
+
+Nodes
+
+Faces
+
+BRep Geometry
+
+Determine grid spacing at Nodes
+
+Discretize Edges
+
+Construct Face meshes with iblanks
+
+Construct Node meshes
+
+Construct Edge meshes
+
+Retract Face mesh hole boundaries
+
+Surface meshes + 
+connectivity data
+
+Algebraic/hyperbolic methods
+Loosely-Coupled B.C.
+
+Surface mesh 
+generation
+
+Volume mesh 
+generation
+
+* Volume mesh 
+domain connectivity
+
+Volume meshes +
+connectivity data
+
+Flow solver + aero-loads 
+input generation
+
+Input files for flow solver +
+aero-loads computation
+
+Flow Solver * Work in progress
+
+
+
+9
+
+GRID POINT DISTRIBUTION
+
+• Determine appropriate grid spacing at Nodes based on geometric features
+• Discretize Edges - hyperbolic tangent stretching function
+
+End grid spacings = Node grid spacing
+Max grid spacing = Global param. scaled by local component characteristic length
+Max stretching ratio = Global param.
+
+Trailing Edge
+
+Leading Edge Convex 
+Edge
+
+Concave 
+Edge
+
+Flat
+
+Flat
+
+
+
+10
+
+• Nodes divide face into zones in J and K direction
+• Construct stretched grid in each zone based on
+
+- end spacings (Nodes)
+- max spacing (global param.)
+- max stretching ratio (global param.)
+
+FACE MESHES
+Grid point distribution on Face mesh
+
+Untrimmed Face
+Blanked vertices
+
+Trimmed 
+Face
+
+J
+
+K
+
+Nodes
+
+Iblank array
+• 1 = on geometry, 0 = outside geometry
+• Marks minimum hole cut on face meshes
+
+In/out test in discrete space
+• Directed Edge line segments
+• Cut Face mesh quadrilateral cells
+• Left side in, right side out
+• Paint to fill all Face mesh vertices
+
+In
+
+Out
+
+
+
+11
+
+EDGE MESHES
+
+• Retract discretized Edges from Nodes
+• Variable retraction to achieve (2 x Nf) cell overlap with 
+
+Node mesh at end points
+• Generate Edge meshes by hyperbolic/algebraic marching
+
+Outer boundary 
+fringe layers Retracted 
+
+edge
+
+Original 
+edge
+
+Node mesh
+
+Node mesh
+
+
+
+12
+
+NODE MESHES
+
+• Construct initial curve to straddle Node by 
+concatenating “best” two Edges meeting at Node
+
+• Two, three or four parts created by hyperbolic or 
+algebraic marching
+
+• Switch to TFI for algebraic meshes with non-
+aligned iso-parameter lines relative to sharp 
+dividing Edge at Node
+
+H
+
+H
+
+Node
+
+Misaligned iso-
+parameter lines
+
+Aligned iso-
+parameter lines
+
+Sharp Edge
+
+A A
+
+H
+
+H H
+
+A A
+
+H
+
+A A
+
+Without TFI Correction With TFI Correction
+
+AIAA 
+2019-3671
+
+
+
+13
+
+HYPERBOLIC MARCHING WITH SURFACE WALKING
+
+• Previous projection scheme can run into difficulty near sharp edges (e.g., 
+trailing edges)
+
+• Replace with walking scheme on triangulation
+• Take step from triangle interior, edge or vertex using step vector predicted 
+
+by hyperbolic marching equations
+
+
+
+14
+
+FACE MESH RETRACTION & REDUCTION
+
+• Expand minimum hole
+• Remove face meshes that are completely covered by Edge/Node meshes
+• Reduce dimensions on meshes with one or more layers of blanked points
+• Blanked vertices and donor stencils for fringe points identified =>
+
+surface domain connectivity completed
+
+Face meshes with minimum hole Edge and Node meshes Retracted Face meshes with 
+expanded hole
+
+Side boundary 
+fringe points
+
+(LCBC)
+
+Outer boundary 
+fringe points
+
+Minimum hole 
+boundary
+
+Expanded hole 
+boundary
+
+
+
+15
+
+FACE MESH REFINEMENT
+(work in progress)Outer boundary
+
+Hole 
+boundary
+
+• Identify cells that contain Edge/Node mesh orphan points (black symbols)
+• Split into zones in J and K direction for local refinement
+
+Reduce grid 
+spacing
+
+Reduce grid 
+spacing
+
+Reduce grid 
+spacing
+
+
+
+16
+
+VOLUME MESH GENERATION
+
+• Hyperbolic meshes
+• All meshes use same wall 
+
+spacing, marching distance, 
+stretching ratio
+
+• Auto selection of smoothing 
+parameters and splay 
+boundary conditions based 
+on concave region detection
+
+Near-Body Curvilinear
+
+Off-Body Cartesian
+• Simple stretched Cartesian
+
+Concave region
+
+
+
+17
+
+Chuen, A. M., Chan, W. M., Overlap Preservation Using Loosely-Coupled Boundary Conditions for Body-Fitted 
+Structured Overset Grids, AIAA Paper 2022-0216, AIAA SciTech Forum, San Diego, CA, Jan., 2022.
+
+LOOSELY-COUPLED BOUNDARY CONDITIONS FOR 
+HYPERBOLIC MESHES
+
+• Overview of Loosely Coupled Boundary Conditions (LCBC)
+• Motivation
+• Loose-coupling algorithm
+• Implementation in surface and volume meshing
+
+• Examples
+• 6-Pax Quadrotor
+• NASA Juncture Flow Experiment Model 0015
+
+• Conclusions
+
+
+
+18
+
+OVERLAP ISSUES IN HYPERBOLIC SURFACE AND 
+VOLUME MESHES
+
+Gaps between adjacent 
+hyperbolic volume meshes
+
+Gaps produced in 
+trailing edge wake
+
+Gaps between adjacent (edge/node) hyperbolic 
+meshes with overlapping initial curves
+
+Face mesh (orange) 
+filling in gaps between 
+adjacent meshes
+
+
+
+19
+
+LOOSELY COUPLED BOUNDARY CONDITIONS (1)
+
+• Need to enforce different boundary 
+conditions for hyperbolic meshes
+
+• Overlapping grid points must exhibit 
+similar trajectories to maintain overlap
+
+• Enforced via float-along boundaries
+• Convergence: displacement of boundary 
+
+between iterations falls below specified 
+tolerance
+
+New boundary curve (magenta) 
+extracted for blue mesh
+
+New boundary curve (green) 
+extracted for orange mesh
+
+Overlapping initial curves 
+(distance exaggerated)
+
+
+
+20
+
+LOOSELY COUPLED BOUNDARY CONDITIONS (2)
+
+Overlapping initial curves 
+(distance exaggerated)
+
+Overlap consistently 
+maintained across 
+marching direction
+
+
+
+21
+
+LCBC FOR SURFACE MESH GENERATION
+
+Transition to splay for coupled 
+hyperbolic and algebraic grids
+
+Surface meshes generated 
+from overlapping set of 
+node & edge curves
+
+• Setup connectivity between node and 
+edge meshes 
+
+• Coupling can occur between hyperbolic 
+and algebraic edge meshes
+
+• Boundary enforcement similar to field 
+meshes
+
+• Revert to splay for potential difficult 
+boundaries from algebraic grids
+
+
+
+22
+
+LCBC FOR VOLUME MESH GENERATION
+
+• Surface domain connectivity: 
+• Face mesh retraction
+• Fringe point donor stencil search
+
+• Collar meshes are excluded from LCBC
+
+Chan, W. M., Pandya, S. A., and Haimes, R., “Automation of Overset Structured Surface Mesh Generation on 
+Complex Geometries,” AIAA Paper 2019-3671, June 2019. https://doi.org/10.2514/6.2019-3671.
+
+Coupling of initial surface 
+meshes through surface 
+domain connectivity
+
+
+
+23
+
+LCBC ENFORCEMENT FOR FACE (VOLUME) MESHES
+(work in progress)
+
+LCBC enforced 
+here
+
+LCBC enforced 
+here
+
+LCBC enforcement at 
+outer boundaries
+
+LCBC enforced 
+here
+
+Surface mesh
+
+Volume mesh 
+slice
+
+LCBC enforcement at 
+retracted (hole) boundaries
+
+Volume cut
+Volume cut
+
+
+
+24
+
+BOUNDARY ENFORCEMENT FOR VOLUME MESHES
+
+• Coupling is done by floating-curve enforcement for each fringe point
+• Boundaries at J=1,J=JMAX,K=1,K=KMAX indices left as splay if not 
+
+fringe point
+
+Fringe point
+
+Boundary curve from 
+orange mesh applied 
+to blue mesh fringe 
+point boundary
+
+
+
+25
+
+6-PAX QUADROTOR
+
+• 56 Face Meshes, 168 Edge and Node Meshes 
+(224 meshes total)
+
+• Surface Mesh with LCBC
+• Applied to all node and edge meshes
+• 17 iterations
+• Total wall time: 61 seconds (4 second increase 
+
+from without LCBC)
+
+• Volume Mesh with LCBC
+• Applied to skid meshes (19 meshes, 1.3M pts)
+• 60 iterations
+• Total wall time: 4.5 minutes
+
+Silva, C., Johnson, W. R., Solis, E., Patterson, M. D., and Antcliff, K. R., “VTOL Urban Air Mobility Concept Vehicles for 
+Technology Development,” AIAA Paper 2018-3847, June 2018. https://doi.org/10.2514/6.2018-3847.
+
+Quadrotor Geometry
+
+
+
+26
+
+6-PAX QUAD SURFACE MESH – WITHOUT LCBC
+
+Face meshes forced into gap 
+between hyperbolic meshes
+
+Hyperbolic meshes generated 
+around strut-body junction
+
+
+
+27
+
+6-PAX QUAD SURFACE MESH – WITH LCBC
+
+Face meshes removed from 
+overlap between meshes
+
+Hyperbolic meshes generated 
+around strut-body junction
+
+
+
+28
+
+6-PAX QUAD VOLUME MESH – WITHOUT LCBC
+
+Applied to Skid meshes
+
+Cross-sec cut of volume meshes at X=0 Center Z-plane cut of front (top) and rear 
+(bottom) skid tips
+
+
+
+29
+
+6-PAX QUAD VOLUME MESH – WITH LCBC
+
+Center Z-plane cut of front (top) and rear 
+(bottom) skid tips
+
+• Volume mesh boundaries retain consistent 
+overlap – gaps in overlapping regions removed
+
+X=0 plane cut of skid volume meshes
+
+
+
+30
+
+JUNCTURE FLOW EXPERIMENTAL MODEL 0015 WING
+
+• 37 Face meshes, 109 Edge and Node meshes 
+(146 meshes total)
+
+• Surface mesh with LCBC
+• Near-body volume mesh with LCBC
+
+• Applied to full geometry (13.3M pts)
+• 100 iterations, total wall time: 56 min.
+• Fringe-pt. count with donor stencil quality ≥0.9 
+
+• Without LCBC: 96.6%
+• With LCBC: 99.3%
+
+Kegerise, M. A., and Neuhart, D. H., “Wind Tunnel Test of a Risk-Reduction Wing/Fuselage Model to Examine Juncture-Flow 
+Phenomena,” Tech. Rep. NASA/TM-2016-219348, NASA Langley, November 2016.
+
+JFM Geometry
+
+Convergence of max boundary displacement
+
+
+
+31
+
+JUNCTURE FLOW MODEL – WITHOUT LCBC
+
+Large gaps develop in 
+trailing edge wake
+
+Y = 550 Y = 1150
+
+Mesh divergence occurs 
+near-wall in wake
+
+
+
+32
+
+JUNCTURE FLOW MODEL – WITH LCBC
+
+Trailing edge gaps are 
+closed
+
+Y = 550 Y = 1150
+
+Overlap consistent with 
+initial surface maintained 
+across marching direction
+
+
+
+33
+
+WINGTIP TRAILING EDGE (𝐙 = 𝟎)
+
+Without LCBC With LCBC
+
+Meshes bend away from 
+trailing edge due to splay 
+boundary
+
+
+
+34
+
+VOLUME MESH STENCIL QUALITY
+
+Initial Final
+Quality Count % Total Count % Total
+
+𝑄 = 0.0 18212 8.73 0 0.00
+0.1 ≤ 𝑄 < 0.2 1183 0.567 0 0.00
+0.2 ≤ 𝑄 < 0.3 1061 0.509 0 0.00
+0.3 ≤ 𝑄 < 0.4 1192 0.571 0 0.00
+0.4 ≤ 𝑄 < 0.5 919 0.441 0 0.00
+0.5 ≤ 𝑄 < 0.6 1367 0.655 0 0.00
+0.6 ≤ 𝑄 < 0.7 1581 0.758 0 0.00
+0.7 ≤ 𝑄 < 0.8 1514 0.726 0 0.00
+0.8 ≤ 𝑄 < 0.9 2602 1.25 861 0.413
+0.9 ≤ 𝑄 < 1.0 3787 1.82 2406 1.15
+𝑄 = 1.0 175141 84.0 205326 98.4
+
+Initial Final
+Quality Count % Total Count % Total
+
+𝑄 = 0.0 58377 2.63 3547 0.16
+0.1 ≤ 𝑄 < 0.2 801 0.362E-1 0 0.00
+0.2 ≤ 𝑄 < 0.3 790 0.357E-1 0 0.00
+0.3 ≤ 𝑄 < 0.4 801 0.362E-1 2 0.903E-4
+0.4 ≤ 𝑄 < 0.5 758 0.342E-1 8 0.361E-3
+0.5 ≤ 𝑄 < 0.6 926 0.418E-1 28 0.126E-2
+0.6 ≤ 𝑄 < 0.7 1050 0.474E-1 329 0.149E-1
+0.7 ≤ 𝑄 < 0.8 1166 0.526E-1 226 0.102E-1
+0.8 ≤ 𝑄 < 0.9 10948 0.494 10550 0.476
+0.9 ≤ 𝑄 < 1.0 29521 1.33 29749 1.34
+𝑄 = 1.0 2110521 95.3 2171220 98.0
+
+6-Pax Quadrotor (Skid) Juncture Flow Model
+
+
+
+35
+
+LCBC RECAP
+
+• Presented an automatic approach to maintain sufficient overlap between 
+hyperbolic meshes in auto-generated surface and volume grid systems
+
+• Prevented face/off-body meshes from filling in gaps in overlap region 
+(avoids mismatch in grid spacing)
+
+• Reduced manual effort needed to maintain overlap (hours to minutes)
+• Demonstrated applications of LCBC in both surface and volume meshing 
+
+on two aeronautical vehicles
+
+
+
+36
+
+SOFTWARE MODULES (1)
+EGADS2SRF
+
+• Interface to geometry file using Engineering Sketch Pad (ESP) from MIT
+
+• Input
+• Boundary Representation (BRep) solid in a STEP or IGES file
+• Global parameters: max grid spacing, max turning angle, max stretching 
+
+ratio, min number of points on an edge
+• Optional geometric components specification file
+• Options (face removal for open boundary cases, single component meshing)
+
+• Output
+• Surface triangulation (CART3D format)
+• Discretized Faces (PLOT3D surfaces)
+• Discretized Edges (PLOT3D curves)
+• Edge/face topological relationship (text)
+• Input parameters file for POGS (text)
+
+
+
+37
+
+SOFTWARE MODULES (2)
+POGS (Pre-processor for Overset Grid Simulations)
+
+• Generate edge and node surface meshes and compute surface connectivity
+• Generate near-body and off-body volume meshes
+• Perform volume mesh domain connectivity * Work in progress
+• Write input files for flow solvers and component aero-loads computation
+
+Input
+• Output files from EGADS2SRF (or files with equivalent data)
+• Optional geometric components specification file
+
+Output
+• Surface grids with iblanks (PLOT3D surface grids)
+• Surface grid donor stencils data file (SINTOUT)
+• Near-body + Cartesian off-body volume grids with iblanks (PLOT3D volume grids)
+• Volume grid donor stencils data file (INTOUT) * Work in progress
+• Input file for component aero-loads computation (FOMOCO)
+• Input file for flow solver (OVERFLOW & LAVA)
+
+
+
+38
+
+GEOMETRIES WITH OPEN BOUNDARIES
+
+Half-Body Truncated-Body Internal Flow with 
+Entrance and Exit
+
+• Option to specify list of BRep faces to be removed before meshing
+• Auto Edge/Face relationship update
+• Allow for open boundaries in Edge/Node mesh construction
+
+Removed 
+Face(s) Removed 
+
+Face(s)
+
+
+
+39
+
+SINGLE COMPONENT MESHING OPTION
+
+• Option to specify a subset of BRep Faces as the meshing domain via 
+geometric component specification
+
+• All neighboring Faces that touch component are also meshed
+(includes associated collar grids)
+
+30 Faces
+84 Edges
+
+414 Faces
+1108 Edges
+
+Component: 
+Inboard Slat 
+
+Brackets
+
+
+
+40
+
+TEST CASES
+
+• All cases ran on 2018 Mac laptop, 2.9 GHz Intel Core i9, 16GB memory
+• Surface meshes – mostly single processor
+• Volume meshes – OpenMP on 6 threads
+
+• Percent acceptable
+• Percent of surface meshes with no negative cell areas 
+• Percent of volume meshes with no negative Jacobians
+
+
+
+41
+
+JUNCTURE FLOW EXPERIMENT
+NACA 0015 WING-BODY
+
+Geometry: 41 Faces, 100 Edges, 51 Nodes
+Surface meshes:   # meshes = 146,      100% acceptable
+Volume meshes:   # points    = 13.4 M,   96% acceptable
+Wall clock time for surface + volume meshes = 57 sec.
+
+Manual meshing time ~ days
+
+
+
+42
+
+ROTOR HUB
+Geometry: 34 Faces, 79 Edges, 45 Nodes
+Surface meshes:   # meshes = 142,     99% acceptable
+Volume meshes:   # points    = 4.9 M,   99% acceptable
+Wall clock time for surface + volume meshes = 35 sec.
+
+Surface 
+Meshes
+
+Volume 
+Meshes
+
+
+
+43
+
+MULTI-ROTOR TEST BED
+Geometry: 65 Faces, 166 Edges, 110 Nodes
+Surface meshes:   # meshes = 258,    100% acceptable
+Volume meshes:   # points = 35.6 M,   100% acceptable
+Wall clock time for surface + volume meshes = 1 min. 35 sec.
+
+Surface Meshes
+
+Volume Meshes
+
+
+
+44
+
+ROTORCRAFT CONCEPT VEHICLES
+
+Tiltwing Cruise Mode
+
+Side-By-Side Hybrid
+
+Quiet Single Main Rotor
+
+Lift+Cruise6-Pax Quadrotor
+
+Concept Vehicle # 
+Meshes
+
+# Volume 
+mesh pts
+
+% Acceptable meshes
+Surface      Volume
+
+Wall clock time 
+surface+volume
+
+6-Pax Quadrotor 224 22.5 M 100% 79% 4 min 15 sec
+Lift+Cruise 351 23.4 M 97% 91% 4 min 32 sec
+
+Quiet Single 
+Main Rotor
+
+179 17.3 M 97% 84% 3 min 32 sec
+
+Side-By-Side 160 16.9 M 99% 86% 4 min 22 sec
+Tiltwing Cruise 287 52.1 M 95 % 87% 7 min 44 sec
+
+Manual meshing time ~ weeks per vehicle
+
+
+
+45
+
+HIGH-LIFT COMMON RESEARCH MODEL (HLCRM)
+High-Lift Prediction Workshop 4
+
+Half-body geometry: 414 Faces, 1108 Edges, 698 Nodes
+
+Fuselage
+
+Wing
+
+Inboard Slat
+
+Outboard Slat
+
+Outboard Flap
+
+Inboard Flap Gap
+
+NacellePylon
+
+FinInboard Flap
+
+Middle Flap Gap
+
+Flap Track Fairings (x3)
+
+Outboard Slat Brackets (x12)
+
+Inboard Slat Brackets (x3)
+
+
+
+46
+HLCRM AUTO SURFACE MESH STATISTICS
+
+Single Component Runs
+Component # 
+
+Meshes
+# Mesh pts 
+
+(x 10^6)
+% Acceptable 
+
+meshes
+Wall clock time
+
+Fuselage 123 0.63 99% 25 min 29 sec
+Inboard Slat 59 0.18 85% 10 min 13 sec
+
+Outboard Slat 147 0.91 87% 18 min 5 sec
+Flaps + gaps 99 0.30 75% 12 min 14 sec
+
+Pylon+Nacelle+Fin 74 0.61 89% 17 min 43 sec
+Inboard Slat Bracs (x3) 95 0.17 85% 10 min 49 sec
+
+Outboard Slat Bracs (x12) 426 0.51 84% 16 min 13 sec
+Inboard Flap Track Fair. 176 0.25 94% 12 min 35 sec
+Middle Flap Track Fair. 182 0.30 93% 12 min 44 sec
+
+Outboard Flap Track Fair. 183 0.33 92% 14 min 26 sec
+FTF Connectors (x3) 124 0.30 75% 10 min 6 sec
+
+Wing 451 1.70 85% 59 min 20 sec
+Complete HLCRM 413 (f) 2.70 (f) 100% (f) 44 min 16 sec (f)
+
+(f) Face meshes only. Edge + node meshes in progress Manual meshing time ~  1.5 – 4 months
+
+
+
+47
+
+HLCRM: FUSELAGE
+
+Wing-body junction near wing leading edge 
+showing blanked fuselage points
+
+
+
+48
+
+HLCRM: PYLON/NACELLE/FIN
+
+Pylon Fin
+
+Nacelle
+
+
+
+49
+
+HLCRM: OUTBOARD SLAT BRACKETS
+
+Auto mesh clustering 
+on slat mesh
+
+Auto surface hole cut 
+on slat mesh
+
+
+
+50
+
+HLCRM: FLAPS
+
+Bottom view
+
+Bottom view near 
+outboard tip
+
+Flap track fairing 
+intersection
+
+Auto mesh 
+clustering 
+
+Top view
+
+Inboard 
+flap gap
+
+
+
+51
+
+HLCRM: FLAP TRACK FAIRIINGS
+
+Middle Flap Track 
+Fairing
+
+Flap Track Fairing 
+Connectors to 
+
+Flaps
+
+
+
+52
+
+HLCRM: WING
+
+Wing lower 
+surface with collar 
+
+grids to various 
+components 
+
+Fuselage
+
+Wing root trailing 
+edge cove
+
+Wing 
+tip
+
+Slat cut-out
+
+
+
+53
+
+WORK IN PROGRESS AND CONCERNS
+
+Work in progress
+• About 95+% of unacceptable meshes - concave regions of hyperbolic meshes 
+
+(challenge #5)
+• Remaining unacceptable meshes - choice of Node mesh initial curve at saddle 
+
+points or marching scheme selection
+• Automatic surface mesh local refinement based on orphan point locations
+• Volume mesh domain connectivity automation
+
+Geometry Input Concerns
+• BRep solid geometry not always available
+• Poor choice of BRep topology from geometry construction 
+• Face parameter space not lined up with surface curvature 
+• Unnecessarily excessive number of Edges and Faces on smooth geometry
+
+
+
+54
+
+CONCLUDING REMARKS
+• Automation scheme 
+
+• Surface domain decomposition into face, edge, node meshes
+• Grid point distribution
+• Hyperbolic / algebraic meshes
+• Domain connectivity (surface and volume)
+• Flow solver and post-processing input file generation
+
+• Recent features: open boundary geometries, component specification
+
+• Two software modules: egads2srf, pogs (internal testing only)
+
+• Successful application to a variety of aeronautical vehicles
+
+• Percentage of acceptable auto-generated meshes (75% - 100%)
+
+• Significant reduction in manual effort and time: hybrid auto and 
+manual meshes (weeks/months -> days, days -> hours)
+
+
+
+55
+
+ACKNOWLEDGEMENTS
+
+Funding
+
+NASA Transformational Tools and Technologies (TTT) Project
+NASA Revolutionary Vertical Lift Technology (RVLT) Project
+
+Computational Resources
+
+NASA Advanced Supercomputing (NAS) facility
+
+

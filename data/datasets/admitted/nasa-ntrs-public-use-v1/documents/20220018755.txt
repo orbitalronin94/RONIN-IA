@@ -1,0 +1,425 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Slide 1
+
+Validation of Cryogenic Propellant Tank Self-Pressurization
+December 08, 2022
+
+C. S. Patel – JSEG, Fluid Dynamics Branch (NASA MSFC-ER42)
+H. Q. Yang – JSEG, Fluid Dynamics Branch (NASA MSFC-ER42)
+B. R. Williams – Fluid Dynamics Branch (NASA MSFC-ER42)
+
+
+
+
+This topic will be an overview of validation of propellant tank self-pressurization via CFD simulation and reduced order modeling.
+The work was performed by my colleague Dr. Yang on behalf of the Fluid Dynamics Branch at the NASA Marshall Space Flight Center.
+
+
+
+2
+Background
+NASA’s current and near-future missions and important of advancements in cryogenic fluid management (CFM), including safe and reliable long-term propellant storage
+NASA Space Technology Mission Directorate (STMD) has established CFM portfolio to improve CFM technologies for upcoming missions
+Fluid Dynamics Branch (ER42) within the Propulsion Systems Department at the Marshall Space Flight Center is tasked with testing and improving our computation tools for design and analysis of CFM systems
+ER42 supports multiple programs in need of in-space CFM analysis
+Space Launch System (SLS) upper stages
+Commercial Lunar Payload Services (CLPS)
+Human Landing System (HLS)
+Nuclear Thermal Propulsion (NTP) systems
+Self-pressurization of propellant tank over long time due to heat leakage in one of the challenging CFM problem
+
+
+
+
+
+
+
+3
+Problem and Solution
+Nodal tool find it extremely difficult to accurately model self-pressurization because they lack essential dynamics of the problem
+Necessary to employ 3-D Computational Fluid Dynamics (CFD)
+CFD tool requirements: efficient, computationally scalable, modular with ability to incorporate various physics models, and robust enough to not accumulate conservation errors over several hours of simulated time
+Loci-Stream CFD tool along with the VOF module is a great candidate
+Validate Loci-Stream for predicting self-pressurization of a flight scale propellant tank so it can serve as a reliable design and analysis tool for NASA’s CFM application needs
+Liquid hydrogen tank pressurization tests carried out at the K-site testing facility provides a reliable data-set for this purpose
+Demonstrate accurate predictive capabilities of Loci-Stream-VOF and lumped gas liquid CFD model
+
+
+
+Until recently, these long term (order of hours or days) CFD simulations have been too impractical to conduct due to prohibitive wall time and computational resource requirements.
+
+
+
+
+
+
+
+
+4
+Experimental Setup
+Multiple tank self-pressurization tests were performed at the NASA Glenn Research Center K-site facility
+An insulated ellipsoidal tank was filled with liquid hydrogen (LH2) and allowed to pressurize through controlled heating
+Liquid fill level and heat flux sensitivities were studied
+Ullage pressure and axially varying temperatures in both fluid phases were the primary metrics used to quantify the self-pressurization process
+
+Tank Configuration Schematic
+(Temperature Sensor Locations Shown)
+Reference:
+Hasan M, Lin C, Dresar NV. Self-pressurization of a flightweight liquid hydrogen storage tank subjected to low heat flux. NASA TM 103804; 1991.
+
+
+
+
+
+
+
+5
+Computational Model
+Loci-Stream
+Loci framework – flexible and scalable
+Pressure based solver for all speed flows for generalized meshes
+Laminar, RANS turbulence and DDES turbulence model equation options are available
+VOF Module
+Implements Volume of Fluid (VOF) method by solving additional VOF transport equation for two-phase flows
+Interface reconstruction to avoid smoothing of the sharp interface using PLIC (Piecewise Linear Interface Construction) method
+Loci-Stream-VOF
+Solves a single set of governing equations for two phases
+Boussinesq hypothesis for liquid
+Variable time step size is determined for each time step, by user defined maximum CFL condition
+Phase Change Mass Transfer Model
+Kinetic model by Hertz-Knudsen-Schrage (HKS)
+Antoine equation for saturation pressure
+Material Properties from NIST database
+
+
+
+
+
+VOF Transport Equation
+Conservation Equations
+
+HKS Model
+Antoine Equation
+Φ is Heat dissipation through shear stress
+
+
+
+The Loci system uses a rule-based approach to automatically assemble the numerical simulation components into a working solver. This technique enhances the flexibility of simulation tools, reducing the complexity of CFD software induced by various boundary conditions, complex geometries, and different physical models. Loci plays a central role in building flexible goal-adaptive algorithms that can quickly match numerical techniques with various physical modeling requirements.
+
+the geometrical reconstruction and backward projection of the VOF formulation are purely based on the assumption of conservation of liquid volume. In order to conserve total liquid mass, one must assume the liquid density to be constant. Thus, a physics-accurate internal energy formulation cannot be easily implemented alongside the VOF formulation. This problem is solved by representing the total energy conservation in a different thermodynamic state variable, enthalpy.
+
+Boussinesq hypothesis - liquid is incompressible except for the buoyancy term in the momentum equation where density is a linear function of temperature
+
+
+
+
+6
+Lumped Gas Liquid CFD Model
+Solve self-pressurization problem more efficiently by observing
+Ullage is always near equilibrium due to low heat fluxes, and closed system
+Gas-liquid interface is always quiescent
+Interfacial thermal stratification in liquid dominates the problem dynamics
+Advantages:
+Preclude any movement of the gas-liquid interface observed in the VOF method and alleviate restrictive time step requirements of VOF module
+Greater numerical stability at higher time-steps
+Increase spatial resolution with minimal impact to simulation wall time
+Implementation:
+CFD-ACE+ solver for proof of concept
+A more general sharp interface model is implemented and being tested in Loci-Stream
+Methodology
+Gas phase CFD is decoupled and simulated separately to obtain lumped gas reduced order model (ROM)
+Ullage dynamics are then coupled with time-accurate liquid CFD via gas-liquid interface boundary condition via the gas ROM
+Illustration of Lumped Gas Liquid CFD Model
+
+
+
+qin
+(from reduced order model)
+Liquid Phase
+
+
+
+(initial temperature from test measurements)
+Gas Phase
+
+
+
+
+
+This work was used to demonstrate the critical physics for tank self-pressurization and numerical methodologies that may be used to best resolve those physics.
+
+The findings informed development and operation of production level CFD tools used in the Fluid Dynamics Branch at NASA Marshall Space Flight Center.
+Development of a sharp interface model in the branch’s production level CFD tools where both fluid phases are distinctly and explicitly represented in CFD is underway.
+
+the robustness and speed of the approach can enable rapid assessment of inline production work.
+
+
+
+
+7
+Lumped Gas ROM – Methodology
+Derive boundary heat flux boundary condition for the liquid CFD
+
+
+
+
+
+
+Energy balance at the gas-liquid interface
+
+Gas phase internal energy conservation
+
+Obtain boundary condition for the heat flux into the liquid phase by combining the above equations
+
+
+
+
+
+
+
+Phase change mass transfer rate
+
+Invoke gas ROM assumptions
+Decompose gas temperature into sum of interface temperature and difference between interface and gas temperature. The latter, is then described as only a function of time and not ullage spatial coordinates
+
+
+
+
+
+
+
+
+
+
+
+8
+Results – Gas ROM CFD
+Temperature fields for the 49% fill level simulations are shown
+Formation of natural convection cells and thermal stratification on the liquid side of the gas-liquid interface are important dynamics of the problem
+A successful model must capture both accurately in order to predict pressurization
+
+
+
+
+Vapor Phase Analysis
+(Final State Shown)
+Liquid Phase Analysis
+(Transients Shown)
+Heat Flux : 3.5 W/m2
+Heat Flux: 2.0 W/m2
+
+
+
+9
+Results – Pressurization
+
+Four K-site LH2 self-pressurization experiments
+Simulated using both VOF and lumped gas ROM CFD
+Both VOF and gas ROM method capture pressurization well demonstrating successful validation 
+Initial transients were also captured well by both methods although there is a slight overshoot in VOF method due to small interfacial instabilities encountered in VOF method
+Lumped gas method decouples gas and liquid CFD and is therefore more robust and captures the initial transience better
+
+
+
+10
+Results – Temperature Probes
+
+
+Temperature trend and profile are shown for 49% fill case with 3.5 W/m2 heat load
+Again, both VOF and gas ROM method capture both temporal and spatial trends very well
+The agreement with experimental data for both VOF and lumped gas models emphasizes how well (i) the flow field is resolved, and (ii) energy conservation is maintained.
+Both must be simultaneously achieved for an accurate solution.
+The turbulent flow model fails at capturing the temperature trends in the ullage, which is discussed later.
+
+
+
+
+11
+Results – Sensitivity to Mesh Resolution
+
+Initial (coarse) mesh resolution: equivalent to 4 million cells for the full 3-D model, a typical size used for propellant slosh applications
+Mesh independence was ensured by simulating three mesh resolutions
+The coarsest mesh produces acceptable qualitative predictions, but the pressurization rate is under-predicted
+The baseline mesh improves the prediction by better capturing the thermal stratification in the liquid phase, which is one of the two most important dynamics of this problem
+The finest mesh produces the best match with the experiment by further improving the accuracy of the interfacial liquid thermal layer resolution
+Note, further refinement may marginally improve pressurization with VOF model but is prohibitively costly in terms of wall time requirements
+Refinement with the gas ROM model was possible due to stability at higher time steps and slightly improves the predction
+
+
+
+
+
+Coarse Mesh
+Baseline Mesh
+Refined Mesh
+
+
+
+the prohibitively high cost of such CFD simulations is not justified by small improvements in predictive capability.
+
+
+
+
+12
+Results – Effect of Flow Regime
+
+Laminar model performs well
+The 𝑘 − 𝜔 SST RANS model under-pressurizes
+Reason: high turbulent viscosity in the interfacial region
+The resulting high momentum and thermal diffusivity smears out the liquid side thermal stratification
+The liquid side interfacial temperatures plays a very important role in the dynamics of the problem
+Decides saturation pressure and the mass transfer rate in the phase change model  dictates the pressurization rate
+The root cause of the 𝑘 − 𝜔 SST model’s failure
+Developed for single phase applications
+Employing the same model simultaneously for liquid and gas phases with a continuous turbulent kinetic energy and turbulent dissipation field is not accurate description of the underlying physics encountered at a gas-liquid interface
+A more sophisticated RANS turbulence model is necessary for two phase VOF class of applications and is being investigated
+The 𝑘 − 𝜔 DDES (hybrid RANS-LES) model is less diffusive than the RANS model but still inferior to the laminar model in predictive capacity
+
+
+
+
+Models for both laminar and turbulent flow regimes were tested and compared
+The observation of high momentum and thermal diffusivity produced by the RANS model is further reinforce by examining the effect of mesh resolution on the turbulent flow simulations
+Coarse meshes are numerically diffusive and artificially increases the viscosity, but mesh refinement reduces this effect.
+No change in pressurization rate with the refined mesh - in contrast with the laminar flow regime behavior - demonstrating the high diffusivity generated by the turbulence model.
+
+The root cause of the 𝑘 − 𝜔 SST model’s failure to capture the thermal stratification in the gas-liquid interface region lie in the origin of the turbulence modeling
+
+
+
+
+
+13
+Results – Sensitivity to Accommodation Factor
+
+HKS model for phase change mass transfer has an accommodation factor (AF or Cm) that drives the evaporation/condensation rates
+But does not have an empirically-derived value
+In fact, did not find a definitive AF value for LH2 at the given operating condition
+Necessary to demonstrate the impact of AF on the validation
+HKS equation suggests that higher AF causes higher mass transfer rate, but it does not linearly impact the observed phase change rate in a closed system which is near equilibrium, because higher ullage mass increases the ullage pressure, which suppresses the mass transfer rate
+The pressurization rate is expected to be insensitive to AF in a reasonably large range and converge logarithmically as the value approaches unity
+From experience, AF = 1e-5 produced insufficient pressurization
+Assessed the model sensitivity in range [1e-4, 1e-2]
+Difficult to simulate1e-2 due to extremely low time-step required for numerical stability
+Found the difference between AF of 1e-3 and 1e-4 to be reasonably insignificant
+Conclusion: AF above a minimum threshold of 1e-4 does not yield any significant change in self-pressurization rates for a closed quiescent system
+Note that lumped gas ROM CFD does not require AF
+
+
+HKS Equation
+Antoine Equation
+
+
+
+14
+Contributions
+Quantification of self-pressurization of propellant tanks has direct application to long-term safe storage of cryogenic propellants, a need for many current and future programs
+Validated Loci-Stream-VOF and the lumped gas ROM CFD model against the K-site LH2 tank self-pressurization experiments
+Demonstrated that for all four K-site experiments, both methods have accurate predictive ability for ullage pressure and liquid as well as gas phase temperature probes.
+Showed that while both methods are accurate, lumped gas method has some advantages
+Precluding any movement of the gas-liquid interface alleviates small interface stabilities seen in VOF method
+Consequently, an order of magnitude (or more) speed up without degradation of the solution for an equivalent mesh, and simulations with more refined meshes are economical
+Developing a more general segregated gas/liquid domain approach to augment Loci-Stream-VOF capabilities
+In the current state, Loci-Stream with VOF module, and the lumped gas model are both well equipped to simulate fluid and thermal dynamics of cryogenic tank self-pressurization to support NASA’s future missions, and validation under in-space (microgravity) conditions is underway
+
+
+
+
+
+
+
+image2.png
+
+image3.png
+
+image1.jpg
+
+image4.png
+
+image5.png
+
+image6.png
+
+image7.png
+
+image8.png
+
+image9.png
+
+image10.png
+
+image11.png
+
+image12.png
+
+image13.png
+
+image14.png
+
+image15.png
+
+image110.png
+
+image120.png
+
+image130.png
+
+image16.png
+
+image17.png
+
+image18.png
+
+image19.png
+
+image20.png
+
+image21.png
+
+image22.png
+
+image23.gif
+
+image24.gif
+
+image25.png
+
+image26.png
+
+image27.png
+
+image28.png
+
+image29.png
+
+image30.png
+
+image31.png
+
+image32.png
+
+image33.png
+

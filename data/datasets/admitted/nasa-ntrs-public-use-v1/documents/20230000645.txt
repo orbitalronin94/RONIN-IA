@@ -1,0 +1,1199 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Wall_AAS_GR_Test_2022
+
+
+AAS 23-156
+
+DESIGN, INSTRUMENTATION, AND DATA ANALYSIS FOR THE
+SLS CORE STAGE GREEN RUN TEST SERIES
+
+John H. Wall*, Chris Russell†, Richard K. Moore‡, Jeb S. Orr§, Abran Alaniz¶,
+and Stephen G. Ryan||
+
+The Space Launch System (SLS) Core Stage (CS) Thrust Vector Control (TVC)
+system is comprised of eight mechanical feedback Shuttle heritage Type III TVC
+actuators and four RS-25 engines, each attached to a Shuttle heritage gimbal
+block/bearing. The actuators are powered by a Shuttle-derived hydraulic Core
+Auxiliary Power Unit (CAPU), and integrated with an all-new Core Stage thrust
+structure. The actuators are interfaced to the SLS Vehicle Management (VM) soft-
+ware via an all-new TVC Actuator Control (TAC) avionics subsystem. Despite the
+significant test and flight experience of the Shuttle hardware, the SLS Green Run
+ambient and hot fire test activities revealed a number of new findings associated
+with the dynamic response of the TVC integrated system. Test responses sug-
+gested that the TVC system did not meet its performance specifications and its
+step and frequency responses exhibited unexpected departures from prior lab tests
+and modeled behavior. This paper is the fifth installment in a seven-paper series
+surveying the design, engineering, test validation, and flight performance of the
+Core Stage Thrust Vector Control system. In this paper, the design of the TVC
+analyses conducted during the Core Stage Green Run test series are discussed in
+detail. Throughout the course of the test activities, the SLS flight control team
+worked diligently with the Core Stage contractor to revise test command profiles
+and ensure sufficient instrumentation was available to collect data. Post-test anal-
+ysis combined the Green Run modal, ambient, and hot fire test data, MSFC 2-
+axis Core Stage TVC Inertial Load Simulator (ILS) data, Hardware-In-the-Loop
+(HWIL) Systems Integration Lab (SIL) results, and actuator Acceptance Testing
+Procedure (ATP) responses. These data were used to characterize the response,
+validate critical math models of the TVC subsystem, and isolate the probable cause
+of the unexpected responses. Through comprehensive analysis of the available test
+data sources, the integrated team identified the dominant contributors to the ob-
+served response and developed test-correlated rationale for vehicle flight control
+system performance, ultimately leading to a confident posture for the Artemis I
+mission.
+
+1 INTRODUCTION
+
+The Space Launch System (SLS) launch vehicle flight control system commands eight core stage
+actuators to gimbal four RS-25 engines’ thrust from liftoff to the RS-25 main engine cutoff (MECO)
+event. Prior to booster separation, the core stage Thrust Vector Control (TVC) system shares control
+authority with booster TVC but is the sole means of achieving attitude control in exoatmospheric
+
+*SLS Flight Controls Lead, Mclaurin Aerospace (Jacobs ESSCA), Huntsville, AL
+†Core Stage TVC Engineer, The Boeing Company, Huntsville, AL
+‡Flight Systems Technical Staff, Mclaurin Aerospace (Jacobs ESSCA), Seattle, WA
+§SLS Flight Dynamics and Control Technical Specialist, Mclaurin Aerospace (Jacobs ESSCA), Knoxville, TN
+¶Flight Systems Principal Staff, Mclaurin Aerospace (Jacobs ESSCA), Houston, TX
+||SLS Chief Engineer’s Office (MTS CPSS), Huntsville, AL
+
+1
+
+
+
+flight after booster burnout. Leveraging the heritage Shuttle actuators but cognizant of the new
+application on an entirely new SLS thrust structure, the MSFC in-house flight control team levied
+a set of key TVC requirements imposed on the stage contractor to ensure robust and stable vehicle
+flight control throughout its ascent flight. The flight companion paper5 shows the frequency and
+transient response spec boundaries within which the the engine angular position must remain when
+commanded at small amplitudes.
+
+Another key verification criteria is the load resonance frequency, which ensures adequate perfor-
+mance and stability of the TVC position control loop. Given a known moment arm and inertia, the
+load resonance frequency is primarily driven by the effective structural stiffness as “seen” by the
+actuator, necessarily excluding any compliances inside the actuator loop, such as that resulting from
+the hydraulic oil or actuator compliance measured by the mechanical position feedback linkages.
+Equation (1) shows a suitable approximation for the undamped load resonance frequency as a func-
+tion of the engine inertia Jn, linear load stiffness KL, and moment arm R. The engine rotational
+stiffness Kn is included for completeness here but has generally been found to be negligible due to
+the small loads imposed by propellant feedlines and associated hardware.
+
+!L =
+
+s
+KLR
+
+2 +Kn
+
+Jn
+(1)
+
+This load stiffness (KL) is the combined result of the stuctural compliances in each actuator’s load
+path including the engine section support/thrust structure, the engines themselves, and the gimbal
+and actuator attach interfaces thereof. The load stiffness is a key quantity utilized in the TVC and
+flight control models for pre-flight stability and performance predictions, but determining its value
+from analysis often proves difficult, and few opportunities exist to accurately determine its value
+from testing.
+
+Figure 1 shows the minimum load resonance frequency requirement. Since the SLS core stage
+thrust structure was designed to interface requirements conistent with those used for the RS-25
+engine on the Space Shuttle Orbiter, the load resonance frequency was expected to fall above a
+minimum frequency value.
+
+While the frequency response, step response, and load resonance frequency requirements apply
+to the fully integrated flight system under hot fire thrusting conditions, the Green Run represented
+the only opportunity to verify the SLS core stage TVC system performance in flight-like boundary
+conditions. This is in contrast to the Shuttle Main Propulsion Test (MPT) program conducted with
+a Shuttle Main Propulsion Test Article (MPTA) built solely for a comprehensive ground testing
+campaign.1 Shuttle MPTA included an extensive series of ambient and hot firing tests with TVC
+commands spanning a range of amplitudes and waveforms.
+
+Throughout the course of the SLS program, the NASA flight control and TVC teams sought to
+ensure the necessary testing was conducted to demonstrate that the design was compliant with the
+requirements and the linear TVC models were accurate representations of the SLS actuation subsys-
+tem. Through persistent efforts early in the program, the NASA teams worked to baseline a set of
+frequency and step vectoring commands and string potentiometer (string pot) based nozzle position
+instrumentation as a critical part of the Green Run Hot Fire test campaign. Integrating components
+of the newly-designed core stage, engine section, and hydraulic power system, the overall TVC
+verification and validation approach and the Green Run test series was managed by the stage con-
+tractor. Up until several revealing findings during the Green Run campaign, the contractor’s official
+
+2
+
+
+
+Figure 1. Minimum Load Resonance Specification
+
+plan for closure of step, frequency, and load resonance requirements was solely via analysis. The
+analysis was largely based on traditional single-axis TVC models, with limited validation through
+laboratory testing. The NASA flight control and TVC engineers worked diligently over the course
+of the SLS program to maintain engagement with the contractor’s modeling, test, and analysis ac-
+tivities, ultimately leading up to Green Run hot fire. In the end, the engineering collaboration and
+active communication between NASA and the contractor teams proved to be essential in ensuring
+that test coverage was adequate and post-test analysis was successful.
+
+Prior to the Green Run test activity, and based on extensive NASA MSFC experience, the flight
+control and TVC teams relied primarily on a planar, linear, small-signal approximation of the TVC
+dynamics known as the Simplex model (A “Simpler” version derived from the multi-servo-channel
+“Complex” model). The Simplex model, represented equivalently in block diagram form, linear
+state space, and compiled language simulation environments, is largely based on first principles with
+some linear approximations. Since Shuttle flight data and Saturn experience did not suggest any
+significant friction-induced Limit Cycle Oscillations (LCOs), and the same Shuttle gimbal bearings
+and engine technologies were re-used on SLS, the MSFC flight controls community was confident
+through the design process that the in-flight vibration environment would render friction effects
+negligible. As such, friction effects were generally excluded from TVC and flight control analysis
+during the SLS program. Lacking flight-like thrust loading, laboratory testing with single-axis test
+stands and vendor acceptance test procedures (ATP) did not exhibit friction effects. The vendor
+and lab data routinely demonstrated excellent agreement with the linear simplex representations
+accross the range of frequencies relevant for flight control analysis, in part due to the precision
+engineering and design-for-linearity inherent in the Orbiter heritage actuator hardware (exclusive of
+gimbal bearing friction).
+
+3
+
+
+
+As will be discussed in the sections that follow, the extended testing accomplished by the MSFC
+2-axis inertial load simulator laboratory and the ambient and hot fire vectoring tests conducted at
+Green Run challenged the long-standing assumptions present in the Simplex model, particularly
+with respect to structural stiffness and gimbal bearing friction. The effects of gimbal friction were
+pronounced during hot fire. The load resonance frequency, while falling above the 6 Hz require-
+ment in all conditions tested, was significantly different in the thrusting and non-thrusting condi-
+tions. In addition to the unexpected results, data from both tests showed violations of the step
+and frequency response requirements. Following the test series, a comprehensive analysis revealed
+that several model refinements were required to represent the observed behaviors.3, 4 The team
+recommended acceptance of the requirement violations (specific to Artemis I) by showing that test-
+anchored bounding model predictions of a Limit Cycle Oscillation (LCO) would not present a risk
+flight. The pre-flight analysis and the results of the highly successful first flight of Artemis I are
+discussed further in a companion paper.5
+
+2 MSFC 2-AXIS INTERIAL LOAD SIMULATOR LABORATORY TESTING
+
+The stage contractor and the MSFC NASA TVC team shared the responsibility of contructing
+a test fixture to evaluate the integrated Core Stage TVC system, with as much flight hardware as
+practical, prior to Green Run testing. At the MSFC 4205 TVC test lab, the NASA engineering
+team built a fully functional 2-axis Inertial Load simulator (shown in Figure 2) whereby two RS-
+25 actuators gimbal a simulated engine about a flight-like Orbiter heritage gimbal bearing. The
+backup/thrust structure stiffness is simulated with a cantilevered plate to which the tailstock of the
+actuator is attached and torsional rods are installed between the test stand and the engine simulator
+to approximate the engine proplleant feedline loads. The flight-like or flight-equivalent hydraulic
+actuators were powered by either a facility hydaulic system or a flight hydrogen-driven Core Axil-
+liuary Power Unit (CAPU), the evaluation of which was a major subsystem qualification objective
+of the laboratory test campaign. Commands were sent to the actuators using either the Shuttle her-
+itage analog Portable Command Signal Controller (PCSC) or flight-like TVC Actuator Controllers
+(TACs). In the case of the TACs, a flight software emulator or the actual flight software running next
+door in the Systems Integration Lab, the SLS HWIL facility,6 issued pitch/yaw angle commands.
+Flight-like telemetry and lab-specific instrumentation data was collected in the lab environment,
+including linear encoder measurement of the actuator stroke, string pot-based inertial load posi-
+tion, tailstock-mounted load cells, as well as the available on-board piston position (actuator stroke)
+measurements, command currents, and angle commands to be used in Green Run and post-flight
+analysis. The lab instrumentation was collected at 1.0 kHz, time-synchronized to the flight-like
+telemetry at 50 Hz, and provided to the flight control team in a form ready for analysis.
+
+2.1 Early Development Testing
+
+The 4205 2-axis test stand provided the SLS engineering team high confidence in the efficacy of
+the Green Run test approach both in commands and instrumentation. Early testing enabled the en-
+gineering team to confirm the behavior and suitability of the modeled TVC system response in the
+relevant environment as well as demonstrate the process of uniquely identifying model parameters
+from test data. Figure 3 shows the frequency responses using the Green Run Hot Fire command
+sequence when the lab was configured in 2017 with Shuttle MPTA heritage Type III actuators. A
+sequence of sinusoidal and step commands identical to the planned Green Run vectoring profile,
+were sent using the analog PSCS controller. The linear encoder (actuator stroke), on-board piston
+
+4
+
+
+
+Figure 2. NASA MSFC 4205 2-Axis Inertial Load Simulator Test Stand
+
+Figure 3. 4205 Lab Early 2017 Frequency Response Using Green Run Style commands
+
+position (strain gauge based, telemetered), and nozzle results (string potetiometer derived) is shown.
+Using this test data and the linear model representations, the engineering team was able to deter-
+mine the load parameters from frequency response, adjust the linear model accordingly and achieve
+agreement between modeled and lab-measured response. Since the moment arm and load inertia
+are very accurately known, the load stiffness can be determined from the load resonance frequency
+using Equation (1).
+
+While the actual value of the load stiffness was found to be softer in the lab than calculated for
+the cantilevered beams prior to the build, the lab demonstrated the efficacy of the Green Run test
+approach to determine the critical system parameters, and confirmed the ability of the planar, linear
+TVC models to predict the system responses.
+
+Even though the linear models fit the frequency response extremely well, further testing with a
+series of triangle wave ramp testing and load cell-based analysis were conducted to identify possible
+sources of friction in the gimbal joint, and confirm negligible friction in the ambient (free-hanging)
+configuration. As expected, the data suggested that other small-amplitude phenomena (such as
+small-signal nonlinearities in the actuator and roll coupling with the inertial load simulator, whose
+roll inertia was significantly less than the flight nozzles) far exceeded any measurable effects of
+friction. Step testing was also conducted at a range of amplitudes including the ranges consid-
+ered for Green Run hot fire testing (0.6, 0.4 and 0.2 degrees), demonstrating a match with linear
+
+5
+
+
+
+models as shown in Figure 4. At higher amplitudes, the responses appeared to match better than
+the lower amplitudes. This was especially true for the nozzle position, which consistently showed
+increased overshoot compared to the model as well as some variable steady-state offset behavior.
+This amplitude-dependent effect, seen in the lab step responses, was later observed during ambient
+testing at Green Run and remains the subject of investigation. It is thought to be the result of gimbal
+bearing mechanical clearances and power spool overlap in the actuator.
+
+2.2 Subsystem Qualification Testing
+
+The core stage contractor’s use of the test lab was primarily for providing a suitable environment
+for integration testing of the hydrogen-driven CAPU, which provides hydraulic power to the actua-
+tors. This test, known as Subsystem Qualification Testing or Subsystem Test Article (SSTA) testing,
+was largely conducted prior to Green Run ambient testing, but the lab configuration remained until
+after Green Run for further testing based on its outcomes. The lab setup for SSTA utilized flight-
+like TACs which were commanded by a flight software emulator also used during assembly at the
+Michoud Assembly Facility (MAF). Apart from the command avionics update, the lab was largely
+unchanged from the 2017 testing with the exception that the actuators used where Shuttle surplus
+Type II actuators, which have different actuator feedback and command gain parameters than the
+Type IIIs previously tested (and installed on SLS). Due to multiple configuration changes and a
+transition in test management from NASA to the stage contractor, the first indications of a TAC
+electronics amplitude-dependent gain offset (nonlinear scale factor) went unnoticed until the first
+tests at Green Run. Figure 5 shows the linear encoder (actuator position) and string pot-based en-
+gine position response from the SSTA lab environment against the model with the Type II actuator
+parameters updated. While the piston notch frequency and peak response are consistent with prior
+lab responses as expected, both quantities show a noticeable reduction in gain, later found to be the
+result of a crossover distortion in the TAC’s analog servo amplifier.5
+
+3 GREEN RUN AMBIENT TESTING
+
+3.1 TC-5: Engine Modal Testing
+
+During the preparations to install the SLS Core Stage into the B-2 test stand, structural dynamics
+instrumentation was installed to facilitate modal testing with the empty core stage hanging from
+its handling interfaces, suspended on a support crane. During this test, the flight actuators were
+installed but inoperative, and “locked” using a Shuttle Orbiter heritage mid-stroke lock device, a
+steel collar that precludes motion of the rod with respect to the actuator body by coupling the
+rod to the body at the end of the hydraulic cylinder. Modal identification attempted to determine
+the locked pendulum modes, i.e., the load resonance of the uncommanded, empty engine with a
+“rigid” actuator in an effort to provide supporting evidence to verify the flight control load resonance
+frequency requirement. However, this test suggested that the engine pendulum modes were lower
+than expected.
+
+Due to inconclusive identification of the pendulum modes, an engine section modal test, con-
+ducted by NASA, was implemented along with additional MSFC instrumentation after the core
+stage was installed into the B-2 test stand (Figure 6). The resulting responses confirmed the lower
+than predicted first pendulum mode frequency observations during crane testing, although results
+were still inconclusive, because no analysis or testing had been performed to determine the compli-
+ance of the mid-stroke lock hardware. After the mid-stroke locks were removed, the accelerometers
+
+6
+
+
+
+Figure 4. MSFC 4205 2-axis ILS Test Lab, 2017 Step Responses
+
+7
+
+
+
+Figure 5. MSFC 4205 2-axis ILS Test Lab, 2020 SSTA Frequency Responses
+
+used for modal ID (including several on the engines) remained installed during the TC-5 initial
+vectoring test.
+
+The TC-5 vectoring test’s primary objective was verification of the the minimum load resonance
+requirement. However, this test approach was complicated by the fact that the active damping of
+the actuator makes the pendulum mode nearly unobservable, and that the pendulum mode (which
+depends on the total compliance) and the load resonance (which excludes the oil) are not at the same
+frequency. The NASA TVC team initially expected that the closed-loop position feedback would
+damp the pendulum mode, but the instrumentation and Operational Modal Asssesment (OMA)
+detected a clear pendulum mode just above the spec minimum load frequencyduring the 20 minute
+quiescent period prior to vectoring.7 After revisiting static loading data from the actuator vendor
+and determining that the piston displacements were below the telemetry quantization thresholds
+during this 20 minute period, the NASA TVC team concluded that the subject modes were due to
+engine motion within the actuator’s servo or power spool deadbands (estimated to be larger than the
+piston quantization limit). This implied that the observed mode involved the actuator oil column
+in series with the rest of the engine, gimbal, and stage structure, viz., the pendulum mode. With
+a recommendation from NASA TVC based on the known feedback characteristics of the actuator
+(i.e., nulling of the oil column compliance when servo is out of deadband), the core stage contractor
+closed the load resonance verification under the assumption that the load resonance must be strictly
+greater than the observed pendulum mode; that is,
+
+!L > !T =
+
+s
+KTR
+
+2 +Kn
+
+Jn
+(2)
+
+where
+1
+
+KT
+=
+
+1
+
+KL
++
+
+1
+
+Koil
+. (3)
+
+This expression is similar to the load stiffness Equation (1), except that the relationship describes
+the total resonance frequency (engine pendulum mode frequency) !T , as a function of the com-
+bined total stiffness, KT , where the total stiffness results from the oil stiffness, Koil in series with
+the load stiffness KL .This approximation assumes that the load stiffness is suitably represented
+by a single spring, KL, and that the inertia and moment arm are precisely known. However, fur-
+ther analysis suggested that a single-spring approximation in any test configuration (mid-stroke
+locked, within deadband) could not be conclusive evidence of the load resonance. This is because
+load resonance is influenced by a dense spectrum of engine pendulum-type modes that involve
+
+8
+
+
+
+Figure 6. TC-5 Accelerometer Locations
+
+heavy thrust structure participation and their integrated effect provides an equivalent single-valued
+observed load stiffness.4 In other words, the total resonance frequency does not necessarily corre-
+spond to any given frequency peak in a modal test. A final note regarding the TC-5 model test was
+that the mid-stroke locked actuator first engine pendulum modes appeared to fall close in frequency
+to those detected during the quiescent period where actuator acted like a column of oil. While an
+independent measure of neither the oil nor locked stiffness was available, the frequency match pro-
+vided some corroborating evidence that the oil column stiffness was similar to the locked actuator
+stiffness. This provided supplementary verification that the hydraulic fluid’s air entrainment was
+sufficiently low to ensure that the oil column stiffness was in the predicted range .
+
+3.2 TC-5: First Gimbaling of Integrated Core Stage
+
+Vectoring tests of the TVC system on the integrated stage were initially to be performed follow-
+ing assembly of the core stage at Michoud Assembly Facility (MAF). However, due to limitations
+associated with the transition from vertical to horizontal assembly, the first commanded motions
+of the engine nozzles on the integrated vehicle were performed after the stage was installed ver-
+tically in the Stennis Space Center (SSC) B-2 test stand. The vectoring test at B-2 provided was
+advantageous because the string pot instrumentation used to determine engine angular position was
+connected to the SSC data acquisition system. This string pot data provided early indications that
+additional ambient testing prior to the hot fire vectoring test was needed.
+
+The series of TVC vectoring commands issued during this test were similar to the basic frequency
+and step response commands as executed during the Shuttle Program in the Orbiter Processing
+Facility prior to each Shuttle flight.1 Step and frequency commands were individually issued to
+each actuator with an amplitude of 0.25 deg at the flight control command rate of 50 Hz (every 20
+ms). The frequencies were a set of four discrete sines as follows. These commands were executed
+one engine at a time on September 9, 2020, as shown in Figure 7.
+
+• 0.25 deg, 0.1 Hz, 25 cycles (250 seconds)
+
+• 0.25 deg, 0.2 Hz, 25 cycles (125 seconds)
+
+• 0.25 deg, 1.0 Hz, 25 cycles (25 seconds)
+
+9
+
+
+
+Figure 7. TC-5 Commands
+
+• 0.25 deg, 3.0 Hz, 25 cycles (8.333 seconds rounded to 8.32 seconds)
+
+The key TVC response measurements available during the test included the commanded current
+(Amps), sensed current on the actuator servo-valves (Amps), piston position (inches), and string pot
+lengths (inches). For convenience in comparison, the currents and piston positions were converted
+to degrees using simple scalings. Additionally, the string pot lengths were transformed into engine
+angles in degrees, although required more involved transformations due to the geometric placement
+of sensor end points. Comparing the commanded current, piston, and string pot-derived engine
+responses to the pre-test models immediately revealed a number of findings. Note that the last
+commanded value is nonzero due to the final 3.0 Hz cycle not falling on an integer sample boundary.
+
+The string pot data was inadvertently recorded at 1 Hz instead of the target 250 Hz data rate during
+the steps. This meant that transient response characteristics of the nozzle could not be observed.
+During the slower full sweep commanding, and during the steady-state step response portion where
+250 Hz string pot data was recorded, the string pot end point location data (according to the attach
+point drawings) did not provide a suitable length-to-angle solution that sufficiently corroborated the
+piston response. As is discussed further in Section 5.1, the available attach locations for string pots
+led to a solution space highly sensitive to knowledge of end point locations.
+
+Figure 8 shows the positive (extend) and negative (retract) step response for the current com-
+mands, current sensed, and piston response along with the pre-test models that assumes a load
+stiffness of around 450 klbf/in. The response reveals two major characteristics that did not match
+the pre-test expectations. One is that the current sense telemetry, representing the actual servo-
+valve current to the actuator torque motor, does not follow the command received by the TAC and
+shows an offset. The other is that the piston response shows a consistently larger overshoot than
+predicted by the model driven by the sensed current. The steady-state piston position follows the
+sensed current offset, indicating that the sensed current is representative of the current going to the
+
+10
+
+
+
+Figure 8. TC-5 Step ResponseTC-5 Commands, Degrees
+
+servovalves.
+
+Figure 9 shows an overlay of the negative and positive current and piston responses for each step
+doublet against the TVC nozzle step response specification. While a piston boundary is not defined,
+the nozzle dynamic response is always larger. Thus the clear violation of the nozzle envelope by the
+piston response provided an early indication that the nozzle step response requirements would not
+be met. The overlay plots indicated a fairly consistent response between the positive and negative
+steps and confirmed that all the engines behaved similarly.
+
+Figure 10 shows the results from the discrete sine frequency response reconstruction technique
+(described in Section 5.2). The piston data shows peaking consistent with the step overshoot and
+both responses demonstrate the -0.5 dB of gain reduction consistent with the steady-state offset
+observed in the step responses. While string pot data was recorded at the full target rate during the
+frequency responses, the angle solutions were not reliable due to the uncertainty in the end point
+locations, which produced a large amount of variation in the results.
+
+In addition to the piston and current data, engine accelerometer data (recorded at 512 Hz), as well
+as video data, was used to confirm that the nozzle motion during steps was indeed exhibiting an
+underdamped response. Figure 11 shows accelerometer responses from each of the steps along with
+the Simplex TVC response model of the near-exit plane aft accelerometer locations. The increased
+overshoot seen between the model and the accelerometer data confirmed the responses observed in
+the piston data.
+
+Parametric sensitivity studies were performed using the Simplex model in an effort to determine
+possible explanations for the underdamped response. Hand tuning of model parameters to fit the
+observed responses and iterative optimization methods led to a number of possible mechanisms,
+including different than expected mechanical component parameters, a slightly different moment,
+abnormally high oil compliance, or a lower-than-expected backup structure stiffness.
+
+Based on the lack of engine position response data during the TC-5 test, and inconclusive nature
+
+11
+
+
+
+Figure 9. TC-5 Step ResponseTC-5 Commands
+
+Figure 10. TC-5 Frequency Response Piston (Left), Current Sense (Right)
+
+12
+
+
+
+Figure 11. TC-5 Accelerometer responses during steps
+
+of the limited test points, the NASA TVC team campaigned to add testing that would determine the
+cause of the observed behaviors and ensure that the string pot-based measurements were properly
+anchored prior to hot fire testing.
+
+3.3 TC-7: Ambient Re-Test
+
+The additional test activities described in this section, known as TC-7 conducted on 2020 Nov
+30th, were not part of the original Green Run test plan. This was the only test, however, that isolated
+the value of the ambient condition load resonance. Based on piston measurement responses, this
+load resonance frequency (and corresponding load stiffness) was found to be much lower than in
+the pre-test model, which provided an explanation for the overshoot in the step response. The ad-
+ditional visual and string pot instrumentation provided a conclusive measure of engine motion, and
+altogether the discrepancies with respect to the expected TC-7 ambient response could be primarily
+isolated to the change in load stiffness from pre-test expectations. From this point, the team confi-
+dently proceeded to hot fire testing while performing impact assessments for flight with the lower
+load stiffness parameter.
+
+3.3.1 Additional instrumentation Due to the geometric arrangement of the string pots, result-
+ing from the available mounting points in the engine section, the ability to convert from sensed
+lengths to engine angles was very sensitive to string pot sensor end point knowledge. After requested
+by the flight control team, an instrumentation contractor utilized structured light photogrammetry to
+measure the precise location of each string pot sensor end points as well as the gimbal and actuator
+attach locations. Additionally, the contractor installed a 12 camera optical motion capture system
+and fiducial markers on the engine and engine section during testing, which provided a photogram-
+metric estimate of the engine angle. Finally, the test procedure was revised to ensure high speed
+recording throughout the duration of vectoring. While the visual system performed extremely well
+to confidently determine the engine angular position, the string pot data still showed significant scat-
+ter in the data despite incorporating measurements of the end points. The team explored a number
+of solutions to determine the best fit of the TC-7 string pot data and those solutions at the time are
+
+13
+
+
+
+Figure 12. TC-7 Commands
+
+represented in the ambient test results shown herein.
+
+3.3.2 Additional Commands In an effort to minimize test time while also acquiring the essen-
+tial data, the team coordinated with the stage contractor test leads to determine an additional set
+of vectoring commands. Unlike the pre-defined hot fire vectoring commands which allowed for
+commanded angular rate to exceed the normal flight rate limits, the commands during this test were
+software rate limited and issued individually by the stage controller. Engines 1 and 4 were chosen
+for testing as those engines contained the two types of actuator attachment configurations (inboard
+and outboard actuator tailstock mountings). Frequency responses were conducted both for indivu-
+dal pitch, yaw, and simultaneously commanded axes for combined axis engine motion to isolate any
+coupling behaviors. Steps of 0.25 degree were performed again, as in TC-5, but with an additional
+command amplitude of 1 degree (albeit rate limited by the commanding software). The commanded
+frequencies (up to about 15Hz), amplitudes (less than 0.25 seconds) , and durations (25 or greater
+cycles per command) were manually sent to the actuators one by one.
+
+3.3.3 Processing A representative test response is shown in Figure 12. Post processing of this
+data required determining the start time of all the various sinusoids issued on the timeline, which
+was made possible by the availability of the telemetered commanded input data. The piston data
+shows an offset, whose slowly varying component results from thermal drift of the actuator as well
+as measurement error bias.
+
+3.3.4 Response The 0.25 deg piston position responses compared well to the TC-5 responses,
+which demonstrated consistency between the test configurations. Figure 13 shows the frequency
+response from the pitch actuator command to the piston measurement in comparison to the pre-
+flight TVC model. The expanded range of frequency commands revealed the lower than predicted
+characteristic load resonance notch frequency, which had not been fully observable during TC-5.
+
+The left plot in Figure 14 shows the measured piston frequency responses compared to the model
+with an adjusted load stiffness parameter. The right plot in Figure 14 shows the engine frequency
+
+14
+
+
+
+Figure 13. TC-7 Piston Frequency Response vs Pre-Test Model
+
+response processed from the visual system data, showing a fair match to the response in peaking and
+corner frequency. As can be seen, the overshoot region of the response is clipping the upper bound-
+ary of the specification. Both responses show a deviation from the model in the higher frequency
+region, which was later attributed to the aforementioned scale factor error in the TAC command
+electronics.5 While not shown in this paper, the combined axis frequency responses are similar to
+those for the individually commanded axes.
+
+Figure 15 shows the step responses for the 0.25 deg commanded piston (left) and engine angle
+data (right). The piston data closely matches the adjusted model with the exception that it appears
+to track the steady state response of the current sensed value. The engine angle data shown on the
+right figure is derived from both the best-estimate of the angles from the string pot solution (gray)
+and the visual data (green colors). The visual data shows a similar trend to the piston steady state
+response in that the mean of the responses fall below the 0.25 deg commanded value. The string
+pot data is much more scattered than the visual data owing to the difficulty in determining absolute
+value from the geometry sensitivity of the string pot end points, even after the as-installed end point
+measurements were incorporated.
+
+In an effort to eliminate the offsets due to the command avionics as well as reduce the scatter in
+the engine angle data, Figure 16 shows the same result but with the responses normalized to their
+individually achieved steady state values. While the piston data shows a fair match between the
+test and model responses, the engine responses according to the string pots and the visual data fall
+significantly out of bounds and do not agree with the model. Despite the mismatch between the
+test and model engine responses, the normalized step shows that the string pot reconstructed angle
+and the visual systems were in sufficient agreement to allow for useful transient data to be collected
+from the string pots during the hot fire test.
+
+Figure 17 shows the responses from the one degree steps. While the one degree step responses
+were software rate-limited, the response comparison to the purely linear model and normalized
+
+15
+
+
+
+Figure 14. TC-7 Piston (left) and engine (right) Frequency Response vs Post-Test Model
+
+Figure 15. TC-7 Piston (left) and string pot (sp) and visual (vis) based engine (right)
+0.25 deg response vs Post-Test Model
+
+16
+
+
+
+Figure 16. Normalized TC-7 Piston (left) and engine (right) Frequency Response vs Post-Test Model
+
+spec bounds gives an indication of amplitude dependence outside of the rate-limiting regime. The
+piston and engine responses show less steady state error than seen in the 0.25 degree steps. This
+can be at least partially attributed to the nonlinearity asssociated with the command avionics but
+is also consistent with prior lab response trends, pointing to small-amplitude nonlinearities in the
+gimbal and actuator itself. The engine responses obtained from the camera system (“vis” labeled)
+indicate a tighter band of traces and a closer match to the model. While the scatter in the string pot
+measurement is a smaller percentage than for the 0.25 degree commands, there are some outliers
+not fully represented by the visual system results. During the processing of the hot fire string pot
+responses (Section 4), additional techniques were applied to the string pots that improved the angle
+solution (see Section 5.1) yet they relied on the same fundamental assumption made during TC-7
+process: that the engine angle moved fully to its final commanded position. While the hot fire string
+pot to angle method still could not determine absolute engine position from the measurements, those
+methods would likely improve the scatter in the string-pot derived results shown here.
+
+4 GREEN RUN HOT FIRE TESTING
+
+The first Green Run Hot Fire (GRHF) was conducted on Janurary 16, 2021 but due to a test-
+specific monitored condition threshold violation, the engines were advanced to shutdown prior to
+reaching the period in which the engines were gimbaled.
+
+The second and final SLS Green Run Hot Fire test was conducted on March 18, 2021, completing
+its full duration and providing valuable data and ultimately confidence for flight. The results of
+the Green Run hot fire test provided TVC response data that was significantly different than the
+ambient results: exhibiting much more damped response without any step overshoot and a piston
+response showing a higher apparent load resonance. The results gathered from hot fire testing
+challenged long-standing assumptions about the RS-25 gimbal friction and structural characteristics
+of the gimbal.3–5
+
+17
+
+
+
+Figure 17. TC-7 Piston (left) and engine (right) Steps vs Post-Test Model
+
+4.1 Commands and Instrumentation
+
+The Green Run hot fire commands were executed by the Green Run vehicle flight software,
+which read a pre-loaded actuator command table and issued them at 50 Hz through the normal
+flight software interface to the TVC actuators. For the Green Run hot fire test specifically, the
+command amplitude and software rate limits were increased to allow the high-frequency test points
+to achieve sufficient amplitude for an adequate signal-to-noise ratio after attenuation by the acutator
+dynamics. Since only 120 seconds of test time was available for vectoring, the discrete pitch and
+yaw frequency response commands were sent simultaneously to all eight actuators but with high
+and low frequencies scheduled to minimize pitch/yaw cross talk. The steps were comprised of three
+amplitudes: 0.6, 0.4, and 0.2 degrees, and were issued to all yaw actuators, followed by all the
+pitch actuators. In order to impart zero net loads on the vehicle’s interface to the test stand, the
+pitch and yaw commands on engines for steps and frequency responses were commanded in the
+predicted geometric null space such that opposing engines would vector simultanously towards or
+away from each other. An additional max-rate circular gimbal test was performed during the low-
+throttle portions of the burn. This circular gimbal test served to demonstrate the full rate capability
+of the TVC system for low throttle conditions with the newly designed propellant-driven CAPU
+hydraulic supply.
+
+Figure 19 shows the overall command and piston response data during the frequency and step
+portion of the profile. The frequency response was issued first with simultaneous gimbaling occur-
+ing in pitch and yaw axes. First the yaw axes executed discrete frequency sinusoids (at 0.4 degree
+amplitude) while pitch executed a series of 0.8 degree amplitude high frequency sines. Thereafter,
+the pitch axes performed the same low-frequency set while yaw executed the high frequency sines.
+The step responses followed the frequency response portion and were issued in descending ampli-
+tude in the yaw axes, then the pitch axes. All gimbaling was commanded so as to result in net zero
+lateral loading and minimize net loads on the vehicle and test stand.
+
+18
+
+
+
+Figure 18. GRHF Engines Firing and Vectoring
+
+Figure 19. GRHF Command Schedule
+
+19
+
+
+
+Figure 20. GRHF Command Schedule Frequencies
+
+The frequencies and amplitude schedules for each portion are shown in Figure 20. The frequen-
+cies were selected to evenly distribute the frequencies across the target spectrum in logarithmic
+fashion with fine adjustments to ensure the peaks of the commands were aligned with the 20 ms
+command sample boundaries.
+
+4.2 Frequency Response
+
+The command-to-piston frequency responses for pitch and yaw are shown in Figure 21. The
+immediately noticeable difference was shift in the apparent piston notch (load resonance) frequency
+from the ambient test response, a significant and unexpected result. Using the approach employed
+following the ambient testing, the load stiffness parameter was adjusted from 110 klbf/in to 237
+klbf/in in the linear Simplex TVC model, resulting in a 9.5 Hz notch in the piston response. Figure
+21 shows a comparison of the pitch (left) and yaw (right) command to piston frequency responses for
+each engine in comparison to the load-stiffness-adjusted model. This notch shift between ambient
+and hot fire was subject of much study after the test was performed. Ultimately, detailed analysis
+determined this to be the result of the thrust loaded gimbal bearing and as well as other amplitude-
+dependent nonlinear characteristics4 . While Shuttle MPTA testing was conducted in ambient and
+hot fire conditions, its highest frequency was lower than in the SLS test, and the quantization and
+sample rates were less favorable for reconstruction of the frequency response, so this particular load
+resonance shift was likely present, but not observed during the Shuttle program. As such, the SLS
+Green Run response was the first data that showed the drastic influence of thrust loading on the
+apparent load stiffness.
+
+The second observation in the piston data is that the gain is decreased in the middle of the fre-
+quency ranges and the phase also deviates from the linear model predictions. This behavior can be
+attributed to the effects of friction3 in the thrust-loaded gimbal bearing.
+
+The frequency response for the averaged pitch (left) and yaw (right) engine responses derived
+from the string pot is shown in Figure 22. The engine responses show gain and phase deviations
+from the model in the mid band (as with the piston data), which is also attributed to thrust-loaded
+
+20
+
+
+
+Figure 21. GRHF Piston Response
+
+gimbal bearing friction. While the engine frequency responses at low frequency and in the higher
+frequency rolloff portion appear to match the linear model fairly well, it is important to note that the
+string-pot derived engine data could not be used to determine absolute gain and thus no conclusions
+about the influence of friction could be made. Section 5.1 contains further discussion of the string
+pot limitations and methods to approximate engine angles.
+
+4.3 Step Response
+
+The step responses for the each axis (top plots) and amplitude (each column) piston responses
+are shown alongside the load-stiffness adjusted linear models in Figure 23. A significantly more
+damped response is immediately apparent as a result of thrust-loaded gimbal friction.
+
+The step response for the string pot derived engine angle responses are derived from the process-
+ing technique discussed in Section 4.1 and shown in Figure 24. In comparison to the linear models
+tuned for the notch stiffness seen in the frequency response, the step responses exhibit a significantly
+damped response due to gimbal friction.
+
+4.4 Discussion of Results
+
+Subsequent test-correlated modeling and analysis determined that the damped step response char-
+acteristics are suitably predicted by advanced models of gimbal friction (extensions of the Dahl8 and
+LuGre9 approaches) coupled with a higher fidelity representation of the gimbal bearing structure.
+These model enhancements readily show the gain and phase effects observed in the mid-band of the
+test frequencies during test.3
+
+While Shuttle MPTA testing did not have a measurement of the engine position, the friction-
+augmented models show piston responses that compare favorably to the trends observed in Shuttle
+data in both step and frequency response.1 Shuttle testing also included differential pressure mea-
+surement that could determine actuator load, and conducted ramp command testing to elucidate
+
+21
+
+
+
+Figure 22. GRHF String-Pot Derived Engine Response
+
+friction parameters. The test-derived friction coefficients were siginificant, but debate continued
+throughout the Shuttle program as to how to incorporate these data into flight control models.
+
+Initially, the SLS flight control team developed design products under the long standing MSFC
+flight control and TVC community assumption that friction could be neglected in flight. Indeed,
+Shuttle documentation indicates that the MPTA observed friction effects were not a flight control
+concern.1 Furthermore, Shuttle flight data never exhibited the characteristic limit cycle in flight that
+would have strongly indicated the presence of Coulomb friction . As a result, little detailed analysis
+was conducted on the subject of gimbal friction during the Shuttle program, although informal doc-
+umentation suggests that some engineers recommended investigating advanced friction modeling
+approaches.
+
+In the SLS test program, the engine position data in conjunction with the piston data provided a
+more conclusive indication of gimbal friction, necessitating the use of advanced friction models.3
+
+The inclusion of bounding and test-anchored friction in the TVC models supported flight rationale
+by demonstrating that an in-flight LCO would be inconsequential for flight control stability and
+performance.5 However, due to the constrained geometry, the string-pot-to-angle reconstruction
+method required an assumption of achieved engine angle and thus could not provide a firm indica-
+tion of friction-influenced amplitude nonlinearity. Since the effect of friction on the total actuator
+gain is only observable in the engine angle, it was not until the Programmed Test Input (PTI) fre-
+quency response data was processed following Artemis I flight that such engine gain effects could be
+seen. These data and the performance during the highly successful Artemis I flight test are discussed
+in the companion paper.5
+
+5 SUPPORTING TECHNIQUES AND ANALYSIS
+
+This section describes the use and analysis of the string pots for reconstructing engine data as well
+as detailing the numerical describing function method of extracting frequency domain response data
+from the discrete sines executed in all the test environments shown herein.
+
+22
+
+
+
+Figure 23. GRHF Piston Step Responses
+
+23
+
+
+
+Figure 24. GRHF Engine Step Responses
+
+24
+
+
+
+5.1 String Potentiometers: Angle Conversions and Findings
+
+The string potentiometer measurements were used on several TVC test stands in the MSFC 4205
+2-axis test facility and provided a high precision and accurate means to determine the angular posi-
+tion of the engine load simulator along each actuator plane of motion. The sensor is comprised of
+a ruggedized housing from which a retractable steel cable can be extended by pulling on the eyelet
+attached to the cable end.
+
+Prior to the ambient vectoring tests at the Stennis B-2 stand, string pots were installed with the
+sensor bodies attached to the engine section heatshield and the string end attached to bandclamps
+on available engine ducting . While not resulting in optimal geometry for determination of engine
+angles, the placement was the result of the limited line of sight availability in the engine section and
+acceptable means of attachment to the engine. Being installed above the heatshield, the string pots
+were protected from the thermal environments, did not require attachment to the nozzle, and were
+easily removed prior to shipment to KSC for flight. During hot fire, all 16 measurements devices
+survived the firing environment and produced uniquely valuable data despite limitations inherent in
+the measurement approach.
+
+Several methods for determining the engine angles from the string pots were explored throughout
+the course of the Green Run test campaign.
+
+During TC-7 ambient testing, even after precise measurements were taken of the end point lo-
+cations relative to a known datum in the engine section, initial planar solutions were significantly
+scattered and did not match the expected commands or visual data. In Section 3 that shows the TC-7
+final result, the authors settled on a best fit solution whereby the end points were solved to match
+expected motions during specific steady state motions. The end points were then used in planar
+transformations to convert from string length to angle. During hot fire testing, the end points both
+on the heat shield and engine section were expected to move as the entire structure deflects under
+thrust load, so the ambient derived end points would not be an accurate assumption for hot fire. To
+determine engine angles from string pot measurements during hot fire a variety of methods were
+employed to determine a best fit including using as-measured points and stress FEM predictions of
+the expected deflection of end points, 3-D solver using those end points, and finally a method that
+utilize a direct affine transform, described below. The affine transform resulted in the best solution
+and further led to the discovery that opposing engine pairs with like-mounted actuators resulted in
+a synchronized but symmetric/asymmetric roll motion that would cancel when data from those two
+engines were averaged. The final result of the affine and averaged transform produced the step fre-
+quency responses shown in Section 3. While the absolute value of the nozzle motion in response to
+commands could not be determined from the string pot data, the transient and frequency response
+characteristics provided invaluable data that helped uniquely identify characteristics associated with
+the unpexected responses. Neither ambient nor hot fire engine response data was available during
+the MPTA Shuttle program; only the piston data served as the closest available representation of the
+nozzle motion.
+
+5.1.1 Affine Transformation of String Pots During Hot Fire The string length can be repre-
+sented analytically as the norm of the difference between the non-rotating vector from the gimbal
+to the string pot spool, u, and the rotating vector from the gimbal to the string end on the engine, v.
+The pitch and yaw transform matrix is T. To further refine the sensor and end locations, a numeri-
+cal optimizer searched for string end and spool positions that minimized the error between logged
+string length timeseries,ln, and a simulated string length for the angles alpha and beta in command
+
+25
+
+
+
+time series, g(t), using Equation (7). After identifying spool and end locations consistent with the
+data, engine angle estimates were obtained by finding the angles at each step of the time series that
+minimized the formula. Results could be further constrained by only searching in either pitch or
+yaw alone.
+
+ln = |un � T (↵,�)vn| (4)
+
+[↵,�] = g(t) (5)
+
+min
+
+ 
+X
+
+t
+
+(ln(t)� |un � T (g(t))vn|)2
+!
+
+(6)
+
+During hot fire testing, the end points both on the heat shield and engine section were expected
+to move as the entire structure deflected under thrust load. The endpoint error solving method used
+to process the ambient data proved less successful with the larger search volumes and higher noise
+environment on the thrust-shifted hot fire vehicle. Figure 25 shows that the changes in overall string
+length from ambient testing to hot fire are large relative to those due to the TVC test command
+profiles. The relationship between string lengths and associated engine angles are sufficiently linear
+over the +/-0.8 degree range of the hot fire TVC command sequence to consider fitting a linear
+transform to estimate engine angles. The affine transform preserves the rotation, scale, and shear
+capabilities of a two-dimensional geometric transform matrix, but is augmented to allow overall
+shift as well. The vector x can be transformed with the matrix A after augmentation with shifts in
+vector b to yield vector y. Static string pot data collected during hot fire seconds after step response
+settling were used with command angles to find a least-squares-fit affine transform to convert string
+pot lengths to estimated engine angles.
+
+
+y
+1
+
+�
+=
+
+
+A b
+
+0 · · · 0 1
+
+� 
+x
+1
+
+�
+(7)
+
+Pitch
+
+Ya
+w
+
+Engine 1 angles from affine-transformed string lengths
+
+GRHF
+
+Figure 25. a. Scatter of string lengths from 2 string pots on engine 1 during ambient
+and hot fire testing. b. Scatter of engine angle estimates from string length data after
+application of best-fit affine transform.
+
+26
+
+
+
+Some engine roll motion is permitted by gimbal compliance during vectoring. While this is not
+expected to affect the thrust vector, the string pots geometries were sensitive to engine roll and there
+was a need to remove roll effects from the pitch and yaw engine angle estimates. The lack of static
+engine roll step data prevented the fitting of a three dimensional affine transform. Simulated string
+pot data applied to the fitted affine transforms demonstrated that roll projected to the yaw-pitch
+axes with one polarity for engines 1 and 3 and with opposing polarity for engines 2 and 4. Figure
+26 shows the result of averaging the affine-transformed engine angle timeseries for complementary
+engines where the the roll artifacts are largely cancelled as a result of symmetric roll responses
+amongst the engines.
+
+Pitch estimate
+
+Ya
+w
+
+ e
+st
+
+im
+at
+
+e
+
+Non-actuator side string pots
+Actuator side string pots
+
+Yaw unit vectors
+
+Pitch unit vectors
+
+Roll unit vector
+
+Roll unit vector
+
+Time
+Pi
+
+tc
+h 
+
+es
+tim
+
+at
+e
+
+Affine-transformed engine 1 pitch
+Affine-transformed engine 2 pitch
+Roll-cancelled pitch average
+
+Figure 26. a. Roll, pitch, and yaw vectors projected into engine angle estimate plane
+for engines 1 & 4. b. Roll component nulling by combining pitch estimate timeseries
+from engines with complementary symmetry.
+
+5.2 System Identification via Describing Functions (DF)
+
+Describing function (DF) analysis is a useful tool for predicting sustained periodic solutions
+(limit cycles) of single-input, single-output nonlinear feedback dynamical systems, and the system
+identification technique used herein synthesizes a pointwise, numerically determined, complex-
+valued describing function
+
+N (A,!) (8)
+
+as a function of input amplitude A and frequency !, where the TVC actuator engine position and
+piston displacements are assumed to be described by a nonlinear system
+
+ż = f(z, u) (9)
+q = h(z, u) (10)
+
+with z 2 Rn.
+
+If given the input
+u = A sin!t (11)
+
+the output q(t) is periodic as t increases, the nonlinearity in Equations (9-10) can be approximated
+by the first harmonic of a Fourier series expansion, i.e., a describing function. In the special case
+that f and h are linear functions of z and u, the describing function is equivalent to the usual
+complex-valued transfer function H(j!) = q/u.
+
+27
+
+
+
+It is often assumed in the use of describing functions that the nonlinearity must be single-valued
+and static, in which case f = 0 and q = h(u); that is, the system has no dynamics. There is no
+restriction on the use of a dynamic nonlinearity in the feedback path so long as the describing func-
+tion is computable (i.e., the nonlinear system is locally stable with respect to input perturbations),
+even if the describing function cannot be determined analytically.
+
+In either a simulation or test environment, the exact sinusoidal describing function approximation
+N(Aj ,!k) can be determined at the discrete amplitudes and frequencies Aj , !k using a trapezoidal
+integration approximation to compute the real Fourier coefficients10 using a discrete-time (sampled)
+representation of q(t) taken from the actuator output;
+
+ajk =
+2
+
+Tk
+
+Z T/2
+
+�T/2
+qjk(nts) cos(!kt) dt (12)
+
+bjk =
+2
+
+Tk
+
+Z T/2
+
+�T/2
+qjk(nts) sin(!kt) dt (13)
+
+where ts is the sample period (typically 20ms). The real and imaginary parts of N are then com-
+puted using
+
+|Njk| =
+
+q
+a
+2
+jk + b
+
+2
+jk
+
+Aj
+(14)
+
+and
+\Njk = tan�1 ajk
+
+bjk
+. (15)
+
+The phase is subsequently corrected for the sampling delay ts/2. Since the computation of the
+Fourier coefficients is restricted to a single, known a priori signal, this method rejects frequencies
+outside the command frequency !k and recovers, in a least-squares sense, only the first harmonic
+of the output. In a test environment, this tends to reject the cross-talk effects from adjacent actuator
+degrees of freedom and provide resonably accurate phase response. In practice, it is necessary to
+pay careful attention to timing alignment to eliminate spurious phase effects, and the integration
+limits must be chosen to be a few time constants beyond the settling time of the system’s transient
+response. The integration limits are extended over several periods, depending on available test time,
+in order to reduce the effects of zero-mean noise. Pre-test verification of the efficacy of the chosen
+input test signals is performed numerically using a linear model, for which N is equal to the transfer
+function.
+
+Figure 27. Original and describing function approximation of feedback nonlinearity
+
+28
+
+
+
+System identification in the form a describing function yields a useful tool for model validation,
+since the entire nonlinear system (the actuator DoF) can be replaced with a family of describing
+functions for stability analysis. The approximation N can be incorporated into the loop as in Figure
+27. The Nyquist theorem predicts, but does not guarantee, the existence of a sustained periodic
+oscillation in the closed-loop system (a limit cycle) at a particular frequency ! and amplitude A if
+the linearized system return difference function satisfies the equality
+
+1 +G(j!)N(A, j!) = 0, (16)
+
+for some ! = !k and A = Aj . This leads to the well-known sinusoidal inverse describing function
+relationship
+
+G(j!) = � 1
+
+N(A, j!)
+. (17)
+
+In practice, control stability analysis is performed by eliminating the additional frequency vari-
+able and evaluating the function G(j!)N(A, j!) (Equation 16) over a set of discrete frequencies
+! = !k, k = 1, 2, . . . , n. Comparison of this function with the point �1 + j0 in the complex
+plane provides an equivalent criterion to Equation (17). At each unique amplitude Aj , the resultant
+curve can be interpreted similarly to a traditional Nichols plot, and provides a measure of describing
+function gain or phase margin with respect to the predicted LCO. This technique is referred to as
+“DF-in-the-loop”.11
+
+6 CONCLUSIONS
+
+The SLS Core Stage TVC system utilized a number of Shuttle hertiage components, which were
+connected to a new command system and attached to a new structure. SLS’s test of the integrated
+TVC system revealed response characteristics both known and unknown to the Shuttle engineers.
+The findings from test and subsequent analysis activities required a new way of thinking and the
+team worked with the new knowledge to build a strong rationale for first flight. The fidelity in the
+MSFC TVC test laboratory, late adds to testing during ambient conditions on the integrated vehicle,
+and Green Run Hot fire tests all provided critical elements. Using the outcomes from test, the SLS
+flight controls and TVC teams were able to firmly identify TVC system response characteristics,
+model their effects, and develop confident flight predictions for the flight of Artemis I.
+
+ACKNOWLEDGMENTS
+
+The authors recognize the support of Garry Lyles, John Blevins, Neil Otte, Mark West, Charlie
+Hall, Matt Strickland, Jason Bush, Joey Broome, Blake Stuart, Nick Johnston, Jesse McEnulty, Lila
+Paseur, David Young, Nathaniel Stepp, Lisa Bates, Boyd McNutt, Stan McDonald, Jeff Holmes,
+Bob Dougert, Adam Reinhart, Don Varanauski, Rick Zietler, and Shahram Namvari who throughought
+the SLS program worked to ensure the TVC test program was a success. This work was supported
+under contract number 80MSFC18C0011 for the NASA Marshall Space Flight Center.
+
+REFERENCES
+[1] McDermott et al. “Space Shuttle Ascent Flight Control Actuation Subsystem Data Book”,
+
+SSD93D0595, Sept 30, 1993
+[2] Gerstner, B. A. “MPT Engineering Analysis Second Interim Report Static Firings S/F-5A Through
+
+S/F-12” Rockwell Report STS 81-0254 May 1981
+
+29
+
+
+
+[3] Russell, C., Brouwer, J., Ryan, S., and Stepp, N. “Gimbal Bearing Friction in the Core Stage TVC
+System”, AAS-23-154, American Astronautical Society GN&C Conference, Feb 2-8, 2023
+
+[4] Moore, R. et al. “Structural Dynamics Observations in Space Launch System Green Run Hot Fire
+Testing”, AAS-23-156, American Astronautical Society GN&C Conference, Feb 2-8, 2023
+
+[5] Wall, J., Russell, C., Orr, J., Alaniz, A., Ryan, S., “Flight Performance and Stability of Space Launch
+System Core Stage Thrust Vector Control”, American Astronautical Society GN&C Conference, Feb
+2-8, 2023
+
+[6] McMahan, T. and Harbaugh, J. “NASA Certifies SLS Rocket Laboratory To Test Flight Software
+for Artemis I” Online Article https://www.nasa.gov/exploration/systems/sls/news/sls-rocket-laboratory-
+certified-to-test-flight-software-for-artemis-I.html retrieved 2022 Dec 27
+
+[7] Sontag, B. & Parks, Russel “Space Launch System (SLS) RS-25 Engine Pendulum Modal Test Report”
+NASA MSFC ET40 Report, SLS-DEV-20_024, Sept 28, 2020
+
+[8] Dahl, P. R., “A Solid Friction Model,” Space and Missile Systems Organization, TR-77-131, 1977.
+[9] Olsson, H., Åström K.J., Canudas de Wit, C., Gäfvert, M., and Lischinksky, P., “Friction Models and
+
+Friction Compensation,” European Journal of Control, vol. 4, no. 3, pp. 176-195, 1997.
+[10] Klyde, D., McRuer, J., and Myers, T., “Pilot-Induced Oscillation Analysis and Prediction with Actuator
+
+Rate Limiting,” J. Guidance, Control, and Dynamics, Vol. 20, No. 1, pp. 81–89, 1997.
+[11] Orr, J. and Dennehy, C., “Analysis of the X-15 Flight 3-65-97 Divergent Limit Cycle Oscillation,”
+
+AIAA J. Aircraft, Vol. 54, No. 1, pp. 135-148, 2016.
+[12] Stuart, B., et al., “Overview of the SLS Core Stage Thrust Vector Control System Design,” AAS 23-152,
+
+American Astronautical Society Guidance, Navigation, and Control Conference, February 2023.
+[13] Orr, et al., “Advanced Modeling of Control-Structure Interaction in Thrust Vector Control Systems,”
+
+AAS 23-153, American Astronautical Society Guidance, Navigation, and Control Conference, February
+2023.
+
+[14] Stuart, B., et al., “Core Stage TVC Systems Engineering Challenges in Reusing Heritage Hardware,”
+AAS 23-154, American Astronautical Society Guidance, Navigation, and Control Conference, February
+2023.
+
+30
+
+

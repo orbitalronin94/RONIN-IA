@@ -1,0 +1,1538 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ADVANCED MODELING OF CONTROL-STRUCTURE INTERACTION IN THRUST VECTOR CONTROL SYSTEMS
+
+
+AAS 23-153
+
+ADVANCED MODELING OF CONTROL-STRUCTURE
+INTERACTION IN THRUST VECTOR CONTROL SYSTEMS
+
+Jeb S. Orr*, Timothy M. Barrows†, Colter W. Russell‡, Richard K. Moore§, Abran
+Alaniz¶, and Stephen G. Ryan||
+
+The Space Launch System (SLS) Core Stage (CS) Thrust Vector Control (TVC)
+system is comprised of 8 mechanical feedback Shuttle heritage Type III TVC
+actuators and four RS-25 engines, each attached to a Shuttle heritage gimbal
+block/bearing. Two actuators are used to move each engine in two planes per-
+pendicular to one another (i.e., pitch and yaw). The TVC system design lever-
+ages hardware from the Space Shuttle program as well as new hardware designed
+specifically for the Core Stage.
+
+During the development of the SLS TVC system, a family of advanced dynam-
+ics models were developed to extend and compliment the simplified quasi-linear
+“simplex” model historically used for flight control design and stability analysis.
+The importance of these advanced models became increasingly evident after ambi-
+ent and hot fire testing of the Core Stage, which revealed a number of findings as-
+sociated with the dynamic response of the TVC integrated system. Test responses
+suggested that the TVC did not meet its performance specifications and its step
+and frequency responses exhibited unexpected departures from prior lab tests and
+modeled behavior. One driving factor for these results was a higher-than-expected
+degree of coupling between the TVC system, the engine dynamics, and the Core
+Stage structure.
+
+This paper is the third installment in a seven-paper series surveying the design,
+engineering, test validation, and flight performance of the Core Stage Thrust Vec-
+tor Control system. In this paper, a new method of modeling rocket vehicle thrust
+vectoring servoelastic dynamics is presented. In this approach, the load dynamics
+are replaced by a detailed finite element model containing both the rigid body and
+elastic modes. A partitioning technique is used to compute the effective compli-
+ance from the modal data and obtain accurate simulation results using a reduced
+number of generalized coordinates. Coupled backup structure and nozzle attach
+compliance effects on multiple engines are captured in higher fidelity than with
+a spring approximation, eliciting novel effects due to the complex load paths in-
+volved in the Core Stage structure. Validation of the model is demonstrated using
+a variety of structural/modal, laboratory, and full-scale hot fire test data.
+
+1 INTRODUCTION
+
+In the aerospace domain, it is important to develop accurate models of servoactuator systems to
+support the design of flight control algorithms. More so than in many applications, in launch vehi-
+cles having gimbaled engines, the contributions of the thrust loading and inertial coupling effects of
+
+*Space Launch System Flight Dynamics and Control Technical Specialist (Mclaurin Aerospace / ESSCA), Knoxville, TN
+†Principal Member of the Technical Staff, Draper (Retired), Cambridge, MA
+‡Flight Systems Technical Staff, Mclaurin Aerospace (Jacobs ESSCA), Knoxville, TN
+§Flight Systems Principal Staff, Mclaurin Aerospace (Jacobs ESSCA), Seattle, WA
+¶Flight Systems Principal Staff, Mclaurin Aerospace (Jacobs ESSCA), Houston, TX
+||SLS Chief Engineer’s Office (MTS CPSS), Huntsville, AL
+
+1
+
+
+
+the articulated engine nozzles can significantly influence the structural dynamic response. The goal
+of a thrust vector control (TVC) actuator model is to accurately reproduce the dynamic response of
+the engine and thrust vector to both flight software commands and external load torques. Such a
+model can be combined with test data to produce a validated representation of the engine-actuator
+system, used to verify requirements. Thereafter, a simplified model can be synthesized for integra-
+tion with a high-fidelity linear or nonlinear model of the vehicle dynamics. This fully integrated
+simulation is then used to determine flight control gains and filters and verify the stability of the
+integrated engine-vehicle system prior to flight.
+
+The Space Launch System (SLS) hydraulic actuator (Figure 1) is a pressure-stabilized, three-
+stage, quad-redundant position control system, originally developed and qualified for use with the
+RS-25D Space Shuttle Main Engine (SSME) and adapted to control the RS-25E Core Stage En-
+gine (CSE) used on the Space Launch System launch vehicle.3, 4 This actuator contains a servo-
+valve package with 4 current-controlled servovalves driven by an external TVC Actuator Controller
+(TAC). However, the servoloop feedback is entirely mechanical and no power other than hydraulic
+pressure is required to operate the actuator. Piston feedback is provided via a roller cam assembly
+that provides nulling torques on all four servovalves while load damping is provided by a passive
+hydraulic pressure feedback (DPF) assembly. Current inputs to the servovalve torque motors apply
+a bias which induces flow until the servovalve torque is equalized by the piston position feedback
+cam. As such, piston position is directly proportional to input current. With its exceptional design
+and precision tolerances, the SLS actuator is able to achieve a reasonably linear response over an
+impressive range of loading conditions and control piston displacements.
+
+Figure 1. Typical SLS Hydraulic Actuator
+
+In the NASA launch vehicle community, TVC models traditionally used for design verification
+fall into two categories: a high-fidelity, nonlinear (“complex”) model, and a lower-fidelity, linearized
+or mostly-linear (“simplex”) model. In the case of a hydraulic actuator, the former represents all of
+the internal nonlinearities and flow limitations, and is valid over a wide range of command ampli-
+tudes and operating conditions. Such models are used in detailed functional requirements verifica-
+tion, i.e., in a software-in-the-loop (SIL) simulation environment. The simplex model is a simplified
+representation of the complex model, valid for small signals and used for linear stability analysis of
+the flight control system.
+
+During the development of the Space Launch System Core Stage TVC system, additional fidelity
+was required to represent the predicted (and later observed) response of the TVC system in flight
+or flight-like boundary conditions, as seen during the Green Run ambient and hot fire vectoring
+tests conducted in the Stennis Space Center B-2 test stand in January and March of 2021 (Fig-
+ure 2). The notable discrepancy between modeling and test, particularly in the non-firing case, was
+an observed change in the apparent load resonance frequency of the engine-structure-actuator sys-
+
+2
+
+
+
+Figure 2. SLS Green Run Hot Fire Test #1, SSC B-2, January 16, 2021 (NASA TV)
+
+tem. In non-firing conditions, this resonance depends almost entirely on the compliance of the stage
+backup structure and engine attach load path. While it was not surprising that the actual structural
+compliance was higher than predicted by the design, it was determined that the single-spring ap-
+proximation traditionally used in the planar, single-DoF simplex model could be improved upon by
+directly incorporating information about the structure from a finite element model (FEM).
+
+As of the Green Run hot fire test, NASA MSFC’s Multiple Actuator Stage Vectoring (MASV)
+simulation model had already undergone development to support verification of the servoelastic
+stability of the TVC system coupled to the core stage structure. Since high-power actuation systems
+must actively stabilize the load, MASV was used to verify that all eight actuator degrees of freedom
+were robustly stable with respect to the elastic modes of the core stage structure, as reflected into
+the actuator position feedback loop.
+
+The MASV model is a mechanism whereby the traditional single-DoF simplex model is extended
+to incorporate a modal representation of the rigid and elastic DoFs of multiple engines, coupled with
+multiple actuators in flight-like boundary conditions. In the case of the SLS Core Stage, this includes
+four engines, eight actuators, and many thousands of degrees of freedom as represented in a high-
+fidelity FEM. The MASV implementation has been successfully verified using an independently-
+developed, generalized elastic multibody simulation (DARTS/DSHELL).1, 2
+
+MASV is used to support test validation of the SLS Core Stage TVC parameters, including those
+derived from finite element model data, by correlating the fully-coupled response of the engine-
+structural system to ground test data in both ambient and static firing conditions. While not rep-
+resentative of all of the nonlinearities that affect the TVC system response (particularly friction),
+MASV has the highest-fidelity representation of the structural dynamics and the associated load
+paths and was part of the overall toolchain used for development of the Artemis I mission flight
+rationale.8 The derivation and development of MASV is the topic of the present paper. Further
+analysis as applied to the SLS Core Stage and model correlation performed using MASV are dis-
+cussed further in the companion papers.6, 7
+
+1.1 Traditional Model
+
+The simplex model is a compact representation of the TVC system containing only a few states,
+and is valid over a typical range of operating conditions. Typical simplifications in the hydraulic case
+
+3
+
+
+
+include the removal or linearization of nonlinearities in the small-signal regime, removal of kine-
+matics and external pressure equalization dynamics, and consolidation of redundant servovalves and
+flow paths into a single transfer-function representation. These models are used in linear stability
+analysis to assess the effects of flight control stability, global servoelasticity, and so on. Due to the
+dependence of the inertial coupling (“tail-wag-dog” or TWD) effect on the engine acceleration, the
+simplest model that provides an appropriate representation of the open-loop phase lag and TWD ef-
+fects has three states: two states for the engine angle and angular rate, and a third state representing
+the actuator lag, e.g., the hydraulic power cylinder.
+
+In practice, the model must also account for the servovalve dynamics, pressure feedback, and
+the compliance of the load, so a typical linear model has six states. Since the oil and structure
+are both compliant at high loads, the position of the piston and that of the load (the engine) differ.
+The actuator’s integrating position feedback eliminates the effect of the oil and actuator structural
+compliances between the actuator endpoints, and actively stabilizes the load resonance of the engine
+combined with the backup structure. Dynamic pressure feedback (DPF) adds damping to the load
+resonance, and provides a remarkably well-damped response with good phase lead characteristics
+near the rigid-body control frequency.
+
+This combination of active stabilization and load feedback also has the important feature that
+tends to improve flight control stability margins for global modes that have a strong coupling with
+the aft structure of the launch vehicle. That is, the actuators indirectly act as active dampers for
+certain servoelastic interactions. Such effects are uncovered using a high-fidelity vehicle-level ser-
+voelastic coupling model.9 (Conversely, thrust vector servoelasticity can be destabilizing, as in the
+case of the SLS booster antisymmetric bending, but was found to be inconsequential in the presence
+of elastic jet damping effects).
+
+In a simplex model, it is typical to represent the compliance of the load by combining the engine
+and stage compliances into a single spring. While this assumption is warranted in most cases,
+strong coupling with secondary modes other than the fundamental load resonance requires careful
+verification that these modes do not present a servoelastic concern. More importantly, a value of this
+load spring must be determined, and it can usually only be ascertained from a test-validated model.
+
+1.2 Multiple Actuator Stage Vectoring (MASV) Model
+
+The MASV formulation is intended to complement the vehicle-level reduced-body approach for
+coupling the engine-servo dynamics and the vehicle global bending modes. Importantly, this ap-
+proach can be used to demonstrate that the local compliance effects, typically several decades above
+the global vehicle bending modes, can be omitted from the global vehicle model if their effect on
+servoloop response is shown to be negligible (as intended in the servoloop design).
+
+The structure of the paper is as follows. In Section 2, a review of the simplex model formulation
+is presented, and a state model is derived assuming a single-spring approximation of the load and
+a rigid engine. In Section 3, the rigid load is replaced with a modal representation. In Section 4, it
+is shown that a portion of the structural modes from the finite element model can be collapsed into
+a static compliance without a significant loss of fidelity. In Section 5, the use of MASV to support
+TVC performance validation using both ambient and static firing data is discussed.
+
+4
+
+
+
+Figure 3. TVC actuator with load compliance
+
+2 SIMPLEX MODEL
+
+Consider the notional diagram of a hydraulic actuator given in Figure 3. In this simplified model,
+the actuator components are massless and the only compliances are in the loadKL and the hydraulic
+oil Ko.* The load compliance is a single spring that represents all of the compliance in the system,
+including the actuator components outside the position control loop, the engine structure, and the
+backup structure.
+
+The total compliance from the rocket stage to the (rigid) engine interface is
+
+KT =
+
+(
+1
+
+KL
++
+
+1
+
+Ko
+
+)−1
+
+(1)
+
+and the linear displacement of the rigid engine is given by
+
+xE = Rβ (2)
+
+whereR is the equivalent moment arm calculated about the actuator null position and β is the engine
+angular displacement (in radians). It is helpful to introduce the ideal piston position xi which can
+be thought of as the displacement of the piston if the oil were not compressible. The ideal piston
+position is related to the flow by
+
+ẋi =
+1
+
+Ap
+Q (3)
+
+whereAp is the piston area andQ is the input flow. For small signals, the dynamics of the spool and
+servovalves at the input of the power cylinder are well-represented by a second-order linear system
+of the form
+
+H(s) =
+Q(s)
+
+u(s)
+=
+
+kvω
+2
+v
+
+s2 + 2ζvωvs+ ω2
+v
+
+(4)
+
+*In this discussion, it is assumed that the compliance of the oil, which depends strongly on fluid air entrainment, is the
+most significant factor affecting the total compliance within in the servo position loop. The structural compliance of the
+actuator body and the radial elasticity of the cylinder also contribute to the actuator compliance, but are generally much
+less than that of the oil. In practice, these effects are combined to form a single actuator stiffness Kac.
+
+5
+
+
+
+where u and Q are the servovalve torque input and output flow rate, kv is the valve package gain,
+and ζv, ωv are the damping and natural frequency, respectively.
+
+The actual displacement of the piston xa is less than xi due to the compliance of the oil and the
+actuator body. The displacement of the engine, xE , is less than xa due to the fact that KL is not
+infinite. Thus we can write
+
+xE = xa −
+fa
+KL
+
+(5)
+
+where
+fa = KT (xi − xE) (6)
+
+is the force developed in the actuator. Combining these expressions,
+
+xa =
+
+(
+1− KT
+
+KL
+
+)
+Rβ +
+
+KT
+
+KL
+xi. (7)
+
+The engine dynamics can be written as
+
+Jnβ̈ = faR− Cnβ̇ −Knβ
+
+where the first term on the right-hand side of the equation is the actuator torque on the rigid engine.
+The damping coefficientCn is a viscous damping approximation to dissipation in the load dynamics,
+and the angular stiffness Kn represents gravitational restoring torque and loads about the engine
+gimbal due to the pressurized propellant feedlines. Substituting from (6) and then from (2) it follows
+that
+
+Jnβ̈ = KTRxi − Cnβ̇ −
+(
+Kn +KTR
+
+2
+)
+β (8)
+
+The engine natural frequency for a stationary actuator (xi = 0) with zero damping is
+
+ωp =
+
+√
+KTR2 +Kn
+
+Jn
+. (9)
+
+This is called the pendulum mode frequency. It represents the natural frequency of the engine-
+structure-actuator system when the compliance of the structure and oil is included and the actuator
+is inoperative. Compared with the effect of the structure, the contribution of Kn in this equation, at
+1g, can be neglected for most liquid engines. (For SRMs, Kn can be much more significant due to
+the effects of a flex bearing).
+
+Similarly, the load resonance frequency is
+
+ωL =
+
+√
+KLR2 +Kn
+
+Jn
+, (10)
+
+which depends only on the load compliance, and does not include the oil. As discussed in the com-
+panion papers,6, 8 the load resonance frequency appears as an antiresonance (notch) in the transfer
+function relating the piston position xa to the servovalve input torque. This relationship is crucial
+for test-based validation of the load stiffness KL, assuming that the moment arm and inertia can
+be determined separately. This fact was noted by Thompson10 in the development of the simplex
+model.
+
+6
+
+
+
+In order to control the position of the load, a feedback mechanism is used to sense the displace-
+ment and the force. Since the direct sensing of the engine position is not feasible, a piston position
+measurement (Equation 7) is determined via the actuator’s internal mechanical feedback cam. The
+second component, the load feedback, depends on the differential pressure ∆P developed in the
+actuator. The differential pressure ∆P is equal to the actuator force (Equation 6) divided by the
+piston area;
+
+∆P =
+1
+
+Ap
+fa. (11)
+
+Load feedback is used to add damping to the load; i.e., the engine-structural resonance, which
+becomes proportional to the load velocity after integration by the power cylinder. Since direct load
+feedback would produce an unacceptable steady-state error, the load feedback is filtered using a
+hydraulic high-pass filter, which has the dynamics
+
+żd = − 1
+
+τp
+zp + ∆P. (12)
+
+This scheme is referred to as Dynamic Pressure Feedback (DPF). The quantity zp is the state of the
+load feedback filter, and the output that is used for feedback is the state derivative żp. The value
+τp is the time constant associated with the load feedback dynamics. Combining (2), (12), and (11)
+gives the equation for the pressure feedback filter;
+
+żp = − 1
+
+τp
+zp +
+
+1
+
+Ap
+KT (xi −Rβ) . (13)
+
+The engine slew control is performed by modulating the flow Q using both piston position feed-
+back and pressure feedback. An external motor torque is applied to the servovalve that biases the
+equilibrium point obtained by mechanical feedback. The total servovalve torque input is given by
+
+u = ktmic − kfbxa − kdżd (14)
+
+where xa is the mechanical displacement across the actuator body and kd is the DPF gain. The
+torque applied to the servovalve is proportional to the input current ic. Using the load feedback
+and measured piston position expressions (6) and (7) to replace fa and xa with quantities related to
+the engine angle β, and substituting the state derivative żd in Equation 14, the final set of simplex
+equations are given by
+
+ẋi =
+1
+
+Ap
+Q (15)
+
+żd = − 1
+
+τd
+zd +
+
+1
+
+Ap
+KT (xi −Rβ) (16)
+
+β̈ =
+KTR
+
+Jn
+xi −
+
+Cn
+Jn
+β̇ − Kn +KTR
+
+2
+
+Jn
+β (17)
+
+along with the servo dynamics
+
+Q̇ = zv (18)
+
+and
+
+7
+
+
+
+żv = −2ζvωvzv − ω2
+vQ+
+
+(
+kvω
+
+2
+vkd
+
+1
+
+τd
+
+)
+zd −
+
+(
+kvω
+
+2
+vKT
+
+(
+kd
+Ap
+
++
+kfb
+KL
+
+))
+xi
+
++ kvω
+2
+vR
+
+(
+kd
+Ap
+KT − kfb
+
+(
+1− KT
+
+KL
+
+))
+β + kvω
+
+2
+vktmic. (19)
+
+This model can be mechanized in a state model form ẋ = Ax + bic , y = Cx using the state
+vector
+
+x =
+[
+xi zd Q zv β β̇
+
+]T
+(20)
+
+and the system matrices
+
+A =
+
+
+
+0 0 1
+Ap
+
+0 0 0
+1
+Ap
+KT − 1
+
+τd
+0 0 − 1
+
+Ap
+KTR 0
+
+0 0 0 1 0 0
+
+−kvω2
+vKT
+
+(
+kd
+Ap
+
++
+kfb
+KL
+
+)
+kvω2
+
+vkd
+τd
+
+−ω2
+v −2ζvωv kvω
+
+2
+vR
+(
+kd
+Ap
+KT − kfb
+
+(
+1− KT
+
+KL
+
+))
+0
+
+0 0 0 0 0 1
+
+KTR
+Jn
+
+0 0 0 −(Kn+KTR
+2)
+
+Jn
+−Dn
+Jn
+
+
+
+b =
+
+
+
+0
+0
+0
+
+kvω
+2
+vktm
+0
+0
+
+ (21)
+
+The outputs are the engine angle and actuator piston position
+
+y =
+
+[
+β
+xa
+
+]
+(22)
+
+The engine angle β can be taken directly from the state vector; the actual piston position is given by
+Equation 7 and therefore
+
+C =
+
+[
+0 0 0 0 1 0
+KT
+KL
+
+0 0 0 R
+(
+
+1− KT
+KL
+
+)
+0
+
+]
+. (23)
+
+3 MODAL MODEL
+
+Incorporating a modal model of the structure with the actuator dynamics allows the load path to
+be represented, hypothetically, by a structural model of arbitrary fidelity. A modal representation
+allows an analyst to isolate the modal components that contribute most significantly to the response
+and identify physical characteristics of the structure that influence the servodynamic response.
+
+Suppose the engine degrees of freedom are described by a FEM withK orthogonal modes instead
+of a rigid-body engine model (Figure 4). Associated with this FEM are the gridpoints at the two
+
+8
+
+
+
+Actuator 
+
+R
+
+
+
+x 
+
+2 2,f 1 1,f 
+
+Gimbal 
+
+Rocket body 
+
+z 
+
+Figure 4. Rocket Nozzle and Coordinate Frame
+
+attach points of the actuator. The bending equation in generalized coordinates is given by
+
+η̈ + Dη̇ + Ω2η = ΦT
+1 f1 + ΦT
+
+2 f2 + ΨT
+β (gs + gd) + ΦT
+
+0 f0 (24)
+
+where D is a viscous damping matrix, Ω2 = diag(ω2
+i ), fj is the applied force at each attach point,
+
+and gs, gd are the spring and damping torques applied at the gimbal point, respectively. The engine
+angle is described by
+
+β = (Ψβ −Ψ0)η = Ψ̃βη (25)
+
+where β ∈ R3 is, in general, a three-axis small rotation about the nominal engine position, and
+Ψβ ∈ R3×K is the mode slope on the rotating side of the engine gimbal. The external thrust load
+f0 is applied at the gimbal interface, where Φ0 ∈ R3×K is the mode shape on the fixed (thrust
+structure) side.
+
+For a freely rotating (frictionless) gimbal, this point must be unconstrained in the FEM so that the
+engine is free to pivot. Likewise, the quantity Ψ0 is the mode slope on the fixed side of the gimbal,
+or at some point in the thrust structure that corresponds to the local control actuation plane. Thus,
+β represents the rotation of the engine structure with respect to the thrust structure, which is the
+controlled quantity as represented in the simplex model. It is important to distinguish between this
+quantity and
+
+βg = Ψβη (26)
+
+which is the rotation of the engine structure with respect to the global undeformed vehicle coordi-
+nate system. Since, in general, the addition of external thrust loads, dynamic response, and varying
+boundary conditions may cause differing degrees of thrust structure deformation, βg 6= β, in gen-
+eral.
+
+9
+
+
+
+The spring and damping torques are given by
+
+gs = −Knβ +mng
+×
+0 r×nβg = −
+
+(
+KnΨ̃β −mng
+
+×
+0 r×nΨβ
+
+)
+η (27)
+
+gd = −Dnβ̇ = −DnΨ̃βη̇ (28)
+
+where the nozzle mass mn and center of mass location rn affect the gravitational load torque. The
+gravitational stiffening has been separated from the usual nozzle angular stiffness term, since it
+must be computed with respect to the global frame. It is also important to distinguish between Dn,
+representing the damping torque applied at the gimbal point, and the matrix D representing the
+modal damping. For liquid engines, the term Dn can approximate the friction of the gimbal bearing
+and account for any residual velocity-dependent damping as measured via test. For conservatism,
+D is usually chosen as a diagonal viscous damping matrix with ζi = 0.005, but Rayleigh damping
+has also been shown to compare favorably with test.
+
+It is assumed in the present discussion that these auxiliary stiffness and damping matrices are
+diagonal and have no axial components; however, this need not be the case. In the case of the
+RS-25 engine, the feedline torques are not symmetric about the gimbal axis. Compared with the
+backup structure stiffness and actuator forces, however, they are too small to measure to any degree
+of confidence. Other real effects, particularly compliance of the gimbal attach structure, may lead
+to a non-diagonal auxiliary stiffness matrix. These values can be estimated via detailed modeling
+and validated through testing.
+
+If the test structure is vertical, the external load f0 is equal to
+
+f0 = (I + βg) u0FT −mng0 (29)
+
+= FTu0 −mng0 − FTu×
+0 Ψβη. (30)
+
+where the nominal thrust unit vector is u0, and mng0 represents the weight of the engine. The first
+two terms are static and can be omitted from a linear analysis. The remaining term is the follower
+effect, and should be retained to capture the dependency of the thrust vector on the global engine
+angle.
+
+It is assumed that for the present model and to be consistent with the linearization of the finite
+element model, deflections of the engine are small angles from the nominal (null) position of the
+engine. The actuator force is resolved along a unit vector p that points along the direction of the
+actuator line of action as used in the previous section. It is not necessary that the actuator be aligned
+in any particular way with the vehicle body frame; p is directly computed from the FEM geometry.
+The applied force vectors are related to the scalar actuator force by
+
+f1 = −fap (31)
+
+f2 = fap (32)
+
+These forces excite the structure at the two points shown in Figure 4. For a single nozzle with
+two actuators, the FEM will contain two zero-frequency modes (rigid-body modes) that represent
+the equivalent of the nozzle deflections βy and βz . The remaining modes will represent the structural
+deflections. When all the modes are included, the FEM provides the total actuator output as given
+by Equation 25, and it is not necessary to distinguish between Rβ and xstr . The actuator output
+equation can be replaced by the component of the net deflection in the direction of p:
+
+10
+
+
+
+xa = pT (Φ2 −Φ1)η (33)
+
+Defining
+
+γT = pT (Φ2 −Φ1) , (34)
+
+the quantity γ is the modal compliance coefficient. It is a constant derived from the finite element
+model geometry and its eigenvectors. The modal equation and actuator position equations can now
+be written as
+
+η̈ + Dη̇ + Ω2η =
+(
+ΦT
+
+1 −ΦT
+2
+
+)
+pfa + Ψ̃β
+
+T
+(gs + gd) + ΦT
+
+0 f0 (35)
+
+= γfa + Ψ̃β
+T
+
+(gs + gd) + ΦT
+0 f0
+
+xa = γTη (36)
+
+The quantity
+
+xac = xi − xa (37)
+
+can be used to describe the actuator compliance; that is, the displacement of the actuator due to the
+compliance of the oil and actuator structure. Note that the ideal actuator position xi introduced in
+Equation 3 is not an actual displacement, but can be thought of as proportional to the time integral
+of the flow. The actuator force becomes
+
+fa = Kacxac = Kac
+
+(
+xi − γTη
+
+)
+(38)
+
+Using this expression and Equations 25 through 28, and grouping terms, the elastic equation be-
+comes
+
+η̈ = γKacxi −
+(
+D + Ψ̃T
+
+βDnΨ̃β
+
+)
+η̇ −
+
+(
+Ω2 +Kacγγ
+
+T + K̃
+)
+η + ΦT
+
+0 (FTu0 −mng0) (39)
+
+where
+K̃ = Ψ̃T
+
+β
+
+(
+KnΨ̃β −mng
+
+×
+0 r×nΨβ
+
+)
++ FTΨ0
+
+Tu×
+0 Ψβ.
+
+Note that the term Kac is equivalent to Ko as used in Section 2. It is straightforward to use Equa-
+tion 39 to extend the analysis of Section 2 and incorporate the actuator dynamics (xi). The state
+vector for the updated model can be chosen as
+
+x =
+[
+xi zd Q zv η η̇
+
+]T (40)
+
+By inserting Equation 38 into Equation 16, the pressure feedback dynamics are given by
+
+żd = − 1
+
+τd
+zd +
+
+Kac
+
+Ap
+
+(
+xi − γTη
+
+)
+(41)
+
+By using Equations 36 and 41 to modify Equation 19, the servovalve feedback expression is given
+by
+
+11
+
+
+
+żv = −2ζvωvzv−ω2
+vQ−
+
+kvω
+2
+vkd
+τd
+
+zd−
+kvω
+
+2
+vkdKac
+
+Ap
+
+(
+xi − γTη
+
+)
+−kvω2
+
+vkfbγ
+Tη+kvω
+
+2
+vktmic (42)
+
+In the generic form ẋ = Ax + bic, omitting zero-order terms, the system matrices are
+
+A =
+
+
+
+0 0 1
+Ap
+
+0 0TK 0TK
+Kac
+
+Ap
+− 1
+τd
+
+0 0 −Kac
+
+Ap
+γT 0TK
+
+0 0 0 1 0Tk 0TK
+
+−kvω
+2
+vkdKac
+
+Ap
+
+kvω
+2
+vkd
+τd
+
+−ω2
+v −2ζvωv kvω
+
+2
+v
+
+(
+kdKac
+
+Ap
+− kfb
+
+)
+γT 0TK
+
+0K 0K 0K 0K 0K×K 1K×K
+
+Kacγ 0K 0K 0K −
+(
+Ω2 +Kacγγ
+
+T + K̃
+)
+−
+(
+D + Ψ̃T
+
+βDnΨ̃β
+
+)
+
+
+
+b =
+
+
+
+0
+0
+0
+
+kvω
+2
+vktm
+
+0K
+0K
+
+ . (43)
+
+Here 0K is a null vector with K elements, 0K×K is a square null matrix of dimension K, and
+1K×K is an identity matrix of dimension K. This model is valid for a single actuator and an
+arbitrary number of engine degrees of freedom. In the MASV implementation, this structure is
+block-diagonalized with a single set of elastic modes to represent multiple actuators and engines.
+
+4 STATIC AND DYNAMIC MODES
+
+The previous section assumes that the modes from the FEM can be used to represent all of the
+deflection that results from an actuator force. Although this is possible in theory, in practice it
+becomes necessary to include a very large number of modes from the FEM in order to fully capture
+the displacements and accelerations of the attach points at the nozzle and backup structure. The
+present section introduces a method whereby the full compliance can be approximated using a only
+a small number of modes.
+
+In this technique, a frequency cutoff is defined, such that only those modes that are below this
+frequency are included in the state-space model. This set of modes is referred to as the dynamic
+modes. The modes that are not included, i.e., those that are above the cutoff, are static modes. To
+analyze these static modes, we begin with the elastic equation, neglecting the spring and damping
+torques gs, gd and external loads that are applied at the gimbal.
+
+η̈ + Dη̇ + Ω2η =
+(
+ΦT
+
+1 −ΦT
+2
+
+)
+pfa = γfa (44)
+
+In its modal representation, the system dynamics are uncoupled (diagonal), and therefore each scalar
+equation appears in the form
+
+12
+
+
+
+η̈k +Dkη̇k + Ω2
+kηk = γk fa (45)
+
+Here, k represents the mode number.
+
+The choice of cutoff frequency is based on the assumption that for modal frequencies Ωk � ωL,
+that is, much greater than the load resonance frequency, the settling time of the structural dynamics
+is such that η̈k ≈ 0 on a much faster timescale than that of the actuator dynamics. If this is the case,
+the modal displacement is directly proportional to the applied force;
+
+ηk ≈
+γk fa
+Ω2
+k
+
+, k > J (46)
+
+In this expression, it is assumed that the modes are sorted by frequency, and that J is the number
+of the highest frequency mode to be included in the dynamics. For the static modes, in scalar form,
+Equation 36 is written
+
+xa =
+∑
+
+γkηk, (47)
+
+which is composed of the sum of the effective engine displacement (xE) and the structural displace-
+ment. The structural displacement contains both a dynamic component xd and static component
+xs;
+
+xa = xE + xd + xs (48)
+
+In the simple case of one engine with two actuators and a FEM constrained to have only two free
+DoF about the gimbal, there will be two rigid-body modes. The effective displacement can be
+written as
+
+xE = γ1η1 + γ2η2. (49)
+
+Here, η1 and η2 correspond to the modes whose eigenvalues in the generalized stiffness matrix are
+equal to zero.
+
+The static and dynamic displacements are given by
+
+xs =
+K∑
+
+k=J+1
+
+γkηk ≈
+K∑
+
+k=J+1
+
+γ2k fa
+Ω2
+k
+
+(50)
+
+xd =
+J∑
+k=3
+
+γkηk (51)
+
+The load compliance can then be defined as
+
+Cs =
+xs
+fa
+
+=
+K∑
+
+i=J+1
+
+γ2k
+Ω2
+k
+
+. (52)
+
+The inverse of this quantity is Ks, which is analogous to the load stiffness in Equation 1. It is
+emphasized that this static load stiffness is only a portion of the total load stiffness, because the
+remaining dynamics are represented using lower-frequency modes from the finite element model.
+
+13
+
+
+
+In the equations of motion, overbars are used to designate the following vectors in which the
+static modes have been removed via truncation;
+
+γ̄ = [ γ1 γ2 · · · γJ ]T (53)
+
+η̄ = [ η1 η2 · · · ηJ ]T (54)
+
+The actuator displacement expression can then be partitioned as
+
+xa = γ̄T η̄ + faCs (55)
+
+The actuator force in Equation 38 can be replaced with a partitioned version;
+
+fa = Kac
+
+(
+xi − γ̄T η̄ − faCs
+
+)
+. (56)
+
+This equation can be solved for the total actuator force fa,
+
+fa = K0
+
+(
+xi − γ̄T η̄
+
+)
+(57)
+
+where
+
+K0 =
+
+(
+1
+
+Ks
++
+
+1
+
+Kac
+
+)−1
+
+. (58)
+
+Equation 57 can be used to incorporate the static stiffness using overbarred variables and substituting
+K0 forKac . Note that if J is chosen to incorporate only rigid-body modes, and a very large number
+of modes is included in calculating the static modes, Ks → KL and K0 → KT , the simplex
+approximations to the load stiffness and total stiffness, respectively. That is, the simplex model
+corresponds to the case in which all of the flexibility, except the rigid-body mode, is treated as static
+modes. A side effect of this relationship is that Equation 52 can be used to interrogate the FEM and
+determine an estimate of the load stiffness.
+
+With the partitioning included, the final form of the elastic equation becomes
+
+¨̄η = γ̄K0xi −
+(
+D + Ψ̃T
+
+βDnΨ̃β
+
+)
+˙̄η −
+
+(
+Ω2 + K̃T γ̄γ̄
+
+T + K̃
+)
+η̄ + ΦT
+
+0 (FTu0 −mng0) (59)
+
+Here, it is understood that all of the boldfaced parameters must be truncated to match the size of the
+overbarred quantities.
+
+When there is no truncation of the modes, the 3-vector of nozzle angles (a small rotation) is
+obtained from Equation 25, in which Ψ̃β is full-sized. With truncation, this expression can be
+written as
+
+β = Ψ̃βη̄ +
+
+K∑
+k=J+1
+
+ψ̃βkηk (60)
+
+14
+
+
+
+where the mode slope matrices Ψ are truncated accordingly to be consistent with Equation 59. This
+expression can be rewritten using Equations 46 and 57 such that
+
+β = Ψ̃βη̄ +K0
+
+(
+xi − γ̄T η̄
+
+) K∑
+k=J+1
+
+ψ̃βk
+γk
+Ω2
+k
+
+(61)
+
+Note that the summation is a fixed parameter that only has to be computed once. It is entirely
+reasonable to select a very large number for K, which could represent as many as several thousand
+degrees of freedom.
+
+5 RESULTS
+
+As employed on the Space Launch System program, the present approach has been used for
+a variety of detailed analyses of control-structure interaction, as represented by a detailed finite
+element model that reproduces the boundary conditions of the core stage as installed in the B-2 test
+stand at SSC, or in flight.
+
+A principal goal of these analyses was to determine the effect of higher-frequency modal con-
+tent on the servoloop stability. A representative comparison between the open-loop Nichols (log-
+magnitude frequency response) of one actuator degree of freedom in both static conditions and
+with a modal representation is shown in Figure 5. The response shown on the left includes only
+rigid-body degrees of freedom: the modal representation of the engine consists only of the eight
+unconstrained engine DoF representing pitch and yaw rotations about each gimbal point. The re-
+maining DoF (over 6,000 modes, including residual vectors) have been used to compute a static
+stiffness approximation according to Equation 52.
+
+Phase [deg]
+
+G
+a
+in
+
+ [
+d
+
+B
+]
+
+MASV (static)
+
+Simplex
+
+Phase [deg]
+
+G
+a
+in
+
+ [
+d
+
+B
+]
+
+MASV (1142 dyn. + 6324 static)
+
+Simplex
+
+Figure 5. MASV core stage actuator servo loop break, GRHF configuration. Static
+approximation (left); dynamic modes to 25 Hz (right)
+
+The dynamic model (Figure 5, right) represents the same configuration but with dynamic content
+truncated above 25 Hz. The modal representation (here, using about 1,000 dynamic modes) repro-
+duces the spring load resonance in higher fidelity. In Figure 5, the simplex model with a rigid engine
+is shown for comparison (dashed lines). The rigid-body response is identical, although the MASV
+solution exhibits slightly higher damping. In the modal representation, the coupling of the elastic
+modes through the actuators effectively distributes dissipation across multiple modes, resulting in a
+resonance that is less concentrated at a single frequency.†
+
+†This results in an effective coupled system damping matrix that is no longer diagonal.
+
+15
+
+
+
+As can be seen, the servoloop provides ample stability margin for variable load resonances in both
+gain, phase, and frequency. In fact, the range of load resonances that can be tolerated by the RS-25
+servoactuator is roughly one octave, between about 6 Hz and 12 Hz. In the absence of friction,
+variations in this range produce a relatively small change in the transient performance characteris-
+tics. However, the coupling of gimbal bearing friction and the load compliance is significant. These
+effects are discussed in more detail in the companion papers.6, 8
+
+In order to determine the appropriate cutoff frequency, a convergence study was implemented as
+part of the MASV workflow. The results of a typical convergence analysis are shown in Figure 6,
+shown here for the Green Run hot fire configuration. The load stiffness as computed by MASV is in
+family with values computed using other finite element analysis techniques.‡ Although the backup
+structure is slightly different for adjacent actuator degrees of freedom, the effective load stiffness
+is approximately the same for all gimbal DoF. As discussed in Refs.6, 8 the as-tested value was
+significantly lower in the non-firing condition, in part due to compliance in the gimbal bearing and
+small-amplitude nonlinearities associated with the actuator and structure. Subsequent frequency
+identification during hot fire showed that the thrusting condition stiffness was closer to the value
+predicted by the finite element model with propellant pressurization and cryo loading effects, and the
+remaining increase in the apparent load resonance frequency could be accounted for by the interplay
+of friction, mechanical deadbands, nonlinear load response, and gimbal bearing elasticity.5, 7, 8
+
+Cutoff frequency [Hz]
+
+s
+ta
+
+ti
+c
+ s
+
+ti
+ff
+n
+e
+s
+s
+
+K
+L
+
+Figure 6. Computation of Ks as a function of modal frequency
+
+Finally, MASV was used to produce both the closed-loop engine transient response and actuator
+piston transfer functions, to compare with those data as telemetered during test using string po-
+tentiometer and piston position feedback measurements (Figure 7). Piston position is the primary
+measure of the frequency of the load (anti)resonance,6 and while engine position information was
+not available during the first flight of Artemis I, the correlated models incorporate system identifica-
+tion data and are used to predict the flight performance.8 Here, the closed-loop piston antiresonance
+(notch) frequency appears close to 9.5 Hz, which is consistent with the MASV predictions for the
+flight configuration.
+
+‡The reader is cautioned that depending on the technique, direct querying of a FEM can produce misleading results in
+
+16
+
+
+
+Frequency [Hz]
+-300
+
+-200
+
+-100
+
+0
+
+P
+h
+
+a
+s
+e
+ [
+
+d
+e
+g
+
+]
+
+-20
+
+-10
+
+0
+
+G
+a
+in
+
+ [
+d
+
+B
+]
+
+MASV (1142 dyn. + 6324 static)
+
+Simplex
+
+Figure 7. RS-25 actuator piston transfer function, GRHF configuration
+
+6 CONCLUSIONS
+
+In certain highly-coupled thrust vector control systems, and especially those used for vectoring
+of multiple liquid engines, it may be necessary to capture dynamic effects that span a wide spec-
+trum of local and global structural modes. The present approach provides an analysis framework
+for incorporating potentially thousands of modes into a fully-coupled, multi-actuator simulation.
+Importantly, MASV and related formulations can be used to elucidate effects from a finite element
+model representation of the thrust structure that are not immediately obvious considering only the
+structural dynamics or the actuator dynamics alone.
+
+The simplex formation, where the engine load response is approximated by a rigid inertia and a
+spring, is a reliable design tool for flight control performance and stability analysis unless friction or
+gimbal elasticity cannot be represented in a single plane.5 However, it is important to consider that
+these simplified design models should be verified using a higher-fidelity approach to ensure that no
+adverse coupling can occur. Design models should be anchored to hot fire test data, especially when
+any or all of the components do not have a validated modeling pedigree in the flight configuration.
+
+ACKNOWLEDGEMENTS
+
+The authors would like to thank Carl Leake, Abhi Jain, and Arash Kalantari of JPL as well as
+Ivan Bertaska (MSFC) and Jeff Brouwer (Troy 7, Inc.) for their assistance in verifying the MASV
+implementation using DARTS. This work was supported by the NASA Marshall Space Flight Center
+under contract number 80MSFC18C0011.
+
+determining the TVC load stiffness.
+
+17
+
+
+
+REFERENCES
+[1] Jain, A., "DARTS - Multibody Modeling, Simulation and Analysis Software", 2019 Multibody Dynam-
+
+ics, ed. Andrés Kecskeméthy, Francisco Geu Flores, Springer, 2019.
+[2] Schutte, et al., "Development and Verification of a Pipeline for Modeling Flexible Multibody Dynam-
+
+ics", NESC Technical Memo, NASA/TM−2020-5008164, NESC-RP-18-01312, August 2020.
+[3] Stuart, B., et al., “Overview of the SLS Core Stage Thrust Vector Control System Design,” AAS 23-152,
+
+American Astronautical Society Guidance, Navigation, and Control Conference, February 2023.
+[4] Stuart, B., et al., “Core Stage TVC Systems Engineering Challenges in Reusing Heritage Hardware,”
+
+AAS 23-154, American Astronautical Society Guidance, Navigation, and Control Conference, February
+2023.
+
+[5] Russell, C., et al., “Gimbal Bearing Friction in the SLS Core Stage Thrust Vector Control System,”
+AAS 23-155, American Astronautical Society Guidance, Navigation, and Control Conference, February
+2023.
+
+[6] Wall, J., et al., “Design, Instrumentation, and Data Analysis for the SLS Core Stage Green Run Test
+Series,” AAS 23-156, American Astronautical Society Guidance, Navigation, and Control Conference,
+February 2023.
+
+[7] Moore, R., et al., “Structural Dynamics Observations in Space Launch System Green Run Hot Fire
+Testing,” AAS 23-157, American Astronautical Society Guidance, Navigation, and Control Conference,
+February 2023.
+
+[8] Wall, J., et al., “Flight Performance and Stability of Space Launch System Core Stage Thrust Vector
+Control,” AAS 23-158, American Astronautical Society Guidance, Navigation, and Control Confer-
+ence, February 2023.
+
+[9] Orr, J., Wall, J., and Barrows, T., “Simulation-Based Analysis and Prediction of Thrust Vector Ser-
+voelastic Coupling,” AAS 20-091, American Astronautical Society Guidance, Navigation, and Control
+Conference, February 2020.
+
+[10] Thompson, Z., and Hung, J.C., “A Mathematical Model for a Space Vehicle Thrust Vector Control
+System,” Scientific Report no. 15, Control Theory Group, University of Tennessee, August 24, 1967.
+
+18
+
+
+	Introduction
+	Traditional Model
+	Multiple Actuator Stage Vectoring (MASV) Model
+
+	Simplex Model
+	Modal Model
+	Static and Dynamic Modes
+	Results
+	Conclusions
+

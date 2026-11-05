@@ -1,0 +1,1636 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Modeling Validation and Its Design Relevance for NTP Fuel Elements
+
+
+1 
+
+ 
+
+Modeling Validation and Its Design 
+
+Relevance for NTP Fuel Elements 
+
+Mark E. M. Stewart1   
+HX5 at NASA Glenn Research Center, Cleveland, OH, 44135, USA 
+
+The development of Nuclear Thermal Propulsion engines depends heavily on modeling and 
+
+simulation of several disciplines—neutronic / fluid / thermal / structural are only a start.  
+
+Further, these rockets involve extreme conditions, particularly high material temperatures in 
+
+the nuclear fuel. This paper considers validation of the underling physical models and 
+
+simulations and how their accuracy influences several design challenges. Several issues are 
+
+identified, where models, material data, could enable design solutions.  In particular, thermal 
+
+and CTE mismatch stresses are a concern, and stress predictions would benefit from improved 
+
+mechanical property data at high temperatures. Nuclear inter-element heating causes 
+
+propellant flow maldistribution and performance risks, but a simple model provides insights. 
+
+High temperature chemical diffusion should be modeled to understand fuel element mass loss.   
+
+I. Nomenclature 
+
+A = area, m2  
+
+CFD = computational fluid dynamics 
+
+Cp = specific heat, J/kg-K 
+
+CTE, α = coefficient of thermal expansion (secant method), m/m-K 
+
+Cspecie = specie concentration 
+
+D = coolant channel diameter, m 
+
+DI = interaction depth, mm 
+
+E = modulus of elasticity, Pa 
+
+𝐸𝑎  = activation energy of permeating species, J/mol 
+fturb = turbulent Fanning friction factor, dimensionless 
+
+HEU = highly enriched uranium 
+
+I, I0 = particle beam intensity, initial intensity, number/s 
+
+Isp = specific impulse (vacuum), s 
+
+J = index 
+
+k = coefficient of thermal conductivity, W/m-K 
+
+LEU = low enriched uranium 
+
+M = Mach number, dimensionless 
+
+MCNP = Monte Carlo n-particle transport, a neutronics simulation code 
+
+�̇� = mass flow rate, kg/s 
+n = surface normal direction, away from solid 
+
+𝑁𝑎 = number density of target particles, here U-235 nuclei, number/cc 
+NTP = nuclear thermal propulsion 
+
+O( ) = order of magnitude approximation 
+
+P,P = pressure, pressure drop, Pa 
+PPF = power peaking factor, ratio of local (channel) power density, Q, to fuel element average, dimensionless 
+
+Pr = Prandtl number, dimensionless 
+
+q = heat flux, W/m2  
+
+Q = volumetric heat deposition rate, equivalently power density, W/m3  
+
+ 
+1 Senior Research Scientist, AIAA (Senior) Member 
+
+
+
+2 
+
+ 
+
+r, 𝑟0, 𝑟1 = radial distance to coolant channel center, borehole radius of fuel, maximum radius, m 
+R = universal gas constant, J/mol-K 
+
+Re = Reynolds number based on coolant channel diameter, dimensionless 
+
+s = half coolant channel pitch, m; seconds, s 
+
+SNRE = small nuclear rocket engine 
+
+t = time, s 
+
+T = temperature, K 
+
+𝑇𝑆𝐹  = stress-free temperature, or fabrication temperature, K 
+𝑢, 𝑣 = axial, radial displacements, for stress-strain, m 
+U = fluid velocity, m/s 
+
+z = axial distance from channel inlet, m 
+
+, CTE = coefficient of thermal expansion (secant method), m/m-K 
+𝛾 = ratio of specific heats, dimensionless 
+𝛥𝐽  = Sparrow equation coefficients, K 
+
+𝜀𝑟 , 𝜀𝜃 , 𝜀𝑧  = structural strain, in radial, circumferential, and axial directions, m/m 
+𝜃 = circumferential coordinate in polar coordinates, rad 
+𝜈 = Poisson’s ratio, dimensionless 
+ = density, kg/m3  
+𝜎 = nuclear cross section, 𝜎𝑓 -fission, 𝜎𝑒 -elastic, 𝜎𝛾 -radiative capture, cm
+
+2  
+
+𝜎𝑟 , 𝜎𝜃 , 𝜎𝑧   = structural stress in radial, circumferential, and axial directions, Pa 
+τw = shear stress at the wall, Pa 
+𝜓 = thermoelastic displacement potential, for stress-strain 
+w/b = wall / bulk conditions 
+
+in/out = inlet / outlet 
+
+0/1 = inner / outer 
+
+II. Introduction 
+
+Modeling and simulation are appealing in a broad range of scientific and engineering fields. Predictions are valuable 
+
+to designs, computers are fast, costs are low, and designs are becoming increasingly complex. Yet the gold standard 
+
+remains experimental testing. In a test, Mother Nature gets all the physics right: all disciplines are tested together—
+
+plus their interactions, transients, controls and fabrication.  Modeling and simulation are more piecemeal: even the 
+
+best, foreseeable multidisciplinary simulations are unlikely to capture all the subtle disciplines, nor their interactions.  
+
+Do we currently capture acoustic disturbances in coolant tubes with their structural consequences and importance? 
+
+The more important question is: what physics do we need to capture for a viable design? 
+
+The perspective of this paper is that validation is important in complex 
+
+simulations but understanding a design’s constraints is also important. 
+
+Aggressive, novel designs have design challenges. Nuclear Thermal 
+
+Propulsion (NTP) rockets have the promise of high levels of thrust while 
+
+efficiently using propellant. Uniquely for a rocket, nuclear heat is 
+
+deposited in the solid fuel, diffuses to nearby coolant channels containing 
+
+flowing propellant; fuel is cooled, propellant is heated. In contrast, 
+
+chemical rockets and jet engines release heat directly into the gas phase; 
+
+incidentally, walls are carefully cooled. For NTP rockets, propellant 
+
+temperature is performance—higher temperature is better (Isp increases by 
+
+17 s for every 100K increase in mean propellant temperature). Yet, when 
+
+the heat originates in solid fuel, this reactor fuel presents new design 
+
+issues.  Not only material temperatures, but many disciplines are pushed 
+
+to their limits.  Further, other rocket components (nozzles, turbopumps, 
+
+and valves) have been operationally proven, while NTP fuel elements are 
+
+relatively unproven. 
+
+ 
+
+There are limitations to the scope of this work. Validation is 
+
+specialized to NTP hexagonal fuel/moderator elements (Figure 1) and a 
+
+reactor configuration which was first used in the Rover/NERVA program 
+
+[1].  Other reactor types include the Russian ribbon fuel [2] and pebble bed 
+
+ 
+
+Figure 1: Simulations and their 
+
+validation involve fuel element / 
+
+moderator element reactor designs.  
+
+Particle bed and ribbon fuels are not 
+
+currently simulated. 
+
+ 
+
+
+
+3 
+
+ 
+
+[3] reactor designs. This work does not consider many other pacing issues in NTP design, including: long term liquid 
+
+hydrogen storage in space, valve leakage, material property changes in a reactor’s radiation field. 
+
+The following sections break down current multidisciplinary simulations into their disciplines, the equations 
+
+solved, and how these predictions are validated.  Further, validations are emphasized according to important design 
+
+issues.  When limited testing and experimental data exists, validation is careful comparisons with other solutions. 
+
+III. Basic Validation and Verification 
+
+1. Conservation of Mass, Momentum and Energy 
+In fluid solutions, conservation of mass, momentum and energy are routinely verified. Further, convergence is 
+
+carefully monitored to ensure the best practical convergence.  Lastly, solutions are carefully examined and checked.   
+
+2. Propellant Outlet Mean Temperature 
+Propellant outlet mean temperature is validated readily, by comparing with an energy balance equation, Eq. (1).  
+
+Heat is conserved by the numerical scheme, so all deposited heat, Q, is transferred to the propellant and exits at the 
+
+fluid outlet boundary.  Consequently, propellant outlet mean temperature is a material property: hydrogen specific 
+
+heat, Cp. It is dependent solely on the specified total nuclear heat deposition and the specified propellant flow rate. 
+
+∫ 𝑄 𝑑𝑉𝑜𝑙
+𝐹𝑢𝑒𝑙
+
+=  ∫ 𝜌𝑈 ∫ 𝐶𝑝 𝑑𝑇
+𝑇𝑜𝑢𝑡
+
+𝑇𝑖𝑛
+ 𝑑𝐴
+
+𝑜𝑢𝑡
+ ,  in steady conditions                           (1) 
+
+IV. Disciplines, Equations & Solution Validation: 
+
+The author’s multidisciplinary simulations for NTP [4] [5] [6] involve neutronic / fluid / thermal / structural 
+
+simulations which solve 3D equations in complex, fuel element / moderator element geometries (Figure 1). The 
+
+following sections consider each of these disciplines, with a focus on the equations solved, validation, and relevance 
+
+to design challenges. Ideally. validation is typically comparison with a closed-form solution. 
+
+A. Thermal Simulations 
+
+Fluid / thermal simulation and 
+
+predictions come from ANSYS 
+
+Multiphysics [7] [8], which combines 
+
+FLOTRAN for the fluid analysis, 
+
+ANSYS Thermal for the thermal 
+
+analysis, and ANSYS Structural for 
+
+the stress analysis. 
+
+1. Heat Diffusion in Solid 
+One important discipline is 
+
+calculating heat flow through a solid 
+
+material.  The physics is thermal 
+
+diffusion; the equation, 
+
+ 𝜌 𝐶𝑝
+𝜕𝑇
+
+𝜕𝑡
+=  ∇ ∙ (𝑘 ∇𝑇) + 𝑄     (2) 
+
+has a simple, stable numerical 
+
+solution; and thermal conductivities, 
+
+k(T), are measured [9], with consensus, to high temperatures for many materials, but not all.  A closed-form solution, 
+
+Eq. (3), exists [10] [11] for validation. This two-dimensional solution is specialized to the symmetry of a coolant tube 
+
+array, as shown in Figure 2, with no coating or cladding, and uniform heating. 
+
+ 𝑇(𝑟, 𝜃) − 𝑇𝑤𝑎𝑙𝑙  =  
+𝑄
+
+𝑘
+𝑠2 [
+
+√3
+
+𝜋
+ln (
+
+𝑟
+
+𝑟0
+) −  
+
+1
+
+4
+[(
+
+𝑟
+
+𝑠
+)
+
+2
+
+− (
+𝑟0
+
+𝑠
+)
+
+2
+
+] + ∑ 𝑇𝐽 (𝑟) cos 6𝐽𝜃𝐽=1  ]     (3) 
+
+ 
+
+Figure 2: Temperature in a fuel element with symmetrical coolant tube 
+
+spacing and uniform heating. The triangular region tiles or covers the 
+
+section—reflecting over any face preserves the geometry.  Temperature 
+
+and 2D heat diffusion are predicted by the Sparrow equation [10], Eq. 
+
+(3). Outside the tube array—at the fuel element edges—symmetry fails 
+
+as does the closed-form temperature prediction.  
+
+ 
+
+r
+
+
+r
+
+
+
+
+4 
+
+ 
+
+𝑇𝐽 (𝑟) =  
+∆𝐽
+
+6𝐽
+(
+
+𝑟
+
+𝑠
+)
+
+6𝐽
+
+[1 − (
+𝑟0
+
+𝑟
+)
+
+12𝐽
+
+]                                                             (3-b) 
+
+Figure 3 shows the disagreement (or 
+
+error) between the closed form solution, Eq. 
+
+(3), and simulation. The temperature range is 
+
+order O(170 K), and the error is less than 
+
+0.015 K throughout the triangular region.  
+
+The simulation does not include channel 
+
+coating or cladding—only homogenized 
+
+fuel; thermal conductivity, k, and volumetric 
+
+heat deposition, Q, are constant radially and 
+
+axially. 
+
+One consideration is the composition of 
+
+the fuel. Modeling prefers uniform, isotropic 
+
+solid materials. In reality, a volume of fuel 
+
+may contain many fuel particles in a distinct 
+
+matrix material or be sintered from a powder 
+
+mixture. Ideally, experimental 
+
+measurements provide homogenized 
+
+(averaged) material properties for these 
+
+simulations; often, carefully devised 
+
+mathematical methods can estimate these 
+
+homogenized properties. 
+
+B.  Fluid / Thermal Simulations 
+
+In an NTP rocket engine, nuclear heat is deposited in the solid fuel, and diffuses to nearby coolant channels 
+
+containing flowing hydrogen propellant.  Heat transfer at the wall is not trivial to model. As indicated in Figure 4, 
+
+local heat transfer depends on the slope 
+𝜕𝑇
+
+𝜕𝑛
+ at the wall for solid, Eq. (2), and fluid. In the CFD fluid calculation, the 
+
+boundary layer’s velocity and temperature profiles must be accurately calculated.  Heat transfer correlations exploit a 
+
+mathematical trick: similarity solutions for the non-dimensionalized Navier-Stokes equations. 
+
+1. Fluid / Solid Heat Transfer: 
+Heat Transfer Correlations  
+
+Heat transfer correlations are a 
+
+common method of calculating 
+
+this local heat transfer (Figure 4). 
+
+Equation (4) gives the SNRE 
+
+standard formula [12, pp. 138, Vol 
+
+2], and there are a number of 
+
+similar correlations [13]. 
+
+It is helpful to understanding 
+
+the origin of heat transfer 
+
+correlations, like Eq. (4).  The 
+
+underlying idea is a similarity 
+
+solution: scaling the non-
+
+dimensionalized Navier-Stokes 
+
+equations. In this form, the 
+
+momentum equations have only 
+
+one parameter: Reynolds number, 
+
+Re. Adding the heat equation adds 
+
+another parameter: Prandtl number, Pr. For two different problems (say flow in two different pipes, different radii, 
+
+fluids, temperatures, pressures), if you match these two numbers (in similar geometry), the solutions are the same—
+
+ 
+
+Figure 4: Heat transfer from solid to fluid depends on calculating the 
+
+slope 
+𝝏𝑻
+
+𝝏𝒏
+ normal to the wall (circle) through a boundary layer—much 
+
+harder than calculating the surface pressure, P, which is constant 
+
+through a boundary layer. 
+
+ 
+
+ 
+Figure 3: Comparison of thermal simulation and closed-form 
+
+solution.  The discrepancy or error is less than 0.015 K while the 
+
+temperature range in the solution is ~170 K. 
+
+ 
+
+
+
+5 
+
+ 
+
+heat flow too2. If experiments measure heat flux, q, over many values of Re and Pr, then q is a function of Re and Pr.  
+
+Fitting this experimental data [14] will reveal the exponents and coefficient in Eq. (4). Note that the experimental data 
+
+[14] is hydrogen and helium in a tube at NTP temperatures—custom data from the NERVA/Rover program. Note Eq. 
+
+(4) is very similar to the Dittus-Boelter equation; exponents and coefficients are very different for other geometries 
+
+like flat plate heat transfer. 
+
+𝑞 = 0.023 
+𝑘𝑏
+
+𝐷𝑏
+ 𝑅𝑒𝑏
+
+0.8 𝑃𝑟𝑏
+0.4  (
+
+𝑇𝑤
+
+𝑇𝑏
+)
+
+[−0.57− 
+1.59
+𝑧
+
+𝐷𝑏
+⁄
+
+]
+
+                                               (4) 
+
+2. Fluid / Solid Heat Transfer: Validation 
+Comparison of CFD and the heat transfer correlation Eq. (4) is a strong validation—these starkly independent 
+
+methods should make similar predictions. Figure 5 graphs the ratio of heat fluxes, q, given by correlation, Eq. (4), and 
+
+numerical simulation [6] axially along multiple wall locations.  Figure 5 suggests general agreement to ~25%, with 
+
+CFD predicting more heat transfer than the correlation. 
+
+ 
+2 There is fine print. Typically, the pipe flow scaled solution is fully developed flow— ~20 diameters from an inlet—
+
+otherwise it is not truly a scaled solution, only an approximation.  If flow accelerates due to high heating and 
+
+expansion, is it still a scaled solution? 
+
+ 
+
+Figure 5: Comparison (left) between heat transfer correlations and CFD [6] by plotting the heat flux, q, ratio, 
+
+correlation to CFD.  Sample locations are shown at right. Edge coolant channels behave differently.  Vertical 
+
+asymptotes occur when heat transfer reverses sign at different axial locations. 
+
+ 
+
+ 
+
+Figure 6: Peak heat deposition (left) occurs mid fuel element. Over/under predictions of solid/fluid heat flux 
+
+may decrease/increase the wall and fuel temperature. 
+
+
+
+6 
+
+ 
+
+A rule of thumb in CFD is that surface pressure (lift and drag) can be predicted to within 1%, but heat transfer 
+
+within 10% is doing well.  The operational conclusion is agreement to 25% for a difficult calculation, while looking 
+
+for a more satisfactory resolution. 
+
+What are the consequences of inaccurate fluid/solid heat flux predictions from CFD?  It could be worse. Heat is 
+
+conserved numerically, so all heat is transferred to the fluid and exits at the fluid outlet boundary. However, wall and 
+
+fuel temperatures (Figure 6) are likely over/under predicted, particularly in high heat flux locations and not likely 
+
+where the fuel is hottest.  Where fuel temperatures are hottest—at the hot end with low nuclear heat deposition—heat 
+
+flux is low, and temperatures are dominated by the propellant temperature. 
+
+3. Coolant Channel Pressure Drop Verification 
+Coolant channel pressure drop is traditionally predicted with Eq. (5); here the first RHS term. The Fanning friction 
+
+factor, 𝑓𝑡𝑢𝑟𝑏, is given by a correlation Eq. (6), and was fitted [15] so that 90% of experimental data falls within ±10%. 
+
+∆𝑃 =  −
+1
+
+2
+∆𝜌𝑈2̅̅ ̅̅ ̅ −  𝑓𝑡𝑢𝑟𝑏 (
+
+1
+
+2
+𝜌𝑈2̅̅ ̅̅ ̅)
+
+2 ∆𝑧
+
+𝐷𝑏
+           (5) 
+
+ 𝑓𝑡𝑢𝑟𝑏 =  
+𝜏𝑤
+
+1
+
+2
+𝜌𝑈2̅̅ ̅̅ ̅̅
+
+=  (0.0014 +  
+0.125
+
+𝑅𝑒0.32
+) (
+
+𝑇𝑏
+
+𝑇𝑤
+)
+
+1/2
+
+          (6) 
+
+A comparison between this correlation and CFD results is not yet complete. 
+
+C.  Stress and Strain Simulations in Fuel Elements 
+For NTP fuel and fuel elements, large stresses accompany 
+
+high nuclear heat deposition, large temperature ranges and 
+
+gradients. Also, coatings (coolant channels and exterior) 
+
+introduce CTE mismatch stresses.  Russian NTP designs (no 
+
+coatings) also emphasize the relevance of thermal stresses [2, p. 
+
+306] and there is considerable Russian research [16]. 
+
+Multidisciplinary simulations [4] capture these stresses, and 
+
+closed-form solutions can almost validate them; yet, these 
+
+solutions do provide valuable insights.  
+
+1. Closed-Form Stress-Strain Solutions for Fuel 
+Timoshenko and Goodier [17, pp. 481, 443] give a closed-
+
+form solution, Eq. (7), for stress/strain equations (plane strain) 
+
+with arbitrary temperature distributions in polar coordinates. 
+
+Figure 7 shows the intended domain and boundary conditions3.  
+
+𝜓(𝑟,  ) =  𝜓0(𝑟) + ∑ 𝜓𝐽 (𝑟)
+∞
+𝐽=1 cos 6𝐽             (7-a) 
+
+𝑢 =  
+𝜕𝜓
+
+𝜕𝑟
+,                   𝑣 =  
+
+1
+
+𝑟
+
+𝜕𝜓
+
+𝜕
+,              (7-b, -c) 
+
+ 𝜀𝑟 =  
+𝜕𝑢
+
+𝜕𝑟
+,               𝜀𝜃 =  
+
+𝑢
+
+𝑟
++  
+
+1
+
+𝑟
+
+𝜕𝑣
+
+𝜕𝜃
+          (7-d, -e) 
+
+The radial solution, 𝜓0(𝑟), gives the dominant radially dependent stresses of Eq. (8), [17, p. 444],  
+
+𝜎𝑟 (𝑟) =  −
+𝛼𝐸
+
+1−𝜈
+ 
+
+1
+
+𝑟2
+∫ (𝑇(𝑟) − 𝑇𝑆𝐹 ) 𝑟 𝑑𝑟
+
+𝑟
+
+𝑟0
++  
+
+𝐸
+
+1+𝜈
+ (
+
+𝐶1
+
+1−2𝜈
+−  𝐶2
+
+1
+
+𝑟2
+)                                (8-a) 
+
+𝜎𝜃 (𝑟) =     
+𝛼𝐸
+
+1−𝜈
+ 
+
+1
+
+𝑟2
+∫ (𝑇(𝑟) − 𝑇𝑆𝐹 ) 𝑟 𝑑𝑟
+
+𝑟
+
+𝑟0
++  
+
+𝐸
+
+1+𝜈
+ (
+
+𝐶1
+
+1−2𝜈
++  𝐶2
+
+1
+
+𝑟2
+) −
+
+𝛼𝐸(𝑇−𝑇𝑆𝐹)
+
+1−𝜈
+        (8-b) 
+
+𝜎𝑧 (𝑟) =  −
+𝛼𝐸(𝑇−𝑇𝑆𝐹)
+
+1−𝜈
++
+
+2𝜈𝐸𝐶1
+
+(1+𝜈)(1−2𝜈)
++ 𝐶3                                              (8-c) 
+
+ 
+3 Currently, these solutions satisfy all boundary conditions but one, as explained in Figure 7. Applicable remote 
+
+from axial ends. 
+
+ 
+
+Figure 7: Boundary conditions for stress-
+
+strain equations.  Hexagonal symmetry is 
+
+ensured by the condition 
+𝝏𝜺𝒓
+
+𝝏𝜽
+=
+
+𝝏𝜺𝜽
+
+𝝏𝜽
+= 𝟎 on the 
+
+two radial lines.  Currently, the condition 
+𝝏𝜺𝒓
+
+𝝏𝒏
+=
+
+𝝏𝜺𝜽
+
+𝝏𝒏
+= 𝟎 is not satisfied. 
+
+ 
+
+r
+
+
+
+7 
+
+ 
+
+based on the temperature, 𝑇(𝑟), given by the radial component of Eq. (3).  The constants 𝐶1, 𝐶2, 𝐶3 must satisfy 
+boundary conditions. The 𝑟 − 𝜃 solutions, 𝜓𝐽 (𝑟) cos 6𝐽, are given by Eq. (9). 
+
+𝜓𝐽(𝑟) =  −
+1+𝜈
+
+1−𝜈
+
+𝛼
+
+12𝐽
+[ 𝑟6𝐽 ∫ 𝑇𝐽(𝜌)𝜌
+
+1−6𝐽𝑑𝜌 
+𝑟1
+
+𝑟
++ 𝑟−6𝐽 ∫ 𝑇𝐽(𝜌)𝜌
+
+1+6𝐽𝑑𝜌 
+𝑟
+
+𝑟0
+]     (9) 
+
+where 𝑇𝐽 (𝑟) are the radial terms in Eq. (3-b); 𝜌 is a dummy integration variable. These functions are polynomials in 
+
+radial distance, 𝑟. Note that the cos 6𝐽  term ensures hexagonal symmetry. 
+A factor which aids validation and analysis is linearity of the stress-strain equations.  In the linear elastic region, 
+
+𝜀𝑟 −  𝛼 (𝑇 − 𝑇𝑆𝐹 ) =  
+1
+
+𝐸
+[𝜎𝑟 −  𝜈(𝜎𝜃 + 𝜎𝑧 )]   (similarly for 𝜀𝜃 , 𝜀𝑧 ; E, ,  constant), solutions can be added.  Hence, 
+
+different stresses—including thermal and CTE mismatch stresses—can each be analyzed and compared in isolation, 
+
+then added together for the net stress. For example and comparison, Roark [18, p. 376] gives, for a thin cylindrical 
+
+shell, the thermal stress term 
+𝛼𝐸𝑇
+
+1−𝜈
+ balanced between 𝜎𝜃 =  𝜎𝑧 =
+
+𝑇1−𝑇0
+
+2
+
+𝛼𝐸
+
+1−𝜈
+ at inner and outer radii, tension and 
+
+compression respectively for 𝑇1 > 𝑇0. 
+
+2. CTE Mismatch Stress 
+When different materials are bonded, and 
+
+temperature differs from the fabrication 
+
+temperature, the result is thermal expansion 
+
+differences and CTE mismatch stresses (Figure 8). 
+
+Since they occur at the fuel/coating interface (and 
+
+coating is generally weaker), they are more likely 
+
+to cause coating fracture and failure. Depending 
+
+on coating, cracking or blistering is possible. 
+
+Equation (8) can accommodate CTE mismatch 
+
+stresses.  In particular, Eq. (8) applies to both 
+
+coating(s) and fuel individually with, of course, 
+
+different properties, 𝐸, 𝛼, 𝜈, and constants, 𝐶𝑖 . At 
+interfaces, strains 𝜀𝑟 , 𝜀𝜃  must be continuous. 
+3. Stress / Strain Validation Conclusions 
+
+Equation (8) is insightful in understanding the 
+
+importance of design choices, including heat 
+
+deposition level, coating material and thickness. 
+
+Currently, one boundary condition (Figure 7) 
+
+cannot be satisfied, so validation is out of reach, for now. 
+
+D. Neutronic Analysis: Code Verification and Cross Section Validation  
+Neutronic analysis [6] is done with MCNP6 [19] [20] using ENDFB-VII.1 cross section data [21]. MCNP is used 
+
+extensively in the United States and the international community, and the MCNP development team takes code 
+
+verification and validation very seriously [22]. In particular, benchmark problems and results are published [22] [23] 
+
+[24].  These benchmarks compare against both analytical solutions and experimental results. 
+
+1. Cross Section Validation 
+The nuclear community is focused on nuclear cross-section validation and improvement. Reference [25] explains 
+
+contemporary issues in U235 cross section data validation.  
+
+2. Validation Conclusions 
+Realistically, errors are more likely to come from the user, rather than the code. 
+
+3. NTP Design Relevance: Axial and Radial Nuclear Heat Deposition 
+MCNP simulations confirm design details including nuclear criticality, fuel loading, drum worth. However, for 
+
+multidisciplinary simulations, they also generate reactor axial (Figure 6 (left)) and fuel element radial (Figure 9) 
+
+nuclear heat deposition profiles. Axial profiles are scaled to the reactor design power, and become the Q term in the 
+
+thermal equation, Eq. (2). 
+
+ 
+
+Figure 8: CTE mismatch stresses are a dominant fuel 
+
+element stress, and can cause coating failure [1]. Tension 
+
+and compression depend on 𝜶𝒇𝒖𝒆𝒍 , 𝜶𝒄𝒐𝒂𝒕𝒊𝒏𝒈, fabrication 
+
+temperature. 
+
+ 
+
+
+
+8 
+
+ 
+
+With ~20% of the fissionable U-235 atoms of HEU, LEU designs 
+
+must increase fission probabilities to achieve criticality. Using low 
+
+absorption materials helps, but the dominant trick is using U-235’s 
+
+higher fission cross section for lower energy, thermal neutrons.  Fission 
+
+probability increases by a factor of O(10) as neutron energies drop 
+
+from epithermal to thermal. Practically, more moderator elements are 
+
+added to the reactor, compared with an epithermal reactor like the 
+
+SNRE [4] [12]. 
+
+4. Inter-Element Heating 
+An important design issue is non-uniform, radial heating of fuel 
+
+elements (Figure 9), or inter-element heating [26, p. 529].  The thermal 
+
+neutrons that return to fuel elements—after losing fission energy to 
+
+collisions in the moderator—preferentially fission near the edges of 
+
+fuel elements. This non-uniform heat deposition is apparent in Figure 
+
+9.  
+
+Inter-element heating is important for high performance of NTP 
+
+engines. In a rocket, performance (specific impulse, Isp) requires the 
+
+highest possible mean outlet temperatures. With maximum 
+
+temperature limited by fuel materials, the hottest channel (highest 
+
+PPF) becomes the limiter, and broad heat deposition variations impede 
+
+performance. 
+
+There is also a design challenge for fluid dynamics.  For 
+
+a common pressure drop across all coolant channels, the 
+
+ones draining different amounts of heat have very different 
+
+mass flows and outlet temperatures. In fact, channels with 
+
+more heating are starved for coolant, while tubes with less 
+
+heat are flooded with coolant. Analytically, Rayleigh flow 
+
+[27] is a very good model, Eq. (10), namely, a constant area 
+
+duct, with heat addition, and frictionless flow.  Figure 10 
+
+shows Eq. (10) solutions for a constant pressure drop and a 
+
+range of channel PPFs.  Further, it shows that high PPF 
+
+channels are starved for coolant flow—the ideal response 
+
+curve has a slope of opposite sign. 
+
+𝑃𝑜𝑢𝑡
+
+𝑃𝑖𝑛
+=  
+
+1+𝛾 𝑀𝑖𝑛
+2
+
+1+𝛾 𝑀𝑜𝑢𝑡
+2       
+
+𝑇𝑜𝑢𝑡
+
+𝑇𝑖𝑛
+=  [
+
+𝑀𝑜𝑢𝑡
+
+𝑀𝑖𝑛
+ 
+
+1+𝛾 𝑀𝑖𝑛
+2
+
+1+𝛾 𝑀𝑜𝑢𝑡
+2  ]
+
+2
+
+ (10) 
+
+𝑃𝑃𝐹𝑐ℎ𝑎𝑛 =
+∫    𝑄 𝑑𝑉𝑜𝑙𝑐ℎ𝑎𝑛
+
+∫ 𝑄 𝑑𝑉𝑜𝑙𝑎𝑣𝑔 𝑐ℎ𝑎𝑛
+
+=
+(𝑇𝑜𝑢𝑡−𝑇𝑖𝑛)𝑐ℎ𝑎𝑛 𝑀𝑖𝑛
+(𝑇𝑜𝑢𝑡−𝑇𝑖𝑛)𝑎𝑣𝑔 𝑀𝑖𝑛
+
+ (11) 
+
+5. A Neutronic Model for Inter-Element Heating  
+There is a helpful model of inter-element heating; it 
+
+provides both design guidance and code validation. From 
+
+the definition of a nuclear cross section, 𝜎, [26, p. 20], the 
+interaction of particles with target particles is given by 
+
+𝜎 𝑁𝑎  𝑑𝑥 = −  
+𝑑𝐼
+
+𝐼
+                       (12-a)  
+
+For a beam of intensity 𝐼0 incident on a material (Figure 11), 
+the solution is, 
+
+𝐼(𝑥) = 𝐼0 𝑒
+−𝜎𝑁𝑎 𝑥 ,    𝑥 ≥ 0          (12-b) 
+
+The material properties are cross section, 𝜎, and number 
+density of target particles, 𝑁𝑎.   
+
+ 
+
+Figure 9: TMESH/MCNP plot of power 
+
+density near reactor’s central axis.  
+
+Results are qualitative; linear color 
+
+scale is a factor of ~3, extreme values 
+
+are cutoff—to blue. 
+
+ 
+
+ 
+
+Figure 10: The Rayleigh equation (10) compares 
+
+coolant tubes with different heat deposition or 
+
+PPF—all tubes are at a common pressure ratio.  
+
+‘Hot’ tubes are starved of coolant, while ‘Cold’ 
+
+tubes are over-supplied with coolant. The ideal 
+
+response is shown by the dashed line. 
+
+           
+
+Figure 11: Fission distribution due to neutrons 
+
+incident on a fuel face. 
+
+ 
+
+
+
+9 
+
+ 
+
+Importantly, Eq. (12-b) includes a characteristic length, 
+1
+
+𝜎𝑁𝑎
+. As the particle beam enters and transits the material, 
+
+63% of incident particles will interact from surface to depth 
+1
+
+𝜎𝑁𝑎
+; before two depths, 
+
+2
+
+𝜎𝑁𝑎
+, 86% of incident particles 
+
+will interact.  In a reactor, the particles of interest are neutrons, and their flux is not normal to the fuel’s surface; if 
+
+neutron direction is a uniform random distribution, the heating or interaction depth, DI, is slightly less. 
+
+ 𝐷𝐼 =  
+4
+
+𝜋2
+ 
+
+1
+
+𝜎𝑁𝑎
+                    (13) 
+
+This nuclear cross section model describes 
+
+several interactions between neutrons and atoms: 
+
+elastic 𝜎𝑒 and inelastic scattering, including 
+absorption cross sections: fission, 𝜎𝑓, and radiative 
+
+capture 𝜎𝛾. 
+For inter-element heating, fission is the 
+
+appropriate particle interaction. Of the fission heat 
+
+released, 83% is released within µm of the fission 
+
+site; the balance is more uniformly distributed. 
+
+Equation (13) uses the U-235 fission cross section, 
+
+𝜎𝑓, and number density of U-235 target nuclei, 𝑁𝑎. 
+These two parameters can be determined from 
+
+MCNP and input data. The fission cross section, 𝜎𝑓, 
+depends on the incident neutron’s energy, so a range 
+
+of values of interaction depth, DI, will result. 
+
+6. Validating the Neutronics of Inter-Element 
+Heating  
+
+Comparison of this model for heating depth, 
+
+𝐷𝐼 and MCNP simulations is a valuable 
+validation, which also provides design insights. 
+
+Figure 12 shows the measured PPF profile near 
+
+the fuel element edge in a LEU cermet reactor 
+
+which will be denoted as the alternate reactor 
+
+design. The heating depth of ~2 mm is very close 
+
+to the thickness predicted by Eq. (13) as shown 
+
+in Table 1. The measurement of Figure 12 
+
+exploits MCNP tallies in a variable thickness 
+
+shell on the outer edge of each fuel element.  
+
+Consequently, it is a highly averaged value, that 
+
+would not capture the extremes apparent in 
+
+Figure 9. 
+
+Table 1 compares interaction or heating 
+
+depth, DI, predictions of Eq. (13) for two 
+
+reactors with different fuel types: the HEU 
+
+SNRE reactor [12] and an LEU alternate reactor 
+
+design—a typical cermet reactor.  The listed 
+
+ 
+
+Figure 13: Distribution of PPF for channels in a single fuel 
+
+element in each of two designs.  The upper distribution is for 
+
+the SNRE [12], while the lower distribution is for the 
+
+alternate design. The channel tally is heat deposition in a 
+
+hexagonal region surrounding each coolant channel. 
+
+ 
+
+ 
+
+Figure 12: Local PPF near fuel element (FE) edge, 
+
+based on MCNP calculations for an alternate reactor 
+
+design.  Calculated from MCNP tallies of hexagonal 
+
+shells of varying thickness on FE edge. Equation (13) 
+
+predicts 1.1 mm for 0.025 eV neutrons and 6.0 mm at 
+
+0.625 eV. 
+
+Reactor 
+Nuclei Density, Na Predicted Heating Depth, DI (mm) Neutron Fission Spectrum (%) 
+
+(atom/cc) @ 0.025 eV @ 0.625 eV <0.0625 eV 0.625 < 100 keV > 100 keV 
+
+SNRE 1.14E+21 6.7 35.5 39.2 54.1 6.6 
+
+Alt Design 6.76E+21 1.1 6.0 59.8 31.6 8.6 
+
+Table 1: Predictions of interaction or heating depth, DI, using Eq. (13) for fuel elements of two reactors. Given 
+
+the SNRE’s flat-to-flat dimension of 19 mm and the reactor’s neutron spectrum, the heating depth is as large 
+
+or larger than the fuel element dimension. This confirms the narrow distribution of channel PPF shown in 
+
+Figure 13.  
+
+
+
+10 
+
+ 
+
+neutron fission spectrum shows the SNRE is an epithermal reactor, while the alternate design is thermal.  This shift to 
+
+lower neutron energies will increase 𝜎𝑓  in Eq. (13) and accounts for some of the reduced heating depth, 𝐷𝐼 .    
+
+However, a significant factor—at least five—in the 𝐷𝐼  differences is the U-235 nuclei density, 𝑁𝑎, which is six 
+times higher here.  Cermet NTP reactors typically require five to ten times more U-235 mass to reach criticality.  
+
+The SNRE reactor has a flat-to-flat dimension of 19 mm.  With the large predicted heating depth, severe inter-
+
+element heating would not be expected in this reactor.  While in the alternate cermet design it would be expected.  
+
+Figure 13 shows measurements which confirm this prediction.  The MCNP measurements show typical PPF 
+
+distributions for channels in single fuel element from each of the two reactors.  In particular, tallies measure nuclear 
+
+heat deposition in hexagonal regions surrounding each coolant channel.  The narrow SNRE distribution indicates 
+
+much more uniform heating across the fuel element, while the broad distribution of the alternate reactor indicates the 
+
+non-uniform heating of inter-element heating, as in Figure 9. 
+
+E. Chemical Species Diffusion and Fuel Element Mass 
+Loss 
+
+As fuel temperatures increase, specie diffusion 
+
+(permeation) rates through fuel and coating increase 
+
+exponentially, in particular, an Arrhenius form, 𝑒𝑥𝑝 (
+−𝐸𝑎
+
+𝑅𝑇
+). 
+
+Figure 14, from Reference [28], shows measured rates. This 
+
+diffusion is mass loss, which is isolated to the fuel elements’ 
+
+hot end, but, in some cases, it is a significant issue in reactor 
+
+life [12, pp. 87, 111 Vol 3]. 
+
+Figure 15 shows how chemical species diffuse through fuel 
+
+and cladding, and convect/diffuse from the wall into the 
+
+hydrogen of the coolant channel, where the hydrogen flow 
+
+convects it downstream. 
+
+Transfer of specie atoms at the wall is a balance between 
+
+surface vaporization and condensation—atoms escaping from 
+
+and returning to the solid surface.  Saturated vapor pressure is 
+
+the specie partial pressure where a balanced equilibrium occurs 
+
+with no convection.  Clearly, predicting specie concentration 
+
+through the boundary layer—in particular, within a mean free 
+
+path of the wall—is important to predicting this equilibrium. 
+
+In the Rover/NERVA program, mass loss due to 
+
+species diffusion was carefully studied. Storms [29] 
+
+suggested that mass loss leads to an erosion region 
+
+(CVC) near the coolant channel surface.  Mass loss 
+
+slows as the rate limiting process becomes specie 
+
+diffusion from deeper within the fuel. 
+
+For both carbide and cermet fuels, coating or 
+
+cladding on coolant channel surface can reduce this 
+
+process by either reducing the diffusion rate with a 
+
+coating, or by displacing the erosion region.  Cermet 
+
+fuel testing [30] showed that cladding reduced mass 
+
+loss by an order of magnitude.  For these fuels, 
+
+cladding is a requirement.  Some fuels have less of a 
+
+need for coatings, and Russian fuel is apparently not 
+
+clad [2, pp. 306, 316].  Eliminating CTE mismatch 
+
+stresses is an advantage. 
+
+ 
+
+Figure 14: Comparison of permeation 
+
+coefficients for nitrogen, hydrogen, and oxygen 
+
+through arc-cast tungsten.  Diagram from [28]. 
+
+Ref 1 refers to [32]. 
+
+ 
+
+ 
+
+Figure 15: Species diffusion through fuel and coating 
+
+couples with convection/diffusion in the coolant 
+
+channel.  Mass loss results at high temperatures. 
+
+Hydrogen can diffuse into hot fuel. 
+
+ 
+
+
+
+11 
+
+ 
+
+V. Conclusion 
+
+Validation of NTP simulation results is an important part of numerical simulation and prediction of NTP 
+
+performance.  There is strong validation of thermal solutions, and moderate validation of fluid and neutronic solutions. 
+
+Stress / strain solutions need further attention. No significant inconsistencies have been found. 
+
+Acknowledgments 
+
+This work was supported by Game Changing Development Project at NASA Headquarters and the Space Nuclear 
+
+Propulsion program at NASA Marshall Space Flight Center. Computing was provided by Advanced Computing 
+
+Concepts Lab at NASA Glenn Research Center (GRC) and NAS.  Library services at GRC have been invaluable. This 
+
+work was not done in isolation; the author thanks Jessica Bowers, Jim Fittje, Tom Lavelle, Justin Milner, Paul Giel, 
+
+Andy Presby and Dan Falkenbach at NASA Glenn for many valuable discussions.  The author also thanks Bruce 
+
+Schnitzler, Jonathan Witter, Jeremy Gustafson, Michael Eades and Vishal Patel for valuable discussions. 
+
+References 
+
+ 
+
+[1]  L. L. Lyon, "Performance of (U,Zr)C-Graphite (Composite) and of (U,Zr)C (Carbide) Fuel Elements in the 
+Nuclear Furnace 1 Test Reactor," Los Alamos Scientific Laboratory, Rept LA-5398-MS, LANL, Los Alamos, 
+
+NM, Sept, 1973. 
+
+[2]  A. G. Lanin and I. I. Fedik, "Selecting and using materials for a nuclear rocket engine reactor," Physics--
+
+Uspekhi, Russian Academy of Sciences, vol. 54, no. 3, pp. 305-318, 2011.  
+
+[3]  H. Ludewig, J. R. T. M. Powell, G. Maise, R. Barletta and D. G. Schweitzer, "Design of Particle Bed Reactors 
+
+for the Space Nuclear Thermal Propulsion Program," Progress in Nuclear Energy, vol. 30, no. 1, pp. 1-65, 1996.  
+
+[4]  M. E. M. Stewart and B. G. Schnitzler, "Thermal Hydraulics and Structural Analysis of the Small Nuclear 
+
+Rocket Engine (SNRE) Core," in 43rd Joint Propulsion Conference, AIAA 2007-5619, Cincinnati, July 2007.  
+
+[5]  M. E. M. Stewart and B. G. Schnitzler, "Thermal, Fluid, and Structural Analysis of a Cermet Fuel Element," in 
+
+48th Joint Propulsion Conference, AIAA 2012-3959, Atlanta GA, August 2012.  
+
+[6]  M. E. M. Stewart, "Thermal, Fluid and Neutronic Analysis of an LEU Nuclear Thermal Propulsion Core," in 
+
+AIAA Power & Propulsion, AIAA-2019-3944, Indianapolis IN, August 2019.  
+
+[7]  ANSYS, "ANSYS Multiphysics Software, Ver. 17.2," ANSYS, Inc., Canonsburg, PA, Aug 2016. 
+
+[8]  ANSYS, ANSYS Fluent Theory Guide, Release 17.2, Canonsburg, PA: Ansys, Inc., Aug 2016.  
+
+[9]  Y. S. Touloukian, Thermophysical Properties of Matter, vol. 2, New York: IFF/Plenum, 1970.  
+
+[10]  E. M. Sparrow, "Temperature Distribution and Heat-Transfer Results for an Internally Cooled, Heat-Generating 
+
+Solid," Trans ASME Journal of Heat Transfer, pp. 389-392, Nov 1960.  
+
+[11]  E. M. Sparrow, "Temperature Distribution in an Internally-Cooled, Heat-Generating Solid," ASME, New York, 
+
+1960. 
+
+[12]  F. P. Durham, "Nuclear Engine Definition Study Preliminary Report Vol. 1-3," LA-5044-MS, Los Alamos 
+
+National Lab., Los Alamos, Sept 1972. 
+
+[13]  G. R. Thomas, "An Interim Study of Single Phase Heat Transfer Correlations Using Hydrogen," Westinghouse 
+
+Electric Corporation, Astronuclear Lab, WANL-TNR-056, April 1962. 
+
+[14]  M. F. Taylor, "Experimental Local Heat-Transfer and Average Friction Data for Hydrogen and Helium Flowing 
+
+in a Tube at Surface Temperatures Up To 5600 R," NASA TN D-2280, Washing, 1964. 
+
+[15]  M. F. Taylor, "A Method of Correlating Local and Average Friction Coefficients for both Laminar and Turbulent 
+
+Flow of Gases Through a Smooth Tube with Surface to Bulk Temperature Ratios from 0.35 to 7.35," Int. J. 
+
+Heat Mass Transfer, vol. 10, pp. 1123-1128, 1967.  
+
+[16]  A. Lanin and I. Fedik, Thermal Stress Resistance of Materials, Springer, 2008.  
+
+[17]  S. P. Timoshenko and J. N. Goodier, Theory of Elasticity; Third Edition, New York: McGraw-Hill, 1970.  
+
+[18]  R. J. Roark, Formulas for Stress and Strain, Fourth Edition, McGraw-Hill, 1965.  
+
+[19]  Los Alamos National Laboratory, "A General Monte Carlo N-Particle (MCNP) Transport Code," [Online]. 
+
+Available: https://mcnp.lanl.gov. [Accessed 2019]. 
+
+
+
+12 
+
+ 
+
+[20]  Los Alamos National Laboratory, "MCNP6 User's Manual Version 1.0," LA-CP-13-00634, Los Alamos, 2013. 
+
+[21]  "Listing of Available ACE Data Tables: Formerly Appendix G of the MCNP Manual," LANL, LA-UR-17-
+
+20709, 2017. 
+
+[22]  L. A. N. Laboratory, "MCNP Reference Collection - Verification and Validation," MCNP Team, November 
+
+2019. [Online]. Available: https://laws.lanl.gov/vhosts/mcnp.lanl.gov/references.shtml#mc_verif. [Accessed 
+
+January 2020]. 
+
+[23]  R. D. Mosteller, "Validation Suites for MCNP," LANL LA-UR-02-0878, Los Alamos, 2002. 
+
+[24]  D. J. Whalen, H. D. E. and J. S. Hendricks, "MCNP: Photon Benchmark Problems," Los Alamos Nuclear Lab, 
+
+LA-12196, Los Alamos, 1991. 
+
+[25]  Nuclear Energy Agency OECD, "International Evaluation Co-operation Volume 29: Uranium-235 Capture 
+
+Cross-section in the keV to MeV Energy Region," NEA-WPEC-29, 2011. 
+
+[26]  J. J. Duderstadt and H. L. J., Nuclear Reactor Analysis, Ann Arbor: John Wiley, 1976.  
+
+[27]  A. H. Shapiro, The Dynamics and Thermodynamics of Compressible Fluid Flow, New York: Ronald Press, 
+
+1954.  
+
+[28]  P. Conn, E. Duderstadt and R. Fryxell, "Measurement of the Permeability of Tungsten to Nitrogen, Final 
+
+Report," NASA CR-72238, GE-NMP 67-522, Cincinnati, July 1965. 
+
+[29]  E. Storms, "The Behavior of ZrC(1-x) and Uy Zr(1-y) C(1-x) in Flowing Hydrogen at Very High Temperatures," 
+
+LANL LA-12043-MS, Los Alamos, 1992. 
+
+[30]  M. E. M. Stewart, "A Historical Review of Cermet Fuel Developmet and the Engine Performance Implications," 
+
+in Nuclear and Emerging Technologies for Space-NETS 2015, Albuquerque, 2015.  
+
+[31]  R. D. Mosteller, F. B. Brown and B. C. Kiedrowski, "An Expanded Criticality Validation Suite for MCNP," 
+
+LA-UR-11-04170, LANL, 2011. 
+
+[32]  E. A. Aitken, P. K. Conn, E. C. Duderstadt and R. E. Fryxell, "Measurement of the Permeability of Tungsten to 
+
+Hydrogen and to Oxygen," NASA CR-54918, May 1966. 
+
+ 
+
+ 
+
+

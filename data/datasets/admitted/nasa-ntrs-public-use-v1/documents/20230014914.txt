@@ -1,0 +1,869 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="pdf:PDFVersion" content="1.3">
+<meta name="pdf:hasXFA" content="false">
+<meta name="access_permission:modify_annotations" content="true">
+<meta name="access_permission:can_print_degraded" content="true">
+<meta name="dcterms:created" content="2023-10-02T19:00:23Z">
+<meta name="dcterms:modified" content="2023-10-02T19:00:23Z">
+<meta name="dc:format" content="application/pdf; version=1.3">
+<meta name="access_permission:fill_in_form" content="true">
+<meta name="pdf:docinfo:modified" content="2023-10-02T19:00:23Z">
+<meta name="pdf:hasCollection" content="false">
+<meta name="pdf:encrypted" content="false">
+<meta name="pdf:hasMarkedContent" content="false">
+<meta name="Content-Type-Override" content="application/pdf">
+<meta name="Content-Type" content="application/pdf">
+<meta name="pdf:producer" content="macOS Version 13.6 (Build 22G120) Quartz PDFContext">
+<meta name="access_permission:extract_for_accessibility" content="true">
+<meta name="access_permission:assemble_document" content="true">
+<meta name="xmpTPg:NPages" content="31">
+<meta name="pdf:hasXMP" content="false">
+<meta name="access_permission:extract_content" content="true">
+<meta name="access_permission:can_print" content="true">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.DefaultParser">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.pdf.PDFParser">
+<meta name="access_permission:can_modify" content="true">
+<meta name="pdf:docinfo:producer" content="macOS Version 13.6 (Build 22G120) Quartz PDFContext">
+<meta name="pdf:docinfo:created" content="2023-10-02T19:00:23Z">
+<title></title>
+</head>
+<body><div class="page"><p></p>
+<p>National Aeronautics and Space Administration
+</p>
+<p>www.nasa.gov 
+</p>
+<p>October 13, 2023
+</p>
+<p>Domain-Specific Language (DSL) Adoption 
+into NASA’s Goddard Earth Observing 
+</p>
+<p>System (GEOS) Model
+</p>
+<p>Purnendu Chakraborty, Florian Deconinck, Christopher Kung</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Outline
+• Motivation
+</p>
+<p>• DSL Integration Strategy
+</p>
+<p>• Validation : Held-Suarez &amp; Aquaplanet
+</p>
+<p>• Optimization
+</p>
+<p>• Ported physics packages to GPU via OpenACC
+</p>
+<p>• Next Steps</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Outline
+• Motivation
+</p>
+<p>• DSL Integration Strategy
+</p>
+<p>• Validation : Held-Suarez &amp; Aquaplanet
+</p>
+<p>• Optimization
+</p>
+<p>• Ported physics packages to GPU via OpenACC
+</p>
+<p>• Next Steps</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Next-Generation Goddard Earth Observing 
+System (GEOS) code
+</p>
+<p>Goal : Develop the next generation 
+GEOS model that enables an 
+increase in resolution and 
+scalability to meet future NASA 
+Global Modeling and Assimilation 
+Office (GMAO) requirements.
+</p>
+<p>Team
+• Developers : Purnendu Chakraborty, 
+</p>
+<p>Florian Deconinck, Chris Kung
+• Support : GMAO Software Integration 
+</p>
+<p>Team, NASA Center for Climate 
+Simulation (NCCS)
+</p>
+<p>• Management : Craig Pelissier, Bill 
+Putnam, Dan Duffy, Tsengdar Lee
+</p>
+<p>• External Collaborators : NOAA, NVIDIA, 
+ETH Zurich’s SPCL and CSCS</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>GEOS Future Requirements
+• Production support for Coupled Data Assimilation
+</p>
+<p>• Numerical Weather Prediction: 6-km Atmosphere Model (ATM) coupled to 6-km Ocean Model (OCN)
+• Sub-Seasonal to Seasonal Predictions: 25-km ATM coupled to 25-km OCN (Ensemble members 
+</p>
+<p>creating 30- to 90-day predictions)
+• Reanalysis: 12-km ATM coupled to 12-km OCN
+</p>
+<p>• Ultra-high resolution global Nature Runs for Climate Observing System Simulation 
+Experiments
+</p>
+<p>• Coupled 3-km ATM and 3-km OCN
+• Carbon and chemistry: 3- to 1-km ATM
+• Global convection resolving weather: &lt; 1 km ATM
+</p>
+<p>3-km Global GEOS CO2 
+nature run simulation
+</p>
+<p>May 17th – May 29th 6-km GEOS Updraft Helicity (12-24hr Forecasts)
+</p>
+<p>Tornado Activity May 17th – 29th 2019
+</p>
+<p>NWS Reports 6-km GEOS Forecasts</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Outline
+• Motivation
+</p>
+<p>• DSL Integration Strategy
+</p>
+<p>• Validation : Held-Suarez &amp; Aquaplanet
+</p>
+<p>• Optimization
+</p>
+<p>• Ported physics packages to GPU via OpenACC
+</p>
+<p>• Next Steps</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Approach / Strategy
+• Leverage heterogeneous architectures via Domain Specific Language (DSL) 
+</p>
+<p>and OpenACC
+• Recognize that accelerator-based heterogeneous systems provide a promising platform to meet future 
+</p>
+<p>GEOS requirements.
+• DSL : Programming language specialized to a particular domain
+</p>
+<p>• DSL adoption creates an opportunity to create portable and scalable code across multiple platforms, 
+including traditional CPU systems and accelerator-based systems, by abstracting away details of the 
+computing architecture
+</p>
+<p>• For GEOS, we utilize the GridTools for Python (GT4Py) DSL
+• Incorporate a GT4Py port of Geophysical Fluid Dynamics Laboratory’s 
+</p>
+<p>(GFDL) dynamical core (FV3) created by Vulcan / Allen Institute for AI (AI2) 
+into GEOS
+</p>
+<p>• GT4Py-ported FV3 (gtFV3) is a non-hydrostatic code used for global storm-resolving modeling
+• Leverage DSL without extensive investment in code rewriting / refactoring</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Some definitions
+GT4Py (GridTools for Python)
+</p>
+<p>• GridTools
+</p>
+<p>- C++ DSL
+</p>
+<p>- Express “stencil”-like patterns concisely
+</p>
+<p>- Multiple backends - OpenMP(CPUs)/CUDA/HIP
+</p>
+<p>- Easy switching between backends
+</p>
+<p>• Frontend code in Python
+</p>
+<p>gtFV31
+</p>
+<p>• GT4Py port of (Fortran) FV3
+</p>
+<p>1 A Python-based Performance-Portable Implementation of the FV3 Dynamical Core. Dahm et al., EGUsphere [preprint: https://doi.org/10.5194/egusphere-2022-943, 2022.]</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>GEOS</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>GPU Porting Approach
+</p>
+<p>Do we need m
+ore 
+</p>
+<p>details 
+about 
+</p>
+<p>CFFI?
+</p>
+<p>Pie ch
+art o
+</p>
+<p>f d
+ata 
+</p>
+<p>distr
+ibution</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Outline
+• Motivation
+</p>
+<p>• DSL Integration Strategy
+</p>
+<p>• Validation : Held-Suarez &amp; Aquaplanet
+</p>
+<p>• Optimization
+</p>
+<p>• Ported physics packages to GPU via OpenACC
+</p>
+<p>• Next Steps</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Validation Case – Held-Suarez</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>FV3 – HS vs gtFV3 – HS (OpenACC)
+FV3 (CPU), HS (CPU) gtFV3 (GPU), HS (GPU)
+</p>
+<p>Zonal mean of U-winds averaged over 30 days</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>GEOS-Aquaplanet
+</p>
+<p>Aquaplanet
+• AGCM without Land, Lake and LandIce
+• Idealized, prescribed SST
+</p>
+<p>Plus, some simplification
+• GOCART data
+• PCHEM</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Aquaplanet-FV3 Vs Aquaplanet-gtFV3 – comparing time averages
+- Assembled application (one codebase, one build, choose FV3/gtFV3 at runtime), resolved significant differences between old/new FV3 and gtFV3
+- From data dump (C180 - 50km), ran 18 months simulation (6 months spin-up + 12 months analysis) for both cases
+- Compared time-averaged zonal means over the analysis period
+</p>
+<p>Aquaplanet (FV3) Aquaplanet (gtFV3)
+</p>
+<p>Zo
+na
+</p>
+<p>l w
+in
+</p>
+<p>d 
+(𝑚
+	𝑠
+!
+" )
+</p>
+<p>Te
+m
+</p>
+<p>pe
+ra
+</p>
+<p>tu
+re
+</p>
+<p> (𝐾
+)
+</p>
+<p>Specific hum
+idity
+</p>
+<p>O
+utgoing Longw
+</p>
+<p>ave R
+adiation
+</p>
+<p>Precipitation
+</p>
+<p>Aquaplanet (FV3) Aquaplanet (gtFV3)
+</p>
+<p>(𝑊
+/𝑚
+</p>
+<p>!)
+(𝑘𝑔/𝑘𝑔)
+</p>
+<p>(𝑘𝑔/𝑚
+!/𝑠)</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Configuration for Aquaplanet Verification
+• Node hardware
+</p>
+<p>• AMD EPYC 7402
+• 24 cores per socket
+• 2 sockets per node
+</p>
+<p>• NVIDIA A100
+• 4 GPUs per node
+</p>
+<p>• FV3 Configuration
+• 2 Nodes
+• 96 ranks / 1 rank per core
+</p>
+<p>• gtFV3 Configuration
+• 1.5 nodes
+• 6 ranks / 1 rank per GPU</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Outline
+• Motivation
+</p>
+<p>• DSL Integration Strategy
+</p>
+<p>• Validation : Held-Suarez &amp; Aquaplanet
+</p>
+<p>• Optimization
+</p>
+<p>• Ported physics packages to GPU via OpenACC
+</p>
+<p>• Next Steps</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>GEOS-gtFV3 Performance Strategy
+</p>
+<p>• Many-processes vs Many-threads
+• GEOS uses many-processes paradigm: one CPU core per task, with problems divided 
+</p>
+<p>in smaller problems.
+• GPUs are built for many-threads paradigm: one GPU per problem computed across 
+</p>
+<p>many-threads, with the bigger problem size that fits memory.
+</p>
+<p>• Due to the hybrid nature of our work, we need solutions that can do both
+• Many-processes on one GPU (Nvidia’s MPS).
+• Different domain decomposition for physics and dynamics:
+</p>
+<p>• SI Team is working on this.
+• Allow for best usage of each hardware: GPU is given the entire problem at once, 
+</p>
+<p>CPU is given a smaller chunk of the problem.</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>GEOS-gtFV3 Benchmarks: GPU vs CPU node
+• The benchmark setup aims to compare a CPU-node with a GPU-node as 
+</p>
+<p>available on Discover.
+• Setup on Discover using MPS
+</p>
+<p>• CPU: AMD EPYC 7402, 24 cores, 128 MB L3 cache
+• GPU: NVIDIA A100, 40 GB VRAM
+• Node: 2x CPU, 4x GPU, 2x InfiniBand
+• Using MPS: 12 CPU cores per GPU (node to node)
+</p>
+<p>• Experiment
+• Using Held-Suarez setup to focus on the dynamical core
+• 24h simulation, average over 10 runs
+• 30 days simulation on subset of resolution to check for stability</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>GEOS-gtFV3 Benchmark Results
+</p>
+<p>0.0
+</p>
+<p>1.0
+</p>
+<p>2.0
+</p>
+<p>3.0
+</p>
+<p>4.0
+</p>
+<p>5.0
+</p>
+<p>6.0
+</p>
+<p>Call-to-Call Comp Application
+</p>
+<p>Sp
+ee
+</p>
+<p>d 
+up
+</p>
+<p> v
+s F
+</p>
+<p>or
+tr
+</p>
+<p>an
+</p>
+<p>Held-Suarez benchmarks (dace:gpu)
+</p>
+<p>C180-L72 C180-L91 C180-L137 C360-L72• On a 30 days run at C180-L72 resolution, those gains 
+translate as follows:
+</p>
+<p>• Fortran: 3h 49m
+• Hybrid GPU/CPU: 2h 21m (1.62x consistent 
+</p>
+<p>with the measure 24h measure)</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>GEOS-gtFV3 Aquaplanet Performance Comparison
+</p>
+<p>2.79
+</p>
+<p>5.66
+</p>
+<p>0.00
+</p>
+<p>1.00
+</p>
+<p>2.00
+</p>
+<p>3.00
+</p>
+<p>4.00
+</p>
+<p>5.00
+</p>
+<p>6.00
+</p>
+<p>0.00
+</p>
+<p>1.00
+</p>
+<p>2.00
+</p>
+<p>3.00
+</p>
+<p>4.00
+</p>
+<p>5.00
+</p>
+<p>6.00
+</p>
+<p>C180- L72 C360- L72
+</p>
+<p>Sp
+ee
+</p>
+<p>d 
+up
+</p>
+<p> v
+s F
+</p>
+<p>or
+tr
+</p>
+<p>an
+</p>
+<p>Ru
+nt
+</p>
+<p>im
+e 
+</p>
+<p>in
+ se
+</p>
+<p>co
+nd
+</p>
+<p>s
+</p>
+<p>Resolution
+</p>
+<p>Dynamical core (median) 96/0 vs 96/8 (CPUs/GPUs)
+</p>
+<p>fortran dace:gpu Speed up vs Fortran
+</p>
+<p>1.96
+</p>
+<p>2.97
+</p>
+<p>0.00
+</p>
+<p>0.50
+</p>
+<p>1.00
+</p>
+<p>1.50
+</p>
+<p>2.00
+</p>
+<p>2.50
+</p>
+<p>3.00
+</p>
+<p>3.50
+</p>
+<p>0
+</p>
+<p>200
+</p>
+<p>400
+</p>
+<p>600
+</p>
+<p>800
+</p>
+<p>1000
+</p>
+<p>1200
+</p>
+<p>1400
+</p>
+<p>C180- L72 C360- L72
+</p>
+<p>Sp
+ee
+</p>
+<p>d 
+up
+</p>
+<p> v
+s F
+</p>
+<p>or
+tr
+</p>
+<p>an
+</p>
+<p>Ru
+nt
+</p>
+<p>im
+e 
+</p>
+<p>in
+ se
+</p>
+<p>co
+nd
+</p>
+<p>s
+</p>
+<p>Resolution
+</p>
+<p>FV Component 96/0 vs 96/8 (CPUs/GPUs)
+</p>
+<p>fortran dace:gpu Speed up vs Fortran
+</p>
+<p>1.24
+1.37
+</p>
+<p>0.00
+</p>
+<p>0.20
+</p>
+<p>0.40
+</p>
+<p>0.60
+</p>
+<p>0.80
+</p>
+<p>1.00
+</p>
+<p>1.20
+</p>
+<p>1.40
+</p>
+<p>1.60
+</p>
+<p>0.00
+</p>
+<p>500.00
+</p>
+<p>1000.00
+</p>
+<p>1500.00
+</p>
+<p>2000.00
+</p>
+<p>2500.00
+</p>
+<p>3000.00
+</p>
+<p>3500.00
+</p>
+<p>C180- L72 C360- L72
+</p>
+<p>Sp
+ee
+</p>
+<p>d 
+up
+</p>
+<p> v
+s F
+</p>
+<p>or
+tr
+</p>
+<p>an
+</p>
+<p>Ru
+nt
+</p>
+<p>im
+e 
+</p>
+<p>in
+ se
+</p>
+<p>co
+nd
+</p>
+<p>s
+</p>
+<p>Resolution
+</p>
+<p>Full application 96/0 vs 96/8 (CPUs/GPUs)
+</p>
+<p>fortran dace:gpu Speed up vs Fortran</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Outline
+• Motivation
+</p>
+<p>• DSL Integration Strategy
+</p>
+<p>• Validation : Held-Suarez &amp; Aquaplanet
+</p>
+<p>• Optimization
+</p>
+<p>• Ported physics packages to GPU via OpenACC
+</p>
+<p>• Next Steps</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>OpenACC for Physics
+• Why OpenACC?
+</p>
+<p>• Development remains in Fortran
+• Flexibility : GT4Py structures code based on stencil computations, making it less flexible if an 
+</p>
+<p>algorithm doesn’t map into a stencil.
+• What about “proprietary-ness”?
+</p>
+<p>• OpenACC may not be the final solution since it’s (mostly) NVIDIA-centric and OpenACC compilers 
+(generally) are not available or less optimal for non-NVIDIA GPUs. 
+</p>
+<p>• The OpenACC implementation can guide development of an OpenMP-offloading implementation due 
+to the relatively similar feature set of both programming models.
+</p>
+<p>• General Porting Methodology
+• Create a CPU-based standalone code of physics schemes that verifies with input and output data 
+</p>
+<p>generated from GEOS runs that call the physics schemes
+• Apply OpenACC to parallelizable code sections within the CPU-based standalone code
+• Verify that data computed from OpenACC standalone code closely matches GEOS generated data 
+</p>
+<p>from CPUs</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Status of OpenACC Physics Standalones
+Moist OpenACC
+</p>
+<p>fillq2zero ✔
+</p>
+<p>buoyancy ✔
+</p>
+<p>buoyancy2 In progress
+</p>
+<p>aer_activation ✔
+</p>
+<p>cup_gf (v GF2020) In progress
+</p>
+<p>gfdl_cloud_microphys_driver ✔
+</p>
+<p>evap_subl_pdf_loop ✔
+</p>
+<p>radcoup_loop ✔
+</p>
+<p>uw_shallow_convection ✔
+</p>
+<p>Turbulence OpenACC
+</p>
+<p>run_edmf ✔
+</p>
+<p>vtrisolvesurf ✔
+</p>
+<p>vtrilu ✔
+</p>
+<p>update_moments ✔
+</p>
+<p>Gravity Wave OpenACC
+</p>
+<p>ncar_gwd ✔</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>OpenACC Physics Integration Approach
+</p>
+<p>• Statistics from “RUN” portion of GEOS 
+Aquaplanet setup
+</p>
+<p>• 96 ranks / 8 GPUS
+</p>
+<p>• Overall Physics : ~50% of “RUN” execution 
+time
+</p>
+<p>• Moist : ~25% of “RUN” execution time
+• Radiation : ~14% of “RUN” execution time
+</p>
+<p>• Plan : Integrate OpenACC-ported Moist 
+physics for greatest initial potential to reduce 
+execution time
+</p>
+<p>Measured wallclock time</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>OpenACC Physics Integration: Moist
+</p>
+<p>• GF: Contains cup_gf (v GF2020)
+• UW : Contains uw_shallow_convection
+• GFDL_1M : Contains gfdl_cloud_microphys, evap_subl_pdf_loop, radcoup_loop </p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Moist Standalone Runtimes
+Standalone CPU Runtime (sec) GPU Runtime (sec) GPU Speedup
+</p>
+<p>aer_activation 6.24 ✕ 10-1 8.70 ✕ 10-3 71.8
+buoyancy 5.38 ✕ 10-3 1.99 ✕ 10-4 27.1
+evap_subl_pdf_loop 7.50 ✕ 10-1 7.18 ✕ 10-3 104.4
+fillq2zero 7.86 ✕ 10-3 1.10 ✕ 10-4 71.5
+gfdl_cloud_microphys_driver 1.64 ✕ 100 1.04 ✕ 10-1 1.58
+radcoup_loop 1.72 ✕ 10-1 1.20 ✕ 10-3 143.4
+cup_gf (v GF2020) 1.43 ✕ 10-1 TBD TBD
+buoyancy2 1.64 ✕ 100 TBD TBD
+</p>
+<p>• Resolution : C180 (180 x 180 x 72)
+• Compiler : nvfortran v22.3
+• CPU : AMD EPYC 7402
+• GPU : NVIDIA A100-SMX4 40 GB
+</p>
+<p>• CPU runtimes are single core execution times
+• Listed runtimes are the average of standalone runtimes from 6 
+</p>
+<p>different input sets
+• Timings do not measure data transfer time between host and device</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>OpenACC Physics Integration Status
+Timer Routines Porting status1 Integration status2
+</p>
+<p>Total buoyancy Ported Builds and runs
+</p>
+<p>buoyancy2 Porting
+</p>
+<p>--CONV_TRACERS
+</p>
+<p>--AERO_ACTIVATE aer_activation Ported Builds
+</p>
+<p>--GF cup_gf Porting
+</p>
+<p>--UW uwshcu_inv Porting
+</p>
+<p>--GFDL_1M
+</p>
+<p>----CLDMACRO evap/subl/pdf (loop) Ported Builds
+</p>
+<p>----CLDMICRO gfdl_cloud_microphys Ported Builds
+</p>
+<p>radiation coupling (loop) Ported Builds
+</p>
+<p>fillq2zero Ported Builds and runs
+</p>
+<p>In-between code ✗ ✗
+</p>
+<p>1 Standalone, NVIDIA Fortran
+2 Integration into GEOS, GNU Fortran</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Outline
+• Motivation
+</p>
+<p>• DSL Integration Strategy
+</p>
+<p>• Validation : Held-Suarez &amp; Aquaplanet
+</p>
+<p>• Optimization
+</p>
+<p>• Ported physics packages to GPU via OpenACC
+</p>
+<p>• Next Steps</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>August 2022
+- Completed gtFV3-Held-
+</p>
+<p>Suarez (OpenACC) 
+integration, validation
+</p>
+<p>- Completed Turbulence 
+porting to OpenACC
+</p>
+<p>May 2023
+- Completed Aquaplanet 
+</p>
+<p>integration, started validation
+- Porting Moist physics to OpenACC
+- Started performance engineering 
+</p>
+<p>of gtFV3
+</p>
+<p>September 2023
+- Complete Aquaplanet validation 
+</p>
+<p>and benchmarking with gtFV3
+- Porting Moist and Turbulence 
+</p>
+<p>Physics to OpenACC
+- Further optimization of gtFV3
+</p>
+<p>… …
+</p>
+<p>April 2021
+Project start
+</p>
+<p>Q1 2024
+- Complete porting, integrating, 
+</p>
+<p>validating and benchmarking 
+of Aquaplanet-gtFV3 with 
+OpenACC physics components</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Thank you!</p>
+<p></p>
+</div>
+</body></html>

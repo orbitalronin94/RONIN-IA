@@ -1,0 +1,797 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Optical Navigation Attitude Estimation and Calibration 
+Performance Improvement using Outlier Rejection 
+
+Malak Samaan1, Ronney Lovelace2, Riana Pécourt3 and Greg Holt4 
+
+ 
+
+Spacecraft optical navigation (OpNav) systems process a sequence of images of celestial 
+
+bodies against a star field background to estimate the position and velocity of the vehicle. 
+
+While attitude is sometimes available from an onboard star tracker, it is often desirable to 
+
+recognize the background stars in the OpNav images to better align the image. While 
+
+many image processing algorithms exist for finding stars, efficiency and reliability 
+
+remain key issues in the presence of extended bodies (e.g. the Moon, Earth), especially 
+
+when attempting to solve the full lost-in-space problem. Some star outliers (stars 
+
+identified with high residuals) could appear in the camera field of view, however using 
+
+them in the attitude estimation or camera calibration would lead to less accurate results. 
+
+Therefore, we require new and robust approaches to remove these outliers before any 
+
+further processing. 
+
+The emphasis of the work is on developing a simple and robust iterative technique to 
+
+detect and reject the outliers which could be found in any frame during the lost in space 
+
+attitude determination or during the camera calibration. These outliers are determined 
+
+based on the residuals of the centroids of the detected stars and the corresponding 
+
+location using the star catalog. If the residuals exceed a predetermined threshold value, 
+
+the object will be detected as an outlier and will be removed before another attitude 
+
+determination and calibration iteration is performed.  
+
+The performance for both attitude determination and on-orbit camera calibration are 
+
+improved by an almost two-fold increase in accuracy when applying this outlier rejection 
+
+technique. 
+
+ 
+
+INTRODUCTION 
+
+The optical navigation (OpNav) camera measurement will be used mainly to provide vehicle 
+position and velocity navigation information when the Moon/Earth is in the camera field of view 
+
+(FOV). The attitude of the vehicle will be estimated using identified stars in the OpNav FOV. 
+
+Therefore, a robust and accurate technique is required to estimate the attitude as well as the 
+
+camera calibration from the imaged stars. 
+
+The outlier rejection introduced in this paper is a novel technique to remove the stars which have 
+
+residuals greater than a certain predefined pixel threshold. This technique will ensure more 
+
+ 
+
+1 Senior GNC Engineer, PhD, Odyssey Space Research, Houston, TX, 77058, USA 
+2 GNC Engineer, NASA Johnson Space Center, Houston, Texas, 77058, USA 
+3 GNC Engineer, NASA Johnson Space Center, Houston, Texas, 77058, USA 
+4 Orion Navigation Lead, PhD, NASA Johnson Space Center, Houston, Texas, 77058, USA  
+
+(Preprint) AAS 22-XXX 
+
+
+
+ 
+
+ 
+
+accurate calibration parameters as well as more accurate star tracking attitude estimates from the 
+
+stars with lower residuals. The star residuals are calculated after the first lost-in-space attitude is 
+
+estimated. 
+
+When a star image is captured for both lost-in-space attitude determination and on-orbit camera 
+
+calibration, star catalog data is used in conjunction with the camera’s inertial attitude to determine 
+
+which stars are expected to be in the camera’s field of view. The pixel coordinates (u, v) of these 
+
+expected catalog stars are then compared to the centroids of candidate stars from a starfield 
+
+image. The difference in the pixel location of a candidate star and its matching catalog star results 
+
+in two measurement residuals – a difference in the u (column) coordinate and a difference in the v 
+
+(row) coordinate. A collection of measurement residuals for all matching candidate stars and 
+
+catalog stars is then used to evaluate the quality of the attitude determination or camera 
+
+calibration. Extending this measurement residual evaluation to include the identification of 
+
+outliers offers the opportunity to increase the robustness and accuracy of these attitude 
+
+determination and camera calibration algorithms.  
+
+For camera calibration a set of starfield images are taken with each image at a different attitude. 
+
+The inertial attitude of the camera for each image is calculated and then used to determine which 
+
+centroids within these images are likely identifiable stars. When a minimum number of stars for 
+
+an image have been matched to a catalog star a data structure is then populated with that starfield 
+
+image’s attitude, number of matched stars, and catalog data for each matched star. After the full 
+
+set of starfield images have been analyzed an array of starfield image structures is passed to a 
+
+function that determines camera calibration parameters using an iterative Levenberg-Marquardt 
+
+Algorithm. 
+
+The newly found camera calibration parameters are then used to compare expected catalog star 
+
+locations to their respective matched image centroids. The difference in pixel coordinates of 
+
+catalog stars and image centroids are collected in a measurement residual array. The residual 
+
+array is then analyzed, and if a residual exceeds a predetermined threshold then the new camera 
+
+calibration parameters are considered unusable. Unusable calibration parameters would at this 
+
+point necessitate the collection of a whole new set of starfield images.  
+
+However, modifying the camera calibration process to include outlier identification and rejection 
+
+prevents the need for collecting a completely new set of starfield images. This modification 
+
+occurs after measurement residuals have been calculated by an initial calibration. Here the 
+
+measurement residual array is used to calculate the normalized residuals for each pair of matched 
+
+catalog star, image centroid in each starfield image. If the normalized residual for a matched pair 
+
+is above a predetermined threshold, the centroid of that matched pair is considered an outlier. 
+
+Information for matched pairs that meet or are below the threshold are kept within their 
+
+respective starfield data structure – otherwise their information is filtered out. If at any point an 
+
+outlier is found, a flag is set to run a second calibration using the now refined array of starfield 
+
+data structures. The end result of this outlier filtering and recalibration technique are final camera 
+
+calibration parameters that better fit to the majority of matched star centroid pairs.  
+
+ 
+
+LOSS OF COMMUNICATION NAVIGATION 
+
+NASA’s Orion Multi-Purpose Crew Vehicle requires regular radionavigation-derived state 
+
+updates from the Mission Control Center (MCC) to maintain an accurate navigation state 
+
+throughout the mission timeline [Ref. 1]. In the event of communication loss, the onboard 
+
+navigation estimate will diverge from the true trajectory due to unmodeled perturbations and 
+
+
+
+ 
+
+ 
+
+sensor drift.  The Optical Navigation (OpNav) system provides a backup onboard source for 
+
+navigation state updates, thus mitigating this hazard. More specifically, it provides range and 
+
+bearing to a given target with the additional features of self-attitude determination, and real-time 
+
+self-calibration. The software processes images, removes dark frames, undistorts images in real-
+
+time, and can be commanded to self-calibrate. Optical navigation functionality is a required part 
+
+of the Orion spacecraft system [Ref. 2,3]. 
+
+ 
+
+Figure 1 illustrates the timeline of Orion navigation with communication loss.  The same high-
+
+level procedural steps of the OpNav system are used throughout the remainder of the mission.  
+
+First, still images of Moon or Earth are processed to find apparent angular diameter and centroid 
+
+in camera focal plane.  Next, this raw data is transformed into range and bearing angle 
+
+measurements using planetary data and precise star tracker inertial attitude.  Finally, the 
+
+measurements are sent to the main flight computer’s Kalman filter to update the onboard state 
+
+vector.  Images are collected over an arc (~2hrs) to converge the state and estimate velocity.  The 
+
+same basic technique was used by NASA’s Apollo program to provide navigation in the event of 
+
+lost communication, but Apollo used manual crew sightings with a sextant instead of 
+
+autonomously processing optical imagery. 
+
+ 
+
+ 
+
+  
+
+Figure 1.  The outline of the Orion Spacecraft and the OpNav- Loss of Comm 
+
+
+
+ 
+
+ 
+
+ 
+
+OPNAV IMAGE CALIBRATION CONCEPT 
+
+The Orion OpNav image calibration capability analyzes an ensemble of starfield images to refine 
+
+the estimates of the camera’s geometric calibration parameters – five intrinsic parameters, five 
+
+lens distortion parameters – and produce a distortion map. In addition, a corrected interlock angle 
+
+(star tracker to camera) is determined if star trackers are used as a source to determine the camera 
+
+attitude [Ref. 4-6].  
+
+Using star catalog data, a priori camera inertial attitudes, and the Brown distortion model, the 
+
+calibration algorithm first identifies which stars will be projected onto the image and their 
+
+expected pixel coordinates. The image itself is then processed beginning with dark frame 
+
+removal. Next, centroids are identified and corrected for stellar aberration. Finally, the centroids 
+
+and the expected catalogued stars are compared to determine which centroids are likely stars. 
+
+If there are enough images with a sufficient number of stars, the star centroid positions and their 
+
+star catalog information are run through the iterative Levenberg-Marquardt Algorithm (LMA) 
+
+[Ref. 7] to improve the intrinsic and lens distortion parameters, as well as the inertial camera 
+
+attitude. Each image carries a separate alignment state, as such, these redundant attitude estimates 
+
+are eventually combined using the QUaternion ESTimation (QUEST) algorithm [Ref. 8]. 
+
+Measurement residuals are used to evaluate the quality of the calibration. Following the initial 
+
+calibration, a check for any outlier centroids is performed. If an outlier is found, a second 
+
+calibration with the filtered starfield image data will be run. The new camera calibration 
+
+parameter estimates are used to generate a distortion map, and the inertial camera attitude 
+
+correction is applied to the interlock angle. 
+
+ 
+
+OUTLIER REJECTION ALGORITHM 
+
+Outlier Rejection is a form of refinement made after an initial calibration. This refinement is done 
+
+by removing star centroid data that skew the results of the initial calibration. A single outlier can 
+
+cause the code to throw away an otherwise useful set of starfield images and necessitate the 
+
+gathering of a whole new ensemble of images. 
+
+To deal with outliers, the Outlier Rejection algorithm normalizes measurement residuals obtained 
+
+from the initial calibration and compares these residuals to a threshold. If the normalized residual 
+
+is above the threshold, the corresponding centroid is considered an outlier. Outlier centroids and 
+
+their associated data are then removed from the starfield data structure that fed into the initial 
+
+calibration. This refined data structure is then used as input for a second calibration. 
+
+The algorithm is mainly comprised of two for-loops. The outer for-loop will iterate across every 
+
+image in the ensemble, while the inner for-loop will iterate across every star in an image. During 
+
+this process the starfield data structure used in the initial calibration is recopied. If an outlier is 
+
+detected, the information for that outlier centroid is not copied to the data structure, and a 
+
+recalibration flag is set to run a second calibration. A flowchart of the Outlier Rejection algorithm 
+
+can be seen below in figure 2. 
+
+ To ensure there are still enough valid centroids left for a second calibration, two checks are used. 
+
+The first check makes sure that each image has at least the minimum number of valid centroids 
+
+for a valid image. The second check makes sure that there are at least the minimum number of 
+valid images for a valid ensemble. Both minimum number of centroid and minimum number of 
+
+
+
+ 
+
+ 
+
+image values are defined in an onboard configuration table. If an image is determined to have less 
+
+than the minimum number of centroids, the image and its associated data is removed from the 
+
+ensemble and data structure. If there are less than the minimum number of valid images left, then 
+
+an error is set that there are not enough good images. If there is an error then a second calibration 
+
+is not performed, and a whole new set of images will need to be collected. 
+
+ 
+
+Figure 2. The Flowchart of the Outlier Rejection Technique 
+
+ 
+
+ 
+
+OUTLIER REJECTION MATLAB DRIVER 
+
+The outlier rejection technique described in the previous section was tested using several 
+
+synthetic images created using NASAs’ Engineering Doug Graphics for Exploration (EDGE) 
+
+package. These EDGE images are created using the OpNav hardware (Sensor/Lens) parameters 
+
+and star catalog data simular to that which is loaded on the Orion spacecraft. 
+
+A MATLAB program is used to interface with the Lost in space algorithm (LISA) for the attitude 
+
+determination. In this interface program, the outlier rejection may be either enabled or disabled. 
+
+Additionally, the number of pixels to consider a rejected star is defined.  
+
+The program loads the simulated star image with an imager pixel size of nx= 2592, ny= 2048, a 
+
+pixel size of 4.8 microns, and a field of view size of 16 x 20 degrees. Also, the associated true 
+
+attitude is used for the quaternion error calculation. 
+
+
+
+ 
+
+ 
+
+Once the LISA has been performed and the estimated star quaternion, centroids, and inertial 
+
+(cataloged) vectors are reported, the algorithm will execute the following steps: 
+
+1. The estimated attitude is used to calculate the projected star vectors in the camera 
+FOV.  
+
+ 
+
+ Where;  is the projected star vector in the FOV,  is the direction cosine 
+
+matrix that rotates a vector from the inertial frame to the camera frame, and  is the star 
+
+inertial (cataloged) vector. 
+
+2. Using the projected star vectors and the camera calibration parameters, calculate 
+the projected stars in the FOV. 
+
+ 
+
+ 
+
+ 
+
+ Where; and are the projected star location in the FOV, f is the focal length 
+
+and ps is the pixel size. 
+
+3. The residuals between the star centroids from LISA and the projected stars are 
+then calculated. 
+
+ 
+
+ 
+
+Where;  and , are the measured centroids of each star. 
+
+4. The norm of each star residual is calculated and compared against the predefined 
+outlier rejection threshold (NumPixThre) for the number of pixel to consider a 
+
+rejected star.  
+
+5. If any star has a norm of the residual greater than the NumPixThre, then this star 
+will be rejected from further processing. 
+
+6. All the stars with less threshold are used for both the camera recalibration and 
+attitude re-estimation using the The fast optimal attitude matrix (FOAM) for 
+
+minimizing Wahba's loss function solves the optimal attitude matrix directly and 
+
+efficiently [Ref. 9].  
+
+ 
+
+OPNAV ATTITUDE IMPROVEMENT RESULTS 
+
+The above Matlab driver is applied to test the outlier rejection technique and several EDGE 
+
+simulated images are used to evaluate the performance of the proposed algorithm.  
+
+
+
+ 
+
+ 
+
+Figure  (3) shows one of the OpNav star images with lens distortion and stellar aberration added 
+
+to the simulated image. The associated results from the LISA are also projected on the simulated 
+
+image. The star image has 18 centroided stars, shown as green circles, and 10 identified stars, 
+
+shown as red stars. The total attitude error between the true attitude and the estimated attitude 
+
+before applying the outlier rejection is about 48.17 arcsec.  
+
+Figure  (4) shows the residuals between the measured star centroids and the projected star 
+
+centroids in the FOV.  Two candidate residual thresholds (NumPixThre) are shown. The red line 
+
+is for NumPixThre equal to 2 pixels while the green line is for the NumPixThre equal to 3 pixels.  
+
+If the NumPixThre is 3 (green-line) pixels, then 1 star will be rejected from the list of the 
+
+identified stars and only 9 identified stars will be used for the attitude estimation re-calculation, 
+
+and the resulting attitude error will drop to 28.48 arcsec. 
+
+If the NumPixThre is 2 pixels (red-line), then 4 stars will be rejected from the list of the identified 
+
+stars and only 6 identified stars will be used for the attitude estimation re-calculation, and the 
+
+resulting attitude error will drop to 23.25 arcsec. 
+
+ 
+
+ 
+
+Figure 3.  The image processing results for the OpNav star image 
+
+ 
+
+
+
+ 
+
+ 
+
+ 
+
+Figure 4.  The Residuals of the star centroids in the FOV 
+
+ 
+
+The outlier rejection technique is also applied to 20 simulated images with a 0.18 deg/sec vehicle 
+
+rotation rate. Figure  (5) shows the true attitude of the simulated EDGE images. The resulting 
+
+number of centroided stars as well as the identified stars for each image are shown in Figure  (6). 
+
+The attitude errors, the cross and about-boresight errors, and the total errors for each images are 
+
+illustrated in Figure  (7). The mean of total attitude errors is 24.88 arcsec, and the 3 standard 
+
+deviation is 28.7 arcsec. The 3 for the cross/about-boresight errors are 14.09 arcsec and 28.74 
+
+arcsec respectively. 
+
+ 
+
+       
+
+Figure 5. True attitude Yaw/Pitch/Roll (deg) Figure 6. The number of centroided/identified 
+
+stars 
+
+ 
+
+
+
+ 
+
+ 
+
+ 
+
+Figure 7. The attitude errors for each image 
+
+ 
+
+At least six images have one or two outlier objects for NumPixThre equal to 2 pixels. Figure 8 
+
+shows an example of one of these images that have 10 identified, with the two outlier stars near 
+
+the corner of the image. If one of these stars is removed, the total attitude errors drops from 34.8 
+
+arcsec to 28.9 arcsec.  If the other outlier star is also removed the total error drops to 24.03 arcsec. 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Figure 8. One of the star images with the outlier stars near the edges. 
+
+
+
+ 
+
+ 
+
+ 
+
+OPNAV CALIBRATION RESULTS: WITH AND WITHOUT OUTLIER REJECTION 
+
+One of the robustness tests for the Orion OpNav calibration software focuses on observing how it 
+
+handles stars whose centroid location might be adversely affected by a non-stellar object near its 
+
+Region-of-Interest (ROI). With the outlier rejection feature, the expectation is that such 
+
+measurements will be dropped from the calibration data set, and calibration will be able to 
+
+successfully complete. 
+
+ 
+
+Two cases were examined: 
+
+1. A non-stellar object overlapping a star (centroided as a single object) 
+
+2. A non-stellar object very close to a star, but not touching (centroided as two separate 
+
+objects) 
+
+Case 1: Overlapping non-stellar object and star centroided as one 
+
+ 
+
+Figure 9. Overlapping object and star centroided as one 
+
+Figure  9 shows a non-stellar object, a star, and their centroided location as represented by the red 
+
+“x”. Due to the non-stellar object, the star’s centroid is skewed away from it. Without the outlier 
+
+rejection feature, calibration associates this centroid location with a star, and includes it in its 
+
+calculations. This can be seen in Figure 10 where the green “x” marks represent centroids that 
+
+have been identified as a star and used in the calibration. Ultimately, this causes the software to 
+
+fail its measurement residual check. As such, the entire calibration is rejected, and a new set of 
+
+images needs to be collected. 
+
+
+
+ 
+
+ 
+
+ 
+
+Figure 10. Zoomed-in view of the overlapping non-stellar object/star being identified as a star for 
+
+calibration 
+
+ 
+
+Once outlier rejection is applied, however, the overlapping non-stellar object/star is discarded 
+
+(see Figure 11), and the software is able to successfully complete and provide results within 
+
+tolerance. 
+
+ 
+
+Figure 11. Zoomed-in view of the overlapping object/star not included in the calibration 
+
+
+
+ 
+
+ 
+
+Case 2: Non-stellar object within the ROI of a star, and centroided separately 
+
+ 
+
+Figure 12. Non-stellar object near a star, and centroided separately 
+
+ 
+
+Figure 12 shows both a non-stellar object and a star, with their respective centroided locations 
+
+represented by red “x” marks. With the non-stellar object being within a cataloged star’s ROI, 
+
+both the non-stellar object and star are matched to the same cataloged star. This can be seen in 
+
+Figure 13 where the green “x” marks show which centroids are identified as a star for use in 
+
+calibration. 
+
+ 
+
+Figure 13. Non-stellar object and nearby star both matched to the (same) star 
+
+
+
+ 
+
+ 
+
+Similar to Case 1, the entire calibration routine would have failed due to the single high residual 
+
+data point that the non-stellar object introduces, and a new set of images would be required. With 
+
+the inclusion of the outlier rejection algorithm, however, that data point is dropped (see Figure  
+
+14), and calibration can complete successfully. 
+
+ 
+
+Figure 14. Non-stellar object is excluded from the calibration data set 
+
+ 
+
+As illustrated by these two test cases, the outlier rejection feature allows the calibration software 
+
+to be robust against non-stellar objects in the field of view and, consequently, allows for a more 
+
+efficient and simple concept of operations. 
+
+ 
+
+CONCLUSION  
+
+     This paper introduces a new technique to detect and reject the outliers which could be found in any 
+
+frame of the OpNav filed of view during the lost in space attitude determination or during the camera 
+
+calibration. This robust technique first determines the  outliers  based on the residuals of the centroids for 
+
+the detected stars and their corresponding location using the star catalog. If these residuals exceed a 
+
+predetermined threshold, the object will be detected as an outlier and will be removed before another 
+
+attitude determination and calibration iteration is performed.  
+
+    Several tests using single and mutliple star images are carried out to test the performance for both the 
+
+attitude determination and the camera calibration. These tests proved that the results are improved by an 
+
+almost two-fold increase in accuracy when applying this outlier rejection technique. 
+
+ 
+
+
+
+ 
+
+ 
+
+REFERENCES 
+
+1 Mamich, H., and D’Souza, C., “Orion Preliminary Navigation System Design,” AIAA Paper 2008-
+7295, Aug. 2008. 
+
+2 Christian, J., and Lightsey, E., “Integrated Performance of an Autonomous Optical Navigation 
+Systems for Space Exploration,” AIAA SPACE 2010 Conference and Exposition, AIAA Paper 
+
+2010-8786, 2010. 
+
+3 Owen, W.: “Methods of Optical Navigation.” In: AAS/AIAA Space Flight Mechanics Meeting (13-
+17) (2011) 
+
+4 Christian J., Benhacine L.”Geometric Calibration of the Orion Optical Navigation Camera using 
+Star Field Images”, Journal of Astronaut Sci (2016) 63:335–353 DOI 10.1007/s40295-016-0091-3 
+
+5 Oberst, J., Brinkmann, B., Giese, B.: “Geometric Calibration of the MICAS CCD Sensor for the 
+DS1 (Deep Space 1) Spacecraft: Laboratory Vs. In-Flight Data Analysis.” In: International 
+
+Archives of Photogrammetry and Remote Sensing, Vol. XXXIII (2000) 
+
+6 Samaan M, Lockhart S,  Holt G, and Mamich H, “On-Ground Calibration and Optical Alignment 
+for the Orion Optical Navigation Camera” , AAS John L. Junkins Dynamical Systems Symposium, 
+
+College Station, TX, May 20–21, 2018, 
+
+7 D.W. Marquardt. “An algorithm for least-squares estimation of nonlinear parameters,” Journal of 
+the Society for Industrial and Applied Mathematics, 11(2):431-441, 1963.  
+
+8 I. y. Bar-Itzhack and Y. Oshman, "Attitude Determination from Vector Observations: Quaternion 
+Estimation," in IEEE Transactions on Aerospace and Electronic Systems, vol. AES-21, no. 1, pp. 
+
+128-136, Jan. 1985, doi: 10.1109/TAES.1985.310546. 
+
+9 Markley F L  “Attitude determination using vector observations—a fast optimal matrix 
+algorithm” Journal of. Astron. Sci. 41 261–80, 1993 
+
+10 Holt, G.N., D’souza C.N., and Saley D., “Orion Optical Navigation Progress Toward Exploration 
+Mission 1”. AIAA 2018-1978, AIAA SciTech Forum, Jan. 2018. 
+
+

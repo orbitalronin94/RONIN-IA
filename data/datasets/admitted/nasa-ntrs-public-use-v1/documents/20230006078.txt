@@ -1,0 +1,330 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="cp:revision" content="2">
+<meta name="extended-properties:AppVersion" content="16.0000">
+<meta name="meta:paragraph-count" content="66">
+<meta name="meta:word-count" content="4984">
+<meta name="dc:creator" content="Cecil Byles">
+<meta name="extended-properties:Company" content="">
+<meta name="dcterms:created" content="2023-05-11T16:39:00Z">
+<meta name="meta:line-count" content="236">
+<meta name="dcterms:modified" content="2023-05-11T16:39:00Z">
+<meta name="custom:xd_ProgID" content="">
+<meta name="custom:TriggerFlowInfo" content="">
+<meta name="meta:character-count" content="28412">
+<meta name="custom:Order" content="70800.0">
+<meta name="custom:ComplianceAssetId" content="">
+<meta name="meta:character-count-with-spaces" content="33330">
+<meta name="custom:GrammarlyDocumentId" content="771c6d4e821d407514b27e3e279aafe3e15529d3087c04aed696dba2c8b4a87f">
+<meta name="Content-Type-Override" content="application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+<meta name="Content-Type" content="application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+<meta name="custom:_ExtendedDescription" content="">
+<meta name="custom:ContentTypeId" content="0x010100AA137B7158B5884495B75C774E6EAA67">
+<meta name="extended-properties:Application" content="Microsoft Office Word">
+<meta name="meta:last-author" content="Ross, Kenton W. (LARC-E3)">
+<meta name="xmpTPg:NPages" content="15">
+<meta name="custom:xd_Signature" content="false">
+<meta name="extended-properties:Template" content="Normal.dotm">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.DefaultParser">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.microsoft.ooxml.OOXMLParser">
+<meta name="extended-properties:DocSecurityString" content="None">
+<meta name="custom:MediaServiceImageTags" content="">
+<meta name="custom:TemplateUrl" content="">
+<meta name="meta:page-count" content="15">
+<meta name="dc:publisher" content="">
+<title></title>
+</head>
+<body><p class="normal0"><b>NASA DEVELOP National Program</b></p>
+<p class="normal0"><img src="embedded:image15.png" alt=""><b> California – Jet Propulsion Laboratory</b></p>
+<p class="normal0"><i>Spring 2023</i></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<table><tbody><tr>	<td><p class="normal0"></p>
+</td>	<td><p class="normal0"></p>
+</td>	<td><p class="normal0"></p>
+</td></tr>
+</tbody></table>
+<p class="normal0"></p>
+<p class="normal0">WET Water Resources</p>
+<p class="normal0"> Enhancing Capabilities and Updating the Wetland Extent Tool in Google Earth Engine Python API to Map Wetland Extent and Inundation</p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"><b>                 </b><b>Technical Report</b><img src="embedded:image1.png" alt=""></p>
+<p class="normal0">Final – March 30th, 2023</p>
+<p class="normal0">Lori Berberian (Project Lead)</p>
+<p class="normal0">Kaely Harris</p>
+<p class="normal0">Mitch Porter</p>
+<p class="normal0">Emma Waugh</p>
+<p class="normal0"></p>
+<p class="normal0"><b><i>Advisors:</i></b></p>
+<p class="normal0">Bruce Chapman, NASA Jet Propulsion Laboratory, California Institute of Technology (Science Advisor)</p>
+<p class="normal0">Benjamin Holt, NASA Jet Propulsion Laboratory, California Institute of Technology (Science Advisor)</p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"><b><i>Fellow:</i></b>
+Michael Pazmino (California – JPL)</p>
+<p class="normal0">
+</p>
+<h0>1. Abstract</h0><p class="normal0">Wetland ecosystems are annually or seasonally wet transition zones between land and water. They provide a range of ecosystem services such as water filtration, flood mitigation, and carbon sequestration, as well as hosting biodiversity hotspots. Although they fulfill fundamental physical and natural processes, wetland extent and health are threatened by anthropogenic influences related to urbanization, population increase, pollution, and climate change. Recognizing the need to quantitatively monitor changes in these recently threatened ecosystems in a timely and cost-effective way, we developed a Google Earth Engine (GEE) Python API tool for automated wetland extent mapping using optical and radar satellite sensors that can be applied globally. The tool will significantly improve wetland change analysis and monitoring as SAR data provides high resolution (5-10 m) imagery, unaffected by cloud cover and light availability (day vs. night), common limitations for other remotely sensed sensors. The tool utilizes Copernicus Sentinel-1 C-band and NISAR L-band (once operational and available on the GEE repository) synthetic aperture radar (SAR) imagery. During image preprocessing, we applied a Terra Moderate Resolution Imaging Spectroradiometer (MODIS) snow product to determine regional snow coverage, which affects land classification sensitivity. Calibration and validation were conducted through a historical change and sensitivity analysis of the Sudd wetland located in central Sudan. The tool was the first of its kind, as it enables NISAR data processing through an open-source GEE repository, further expanding and improving the utility of NASA Earth observations and contributing to NASA Open Science initiatives. We anticipate the tool will be used by researchers and practitioners interested in wetland monitoring and management.</p>
+<p class="normal0"></p>
+<p class="normal0"><a name="_heading=h.30j0zll"></a><b>Key Terms: </b>Inundation, Land Cover Classification, Machine Learning, NISAR, Remote Sensing Imagery, SAR, Sentinel-1, Wetland</p>
+<p class="normal0"><b>2. Introduction</b></p>
+<p class="normal0"><b><i>2.1 Background Information</i></b></p>
+<p class="normal0">Wetland ecosystems are critical to biodiversity, water quality, flood mitigation, and carbon sequestration. These essential aquatic environments provide a range of ecosystem services that are becoming increasingly threatened by land use change, pollution, urbanization, sea level rise, groundwater depletion, and climate change. Despite their environmental importance, hazard mitigation and habitat restoration practices have become relevant only recently. The purpose of this investigation was to develop a more thorough understanding of wetland extent and inundation. This knowledge will support the accurate and timely land management and conservation efforts required to support wetland systems. To develop this understanding, we created a tool for improved wetland mapping methods that define wetland extent (spread) and inundation status (water presence) at a high resolution and with high accuracy. Although regionally discrete semi-automated methods for detecting wetland extent currently exist (Islam et al., 2008; Kloiber et al., 2015; Behnamian et al., 2017), there is a need for streamlined automation of wetland monitoring via remote sensing that will expand the utility of various Earth observations to survey wetland areas, which our tool focused to accomplish. </p>
+<p class="normal0"></p>
+<p class="normal0">Wetlands can be classified into four major types: marshes, swamps, bogs, and fens, according to their geomorphic setting, dominant water source, and hydrodynamics (US Environmental Protection Agency [EPA], 2015). These four wetland types are further differentiated into subclassifications, which increases the difficulty in classifying these ecosystems using remote sensing methods. In this investigation, wetland extent and inundation are classified using satellite imagery according to their land cover characteristics—water presence, vegetation, and ground cover.</p>
+<p class="normal0"></p>
+<p class="normal0">Previous methods of mapping wetland extent and inundation have utilized optical imagery. However, optical imagery is highly limited due to its inability to penetrate cloud and vegetation cover. In our investigation we utilized synthetic aperture radar (SAR) data, which has proven effective at detecting physical structures of inundated vegetation, can penetrate cloud and vegetation cover, and are unaffected by nighttime conditions. Lastly, due to predominant specular reflection, radar backscatter over non-disturbed water bodies is low relative to surrounding non-water features, resulting in starkly contrasting pixel colors, and improving the differentiation of land cover types (Moreira et al., 2013).</p>
+<p class="normal0"></p>
+<p class="normal0">The amount of received radar signal, called backscatter, is indicative of surface roughness and water content. Low backscatter generally indicates smooth surfaces such as water or roads, while higher backscatter is correlated with more texture, usually biomass. In this project, we utilized dual-channel SAR data, meaning the sensor transmits and receives radar waves in different orientations; it collects co-polarized (in which waves are vertically transmitted and vertically received, or VV) and cross-polarized (in which waves are vertically transmitted and horizontally received, or VH) information (White et al., 2015). Co-polarized data can detect inundated vegetation more successfully due to its sensitivity to double-bounce scattering, where two surfaces at a right-angle direct energy back to the sensor. Cross-polarized data remains superior for open water detection because it is less impacted by the effects of wind roughening on smooth water surfaces, which can otherwise lead to abnormally high backscatter values. This project utilizes both polarization combinations as well as the ratio between spectral values to provide a comprehensive analysis of various inundation states.</p>
+<p class="normal0"></p>
+<p class="normal0">Previous NASA DEVELOP projects have created tools to delineate inundation in specific regions with certain stakeholders in mind. This project developed WET 3.0, a global wetland extent tool utilizing a Python application programming interface (API) for Google Earth Engine (GEE), a cloud-based geoprocessing service that has the capacity to store petabytes of data. The tool restricts the data to user-specified region(s) of interest (ROI). </p>
+<p class="normal0"></p>
+<p class="normal0">We performed validation of our tool on the Sudd wetland in South Sudan, one of the world’s most extensive wetlands located within the Nile River Basin (Figure 1). Its 23,000 to 40,000 km2 area includes permanent wetlands and seasonal pools as well as grasslands and marshes—some of which host settlements and pastures for local pastoral communities (Sosnowski et al., 2016). The Sudd provides critical floodwater storage, sediment retention, and wildlife habitat. The wetland experiences extreme variation in extent due to flooding and drought conditions, and recent floods have caused displacement of many inhabitants. The advantages of using the Sudd wetland as a pilot for evaluating WET 3.0 functionality are that there is a wealth of existing reference data for this region, and it is primarily unobscured by tree canopy. (Downs et al. 2023) conducted a validation of their Global Navigation Satellite Systems Reflectometry (GNSS-R) inundation mapping tool on the region using a floodwater fraction product from Suomi-NPP Visible Infrared Imaging Radiometer Suite (VIIRS). However, wide variation in wetland types globally means the Sudd is not representative of all wetlands; wetlands beneath dense forest canopies are particularly challenging to detect. Further testing on other wetland types will therefore be necessary to improve the robustness of results and sensitivity of the tool. </p>
+<p class="normal0"></p>
+<p class="normal0"><img src="embedded:image2.png" alt=""></p>
+<p class="normal0"><i>Figure 1. </i>The case study area, the Sudd Wetland in South Sudan, is shaded in green. The wetland is part of the White Nile River system. Other local water bodies are pictured in light blue. </p>
+<p class="normal0"></p>
+<p class="normal0"><b><i>2.2 Objectives</i></b>
+The aim of this project was to create a tool to classify wetland extent on a global scale. In addition, we designed this tool to support future NASA DEVELOP projects and improve wetland monitoring, management, and research within NASA’s Earth Science network. Specifically, our tool aims to quantify wetland extent and provide regional statistics, compare wetland extent to other land classification products, and visualize the data in a user-friendly Jupyter Notebook. Additionally, we performed a historical analysis on the Sudd wetland. This tool addressed a need for increased wetland monitoring capabilities to support wetland management and restoration as well as research while also being globally generalized and accessible, allowing users to generate wetland classifications for various wetland types for any location in the world. An openly accessible classification tool will allow the user to visualize and quantify the changes in surface wetland inundation extent in the context of a rapidly changing climate. Secondary objectives, including expanding the utility of Sentinel-1 and SAR observations, improving global wetland mapping applications, and providing the first algorithm compatible with NASA-ISRO Synthetic Aperture Radar (NISAR) data, will result in the completion of the project’s primary objectives. </p>
+<p class="normal0"></p>
+<h0>3. Methodology</h0><p class="normal0">The following section details the data acquisition and processing of remotely sensed data sets utilized for calibration, classification, and validation for this tool (Figure 2). </p>
+<p class="normal0"></p>
+<p class="normal0"><img src="embedded:image3.png" alt=""><i>Figure 2. </i>The methodology developed for this project.</p>
+<p class="normal0">*NISAR data were not available until after the project’s conclusion.</p>
+<p class="normal0"></p>
+<p class="normal0"><b><i>3.1 Data Acquisition</i></b></p>
+<p class="normal0">Our team accessed Copernicus European Space Agency (ESA) Sentinel-1 C-SAR imagery via the GEE data catalog (Table 1). C-SAR is C band (5.405 GHz) cross-polarized with VV + VH bands. The scenes were preprocessed using thermal noise removal, radiometric calibration, and terrain correction with digital elevation models. WET 3.0 tool users select their desired date range and ROI; for our case study in the Sudd wetland, we filtered for the study area location in October 2021 (Figure 1). Then, we filtered data to include interferometric wide swath mode (the mode for most terrestrial coverage).</p>
+<p class="normal0"></p>
+<p class="normal0">Table 1.<i> Earth observation data utilized in this tool. </i></p>
+<table><tbody><tr>	<td><p class="normal0"><b>Platform, Sensor &amp; Product</b></p>
+</td>	<td><p class="normal0"><b>Processing Level &amp; Product Title</b></p>
+</td>	<td><p class="normal0"><b>Resolution</b></p>
+</td>	<td><p class="normal0"><b>Data Provider</b></p>
+</td></tr>
+<tr>	<td><p class="normal0">Sentinel-1 C-band Synthetic Aperture Radar</p>
+</td>	<td><p class="normal0">Level 1 Ground Range Detected</p>
+</td>	<td><p class="normal0">5 to 10-meter, 12-day revisit</p>
+</td>	<td><p class="normal0">ESA</p>
+</td></tr>
+<tr>	<td><p class="normal0">NISAR</p>
+</td>	<td><p class="normal0">—</p>
+</td>	<td><p class="normal0">3 to 10-meter, 12-day revisit</p>
+</td>	<td><p class="normal0">NASA &amp; ISRO</p>
+</td></tr>
+<tr>	<td><p class="normal0">MODIS Terra Snow Cover</p>
+</td>	<td><p class="normal0">Normalized Difference Snow Index</p>
+</td>	<td><p class="normal0">500-meter, daily revisit</p>
+</td>	<td><p class="normal0">NASA &amp; NOAA</p>
+</td></tr>
+<tr>	<td><p class="normal0">Sentinel-2 MSI</p>
+</td>	<td><p class="normal0">Dynamic World Near Real Time Land Use/Land Cover</p>
+</td>	<td><p class="normal0">5 to 10-meter, 12-day revisit</p>
+</td>	<td><p class="normal0">ESA</p>
+</td></tr>
+<tr>	<td><p class="normal0">Suomi-NPP VIIRS</p>
+</td>	<td><p class="normal0">VNG Flood 1.0</p>
+</td>	<td><p class="normal0">375-meter, 16-day revisit</p>
+</td>	<td><p class="normal0">NASA &amp; NOAA</p>
+</td></tr>
+</tbody></table>
+<p class="normal0"></p>
+<p class="normal0">NISAR, NASA and the Indian Space Research Organization’s (ISRO) new L-band SAR satellite, has completed construction and is set to undergo testing. NISAR’s estimated launch date is set for January 2024, and it will become operational within one year of the launch. Conveniently, its Earth observation data will be accessible through the GEE data repository. Once operational, our tool will utilize the L-band sensor for image processing and wetland detection, providing higher spatiotemporal resolution than the Sentinel-1 C-band SAR data. Application of this tool for NISAR, therefore, posits various advantages and justifies the need to develop the tool with dual sensor compatibility. </p>
+<p class="normal0"></p>
+<p class="normal0">A snow mask was created using the Terra Moderate Resolution Imaging Spectroradiometer (MODIS) Snow Cover Daily Global 500m product via the GEE data catalog. The Normalized Difference Snow Index (NDSI) band provides values 0-100 for snow cover; we used it to make a snow coverage time series to eliminate snowy periods of the year. We used the Sentinel-2 Multispectral Instrument (MSI) Dynamic World Near Real Time (NRT) Land Use/Land Cover (LULC) global 10m product as a reference for training polygons for our inundation classification. We accessed this product via the GEE data catalog. </p>
+<p class="normal0"></p>
+<p class="normal0">We obtained inundation data for our South Sudan case study from October 2021 for validation. Using Suomi-NPP VIIRS, Li et al. (2018) developed an automated near-real time flood detection product called VIIRS NOAA GMU (VNG) Flood 1.0, which was in turn used by Downs et al. (2023) to validate their study of wetland extent in the same region using Global Navigational Satellite Systems-Reflectometry. VNG Flood 1.0 imposes a 10% floodwater fraction threshold and a 10% cloud-free threshold onto a monthlong composite VIIRS image to create a binary classification of land and normal open water. </p>
+<p class="normal0"></p>
+<p class="normal0"><b><i>3.2 Data Processing</i></b></p>
+<p class="normal0">Our tool includes functions to process the data prior to analysis in the GEE Python API. First, we computed spatial and temporal rolling averages to reduce speckle in the radar data. We also created a new band for the ratio between the VV and VH values, which aids in identifying inundated vegetation. Differences in backscatter intensity between ascending and descending orbits can impact change analysis, as different incidence angles affect pixel area. Therefore, when both orbits were present, we divided data into two image collections for separate analysis. </p>
+<p class="normal0"></p>
+<p class="normal0">Additionally, snow cover detection products were used to filter out snow-covered lands to reduce impacts on wetland classification accuracy. The tool automatically acquires the Terra MODIS snow cover product for the user’s ROI and the specified dates. We selected the MODIS snow cover dataset because of its algorithms that alleviate errors and flag uncertain snow cover detections. After users select a date range and ROI, the tool produces an annual snow cover time series from the MODIS snow product, which provides users with the information needed to choose a snow-free date range. The product sometimes misidentifies snow in individual images, so we include a 10% error line. If snow is detected, the user is asked if the Sentinel-1 imagery for the respective date should be removed from the dataset.</p>
+<p class="normal0"></p>
+<p class="normal0">To collect the training data required for our supervised classification of Sentinel-1 imagery reflectance values, we utilized the Sentinel-2 Dynamic World NRT LULC product as a reference. This tool provides precise, frequent high-resolution land cover classification information, making it suitable for our analysis. It allowed us to select the training data required to capture threshold values of backscatter that correlate with our classification categories. To do this, we created polygons to sample pixel values of three classes—open water, inundated vegetation, and no water (selected from the Dynamic World “grass” class)—from the Sudd, South Sudan. Using GEE statistical tools, we collected the values of the Sentinel-1 imagery pixels within the training polygons. Then, we plotted histograms of pixel values of the three classes for each band. We manually selected the threshold values according to the histograms to use for classification.  </p>
+<p class="normal0">       </p>
+<p class="normal0"><b><i>3.3 Data Analysis</i></b></p>
+<p class="normal0">Once the imagery was prepared for the given ROI and date range and the classification thresholds were determined, we began pixel value change analysis and the classification. We calculated the relative change from the mean and created a classified image for each image in the date range. The tool also utilized the geemap Python package developed by Wu (2020) to plot preliminary images and resulting products to an interactive map. </p>
+<p class="normal0"></p>
+<p class="normal0"><i>3.3.1 Pixel Value Change Analysis</i></p>
+<p class="normal0">For each band in the image collection, we calculated the mean pixel values within the given date range. We then determined the relative change from the mean for every image in the collection to highlight changes in inundation across the date range. We displayed the results as a map and bar plot. </p>
+<p class="normal0"></p>
+<p class="normal0"><i>3.3.2 Classification</i></p>
+<p class="normal0">Based on the VV and VV/VH threshold values we determined from the histograms, we classified the images by reassigning pixel values to classes 1, 2, and 3 for open water, inundated vegetation, and no water, respectively. Threshold values assigned to each inundation state are displayed in Table 2. We applied the thresholds to VV and VV/VH ratio values and used the NumPy Python package developed by Harris et al. (2020) to assign the resulting classified values to pixels to create an additional classified band to each image (Figure 3). </p>
+<p class="normal0"></p>
+<p>Table 2. <i>Land classification and threshold value criterion used for the Sudd wetland case study. </i></p>
+<table><tbody><tr>	<td><p><b>Pixel Classification</b></p>
+</td>	<td><p><b>Threshold Values</b></p>
+</td>	<td><p><b>Polarization Characteristic</b></p>
+</td>	<td><p><b>Assigned Value</b></p>
+</td></tr>
+<tr>	<td><p>Open water</p>
+</td>	<td><p>VV &lt; 0.01</p>
+</td>	<td><p>Low VV</p>
+</td>	<td><p>1</p>
+</td></tr>
+<tr>	<td><p>Inundated vegetation</p>
+</td>	<td><p>0.01 &lt; VV &lt; 0.11</p>
+<p><i>0.1 &lt; VV &lt; 0.2 and VV/VH &gt; 5.5</i></p>
+<p><i>0.2 &lt; VV &lt; 0.3 and VV/VH &gt; 8.5</i></p>
+</td>	<td><p>Moderate VV and high VV/VH</p>
+</td>	<td><p>2</p>
+</td></tr>
+<tr>	<td><p>No water</p>
+</td>	<td><p>VV &gt; 0.11</p>
+<p><i>0.1 &lt; VV &lt; 0.2 and VV/VH &lt; 5.5</i></p>
+<p><i>0.2 &lt; VV &lt; 0.3 and VV/VH &lt; 8.5</i></p>
+</td>	<td><p>High VV and low VV/VH</p>
+</td>	<td><p>3</p>
+</td></tr>
+</tbody></table>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"><img src="embedded:image4.png" alt=""></p>
+<p class="normal0"><i>Figure 3. </i>Sentinel-1 images of Sudd wetland are classified to indicate land cover that is open water, inundated vegetation, or non-surface water. (From WET 3.0, 2023).</p>
+<p class="normal0"></p>
+<p class="normal0">Similar to the mean pixel value change analysis, we also analyzed the classification time series to assess changes in inundation state over time. We totaled the number of pixels classified as each inundation state on each date, allowing users to track changes in inundation state between dates and across the date range. Resulting images showing changes in distribution of inundation state over time allow for easy data interpretation and are relevant to wetland management and conservation practitioners. To test the above data analysis techniques and the sensitivity of our threshold classification system, we used training data and applied the methods to the Sudd wetland in South Sudan.</p>
+<p class="normal0"></p>
+<p class="normal0"><i>3.3.3 Case Study Accuracy Assessment</i></p>
+<p class="normal0">Applying an accuracy assessment to the WET 3.0 wetland extent classifier allows producers and users to understand the accuracy of the classification results being produced. In this analysis, we used a confusion matrix of classified pixel values to determine the accuracy of our tool. A confusion matrix is a table of values that compares the predicted output of the model to the actual output of the pixel. Once we determined the accuracy of the classifier from the confusion matrix table values, we calculated the kappa coefficient, producer’s accuracy, and user’s accuracy. Kappa coefficient is a measure of agreement between the predicted classified pixel values and the observed pixel classification. Producer’s accuracy and user’s accuracy measure the number of times a landcover class is correctly identified by the model and the number of true positive cases that are correctly identified, respectively. </p>
+<p class="normal0"></p>
+<p class="normal0">We conducted an accuracy assessment of our Sudd wetland case study by comparing our results to a VIIRS VNG Flood 1.0 floodwater fraction product from the same region in October 2021 (Figure 4). The dataset has only 2 classes (water and no water), so for the accuracy assessment we combined our open water and inundated vegetation classes for comparison with the VNG water class. </p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"><img src="embedded:image5.png" alt=""></p>
+<p class="normal0"><i>Figure 4. VIIR</i>S classified image of Sudd wetland indicate land cover that is open water or non-surface water. This imagery is used for accuracy assessment of the WET 3.0 classifier. (From Downs et al., 2023).</p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"><i>3.3.4 WET 3.0 Display and User Interface </i></p>
+<p class="normal0">One of this project’s primary goals was to develop a tool easily accessible to our intended users and audience. To accomplish this, we designed a user interface that would allow the end user to easily adjust input parameters to yield the output results for their region and date range of interest (Figure 5). Once users select a region of interest and date range, they can choose to apply a snow filter, despeckle images via rolling averages, and display various unprocessed and processed images. An embedded interactive Folium map allows users to display and inspect images (Figure 6). A separate script allows users to determine thresholds for the classification based on the pixel value distribution from training polygons for each inundation class. Users may choose to use the thresholds we determined in our Sudd case study or draw new polygons using Sentinel-1 C-SAR, Sentinel-2 MSI true color imagery, and Dynamic World LULC as references to find suitable thresholds for a different study area. Instructions in the script guide users through choosing thresholds based on VV and VV/VH ratio. Interactive maps, widgets, and stepwise instructions allow users with limited spatial analysis and programming backgrounds to utilize our tool and obtain results. </p>
+<p class="normal0"></p>
+<p class="normal0"></p>
+<p class="normal0"><img src="embedded:image6.jpg" alt=""></p>
+<p class="normal0"><i>Figure 5. </i>Example of user-drawn region of interest. Users can select their region of interest and date range from any location in the world. (From WET 3.0, 2023).</p>
+<p class="normal0"></p>
+<p class="normal0"><img src="embedded:image7.jpg" alt=""></p>
+<p class="normal0"><i>Figure 6. </i>The tool utilizes an embedded Folium map, allowing users to display and inspect imagery. (From WET 3.0, 2023).</p>
+<p class="normal0"></p>
+<p class="normal0"><b>4. Results &amp; Discussion</b></p>
+<p class="normal0"><b><i>4.1 Analysis of Results</i></b></p>
+<p class="normal0"><a name="_heading=h.2et92p0"></a>We used our WET 3.0 classification tool to classify inundation extent in the Sudd wetland with the three classes (open water, inundated vegetation, and no water) determined by VV and VV/VH backscatter value distribution in our thresholding script. We reclassified each pixel to one of the three values (1, 2, or 3) associated with the three classes, based on the distinct breaks between VV values in the VV histograms. In the case study, VV &lt; 0.01 is open water; 0.1 &lt; VV &lt; 0.11 is inundated vegetation; and VV &gt; 0.11 is no water (Figure 7). </p>
+<p class="normal0"></p>
+<p class="normal0"><img src="embedded:image8.png" alt=""> </p>
+<p class="normal0"><i>Figure 7. </i>Pixel values of VV backscatter imagery of the three land cover classes: open water, inundated vegetation, and no water. The distinct thresholds are used for classifying the SAR imagery. (From WET 3.0, 2023).</p>
+<p class="normal0"></p>
+<p class="normal0">To take advantage of the VV/VH ratio’s application for distinguishing between inundated vegetation and dry land, we further distilled our thresholds with the ratio based on subsets of VV values (Figure 8). </p>
+<p class="normal0">When VV &lt; 0.1, inundated vegetation and no water values are indistinguishable. However, when VV values are moderate, VV/VH distributions are more distinct; for 0.1&lt;= VV &lt; 0.2, no water VV/VH values are below 5.5, while inundated vegetation values are above 5.5 (Figure 8). For 0.2&lt;= VV &lt; 0.3, no water VV/VH values are below 8.5, while inundated vegetation values are above 8.5. For VV values &gt;= 0.3, we classified all pixels as no water due to the dominance of that class. </p>
+<p class="normal0"><img src="embedded:image9.png" alt=""><img src="embedded:image10.png" alt=""></p>
+<p class="normal0"><img src="embedded:image11.png" alt=""><img src="embedded:image12.png" alt=""></p>
+<p class="normal0"><i>Figure 8. </i>Pixel value ranges between 0–0.4 are used to further separate VV reflectance pixel values. This enables a more precise classification (from WET 3.0, 2023).</p>
+<p class="normal0"></p>
+<p class="normal0">The WET 3.0 successfully classified Sentinel-1 C-SAR imagery into three land cover types: open water, inundated vegetation, and non-water surface. Using the threshold values determined from VV and VV/VH values, the supervised classifier accurately determined the land cover type of each pixel within the region of interest (Figure 8). Our tool classified the total area of our study site (2306.376 km2) to have a mean inundated vegetation of 1181.883 km2 open water 43.220 km2 no water 1,081.090 km2 (Figure 9a-b).</p>
+<p class="normal0"><img src="embedded:image13.jpg" alt=""></p>
+<p class="normal0"><i>Figure 9a.</i> Sudd Study Site Land Classification. The imagery from this land classification was taken on October 30, 2021, over a 2306.376 km2 total area. The map shows an inset of the sample study site total area for greater geographic context. No pixels were identified as having “no pixel values”. </p>
+<p class="normal0"></p>
+<p class="normal0"><img src="embedded:image14.jpg" alt=""></p>
+<p class="normal0"><i>Figure 9b.</i><b> </b>Visualization of the land cover types classified in our sample study site (5 images total). </p>
+<p class="normal0"></p>
+<p>An accuracy assessment will help us determine the effectiveness of our tool in classifying complex habitats and land covers. Due to project timeline constraints we were unable to complete this section for the tool. The accuracy assessment of the classifier would be used to determine overall accuracy, user’s accuracy, producer’s accuracy, and kappa accuracy. Values will be derived from VIIRS data. C-band SAR imagery is highly accurate when classifying wetland inundation extent in marshland ecosystems but does not classify inundation in forested areas accurately due to difficulty with penetrating the canopy. This limits our tool until NISAR L-band data is available and integrated into our tool. L-band SAR more accurately classifies wetland extent in forested areas like swamps due to the longer wavelength compared to C-band SAR.</p>
+<p class="normal0"></p>
+<p><b><i>4.2 Future Work </i></b></p>
+<p>We intend for continued development of the WET 3.0 tool by contributors from various spheres. We identified various focus areas for future research and development: a functional time-series and land change analysis, automated thresholding to increase ease of interpreting histograms, increased GUI functionality, and integrating NISAR imagery (set to be available in 2025). Future work is also necessary to address several of this project’s uncertainties. These include understanding how effectively we are actually classifying wetland regions given the limitations of Sentinel-1 C-SAR sensors when tree canopy is present. We hope to better understand how to differentiate overlapping pixel reflectance values when land cover classes are distinct but still very similar. We hope that validation data such as the Dynamic Surface Water Extent product can be used given the limited accuracy of the Dynamic World NRE LULC product for inundated vegetation regions.</p>
+<p></p>
+<h0>5. Conclusions</h0><p>The objectives of this project were to develop a high accuracy classifier tool that is easily accessible and intuitive to the user, compatible with NISAR imagery, and will have long-term functionality with the GEE Python API interface. It is critical that end users have the ability to openly access tools such as this one, to get accurate results in a timely and cost-effective way. Future users will need to have access to results such as these to make effective land management decisions to ensure the conservation of wetlands. Beyond this, our project and tool has developed a new methodology of land cover classification using SAR imagery that will support future development of highly accurate and automated classifications.  </p>
+<h0>6. Acknowledgments</h0><p class="normal0">Our team would like to express our gratitude to our science advisors Bruce Chapman and Ben Holt, as well as our DEVELOP Fellow Michael Pazmino, all at the NASA Jet Propulsion Laboratory, for their contributions to this project. We would also like to recognize the Great Lakes Water Resources II (JPL Spring 2020) team for their work on WET 2.0 and Brandi Downs et al. (2023) for the use of their VNG Flood 1.0 product for our case study area.</p>
+<p class="normal0"></p>
+<p class="normal0">This material contains modified Copernicus Sentinel data (2023) processed by ESA.</p>
+<p class="normal0"></p>
+<p class="normal0">Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Aeronautics and Space Administration.</p>
+<p class="normal0"></p>
+<p class="normal0">This material is based upon work supported by NASA through contract NNL16AA05C.</p>
+<h0><a name="_heading=h.1t3h5sf"></a></h0><h0>7. Glossary</h0><p class="normal0"><b>Backscatter </b>– redirection of radar signal back toward the radar antenna after the signal has interacted with the Earth’s surface </p>
+<p class="normal0"><b>C-band SAR</b> – a synthetic aperture radar instrument with 3.8-7.5cm wavelength, or 4-8 GHz</p>
+<p class="normal0"><b>Earth observations</b> – Satellites and sensors that collect information about the Earth’s physical, chemical, and biological systems over space and time </p>
+<p class="normal0"><b>GEE</b> – Google Earth Engine </p>
+<p class="normal0"><b>L-band SAR</b> – synthetic aperture radar instrument with 15-30cm wavelength, or 1-2GHz</p>
+<p class="normal0"><b>NISAR</b> – NASA-ISRO SAR Mission; an upcoming SAR mission jointly planned by NASA and the Indian </p>
+<p class="normal0">Space Research Organization (ISRO) that will provide L-Band and S-Band SAR measurements </p>
+<p class="normal0"><b>Open Science</b> – NASA’s commitment to make publicly-funded science—including publications, data, and software—transparent, inclusive, accessible, and reproducible</p>
+<p class="normal0"><b>Python API </b>– Application programming interface that allows users to access GEE’s data catalog and cloud-based processing using Python</p>
+<p class="normal0"><b>SAR</b> – Synthetic Aperture Radar </p>
+<p class="normal0"><b>Speckle </b>– grainy salt-and-pepper pattern present in SAR imagery caused by the interaction of out-of-phase waves with a target </p>
+<p class="normal0"><b>VH </b>– Vertically transmitted, horizontally received; radar system wave polarization consisting of vertical linear transmission and horizontal linear reception</p>
+<p class="normal0"><b>VV </b>– Vertically transmitted, vertically received; radar system wave polarization consisting of vertical linear transmission and vertical linear reception</p>
+<p class="normal0"></p>
+<h0>8. References</h0><p>Behnamian, A., Banks, S., White, L., Brisco, B., Millard, K., Pasher, J., Chen, Z., Duffe, J., Bourgeau-Chavez, L., &amp; Battaglia, M. (2017). Semi-automated surface water detection with synthetic aperture radar data: A wetland case study. <i>Remote Sensing</i>, <i>9</i>(12), 1209. <a href="https://doi.org/doi.org/10.3390/rs9121209">https://doi.org/doi.org/10.3390/rs9121209</a></p>
+<p></p>
+<p>Copernicus Sentinel Data. (2021). <i>Sentinel-1 C-band Synthetic Aperture Radar Ground Range Detected </i>[Data set]. Alaska Satellite Facility DAAC. Retrieved February 2023, from <a href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/">https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/</a></p>
+<p>Downs, B., Kettner, A. J., Chapman, B. D., Brakenridge, G. R., O’Brien, A. J., &amp; Zuffada, C. (2023). Assessing the relative performance of GNSS-R flood extent observations: Case study in South Sudan. <i>IEEE Transactions on Geoscience and Remote Sensing</i>, <i>61</i>, 1–13. <a href="https://doi.org/10.1109/TGRS.2023.3237461">https://doi.org/10.1109/TGRS.2023.3237461</a></p>
+<p></p>
+<p>Hall, D. K. and G. A. Riggs. (2016). <i>MODIS/Terra Snow Cover Daily L3 Global 500m SIN Grid, Version 6</i> [Data Set]. NASA National Snow and Ice Data Center Distributed Active Archive Center. Retrieved February 2023, from <a href="https://doi.org/10.5067/MODIS/MOD10A1.006">https://doi.org/10.5067/MODIS/MOD10A1.006</a></p>
+<p>Harris, C. R., Millman, K. J., van der Walt, S. J., et al. (2020). Array programming with NumPy. <i>Nature</i>, <i>585</i>(7825), 357–362. <a href="https://doi.org/10.1038/s41586-020-2649-2">https://doi.org/10.1038/s41586-020-2649-2</a> </p>
+<p></p>
+<p>Islam, M., Thenkabail, P. S., Kulawardhana, R. W., Alankara, R., Gunasinghe, S., Edussriya, C., &amp; Gunawardana, A. (2008). Semi‐automated methods for mapping wetlands using Landsat ETM+ and SRTM data. <i>International Journal of Remote Sensing</i>, <i>29</i>(24), 7077–7106. <a href="https://doi.org/10.1080/01431160802235878">https://doi.org/10.1080/01431160802235878</a></p>
+<p></p>
+<p>Kloiber, S. M., Macleod, R. D., Smith, A. J., Knight, J. F., &amp; Huberty, B. J. (2015). A semi-automated, multi-source data fusion update of a wetland inventory for east-central Minnesota, USA. <i>Wetlands</i>, <i>35</i>(2), 335–348. <a href="https://doi.org/10.1007/s13157-014-0621-3">https://doi.org/10.1007/s13157-014-0621-3</a></p>
+<p></p>
+<p>Li, S., Sun, D., Goldberg, M. D., Sjoberg, B., Santek, D., Hoffman, J. P., DeWeese, M., Restrepo, P., Lindsey, S., &amp; Holloway, E. (2018). Automatic near real-time flood detection using Suomi-NPP/VIIRS data. <i>Remote Sensing of Environment</i>, <i>204</i>, 672–689. <a href="https://doi.org/10.1016/j.rse.2017.09.032">https://doi.org/10.1016/j.rse.2017.09.032</a></p>
+<p></p>
+<p>Masek, J., Ju, J., Roger, J., Skakun, S., Vermote, E., Claverie, M., Dungan, J., Yin, Z., Freitag, B., Justice, C. (2021). <i>HLS Sentinel-2 Multi-spectral Instrument Surface Reflectance Daily Global 30m v2.0</i> [Data set]. NASA EOSDIS Land Processes DAAC. Retrieved February 2023, from <a href="https://doi.org/10.5067/HLS/HLSS30.002">https://doi.org/10.5067/HLS/HLSS30.002</a></p>
+<p></p>
+<p>Moreira, A., Prats-Iraola, P., Younis, M., Krieger, G., Hajnsek, I., &amp; Papathanassiou, K. P. (2013). A tutorial on synthetic aperture radar. <i>IEEE Geoscience and Remote Sensing Magazine</i>, <i>1</i>(1), 6–43. <a href="https://doi.org/10.1109/MGRS.2013.2248301">https://doi.org/10.1109/MGRS.2013.2248301</a></p>
+<p></p>
+<p>Sosnowski, A., Ghoneim, E., Burke, J. J., Hines, E., &amp; Halls, J. (2016). Remote regions, remote data: A spatial investigation of precipitation, dynamic land covers, and conflict in the Sudd wetland of South Sudan. <i>Applied Geography</i>, <i>69</i>, 51–64. <a href="https://doi.org/10.1016/j.apgeog.2016.02.007">https://doi.org/10.1016/j.apgeog.2016.02.007</a></p>
+<p></p>
+<p>Soulard, C. E., Walker, J. J., &amp; Petrakis, R. E. (2020). Implementation of a surface water extent model in Cambodia using cloud-based remote sensing. <i>Remote Sensing</i>, <i>12</i>(6), Article 6. <a href="https://doi.org/10.3390/rs12060984">https://doi.org/10.3390/rs12060984</a></p>
+<p></p>
+<p>US EPA (2015). <i>Classification and Types of Wetlands</i>. <a href="https://www.epa.gov/wetlands/classification-and-types-wetlands">https://www.epa.gov/wetlands/classification-and-types-wetlands</a></p>
+<p></p>
+<p>White, L., Brisco, B., Dabboor, M., Schmitt, A., &amp; Pratt, A. (2015). A collection of SAR methodologies for monitoring wetlands. <i>Remote Sensing</i>, <i>7</i>(6), Article 6. <a href="https://doi.org/10.3390/rs70607615">https://doi.org/10.3390/rs70607615</a></p>
+<p></p>
+<p>Wu, Q. (2020). geemap: A Python package for interactive mapping with Google Earth Engine. <i>Journal of Open Source Software</i>, <i>5</i>(51), 2305. <a href="https://doi.org/10.21105/joss.02305">https://doi.org/10.21105/joss.02305</a></p>
+<p class="normal0"></p>
+<p class="normal0">1</p>
+<p class="normal0"></p>
+<div class="package-entry"><h1>image1.png</h1>
+</div>
+<div class="package-entry"><h1>image2.png</h1>
+</div>
+<div class="package-entry"><h1>image3.png</h1>
+</div>
+<div class="package-entry"><h1>image4.png</h1>
+</div>
+<div class="package-entry"><h1>image5.png</h1>
+</div>
+<div class="package-entry"><h1>image6.jpg</h1>
+</div>
+<div class="package-entry"><h1>image7.jpg</h1>
+</div>
+<div class="package-entry"><h1>image8.png</h1>
+</div>
+<div class="package-entry"><h1>image9.png</h1>
+</div>
+<div class="package-entry"><h1>image10.png</h1>
+</div>
+<div class="package-entry"><h1>image11.png</h1>
+</div>
+<div class="package-entry"><h1>image12.png</h1>
+</div>
+<div class="package-entry"><h1>image13.jpg</h1>
+</div>
+<div class="package-entry"><h1>image14.jpg</h1>
+</div>
+<div class="package-entry"><h1>image15.png</h1>
+</div>
+</body></html>

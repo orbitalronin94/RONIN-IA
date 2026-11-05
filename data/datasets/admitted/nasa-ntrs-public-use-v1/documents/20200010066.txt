@@ -1,0 +1,429 @@
+Demonstration of the Space Launch System
+Augmenting Adaptive Control Algorithm on a
+Quad-Rotor
+AIAA Sci-Tech Conference, Orlando FL
+January 9, 2018
+Luke Miller, Jing Pei, and Paul Rothhaar
+NASA Langley Research Center
+
+www.nasa.gov
+
+Overview
+Background
+Experimental Setup
+Baseline Linear Control
+Adaptive Augmenting Control (AAC)
+Demonstrating the three key objectives of the
+augmenting adaptive control (AAC) algorithm on the
+Quad-Rotor platform
+Conclusions and Ongoing work
+
+2
+
+Background
+ SLS EM-1 marks the first time an adaptive controller is to be
+implemented on a human-rated launch vehicle
+•The adaptive controller is intended to augment the performance of the
+already well-tuned baseline linear controller.
+•Done by extending the envelope of failures and flight anomalies.
+ In a launch vehicle, the controlled error dynamics are lower in
+frequency than the internal dynamics (flex, slosh) and parasitic
+(engine) dynamics
+•As we approach instability due to insufficient forward
+loop gain (aerodynamics, thrust uncertainty), the error
+dynamics diverge exponentially or at a frequency at
+or below the design control frequency.
+•As we approach instability due to excessive forward
+loop gain, we observe the introduction of highfrequency spectrum in the control loop.
+•These are general characteristics of the control of
+damped complex roots with servo lag, delay, and
+complex engine poles.
+3
+
+Background
+Three key functionalities of the SLS Augmenting Adaptive
+Control (AAC) algorithm
+•Objective 1: Minimum adaptation when the baseline control system is
+performing within the nominal envelope.
+•Objective 2: Increase performance when tracking error becomes too
+large.
+•Objective 3: Decrease system overall gain to suppress undesirable high
+frequency dynamics in the control path.
+
+Demonstrate the key functionalities the AAC algorithm on
+the Quad-Rotor hardware at the LaRC Autonomy Incubator
+(AI)
+•Dynamics of controlling a conditionally stable quad-rotor is analogous to
+controlling an aerodynamically unstable launch vehicle.
+•In theory, the AAC algorithm should be applicable
+for a wide range of conditionally stable dynamical
+systems
+4
+
+Background
+Part of a SLS-NASA Engineering Safety Center (NESC)
+joint risk mitigation effort in providing additional
+confidence into AAC design, operation, and robustness
+•Simple, “Classroom” type of setup
+•Simple dynamics and intuitive for non-controls engineers
+•Provides insight into the complex SLS
+
+5
+
+Background
+AAC is a form of model reference adaptive control
+• The forward loop gain KT is augmented by a signal Ka which comprises of low
+frequency content in the reference model error signal, and high frequency
+content that’s in the control signal.
+• Multiplicative augmentation is easy to assess in terms of gain margin.
+• Limits of adaptation (KT) are based on the stability margin requirements (+/- 6
+dB) for the baseline linear controller.
+• AAC is there to “extend” the nominal stability margins.
+
+6
+
+Related Works
+ Orr, J. and VanZwieten, T. “Robust, Practical, Adaptive Control for
+Launch Vehicles”. AIAA 2012-4549
+ Wall. J, Orr, J. VanZwieten, T. “Space Launch System Implementation
+of Adaptive Augmenting Control”. AAS 14-051
+ VanZwieten, T, Gilligan E. and et al. “Adaptive Augmenting Control
+Flight Characterization Experiment on an F/A-18”. AAS 14-052
+ Wall, J. VanZwieten, T. and et al. “In-Flight Suppression of a
+Destabilized F/A-18 Structural Mode Using the Space Launch System
+Adaptive Augmenting Control System”. AIAA 2015-1775
+ VanZwieten, T. Hannan, M. “Evaluating the Stability of NASA’s Space
+Launch System with Adaptive Augmenting Control”. ESA GNC 2017
+ Pei, J. and Rothhaar, P. “Demonstration of the Space Launch System
+Augmenting Adaptive Control Algorithm on a Pole-Cart Platform”. AIAA
+SciTech 2018.
+
+7
+
+Quad – Rotor System
+Control Problem
+•Quad-Rotor actively stabilizes itself by adjusting the speed of the four
+rotors.
+•Similarly, a launch vehicle adjusts gimballed nozzles to actively
+stabilize itself.
+
+Simple and inexpensive
+•Intuitive to understand
+•Help gain insight into the
+more complex system SLS
+
+8
+
+Experimental Setup
+Quad-rotor
+Hardware
+
+Control Station
+
+On-board Intel
+Edison and IMU
+
+9
+
+Experimental Setup
+Off-Board:
+
+On-Board:
+Hardware sensors
+
+ Vicon motion capture system
+outputs position and attitude
+measurements.
+ Fed directly into the controller.
+ The position measurement is
+smoothed with a LPF.
+ The derivative is taken to
+obtain velocity.
+
+K
+
+Plant
+
+ Inertial Measurement unit
+(IMU) outputs body rate
+measurements.
+ Fed directly into the controller.
+
+• Design a PD control
+system to actively stabilize
+the quadrotor at hover.
+
+10
+
+Control Architecture
+Quad Control Architecture
+
+Focus of this study
+
+Current work focuses on intentionally making the inner
+loop unstable and show that the AAC can help the quad
+regain stability
+11
+
+Nominal Stability Margins
+Control Design: Inner Loop
+
+Pair of complex poles representing the actuator dynamics
+•
+Poles begin as neutrally stable
+•
+Migrate toward right hand plane as loop gain increases
+Note: linear model shows poor phase margin but the quad flies
+extremely well.
+
+12
+
+Nominal Stability Margins
+Inner Loop Stability Margins Gain Crossover
+LF GM HF GM HF GM
+Phase
+(abs)
+
+(abs)
+
+Frequency Margin Frequency (Hz)
+(HZ)
+(deg)
+
+0
+
+1.639
+
+2.31
+
+9.39
+
+1.72
+
+Nonlinear 0
+simulation
+
+1.34
+
+1.75
+
+6.76
+
+1.93
+
+Hardware 0.68
+
+1.38
+
+2.03
+
+11.06
+
+1.54
+
+Linear
+Model
+
+13
+
+AAC Architecture
+AAC Architecture
+
+14
+
+AAC Design
+Parameters
+Parameters
+
+SLS (DAC-3R)
+
+Quad-Rotor
+
+Gain crossover Freq
+
+0.2 Hz
+
+1.54 Hz
+
+SD HPF
+
+0.4 Hz, ξ = 0.9
+
+3 Hz, ξ = 0.9
+
+SD LPF
+
+0.25 Hz, ξ = 1
+
+1 Hz, ξ = 1
+
+Err LPF
+
+0.2 Hz, ξ = 1
+
+0.7 Hz, ξ = 1
+
+K (ratio between err
+and SD gain) α=Ka
+
+1.45
+
+5
+
+a, Err gain
+
+100
+
+10
+
+Selectivity Function
+Zero
+AAC LPF
+
+0.35 Hz
+
+1.5 Hz
+
+0.15 Hz, ξ = 1
+
+1.25 Hz, ξ = 1
+15
+
+Flight Tests
+Objective 1
+•Test 1, AAC Off, Gain Shift Parameter = 1
+•Test 2, AAC On, Gain Shift Parameter = 1
+
+Objective 2
+•Test 3, AAC Off, Gain Shift Parameter = 0.68
+•Test 4, AAC Trigger, Gain Shift Parameter = 0.68
+
+Objective 3
+•Test 5, AAC Off, Gain Shift Parameter = 1.38
+•Test 6, AAC Trigger, Gain Shift Parameter = 1.38
+
+16
+
+Flight Tests
+AAC Trigger
+•Quadrotor is initially free to oscillate with the AAC not being fed into the
+controller.
+•When oscillations reach ±0.2
+a software switch triggers and the
+AAC is fed into the controller.
+•Intended to show before/after picture of AAC.
+
+17
+
+Nominal System: AAC OFF
+Gain Shift Parameter = 1
+Hardware: AAC OFF
+Gain Shift Parameter = 1
+
+18
+
+Nominal System: AAC OFF
+Gain Shift Parameter = 1
+
+19
+
+Objective #1: Minimal Adaptation
+Gain Shift Parameter = 1
+Hardware: AAC ON
+Gain Shift Parameter = 1
+
+20
+
+Objective #1: Minimal Adaptation
+Gain Shift Parameter = 1
+
+21
+
+Rigid Body Instability: AAC OFF
+Gain Shift Parameter = 0.68
+
+• This is caused by motor
+imbalance/degradation
+• These effects are not captured
+in the simulation, Thus The rigid
+body instability does not exist in
+simulation
+
+22
+
+Rigid Body Instability: AAC OFF
+Gain Shift Parameter = 0.68
+
+23
+
+Objective #2: Response to Rigid
+Body Instability
+GainHardware AAC ON: 0.68
+Shift Parameter =
+Gain Shift Parameter = .68
+Rigid Body Instability
+
+24
+
+Objective #2: Response to Rigid
+Body Instability
+Gain Shift Parameter = 0.68
+Objective #2: Response to Rigid
+Body Instability
+
+25
+
+High Frequency Instability: ControlStructure Interaction
+Hardware: AAC OFF
+Gain Shift Parameter = 1.38
+Gain Shift Parameter = 1.38
+High Frequency Instability
+
+26
+
+High Frequency Instability: ControlStructure Interaction
+Gain Shift Parameter = 1.38
+
+27
+
+Objective #3: Response to High Frequency
+Instability (control-structure interaction)
+Gain Shift Parameter = 1.38
+Hardware AAC ON:
+Gain Shift Parameter = 1.38
+High Frequency Instability
+
+28
+
+Objective #3: Response to High Frequency
+Instability (control-structure interaction)
+Gain Shift Parameter = 1.38
+
+29
+
+Conclusions and Ongoing work
+
+ Key functionalities of the AAC were work
+Conclusions and Ongoing demonstrated on
+the quadcopter
+• Objective 1: Show the AAC provides minimal adaptation when not
+needed.
+• Objective 2: Show the AAC regain stability in the presence of rigid
+body instability.
+• Objective 3: Show the AAC regain stability in the presence of
+control-structure interaction.
+
+30
+
+Conclusions and Ongoing work
+Current Work:
+•Better quantification of the system parameters
+•Replicating other launch vehicle dynamics
+– Use the Quad-Rotor to stabilize an inverted pendulum (IP).
+– Use the AAC to extend the stability margins of the IP.
+– Make the IP semi-rigid and attach sensor at tip (to mimic flexibility
+
+and non-minimum phase behaviors).
+
+31
+

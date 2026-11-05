@@ -1,0 +1,490 @@
+TISA Working Group Update
+CERES TISA Sublead: D. Doelling
+TISA: A. Gopalan, E. Kizer, C. Nguyen, M. Nordeen, M. Sun, J. Wilkins, F. Wrenn
+GEO calibration: R. Bhatt, C. Haney, B. Scarino
+Sub-setter: P. Mlynczak, C. Chu, B. Samani
+CERES Science Team Meeting
+Lawrence Berkeley National Laboratory, Building 66, Berkeley, CA
+October 29-31, 2019
+
+NASA Langley Research Center / Atmospheric Sciences
+
+OUTLINE
+• FluxbyCloudType (FBCT) Product, Moguo Sun
+– The FBCT product description
+– FBCT-monthly and daily products
+– Validation and Beta tester results
+– Public Release
+
+• TISA
+– Ed5 TISA/Flashflux/SARB framework
+– GEO daily gain monitoring
+
+NASA Langley Research Center / Atmospheric Sciences
+
+Ed5 flowchart
+
+NASA Langley Research Center / Atmospheric Sciences
+
+CERES processing editions
+• Ed2
+– CERES-only (SSF1deg), CERES+GEO (SYN1deg), and SARB tuned fluxes all in
+one product package (SRBAVG/ZAVG/AVG)
+– CERES-only fluxes are not dependent on GEO or SARB
+– SARB-tuned fluxes dependent on GEO broadband fluxes
+
+• Ed4
+– SSF1deg product is the CERES-only
+– SYN1deg product contains both the CERES+GEO and SARB tuned fluxes
+
+• Ed5
+– Remove the Tuned SARB fluxes from SYN1deg to allow SARB and TISA to improve
+in parallel
+
+• Ed5 TISA/SARB/FlashFLUX framework
+NASA Langley Research Center / Atmospheric Sciences
+
+Ed5 TISA/SARB/FlashFLUX requirements
+• FlashFLUX
+– requires local 3-day processing segments run daily
+– To incorporate and GEO Fu-Liou computed fluxes
+– Migrate to same code as CERES, To facilitate new inputs of NPP, NOAA-20, and GEO clouds
+and fluxes into temporal interpolation and averaging
+
+• TISA
+– Run GEO NB to BB and computed fluxes at the instantaneous gridded level, allows flexibility to
+change the cloud/atmosphere/channel radiance parameters, rather than drag parameters
+through the entire TISA code
+– Each SW flux will be assigned a directional model, This facilitates nearly the same TISA code
+to temporally interpolate and to average fluxes for SSF1deg and SYN1deg, lite, and Flashflux.
+
+• SARB
+– Remove tuned fluxes, removes contingency of GEO derived fluxes
+– Computed fluxes to be run daily, rather than by monthly-zonal processing, for efficiency
+– Computed fluxes to be run for single GEOs to facilitate quick validation of surface fluxes.
+NASA Langley Research Center / Atmospheric Sciences
+
+Ed5 flowchart
+Sensor pixel level/native resolution
+
+SSF footprint clouds/fluxes
+Validation Source specific
+spatial resolution: GERB
+
+MOA
+Aerosol
+Snow map
+Gridded Daily files
+
+GEO module fluxes
+
+Instantaneous
+gridded GEO
+cloud/rad
+(sensor daily
+gridded netCDF)
+
+SARB module fluxes
+
+(CERES/Flash) Source specific spatial
+resolution: atmospheric profile
+(GEOS5/FPIT), aerosol, snow maps
+
+CERES spatial grid codes
+
+GEO image pixel level radiance
+and clouds (sensor
+instantaneous netCDF)
+
+Sensor instantaneous common grid
+Instantaneous GEO
+gridded
+cloud/TOA/computed flux
+(sensor daily gridded
+netCDF)
+
+Instantaneous gridded SSF
+cloud/fluxes
+(sensor daily gridded netCDF)
+Processed daily
+
+Processing direction
+
+NASA Langley Research Center / Atmospheric Sciences
+
+Ed5 flowchart
+
+Instantaneous gridded SSF
+cloud/fluxes
+
+GERB instantaneous
+gridded fluxes
+
+CERES/GEO SW and LW
+normalization factors
+GEO/MODIS
+instantaneous cloud
+property differences
+GEO/CERES computed
+flux differences
+GEO/CERES TOA flux
+differences
+GEO/GERB TOA flux
+differences
+
+Processing direction
+
+NASA Langley Research Center / Atmospheric Sciences
+
+Plotting package
+
+Instantaneous GEO
+gridded cloud
+TOA/computed flux
+(sensor daily gridded
+netCDF)
+
+Instantaneous gridded matching tool
+
+Sensor Instantaneous common grid comparisons
+
+Processed
+daily/monthly
+
+Ed5 flowchart
+Instantaneous GEO
+gridded cloud
+TOA/computed flux
+(sensor daily gridded
+netCDF)
+Apply GEO flux
+normalization factors
+Instantaneous gridded
+SSF cloud/fluxes
+
+Input Selection
+Sensor & parameter
+global compositing
+
+Time-step selection
+
+Terra/Aqua/NPP/N20
+(SSF1deg)
+
+Temporal resolution
+Hourly, 30’, 3-hour
+
+CERES-Terra+Aqua
+(SSF1deg lite)
+
+GMT/local time
+
+Terra+Aqua+GEO
+(SYN1deg) (lite)
+Clouds - CLDTYPHIST
+Terra/Aqua - FBCT
+
+PC/Tau stratification
+
+GEO-only (validation)
+NASA Langley Research Center / Atmospheric Sciences
+
+Common grid and timestep
+Time step Sensor parameter compositing
+
+Instantaneous Common grid
+
+global time-step
+TOA/SFC/clouds
+map (daily netCDF)
+
+Processed daily
+Processing direction
+
+global time-step
+TOA/SFC/clouds
+map (daily netCDF)
+
+Processed daily
+Processing direction
+
+Regional-timestep
+Temporally interpolate
+clouds, TOA fluxes
+Compute fluxes for
+missing time steps
+Compute tuned fluxes for
+all time steps (option)
+Temporally average
+Daily, monthly, month-hour
+Bypass: CldTYPHIST, FBCT
+CERES-monthly processing
+FLashFLUX 3-day processing
+
+NASA Langley Research Center / Atmospheric Sciences
+
+Convert regional-timestep into temporal resolution output
+
+Common grid and timestep
+
+Convert timestep maps into regional-timestep
+
+Ed5 flowchart
+Hourly/daily/monthly regional
+Zonal and global
+averaging
+Write out SSF1deg,
+SYN1deg,lite,
+CldTypHist, FlashFLUX,
+hourly/daily/monthly
+netcdf files
+
+L1B daily monitoring
+
+NASA Langley Research Center / Atmospheric Sciences
+
+NOAA GOES-16 ABI Calibration Events Log
+• First of all, usually there are no sensor event logs, GEO L1B never reprocessed
+• I praise NOAA efforts to provide this web page to the remote sensing community
+This is a partial list, only listed the visible calibration issues
+
+Magnitude not cited
+
+NASA Langley Research Center / Atmospheric Sciences
+
+https://www.star.nesdis.noaa.gov/GOESCal/goes_SatelliteAnomalies.php
+
+GEO/MODIS ATO ray-matching calibration algorithm
+GOES-16/Aqua-MODIS
+Feb 2019
+
+GOES-16 gain referenced to
+Aqua-MODIS
+
+Timeline plot
+
+NASA Langley Research Center / Atmospheric Sciences
+
+• Find within 15 minute
+coincident GOES-16
+and Aqua-MODIS 50-km
+ray-matched radiances
+over all-sky ocean
+• Apply spectral band
+adjustment factor
+• Linearly regress
+through the space count
+the ray-matched
+radiances to obtain the
+monthly gain factor
+• Linearly regress (2nd
+order) the monthly gain
+factors to obtain the
+calibration coefficients
+over time.
+
+CERES Ed4 calibration methodology validation
+• The ATO-RM is the primary calibration
+
+method, the other 3 methods are used to
+validate the primary method
+
+Desert
+
+• All methods independently transfer the
+Aqua-MODIS calibration standard
+• The 4 method mean timeline gains are
+within 0.6%
+
+CERES Edition 4 calibration website:
+https://satcorps.larc.nasa.gov/cgibin/si
+te/showdoc?mnemonic=CALIB-ED4
+Realtime GEO calibration web site:
+https://satcorps.larc.nasa.gov/cgibin/si
+te/showdoc?mnemonic=CALIB-UPRT
+NASA Langley Research Center / Atmospheric Sciences
+Doelling, et al., Geostationary Visible Imager Calibration for the CERES SYN1deg Edition 4 Product. Remote Sens. 2018, 10, 288.
+
+ATO ray-matching daily monitoring, Jan 2019
+Use Terra, Aqua, NPP and N20 ray-matches to increase sampling
+GOES-16/Terra-MODIS
+Jan 2019, all MODIS&VIIS
+#=23K
+
+GOES-16/Terra-MODIS daily gains
+Jan 2019, all MODIS&VIIS
+
+SE=0.8%
+
+±2.5%
+
+NASA Langley Research Center / Atmospheric Sciences
+
+ATO-RM detected the Jan 17-20, 2019 anomalies
+
+GOES-16 daily ATO-RM gain monitoring
+
+The daily gain standard error is 1.0%, all daily gain departures
+> 3% are considered L1B anomalies
+Only two false positives exceeded ±3%, after filtering 9% of
+all days
+Known L1B anomalies from NOAA GOES-16 web page
+Known ch2 calibration gain 6.2% adjustment from NOAA G16
+event log page
+
+NASA Langley Research Center / Atmospheric Sciences
+
+DCC invariant target (IT) calibration algorithm
+• DCC is a statistical approach that
+
+NPP-VIIRS-I1 assumes that the collective tropical
+
+DCC reflectance is invariant
+• DCC pixels are identified as
+BT<205K, SZA<40°, VZA<40°,
+VIS<3% and IR<1K
+• Apply DCC BRDF, which in this case
+is a very small adjustment
+• The DCC pixels are compiled into a
+monthly probability density functions
+(PDFs) and the PDF mode DCC
+radiance is tracked over time. For
+wavelengths<1µm use the mode
+NASA LangleyI1 radiance
+statistic, >1µm then mean
+VIIRS Research Center / Atmospheric Sciences
+
+DCC IT daily monitoring, Jan 2019
+Jan 2019
+
+Use 4 times as many GEO images per day to increase
+sampling
+
+The DCC-IT looks promising to detect
+daily calibration anomalies
+
+NASA Langley Research Center / Atmospheric Sciences
+
+GOES-16 daily DCC-IT gain monitoring
+Use the previous 30
+days as the baseline for
+±3% sigma threshold
+
+±3 threshold
+
+• DCC-IT was able to detect Jan 18-22, 2019, & April 8-9 GOES-16 L1B calibration anomalies
+• DCC-IT was also able to predict the April 23, 2019 GOES-16 L1B calibration adjustment
+• DCC-IT 3 sigma Langley Research Center / Atmospheric Sciences
+NASA is ±2.1%
+
+Conclusions
+
+• Edition 5 code re-architecture
+– One overarching framework that facilitates TISA, SARB, and
+FlashFLUSH products and validation efforts
+• TISA code review
+–Based on a TISA library model, where shared subroutines
+among products remains consistent
+–Ed5 codes will be validated against Ed4 output
+• A new GEO daily calibration monitoring system has been
+developed
+• The FluxbyCloudType product should be released shortly
+NASA Langley Research Center / Atmospheric Sciences
+
+Backup Slides
+
+NASA Langley Research Center / Atmospheric Sciences
+
+Ed2 flowchart
+CERES
+SFC-Terra
+
+SFC-Aqua
+
+FlashFlux
+GEO1deg 5-satellites
+
+Monthly gridded processing, CERES codes
+
+SFC-Terra
+
+SFC-Aqua
+
+Daily gridded processing, Flash codes
+
+CERES/GEO normalization factors
+Terra+Aqua CERES-only fluxes
+Normalized CERES+3-hourly GEO hourly fluxes
+Apply Fu-Liou to obtain surface/atm fluxes
+Then compute tune fluxes based on CERES/GEO fluxes
+Products:
+SYN -> 3-hourly
+SRBAVG -> monthly
+ZAVG -> zonal, global
+
+Temporal interpolation to hourly
+Hourly surface flux parameterizations
+
+Daily averaging
+Daily TOA/SFC fluxes
+
+• The CERES-only product, which is not being updated, must wait for TISA and SARB
+• SARB must wait for TISA for TOA fluxes of the CERES+GEO product to begin
+improving tuned computed fluxes.
+
+NASA Langley Research Center / Atmospheric Sciences
+
+Ed4 flowchart
+CERES
+SSF1deg-Terra
+
+SSF1deg-Aqua
+
+Terra-only
+Aqua-only
+Products:
+SSF1deg-day/month
+
+FlashFlux
+GEO1deg 5-satellites
+
+SSF1deg-Terra
+
+SSF1deg-Aqua
+
+CERES/GEO normalization factors
+Normalized 1-hourr GEO + CERES
+hourly fluxes
+Computed surface/atm fluxes
+Compute tuned (to CERES/GEO) fluxes
+Products:
+SYN1deg-hour/day/month/mhour
+
+Temporal interpolation to hourly
+Hourly surface flux parameterizations
+
+Daily averaging
+Daily TOA/SFC fluxes
+
+• The CERES-only product released near real-time
+NASA TISA for TOA Center / Atmospheric Sciences
+• SARB must wait for Langley Researchfluxes of the CERES+GEO product to begin improving tuned computed fluxes.
+
+GEO derived broadband fluxes
+• The CERES project relies on geostationary (GEO) derived broadband fluxes to infer the
+regional diurnal cycle in between Terra (10:30AM) and Aqua (1:30PM) CERES
+measurements.
+• The GEO broadband (BB) fluxes are derived from the narrowband (NB) channel imager
+radiances and associated cloud properties to select the appropriate NB to BB and
+angular directional models (ADMs) based on scene selection.
+• The GEO imager radiances are calibrated against Aqua-MODIS to ensure consistent
+clouds
+• The GEO imager derived broadband fluxes are normalized against the CERES
+instrument observations to maintain temporal stability in the SYN1deg product
+– The climate quality CERES EBAF-monthly TOA fluxes have mostly mitigated all known GEO artifacts
+
+• The GEO imager L1B radiances occasionally show daily anomalies, which can vary up
+to 10%
+– Need to be mitigated to avoid impacting the GEO BB fluxes in the CERES BB SYN1deg (hourly) dataset
+NASA Langley Research Center / Atmospheric Sciences
+

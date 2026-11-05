@@ -1,0 +1,2413 @@
+SENSITIVITY ANALYSIS METHOD TO ADDRESS USER DISPARITIES IN THE ANALYTIC
+HIERARCHY PROCESS
+Marie Ivanco a, Gene Hou b, Jennifer Michaeli c
+a
+
+NASA Langley Research Center, Hampton, VA, USA
+Department of Mechanical and Aerospace Engineering, Old Dominion University, Norfolk, VA, USA
+c Department of Engineering Technology, Old Dominion University, Norfolk, VA, USA
+b
+
+Abstract
+Decision makers often face complex problems, which can seldom be addressed well without the
+use of structured analytical models. Mathematical models have been developed to streamline and
+facilitate decision making activities, and among these, the Analytic Hierarchy Process (AHP) constitutes
+one of the most utilized multi-criteria decision analysis methods. While AHP has been thoroughly
+researched and applied, the method still shows limitations in terms of addressing user profile disparities.
+A novel sensitivity analysis method based on local partial derivatives is presented here to address these
+limitations. This new methodology informs AHP users of which pairwise comparisons most impact the
+derived weights and the ranking of alternatives. The method can also be applied to decision processes that
+require the aggregation of results obtained by several users, as it highlights which individuals most
+critically impact the aggregated group results while also enabling to focus on inputs that drive the final
+ordering of alternatives. An aerospace design and engineering example that requires group decision
+making is presented to demonstrate and validate the proposed methodology.
+
+Nomenclature
+
+a kl
+
+=
+
+Pj
+k
+
+A
+
+Pairwise comparison in the kth row and the lth column in a pairwise comparison table
+
+=
+
+Normalized row geometric mean of the kth criterion in the pairwise comparison table
+input by user Pj
+
+Pj
+
+Ak
+C
+
+ ij
+
+Row geometric mean of the kth criterion in the comparison table input by user Pj
+
+=
+
+Pairwise comparison matrix input by user Pj
+
+=
+
+Pj
+
+=
+
+Error associated with element
+
+Gki , ji 1  =
+i , ji 1 
+
+Gk
+
+aij
+
+Normalized group row geometric mean for the kth criterion at the ith level under the
+criteria ji 1
+
+=
+
+max =
+
+Group row geometric mean for the kth criterion at the ith level under the criteria ji 1
+Largest eigenvalue of a pairwise comparison table
+
+2
+
+
+
+=
+
+Consistency Index of a pairwise comparison table
+
+n i , ji 1  =
+
+Number of criteria in level i under the criteria ji 1 in the upper level
+
+Pi
+
+=
+
+User i
+
+Sq
+
+=
+
+Relative weight of design alternative q
+
+W I ,J
+
+=
+
+Relative weight of the criteria J in level I
+
+Wq
+
+=
+
+Relative weight of design alternative q
+
+I. Introduction
+The decision making process rarely resides in the hands of one decision maker. Similarly, it is
+seldom based on the input of a single Subject Matter Expert (SME). Complex decision frameworks
+receive inputs from groups of individuals, who all contribute to the process. Very often, these individuals
+involved in the decision making process have varying backgrounds, experience and personal goals. The
+opinions of these individuals should be taken into account and be combined in order to better inform the
+decision. Beyond the task of defining and prioritizing requirements, and the goal of ranking a set of
+alternatives for an individual decision maker or SME, decision frameworks therefore often also assist
+with the aggregation of inputs from several users.
+Among these models, the Analytic Hierarchy Process constitutes one of the most studied and
+utilized multi-criteria decision analysis (MCDA) methods. AHP has been used in a variety of fields, to
+include, among many others: marketing and portfolio management, shipping assets selection, military
+applications, the evaluation of the environmental impact of construction projects, marine biology and
+medical applications (Forman & Gass, 2001). In recent years, there has been a noticeable increase in the
+use of AHP for applications in mechanical and aerospace engineering. Lafleur, Sharma & Apa (2007)
+developed a framework to down-select a vehicle for robotic space exploration. AHP was used in
+conjunction with a Pareto plot to rapidly outline solutions that concurrently offer high value and low cost.
+Guk-Hyun et al. (2008) used AHP in conjunction with TOPSIS and Quality Function Deployment (QFD)
+in a hybrid method to evaluate the preliminary shape of a very light jet. Conrow (2011) used AHP to
+assess the Technology Readiness Level (TRL) scale used by the Department of Defense (DoD) and the
+National Aeronautics and Space Administration (NASA).
+A comprehensive literature survey revealed that multi-user aggregation methods for AHP are still
+widely debated and researched. Solutions have been proposed to combine individual results or develop
+consensus frameworks. In recent years, a certain emphasis has been put on differences among decision
+makers or among Subject Matter Experts, who will hereafter be referred to as users. It has been
+
+3
+highlighted that users who collaborate on a common project and provide pairwise comparisons of criteria
+and alternatives in parallel do not share absolutely identical profiles. Users have different perspectives of
+the different parts of the system. Some have more experience relevant to certain aspects of the problem of
+concern than others; while other have more experience with the AHP methodology itself. The traditional
+AHP methodology assigns equal importance to each individual’s priority vectors and ranking, and ignores
+the disparities in profiles. Little information is available to interpret the sensitivity of a given pairwise
+comparison on the obtained results. The motivation of this study is to investigate this selected limitation
+of AHP and to present a new methodology. User profile disparities are addressed by deriving an
+analytical sensitivity analysis based on local partial derivatives. The results of this effort provide AHP
+users with additional information about which individuals most critically impact the aggregated group
+results, therefore enabling users to focus on inputs that drive the final ordering of alternatives.
+This paper first introduces a mathematical representation of the traditional AHP method in
+Section II. Variations of the traditional AHP method, and their strategies and limitations in addressing
+user profile disparities are discussed in Section III. The derivation of analytical sensitivities of the weights
+with respect to user input in the pairwise comparison matrices is presented in Section IV. An example of
+the selection of a wheel design for the Space Exploration Vehicle is then presented in Section V to
+validate the derived sensitivity equations and to demonstrate how they provide information which can be
+used to address user profile disparities. The conclusion of this research effort is given in Section VI.
+
+II. The traditional Analytic Hierarchy Process
+Prior to discussing the developed methodology, an overview of the traditional mathematical steps
+of the Analytic Hierarchy Process is presented hereafter.
+
+II.1. Problem Modeling
+Saaty (1986) describes three principles used sequentially in decision making: “They are the
+principles of decomposition, comparative judgment and synthesis of priorities” (p. 841). The process of
+decomposing the problem at hand or structuring its complexity constitutes the first step of the Analytical
+Hierarchy Process (Forman and Gass, 2001). A hierarchical tree of the problem requirements is derived
+from the problem statement in order to visualize these various requirements and their logical structure.
+This initial problem formulation has a great impact on the derivation of the priority vectors and final
+ranking of the alternatives. Careful modeling is critical to the success of the methodology. Saaty (1994)
+comments on this “significant effect on the outcome” (p. 22) of problem modeling, defining it as the most
+“creative part” of the AHP methodology. Franek and Kresta (2014) also comment on the correlation
+between the chosen hierarchical structure and the achieved outcome. Typically, problem modeling will
+
+4
+generate a multi-layer tree, with top-level requirements subsequently broken down into lower level subrequirements. Requirements are commonly referred to as criteria in the literature. The modeling of the
+problem should yield clusters of criteria, with a commonality of focus within clusters (Forman & Gass,
+2001). The number of criteria that are under consideration should be sufficient, but limited. A total
+number of criteria smaller than 9 is typically recommended, as studies have shown that “a person cannot
+simultaneously perceive and estimate more than 7 +/- 2 objects” (Tsyganok, Kadenko & Andriichuk,
+2012). In this study, the number of sub-criteria in level i, under the criteria ji 1 of the upper level i  1 is
+denoted as n i , ji 1  . This yields a total number of sub-criteria n i ,: in a given level i as
+n
+
+( i ,:)
+
+
+
+ji 1  n ( i 1,:)
+
+ n
+
+i , ji 1 
+
+(1)
+
+ji 1 1
+
+II.2. Pairwise Comparison
+Once the problem modelling is completed, users proceed to comparing each criterion against
+every other criterion, in pairs. As these pairwise comparisons are performed, they are sorted in reciprocal
+matrix format. For a given criterion, a matrix C Pi of size m  m stores all pairwise comparisons provided
+by the evaluator Pi (Eq. 2), where m is set to be n i , ji 1  . The pairwise comparison in the kth row and the
+lth column is denoted as a kl . It should be noted that not all comparisons are independent. One had
+
+a kl  1 for k=l and akl  1 / alk for k  l . This is due to the reciprocity axiom, which implies that only
+pairwise comparisons in the upper triangle of the matrix above the diagonal are independent (Forman &
+Gass, 2001). Furthermore, the rule of transitivity (Franek & Kresta, 2014) is used to check that an
+acceptable level of consistency is achieved as users perform pairwise comparison. The following equality
+should be true for any indices k ,  and p: ak ap  a kp .
+
+C Pi
+
+
+
+
+
+
+
+
+
+1
+1
+a 21
+...
+1
+a1m
+
+a12
+1
+...
+1
+a2m
+
+... a1m 
+
+... a 2 m 
+1 ... 
+
+... 1 
+
+
+(2)
+
+The pairwise comparison values stored in the matrix are then aggregated to form a vector of
+relative weights for each criterion considered in the matrix. This aggregation can be performed with either
+the right eigenvector method or the row geometric mean method (Djikstra, 2010 & Davoodi, 2009). Both
+methods yield satisfactory results and are appropriate to use. In this study, the row geometric mean
+method is used for both its computational simplicity and its compatibility with MS Excel. One of the
+objectives of this study was to develop a methodology that could be easily deployable with commonly
+
+5
+used software. MS Excel is widely used for engineering applications, and constitutes an excellent
+platform to implement the application of the analysis and to produce visualization aids. The ease of
+implementation of the row geometric mean method in MS Excel when compared to the right eigenvector
+method made the method more suitable for the purposes of this study and was therefore selected.
+Pj
+
+The row geometric mean Ak provides the weight of the kth criterion in the pairwise comparison
+matrix C Pi prepared by the jth user as shown in Eq. 3.
+Pj
+ m
+
+A k  m   a k   m a k1 a k 2 ...a km
+
+
+  1
+
+
+(3)
+
+Considering element dependency in the pairwise comparison matrix, the expression for the geometric
+mean can also be written as Eq. 4.
+Pj
+
+Ak  m
+
+1
+1
+...
+a k ,k 1 ...a k ,m
+a1k a k 1,k
+
+(4)
+
+The computed weights are then normalized for the jth user and the kth criterion. The normalized row
+P
+
+j
+geometric mean Ak of the kth criterion, evaluated by the jth user is shown in Eq. 5.
+
+Pj
+
+A 
+Pj
+k
+
+Ak
+m
+
+A
+q 1
+
+Pj
+q
+
+(5)
+
+j
+The value of Ak represents the weight of the kth criterion assigned by user Pj , among the ni, ji 1 
+
+P
+
+number of criteria of the ith level, which is a sub-criterion under criterion ji 1 one level above.
+Saaty (1980, p. 180) proposed an index, the Consistency Index  , to measure the level of inconsistency
+of a given pairwise comparison matrix C Pi (Eq. 6),
+
+
+where m is equal to ni, ji 1  ,
+
+1 
+1   1
+
+     ij    1   mm  1
+
+  2
+n 1
+ ij  
+
+i j  2 
+
+
+max  n
+
+(6)
+
+max is the largest eigenvalue of the pairwise comparison matrix C P and
+i
+
+ ij is the error for element a ij in the matrix. The error is defined as  ij  aij  A Pj / AiPi , where AiPj and
+j
+P
+
+A j j are the weights associated with rows i and j. A perfectly consistent pairwise comparison matrix has
+an error of  ij  1 for any element in the matrix. Saaty defines the Random Index as the averaged
+consistency indices for randomly generated pairwise comparison tables. Table 1 lists the values of
+Random Indices for different sizes of pairwise comparison tables. Saaty defines the threshold for suitable
+
+6
+consistency in a pairwise comparison matrix as 10% of the ratio between the Consistency Index and the
+Random Index. The weights used to compute the Consistency Index as defined in Eq. 6 can be calculated
+either by the right eigenvector method or by the row geometric mean method. Two sets of Random
+Indices are reported in Table 1, based upon the method used to calculate the weights.
+
+Table 1. Random Indices for Consistency Check (Dijkstra, 2010, p.108)
+n=3
+
+n=4
+
+n=5
+
+n=6
+
+n=7
+
+n=8
+
+n=9
+
+n=10
+
+Geometric Method
+
+0.52
+
+0.87
+
+1.08
+
+1.22
+
+1.32
+
+1.39
+
+1.44
+
+1.48
+
+Eigenvector Method
+
+0.52
+
+0.89
+
+1.11
+
+1.25
+
+1.35
+
+1.40
+
+1.45
+
+1.49
+
+II.3 Group Aggregation
+Two methods are available to perform the row geometric mean method at the group level: the
+Aggregation of Individual Judgements (AIJ) and the Aggregation of Individual Priorities (AIP) (Escobar,
+Aguaron & Moreno-Jiménez, 2004). AIJ obtains a group judgment matrix from individual matrices and
+then derives the group priorities. AIP first computes individual priority vectors from the individual
+matrices and then derives the group priorities. Escobar at al. (2004) show that both methods yield the
+same alternatives priorities. Also, for both AIJ and AIP, the group inconsistency equals or outperforms
+the worst individual inconsistency. AIP is less computationally intensive and was therefore selected as the
+aggregation method in this study.
+i , ji 1 
+
+For a given number of users P, the aggregated group geometric mean G k
+
+for the kth criterion
+
+at the ith level under the criterion ji 1 of the upper level i  1 is given by Eq. 7.
+i , ji 1
+
+Gk
+
+ P
+
+1
+ P   Ak   P Ak Ak2 ... AkP
+
+
+  1
+
+
+(7)
+
+Similarly to the weight calculations for a pairwise comparison table, the priority vector given in Eq. 7 is
+
+i , j 
+
+then normalized. The normalized aggregated group geometric mean Gk
+
+i 1
+
+for the kth criterion at the ith
+
+ i,
+
+level under the criterion ji 1 of the upper level i  1 is given by Eq. 8, where m  n 
+
+i , ji 1 
+
+Gk
+
+ji 1 
+
+
+
+.
+
+i , ji 1 
+
+
+
+Gk
+m
+
+G
+q 1
+
+i , ji 1 
+q
+
+(8)
+
+7
+II.4 Final Ranking of Alternatives
+Similarly to the method used to determine the relative weight of each criterion, the design
+alternatives available to the users are evaluated and ranked against each criterion in the lowest level of the
+decision making hierarchy. The dimension of the pairwise comparison table in this case is equal to the
+number of evaluators. The rank of the design alternative q against a selected criterion of level i under
+i , j 
+criterion ji 1 one level above is denoted by S q i 1 ,which can be obtained with Eqs. (3-8).
+
+The weights obtained for the criteria and the design alternatives are then combined by
+multiplication, leading to a ranking of the design alternatives based on the formulated criteria hierarchy.
+I ,J
+The overall weight W
+of the criterion J in level I of the criteria hierarchy aggregates weights from the
+
+various levels is given by in Eq. 9,
+
+W I , J  Gki , ji1 G jii1,, ji2 ...G j2, j1 G j1,0 
+1
+2
+1
+
+(9)
+
+where criterion J represents the kth criterion under the upper level criterion ji 1 . The final ranking of the
+design alternative q, aggregated from all users, measured against the subcriteria, J in the lowest level I,
+I
+denoted by S q , J , can then be expressed as
+
+
+S qI , J  W I , J S qi , ji 1 
+i , ji1 
+
+It should be noted that S q
+
+(10)
+
+is the local ranking of design alternative q, among all design alternatives,
+
+I ,J
+measured solely against a ith level criterion under the upper level criterion ji 1 , while S q is the ranking
+
+that considers not only the merit of design alternative q among all alternatives but also the importance of
+the subcriteria J among all lowest level criteria. The final ranking of alternative q is then obtained by
+I ,J
+summing all S q for all criteria in the lowest level.
+
+Wq 
+
+S
+
+I ,J
+q
+
+(11)
+
+I ,J
+
+III. Variations of Traditional AHP
+Recently, great emphasis has been put on qualifying and integrating disparities in user profiles.
+Traditional AHP aggregates users’ priority vectors with the assumption that every individual contributes
+equally to the process. This assumption is rarely valid. User profiles vary greatly and the traditional AHP
+methodology lacks the ability to take this diversity into account. A discussion of some attempts to integrate
+these disparities in the AHP model and their limitations follows. First, the categorization of disparities
+among users will be discussed. Strategies that use AHP to differentiate users will then be presented,
+
+8
+followed by qualitative strategies, and then quantitative strategies. Lastly, the group consensus approach
+will be discussed.
+
+III.1. Categorization of Disparities among Users
+If the presence of disparities among users is commonly accepted, the formulation of the exact nature
+of the disparities is rare. In one study, common variations among users are described as “underestimation,
+optimism and limited capacity for concurrent analysis of multi-factor problems” (Bulut et al., 2012, p.22).
+This highlights two sets of disparities among users: the ability to relate one’s perception of a criterion to a
+crisp number on the 1-9 scale, which is typically coined as mapping (Aly & Vrana, 2008) and the cognitive
+ability of the users to handle multi-factor problems. A different interpretation is given by Aly & Vrana
+(2008), who use the term “importance” to qualify users. The study breaks down importance in three
+categories: “Knowledge: the amount of important knowledge and information each expert bears.
+Experience: the age and historical deepness of the expertise contained in each expert. Relevance: the degree
+of how much each expert has knowledge pertaining and relating to the decision problem” (p. 533). Bennour
+& Crestani (2007) define professional competence as the “combination of knowledge (theoretical,
+contextual and procedural), know-how (practical and implemented in empirical manners) and behaviors
+(attitudes and relational or cognitive behaviors)” (p. 5745).
+An extensive literature search revealed that there is no commonly accepted definition of disparities
+in user profiles and abilities to use the model. The different interpretations found in the literature can be
+combined and organized as follows:
+1. Competence: years of experience, relevance of educational and professional training, familiarity
+with part or the totality of the subject of the study.
+2. Ability: familiarity with the formulation of judgments for multi-factors problems, familiarity
+with decision-making strategies, ability to formulate consistent comparisons.
+3. Compliance: use of the decision-making model as intended, lack of personal interest, and absence
+of coalition between users.
+The need to integrate the disparities in user profiles into the final rankings is demonstrated by
+Tsyganok et al. (2012), who develop two mathematical models to study the dependency of final rankings
+on group size. Following two different distribution laws, the authors randomly generate “expert opinions”
+or rankings. The number of users varies between 3 and 200 while the number of criteria varies between 3
+and 9. The study finds that the minimum number of users in a group for which disparities can be ignored is
+50, the threshold at which the discrepancy between the model adjusted for user competency and the
+unadjusted model is under 5%.
+
+9
+Groups involved in decision making typically do not comprise such a large number of individuals.
+This study therefore justifies the need to take into account user profiles into the final rankings obtained
+from an AHP study.
+
+III.2 Current AHP-Based Strategies and Limitations
+The earlier strategies developed to integrate the discrepancies in user profiles involve the use of
+AHP. Authors use the AHP process to obtain weights for users. In a 1994 study by Ramanathan & Ganesh,
+each user rates the other users with the AHP model, formulating pairwise comparisons. The individual
+weights are then aggregated and produce a priority vector for the group. Users are also required to include
+a rating of themselves in the comparison matrix. Other studies (Cook, Kress & Seiford, 1996 and Aly et al.,
+2008, p.532) introduce the notion of a “supra decision-maker.” One decision maker is assumed to have
+knowledge of all of the other users’ profiles and performs pairwise comparisons of the other users with the
+AHP tool. To do so, Cook et al. (1996) use the traditional AHP methodology with a 1-9 scale of crisp
+numbers. Aly et al. (2008) introduce a Fuzzy-AHP tool to weight the knowledge of experts. Fuzzy numbers
+and their membership functions are used in an effort to take the qualitative aspect of the ranking into
+account.
+Shortfalls of these methods are described hereafter. In the case of all of the users supplying rankings
+for the entire group, there is a high risk for conflicting personal interest or coalitions. The expertise of users
+is also a matter of perspective and rating expertise can be highly subjective. Also, there are cases where
+users do not physically interact. Criteria rankings might be obtained with no in-person meetings, rendering
+users unaware of the profile of the other users. In the case of the supra decision-maker, it may be difficult
+for one individual to have a precise knowledge of all of the user profiles. The supra decision-maker can
+easily obtain quantitative elements from the users, for example the number of years worked in a given field
+or the highest level of education achieved. It may however be difficult for the supra decision-maker to
+determine the familiarity of a user with the formulation of multi-factor decisions, or whether or not the user
+performed rankings with an ulterior motive in mind.
+
+III.3. Current Qualitative Strategies and Limitations
+Several studies attempt to introduce qualitative strategies. Fuhua, Hongke & Guoqiang (2010)
+allocate a weight vector to the users based on the “expert’s experience value” (p. 3788) A benchmark
+integrated expert weight vector is formulated from an error ratio. The expert’s weight vector is then
+optimized with the integrated expert weight vector to obtain a final weight vector. The “expert’s experience
+value” is determined from “experience and familiarity.” This approach implies that the value is either
+allocated by a supra decision-maker or that it is self-determined by the user. The shortfalls described in the
+
+10
+previous section on using AHP to determine the weights of users apply here also. Bulut et al. (2012) assign
+a coefficient to users, described as “Lambda coefficients [that] correspond to the expertise priority” (p.
+1918). Bardossy, Duckstein & Bogardi (1993) investigate combining fuzzy-AHP results from users. When
+others typically focus on determining which experts have the most knowledge and experience, Bardossy et
+al. approach the issue from a reliability standpoint. Finally, Van den Honert (1998) uses “suitable weights
+for the group members” (p.100). The term “suitable” however is not defined.
+Srdjevic et al. (2013) discuss two shortcomings that stem from qualitative strategies. The task of
+assigning weights can be difficult when there are many users. Also, determining weights for users prior to
+the decision process “may lead to a result which the participants do not feel to be their own” (p. 6671). The
+qualitative approach leaves room for subjectivity and bias on the part of the user who is determining the
+weights. This approach conflicts with the analytical method of AHP, which strives to introduce structure
+and objectivity in the decision-making process.
+
+III.4. Current Quantitative Strategies and Limitations
+Three recent studies describe quantitative strategies to integrate user profiles in the final rankings.
+Jongsawat & Prenchaiswadi (2010) base their methodology on the Euclidian distance between the priorities
+of a user and the group aggregated priorities. Weights are then allocated to users, which allow the authors
+to determine whether users contribute positively or negatively to the decision problem. Users with negative
+contributions are excluded. The process is iterated until only a sub-set of users with positive contributions
+is left. Although this method was not specifically designed to be applied with AHP, it could easily be
+transposed to the AHP model. Duru, Bulut & Yoshida (2012) base the prioritization of users on the
+consistency they achieved in the ranking process. The authors question the traditional approach of
+correlating years of experience with greater importance in terms of user priority: “While experience has
+specific importance, it is not a robust indicator of accurate decisions at all” (p. 4955). Rather than relying
+on the experience level of the users, the authors choose to use the consistency achieved while producing
+their rankings, stating, “individual consistency is one of the objective indicators of the quality of judgment”
+(p. 4954) and “level of consistency is one of the unique indicators of the decision quality and robustness”
+(p. 4964). Other studies derive user priorities based on their consistency. Dong et al. (2010) correlate
+consistency with soft consensus. Their iterative algorithm adjusts individual rankings to reach an acceptable
+collective consistency index. A 2011 study combines both Euclidian distance and consistency strategies to
+develop a unique method and obtain individual weights for the users (Srdjevic et al., 2011). The study aims
+at minimizing “the risk of negligent, incompetent, or irresponsible decision making” (p. 531).
+A shortfall of these methods is the assumption that users who should be granted greater priority
+will achieve greater consistency. This assumption may not be valid, and the literature review did not find
+
+11
+any justification for that statement. Experience is not a necessary condition for consistency: a user who is
+familiar with decision-making methodologies can achieve an acceptable consistency ratio without an indepth knowledge of the topic of interest. Also, AHP can be used iteratively until a desired consistency ratio
+is obtained. In that case, any user regardless of experience can input pairwise comparisons until a
+satisfactory consistency level is achieved. A limitation of the study by Dong at al. (2010) stems from the
+adjustment of individual priorities without any input from the users. The consensus can then appear artificial
+as it is not reached based on user feedback. Removing the input of users who obtain a negative rating in the
+method developed by Jongsawat & Prenchaiswadi (2010) may also prevent an objective representation of
+the group diversity. Priority vectors that deviate from the average priority vector may not necessarily
+symbolize a lack of knowledge or a desire to skew the results; rather a user may have a different
+understanding of the problem at hand which may bring additional value to the decision making process.
+Removing outlying opinions may then be detrimental to the outcome of the process. Quantitative methods
+have the benefit of not relying on the subjective opinion of a decision maker. However, quantitative methods
+are still under investigation and few validation studies seem to have been conducted.
+
+III.5. The Group Consensus Approach
+The strategies presented so far take user profile diversity into consideration by defining weights,
+priorities or importance for each user. Beyond the aggregation of individual priorities, judgments or
+preference structures, an alternative approach is to strive to reach group consensus (Moreno-Jimenez,
+Aguaron & Escobar, 2008). Bryson (1996) proposes a measure of consensus based on the value of the sine
+between priority vectors. The method identifies consensus builders as well as users who impact the
+consensus building process negatively. Users can have two types of influence on the rest of the group.
+Informational influence arises when users treat information from others as “evidence about reality” (p. 30).
+Normative influence occurs when users have “the desire to conform to the expectation of other group
+members” (p. 30). During the consensus building process, users learn from each other and adjust their own
+priorities based on this informative feedback. They can cooperate, compromise, and/or compete. The
+consensus approach removes the bias inherent to allocating weights to users. This method also emphasizes
+the importance of the discussion among experts. This discussion increases the liability of users for the
+opinions they provide. The discussion also provides them with the opportunity to increase their knowledge
+about some aspects of the problem, and review and refine their judgment.
+A major shortcoming of the consensus approach provided by Bryson is the time investment that is
+required. The necessary iterations lengthen the decision making process and may not always be practical.
+Another limitation resides in the uncertain outcome of the consensus approach: reaching consensus is not
+guaranteed.
+
+12
+Disparities among users have been identified and many methods have attempted to capture these
+disparities to adjust the outcome of an AHP-based decision process accordingly. These methods, however,
+show some limitations, and the comprehensive literature review presented here has not revealed a
+methodology that provides a suitable solution to the problem.
+
+IV. SENSITIVITY ANALYSIS METHOD TO ADDRESS USER DISPARITIES IN AHP
+A variety of methods have been reviewed in the previous section, which addressed the issue of
+disparities within a group of users tasked with a common decision making problem. These methods,
+however, show various limitations. Building on this observation, this study proposes to address user
+disparities without quantifying them. This novel method is based on sensitivity analysis, which indicates
+critical pairwise comparisons. With the sensitivity analysis based method, the decision facilitator gains
+insight in which pairwise comparisons are most critical to the decision process. The facilitator now has a
+tool to identify users who are most influential to the group outcome and has the ability to focus the group
+effort on these significant data points.
+While this new approach provides information to decision makers on the most critical pairwise
+comparisons and on which users influences most the group results for a given criterion, this approach
+does not relieve decision makers from the concern of identifying relevant SMEs for a given decision
+making problem. Similarly, this new approach does not provide a validation of the obtained rankings. The
+scope of this sensitivity analysis based approach is to allow decision makers to identify critical inputs, and
+critical users who drive the aggregated group results. This sensitivity based method can be applied after
+users have been vetted and calibrated with other methods, such as the method developed by Cooke and
+Goossens (2008). Prior to using the sensitivity analysis presented here, decision makers should also
+ensure that SMEs are “nominated and selected via a traceable and defensible procedure” and that they
+“undergo a training and familiarization session” (Cooke & Kelly, 2010, p. 4).
+The proposed sensitivity analysis method is based on local partial derivatives, a method used in
+engineering disciplines to analyze uncertainty, such as in structural analysis or in optimization problems.
+This section presents the analytical derivatives of the individual variables that directly affect the outcome
+P
+
+of the hierarchy decision model. Those variables are the individual weight Ak j , the aggregated group
+i , ji1 
+
+weight Gk
+
+I ,J
+, the consistency index  , and the final ranking of a design alternative S q , with respect
+
+to an entry in the pairwise comparison table provided by a user.
+
+13
+IV.1 Analytical Derivatives of Weightings
+A change in value of a pairwise comparison, a k , at the ith level by user Pj will affect the
+criterion weights Ak j and A j since ak  1 / a k ; l , k  1,2,..., ni , j 1 . The pairwise comparison table
+P
+
+P
+
+input a k (Eq. 2) is considered hereafter as an independent variable. The general formula for the
+P
+
+derivatives of Ar j with respect to a k is given by directly differentiating Eq. 5. In the case, where r is
+equal to k , one has
+
+ 
+ 
+
+ for
+ for
+
+ a k
+Pj
+Pj
+Pj
+P
+
+Ak j  n i , ji 1   A  1  A  Ak
+
+a k  ak  A P j  1  A P j  A P j
+
+
+k
+ n i , ji 1 
+
+
+k
+(12)
+
+k 
+
+And in the case when r equal to  , one has
+
+A j
+1 A j
+ 2  
+a k
+a k ak
+P
+
+P
+
+A j
+can be obtained by Eq. 12. Finally, in the case when r  k ,  , one has
+a k
+P
+
+where the term
+
+
+
+Ar j
+a
+P
+P
+P
+  i ,jk1   Ar j  Ak j  A j
+i
+ak
+n
+P
+
+
+
+(13)
+
+After aggregation of each user’s weights for the mth criterion at the ith level, one obtains an
+i , ji 1 
+
+aggregated group weight Gm
+
+. The dimension of the aggregation table is n i , ji 1   P , where P is the
+
+total number of users and n i , ji1  is the number of criteria or alternatives. A change in value of the
+i , j 
+pairwise comparison a k at the ith level by user Pj will affect the aggregated weight Gm i 1 as follows:
+
+
+Gmi , ji 1  n
+ 
+a k
+r 1
+
+ i , ji 1 
+
+
+ Gmi , ji 1  ArP j
+
+
+ A Pj
+a k
+r
+
+
+
+
+
+
+
+(14)
+
+Ar j
+On the right-hand side of Eq. 14, the derivative
+has been given in Eq. 12 for r  k or  and Eq. 13
+a k
+P
+
+for r  k ,  . The other derivative,
+
+
+G mi , ji 1 
+
+Ar
+
+Pj
+
+, is the effect on the aggregated group weight of the mth
+P
+
+criterion due to a change of the individual weight, Ar j , evaluated by user Pj on the rth criterion. It can
+be evaluated as follows:
+
+14
+
+
+Gmi , ji 1 
+
+Am j
+P
+
+i , ji 1 
+
+Gm
+
+
+i , j
+
+
+
+ n i 1 
+
+   G pi , ji 1  
+ q 1,q  m
+
+
+
+Pj
+P  Am
+
+for r  m ,
+
+(15)
+
+and
+
+Gmi , ji 1 
+
+
+
+Ar
+
+Pj
+
+
+ Gmi , ji 1   Gri , ji 1 
+
+for r  m ,
+
+P  Ar
+
+Pj
+
+(16)
+
+IV.2 Analytical Derivatives of Inconsistency Index
+The partial derivative of the inconsistency index  of Eq. 6 with respect to a given pairwise
+comparison a k by user Pj is calculated as follows:
+
+
+
+1
+1
+
+  1   2
+
+a k mm  1 i  j  
+ij
+
+
+  ij
+
+ a k
+
+
+
+
+
+
+
+(17)
+
+where the derivative of the error term  ij is given by Eq. 18, for j  i
+
+ ij
+a k
+
+It should be noted that the term
+
+
+
+aij
+a k
+
+aij
+a k
+
+P
+
+
+
+Aj j
+Pj
+
+Ai
+
+
+
+aij
+
+A 
+
+j 2
+
+i
+
+
+
+
+
+
+(18)
+
+in Eq. (18) is null most of time, except for the following two cases:
+
+aij
+a k
+
+A j j
+P
+
+The individual weight derivatives
+
+Pj
+ A Pj
+ j  A Pj  Ai  A Pj
+
+i
+j
+ a k
+a k
+
+
+a k
+
+ 1
+ 2
+ aij
+
+for i  k , j  
+for i  , j  k
+
+(19)
+
+Ai j
+and
+can be computed by Eqs. 12 and 13. The derivative of
+a k
+P
+
+the Consistency Index can also be computed for the right eigenvector method. In this case, the derivatives
+of concern are directly derived by differentiating Eq. 6 as:
+
+ max 
+
+ a   m
+
+
+  k 
+a k
+m 1
+where the derivative of the maximal eigenvalue can be computed as suggested by Saaty (2005, p.30),
+
+(20)
+
+15
+
+
+
+max
+v k  w  a2k  v  wk
+
+m
+a k
+ vi  wi 
+
+
+
+(21)
+
+i 1
+
+where v i and wi are the ortho-normalized left and right-eigenvectors of the pairwise comparison matrix
+
+C Pi . It is evident that the derivative of the Consistency Index is much easier to compute with Eq. 17 than
+with Eq. 21, which is based on the eigenvalue method.
+
+IV.3 Analytical Derivatives of Final Ranking of Alternatives
+
+
+
+
+Set Gki , ji 1 to be the aggregated weight based on the pairwise comparison tables submitted by all
+users for the mth criterion in the ith level and a k is the input value of one pairwise comparison submitted
+by one user. The effect of a change in the value of a k on the overall total weight can then be obtained by
+differentiating the total weight equation, Eq. 9, as
+
+W I , J Gki , ji 1  i 1,, ji  2 
+2
+
+G jI 1
+...G j2 , j1 G j1,0 
+1
+a k
+a k
+
+(22)
+
+Gki , ji1 
+where the derivative
+can be computed by Eqs. 14-16. Consequently, the effect of a change in
+ak
+
+a k of a criteria comparison table on the final ranking of design alternative q, can be obtained by
+differentiating Eq. 10 as:
+
+S qI , J
+a k
+
+
+
+W I , J i , ji 1 
+Sq
+a k
+
+(23)
+
+Numerical validation of the analytical derivation of the sensitivity analysis presented here can be found in
+Ivanco (2015).
+This methodology can be easily implemented using commonly used software such as MS Excel.
+An application is shown in the following section, which showcases numerical examples and visualization
+of the results through graphic displays.
+
+V. An Aerospace Application: Down-Selection of a Wheel Design for the Space Exploration Vehicle
+The novel sensitivity analysis-based method presented here is now applied to an aerospace
+engineering decision making problem. The Space Exploration Vehicle (SEV) is a modular vehicle that
+provides roving capability to astronauts, and enables lunar and Martian exploration. A picture of the SEV
+is shown in Figure 1.
+
+16
+
+Figure 1. The Space Exploration Vehicle1
+The unique mission of the SEV generates many design challenges. Whereas it may sound trivial
+at first in comparison to more sophisticated elements of the rover, the design and selection of the wheels
+is a key design point for the vehicle. The specificities of the terrain and the space environment make these
+wheels especially challenging to design. The National Aeronautics and Space Administration (NASA)
+and the National Institute of Aerospace (NIA) initiated the RASC-AL Lunar Wheel student competition
+in 2013 to foster innovation and propose new potential designs for the SEV wheels. An Old Dominion
+University (ODU) team participated and won first place in the design competition. Students had five
+months to design, manufacture and test a wheel concept. The manufactured wheel would be mounted on a
+Gator RSX to compete against other wheel designs in a roll-off competition. Budget was limited to
+$10,000 to cover all aspects of the competition, to include a week-long travel to Johnson Space Center for
+four students.
+At the time, none of the students were familiar with MCDA methods. The design challenge
+however involved multiple criteria that had to be taken into consideration to satisfy the competition
+requirements. The team also formulated several design alternatives and a consensus had to be reached to
+down-select the alternative that would be fabricated and used during the roll-off. This down-selection of
+an engineering design is well-suited to be analyzed with AHP and to showcase the capabilities of the new
+sensitivity analysis based method. In this light, several users were requested to perform pairwise
+comparisons to rank the proposed alternatives. Users were chosen based on their disparity in profiles,
+with a total number of six users, P  6 . User 1 and User 2 are students who were on the team and have
+first-hand knowledge of the competition requirements and the design process. User 3 and User 4 are
+aerospace engineers who are familiar with the design of components for space applications while not
+
+1
+
+Source: www.nasa.gov
+
+17
+being as familiar with the competition requirements and the team’s decision process. User 5 and User 6
+have no engineering background and no prior knowledge of engineering design and manufacturing for
+space applications.
+
+V.1 AHP Application Problem Modeling
+Figure 2 shows the hierarchical tree used to model the wheel selection problem. The top level
+objective is to select the best wheel design among four alternatives, evaluated against four first-level and
+ten second-level criteria. Table 2 provides definitions for the various criteria.
+
+Figure 2. Problem modeling for the selection of a lunar wheel design
+
+18
+
+Table 2. Definitions of criteria for the selection of a wheel design for the Space Exploration Vehicle
+Regolith
+Boulders and Rocks
+Craters and Slopes
+
+Terrain Performance
+Wheel should not sink nor clog.
+Wheel should climb over boulders and rocks without incurring significant damage.
+Vehicle should be able to ascent and descent up to 15 degree slopes without sliding.
+SEV should be able to navigate crater rims.
+
+Low Volume
+
+Compatibility with Space Application
+Wheel should be able to withstand space radiations, with no or little degradation of the
+material properties and little impact on the fatigue cycle.
+Mass should be minimized.
+Required maintenance should be minimized. Human and/or robotic in-situ repairs or
+replacements should be possible.
+Footprint should be minimized.
+
+Cost
+
+Cost
+Encompasses fabrication, testing and shipping costs.
+
+Material Availability
+Complexity of the
+manufacturing process
+Compliance with NASA
+standards
+
+Manufacturability
+Material should be available within the timeframe of the competition ramp up.
+Encompasses simplicity of the design, machinability of the chosen material, and
+complexity of welding, fastening or extrusion techniques.
+Wheel design must have the ability to comply with NASA fabrication standards for
+space applications.
+
+Ability to withstand
+radiations
+Low Mass
+Low Maintenance
+
+In recent years, new concepts for tires and wheels have emerged in the automotive and bicycle
+industry, growing the pool of available alternatives. In the design phase of the project, the team developed
+several concepts and had to reach a consensus to down-select one design. The alternatives that were
+considered are an All-aluminum wheel, an All-steel wheel, an Aluminum wheel with rubber tread and an
+All-composite wheel (Fig. 3).
+
+All-Aluminum or All-Steel
+
+All-Aluminum w/ rubber tread
+
+All-Composite2
+
+Figure 3. Proposed design alternatives
+2 Michelin Tweel shown here. By TweelTech (Own work) [CC BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0)], via
+
+Wikimedia Commons
+
+19
+Since the team ruled the All-Composite alternative out prior to producing a finalized 3D model,
+Figure 3 shows the Michelin Tweel, which is an existing design that shares similarities with the team
+concept. Each user was required to provide pairwise comparisons to rank the criteria at all levels. There
+is one group of four criteria in Level 1, for which users provided pairwise comparisons in a
+
+n 1,0   n 1,0   4  4 matrix. In Level 2, there are three criteria under the Level 1 Terrain Performance
+criterion, with n 2,1  3 (Regolith, Boulders and Rocks, Craters and Slopes ). There are four criteria
+under the Level 1 Compatibility with Space Applications criterion, with n 2, 2   4 (Ability to withstand
+radiation, Loss Mass, Low Maintenance, Low Volume ). There are no Level 2 criteria under Level 1
+criterion Cost, n 2,3  0 . There are three Level 2 criteria under Level 1 criterion Manufacturability, with
+
+n 2, 4   3 (Material Availability, Complexity of the Manufacturing Process, Compliance with NASA
+Standards). Each evaluator subsequently performed pairwise comparisons in three comparison tables for
+Level 2 criteria, with respective dimensions n 2,1  n 2,1  3  3 , n 2, 2   n 2, 2   4  4 and
+
+n 2, 4   n 2, 4   3  3 . Each user then had to evaluate the design alternatives against each Level 2 criteria,
+where n ( 2,:)  11 . This yielded eleven 4 × 4 tables, as there were four design alternatives considered.
+
+V. 2 Results
+The weights associated with the pairwise comparisons submitted by all users to rank Level 1 and
+Level 2 criteria are calculated with Eq. 5. The aggregated results among all users are then calculated
+based upon Eq. 8 (Table 3). The group ranked Terrain Performance as the most significant criterion,
+followed by Cost, Space Application and lastly Manufacturability.
+Table 3. Criteria weights summary
+Terrain Performance
+Regolith
+Boulders and Rocks
+Craters and Slopes
+
+User 1
+0.151
+0.540
+0.163
+0.297
+
+User 2
+0.402
+0.750
+0.171
+0.078
+
+User 3
+0.100
+0.699
+0.064
+0.237
+
+User 4
+0.627
+0.688
+0.064
+0.248
+
+User 5
+0.445
+0.537
+0.364
+0.099
+
+User 6
+0.439
+0.500
+0.250
+0.250
+
+Group
+0.379
+0.651
+0.157
+0.191
+
+Space Application
+Radiation Resistance
+Low Mass
+Low Maintenance
+Low Volume
+
+0.067
+0.108
+0.430
+0.077
+0.385
+
+0.232
+0.325
+0.193
+0.359
+0.123
+
+0.050
+0.263
+0.089
+0.610
+0.038
+
+0.191
+0.045
+0.245
+0.636
+0.074
+
+0.315
+0.432
+0.314
+0.116
+0.138
+
+0.439
+0.706
+0.106
+0.155
+0.033
+
+0.208
+0.297
+0.262
+0.319
+0.122
+
+Cost
+
+0.391
+
+0.232
+
+0.565
+
+0.150
+
+0.141
+
+0.088
+
+0.269
+
+Manufacturability
+Material Availability
+Fabrication Process
+Compliance with NASA standards
+
+0.391
+0.586
+0.353
+0.061
+
+0.134
+0.460
+0.221
+0.319
+
+0.284
+0.582
+0.348
+0.069
+
+0.043
+0.06226
+0.285
+0.653
+
+0.099
+0.493
+0.311
+0.196
+
+0.035
+0.084
+0.147
+0.769
+
+0.144
+0.356
+0.348
+0.296
+
+20
+Table 4 shows the weights associated with the pairwise comparisons provided by each user for
+the four design alternatives, for each Level 2 criterion under consideration. These weights are calculated
+with Eq. 5.
+Table 4. Alternative weights summary
+
+Regolith
+
+Boulders and
+Rocks
+
+Craters and
+Slopes
+
+Radiation
+Resistance
+
+Low Mass
+
+Low
+Maintenance
+
+Low Volume
+
+Cost
+
+Material
+Availability
+
+Fabrication
+Process
+
+Compliance
+w/ Standards
+
+Steel
+Aluminum
+Composite
+Al. w. rubber tread
+Steel
+Aluminum
+Composite
+Al. w. rubber tread
+Steel
+Aluminum
+Composite
+Al. w. rubber tread
+Steel
+Aluminum
+Composite
+Al. w. rubber tread
+Steel
+Aluminum
+Composite
+Al. w. rubber tread
+Steel
+Aluminum
+Composite
+Al. w. rubber tread
+Steel
+Aluminum
+Composite
+Al. w. rubber tread
+Steel
+Aluminum
+Composite
+Al. w. rubber tread
+Steel
+Aluminum
+Composite
+Al. w. rubber tread
+Steel
+Aluminum
+Composite
+Al. w. rubber tread
+Steel
+Aluminum
+Composite
+Al. w. rubber tread
+
+User 1
+0.167
+0.167
+0.333
+0.333
+0.268
+0.092
+0.499
+0.140
+0.168
+0.156
+0.186
+0.490
+0.441
+0.441
+0.040
+0.078
+0.0037
+0.197
+0.553
+0.212
+0.368
+0.368
+0.070
+0.193
+0.250
+0.250
+0.250
+0.250
+0.400
+0.456
+0.044
+0.100
+0.446
+0.446
+0.043
+0.064
+0.497
+0.368
+0.038
+0.097
+0.400
+0.423
+0.071
+0.106
+
+User 2
+0.415
+0.315
+0.229
+0.041
+0.635
+0.099
+0.195
+0.070
+0.219
+0.327
+0.368
+0.087
+0.393
+0.442
+0.126
+0.039
+0.216
+0.478
+0.201
+0.105
+0.284
+0.444
+0.212
+0.061
+0.227
+0.423
+0.227
+0.122
+0.620
+0.216
+0.058
+0.105
+0.302
+0.347
+0.281
+0.070
+0.521
+0.284
+0.132
+0.063
+0.308
+0.341
+0.274
+0.078
+
+User 3
+0.167
+0.167
+0.333
+0.333
+0.268
+0.092
+0.499
+0.140
+0.168
+0.156
+0.186
+0.490
+0.533
+0.351
+0.039
+0.077
+0.130
+0.237
+0.580
+0.053
+0.533
+0.317
+0.049
+0.101
+0.255
+0.098
+0.590
+0.057
+0.535
+0.321
+0.045
+0.099
+0.446
+0.446
+0.043
+0.064
+0.497
+0.368
+0.038
+0.097
+0.400
+0.423
+0.071
+0.106
+
+User 4
+0.122
+0.510
+0.267
+0.101
+0.533
+0.206
+0.105
+0.156
+0.144
+0.499
+0.297
+0.060
+0.671
+0.128
+0.073
+0.128
+0.033
+0.227
+0.588
+0.152
+0.509
+0.175
+0.062
+0.255
+0.167
+0.262
+0.453
+0.118
+0.129
+0.295
+0.417
+0.158
+0.619
+0.205
+0.059
+0.117
+0.684
+0.193
+0.076
+0.042
+0.175
+0.361
+0.326
+0.137
+
+User 5
+0.276
+0.390
+0.195
+0.138
+0.426
+0.301
+0.213
+0.060
+0.426
+0.301
+0.213
+0.060
+0.501
+0.354
+0.036
+0.109
+0.038
+0.418
+0.318
+0.227
+0.391
+0.391
+0.067
+0.151
+0.238
+0.313
+0.313
+0.137
+0.188
+0.654
+0.040
+0.118
+0.447
+0.316
+0.056
+0.181
+0.501
+0.354
+0.036
+0.109
+0.420
+0.420
+0.044
+0.116
+
+User 6
+0.569
+0.298
+0.065
+0.068
+0.394
+0.356
+0.131
+0.890
+0.119
+0.146
+0.192
+0.543
+0.448
+0.412
+0.049
+0.091
+0.073
+0.491
+0.123
+0.313
+0.366
+0.393
+0.145
+0.095
+0.250
+0.250
+0.250
+0.250
+0.245
+0.245
+0.186
+0.323
+0.373
+0.424
+0.100
+0.102
+0.376
+0.427
+0.060
+0.137
+0.417
+0.417
+0.083
+0.083
+
+Group
+0.284
+0.327
+0.242
+0.147
+0.425
+0.173
+0.243
+0.160
+0.224
+0.281
+0.275
+0.220
+0.513
+0.345
+0.057
+0.085
+0.054
+0.372
+0.395
+0.179
+0.421
+0.352
+0.092
+0.135
+0.244
+0.261
+0.347
+0.148
+0.353
+0.392
+0.098
+0.157
+0.452
+0.371
+0.079
+0.097
+0.522
+0.333
+0.058
+0.088
+0.358
+0.419
+0.115
+0.108
+
+21
+i , ji 1 
+
+The weights are aggregated for the group using Eq. 8 and are denoted by S q
+i , ji 1 
+
+the weight S q
+
+. As an example,
+
+of the All-Steel wheel design alternative is 0.284 indicated in Table 5 for the Level 2
+
+criterion Regolith under the Level 1 criterion Terrain Performance.
+Figure 6 provides a visual representation of the relative importance of the alternatives for each
+criterion. There are eleven columns in the figure, to reflect the eleven Level 2 criteria. Each alternative is
+represented by its own color, so that each column is composed of four colors representing the four
+alternatives. The bar height corresponds to the aggregated group weight listed in the last column of Table
+4 multiplied by the Level 1 aggregated group weight listed in bold in Table 3. The Regolith and the Cost
+criteria are given the most significant importance in the down-selection of the leading design for the SEV
+wheel design.
+
+Figure 6. Aggregated group results for the down-selection of a wheel design for the SEV
+Table 5 provides a summary of the aggregated group results for all criteria and alternatives. Final
+rankings of the alternatives for the group are shown in Table 6. As stated by Eqs. 10 and 11, the final
+ranking of each design alternative is the inner product between the overall weights of the Level 2 criteria
+and the weight of the design alternative of concern. Specifically, the final rankings given in Table 6 are
+the result of the inner product between column 2 and one of columns from 3 to 6 in Table 5.
+The group selected the All-Aluminum wheel design as its leading alternative. This selection was
+due to the high score given to the All-Aluminum design for cost, which has a high priority weight among
+the criteria. This design also ranked high for its performance on regolith, another criterion with a
+
+22
+significant weight. The All-Steel alternative was ranked second. The All-Composite and the Aluminum
+wheel with rubber tread were allocated much lower scores in the final rankings than the first two
+alternatives. The leading alternative obtained with the AHP method coincides with the alternative selected
+by the student team, who elected to manufacture and compete with the All-Aluminum design.
+
+Table 5. Summary of group weights
+Steel
+
+Terrain Performance
+(0.379)
+
+Space Application
+(0.208)
+
+Cost
+(0.269)
+
+Cost
+
+Manufacturability
+(0.144)
+
+Material Availability
+(0.051)
+Complexity of Fabrication
+(0.050)
+Compliance w/ NASA
+standards
+(0.043)
+
+Composite
+
+Aluminum
+w/ rubber
+
+0.284
+
+0.327
+
+0.242
+
+0.147
+
+0.425
+
+0.173
+
+0.243
+
+0.160
+
+0.224
+
+0.281
+
+0.275
+
+0.220
+
+0.513
+
+0.345
+
+0.057
+
+0.085
+
+0.054
+
+0.372
+
+0.395
+
+0.179
+
+0.421
+
+0.352
+
+0.092
+
+0.135
+
+0.244
+
+0.261
+
+0.347
+
+0.148
+
+0.353
+
+Regolith
+(0.247)
+Boulders and Rocks
+(0.060)
+Craters and Slopes
+(0.072)
+Resistance to Radiation
+(0.062)
+Low Mass
+(0.054)
+Maintenance
+(0.066)
+Low Volume
+(0.025)
+
+Aluminum
+
+0.392
+
+0.098
+
+0.157
+
+0.418
+
+0.399
+
+0.095
+
+0.088
+
+0.314
+
+0.539
+
+0.060
+
+0.087
+
+0.403
+
+0.382
+
+0.109
+
+0.106
+
+Table 6. Aggregated group results
+Steel
+
+Aluminum
+
+Composite
+
+Aluminum
+w/ rubber
+
+0.330
+
+0.352
+
+0.173
+
+0.145
+
+V.3 Sensitivity Analysis
+The sensitivity analysis method is now applied to demonstrate its use in determining which
+pairwise comparisons have the greatest impact on the aggregated group results. First, the method is
+applied to the group weights obtained for the four Level 1 criteria. As indicated in Table 3, the group
+weighting coefficients are:
+G.1,0  0.379 0.208 0.269 0.144T
+
+23
+T
+The contributions from User 2 and User 6 are, respectively A.2  0.402 0.232 0.232 0.134 and
+
+A.6  0.439 0.439 0.088 0.035T . To evaluate the influence of a user’s weight on the aggregated group
+1,0 
+weight, the derivatives of G.
+with respect to
+
+A 2 and A 6 are calculated based upon Eqs. 15 and 16, as
+
+follows:
+1, 0 
+
+ Gm
+
+2
+ Ar
+
+ 0.0976 - 0.0567
+  - 0.0327 0.1185
+
+  - 0.0423 - 0.0403
+
+ - 0.0226 - 0.0215
+
+ 0.0893 - 0.0300
+1
+ Gm , 0    - 0.0300 0.0626
+
+
+6 
+ Ar   - 0.0387 - 0.0213
+
+ - 0.0207 - 0.0114
+The magnitudes of the terms reveal that
+
+- 0.0732
+- 0.0403
+0.1413
+- 0.0278
+
+- 0.0677 
+- 0.0372 
+
+- 0.0481 
+
+0.1531 
+
+- 0.1931 - 0.2594 
+- 0.1061 - 0.1426 
+
+0.3725 - 0.1842 
+
+- 0.0733 0.5861 
+
+G.1,0  is more sensitive to the weights in A.6
+
+than in
+
+A.2
+
+as the
+
+former has the largest component. The sensitivity of the group weights with respect to a change in one
+pairwise comparison supplied by one user is now calculated with Eq. 14 and the row geometric means are
+
+ 
+P
+
+calculated for the matrix. For a given weighting vector, Ar j of a comparison table prepared by user Pi ,
+
+ 
+
+for the rth criteria, where r runs from 1 to n i , ji 1  the sensitivity of Ar j to a given pair comparison
+P
+
+entry, a kl is given by a vector
+
+ 
+
+ Ar j
+a k
+P
+
+(23)
+
+Note that the size of the pairwise comparison table is n i , ji 1   n i , ji 1  . Now, sum the absolute value of
+the vector components together to obtain a single scalar quantity representative of the magnitude of the
+sensitivity, called the sensitivity index, as
+
+S
+
+Pj
+k
+
+
+
+n  i , ji 1 
+
+
+r 1
+
+Ar j
+a k
+P
+
+(24)
+
+ 
+
+The n i , ji 1   n i , ji 1  matrix, S ki is called sensitivity matrix. A surface plot of the sensitivity matrix is
+P
+
+provided to the decision maker. Peaks on the plots provide a visualization of the pairwise comparisons
+that have the most critical impact on the aggregated group results.
+Figure 4 shows the sensitivity matrix plots for each user for the Level 1 criteria of the SEV case
+study. The x and y axes represent the rows and columns of the initial pairwise comparison matrix, and
+
+24
+integers 1 to 4 along the axes represent the four criteria under consideration, namely Terrain Performance,
+Compatibility with Space Application, Cost and Manufacturing. The numerical values along the z-axis
+indicate the sensitivity index for each pairwise comparison, or the sum of the absolute values of the vector
+components obtained with Eq. 14 for
+
+
+Gmi , ji 1 
+. It can be observed that User 6, with a maximum
+a k
+
+sensitivity index above 0.22, provided the pairwise comparison that has the greatest magnitude for
+sensitivity. This specific pairwise comparison influences the aggregated group results the most.
+
+25
+
+User 1
+
+User 4
+
+User 2
+
+User 5
+
+User 3
+
+User 6
+
+Figure 4. Sensitivity plots by user for Level 1 criteria
+Table 7 provides the pairwise comparison matrix provided by User 6 for the four Level 1 criteria.
+The sensitivity plots shows that the most critical pairwise comparison is on the fourth row, in the first
+column, which is for the comparison of Manufacturability and Terrain Performance and has an input
+value of 1/9.
+
+26
+
+Table 7. Pairwise comparison matrix for User 6 for the top-level criteria
+
+Terrain Performance
+Space Application
+Cost
+Manufacturability
+
+Terrain
+Performance
+1
+1
+1/7
+1/9
+
+Space
+Application
+1
+1
+1/7
+1/9
+
+Cost
+
+Manufacturability
+
+7
+7
+1
+1/5
+
+9
+9
+5
+1
+
+Table 8 displays the original group weights obtained for the Level 1 criteria and what the group
+weights would be for these same criteria if User 6 was excluded from the results. It can be observed that
+the criteria weights would differ by a percent difference ranging between 10.82% and 24.55%. The
+sensitivity plots shown in Figure 4 show that User 2 has the least influence on the group results. Indeed,
+the most critical pairwise comparison provided by User 2 has a sensitivity index of 0.07, the smallest
+magnitude for all maxima shown in the six plots of Figure 7. The effect of User 2 on the group results is
+also investigated and shown in Table 8. It can be observed that the percent difference between the group
+weights for all users and the group weights adjusted with the exclusion of User 2 ranges between 1.34%
+and 2.89%. The decision maker can now gain insight into which user has the most influence on the group
+results from inspection of the sensitivity plots, as confirmed by the percent difference computed and
+displayed in Table 8.
+
+Table 8. Aggregated group weights for Level 1 criteria after removal of least and most sensitive users
+Original
+group weight
+0.379
+
+Group weight,
+User 6 excluded
+0.342
+
+Percent
+difference
+10.82%
+
+Group weight,
+User 2 excluded
+0.374
+
+Percent
+difference
+1.34%
+
+Space Application
+
+0.208
+
+0.167
+
+24.55%
+
+0.204
+
+1.96%
+
+Cost
+
+0.269
+
+0.313
+
+14.06%
+
+0.277
+
+2.89%
+
+Manufacturability
+
+0.144
+
+0.177
+
+18.64%
+
+0.146
+
+1.37%
+
+Terrain Performance
+
+Given the background of User 6, who has no experience or training in the engineering field, the
+impact of User 6 on the aggregated group results may be of concern. Such a result should trigger a close
+inspection of User 6 inputs for this specific matrix and possibly a group discussion, in an effort to
+determine if the group decision is in accordance with the opinion of User 6.
+
+Similarly, the sensitivity analysis method can be applied to the inconsistency index, to understand
+how a pairwise comparison impacts the inconsistency index obtained by a user. For example, using Eq.
+17, the sensitivity of the inconsistency index with respect to the comparison of radiation resistance and
+
+27
+low volume for the space application criterion for User 2 has a magnitude of 0.0241. Such sensitivities
+can be calculated for all entries in the pairwise comparison matrix of concern.
+The sensitivity analysis method can be applied at any level of the hierarchy tree that models the
+decision problem. For example, one can now evaluate the impact of a user’s pairwise comparisons to the
+four Level 2 criteria under the Level 1 criterion “Compatibility with Space Application”. Using the same
+method as previously, the sensitivity indices are calculated and plotted as surface plots in Figure 5. It can
+be noticed that User 4, who is an aerospace engineer who was not involved with the team, provided the
+pairwise comparison that has the most impact on the aggregated group results. The pairwise comparison
+provided in Row 1, Column 3 by User 4 indeed obtained the maximum sensitivity index in the group for
+the Space Application criterion. It can also be noticed that User 5 and User 6, who have no engineering
+experience, have more influence on the group results than User 1 and User 2 who were very familiar with
+the decision problem. These plots inform the decision maker that User 4, and to a lesser extend User 5
+and User 6, influence the group results the most.
+The sensitivity of the overall total weight of a criterion can be calculated using Eq. 22 and the
+sensitivity of the final ranking of an alternative can be calculated using Eq. 23. For example, in the case of
+the Level 2 criteria under the Level 1 Space Application criterion, one obtains the sensitivity plots shown
+in Figure 6 for the All-Aluminum wheel. It can be noticed that User 4 and User 5 drive the final ranking
+of the All-Aluminum design alternative when evaluated against the Space Application criterion. The
+decision maker can now focus on the inputs provided by these users, highlight critical pairwise
+comparisons as discussion points for the group and confirm that these inputs are in line with the intent of
+the users.
+
+28
+
+User 1
+
+User 4
+
+User 2
+
+User 5
+
+User 3
+
+User 6
+
+Figure 5. Sensitivity plots by user for the Level 2 criteria under the Space Application criterion
+
+29
+
+User 1
+
+User 4
+
+User 2
+
+User 5
+
+User 3
+
+User 6
+
+Figure 6. Sensitivity plots by user for the overall ranking of the All-Aluminum wheel for the Space
+Application Criterion
+
+30
+VI. Conclusion
+Since its development, AHP has been thoroughly studied, implemented and improved upon.
+Several shortfalls to AHP have been discovered and corrected over the years, with the development of
+improved AHP algorithms. A limitation however still remains: traditional AHP algorithms do not take the
+disparities of user profiles into account. Traditional AHP grants the same importance to all user regardless
+of their experience and familiarity with the AHP method. Several qualitative and quantitative methods
+have been proposed to address the issue of disparities within a user group, but several shortcomings can
+be identified. In an effort to develop the current state of the art with regard to addressing user disparities,
+a new methodology was developed and presented in this paper. Rather than trying to quantify the
+disparities in profiles, this new approach uses an analytical sensitivity analysis to identify which users
+have the most impact on the aggregated group results. This sensitivity analysis based method informs the
+decision maker of which pairwise comparisons are most critical to the final rankings so as to enable the
+decision maker to focus the group effort on the most significant data points.
+This new approach does not relieve decision makers from the concern of identifying relevant
+SMEs for a given decision making problem. Neither does this approach validates the obtained rankings.
+The scope of this sensitivity analysis based approach is to allow decision makers to identify critical
+inputs, and which SMEs drive the aggregated group results. The sensitivity based method can be applied
+after SMEs have been vetted and calibrated with other methods, such as the method developed by Cooke
+and Goossens (2008).
+In order to assist SMEs and decision makers with the implementation of AHP, an AHP tool was
+developed in MS Excel. Two visualization capabilities were also developed. A bar chart displays the
+relative importance of the criteria, and provides information on the alternatives scores for each criterion.
+A surface plot of the sensitivity indices allows the decision maker to gain insight in which SME, and
+specifically which pairwise comparison input by a given SME, impacts the group results the most. The
+example of the down-selection of a wheel design for the Space Exploration Vehicle was presented to
+illustrate how the sensitivity analysis visualization plots can be used by the decision maker to determine
+which SME drives the group results. After the most influential SME was identified, original group
+weights and group weights after the exclusion of the most influential SME were compared. The
+sensitivity analysis method presented here allows to focus time and resources on the elements of the
+process that are most critical. This new development to the state of the art allows decision makers to gain
+more insight into the participation of each SME to the aggregated group results and provides a
+methodology to address the limitation of AHP in terms of disparities in user profiles.
+
+31
+REFERENCES
+Aly, S., & Vrana, I. (2008). Evaluating the knowledge, relevance and experience of expert decision
+makers utilizing the fuzzy-AHP. Agricultural Economics, Czech, 54(11), 529-535.
+Bardossy, A., Duckstein, L., & Bogardi, I. (1993). Combination of fuzzy numbers representing expert
+opinions. Fuzzy Sets and Systems, 57, 173-181.
+Bennour, M., & Crestani, D. (2007). Formalization of a process activity performance estimation approach
+using human competencies. International Journal of Production Research, 45(24), 5743-5768.
+Bryson, N. (1996). Group decision-making and the analytic hierarchy process: exploring the consensusrelevant information content. Computers Operations Research, 23(1), 27-35.
+Bulut, E., Duru, O., Keçeci, T., & Yoshida, S. (2012). Use of consistency index, expert prioritization and
+direct numerical inputs for generic fuzzy-AHP modeling: A process model for shipping asset
+management. Expert Systems with Applications, 39(2), 1911-1923.
+Conrow, E. H. (2011). Estimating Technology Readiness Level Coefficients. Journal of Spacecraft and
+Rockets, 48(1), 146-152.
+Cook, W. D., Kress, M., & Seiford, L. M. (1996). A general framework for distance-based consensus in
+ordinal ranking models. European Journal of Operational Research, 96, 392-397.
+Cooke, R.M., Kelly, G.N. (2010). Climate change uncertainty quantification. Lessons learned from the
+Joint EU-USNRC Project on uncertainty analysis of probabilistic accident consequence codes.
+Resources For the Future Discussion Paper 10-29.
+Cooke, R.M., Goossens, L.H.J. (2008). TU Delft expert judgment data base. Reliability Engineering and
+System Safety, 93(5), 657-674.
+Davoodi, A., “On Inconsistency of a Pairwise Comparison Matrix”, International Journal of Industrial
+Mathematics, Vol. 1, No.4, 2009, pp. 343-350
+Dijkstra, T. K. (2011). On the extraction of weights from pairwise comparison matrices. Central
+European Journal of Operations Research, 21(1), 103-123.
+Dong, Y., Zhang, G., Hong, W.-C., & Xu, Y. (2010). Consensus models for AHP group decision making
+under row geometric mean prioritization method. Decision Support Systems, 49(3), 281-289.
+Duru, O., Bulut, E., & Yoshida, S. (2012). Regime switching fuzzy AHP model for choice-varying
+priorities problem and expert consistency prioritization: A cubic fuzzy-priority matrix design. Expert
+Systems with Applications, 39(5), 4954-4964.
+Escobar, M. T., Aguarón, J., & Moreno-Jiménez, J. M. (2004). A note on AHP group consistency for the
+row geometric mean priorization procedure. European Journal of Operational Research, 153(2), 318322.
+Forman, E. H., & Gass, S. I. (2001). The analytic hierarchy process – An exposition. Operations
+Research, 49(4), 469.
+
+32
+
+Franek, J. í., & Kresta, A. (2014). Judgment Scales and Consistency Measure in AHP. Procedia
+Economics and Finance, 12, 164-173.
+Fuhua,Y., Hongke, X. & Guoqiang, L. (2010). An improved analytic process of evaluation. International
+Conference on Computational and Theoretical Physics 2010, 3788-3796.
+Guk-Hyun, C. et al. (2008). A logical Approach for Evaluating Preliminary Shape Design of a Very Light
+Jet. The 28th Congress of International Council of the Aeronautical Sciences.
+Ivanco, M. (2015). Development of Analytical Sensitivity Analysis for AHP Applications (Master Thesis).
+Old Dominion University, Norfolk, VA.
+Jongsawat, N., & Premchaiswadi, W. (2010). Aggregating and Weighting expert knowledge in group
+decision making. Paper presented at the Advanced Intelligent Computing Theories and Applications 6th International Conference on Intelligent Computing, Changsha, China.
+Lafleur, J., Sharma, J., & Apa, J. (2007). From Mission Objectives to Design: An Efficient Framework
+for Down-selection in Robotic Space Exploration. AIAA conference and exposition 2007.
+Moreno-Jiménez, J.M., Aguarón, J., & Escobar, M.T. (2008). The core consistency in AHP-Group
+decision making. Group Decision and Negotiation, 17, 249-265.
+Saaty, T. (1980). The Analytic Hierarchy Process: Planning, Priority Setting Resource Allocation
+(Decision Making Series). Mcgraw-Hill. 978-0070543713.
+Saaty, T. (1986). Axiomatic Foundation of the Analytic Hierarchy Process. Management Science, 32(7).
+Saaty, T. (1994). How to make a decision: The Analytic Hierarchy Process. Interfaces, 24(6), 19-43.
+Saaty, T. (2005). Theory and applications of the analytic network process: decision making with benefits,
+opportunities, costs and risks. RWS publications, 3rd edition. 978-1888603064.
+Srdjevic, B., Blagojevic, B., & Srdjevic, Z. (2011). AHP based group decision making in ranking loan
+applicants for purchasing irrigation equipment: A case study. Bulgarian Journal of Agricultural
+Science, 17, 531-543.
+Srdjevic, B., Srdjevic, Z., Blagojevic, B., & Suvocarev, K. (2013). A two-phase algorithm for consensus
+building in AHP-group decision making. Applied Mathematical Modelling, 37(10-11), 6670-6682.
+Tsyganok, V. V., Kadenko, S. V., & Andriichuk, O. V. (2012). Significance of expert competence
+consideration in group decision making using AHP. International Journal of Production Research,
+50(17), 4785-4792.
+Van den Honert, R.C. (1998). Stochastic group preference modelling in the multiplicative AHP: A model
+of group consensus. European Journal of Operational Research, 110, 99-111.
+

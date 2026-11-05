@@ -1,0 +1,418 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fluid Dynamics Branch
+NASA Marshall Space Flight Center, Huntsville, Alabama
+
+Earth and Space 2022 Conference
+April 25-28, 2022
+
+Demonstration of Capability to Simulate Particle Irregular 
+Shape and Poly-Disperse Mixtures Within Lunar Lander 
+
+Plume-Surface Interaction 
+
+Peter A. Liever
+CFD Research Corporation
+
+Jacobs Space Exploration Group
+
+Jeffrey S. West
+NASA MSFC
+
+
+
+2
+
+NASA Game Changing Development 
+Multi-Year Project
+
+Objective: Develop an integrated modeling, simulation, instrumentation capability, and 
+
+testing approach to predict propulsive landing Plume-Surface Interaction (PSI) effects
+
+• Developing PSI modeling and  simulation 
+capability for full-scale Moon and Mars vehicles
+– Plume physics
+– Erosion/cratering physics
+– Ejecta dynamics
+
+• Design/Development completed, with 
+validation and testing underway:
+– Millimeter Wave Doppler Radar (MWDR)
+– SCALPSS stereo camera (2021 flight on 
+
+Nova-C CLPS lunar lander)
+– Dust Concentration Monitor (DCM)
+
+Predictive Simulation 
+
+Capability
+Ground Testing
+
+Flight-Focused 
+
+Instrumentation
+
+• Subscale, inert gas, supersonic cratering test in 
+MSFC TS300 vacuum facility, CY21/22
+
+• Hot-fire cratering tests planned with Robotic-Scale 
+lander engine and Human-Scale lander engine at 
+MSFC TS300 and GRC Plumbrook Station
+
+• Novel test techniques and diagnostics for Lunar 
+and Mars relevant environments
+
+PSI
+
+
+
+3
+
+FOUR SPECIFIC TASKS were defined for the Predictive Simulation Capability (PSC) Development
+element of the PSI Project sponsored by NASA Game Changing Development (GCD).
+
+• Task 1 – Plume Flow in Low-Pressure/Vacuum Environments
+
+➢ Accurately model plume expansion, dynamics, and impingement in Martian and Lunar 
+low-pressure/vacuum environments
+
+• Task 2 – Effect of Plume Flow on Crater Development and Ejecta Sheets
+
+➢ Simulate complete range of soil material erosion and fluidization mechanism with gas-
+particle two-phase simulations to accurately predict crater shape and size
+
+• Task 3 – Regolith Particle Phase Modeling
+
+➢ Refine soil mixture particle-particle interaction modeling to capture extreme 
+cohesiveness of irregular shape, poly-disperse lunar regolith
+
+• Task 4 – Gas-Particle Interaction Modeling
+
+➢ Close fundamental modeling gaps for gas-particle interaction in supersonic ejecta 
+streams and clouds
+
+PSI – Predictive Simulation Capability (PSC) Development 
+
+
+
+4
+
+• GGFS features Eulerian-Eulerian modeling approach, treating both gas and 
+granular material as mixing continuum phases. Directly computes the 
+interaction of gas and granular phases and simulate erosion, cratering and 
+ejecta processes. 
+
+• GGFS has been ported to highly scalable Loci framework under PSI project. 
+Loci/GGFS enables NASA project applications on HPC supercomputer assets. 
+
+• Eulerian particle phase modeling avoids modeling of intractable number of 
+individual particle interactions. Requires constitutive closure models (stress, 
+dissipation, friction, drag, …) in governing equations. 
+
+• Particle Kinetic Theory can be applied for sphere closure models. 
+
+• Closure models for non-spherical particles are generated from small-scale 
+detailed DEM simulations. 
+
+• The Eulerian-Eulerian gas/granular flow solution framework is then applied to 
+efficiently simulate the gas-granular multi-phase flow. 
+
+Gas-Granular Flow Solver (GGFS): 
+Gas-Particle Two-Phase Simulations
+
+Gas Phase
+
+Granular Phase
+
+Gas-Granular Flow Solver (GGFS) 
+Simulation of Crater Development and Ejecta Sheets
+
+
+
+5
+
+Influence of Particle Shape and Mixture
+
+in Realistic Environment
+
+Monodisperse Sand
+PFGT1_R14_MDS
+
+BP-1
+PFGT1_R55_BP1
+
+• PFGT-1: Physics Focused Ground Test – MSFC TS300 Vacuum Chamber – FY21
+
+➢ Scaled supersonic plume impingement at Martian and near-Lunar background pressures
+
+➢ Six simulants: Glass spheres, mono- and bi-disperse sand, sieved BP-1, tri-disperse mix, full BP-1
+
+➢ Progression in simulant complexity designed to provide validation for irregular particle and poly-
+dispersity effects Loci/GGFS models
+
+• Example shown below: P=0.053 torr, h/D=10
+
+• Dramatic difference in crater characteristics between mono-disperse sand particles and full 
+composition BP-1 poly-disperse irregular particle mix
+
+PFGT-1 Simulant: Quartz Sand
+Irregular, sub-rounded/sub-angular
+
+PFGT-1 Simulant: BP-1
+Irregular, sub-angular/angular
+
+PFGT-1 Pre-Test Simulant Particle Scans
+
+PFGT-1 Simulant: Glass Spheres
+
+Realistic Modeling Of Poly-disperse Soil Composition with 
+Irregular Shape Particles Is First Order Requirement
+
+
+
+6
+
+Particle Phase Property Modeling Capabilities in Loci/GGFS
+
+• Loci/GGFS particle mixture modeling framework designed to accommodate mono-disperse and poly-
+disperse mixtures of ideal (spherical) and irregular particle shapes
+
+• Lunar regolith mixture may require databases with N=8+ discrete particle size bins
+
+• Spherical Particles – Particle Kinetic Theory 
+
+– Spherical shapes use particle kinetic theory closure model formulations
+
+– Poly-disperse mixture: Garzo-Hrenya-Dufty (GHD) mixture property model
+
+– GHD solves coupled set of equations for mixture property using particle kinetic theory for each 
+species in mixture. Recent Loci code optimizations have led to orders of magnitude speed-up. 
+
+• Irregularly Shaped Particles – DEM based database generation with runtime interpolation
+
+– Particle shape and angular features modeled with sphere clumps. DEM particle-particle 
+interaction performed to extract properties ( stress, dissipation, …). Use Python scripted 
+parametric LIGGGHTS DEM database generation.
+
+– Tabular datasets accessed by Loci/GGFS during execution.
+
+– Previously limited to bi-disperse data sets. Efficient Loci 2-D interpolation modules were readily 
+available. Recent extension to general Loci N-dimensional interpolation modules. 
+
+Garzo, V., J. Dufty, C. Hrenya, “Enskog theory for polydisperse granular mixtures I: Navier-Stokes order transport”, Phys. Rev. E. 76 (2007)
+Garzo, V., C. Hrenya, J Dufty, “Enskog theory for polydisperse granular mixtures II: Sonine polynomial approximation”, Phys. Rev. E. 76 (2007)
+Murray, J.A., Benyahia, S., Metzger,  P., Hrenya, C. M., “Continuum representation of a continuous size distribution of particles engaged in rapid granular flow”, Physics of Fluids 24, (2012).
+
+Poly-disperse compositionFocus of this Presentation is on Capabilities of GHD Based Spherical Shape Modeling 
+
+
+
+7
+
+• Loci/GGFS overall maturation has reached level that warrants evaluation of available soil modeling  options
+for a full-scale relevant scenario
+
+• Selected Apollo Lunar Module terminal landing phase PSI cratering -- quasi-steady simulation
+
+• Demonstration served multiple purposes:
+
+➢ Simulation in near-vacuum environments  - test robustness of two-phase flow solver for simulations on 
+edge of continuum flow with orders of magnitude range between gas and particle densities
+
+➢ Assess and demonstrate capabilities and robustness of currently available particle model 
+implementation In GGFS
+
+➢ Demonstrate ability to predict effects postulated as first order: irregular shape and poly-dispersity
+
+➢ Application readiness: Identify computational cost drivers for timely large scale computational 
+modeling for customer support 
+
+Application Demonstration of Loci/GGFS 
+
+Particle Shape and Mixture Effects on Apollo LM Surface Cratering
+
+
+
+8
+
+• Apollo Lunar Module full scale geometry model
+• Elevation 5m from soil surface to engine exit
+• Engines throttled to 2200 lbf
+• Farfield pressure set to 0.1 Pa (Near Lunar)
+
+Assessed particle shape and mixture effects with four models:
+➢ Single size spherical particles, D=30 micron, D=100 micron
+➢ Bi-disperse spherical particles, D=30+100 micron
+➢ Single size irregular particle shape, Cylinder AR=4 with 
+
+volume equivalent to 100 micron
+➢ Tri-disperse spherical particles, D=10+30+100 micron
+
+Application Demonstration of Loci/GGFS 
+
+Particle Shape and Mixture Effects on Apollo LM Surface Cratering
+
+Mach Number Temperature Particle Volume Fraction (log10)
+
+
+
+9
+
+Bi-disperse 30-100mi spheres Mono-disperse 100mi spheres 
+
+Ejecta Sheet Evolution: Effects of Poly-dispersity
+
+• Initial stir-up of particles from impulsive plume startup and impingement on soil slowly rising up as farfield flow forms
+
+• Near surface ejecta sheet forming from soil surface outside of crater ; ejecta sheet angle ~ 5-10deg
+
+• Secondary ejecta stream ejected from crater edge
+
+• Poly-disperse mixture composition results in wider spread of eject sheets 
+
+Animations
+
+Tri-disperse 10-30-100mi spheres 
+
+
+
+10
+
+Bi-disperse 30-100mi spheres Mono-disperse 100mi spheres 
+
+Plume Dynamics and Crater Evolution
+
+• Poly-disperse mixtures result in progressively shallower crater   
+
+• Noticeable increase in surface erosion effects outside of crater
+
+Animations
+
+Tri-disperse 10-30-100mi spheres 
+
+
+
+11
+
+Effect of Particle Mixture on Crater Shape/Depth
+
+• Comparison of crater shape shown at t=1.5 sec 
+
+• Continuous reduction in crater depth with poly-
+dispersity
+
+• More pronounced surface erosion effects outside 
+of crater for tri-dispersed
+
+100mi spheres 30mi spheres 
+
+Bi-disperse 30-100mi spheres Tri-disperse 10-30-100mi spheres 
+
+Loci/GGFS Simulations Capture Crater 
+Characteristics Expected For Particle Size, 
+
+Shape And Mixture Effects.
+
+
+
+12
+
+Effect of Particle Shape/Mixture on Crater Depth
+
+• Crater depth profile comparison shown at t=1.5 sec 
+
+• Continuous reduction in crater depth with poly-dispersity
+
+• Started next level simulation with N=4 for analytical GHD sphere model (10-30-100-300 micron) 
+
+• Further poly-dispersity effects assessment will begin using results of DEM modeling
+
+1.0 m
+
+Results Obtained To Date Indicate That Increased
+Poly-dispersity Results In Increased Resistance To 
+
+Erosion And Reduction In Crater Depth
+
+
+
+13
+
+Computational Speed-up for Production Applications
+
+• Simulations currently require 3 weeks+ ; Cost scales with number of particle bins in poly-disperse modeling
+
+• This is too slow to satisfy customer needs in project support production application
+
+• Loci/GGFS implemented in Loci highly scalable, rule based computational framework. Current Loci/GGFS 
+version constitutes robust implementation of all features. 
+
+• Entered next phase focusing on algorithm optimization on all levels - already demonstrating significant 
+improvements. Solution of two-phase gas-granular mixture models present numerous occurrences of stiff, 
+high-gradient coupled algorithms.  
+
+• Graphical Processing Units (GPU) were recognized as providing potential for significant computational 
+speed increases, in particular for large number of repetitive granular phase sub-models and mixture 
+computations. 
+
+• Heterogenous implementation (GPU/CPU) could provide significant speed-up. A Loci-based mini-application 
+for GPU execution was funded by a NASA HPC Modernization Effort and completed in early FY21—results 
+indicated significant acceleration of Loci/GGFS and Loci-base CFD tools in general were likely. 
+
+• This will require funding not allocated under the PSI GCD project.
+
+
+
+14
+
+Conclusion
+
+• Presented application demonstration of Loci/GGFS capabilities for Apollo Lunar Module PSI surface 
+cratering. 
+
+• Demonstrated capabilities and robustness of currently available particle models In GGFS
+
+• Results obtained to date indicate that increased poly-dispersity results in increased resistance to erosion 
+and continuous reduction in crater depth
+
+• Future simulations will begin using DEM based models to assess cost and scaling. For irregular shapes, 
+database lookup is the only way to perform poly-disperse simulations.
+
+

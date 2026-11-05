@@ -1,0 +1,1021 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="pdf:PDFVersion" content="1.5">
+<meta name="xmp:CreatorTool" content="TeX">
+<meta name="pdf:hasXFA" content="false">
+<meta name="access_permission:modify_annotations" content="true">
+<meta name="access_permission:can_print_degraded" content="true">
+<meta name="dcterms:created" content="2023-04-28T13:34:10Z">
+<meta name="dcterms:modified" content="2023-04-28T16:29:03Z">
+<meta name="dc:format" content="application/pdf; version=1.5">
+<meta name="xmpMM:DocumentID" content="uuid:47ed6c6e-8b03-419c-8749-c70bfdf4549c">
+<meta name="pdf:docinfo:creator_tool" content="TeX">
+<meta name="access_permission:fill_in_form" content="true">
+<meta name="pdf:docinfo:modified" content="2023-04-28T16:29:03Z">
+<meta name="pdf:hasCollection" content="false">
+<meta name="pdf:encrypted" content="false">
+<meta name="pdf:docinfo:custom:PTEX.Fullbanner" content="This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) kpathsea version 6.3.4">
+<meta name="xmp:CreateDate" content="2023-04-28T09:34:10Z">
+<meta name="pdf:hasMarkedContent" content="false">
+<meta name="Content-Type-Override" content="application/pdf">
+<meta name="Content-Type" content="application/pdf">
+<meta name="xmp:ModifyDate" content="2023-04-28T12:29:03Z">
+<meta name="PTEX.Fullbanner" content="This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) kpathsea version 6.3.4">
+<meta name="xmp:MetadataDate" content="2023-04-28T12:29:03Z">
+<meta name="pdf:producer" content="pdfTeX-1.40.24">
+<meta name="access_permission:extract_for_accessibility" content="true">
+<meta name="access_permission:assemble_document" content="true">
+<meta name="xmpTPg:NPages" content="13">
+<meta name="pdf:hasXMP" content="true">
+<meta name="access_permission:extract_content" content="true">
+<meta name="access_permission:can_print" content="true">
+<meta name="pdf:docinfo:trapped" content="False">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.DefaultParser">
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.pdf.PDFParser">
+<meta name="access_permission:can_modify" content="true">
+<meta name="pdf:docinfo:producer" content="pdfTeX-1.40.24">
+<meta name="pdf:docinfo:created" content="2023-04-28T13:34:10Z">
+<title></title>
+</head>
+<body><div class="page"><p></p>
+<p>23ICE-0019
+</p>
+<p>Roughness Parameter Optimization of the McClain Model in GlennICE
+William B. Wright
+</p>
+<p>HX5, LLC, Cleveland, OH, 44135, USA
+</p>
+<p>Thomas Ozoroski
+NASA Glenn Research Center, Cleveland, Ohio, 44135, USA
+</p>
+<p>David L. Rigby
+HX5, LLC, Cleveland, OH, 44135, USA
+</p>
+<p>Abstract
+</p>
+<p>Aircraft icing remains a significant threat to aviation safety. Software
+that predicts the impingement and ice accretion on full aircraft
+geometries and aircraft components are in demand and NASA Glenn
+is committed to produce software that meets this need. One of the key
+parameters affecting an accurate prediction of iced geometry is the
+effect of ice roughness on the heat transfer coefficient. While many
+efforts have been made to implement the roughness in the flow solver,
+this report takes a correlation for roughness height distribution that is
+based on experimental measurements and demonstrates how to relate
+those measurements to an augmentation to the heat transfer coefficient
+provided by the flow solution. The outcome of this effort was the
+callibration of defaults for user supplied parameters to this correlation
+through comparison with 95 large glaze conditions from experiment
+by adjusting user-supplied parameters in the roughness augmentation
+equation.
+</p>
+<p>Introduction
+</p>
+<p>Surface roughness has long been an important consideration in icing.
+Early works focused on the measurement of roughness and its effect
+on heat transfer [1–5]. The initial attempts to incorporate roughness
+effects into icing simulation used an integral boundary layer method
+described by Schlichting [6] and incorporated roughness to determine
+transition [7] as well as the augmentation to heat transfer [8]. These
+criteria were used in LEWICE [9] and LEWICE3D [10] to predict
+transition and turbulent heat transfer with roughness effects. This
+technique was extended for 3D boundary layers by Blanchard et.
+al. [11]. Other researchers built roughness effects through turbulence
+models such as that developed by Aupoix [12] and Menter [13].
+Examples include the efforts of Beaugendre [14], Knopp [15],
+Bernardini [16] Tagawa [17], and Min [18]. Neither the boundary
+layer approach nor the turbulence model approach is always
+applicable in GlennICE [19]. GlennICE is a computational tool that is
+being developed by NASA to predict ice shapes on multi-dimensional
+geometries of higher complexities based on a computational flow
+solution that a user provides. GlennICE does not calculate the flow
+solution, rather it reads in a solution from other sources. These flow
+solvers may or may not have a turbulence model that includes
+roughness effects on heat transfer. Heat transfer coefficient is a critical
+parameter for predicting the ice shape and will increase as ice begins
+to accrete and the surface becomes rough. A methodology is needed
+to incorporate this effect other than through the use of turbulence
+models. The current implementation within GlennICE incorporates a
+roughness model that was designed by McClain [20] which
+incorporates measurements of ice roughness distributions over a wide
+variety of conditions and geometries to produce the correlation
+</p>
+<p>provided. The roughness measurements have been reported in several
+papers [21–27]. The final correlation is based on parameters that are
+obtained from the flow field such as pressure coefficient (Cp),
+specified values for the icing conditions such as liquid water content
+(LWC), and the rate of mass impinging the surface. This
+implementation also includes the introduction of two user-defined
+parameters (UDPs): the ideal rime limit and turbulent heat transfer
+augmentation. The ideal rime limit is a dimensional value in meters
+and determines the point at which the growth of ice stops being
+considered roughness and subsequently becomes an ice shape. The
+turbulent heat transfer coefficient (htc) augmentation is a factor that
+scales the heat transfer coefficient augmentation to the roughness
+values provided by the correlation. This value had previously been set
+within GlennICE to a default value of 3 based on the best prediction
+of case 242 from the Ice Prediction Workshop [28].
+</p>
+<p>Since the roughness augmentation model implemented within
+GlennICE requires these two UDPs to be defined, it is desired that
+suggested values be obtained that show the best agreement with
+experimental ice shapes over a variety of pressure gradient profiles,
+temperature differences, and freestream conditions. In order to
+accomplish this, six different airfoils have been chosen that have
+documented ice shapes and freestream conditions. Previous
+experimental testing within the NASA Icing Research Tunnel (IRT)
+provides a matrix of 95 different conditions to be analyzed [29]. The
+airfoils being investigated are the NACA-0012, NACA-0015,
+NACA-23012, NLF-0414, GLC-305, and LTHS geometries [30].
+</p>
+<p>Methodology
+</p>
+<p>This section is intended to describe the workflow of an initial
+GlennICE run to aid the user in becoming familiar with the GlennICE
+software. The complete workflow for the GlennICE software is
+illustrated in Figure 1. The white boxes in the process are external to
+GlennICE and accomplished with third party software. The green,
+blue, red, and orange boxes denote work accomplished by the
+GlennICE software.
+</p>
+<p>This flow chart illustrates a multi-shot simulation strategy where the
+user is responsible for remeshing the new iced geometry and
+rerunning the Computational Fluid Dynamics (CFD) solver. This
+multi-shot capability is optional, and currently only single shot
+computations have been performed.
+</p>
+<p>GlennICE uses a discretized flow field generated from a Computation
+Fluid Dynamics (CFD) solver. To maintain flexibility with a wide
+variety of commercial and in-house CFD solvers, the coupling
+between GlennICE and the CFD software is currently all one-way
+</p>
+<p>1</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Figure 1: Flow chart of the GlennICE process.
+</p>
+<p>coupling. As such GlennICE can be classified as a CFD
+post-processor. Currently this level of coupling has been sufficient for
+external icing problems. Because of the one-way coupling, GlennICE
+can theoretically accept solutions from a wide variety of CFD solvers.
+It does this by supporting a handful of widely used CFD file formats
+that a majority of CFD solvers utilize. However, it should be noted
+that there are many storage variants. GlennICE requires pressure,
+density, u, v, w-velocity components, and the three components of the
+surface wall shear. It also requires the estimated wall distance to the
+surface which was used by the turbulence model for the adaptive
+refinement scheme published previously [31]. Finally, GlennICE
+requires either the heat transfer coefficient or two solutions with the
+wall heat flux and different wall temperatures from which it can
+calculate the heat transfer coefficient. Currently GlennICE will read
+solutions in Fieldview [32] unstructured format or Tecplot [33] ’szplt’
+binary format.
+</p>
+<p>GlennICE integrates particle trajectories using a method developed by
+Dormand and Prince [34]. It is a 4th order Runge-Kutta scheme that is
+designed to minimize error of the 5th order term. This means that it
+computes both the 5th order result and the 4th order result and returns
+the difference as the error. Particles are released from a user-supplied
+bounding box and subsequently refined based on the distance of the
+trajectory to the surface or based on whether it hits. Details of this
+method were presented previously [31]. Due to the large number of
+cases studied, the MVD drop size was used for all runs. A droplet
+distribution was not expected to change the results for the straight
+wing cases studied.
+</p>
+<p>Heat transfer coefficients can be specified using either a single CFD
+solution or two solutions. The single solution methodology assumes
+the CFD solver provided a value of heat transfer coefficient.
+Alternatively, the user can provide GlennICE with two CFD solutions
+differing only by the wall thermal boundary condition. GlennICE uses
+this information to calculate heat transfer coefficient and adiabatic
+wall temperature. It is assumed that the heat transfer coefficient, htc,
+and adiabatic wall temperature, Taw, are independent of wall thermal
+condition. Therefore, at every location, given (T1, q1) and (T2, q2)
+two simultaneous equations are solved for htc and Taw. This
+technique relies on the definition of htc shown in Eq 1.
+</p>
+<p>q = htc ∗ (Twall − Taw) (1)
+</p>
+<p>The user can specify these two files if they consist of identical
+meshes, however, the two CFD solutions differ in their specification
+of the temperature of the surface. These options do not necessarily
+account for the roughness effects, however. Many solvers contain a
+turbulence model that accounts for sand-grain roughness such as those
+proposed in references [14–18]. In lieu of this, the heat transfer
+coefficient computed by this process was augmented using an
+empirical roughness model that was developed by McClain [35] to
+predict roughness variation on a surface. The equations programmed
+into GlennICE are shown in Eqns. 2-4. These equations use two
+user-defined values that can be adjusted. The first user-defined value
+is the ideal rime limit (IRL), tr,max and the second empirical constant
+is the augmentation constant, A. The McClain paper only provides
+Eq. 2 and does not define tr,max or the heat transfer augmentation.
+The best values for these parameters are the subject of ongoing
+research. The values selected for this paper were chosen to provide
+the best fit to the experimental data. Since this equation depends on
+freezing fraction, which depends on the heat transfer coefficient
+chosen, an iterative approach was used to find final values. The initial
+heat transfer coefficient was used to find a freezing fraction at each
+face. Then that freezing fraction was used to find the roughness and
+augmented heat transfer coefficient for each face as shown below. The
+second iteration would then use the updated heat transfer coefficient
+and the process would continue until values no longer change.
+Typically, six iterations have proven sufficient to converge to the final
+heat transfer coefficient. While this parameter introduces a third UDP
+to the model, the parameter is a convergence metric and not an input
+that is used to change heat transfer augmentation.
+</p>
+<p>Rq = tr ∗ 0.7 ∗ (1− Cp) ∗ η ∗ (0.34 + ∆T
+2
+3
+oS) ∗ e
+</p>
+<p>−∆ToS
+2.25 (2)
+</p>
+<p>Where:
+</p>
+<p>tr = min[
+LWC ∗ V∞ ∗ time ∗ β
+</p>
+<p>ρice
+, tr,max] (3)
+</p>
+<p>The augmented heat transfer is:
+</p>
+<p>htcA = htc ∗ (1 + A ∗Rq
+</p>
+<p>0.001
+) (4)
+</p>
+<p>The parameters A and tr,max are the user-defined parameters
+described above by Eq. 3 and Eq. 4. A linear expression relating
+roughness to heat transfer coefficient was chosen for simplicity and is
+not intended to imply that the augmentation is necessarily linear to the
+roughness. Other forms of augmentation could be used in the future.
+The icing rime limit is used to denote the difference between what is
+considered ”roughness” and what is considered the ice shape.
+</p>
+<p>The mass and energy balance at the surface uses the same terms as
+employed in LEWICE. However, LEWICE required a marching
+algorithm starting at a stagnation point to compute the runback ice
+mass. To avoid this, GlennICE uses the surface shear stress from the
+CFD solver. There are four ways that water flow can enter or exit a
+triangular surface face. The details of this methods were reported in a
+previous paper and will not be replicated here [19].
+</p>
+<p>A fully three-dimensional ice growth was produced using a
+prismatoid method with node-based smoothing. The process is based
+on computing the node centered normal vectors and solving a cubic
+equation at each location to find the appropriate distance from the
+surface that maintains the computed ice volume. This surface
+redefinition process was described in a previous paper [28] and will
+not be replicated here.
+</p>
+<p>2</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Experimental Overview
+</p>
+<p>Experimental data for the comparisons were taken from tests in the
+Icing Research Tunnel over the course of several years [30, 36–45].
+All of the geometries were straight wing (extruded airfoils) that went
+from floor to ceiling in the IRT. The wing sections were mounted on a
+turntable so that angle of attack could be varied. Aerodynamic and
+meteorological conditions chosen in the test were based on the
+objectives of the specific test. Ice shapes were documented by cutting
+out a small section with a heated piece of metal, then inserting a
+cardboard template into the slot. The shapes were traced with a pencil
+and later digitized. The conditions chosen for this study were large
+glaze ice shapes as these shapes are typically the most difficult to
+predict. Conditions with large ice shapes was based on the
+Accumulation Parameter as defined by Eq. 5:
+</p>
+<p>Ac =
+LWC ∗ V∞ ∗ time
+</p>
+<p>ρice ∗DLE
+(5)
+</p>
+<p>Ice shapes with an Accumulation Parameter greater than three were
+considered large. Glaze conditions were defined by conditions with a
+stagnation point freezing fraction less than 0.6. Stagnation point
+freezing fraction can be calculated from the leading edge diameter of
+the airfoil, the flow and meteorological conditions using the scaling
+relationships [46]. After applying the two criteria above, 95 conditions
+remained from these tests for this study. The conditions are listed in
+the appendix. The range of conditions are shown in the table below.
+</p>
+<p>Table 1: Range of Conditions for Test Cases
+</p>
+<p>Variable Low High
+Chord (m) 0.305 1.223
+</p>
+<p>Mach 0.11 0.47
+Re 1M 7.8M
+</p>
+<p>MVD (µm) 15 175
+AOA [deg] 0 6
+</p>
+<p>Geometries
+</p>
+<p>A 2-D representation of the previously mentioned airfoils is used and
+a subsequent mesh for each airfoil is generated. The profiles of the six
+different airfoils being investigated are shown in the Figure 2. Point
+distributions for NACA airfoils were produced from the equations that
+define those airfoils. Airfoil coordinates for the other three airfoils
+(NLF-414, GLC305, LTHS) were read into the software Rhino [47]
+where the profiles were smoothed before grids were generated.
+</p>
+<p>Computational Domain
+</p>
+<p>The domain is setup such that the boundary conditions induce a
+subsonic pressure driven flow utilizing the experimental conditions
+from the case matrix. A viscous wall boundary condition is imposed
+on the airfoils, two symmetry planes are setup on the minimum and
+maximum Y-locations, and freestream boundaries are located on the
+minimum and maximum Z-locations. The inflow and outflow
+boundaries along with the freestream boundaries are located +/- 10
+chord lengths away from the origin which coincides with the leading
+edge of the airfoils. A representation of the computational domain can
+be seen in the Figure 3 where the domain boundaries are identified
+with the exclusion of a single symmetry plane. Each mesh that was
+generated is fully unstructured where the boundary layer is resolved
+such that initial wall spacing is obtained from the case which required
+the minimum wall spacing such that a value of y+ = 1 is obtained.
+The mesh is then geometrically grown for a total of 40 times at a
+defined growth rate of r = 1.2 utilizing Pointwise and the T-Rex
+extrusion solver [48]. Each airfoil is then extruded along the spanwise
+direction for a total of 4 times such that a ’three-dimensional’
+geometry can be analyzed. This results in a subsequent mesh of
+approximately 300K cells for each airfoil. An example grid is shown
+in Figure 4. Since GlennICE acts as a post-processing tool, a volume
+</p>
+<p>Figure 2: Airfoil geometries being used for the roughness optimization: LTHS,
+NACA-23012, GLC-305, NACA-0012, NLF-0414, and NACA-0015.
+</p>
+<p>flow solution is required by GlennICE in order to grow a subsequent
+ice shape. The flow solver utilized is discussed in the following
+section.
+</p>
+<p>Figure 3: Computational domain setup for the roughness optimization.
+</p>
+<p>3</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Figure 4: Unstructured grid used for NACA0012 airfoils
+</p>
+<p>Computational Solver
+</p>
+<p>The NASA production CFD code FUN3D was used in order to
+generate the flow solutions and surface quantities necessary for ice
+accretion as described previously [49]. For the roughness cases, the
+HANIM CFL controller was utilized to limit the amount of
+monitoring needing and to decrease the computational cost of a single
+solution [50]. The cases were run compressibly while using the SA
+turbulence model with a roe flux differencing scheme and a consistent
+linearization scheme for the residual construction [51, 52]. No flux
+limiters were used for any of the roughness cases. This process was
+automated such that the matrix of conditions was read in, a single
+FUN3D case was generated that adjusted the unique conditions from
+the matrix for each case, and then submitted the job without the need
+for any user input. The NACA0012 and GLC305 geometries had
+cases with more than one chord length, all of the grids were generated
+using a unit chord (non-dimensional) and the various chord sizes were
+specified in the FUN3D input. Multiple grid resolutions and inviscid
+wall boundaries were also generated for each geometry to ensure a
+grid-independant solution. Since GlennICE requires two different
+wall temperature ratios, a wall temperature ratio of 1 and 1.04 were
+used such that the heat transfer coefficient can be solved for within
+GlennICE. The wall temperature ratio is simply the ratio of wall
+temperature to the freestream. This resulted in approximately 200
+different cases being generated and run automatically with minimal
+input by the user while simultaneously reducing the risk of an error
+being introduced unknowingly within the case generation. The
+convergence criteria for each case was kept constant and required the
+RMS of the meanflow and turbulence residuals to be converged below
+1E − 14 which typically corresponded to around a 10-order reduction
+in the residuals. The Mach contours and surface pressures for a
+sample case (AC1038436) from the selected test matrix are shown in
+Figure 5 and Figure 6.
+</p>
+<p>Ice Shape and UDP Impact
+</p>
+<p>Collection efficiencies and ice shapes were calculated using
+GlennICE for each of the 95 cases listed in the appendix. GlennICE
+calculates collection efficiency by running a set number of iterations
+and reporting the convergence achieved. Show in Figures 7-11 are an
+example of the results for a sample case. Restart runs can then be
+made until the GlennICE process achieved convergence as defined
+within [19]. All 95 cases were run with a single set of UDPs for the
+heat transfer augmentation. Variation of the augmentation parameters
+</p>
+<p>Figure 5: Mach Contours for Case AC1038436
+</p>
+<p>Figure 6: Pressure Distribution for Case AC1038436
+</p>
+<p>could then be performed quickly using the surface restart capability in
+GlennICE. A surface restart run was executed for each of the 95 cases
+for a new combination of UDP’s. A total of 2280 cases were
+performed for the analysis to measure the impact the UDPs had on the
+final ice shape.
+</p>
+<p>To illustrate how the user-defined parameters (UDPs) change the
+resultant ice shape, by adjusting only the ’ideal rime limit’ or the
+’turbulent heat transfer coefficient augmentation’ initial trends and
+variations are shown in Figure 12. First, the ideal rime limit, tr,max,
+is kept constant at 0.007 m, while the augmented turbulent heat
+transfer coefficient is changed from 1, 3, 5, and 7 using the results
+from a NACA 23012 case. The result of these adjustments are seen in
+the Figure 12(a) where the NACA 23012 airfoil is seen in black, and
+the resultant ice shapes formed from the incremental A values are
+plotted concurrently. It is seen that for this case, while holding the
+ideal rime limit constant, a decreasing value for the A augmentation
+results in a more blunt ice shape. This change also results in the horn
+angle on both the upper and lower surfaces to change and increase in
+</p>
+<p>4</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Figure 7: Collection Efficiency for Case AC1038436
+</p>
+<p>Figure 8: Non-Augmented Heat Transfer Coefficient for Case AC1038436
+</p>
+<p>size as the A augmentation increases. Now, keeping the A
+augmentation constant at 5, the ideal rime limit is adjusted from 0.001
+m to 0.015 m at an increment of 0.002 m on the same NACA 23012
+airfoil case and is shown in Figure 12(b). It is seen then, that as the
+ideal rime limit defined increases, the upper and lower horns of the ice
+shape move forward again. It can be concluded from this brief
+analysis that there are significant changes to the resultant ice shape
+that exist depending on the parameters defined by the user. By
+subjecting a similar analysis over a wider range of both ideal rime
+limit tr,max and turbulent A values on an expanded list of conditions,
+an assessment of the agreement between the experimental and
+computational results can be quantified.
+</p>
+<p>Ice Shape Parameters
+</p>
+<p>Once all of the ice shape predictions were generated, measurements of
+horn angle and ice thickness were extracted using the LEWICE utility
+THICK [9]. THICK determines the x, z location where the maximum
+ice thickness occurs and calculates the angle between that location
+</p>
+<p>Figure 9: Roughness Distribution for Case AC1038436
+</p>
+<p>Figure 10: Heat Transfer Augmentation for Case AC1038436
+</p>
+<p>and the airfoil leading edge. Ice thickness is measured from this
+location to to the nearest point on the airfoil using a unit normal
+calculated from the airfoil coordinates. Upper horn angle, lower horn
+angle, upper horn ice thickness and lower horn ice thickness were
+obtained for each GlennICE case produced. Measurements were also
+taken for the ice shape tracings from the experiment as well as the
+LEWICE multi-shot ice shape prediction. The measurements for the
+experimental shapes and LEWICE shapes were provided by a
+previous LEWICE validation effort [53]. That effort used ice shapes
+from over 3000 experiments so that comparisons from simulations
+could be made based on the variability of ice shape tracing taken for
+repeat runs and various spanwise locations. Because of the process
+used by THICK to find horn angle, small perturbations in the
+experimental ice shape could result in larger differences in horn angle.
+This is shown in Figure 13. If ice shape tracings from two different
+experiments showed a peak location on either side of the upper horn
+shown, that could result in THICK reporting a horn angle difference
+of 31◦. Despite this, the measurements recorded by THICK are still
+useful since the results from LEWICE and GlennICE will have the
+same issues and the important parameters are the relative difference
+</p>
+<p>5</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Figure 11: Ice Shape for Case AC1038436
+</p>
+<p>(a) Ideal Rime Limit = 0.007 m
+</p>
+<p>(b) htc = 5
+</p>
+<p>Figure 12: Resultant ice shapes when holding either ideal rime limit constant or
+htc constant and adjusting the alternate.
+</p>
+<p>between GlennICE and experiment versus the experimental
+variability. The results shown in the next section will be based on the
+differences measured by THICK.
+</p>
+<p>Results
+</p>
+<p>Once all of the GlennICE ice shapes were obtained for each
+combination of the UDPs given, measurements of horn angle and horn
+</p>
+<p>Figure 13: Variability in Horn Angle Measurement produced by THICK
+</p>
+<p>thickness were obtained for the experimental ice shapes and for each
+GlennICE case as described in the previous section. The absolute
+difference between the GlennICE result and the experimental ice
+shape for each measurement was calculated for each of the 95
+conditions for a given combination of ideal rime limit and heat
+transfer augmentation. Those 95 measurement results were then
+averaged to obtain an average difference for the user-defined
+parameters chosen. Those results could be plotted as a function of the
+parameter to illustrate which choice of parameter led to the most
+accurate ice shapes over the entire range of conditions. This is shown
+in Figures 14-21.
+</p>
+<p>Figure 14: Average Difference in GlennICE Upper Horn Angle versus Ideal
+Rime Limit
+</p>
+<p>The plots shown in Figures 14-21 show a similar trend between them
+in that there is a large variation for lower values of the individual UDP
+where the resultant values plateau as the parameters increase. The
+results also show that the changes are similar for each parameter,
+showing that the two UDPs are not independent from each other. That
+is, the combination of ideal rime limit = 1 mm and augmentation = 7
+produces the same ice shape as that obtained using an ideal rime limit
+= 7 mm and an augmentation of 1. To illustrate this, the results were
+plotted as a function of the product of icing rime limit times the
+augmentation. This is shown in Figures 22-25. These results show
+that not only do the results fall on the same curve the results continue
+to plateau as shown previously. The results also show that the
+difference between GlennICE and the experiment is on par with or
+even below the run-to-run variation of tunnel repeatability. Physically,
+this plateau effect occurs because the roughness equation defines the
+horn location. Once all of the water runback from the leading edge
+</p>
+<p>6</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Figure 15: Average Difference in GlennICE Upper Horn Angle versus Heat
+Transfer Augmentation
+</p>
+<p>Figure 16: Average Difference in GlennICE Lower Horn Angle versus Ideal
+Rime Limit
+</p>
+<p>Figure 17: Average Difference in GlennICE Lower Horn Angle versus Heat
+Transfer Augmentation
+</p>
+<p>has frozen at this location, continued enhancement does not change
+the predicted results. This also implies that any multiplier beyond the
+minimum necessary to freeze water runback could be used.
+</p>
+<p>Figure 18: Average Difference in GlennICE Upper Horn Height versus Ideal
+Rime Limit
+</p>
+<p>Figure 19: Average Difference in GlennICE Upper Horn Height versus Heat
+Transfer Augmentation
+</p>
+<p>Figure 20: Average Difference in GlennICE Lower Horn Height versus Ideal
+Rime Limit
+</p>
+<p>The previous analysis demonstrated that, on average, the most
+accurate ice shapes were generated when the product of icing rime
+limit and augmentation was between 40 and 60. The default
+</p>
+<p>7</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Figure 21: Average Difference in GlennICE Lower Horn Height versus Heat
+Transfer Augmentation
+</p>
+<p>Figure 22: Average Difference in GlennICE Upper Horn Angle versus Product
+of UDPs
+</p>
+<p>Figure 23: Average Difference in GlennICE Lower Horn Angle versus Product
+of UDPs
+</p>
+<p>parameters were set to an icing rime limit of 9 mm (0.009 m) and an
+augmentation multiplier of 5. The representative ice shapes using
+those parameters are shown in Figures 26-34.
+</p>
+<p>Figure 24: Average Difference in GlennICE Upper Horn Height versus Product
+of UDPs
+</p>
+<p>Figure 25: Average Difference in GlennICE Lower Horn Height versus Product
+of UDPs
+</p>
+<p>Figure 26: Ice Shape for Case AC1038436
+</p>
+<p>Conclusion
+</p>
+<p>GlennICE results were produced for a selection of 95 large glaze ice
+shapes. Ice shapes were compared with experiment through plots of
+</p>
+<p>8</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Figure 27: Ice Shape for Case AF080936
+</p>
+<p>Figure 28: Ice Shape for Case ED071230
+</p>
+<p>Figure 29: Ice Shape for Case HC1071536
+</p>
+<p>the ice shapes but primarily through measurements of horn angle and
+and horn thicknesses. Two user-defined parameters, the ideal rime
+limit and heat transfer augmentation were varied to find the closest fit
+over this wide range of conditions. The results showed that for ice
+shapes on straight wings in supercooled conditions, the values if ideal
+rime limit of 9 mm and augmentation of 5 produced the best
+</p>
+<p>Figure 30: Ice Shape for Case HE1078236
+</p>
+<p>Figure 31: Ice Shape for Case HF1082436
+</p>
+<p>Figure 32: Ice Shape for Case IG1059742
+</p>
+<p>comparison to data. These values were set as the default values for
+other users of GlennICE. It is emphasized that these results are mainly
+applicable to straight wing geometries. A multi-shot analysis would
+also alter these parameters. Future validation efforts, especially on
+non-wing geometries, would be necessary to provide further
+confidence in the selection of the user-defined parameters for
+</p>
+<p>9</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Figure 33: Ice Shape for Case JF1025636
+</p>
+<p>Figure 34: Ice Shape for Case OD1057536
+</p>
+<p>GlennICE.
+</p>
+<p>References
+</p>
+<p>1. E. Achenbach, “The effect of surface roughness on the heat
+transfer from a circular cylinder to the cross flow of air,” Int. J.
+Heat and Mass Transfer, vol. 20, pp. 359–69, 1977.
+</p>
+<p>2. L. Makkonen, “Heat transfer and icing of a rough cylinder,” Cold
+Regions Science and Technology, vol. 10, pp. 105–116, 1985.
+</p>
+<p>3. P. Poinsatte, “Heat transfer measurements from a naca 0012
+airfoil in flight and in the nasa lewis icing research tunnel,”
+NASA-CR-4278, 1990.
+</p>
+<p>4. J. Shin, “Characteristics of surface roughness associated wfih
+leading edge ice accretion,” NASA TM 106459 (AIAA-94-0799),
+1994.
+</p>
+<p>5. D. Anderson, D. Hentschel, and G. Ruff, “Measurement and
+correlation of ice accretion roughness,” NASA
+CR—2003-211823, 1998.
+</p>
+<p>6. H. Schlichting, Boundary Layer Theory. McGraw-Hill, 1979.
+</p>
+<p>7. A. vonDoenhoff and E. Horton, “A low-speed experimental
+investigation of the effect of a sandpaper type of roughness on
+boundary-layer transition,” NASA TN 1349, 1958.
+</p>
+<p>8. P. Owen and W. Thomson, “Heat transfer accross rough
+surfaces,” J. Fluid Mech., vol. 15, pp. 321–334, 1963.
+</p>
+<p>9. NASA, “LEWICE 3.2.3 ice accretion software,” 2008.
+</p>
+<p>10. NASA, “LEWICE3D 3.6.3 ice accretion software,” 2015.
+</p>
+<p>11. G. Blanchard and et. al., “3d ice accretion modeling using an
+integral boundary layer method,” 7th European Conference For
+Aeronautics And Aerospace Sciences (Eucass), 2017.
+</p>
+<p>12. B. Aupoix and P. Spalart, “Extensions of the spalart–allmaras
+turbulence model to account for wall roughness,” International
+Journal of Heat and Fluid Flow, vol. 24, p. 454–462, 2003.
+</p>
+<p>13. F. Menter and R. Langtry, “Transition modelling for
+turbomachinery flows,” Low Reynolds Number Aerodynamics
+and Transition, pp. 31–58, 2012.
+</p>
+<p>14. H. Beaugendre, F. Morency, and W. Habashi, “Fensap-ice:
+Roughness effects on ice shape prediction,” Low Reynolds
+Number Aerodynamics and Transition, pp. 31–58, 2012.
+</p>
+<p>15. T. Knopp, B. Eisfeld, and J. Calvo, “A new extension for k–ω
+turbulence models to account for wall roughness,” International
+Journal of Heat and Fluid Flow, vol. 30, pp. 54–69, 2009.
+</p>
+<p>16. M. Bernardini, S. Pirozzoli, P. Orlandi, and S. Lele,
+“Parameterization of boundary-layer transition induced by
+isolated roughness elements,” AIAA Journal, vol. 52, 2014.
+</p>
+<p>17. G. Tagawa, F. Morency, and H. Beaugendre, “CFD study of
+airfoil lift reduction caused by ice roughness,” AIAA Applied
+Aerodynamics Conference AIAA-2018-3010, 2018.
+</p>
+<p>18. S. Min and K. Yee, “CFD study of airfoil lift reduction caused
+by ice roughness,” AIAA Journal, vol. 59, 2021.
+</p>
+<p>19. W. B. Wright, C. E. Porter, E. T. Galloway, and D. L. Rigby,
+“GlennICE 2.1 capabilities and results,” AIAA AVIATION 2022
+Forum, 2022.
+</p>
+<p>20. S. T. McClain, M. Vargas, J.-C. Tsao, and A. P. Broeren, “A
+model for ice accretion roughness evolution and spatial
+variations,” AIAA AVIATION 2021 FORUM, 2021.
+</p>
+<p>21. S. T. McClain, D. Reed, M. Vargas, R. E. Kreeger, and J. C.
+Tsao, “Ice roughness in short duration SLD icing events,” 6th
+AIAA Atmospheric and Space Environments Conference
+AIAA-2014-2330, 2014.
+</p>
+<p>22. S. T. McClain, M. Vargas, R. E. Kreeger, and J. C. Tsao, “A
+reevaluation of appendix c ice roughness using laser scanning,”
+SAE 2015 International Conference on Icing of Aircraft,
+Engines, and Structures SAE2015-01-2098, 2015.
+</p>
+<p>23. S. T. McClain, M. Vargas, and J. C. Tsao, “Characterization of
+ice roughness variations in scaled glaze icing conditions,” 8th
+AIAA Atmospheric and Space Environments Conference
+AIAA-2016-3592, 2016.
+</p>
+<p>24. S. T. McClain, M. Vargas, and J. C. Tsao, “Ice roughness and
+thickness evolution on a swept naca 0012 airfoil,” 9th AIAA
+Atmospheric and Space Environments Conference
+AIAA-2017-3592, 2017.
+</p>
+<p>25. S. T. McClain, M. Vargas, J. C. Tsao, and A. P. Broeren, “Ice
+roughness and thickness evolution on a business jet airfoil,” 10th
+AIAA Atmospheric and Space Environments Conference
+AIAA-2018-3014, 2017.
+</p>
+<p>26. S. T. McClain, M. Vargas, J. C. Tsao, and A. P. Broeren,
+“Influence of freestream temperature on ice accretion
+roughness,” SAE Int. J. Adv. and Curr. Prac. in Mobility, vol. 2,
+pp. 227–237, 2020.
+</p>
+<p>10</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>27. S. T. McClain, M. Vargas, J. C. Tsao, and A. P. Broeren,
+“Influence of airfoil angle of attack on ice accretion roughness,”
+AIAA Aviation Forum AIAA-2020-2807, 2020.
+</p>
+<p>28. “Proceeds of the 1st aiaa ice prediction workshop,” 2021.
+</p>
+<p>29. W. Wright, “Validation results for LEWICE 3.0,” 43rd AIAA
+Aerospace Sciences Meeting and Exhibit, 2005.
+</p>
+<p>30. H. E. Addy, “Ice accretions and icing effects for modern
+airfoils,” NASA TP-2000-210031, 2000.
+</p>
+<p>31. W. Wright, C. Porter, M. Potapczuk, E. Galloway, and D. Rigby,
+“An automated refinement process for particle trajectory
+methods in GlennICE,” AIAA 2021-2631, 2021.
+</p>
+<p>32. Fieldview, “Fieldview manual,” 2021.
+</p>
+<p>33. Tecplot, “Tecplot manual,” 2021.
+</p>
+<p>34. D. J. Prince, “A family of embedded runge-kutta formulae,”
+Journal of Computational and Applied Mathematics, vol. 6,
+pp. 19–26, 1980.
+</p>
+<p>35. S. T. McClain, M. Vargas, J. C. Tsao, and A. P. Broeren, “A
+model for ice accretion roughness evolution and spatial
+variations,” AIAA Aviation Forum AIAA-2021-22641, 2021.
+</p>
+<p>36. S. AC-9C, “Icing wind tunnel interfacility comparison tests,”
+SAE AIR 5666, 2012.
+</p>
+<p>37. D. Anderson and G. Ruff, “Scaling methods for simulating
+aircraft in-flight icing encounters,” NASA TM 107538, 1997.
+</p>
+<p>38. D. Anderson and T. Bond, “Effect of velocity in icing scaling
+tests,” AIAA-2000-0236, 2003.
+</p>
+<p>39. J. Shin and T. Bond, “Results of an icing test on a naca 0012
+airfoil in the nasa lewis icing research tunnel,” AIAA-1992-647,
+1992.
+</p>
+<p>40. J. Shin and T. Bond, “Repeatability of ice shapes in the nasa
+lewis icing research tunnel,” Journal of Aircraft, vol. 31,
+pp. 1057–1063, 1994.
+</p>
+<p>41. J. V. Zante, “A database of supercooled large droplet ice
+accretions,” NASA CR 2007-215020, 2007.
+</p>
+<p>42. D. Miller, M. Potapczuk, and T. Langhals, “Preliminary
+investigation of ice shape sensitivity to parameter variations,”
+AIAA-2005-73, 2005.
+</p>
+<p>43. D. Miller, M. Potapczuk, and T. Langhals, “Additional
+investigations of ice shape sensitivity to parameter variations,”
+AIAA-2006-469, 2006.
+</p>
+<p>44. S. Chen and T. Langhals, “Experimental validation on the
+modification techniques developed for the new scaling methods,”
+IRT Test Entry, 1999.
+</p>
+<p>45. A. Reehorst, J. Chung, M. Potapczuk, and Y. Choo, “The
+operational significance of an experimental and numerical study
+of icing effects on performance and controllability,”
+AIAA99-0374, 1999.
+</p>
+<p>46. D. Anderson, “Manual of scaling methods,”
+NASA/CR—2004-212875, 2004.
+</p>
+<p>47. Rhino3D, “Rhino manual,” 2021.
+</p>
+<p>48. Pointwise, “Pointwise manual,” 2021.
+</p>
+<p>49. R. T. Biedron, J.-R. Carlson, J. M. Derlaga, P. A. Gnoffo, D. P.
+Hammond, W. T. Jones, B. Kleb, E. M. Lee-Rausch, E. J.
+Nielsen, M. A. Park, C. L. Rumsey, J. L. Thomas, K. B.
+Thompson, A. C. Walden, L. Wang, and W. A. Wood, “Fun3d
+manual: 13.7,” NASA/TM–20205010139, 2020.
+</p>
+<p>50. L. Wang, B. Diskin, E. J. Nielsen, and Y. Liu, “Improvements in
+iterative convergence of fun3d solutions,” AIAA Scitech 2021
+Forum, 2021.
+</p>
+<p>51. P. R. Spalart and S. Allmaras, “A one-equation turbulence model
+for aerodynamic flows,” 30th Aerospace Sciences Meeting and
+Exhibit, p. 439, 1992.
+</p>
+<p>52. P. L. Roe, “Approximate riemann solvers, parameter vectors, and
+difference schemes,” Journal of Computational Physics, vol. 43,
+no. 2, pp. 357–372, 1981.
+</p>
+<p>53. W. Wright and M. Potapczuk, “Comparison of LEWICE and
+GlennICE in the SLD regime,” 46nd AIAA Aerospace Sciences
+Meeting and Exhibit AIAA-2008-0439, 2008.
+</p>
+<p>Acknowledgments
+</p>
+<p>The authors would like to acknowledge the efforts of the other
+members of the GlennICE team, Christopher Porter, Eric Galloway
+and Zaid Sabri. The authors would like to thank NASA’s Advanced
+Supercomputing Division (NAS) for the computing resources needed
+to obtain the results presented. The authors would also like the
+acknowledge the support of the Vehicle Systems Integration sub
+project of the Advanced Air Transport Technology project.
+</p>
+<p>Nomenclature/Abbreviations
+</p>
+<p>A augmentation to heat transfer
+Ac accumulation parameter
+β collection efficiency
+Cp pressure coefficient
+DLE diameter of airfoil leading edge
+htc heat transfer coefficient
+htcA augmented heat transfer coefficient
+LWC liquid water content
+M Mach number
+MVD median volume diameter
+η freezing fraction
+Pstatic static pressure
+Ptotal total pressure
+ρice ice density
+Rq Surface roughness
+Re Reynolds number
+Tmelt melt temperature
+Tstatic static temperature
+Ttotal total temperature
+∆ToS total temperature - melt temperature
+time time
+tr ideal rime limit
+tr,max maximum ideal rime limit
+V velocity
+V∞ freestream velocity
+</p>
+<p>AOA angle of attack
+CFD computational fluid dynamics
+HANIM hierarchical adaptive nonlinear iteration method
+IRT Icing Research Tunnel
+LTHS large transport horizontal stabilizer
+LWC liquid water content
+MVD mean value diameter
+OML outer-mold-line
+RANS Reynolds averaged Navier-Stokes
+SA Spallart-Allmaras
+UDP user defined parameter
+</p>
+<p>11</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>APPENDIX A
+</p>
+<p>Table 2: List of Conditions for Test Cases (Continues onto next page)
+</p>
+<p>Case Airfoil chord Air Speed AOA Static Temp LWC MVD time Mach Re
+m kts deg K g/m3 microns s
+</p>
+<p>AC048336 NACA0012 0.3048 175.0 3 266.12 0.50 20.0 900 0.275 1.79E+06
+AC048436 NACA0012 0.3048 175.0 3 266.12 1.00 20.0 600 0.275 1.79E+06
+AC048636 NACA0012 0.3048 132.0 3 266.08 1.00 20.0 900 0.208 1.35E+06
+AC048736 NACA0012 0.3048 132.0 3 266.08 1.00 40.0 900 0.208 1.35E+06
+</p>
+<p>AC1033636 NACA0012 0.2667 115.1 0 265.83 1.04 36.7 538 0.181 1.03E+06
+AC1036636 NACA0012 0.2667 183.7 0 265.72 0.89 21.8 395 0.289 1.64E+06
+AC1036836 NACA0012 0.2667 167.6 0 266.04 0.75 22.9 514 0.264 1.50E+06
+AC1038136 NACA0012 0.2667 124.6 0 265.77 1.22 35.0 423 0.196 1.12E+06
+AC1038436 NACA0012 0.2667 184.8 0 263.40 0.88 21.8 400 0.292 1.67E+06
+AC1038936 NACA0012 0.2667 184.7 0 263.14 0.75 19.0 468 0.292 1.67E+06
+AC1040136 NACA0012 0.2667 115.6 0 263.30 1.06 36.6 526 0.183 1.05E+06
+AC1049336 NACA0012 0.2667 167.4 0 263.43 0.78 22.9 496 0.265 1.52E+06
+AC1049536 NACA0012 0.2667 124.7 0 263.44 1.20 35.0 428 0.197 1.13E+06
+AD1109236 NACA0012 0.3556 200.0 0 260.93 0.61 175.0 828 0.318 2.44E+06
+AD1109436 NACA0012 0.3556 150.0 0 260.93 0.99 175.0 678 0.238 1.83E+06
+AD1109836 NACA0012 0.3556 100.0 0 260.93 1.68 175.0 600 0.159 1.22E+06
+AE1005836 NACA0012 0.5334 200.0 4 262.33 1.60 30.0 360 0.317 3.64E+06
+AE1005936 NACA0012 0.5334 200.0 4 262.33 1.80 30.0 360 0.317 3.64E+06
+AE1111236 NACA0012 0.5334 200.0 0 265.26 0.92 20.0 714 0.315 3.59E+06
+AE1111436 NACA0012 0.5334 201.0 0 259.48 0.92 20.0 714 0.320 3.71E+06
+AE1169736 NACA0012 0.5334 200.0 0 261.21 0.70 20.0 900 0.318 3.66E+06
+AE1169836 NACA0012 0.5334 200.0 0 261.21 1.00 20.0 900 0.318 3.66E+06
+AE1170136 NACA0012 0.5334 70.0 0 265.84 1.70 20.0 900 0.110 1.25E+06
+AE1171136 NACA0012 0.5334 200.0 0 261.21 0.80 20.0 618 0.318 3.66E+06
+AE1171436 NACA0012 0.5334 70.0 0 265.84 1.60 20.0 900 0.110 1.25E+06
+AE1171936 NACA0012 0.5334 200.0 0 261.21 0.80 20.0 900 0.318 3.66E+06
+AE1172336 NACA0012 0.5334 130.0 0 264.26 1.06 20.0 900 0.205 2.34E+06
+AF080936 NACA0012 0.9144 200.0 2 262.88 0.83 29.0 1200 0.317 6.22E+06
+AF081536 NACA0012 0.9144 200.0 3 262.88 0.99 38.9 900 0.317 6.22E+06
+AF081636 NACA0012 0.9144 200.0 3 262.88 0.96 36.7 900 0.317 6.22E+06
+AF084236 NACA0012 0.9144 200.0 3 262.88 0.98 25.9 900 0.317 6.22E+06
+AF1160636 NACA0012 0.9144 99.6 0 263.83 1.14 20.0 1687 0.157 3.09E+06
+AF1161336 NACA0012 0.9144 149.5 0 265.11 1.15 20.0 1018 0.236 4.60E+06
+AF1181736 NACA0012 0.9144 100.0 0 264.67 1.10 15.0 1912 0.158 3.08E+06
+AF1181836 NACA0012 0.9144 149.9 0 261.84 1.00 15.0 1223 0.238 4.69E+06
+AF1193936 NACA0012 0.9144 100.0 0 268.59 0.50 15.0 4185 0.157 3.03E+06
+AF1194336 NACA0012 0.9144 100.0 0 265.28 1.00 15.0 2089 0.158 3.08E+06
+AF1195136 NACA0012 0.9144 100.0 0 268.25 1.00 15.0 2092 0.157 3.03E+06
+ED071136 NACA23012 0.4572 250.0 2 258.25 0.67 15.4 600 0.399 3.98E+06
+ED071230 NACA23012 0.4572 250.0 2 260.47 0.67 15.4 600 0.398 3.94E+06
+</p>
+<p>HC1070636 GLC305 0.3048 270.9 0 261.71 1.13 19.0 138 0.430 2.83E+06
+HC1071036 GLC305 0.3048 289.6 0 260.77 1.15 20.0 126 0.460 3.04E+06
+HC1071536 GLC305 0.3048 170.2 0 263.35 1.62 23.3 138 0.269 1.76E+06
+HC1071636 GLC305 0.3048 169.9 0 263.29 1.80 23.0 138 0.269 1.76E+06
+HC1072436 GLC305 0.3048 271.0 0 255.53 1.12 19.0 138 0.435 2.92E+06
+HC1072836 GLC305 0.3048 292.3 0 254.34 1.12 19.0 126 0.470 3.17E+06
+HC1073236 GLC305 0.3048 169.9 0 256.29 1.80 23.0 138 0.272 1.82E+06
+HD1074836 GLC305 0.4572 220.2 0 261.37 1.50 26.0 185 0.350 3.45E+06
+HD1075236 GLC305 0.4572 205.6 0 261.97 1.49 27.0 200 0.326 3.21E+06
+HD1075636 GLC305 0.4572 171.9 0 263.20 1.47 29.0 241 0.272 2.67E+06
+HD1076036 GLC305 0.4572 216.8 0 254.46 1.42 27.0 198 0.349 3.52E+06
+HD1076436 GLC305 0.4572 207.4 0 254.82 1.42 27.0 206 0.333 3.36E+06
+HD1076736 GLC305 0.4572 171.9 0 256.20 1.47 29.0 242 0.276 2.77E+06
+HE1077536 GLC305 0.6096 155.1 0 265.71 0.81 30.7 606 0.244 3.17E+06
+HE1078236 GLC305 0.6096 174.1 0 263.21 1.20 36.2 366 0.275 3.61E+06
+HE1078536 GLC305 0.6096 173.7 0 263.18 1.30 35.0 360 0.275 3.60E+06
+HE1079136 GLC305 0.6096 173.7 0 256.18 1.30 35.0 360 0.278 3.73E+06
+HE1079736 GLC305 0.6096 159.0 0 259.93 0.93 36.0 550 0.253 3.35E+06
+HE1079936 GLC305 0.6096 191.2 0 251.83 1.87 34.0 227 0.309 4.19E+06
+HE1080036 GLC305 0.6096 186.9 0 258.72 0.92 34.0 471 0.298 3.96E+06
+HE1080136 GLC305 0.6096 159.1 0 252.82 1.96 36.0 261 0.257 3.47E+06
+HE1080236 GLC305 0.6096 171.2 0 259.40 0.93 35.0 513 0.273 3.61E+06
+HE1080336 GLC305 0.6096 176.5 0 252.27 1.91 35.0 242 0.285 3.86E+06
+HE1080536 GLC305 0.6096 173.7 0 256.18 1.27 43.0 360 0.278 3.73E+06
+HE1080636 GLC305 0.6096 173.9 0 256.29 1.20 36.2 366 0.279 3.73E+06
+HE1080836 GLC305 0.6096 173.3 0 256.38 1.30 20.1 366 0.278 3.71E+06
+</p>
+<p>12</p>
+<p></p>
+</div>
+<div class="page"><p></p>
+<p>Case Airfoil chord Air Speed AOA Static Temp LWC MVD time Mach Re
+m kts deg K g/m3 microns s
+</p>
+<p>HF1009536 GLC305 0.9144 175.0 6 268.32 0.54 20.0 1350 0.274 5.30E+06
+HF1009636 GLC305 0.9144 175.0 6 268.32 0.54 20.0 2700 0.274 5.30E+06
+HF1009936 GLC305 0.9144 175.0 6 267.40 0.41 20.0 1998 0.275 5.33E+06
+HF1010436 GLC305 0.9144 175.0 6 263.24 0.60 15.0 1350 0.277 5.44E+06
+HF1010536 GLC305 0.9144 175.0 6 263.12 0.60 15.0 2700 0.277 5.44E+06
+HF1012936 GLC305 0.9144 175.0 4 268.32 0.54 20.0 1350 0.274 5.30E+06
+HF1013136 GLC305 0.9144 212.0 4 263.31 0.43 20.0 1350 0.335 6.58E+06
+HF1013236 GLC305 0.9144 175.0 4 268.54 0.54 20.0 1350 0.274 5.30E+06
+HF1013636 GLC305 0.9144 175.0 6 264.77 1.60 20.0 504 0.276 5.40E+06
+HF1013936 GLC305 0.9144 175.0 6 258.17 1.60 20.0 504 0.280 5.58E+06
+HF1014236 GLC305 0.9144 175.0 4 258.17 0.83 160.0 1200 0.280 5.58E+06
+HF1014336 GLC305 0.9144 175.0 6 268.32 0.83 160.0 1200 0.274 5.30E+06
+HF1026936 GLC305 0.9144 175.0 6 268.34 0.54 20.0 1350 0.274 5.30E+06
+HF1081736 GLC305 0.9144 128.2 0 264.43 1.15 50.0 830 0.202 3.96E+06
+HF1082036 GLC305 0.9144 137.2 0 264.39 1.10 50.0 812 0.217 4.24E+06
+HF1082436 GLC305 0.9144 176.3 0 263.06 1.11 45.0 625 0.279 5.48E+06
+HF1082836 GLC305 0.9144 129.0 0 257.68 1.17 50.0 807 0.206 4.12E+06
+HF1083136 GLC305 0.9144 135.7 0 257.45 1.16 50.0 776 0.217 4.34E+06
+HF1083436 GLC305 0.9144 176.3 0 256.06 1.10 45.0 627 0.283 5.68E+06
+IG1059742 NLF0414 1.2294 135.5 1 266.29 0.70 20.0 2700 0.213 5.57E+06
+JF1024136 LTHS 0.9144 250.0 0 264.92 0.41 20.0 1350 0.394 7.70E+06
+JF1025436 LTHS 0.9144 253.0 -1 263.33 0.56 21.0 1110 0.400 7.86E+06
+JF1025636 LTHS 0.9144 253.0 0 263.33 0.56 21.0 2214 0.400 7.86E+06
+JF1025736 LTHS 0.9144 253.0 0 263.33 0.56 21.0 1476 0.400 7.86E+06
+JF1025830 LTHS 0.9144 253.0 0 263.33 0.56 21.0 1110 0.400 7.86E+06
+OD1057336 NACA0015 0.3531 185.1 0 268.14 0.75 19.0 600 0.290 2.17E+06
+OD1057436 NACA0015 0.3531 166.0 0 268.35 0.68 23.4 732 0.260 1.94E+06
+OD1057536 NACA0015 0.3531 185.1 0 263.14 0.75 19.0 600 0.293 2.22E+06
+OD1057836 NACA0015 0.3531 166.0 0 263.35 0.77 23.4 648 0.263 1.99E+06
+</p>
+<p>13</p>
+<p></p>
+</div>
+</body></html>

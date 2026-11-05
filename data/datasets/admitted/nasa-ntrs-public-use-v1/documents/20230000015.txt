@@ -1,0 +1,443 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Benjamin Scarino1, David R. Doelling2, William L. Smith Jr.2, 
+Michele Nordeen1, and Pamela Mlynczak1
+
+1. Science Systems and Application, Inc., Hampton, VA, USA
+
+2. NASA Langley Research Center, Hampton, VA, USA
+
+
+
+CERES Ed4 GOES-17 Cloud Phase: 29 Aug 2021, 14:30 UTC 
+Ice
+Liquid
+Clear
+
+Suspected 
+Cloud
+
+CERES provides satellite-
+based global climate data 
+record of Earth’s radiation 
+
+budget and clouds
+
+Measurement anomalies 
+impact cloud retrieval
+
+A convolution neural 
+network (CNN) can identify 
+and clean bad scanlines as 
+
+effectively as a human
+
+CERES = Clouds and the Earth's Radiant Energy System
+
+Incorrect Cloud Phase = Incorrect Flux
+
+Unmitigated bad 
+scanlines will impact 
+climate data records
+
+GOES-17 ABI cooling system 
+anomaly = many bad scanlines 
+at night (~10:30–16:30 UTC)
+
+Cleaning imagery 
+of bad scanlines 
+is laborious but 
+
+necessary
+
+
+
+Ice
+Liquid
+Clear
+
+Uncleaned Human
+
+CNN
+
+Bad scanlines evident by 
+unnatural cloud phase 
+
+stripes above
+
+Human and CNN cleaning 
+are comparable
+
+CNN cleaning is fast, 
+easy, and more 
+comprehensive  
+
+Suspected 
+Cloud
+
+Phase:
+
+
+
+ŷ=0
+
+ŷ=0
+ŷ=0
+ŷ=1
+ŷ=0
+ŷ=0
+
+ŷ=1
+ŷ=0
+ŷ=?
+
+Most Anomalous
+
+Least Anomalous
+
+Conceptual 
+satellite imagery ➞
+
+White = normal appearing
+Green = some degree of visual anomaly 
+
+Anomalies more apparent in 
+certain products/channels
+
+Scan each line and decide 
+whether it needs cleaning How does the CNN 
+
+learn to make 
+these judgements?
+
+Decision based on center row 
+of the 3x3 scan filter
+
+CNN identifies and 
+removes (cleans) the 
+anomalous scanlines
+
+
+
+Ice
+Liquid
+Clear
+Suspected Cloud
+
+CERES Ed4 GOES-17 Cloud Phase: 
+1 August 2020, 12:30 UTC 
+
+
+
+Ice
+Liquid
+Clear
+Suspected Cloud
+
+CERES Ed4 GOES-17 Cloud Phase: 
+1 August 2020, 12:30 UTC 
+
+
+
+Scrutinize hundreds 
+of CERES product files 
+
+Manually select 
+scanlines for cleaning 
+
+given best judgment of 
+channel/product data
+
+1) Cloud Phase
+2) 3.9−11-µm BT Difference 
+
+(greatest contrast)
+
+1 Aug – 7 Sep 2020
+10:30 – 16:30 UTC hourly
+
+Time consuming, Unreliable, 
+Inconsistent, ★Eye straining★
+
+This approach now 
+replaced by the CNN
+
+
+
+y=1
+
+y=0
+
+y=0
+
+Extract cleaned subsets 
+with dimension 3xN
+
+Randomly selected 
+equal amount of 
+uncleaned subset
+
+Also save 
+corresponding 
+
+predictors
+
+Select such that center line is one that 
+has been manually cleaned
+
+Save as “true” class
+
+Save as “null” class
+
+I.E., center line not cleaned
+
+Augment “true” class, i.e., 4x 
+the samples by flipping 3xN 
+vertically and horizontally
+
+Training set isn’t 
+perfect because a 
+
+human isn’t perfect
+
+Metric for success = 
+is the CNN at least as 
+
+consistent as a human?
+
+Validation Set Metrics
+
+Recall 82%
+
+False Alarm Ratio 38%
+
+False Alarm Rate 1%
+
+
+
+
+
+hPa hPa hPa
+
+Uncleaned CNN Cleaned Human Cleaned
+
+
+
+CNN Cleaned − Uncleaned                   CNN Cleaned − Human Cleaned 
+
+hPa hPa K K
+
+CNN Cleaned and Human Cleaned 
+are in better agreement
+
+CNN Cleaned − Uncleaned                   CNN Cleaned − Human Cleaned 
+
+
+
+Wm-2 Wm-2Wm-2
+
+Uncleaned CNN Cleaned Human Cleaned
+
+
+
+CNN Cleaned − Uncleaned CNN Cleaned − Human Cleaned
+
+Wm-2 Wm-2 Wm-2 Wm-2
+
+Differences less striking than those with cloud 
+products, but CERES is a flux product and these 
+
+biases and degrees of daily variance matter
+
+D D
+
+
+
+Cloud Effective 
+Pressure (hPa) 
+
+Mean Daily Variance
+
+CNN−Uncleaned CNN−Human CNN−Uncleaned CNN−Human
+
+UTC Bias Std Bias Std RMSD Std RMSD Std
+
+10:30 0.37 3.05 0.17 2.33 3.7 10.7 3.3 8.2
+
+11:30 1.06 4.59 0.48 2.62 6.7 16.8 4.9 10.7
+
+12:30 3.77 9.04 0.90 3.18 14.3 26.1 6.3 12.5
+
+13:30 5.33 10.59 0.93 3.79 17.8 28.4 8.7 15.2
+
+14:30 2.27 6.33 0.65 2.45 9.2 19.5 4.8 10.0
+
+15:30 0.52 2.76 0.30 1.64 3.1 10.7 2.5 7.1
+
+16:30 0.27 2.37 0.15 1.39 1.9 8.9 1.6 6.1
+
+TOA LW Up Flux 
+(Wm-2) 
+
+Mean Daily Variance
+
+CNN−Uncleaned CNN−Human CNN−Uncleaned CNN−Human
+
+UTC Bias Std Bias Std RMSD Std RMSD Std
+
+10:30 0.01 0.16 0.01 0.16 0.36 0.49 0.37 0.50
+
+11:30 0.01 0.18 0.01 0.18 0.42 0.54 0.41 0.54
+
+12:30 0.15 0.41 0.02 0.15 0.70 0.81 0.44 0.46
+
+13:30 0.23 0.48 0.02 0.15 0.90 0.94 0.50 0.50
+
+14:30 0.08 0.27 0.01 0.10 0.49 0.66 0.32 0.39
+
+15:30 0.01 0.06 0.01 0.06 0.18 0.29 0.17 0.29
+
+16:30 0.00 0.05 0.00 0.05 0.11 0.23 0.11 0.23
+
+61% decrease in cloud 
+pressure bias
+
+CNN and Human Cleaning 
+Efforts are more consistent
+
+33% decrease in cloud 
+pressure variance
+
+38% decrease in LW 
+flux bias
+
+17% decrease in LW 
+flux variance
+
+
+
+Skill of CNN cleaning 
+on validation set is 
+
+good despite training 
+curation shortcomings
+
+CNN and human 
+cleaned cloud products 
+look natural – appear 
+
+nearly identical
+
+CNN and Human cleaned 
+Flux products results 
+
+align closer than either 
+with Uncleaned
+
+At least as effective as 
+human cleaning but 
+
+with significantly less 
+effort
+
+CNN effective at 
+identifying and 
+
+removing GOES-17 
+scanline anomalies
+
+In operation for GOES-17 
+as of the Fall 2022 
+
+Eclipse Period
+
+
+
+
+
+Randomly (by whole scans) 
+separate predictor ➞ label 
+pairings into training (70%) 
+
+and testing (30%) sets
+
+Feed predictors and 
+labels into CNN and 
+
+make prediction
+
+Evaluate prediction skill
+
+Validation
+
+Recall 0.82
+
+False Alarm Ratio 0.28
+
+False Alarm Rate 0.01
+
+Critical Success Index 0.55
+
+Heidke Skill Score 0.70
+
+Some Variance between Training and 
+Testing – but overall excellent skill
+
+Skill tied to consistency and 
+thoroughness of curated training set 
+
+
+
+§ Apply CNN parameters to every 3×N subset of X input 
+§ 1 Feb – 28 Feb 2021
+§ 10:30 – 16:30 UTC hourly processing timestamps
+
+§ Determine ŷ for each 3×N subset image
+
+§ Produce three version of the CERES SYN1deg Ed4 product February 2021
+§ Uncleaned
+§ Human Clean
+§ CNN Cleaned
+
+§ Compare 1° gridded hourly retrievals, averaged for the month
+§ Cloud top pressure 
+§ TOA LW Upward flux
+
+
+
+
+
+K K K
+
+Uncleaned CNN Cleaned Human Cleaned
+
+

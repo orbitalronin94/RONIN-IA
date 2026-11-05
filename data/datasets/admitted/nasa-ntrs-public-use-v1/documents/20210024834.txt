@@ -1,0 +1,675 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Microsoft PowerPoint - Scitech2022_Balaji_slides_mod_v1
+
+
+Balaji Venkatachari, Pedro Paredes,   
+National Institute of Aerospace, Hampton, VA 
+
+Meelan Choudhari, Fei Li, Chau-Lyan Chang
+
+Computational AeroSciences Branch,
+NASA Langley Research Center, Hampton, VA 
+
+Transition Analysis for the CRM-NLF Wind Tunnel Configuration using 
+
+Transport Equation Models and Linear Stability Correlations 
+
+AIAA SciTech Meeting, January 5, 2022
+
+Copyright 2021 United States Government as represented by the Administrator of the National Aeronautics and Space Administration. No copyright is claimed in the United States under Title 
+17, U.S. Code. All Other Rights Reserved. Published by the American Institute of Aeronautics and Astronautics, Inc. with permission.
+
+
+
+AIAA SciTech 2022
+
+Outline
+
+➢ Motivation & Objectives
+
+➢ CFD and Stability Analysis Solvers
+
+➢ Compressibility Corrections to LM and AFT models
+
+➢ Results for CRM-NLF (CFD + Stability Analysis)
+
+➢ Summary
+
+‣ 2
+
+
+
+AIAA SciTech 2022 ‣ 3
+
+Motivation
+
+➢ Shortcomings of RANS-based transition models for the Common Research Model with Natural Laminar Flow (CRM-
+NLF) configuration (AIAA Paper 2021-1430)
+
+• significant underprediction of the laminar extent
+
+• Increased stability due to compressibility not accounted for in existing mainstream models (empirical transition
+correlations within these models were formulated for low-speed flows)
+
+Big Picture:
+
+Blend the “physics-based” methodology for transition modeling with the RANS-based approaches to create a robust, reliable, user-
+friendly, and cost-efficient approach for integrated modeling of laminar-turbulent transition (CFD Vision 2030 goal)
+
+M= 1.2 Flat Plate
+
+CRM-NLF
+
+(LST)
+
+RANS-based Models
+
+RANS-based Models
+
+Experiment
+
+
+
+AIAA SciTech 2022 ‣ 4
+
+Objectives
+
+➢ Modify selected correlations within these transport-equation-based transition models to account for compressibility
+effects
+
+• Models should return to their original behavior at low subsonic speeds and remain valid for original cases used in
+their calibration & validation
+
+• SST-based Langtry-Menter model and SA-based Amplification factor transport equation model as implemented in
+NASA’s OVERFLOW CFD solver
+
+• Utilize previous works on linear stability analysis to achieve this
+
+➢ Evaluate resulting improvements in transition modeling for transonic CRM-NLF configuration
+
+• Use reference data based on experiment + transition predictions based on stability analysis)
+
+➢ Extend previously calibrated, stability-based dual N-factor criterion* to predict the transition front for all angles of
+attack from the experiment
+
+• Also: PSE marching carried along streamlines as opposed to grid lines in previous work for two AOAs (Paredes et
+al. AIAA Paper 2021-1431)
+
+
+
+AIAA SciTech 2022
+
+CFD  Solver & Stability Analysis Solver
+
+OVERFLOW 2.3b1
+
+➢ Implicit structured overset grid Navier-Stokes solver
+
+RANS-based transition models (studied in this work)
+1. Langtry-Menter (LM) model : SST-2003 + LM2015 (LM2009 + Crossflow)
+
+LM2009: Can model natural, bypass and separation-induced transition scenarios
+2. Amplification Factor Transport (AFT) model: SA + AFT 2017b version
+
+Accounts for TS instabilities alone and no crossflow
+
+LASTRAC 3.d Solver2
+
+➢ General purpose physics-based transition prediction tool: Linear stability theory (LST), Parabolized stability equations
+(PSE)
+
+➢ Mean flow computed using SA-turbulence model with imposed transition front
+
+➢ PSE along streamlines in nonorthogonal coordinate system
+
+o Includes surface curvature and nonparallel mean flow effects
+
+‣ 5
+
+1. Nichols, R. H, and Buning, P. G., “User’s Manual for OVERFLOW 2.3, Version 2.3,” NASA Langley Research Center, Hampton, VA, Oct 2019.
+2. Chang, C.-L., “LASTRAC 3d: Transition Prediction in 3D Boundary Layers,” AIAA Paper  2004-2452, 2004.
+
+
+
+AIAA SciTech 2022
+
+Compressibility-related modifications (LM2009/2015)
+
+ Important modifications from literature: Work by Pascal et al. (2020) and Stroer et al. (2021)
+o Based on AHD; Involved need for non-local terms that were overcome through additional 
+
+transport equations
+
+➢ New modification – a strictly local formulation and reverts to original model at low speeds
+
+o Applies for TS alone; No compressibility correction for crossflow terms (expected to be at least up 
+to the transonic regime)
+
+➢ Corrections to relationship between Vorticity Reynolds number and 𝑅𝑒 (Compressibility BL profiles, 
+Qiao et al.[2018])
+
+o Peak location of Rev moves to edge of boundary layer with increase in Mach number
+
+o 𝑹𝒆𝜽 =
+max 𝑹𝒆𝒗
+
+𝟐.𝟏𝟗𝟑∗𝑪 𝑴𝒆
+; 𝐶 𝑀 = function of edge Mach number Me
+
+➢Modification of correlation for 𝑅𝑒
+
+o Re = 𝑓1 𝐹𝑆𝑇𝐼  . 𝑓2(λ )   (separate functions of FSTI & pressure gradient)
+
+o (Narasimha [1985)] ∶  𝐑𝒆𝜽𝒕 𝐍𝐞𝐰/𝐜𝐨𝐦𝐩 = 𝐑𝒆𝜽𝒕 𝐎𝐫𝐢𝐠𝐢𝐧𝐚𝐥/𝐢𝐧𝐜𝐨𝐦𝐩 ⋅ 𝒇𝟑 𝑴𝒆       
+
+o 𝑓3 𝑀 determined using data from stability computations by Masad and Malik [1993] and Masad
+and Abid [1995] (investigated combined effects of pressure, suction/blowing and wall cooling)
+
+o See paper for limitations of approach & additional details
+
+‣ 6
+
+OriginalModified
+
+Re  for ZPG Flat plate
+
+
+
+AIAA SciTech 2022
+
+Compressibility-related modifications  (AFT)
+
+➢ The AFT model developed by Coder and Maughmer is based on work by Drela and Giles [1987]
+
+➢ Sturdza [2003] modified some of the correlations of Drela and Giles to account for compressibility effects so it is applicable to low 
+
+supersonic speed flows
+➢ We adopt the modifications proposed by Sturdza in this work to account for compressibility effects in AFT model
+
+Modifications:
+
+➢ 𝑅𝑒  at critical point (i.e., onset of instability) :(𝑅𝑒 )new =  (𝑅𝑒 )original . 𝑓1
+
+➢ Slope of N-factor envelope: = . 𝑓2
+
+➢ = 𝑓(𝑀𝑒)
+
+Estimation of edge Mach Number Me
+
+ Key parameter necessary for both models
+ Nontrivial to obtain in an unstructured CFD solver and will make formulation non-local
+ Can be approximated via Bernoulli’s equation + Isentropic relations (provided no shocks)
+ Deviations from isentropic relation expected to be small for M <1.2  (Lee [2016] and Stroer [2020])
+
+‣ 7
+
+
+
+AIAA SciTech 2022
+
+CRM-NLF - Flow Conditions, Computation Details
+
+‣ 8
+
+➢The CRM-NLF* wing has been designed such that the overall amplification of both TS and CF 
+instabilities are reduced
+
+➢ Fixed AoA runs instead of fixed CL as per AIAA Transition Modeling and Prediction Workshop
+
+➢ Steady-State computations using 3rd-order Roe Upwind Scheme and the unfactored successive
+symmetric overrelaxation (SSOR) implicit solution algorithm
+
+➢ In-house generated fine grid (120 million near-body grid points, y+ ~0.5) – See paper for details
+
+➢ Surface roughness = 0.9 μinch (measured in the CRM-NLF experiment; for use with the LM2015
+model)
+
+* Lynde, M. N., Campbell, R. L., and Viken, S. A., “Additional Findings from the Common Research Model Natural Laminar Flow Wind Tunnel 
+Test,” AIAA Paper 2019-3292, 2019. 
+
+Condition AOA (deg.) Mach No. 𝐓 (K) Re (per m) ReMAC
+
+1 1.448 ± 0.001 0.856 ± 0.001 241.7 40.73M 14.84M
+
+2 1.980 ± 0.001 0.856 ± 0.001 242.0 40.66M 14.81M
+
+3 2.461 ± 0.001 0.856 ± 0.001 242.0 40.56M 14.78M
+
+4 2.937 ± 0.001 0.856 ± 0.001 243.0 40.41M 14.72M
+
+
+
+AIAA SciTech 2022
+
+Computation Details (contd.)
+
+‣ 9
+
+➢ Freestream Turbulence Intensity (FSTI) = 0.24% (NTF tunnel characterization)
+
+o Correct FSTI near the wing could only be achieved for SST-based models via use of turbulence sustaining terms
+
+o Turbulence sustaining terms interfered with the behavior of the model within the boundary layer (when FSTI=0.24%)
+
+▪ Incorrect pressure distribution
+
+o Reduction of FSTI to 0.12 % removed the issue for the SST-based LM model
+
+o No such sensitivity issues for SA-based AFT
+
+o Both models were run with FSTI = 0.12 % for consistent comparison
+
+SST-2003-LM2015 (Influence of FSTI on Cp with turbulence sustaining terms)
+
+
+
+AIAA SciTech 2022
+
+Sectional Cps for AOA = 1.98 deg.
+
+‣ 10
+
+LM
+20
+
+15
+A
+
+FT
+20
+
+17
+b
+
+Reasonable match at most spanwise locations
+Shift in shock-location as 
+one moves near wing-tip
+
+
+
+AIAA SciTech 2022
+
+Transition Fronts at AOA = 1.98 deg.
+
+‣ 11
+
+➢ Compressibility corrections -> Substantially improved
+match with experiment in relation to baseline LM and AFT
+models
+
+➢ Exception: Small but visible differences in transition front
+over outboard section of the wing, where the front
+switches from one shock to another)
+
+o Accompanying shifts in pressure distribution
+highlight strong viscous-inviscid interaction in this
+case
+
+Envelope of N-
+factor contours Crossflow TS
+
+Transition 
+Front from Expt.
+
+TSP Image 
+from Expt.
+
+
+
+AIAA SciTech 2022
+
+Transition Fronts at AOA = 2.46 deg.
+
+‣ 12
+
+➢ TS and shock-induced transition mechanisms at
+play
+
+➢ Baseline models did well in inboard regions
+(small region of APG immediately downstream of
+suction peak)
+
+o Compressibility correction predicts larger
+laminar region here
+
+
+
+AIAA SciTech 2022
+
+Linear PSE – Dual NTS-NCF Criterion 
+
+‣ 13
+
+➢ Transit onset occurs when a function of NTS and NCF reaches a threshold 
+
+,
++
+
+,
+= 1;  NTS,c = 6; NCF,c = 6; aTS = 3; aCF = 3  
+
+▪ Critical N based on disturbance, roughness levels  (See Paredes et al. AIAA Paper 2021-1431 )
+
+𝜶 = 1.45° 𝜶 = 1.98° 𝜶 = 2.46°
+𝜶 = 2.94°
+
+Does not reach critical N-values in these regions (end of 
+specified laminar region or shock-limited)
+
+Transition front obtained with dual N-criterion superimposed with data from experiments and transition models
+
+
+
+AIAA SciTech 2022
+
+Summary
+
+ Proposed simple modifications to baseline SST-2003-LM2009/2015 and SA-AFT2017b to account for stabilizing effect of compressibility 
+
+• The models returns to original form at low speeds 
+
+• Applicability limited to Me <1.2 (validity of isentropic approximation to determine edge Mach number)
+
+• Substantial improvements in accuracy of predicting transition front for the transonic CRM-NLF configuration
+
+ Stability analysis carried out with PSE marching along streamlines
+
+• Comprehensive assessment of transition in CRM-NLF based on nonparallel disturbance amplification
+
+• Stability-based dual N-factor criterion predicted transition fronts that matched well with those inferred from the CRM-NLF experiment 
+
+for all the conditions studied
+
+• Provided additional evaluation for assessing the modifications to the RANS-based transition models
+
+‣ 14
+
+Future Work
+➢ Careful evaluation of the compressibility correction and dual N-factor criterion across wide set of problems
+
+➢ More reliable estimate of edge Mach number (extends applicability of model to Me < 2)
+
+➢ Improve some of the simplifications assumed while formulating compressibility corrections
+
+
+
+AIAA SciTech 2022
+
+Acknowledgments
+
+➢ Research Funded by: NASA TTT Project under TACP
+
+➢ NIA cooperative agreement 2A00 (Activity 201133)
+
+➢ Joe Derlaga and Pieter Buning for help with OVERFLOW
+
+➢ Richard Campbell, Michelle Lynde and Sally Viken of CRM-NLF Team
+
+➢ NASA Advanced Supercomputing and LaRC K-Midrange Cluster resources 
+
+‣ 15
+
+
+
+16
+
+Backup Slides
+
+
+
+AIAA SciTech 2022
+
+Compressibility-related modifications
+
+Modifications – a strictly local formulation and reverts to original model at low speeds (See paper for more details)
+
+LM2009/LM2015 Model
+➢ Corrections to relationship between Vorticity Reynolds number and 𝑅𝑒 (Compressibility BL profiles, Qiao et al.[2018])
+
+o 𝑹𝒆𝜽 =
+max 𝑹𝒆𝒗
+
+𝟐.𝟏𝟗𝟑∗𝑪 𝑴𝒆
+; 𝐶 𝑀 = function of edge Mach number Me
+
+➢  Re = 𝑓1 𝐹𝑆𝑇𝐼  . 𝑓2(λ )   (separate functions of FSTI & pressure gradient)
+
+o (Narasimha [1985)] ∶  𝐑𝒆𝜽𝒕 𝐍𝐞𝐰/𝐜𝐨𝐦𝐩 = 𝐑𝒆𝜽𝒕 𝐎𝐫𝐢𝐠𝐢𝐧𝐚𝐥/𝐢𝐧𝐜𝐨𝐦𝐩 ⋅ 𝒇𝟑 𝑴𝒆       
+
+o 𝑓3 𝑀 determined using data from stability computations by Masad and Malik [1993] and Masad and Abid [1995]
+
+AFT 2017b Model
+
+➢ Based on the modifications to correlations of Drela and Giles [1987] by Sturdza [2003] (applicable to low supersonic speeds)
+
+➢𝑅𝑒  at critical point (i.e., onset of instability) :(𝑅𝑒 )new =  (𝑅𝑒 )original . 𝑓1
+
+➢ Slope of N-factor envelope: = . 𝑓2 ;   = 𝑓(𝑀𝑒)
+
+Edge Mach Number Me
+
+➢ Can be approximated via Bernoulli’s equation + Isentropic relations (provided no shocks)
+
+➢Deviations from isentropic relation expected to be small for M <1.2  (Lee [2016] and Stroer [2020])
+
+‣ 17
+
+
+
+AIAA SciTech 2022
+
+CRM-NLF - Flow Conditions, Computation Details
+
+‣ 18
+
+➢The CRM-NLF* wing has been designed such that the overall amplification of both TS and CF 
+instabilities are reduced
+
+➢ Fixed AoA runs instead of fixed CL as per AIAA Transition Modeling and Prediction Workshop
+
+➢ Steady-State computations using 3rd-order Roe Upwind Scheme and the unfactored successive
+symmetric overrelaxation (SSOR) implicit solution algorithm
+
+➢ In-house generated fine grid (120 million near-body grid points, y+ ~0.5) – See paper for details
+
+➢ Surface roughness = 0.9 μinch (measured in the CRM-NLF experiment; for use with the LM2015
+model)
+
+➢ Both models were run with FSTI = 0.12 % for consistent comparison (sustaining turbulence with SST-
+based model)
+
+o See details in paper regarding reduced FSTI and influence of sustain terms on pressure distribution (with SST)
+
+* Lynde, M. N., Campbell, R. L., and Viken, S. A., “Additional Findings from the Common Research Model Natural Laminar Flow Wind Tunnel 
+Test,” AIAA Paper 2019-3292, 2019. 
+
+Condition AOA (deg.) Mach No. 𝐓 (K) Re (per m) ReMAC
+
+1 1.448 ± 0.001 0.856 ± 0.001 241.7 40.73M 14.84M
+
+2 1.980 ± 0.001 0.856 ± 0.001 242.0 40.66M 14.81M
+
+3 2.461 ± 0.001 0.856 ± 0.001 242.0 40.56M 14.78M
+
+4 2.937 ± 0.001 0.856 ± 0.001 243.0 40.41M 14.72M
+
+
+
+AIAA SciTech 2022
+
+Sectional Cps for AOA = 2.46 deg.
+
+‣ 19
+
+
+
+AIAA SciTech 2022
+
+Compressibility-related modifications (LM2009/2015)
+
+➢ Corrections to relationship between Vorticity Reynolds number and 𝑅𝑒 (Compressibility BL profiles, Qiao et al.[2018])
+
+o Peak location of Rev moves to edge of boundary layer with increase in Mach number
+
+‣ 20
+
+𝑅𝑒 =
+max
+
+.
+𝑅𝑒 =
+
+max
+. ∗
+
+𝐶 𝑀 = 1.0 − 0.06124𝑀 + 0.2402 𝑀 − 0.00346 𝑀
+
+➢ Modification of correlation for 𝑅𝑒
+
+o Re = 𝑓 𝐹𝑆𝑇𝐼  . 𝑓(λ )   (separate functions of FSTI & pressure gradient)
+
+o Narasimha [1985] :  Re / = Re / ⋅ f(𝑀 )
+
+o 𝑓 𝑀 determined using data from stability computations by Masad and Malik [1993] and Masad and 
+Abid [1995] (investigated combined effects of pressure, suction/blowing and wall cooling)
+
+𝑓(𝑀 ) = 1.0105 − 0.3046𝑀 + 1.1646 𝑀 − 0.3605 𝑀
+
+o Ideally compressibility correction should be just not function alone of 𝑀 but also involve pressure 
+gradient
+▪ Current modifications will still be applicable for the CRM-NLF configuration due its predominantly 
+
+flat pressure distribution across the span of the wing
+
+
+
+AIAA SciTech 2022
+
+Compressibility-related modifications  (AFT)
+
+➢ 𝑅𝑒  at critical point (i.e., onset of instability)
+
+Original:                       𝑙𝑜𝑔
+.
+
+=
+.
+
+− 0.489  𝑡𝑎𝑛ℎ − 12.9 +
+.
+
++ 0.44
+
+New:                              𝑙𝑜𝑔 =
+.
+
+− 0.489  𝑡𝑎𝑛ℎ − 12.9 +
+.
+
++ 0.44
+
+𝐾 = 𝑎𝑡𝑎𝑛 10 − 10 + 1
+
+➢ Slope of N-factor envelope
+
+Original:                      =
+.
+
+.
+2.4𝐻 − 3.7 + 2.5 𝑡𝑎𝑛ℎ 1.5 𝐻 − 3.1 + 0. 25
+
+.
+
+New:               =
+.
+
+2.4𝐻 𝐾 − 3.7 + 2.5 𝑡𝑎𝑛ℎ 1.5 𝐻 − 3.1 + 0.125 + 𝐾 − 𝐾
+
+𝐾 = 1 + 0.2 𝐻 − 2.5918 1 − ; 𝐾 = 4.7 − 1 ; 𝐾 = 1.2 − 1
+.
+
+; 𝐾 = 0; = 𝑓(𝑀𝑒)
+
+‣ 21
+
+
+
+AIAA SciTech 2022
+
+Compressibility-related modifications
+
+➢ Estimation of edge Mach Number Me
+o Key parameter necessary for both models
+
+o Nontrivial to obtain in an unstructured CFD solver and will make formulation non-local
+
+o Can be approximated via Bernoulli’s equation + Isentropic relations
+o Limited application as isentropic relations fails when shocks are involved
+
+o Deviations from isentropic relation expected to be small for M <1.2 (making it suitable for transonic applications)  (Lee [2016] and 
+Stroer [2020])
+
+‣ 22
+
+| 𝑢 = 𝑢 +
+2𝛾
+
+𝛾 − 1
+1 −
+
+𝑝
+
+𝑝
+
+⁄
+𝑝
+
+𝜌
+
+a = γRT
+p
+
+p
+
+

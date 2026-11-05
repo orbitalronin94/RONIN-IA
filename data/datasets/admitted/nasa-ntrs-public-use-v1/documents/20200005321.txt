@@ -1,0 +1,1177 @@
+Building Your First SINDA Model
+
+Steven L. Rickman
+NASA Technical Fellow for Passive Thermal
+NASA Engineering and Safety Center
+
+1
+
+Disclaimer
+The Systems Improved Numerical Differencing Analyzer
+(SINDA) computer program or its forebears has been a mainstay
+of thermal analysis for more than 50 years.
+SINDA is offered by a number of different vendors and syntax
+and features may vary from product to product.
+For this lesson, SINDA/FLUINT by Cullimore and Ring
+Technologies (C&R Technologies®), Inc. is used. However,
+similar concepts apply to other versions of SINDA. The use of
+this product in this lesson should not be construed as an
+endorsement of one product or another.
+2
+
+Introduction
+Engineers rely on a wide variety of modern thermal tools to
+model thermal problems;
+Many of these tools offer graphical “front ends” whereby users
+formulate their analytical models using a CAD interface;
+Behind the scenes, the analysis is performed on a thermal
+network – this is true whether the analyst uses finite differencing
+or finite element methodologies;
+While graphical front ends are very powerful, understanding the
+resulting thermal network representation used for a model gives
+the user the ability to check or even modify the models at a basic
+3
+level.
+
+Introduction
+Additionally, there are instances where an engineer may prefer to
+develop network models from scratch or use heritage code that
+does not have a graphical front end;
+Some front-end programs output thermal networks in the widely
+used SINDA format;
+Our lesson will focus on this input format.
+
+4
+
+Course Outline
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+
+Review of Basic Heat Transfer
+Discretizing a Physical System
+Nodes
+Conductors
+Problem Statement
+Abstraction of the Problem Geometry
+Material Thermophysical and Thermo-Optical Properties
+SINDA Syntax and the Input Deck
+Transient Results
+Setting Up a Steady State Run
+Steady State Results
+Brief Introduction to Abbreviated Input Formats
+Concluding Remarks
+Acknowledgements
+5
+
+Review of Basic Heat Transfer
+Heat transfer is energy transfer due to a temperature difference
+and can only be measured at the boundary of a system.
+Conduction - Heat transfer from one object to another by direct
+contact.
+Convection - Heat transfer via movement of fluids such as water
+or air.
+Radiation – Heat transfer via electromagnetic waves.
+
+6
+
+Review of Basic Heat Transfer
+Conduction is described by Fourier’s Law:
+
+where…
+̇
+
+,
+
+̇
+
+=
+
+−
+
+is the heat transfer between objects 1 and 2
+is the thermal conductivity of the material through which heat is
+transported
+is the cross-sectional area of heat flow
+is the distance between objects 1 and 2, perpendicular to the heat
+flow direction
+are the temperatures of objects 1 and 2, respectively
+7
+
+Review of Basic Heat Transfer
+Convection is described by Newton’s Law of Cooling:
+
+where…
+ℎ
+
+̇
+
+,
+
+̇
+
+=ℎ
+
+−
+
+is the heat transfer between objects 1 and 2
+is the convective heat transfer coefficient
+is surface area on which convection is taking place
+are the temperatures of objects 1 and 2, respectively
+
+8
+
+Review of Basic Heat Transfer
+Radiation is described by the Stefan-Boltzmann Law:
+
+where…
+̇
+
+,
+
+̇
+
+=
+
+−
+
+is the heat transfer between objects 1 and 2
+is the radiation conductance,
+between objects 1 and 2
+is the infrared emittance of object 1
+is grey body factor between objects 1 and 2
+is the surface area of object 1
+are the absolute temperatures of objects 1 and 2, respectively
+
+9
+
+Review of Basic Heat Transfer
+Note that heat transfer via conduction and convection are
+directly proportional to the absolute1 temperature difference
+∆ = −
+between the two objects of interest.
+However, heat transfer via radiation is proportional to the
+difference of the absolute1 temperatures raised to the fourth
+power ∆ =
+−
+.
+of absolute temperatures in conduction and convection calculations is not strictly required
+since ∆ is the same regardless of whether or not absolute temperature of units is used. Use of
+absolute temperatures for radiation, however, is required.
+1Use
+
+10
+
+Review of Basic Heat Transfer
+Engineers use thermal models as a tool to aid in design and
+understand the performance of thermal systems;
+A thermal model is an abstraction of a physical system.
+Thermal models take the form of thermal networks comprised of
+lumps of mass and heat transfer paths between them – analogous
+to electrical networks.
+
+11
+
+Review of Basic Heat Transfer
+Closed-form solutions do not exist for all physical systems or
+geometries -- so they are discretized into smaller pieces, called
+elements.
+
+Geometry
+Note: Geometry and mesh created using MSC Patran®
+
+Geometry Discretized into a
+Finite Element Mesh
+12
+
+Review of Basic Heat Transfer
+Finite Difference -- uses the differential formulation -- i.e.,
+equations are formulated using the governing differential
+equation -- where we replace the partial derivatives by
+approximations obtained by Taylor series expansions near the
+point of interest;
+Finite Element -- uses a variational formulation -- i.e., equations
+are formulated from an integral formulation arising from the
+Calculus of Variations.
+For our first SINDA model, we will use finite difference.
+
+13
+
+Discretizing a Physical System
+
+Object to be Modeled
+
+Discretized Object
+
+Finite Difference Network
+
+Finite Element Network
+14
+
+Nodes
+There are three* primary types of nodes used in thermal network models:
+Diffusion Nodes – represent a finite thermal capacitance – when heat flows
+into our out of a diffusion node, the temperature changes gradually;
+Arithmetic Nodes – represent a “massless” object – when heat flows into our
+out of an arithmetic node, the temperature changes instantly;
+Boundary Nodes – represent an “infinite” thermal capacitance – they are
+used as heat sources or heat sinks.
+
+*Heater Nodes are a special case of Boundary Nodes and will not be discussed in this
+lesson.
+
+15
+
+Conductors
+In a thermal network model, heat flows from one node to another
+along pathways called conductors – there are two types:
+Linear Conductors -- heat flow for conduction and convection
+is linear – that is, it is based on the ∆ between the two objects
+of interest;
+Radiation Conductors -- heat flow between two objects is
+highly non-linear – that is, it is a function of the ∆
+between
+the two objects.
+
+16
+
+Symbols Used for the Thermal Network in this
+Lesson*
+Diffusion Node
+Boundary Node
+Linear Conductor
+Radiation Conductor
+
+*No arithmetic nodes are used in the sample problem
+17
+
+Problem Statement
+
+A white-painted hollow aluminum box measuring 1 × 1 ×
+1 with sides 2.54
+thick is floating in deep space far from
+any planet with an incident solar flux of 1371 ⁄
+incident
+on one side. Assuming an initial temperature of 20℃, what is
+the steady state temperature of each side of the box? How long
+does it take the box to reach this temperature?
+̇
+
+= 1371
+
+⁄
+
+1
+1
+
+1
+18
+
+Abstraction of the Problem Geometry
+For a finite difference discretization, let’s model the box as six
+separate sides for which individual temperatures will be
+calculated.
+300
+500
+100
+600
+
+200
+
+400
+
+19
+
+Abstraction of the Problem Geometry
+The six box sides meet at twelve edges:
+100 and 300
+100 and 400
+100 and 500
+100 and 600
+200 and 300
+200 and 400
+200 and 500
+200 and 600
+300 and 500
+300 and 600
+400 and 500
+400 and 600
+
+300
+500
+100
+600
+
+200
+
+400
+
+20
+
+Abstraction of the Problem Geometry
+300
+500
+100
+600
+
+200
+
+300
+
+400
+
+600
+200
+
+100
+400
+
+500
+
+21
+
+Abstraction of the Problem Geometry
+The box sides are represented by nodes.
+The edges that are common to any two sides will indicate a heat
+transfer path (conductor) between those two sides is necessary.
+Each exterior box side radiates to deep space – but we will not
+consider internal radiation within the box for this example).
+Solar heating is applied to one box side.
+We will establish a thermal network to represent our geometry.
+22
+
+Abstraction of the Problem Geometry
+Space
+999
+300
+
+600
+Solar Heating
+
+200
+
+100
+400
+
+500
+23
+
+Abstraction of the Problem Geometry
+
+Our model is consists of:
+6
+1
+12
+6
+1
+
+box nodes (diffusion)
+space node (boundary)
+conductors (linear)
+conductors (radiation)
+heat source
+
+24
+
+Material Thermophysical and Thermo-Optical
+Properties
+For our first model, we will assume constant properties;
+For aluminum (typical values shown):
+
+⁄
+= 2710
+= 910 ⁄
+℃
+= 204 ⁄
+℃
+
+For radiative heat transfer, assume the exterior white paint
+thermo-optical properties:
+= 0.27
+= 0.88
+
+25
+
+SINDA Syntax and the Input Deck
+SINDA relies on the user to maintain consistency in units used
+throughout the model;
+It is critical for users to ensure that the value set of absolute zero
+(SINDA variable: ABSZRO) is in the units desired for the
+model;
+For our model, we will use SI units so the following assignment
+must be made in the model (more on this shortly):
+ABSZRO = -273.15
+26
+
+SINDA Syntax and the Input Deck
+SINDA allows submodeling wherein a number of different
+model components may be brought together and run as a single
+thermal model;
+Submodels help the analyst organize their model for, both, the
+thermal design and post-processing of the results;
+For our first model, we will need only one submodel and it will
+be named: SUB1
+
+27
+
+SINDA Syntax and the Input Deck
+A SINDA input deck is composed of numerous blocks;
+There are numerous ways to specify a model – for our first model, however,
+we will limit our discussion to the following input blocks:
+OPTIONS DATA
+NODE DATA
+CONDUCTOR DATA
+SOURCE DATA
+CONTROL DATA
+OPERATIONS DATA
+OUTPUT CALLS
+The input deck ends with the last line:
+END OF DATA
+28
+
+SINDA Syntax and the Input Deck
+HEADER OPTIONS DATA
+TITLE MY FIRST SINDA MODEL
+MODEL = BOX
+OUTPUT = RESULTS.DAT
+USER1 = TEMPERATURES.DAT
+
+29
+
+SINDA Syntax and the Input Deck
+The box will react in a finite amount of time (as opposed to
+instantly) and we will represent it as a diffusion node;
+And if we assume, for the time being, that the thermophysical
+properties are constant, our description of the node takes on the
+format:
+Node#, Tinitial, Thermal Capacitance
+
+For our deep space node, we must specify a constant temperature
+boundary node – we signify this with a “-” sign next to the node
+number:
+- Node#, Tboundary, Any Positive Number
+
+30
+
+SINDA Syntax and the Input Deck
+For each node, we calculate the Thermal Capacitance as
+follows:
+=
+
+Where…
+is the box side length
+is the box side width
+is the box side thickness
+is the aluminum density
+is the aluminum specific heat
+31
+
+SINDA Syntax and the Input Deck
+For our model, all box sides are the same size so the capacitance
+becomes:
+= 2710
+
+⁄
+
+=
+910 ⁄
+
+℃
+
+1
+
+= 6263.9 ⁄℃
+
+1
+
+0.00254
+
+32
+
+SINDA Syntax and the Input Deck
+HEADER NODE DATA, SUB1
+100,
+20.0, 6263.9
+200,
+20.0, 6263.9
+300,
+20.0, 6263.9
+400,
+20.0, 6263.9
+500,
+20.0, 6263.9
+600,
+20.0, 6263.9
+-999, -273.15,
+1.0
+
+300
+500
+100
+600
+
+200
+
+400
+
+33
+
+SINDA Syntax and the Input Deck
+Conduction from one box side to another is linear and, assuming
+constant thermal conductivity, is expressed in the follow format:
+Conductor Number, 1st Node, 2nd Node, Ther. Conductance
+
+Radiation is non-linear so we must indicate to SINDA which
+heat transfer paths are radiative – this is done by placing a “-” in
+front of the Conductor Number:
+-Conductor Number, 1st Node, 2nd Node, Rad. Conductance
+
+34
+
+SINDA Syntax and the Input Deck
+For each node, we calculate the Thermal Conductance as
+follows:
+=
+
+/
+
+Where…
+is the box side length
+is the box side width
+is the box side thickness
+is the aluminum thermal conductivity
+
+35
+
+SINDA Syntax and the Input Deck
+For our model, the thermal conductance between all adjacent
+box nodes is the same, namely:
+= 204
+
+⁄
+
+℃
+
+=
+
+1
+
+= 0.51816
+
+/
+0.00254
+⁄℃
+
+/ 1
+
+36
+
+SINDA Syntax and the Input Deck
+We must also calculate the Rad. Conductance to account for the
+radiative heat loss from each box side to deep space:
+=
+
+Where…
+is the surface infrared emissivity
+is the Stefan-Boltzmann constant 5.67 × 10
+is the box side length
+is the box side width
+
+⁄
+
+37
+
+SINDA Syntax and the Input Deck
+Each box side has the same radiation conductance to space,
+namely:
+= 0.88
+
+=
+5.67 × 10
+
+⁄
+
+= 4.9896 × 10
+
+⁄
+
+1
+
+1
+
+38
+
+SINDA Syntax and the Input Deck
+HEADER CONDUCTOR DATA, SUB1
+100300,
+100, 300, 0.51816
+100400,
+100, 400, 0.51816
+100500,
+100, 500, 0.51816
+100600,
+100, 600, 0.51816
+200300,
+200, 300, 0.51816
+200400,
+200, 400, 0.51816
+200500,
+200, 500, 0.51816
+200600,
+200, 600, 0.51816
+300500,
+300, 500, 0.51816
+300600,
+300, 600, 0.51816
+400500,
+400, 500, 0.51816
+400600,
+400, 600, 0.51816
+-999100,
+999, 100, 4.9896E-8
+-999200,
+999, 200, 4.9896E-8
+-999300,
+999, 300, 4.9896E-8
+-999400,
+999, 400, 4.9896E-8
+-999500,
+999, 500, 4.9896E-8
+-999600,
+999, 600, 4.9896E-8
+
+39
+
+SINDA Syntax and the Input Deck
+Heating is applied in the SOURCE DATA block using the
+following command:
+Node Number, Heating
+
+40
+
+SINDA Syntax and the Input Deck
+We must also calculate the solar heating input to one box side:
+̇ =
+
+̇
+
+Where…
+is the white paint solar absorptivity
+̇
+is the magnitude of the incoming solar flux
+is the box side length
+is the box side width
+
+41
+
+SINDA Syntax and the Input Deck
+This heating will be applied to only one box side (i.e., node 100):
+̇ = 0.27
+
+̇ =
+1371
+
+̇
+
+⁄
+
+̇ = 370.17
+
+1
+
+1
+
+42
+
+SINDA Syntax and the Input Deck
+HEADER SOURCE DATA, SUB1
+100, 370.17
+
+43
+
+SINDA Syntax and the Input Deck
+HEADER CONTROL DATA, GLOBAL
+TIMEND = 50000.0
+OUTPUT = 100.0
+ABSZRO = -273.15
+
+44
+
+SINDA Syntax and the Input Deck
+For a transient analysis…
+HEADER OPERATIONS DATA
+BUILD BOX, SUB1
+CALL TRANSIENT
+
+And for a steady state analysis...
+HEADER OPERATIONS DATA
+BUILD BOX, SUB1
+CALL STEADY
+
+Our first analysis will be transient.
+
+45
+
+SINDA Syntax and the Input Deck
+HEADER OUTPUT CALLS, SUB1
+CALL TPRINT(‘SUB1’)
+
+Or, for a formatted output…
+HEADER OUTPUT CALLS, SUB1
+WRITE(NUSER1,100) TIMEN, T100, T200, T300,
++
+T400, T500, T600
+100
+FORMAT(F8.1,3X,6(F8.1,3X))
+
+The output above specifies each number to be floating point,
+with eight digits including one decimal space. Each number is to
+be separated by three spaces.
+46
+
+SINDA Syntax and the Input Deck
+HEADER OPTIONS DATA
+TITLE MY FIRST SINDA MODEL
+MODEL = BOX
+OUTPUT = RESULTS.DAT
+USER1 = TEMPERATURES.DAT
+HEADER NODE DATA, SUB1
+100,
+20.0, 6263.9
+200,
+20.0, 6263.9
+300,
+20.0, 6263.9
+400,
+20.0, 6263.9
+500,
+20.0, 6263.9
+600,
+20.0, 6263.9
+-999, -273.15,
+1.0
+HEADER CONDUCTOR DATA, SUB1
+100300,
+100, 300, 0.51816
+100400,
+100, 400, 0.51816
+100500,
+100, 500, 0.51816
+100600,
+100, 600, 0.51816
+200300,
+200, 300, 0.51816
+200400,
+200, 400, 0.51816
+200500,
+200, 500, 0.51816
+200600,
+200, 600, 0.51816
+300500,
+300, 500, 0.51816
+300600,
+300, 600, 0.51816
+400500,
+400, 500, 0.51816
+400600,
+400, 600, 0.51816
+-999100,
+999, 100, 4.9896E-8
+-999200,
+999, 200, 4.9896E-8
+-999300,
+999, 300, 4.9896E-8
+-999400,
+999, 400, 4.9896E-8
+-999500,
+999, 500, 4.9896E-8
+-999600,
+999, 600, 4.9896E-8
+
+HEADER SOURCE DATA, SUB1
+100, 370.17
+HEADER CONTROL DATA, GLOBAL
+TIMEND = 50000.0
+OUTPUT = 100.0
+ABSZRO = -273.15
+HEADER OPERATIONS DATA
+BUILD BOX, SUB1
+CALL TRANSIENT
+HEADER OUTPUT CALLS, SUB1
+WRITE(NUSER1,100) TIMEN, T100, T200, T300,
++
+T400, T500, T600
+100
+FORMAT(F8.1,3X,6(F8.1,3X))
+END OF DATA
+
+47
+
+Transient Results
+40
+20
+0
+Node 100
+
+Temperature (ºC)
+
+-20
+-40
+-60
+-80
+
+Node 600 (and 300, 400, 500)
+
+-100
+-120
+
+Node 200
+
+-140
+0
+
+10000
+
+20000
+30000
+Time (s)
+
+40000
+
+50000
+48
+
+Setting Up a Steady State Run
+Instead of running the transient analysis all the way to steady
+state, we can also specify a steady state analysis by calling the
+steady state routine within the OPERATIONS DATA block…
+HEADER OPERATIONS DATA
+BUILD BOX, SUB1
+CALL STEADY
+
+49
+
+SINDA Syntax and the Input Deck
+HEADER OPTIONS DATA
+TITLE MY FIRST SINDA MODEL
+MODEL = BOX
+OUTPUT = RESULTS.DAT
+USER1 = TEMPERATURES.DAT
+HEADER NODE DATA, SUB1
+100,
+20.0, 6263.9
+200,
+20.0, 6263.9
+300,
+20.0, 6263.9
+400,
+20.0, 6263.9
+500,
+20.0, 6263.9
+600,
+20.0, 6263.9
+-999, -273.15,
+1.0
+HEADER CONDUCTOR DATA, SUB1
+100300,
+100, 300, 0.51816
+100400,
+100, 400, 0.51816
+100500,
+100, 500, 0.51816
+100600,
+100, 600, 0.51816
+200300,
+200, 300, 0.51816
+200400,
+200, 400, 0.51816
+200500,
+200, 500, 0.51816
+200600,
+200, 600, 0.51816
+300500,
+300, 500, 0.51816
+300600,
+300, 600, 0.51816
+400500,
+400, 500, 0.51816
+400600,
+400, 600, 0.51816
+-999100,
+999, 100, 4.9896E-8
+-999200,
+999, 200, 4.9896E-8
+-999300,
+999, 300, 4.9896E-8
+-999400,
+999, 400, 4.9896E-8
+-999500,
+999, 500, 4.9896E-8
+-999600,
+999, 600, 4.9896E-8
+
+HEADER SOURCE DATA, SUB1
+100, 370.17
+HEADER CONTROL DATA, GLOBAL
+ABSZRO = -273.15
+HEADER OPERATIONS DATA
+BUILD BOX, SUB1
+CALL STEADY
+HEADER OUTPUT CALLS, SUB1
+WRITE(NUSER1,100) TIMEN, T100, T200, T300,
++
+T400, T500, T600
+100
+FORMAT(F8.1,3X,6(F8.1,3X))
+END OF DATA
+
+50
+
+Steady State Results
+Comparing the results of the transient and steady state analysis
+runs…
+Node
+Number
+
+Predicted
+Temperature
+After 50000
+second Transient
+Analysis (oC)
+
+Predicted
+Temperature
+Steady State
+Analysis (oC)
+
+100
+
+-23.2
+
+-23.2
+
+200
+
+-120.9
+
+-120.9
+
+300
+
+-107.9
+
+-107.9
+
+400
+
+-107.9
+
+-107.9
+
+500
+
+-107.9
+
+-107.9
+
+600
+
+-107.9
+
+-107.9
+51
+
+Brief Introduction to Abbreviated Input Formats
+Our NODE DATA was specified as…
+HEADER NODE DATA, SUB1
+100,
+20.0, 6263.9
+200,
+20.0, 6263.9
+300,
+20.0, 6263.9
+400,
+20.0, 6263.9
+500,
+20.0, 6263.9
+600,
+20.0, 6263.9
+-999, -273.15,
+1.0
+
+But we observe that nodes 100 – 600 have identical initialization temperature
+and thermal capacitance;
+SINDA allows some shortcuts when such situations arise – we can use the
+following format for multiple node inputs:
+GEN Node#, #Nodes, Increment, Tinitial, C
+52
+
+Brief Introduction to Abbreviated Input Format
+Using the abbreviated input, our NODE DATA becomes…
+HEADER NODE DATA, SUB1
+GEN 100, 6, 100, 20.0, 6263.9
+-999,
+-273.15,
+1.0
+
+Using this GEN command, six diffusion nodes will be generated, beginning
+with node 100 with node numbers incrementing by 100;
+Each node will have an initial temperature of 20 ℃ and a capacitance of
+6263.9 ⁄℃;
+The space boundary node (999) is defined as before.
+
+53
+
+Brief Introduction to Abbreviated Input Formats
+Similarly, we can use abbreviated input format in the CONDUCTOR DATA;
+Previously, we had:
+HEADER CONDUCTOR DATA, SUB1
+100300,
+100, 300, 0.51816
+100400,
+100, 400, 0.51816
+100500,
+100, 500, 0.51816
+100600,
+100, 600, 0.51816
+200300,
+200, 300, 0.51816
+200400,
+200, 400, 0.51816
+200500,
+200, 500, 0.51816
+200600,
+200, 600, 0.51816
+300500,
+300, 500, 0.51816
+300600,
+300, 600, 0.51816
+400500,
+400, 500, 0.51816
+400600,
+400, 600, 0.51816
+-999100,
+999, 100, 4.9896E-8
+-999200,
+999, 200, 4.9896E-8
+-999300,
+999, 300, 4.9896E-8
+-999400,
+999, 400, 4.9896E-8
+-999500,
+999, 500, 4.9896E-8
+-999600,
+999, 600, 4.9896E-8
+
+54
+
+Brief Introduction to Abbreviated Input Formats
+For abbreviated input of conductors, the GEN statement takes the form:
+GEN Con#, #Con, Inc, Nod#1, IncNod#1, Nod#2, IncNod#2, G
+We see that our conductor input can be shortened to:
+HEADER CONDUCTOR DATA, SUB1
+GEN 100300, 4, 100,
+GEN 200300, 4, 100,
+GEN 300500, 2, 100,
+GEN 400500, 2, 100,
+GEN -999100, 6, 100,
+
+100,
+200,
+300,
+400,
+999,
+
+0,
+0,
+0,
+0,
+0,
+
+300,
+300,
+500,
+500,
+100,
+
+100,
+100,
+100,
+100,
+100,
+
+0.51816
+0.51816
+0.51816
+0.51816
+4.989E-8
+
+55
+
+Brief Introduction to Abbreviated Input Formats
+HEADER OPTIONS DATA
+TITLE MY FIRST SINDA MODEL
+MODEL = BOX
+OUTPUT = RESULTS.DAT
+USER1 = TEMPERATURES.DAT
+HEADER NODE DATA, SUB1
+GEN 100, 6, 100,
+20.0, 6263.9
+-999,
+-273.15,
+1.0
+HEADER CONDUCTOR DATA, SUB1
+GEN 100300, 4, 100, 100, 0, 300, 100, 0.51816
+GEN 200300, 4, 100, 200, 0, 300, 100, 0.51816
+GEN 300500, 2, 100, 300, 0, 500, 100, 0.51816
+GEN 400500, 2, 100, 400, 0, 500, 100, 0.51816
+GEN -999100, 6, 100, 999, 0, 100, 100, 4.989E-8
+HEADER SOURCE DATA, SUB1
+100, 370.17
+HEADER CONTROL DATA, GLOBAL
+TIMEND = 50000.0
+OUTPUT = 100.0
+ABSZRO = -273.15
+HEADER OPERATIONS DATA
+BUILD BOX, SUB1
+CALL TRANSIENT
+HEADER OUTPUT CALLS, SUB1
+WRITE(NUSER1,100) TIMEN, T100, T200, T300,
++
+T400, T500, T600
+100
+FORMAT(F8.1,3X,6(F8.1,3X))
+END OF DATA
+
+56
+
+Concluding Remarks
+In this lesson, we learned how to discretize a physical system
+into a finite difference network;
+From this abstraction, we formulated a basic SINDA input deck
+to represent the thermal network;
+Only basic functionality was demonstrated – there is a lot more
+to learn;
+The more you learn about how to use the tool and its capabilities
+and limitations, the more power you will have as an analyst.
+
+57
+
+Acknowledgements
+The author thanks GSFC/Mr. Kan Yang, GSFC/Mr. Hume
+Peabody, LaRC/Ms. Ruth Amundsen, and JPL/Mr. Jose Rivera
+for their review and valuable comments on this lesson.
+
+58
+

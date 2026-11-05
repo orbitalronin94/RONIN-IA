@@ -1,0 +1,461 @@
+Ares I-X Aeroelastic and Structural Dynamics
+Modeling for GN&C Simulations
+
+Eugene Heim
+Ares I-X GN&C Deputy Lead
+NASA Langley Research Center
+Aeroservoelastics Workshop
+National Institute of Aerospace
+April 18-19, 2012
+
+www.nasa.gov
+
+Ares I-X
+♦  Structural dynamics major concern for Ares I
+• 
+• 
+• 
+• 
+
+Highest slenderness ratio of any vehicle ever flown
+First bending mode within control bandwidth
+Phase stabilization of first bending mode required
+Gain stabilization of higher modes
+
+♦  Ares I-X provided early flight test of first stage flight
+for model and modeling method validation
+•  Dynamically scaled at liftoff
+•  Dummy upper stage, Orion/LAS, and 5th segment
+
+♦  Made with surplus materials…
+• 
+• 
+• 
+• 
+
+Booster & TVC – expired Shuttle RSRM
+RoCS – disassembled from Peace Keeper ICBM
+BDM’s and BTM’s – Old Shuttle BSM motors
+Avionics – Atlas V
+
+♦  Primary objectives
+•  Demonstrate control of dynamically similar vehicle to Ares I
+•  Perform staging similar to Ares I
+•  Demonstrate assembly and recovery of new first stage
+element at KSC (ground ops)
+•  Demonstrate first stage recovery system
+•  Characterize internal RSRM roll torque
+
+♦  Flown October 28th, 2009 11:30 AM
+2
+
+Flight Video
+
+3
+
+Aeroservoelastic Impacts on GN&C Design
+♦  Control law design required knowledge of first few bending modes
+•  Mode shapes influenced sensor placement and blending
+•  Mode frequencies influenced filter design and stabilization strategy
+•  Modal damping influenced effectiveness of control
+
+♦  Mode shapes, frequencies and even damping changed in time as fuel
+mass was depleted
+•  Required gain scheduling and scheduling of filter coefficients
+•  Ensure nodes and anti-nodes of phase stabilized modes do not cross sensors
+
+♦  Program Test Inputs (PTI’s) throughout flight
+•  Open loop TVC excitations and roll control blackouts
+•  TVC commands: 3 sets of orthogonal sum-of-signs and 1 pulse to excite structure
+•  Used to verify phase stabilization of first bending mode, excite aerodynamics, identify
+structural damping, and RSRM roll torque
+
+♦  Axial, torsion and higher order bending modes needed for other analysis
+•  Ares I thrust oscillation first discovered in early Ares I-X analysis by including axial
+mode and first acoustic mode of RSRM chamber
+•  Torsion mode allowed roll control thrusters to excite sensors leading to roll rate filter
+•  Clearance studies such as liftoff, staging, jettison, etc. as well as flight reconstruction
+require best knowledge of deformation, i.e. all the modes
+4
+
+Sensor Locations and Mode Shapes
+♦ Similar to Ares-I design
+•  Baselined identical architecture
+Feb 2007
+RRGU
+
+♦ Major differences from AresI for ascent flight
+•  Sensor locations
+•  Structural dynamics
+•  Filter and gain coefficients
+
+FTINU
+
+RRGU
+5
+
+STARS Pitch Open Loop Gain
+
+3rd Bending Mode
+1st Bending Mode
+
+4th Bending Mode
+
+6th Pitch Bending
+
+5th Bending Mode
+
+2nd Bending Mode
+
+Sensor Blending Zero
+Tail-Wags-Dog Zero
+
+6
+
+Key Points Linear Stability Analysis
+
+Typical Nichols Chart
+20
+Aerodynamic Gain
+Margin
+
+Gain, dB
+
+Back-Side Phase
+Margin Mode 1
+0
+
+Rigid-Body Phase
+Margin
+
+Gain Margin
+Mode 1
+Front-Side
+Phase Margin
+Mode 1
+
+-20
+
+-40
+-900
+
+Rigid-Body Gain
+Margin
+
+-720
+
+-540
+
+-360
+
+-180
+
+0
+
+180
+
+Phase, degrees
+
+7
+
+Baseline Nichols Charts
+
+♦ Linearizations from STARS
+♦ Baseline trajectory
+♦ Computed every second from 1 to 120 seconds
+8
+
+Modal Models
+♦  13 models representing mass conditions every 10 sec. of flight
+•  All modes under 25 Hz with 27 residual vectors
+•  Each model included 73 nodes (54 centerline, 3 sensor, 2 gimbal, 4 HDP, 2 nozzle centerline and
+4 actuator attachment)
+•  Evaluated with RSRM pressurized “prestiffened” modes
+
+♦  Other models: MLP mounted model, first stage alone and upper stage alone
+
+FTINU 1770.3
+
+FWD RRGU 1023.8
+
+Centerline
+Sensor
+RoCS
+Nozzle
+HDP
+Actuator
+CG
+
+AFT RRGU 3962.9
+
+Structural Dynamics Modeling
+♦  Standard second order flexible body EOM for each elastic mode
+•  Modal eigenvector and values from NASTRAN
+•  Damping ratio of 0.5% for all modes
+
+♦  Linear superposition of elastic modes onto rigid-body dynamics
+♦  Variable mass structural modeling techniques used
+•  Constant modes - hold one set at a time constant throughout flight
+•  Stepping - discrete changes from model to model
+  No model formatting required
+  Allows for dispersed sets of FEM models
+  Care must be taken when switching models to minimize transients
+
+•  Modal interpolation - continuous piecewise linear interpolation
+  No modification to modes
+  Requires labor intensive modal tracking, sorting and consistent mode signs
+  Some loss of orthogonality
+
+♦  Liftoff and staging events used least squares technique
+♦  Dispersed frequencies and mode shapes directly
+•  Scale factor on frequencies
+•  Scale factor and artificial shifts (centerline) on mode shapes
+
+10
+
+Modal Interpolation
+♦  Modal selection based on Hankel-singular values (controllability and
+observability)
+•  FCS can only resolve frequencies up to 25 Hz, sensor bandwidth ~10 Hz, pitch and
+yaw control bandwidth ~2 Hz
+•  Retain at least first 3 bending mode pairs, 1st axial and 1st torsion
+
+♦  Modal tracking with cross-orthogonality and by hand with Patran
+•  Requires engineering judgment when modes combine or coalesce
+
+Modal Tracking and Interpolation
+
+Modal Decomposition
+
+11
+
+Modeling Dynamics on MLP
+♦ Vehicle on pad loaded by
+•  Gravity field
+•  Centripetal relief (due to Earth rotation rate)
+•  Winds (steady, gusts)
+•  Reaction from MLP
+•  Thermal, etc. (not modeled)
+
+♦ Flexible body
+•  Lumped masses used to load nodes due to body
+accelerations (gravity and centripetal relief as function
+of node altitude)
+•  Stiffness is linear, i.e. vehicle will not continue to bend
+due to its own weight
+•  Deformation at Hold Down Post (HDP) release used to
+initialize free-free modes
+
+♦ Rigid-body
+•  Held in place by ground reaction model until
+compressive loads at HDP are zero
+•  Structural dynamics on MLP used to initialize rigidbody EOM at HDP release
+12
+
+Actuator Model & Structural Compliance
+♦  Shuttle heritage actuator model (Linear Simplex)
+•  Standalone model includes nozzle and associated compliances
+•  Several dispersible parameters
+
+♦  Structural model includes nozzle and “locked actuators”
+♦  Actuator-structural modeling “double-dipped”
+actuator, flex bearing and back-up structure compliance
+♦  Negligible 0 to 3 deg. shift in phase margin around first bending mode
+FCS
+&
+Sensors
+
+Gimbal node wagonwheeled to nozzle
+
+Rock Actuator
+
+Structural
+Deformations
+
+Actuator
+Commands
+
+FCS - Actuator Model - Structural Model
+Interaction
+
+Vehicle
+Structural Dynamics
+
+Actuator
+Structural Dynamics
+
+Structural
+Model
+
+Actuator
+Model
+
+“Locked Actuator”
+Nozzle Dynamics
+
+Gimbaling
+Nozzle Dynamics
+
+Tilt Actuator
+All Other Loads
+
+Lateral Thrust,
+TWD & DWT
+
+xb
+fwd
+
+yb
+
+zb
+
+13
+
+Propulsion Models
+♦  Reusable Solid Rocket Motor (RSRM)
+•  Submerged nozzle with flex bearing
+•  Chamber pressure stiffens and expands pressure vessel and compresses flex bearing
+causing nozzle to rotate due to kinematic coupling with actuators
+•  Nozzle rotation due to chamber pressure known as “deterministic error” and book kept
+in a separate model… possible double bookkeeping.
+
+♦  RSRM structural exciters
+•  Axial thrust applied to structural model at forward dome node
+•  Lateral thrust components applied at gimbal node on nozzle side of flex bearing.
+•  Roll torque applied to aft dome node
+•  Optional thrust oscillations added via generalized pressures
+
+♦  Roll Control System (RoCS)
+•  Each thruster had specific node to apply thrust
+
+♦  Rigid body forces transformed and translated due to structural
+deformation
+Lateral Thrust
+Axial Thrust
+Roll Torque
+14
+
+Force Following Debate
+♦  Force following transforms a force acting on the structure by the
+structural deformation. Creates feedback loop, input depends on output.
+•  Real structures with attached lateral forces will bend non-linearly
+•  Free-free assumed modes from NASTRAN will not
+
+♦  Debate between GN&C and Structural communities
+•  Surveyed Ares I, Shuttle, Atlas, Delta, and Aerospace Corp.
+•  In each case GN&C group used force following
+•  All but 1 structures groups recommended not to
+•  Should accelerations be rotated by slope or not?
+
+♦  Impact for Ares I-X was negligible, 0 to 5 deg. phase shift of first bending
+mode
+Apply lateral force to model
+
+Simple beam example
+
+No change in force vector
+θz
+
+Bending mode excited
+g
+
+Force following rotates applied force
+Force following
+θz
+
+Bending and axial modes excited
+g
+
+15
+
+Distributed Aerodynamics
+♦ Distributed line load coefficients used to simulate quasi-static
+aeroelastics on flexible body
+•  Distributed aero databases for ascent and liftoff
+•  Scaled to match corresponding integrated coefficients
+•  Local dynamic pressure, Mach, αTotal and ΦAero at each centerline node used
+to compute forces at node
+
+♦ Not applied to rigid body dynamics
+
+16
+
+Aeroelastic Increments
+♦  Thrust vector increments
+•  Negligibly stabilizing/destabilizing depending on Mach number, nominally less than 1
+deg and 1 dB on all margins
+•  FCS kept gimbal angles small which kept effect small
+ΔC NF C NFflex − C NFrigid
+1
+=
+rad −lb f
+δ nT
+δ nT
+
+(
+
+ΔC PM C PM flex − C PM rigid
+=
+δ nT
+δ nT
+
+)
+
+(
+
+1
+rad −lb f
+
+)
+
+♦  Dynamic pressure-alpha total increments
+•  Negligibly destabilizing, nominally less than 1 deg and 1 dB on all margins
+ΔC NF C NFflex − C NFrigid ft 2
+=
+rad −lb f
+q∞α
+q∞α
+
+(
+
+ΔC PM C PM flex − C PM rigid
+=
+q∞α
+q∞α
+
+)
+
+(
+
+ft 2
+rad −lb f
+
+)
+
+♦  Unsteady aerodynamics explored but not incorporated into sim
+•  Lots of work on reduced order model coupled with structural model
+•  Affects damping of structural modes: increase or decrease with dynamic pressure
+
+17
+
+Summary and Conclusions
+♦ Aeroelastics negligible impact for Ares I-X
+•  Expected result with no significant lifting surfaces
+•  May be more of an issue for more flexible Ares-I
+•  More work needed to incorporate unsteady aero into GN&C simulations
+
+♦ Structural dynamics significant for Ares I-X, more so for Ares-I
+•  Major driver in GN&C design and analysis
+•  Large range in modeling techniques throughout community
+•  Relatively small difference in results between techniques for Ares I-X
+•  More work needed in modeling mass varying systems
+
+♦ Additional structural dynamics techniques subsequently
+developed for Ares-I and SLS
+•  Constant set of shape functions, P. Tobbe (DCI-MSFC), AIAA-2009-6023
+•  Least Squares Quadratic Inequality, J. Wetherbee (SAIC-MSFC)
+
+18
+
+19
+

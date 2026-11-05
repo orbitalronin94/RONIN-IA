@@ -1,0 +1,1177 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+BEFORE  YOU  CONTINUE
+
+
+ 
+
+NASA/TM–20210020028 
+  
+
+ 
+
+T0TEM - T0 Test Evaluation Module  
+Development and Verification 
+ 
+Levi Shelton 
+Marshall Space Flight Center, Huntsville, Alabama
+ 
+Cameron Bosley 
+ESSCA 
+Marshall Space Flight Center, Huntsville, Alabama 
+    
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+August 2021 
+
+
+
+NASA STI Program Report Series 
+ 
+ 
+
+ 
+The NASA STI Program collects, organizes, 
+provides for archiving, and disseminates NASA’s 
+STI. The NASA STI program provides access to 
+the NTRS Registered and its public interface, the 
+NASA Technical Reports Server, thus providing 
+one of the largest collections of aeronautical and 
+space science STI in the world. Results are 
+published in both non-NASA channels and by 
+NASA in the NASA STI Report Series, which 
+includes the following report types: 
+
+ 
+• TECHNICAL PUBLICATION. Reports of 
+
+completed research or a major significant 
+phase of research that present the results of 
+NASA Programs and include extensive data 
+or theoretical analysis. Includes compila- 
+tions of significant scientific and technical 
+data and information deemed to be of 
+continuing reference value. NASA counter-
+part of peer-reviewed formal professional 
+papers but has less stringent limitations on 
+manuscript length and extent of graphic 
+presentations. 
+ 
+
+• TECHNICAL MEMORANDUM.  
+Scientific and technical findings that are 
+preliminary or of specialized interest,  
+e.g., quick release reports, working  
+papers, and bibliographies that contain 
+minimal annotation. Does not contain 
+extensive analysis. 
+ 
+
+• CONTRACTOR REPORT. Scientific and 
+technical findings by NASA-sponsored 
+contractors and grantees. 
+
+• CONFERENCE PUBLICATION.  
+Collected papers from scientific and 
+technical conferences, symposia, seminars, 
+or other meetings sponsored or  
+co-sponsored by NASA. 
+ 
+
+• SPECIAL PUBLICATION. Scientific, 
+technical, or historical information from 
+NASA programs, projects, and missions, 
+often concerned with subjects having 
+substantial public interest. 
+ 
+
+• TECHNICAL TRANSLATION.  
+English-language translations of foreign 
+scientific and technical material pertinent to  
+NASA’s mission. 
+ 
+
+Specialized services also include organizing  
+and publishing research results, distributing 
+specialized research announcements and 
+feeds, providing information desk and personal 
+search support, and enabling data exchange 
+services. 
+
+ 
+For more information about the NASA STI 
+program, see the following: 
+
+ 
+• Access the NASA STI program home page 
+
+at http://www.sti.nasa.gov 
+ 
+
+• Help desk contact information: 
+ 
+
+https://www.sti.nasa.gov/sti-contact-form/ 
+and select the “General” help request type. 
+
+ 
+ 
+ 
+
+  
+  
+
+ 
+
+https://www.sti.nasa.gov/sti-contact-form/
+
+
+ 
+
+NASA/TM–20210020028 
+  
+
+ 
+
+T0TEM - T0 Test Evaluation Module  
+Development and Verification 
+ 
+Levi Shelton 
+Marshall Space Flight Center, Huntsville, Alabama 
+ 
+Cameron Bosley 
+ESSCA 
+Marshall Space Flight Center, Huntsville, Alabama 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+  
+
+National Aeronautics and 
+Space Administration 
+ 
+Marshall Space Flight Center 
+Huntsville, AL 35805 
+
+August 2021 
+
+
+
+ 
+
+2 
+
+Contents 
+Abstract: ......................................................................................................................................... 3 
+Introduction .................................................................................................................................... 4 
+ASTM E1921 Background ............................................................................................................... 4 
+T0TEM Development ...................................................................................................................... 6 
+T0TEM Features ............................................................................................................................. 9 
+T0TEM Verification ...................................................................................................................... 14 
+Conclusion .................................................................................................................................... 16 
+References .................................................................................................................................... 17 
+ 
+Figure 1: Master Curve .................................................................................................................... 4 
+Figure 2: Initial T0 Determination Tab ............................................................................................ 10 
+Figure 3: Inhomogeneity Calculations Tab ....................................................................................... 11 
+Figure 4: Uncertainty Calculations Tab ............................................................................................ 12 
+Figure 5: Multiple Data Sets Tab ..................................................................................................... 13 
+
+ 
+Table 1: T0TEM Change Log ........................................................................................................... 8 
+Table 2: Standard Results Comparison ............................................................................................ 14 
+Table 3: Bi-Modal Confidence Bounds ............................................................................................ 15 
+Table 4: Multi Modal Confidence Bounds ........................................................................................ 15 
+
+ 
+Equation 1 (ASTM E08.07) .............................................................................................................. 5 
+Equation 2 (ASTM E08.07) .............................................................................................................. 5 
+Equation 3 (ASTM E08.07) .............................................................................................................. 5 
+Equation 4 (ASTM E08.07) .............................................................................................................. 5 
+Equation 5 (ASTM E08.07) .............................................................................................................. 6 
+Equation 6 (ASTM E08.07) .............................................................................................................. 6 
+
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+file://msnasgld.ndc.nasa.gov/EM20Data/EM20/Damage_Tolerance/Levi%20Shelton/T0TEM%20-%20T0%20Software/T0TEM%20Technical%20Memo/T0TEM%20-%20T0%20Test%20Evaluation%20Module-DRAFT.docx#_Toc86137287
+file://msnasgld.ndc.nasa.gov/EM20Data/EM20/Damage_Tolerance/Levi%20Shelton/T0TEM%20-%20T0%20Software/T0TEM%20Technical%20Memo/T0TEM%20-%20T0%20Test%20Evaluation%20Module-DRAFT.docx#_Toc86137287
+
+
+ 
+
+Abstract: 
+Transition temperature testing of ferritic steels evaluates the ductile to brittle transition 
+
+temperature, where the behavior of the steel changes from controlled ductile tearing to 
+uncontrollable brittle fracture.  This testing is governed by ASTM (American Society of Testing 
+and Materials) E1921 standard.  The calculations and plots required by this standard are 
+iterative in nature and require significant effort to produce by standard hand calculations.  In 
+addition to analysis of a complete data set, intermediate analysis during testing is beneficial to 
+determine optimal test temperatures.  Given the exhaustive nature of calculating the transition 
+temperature, being able to quickly update target temperatures is a significant benefit to not only 
+the quality of tests, but the number of required tests as well.  T0 Test Evaluation Module 
+(T0TEM) v1.5 is a software application created under the Layered Pressure Vessel (LPV) 
+certification effort.  To reduce the analysis time of transition temperature test data sets produced 
+for this effort, T0TEM was created to calculate the E1921 Master Curve along with all required 
+data and validity checks.  By creating this program, hundreds of hours of analysis time were 
+saved.  In addition, the creation of a standard program provided a significant improvement in the 
+consistency with which results were reported.  T0TEM also calculates the results and plots 
+required for the E1921 inhomogeneity annex to determine whether a material behaves in a 
+homogenous manner.  This program was created by Levi Shelton and Cameron Bosley at 
+NASA, with input and review from the E1921 committee.  The results generated by T0TEM were 
+compared to the validation data sets provided by ASTM with good concurrence.  ASTM 
+committee members have reviewed and applied T0TEM to other data sets with satisfactory 
+results.  T0TEM was originally released to the NASA Software Repository and publicly via 
+SourceForge in May of 2020.  Version 1.5 was released in April of 2021 with minor functionality 
+updates and additional statistical analysis methods.   
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+
+ 
+
+4 
+
+Introduction 
+T0TEM (T0 Test Evaluation Module) is a software code that was created to efficiently 
+
+analyze the large number of E1921 data sets being produced for the Layered Pressure Vessel 
+(LPV) project.  The goal was to produce a program that could rapidly calculate and plot the 
+master curve.  In addition, the software performs all necessary size adjustments, censoring, and 
+validity checks as per ASTM (American Society for Testing and Materials) standard E1921.  
+Recently, the addition of Annex X5 Treatment of Potentially Inhomogeneous Data Sets to ASTM 
+E1921 (ASTM E08.07) created additional functionality of T0TEM to calculate master curve plots 
+related to ferritic steels that exhibit inhomogeneity.  These methods assess whether the data set 
+is likely to be inhomogeneous and they provide methods to characterize the inhomogeneous 
+data.  All methods and formulas required for calculation of any part of E1921 are detailed within 
+the standard.  T0TEM streamlines the data entry process and utilizes specialized root finding 
+functions to speed calculation times as well as produce consistent data output files and plots. 
+
+ 
+
+ASTM E1921 Background 
+The test method delineated in ASTM E1921 is used to determine a reference 
+
+temperature, T0 that characterizes the fracture toughness of ferritic steels that experience onset 
+of cleavage cracking at elastic, elastic-plastic KJIC instabilities, or both.  The method uses the 
+“Master Curve” concept to describe the transition in fracture toughness due to cleavage 
+mechanisms as temperature decreases to the lower shelf.  The Master Curve method defines 
+the ductile to brittle transition temperature of structural steels using static tests of fatigue 
+precracked fracture mechanics samples. This is the recommended method when a limited 
+number and size of specimens are available for testing.  The following figure shows a schematic 
+of the ductile to brittle material behavior of ferritic steels with a superimposed Master Curve. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+
+Figure 1: Master Curve 
+
+
+
+ 
+
+The statistical size effect (length of crack front) needs to be considered.  The weakest 
+length statistics indicate that Pf will be a function of the volume of material tested, therefore the 
+length of the crack front is important since a longer crack front increases the probability of 
+fracture.  Two parameters to be considered are the thickness of specimen in testing, and the 
+assumed or identified length of crack in structure.  E1921 test data is normalized using the 
+statistical model to a 1T equivalent 25.4mm (1 inch) specimen thickness or crack length before 
+evaluating the Master Curve parameter, Ko (and thus T0).   
+
+ 
+The E1921 statistical size correction is defined as:   
+ 
+
+𝐾𝐾𝐽𝐽𝐽𝐽(𝑥𝑥) = 20 + (𝐾𝐾𝐽𝐽𝐽𝐽(1) − 20)(
+𝐵𝐵1
+𝐵𝐵𝑥𝑥
+
+)1 4⁄  
+
+Equation 1 (ASTM E08.07) 
+ 
+where B1 = thickness of the specimen, Bx = 25.4 mm, KJc(1) =  the KJc for the specimen size B1, 
+and KJc(x) = the KJc for the Bx = 25.4 mm thickness. 
+ 
+ 
+ASTM E1921 uses an engineering model where Kmin defines the lower shelf toughness resulting 
+in a three-parameter Weibull model where P is the probability of failure at or before KI. This 
+model has been found to be a good fit to ferritic steels with  b = 4 and Kmin = 20 MPa √m, and 
+since only the scaling factor K0, needs to be defined, a smaller number of samples is needed to 
+be tested to fully define the master curve.  Setting the Weibull slope b = 4 pre-establishes 
+scatter expectations so tolerance bounds are also fully defined with this method. 
+
+ 
+
+𝑃𝑃[𝐾𝐾𝐶𝐶 ≤ 𝐾𝐾𝐼𝐼] = 1 − 𝑒𝑒
+�−�
+
+𝐾𝐾𝐼𝐼−𝐾𝐾𝑚𝑚𝑚𝑚𝑚𝑚
+𝐾𝐾𝑜𝑜−𝐾𝐾𝑚𝑚𝑚𝑚𝑚𝑚
+
+�
+𝑏𝑏
+�
+ 
+
+Equation 2 (ASTM E08.07) 
+ 
+To apply the E1921 method, 6 to 8 replicate specimens are tested at a temperature near the 
+estimated T0 to obtain Jc(i) and then KJc(i) at the onset of cleavage. Some trial and error are 
+generally required to estimate the test temperature so that specimens cleave.  The KJc(i) data is 
+adjusted to the 1T thickness if necessary, then the scale parameter K0 is evaluated from the 
+following equation, where N is the number of specimens: 
+  
+
+𝐾𝐾0 = ��
+�𝐾𝐾𝐽𝐽𝐽𝐽(𝑖𝑖) − 20�
+
+4
+
+𝑁𝑁
+
+𝑁𝑁
+
+𝑖𝑖=1
+
+�
+
+1/4
+
++ 20 
+
+Equation 3 (ASTM E08.07) 
+ 
+The E1921 Weibull scale parameter K0 corresponds to a 63% cumulative probability of fracture 
+and is converted to KJc(med) using: 
+ 
+
+𝐾𝐾𝐽𝐽𝐽𝐽(𝑚𝑚𝑚𝑚𝑚𝑚) = 20 + (𝐾𝐾0 − 20)[ln(2)]1/4 
+Equation 4 (ASTM E08.07) 
+
+ 
+The T0 is calculated from the following, where Ttest is the test temperature: 
+ 
+
+
+
+ 
+
+6 
+
+𝑇𝑇0 = 𝑇𝑇𝑡𝑡𝑚𝑚𝑡𝑡𝑡𝑡 − �
+1
+
+0.019
+� ln �
+
+𝐾𝐾𝐽𝐽𝐽𝐽(𝑚𝑚𝑚𝑚𝑚𝑚) − 30
+70
+
+� 
+Equation 5 (ASTM E08.07) 
+
+ 
+ 
+
+𝐾𝐾𝐽𝐽𝐽𝐽(𝑚𝑚𝑚𝑚𝑚𝑚) = 30 + 70𝑒𝑒
+[0.019(𝑇𝑇−𝑇𝑇0)] 
+
+Equation 6 (ASTM E08.07) 
+ 
+
+The application of E1921 to potentially inhomogeneous data sets is covered in Annex X5 
+of E1921.  This annex provides calculation methods for analyzing material data sets that while 
+still following the Master Curve theory, do not present in typical distributions and therefore need 
+modified analysis to properly characterize the ductile-brittle transition temperature and turn it 
+into a statistically usable value.  The two types of inhomogeneous data sets are bi-modal and 
+multi-modal, and each comes with unique calculations and data validity requirements. 
+ 
+
+From ASTM E1921 X5.3.2.1: “The bimodal toughness distribution applies to data sets 
+that contain two toughness populations; the first population is more brittle than the second.  
+Typically, such toughness distributions are encountered in heat-affected zone (HAZ) materials 
+where the crack tip can sample the low- or high toughness material.  The combined bimodal 
+toughness distribution is fully defined by three parameters: the reference temperature of 
+population A, TA, the reference temperature of population B, TB, and the probability of sampling 
+a specimen from population A, pA.  The probability of sampling a specimen from population B is 
+equal to 1-pA.  Populations A and B are defined using the convention TB ≤ TA.” (ASTM E08.07) 
+ 
+
+From ASTM E1921 X5.3.3.1: “The multimodal toughness distribution applies to data sets 
+that contain randomly distributed toughness populations.  Typically, such cases are 
+encountered in heterogeneous ferritic steels, for which the macroscopic heterogeneities are 
+randomly distributed, or data sets of similar materials that are combined together.  The overall 
+data set is composed of several populations that individually follow the master curve distribution.  
+The combined distribution is fully defined by two parameters: the mean reference temperature 
+of all populations (Tm), and the standard deviation around the mean (σTm).” (ASTM E08.07) 
+
+ 
+ 
+
+T0TEM Development 
+ T0TEM originated in 2017 as a Matlab script which was used to conduct analysis for the 
+LPV program.  This simple script was created to speed test analysis and produce consistent 
+plots and data output for material test reports generated as part of the program.  Following the 
+addition of the inhomogeneity annex to E1921 and the round robin participation of NASA in its 
+development, it was decided to combine all the E1921 analysis and functions into a more usable 
+software package.  Matlab App Designer was selected as the platform for this task, since all the 
+original scripts were created in Matlab.  An added benefit is the ability for external users to 
+operate the software at no cost by using the free Matlab Runtime on Windows, Mac, and Linux. 
+ 
+ Development of T0TEM started in 2018 with an alpha version, was released in 2020 as 
+version 1.4, and updated in 2021 to version 1.5.  The following table contains the change log 
+describing updates and bugs fixed during each iteration. 
+ 
+ 
+ 
+
+
+
+ 
+
+Date Item Changes Version 
+
+8/11/2018 Graph and result tracking Updated titles of graphs to represent the excel file that was used. Alpha 
+
+Appearance Renamed the figure to T0TEM 
+
+Correct unit allows upper shelf to be plotted as 
+well 
+
+Updated the y axis labels to read Kj instead of Kjc. 
+
+Plots critical to analysis Added ability to plot Raw data, simple, bimodal, and multimodal 
+analyses results.  
+
+    
+ 
+
+8/12/2018 Allow for input of either US or metric units  Fixed US unit analysis for single and multitemperature scenarios Alpha 
+
+Faster calculation of multimodal which is the 
+longest calculation 
+
+Decreased amount of time needed for multimodal analysis 
+
+ 
+    
+
+ 
+
+2/13/2019 Multiple data sets, functionality, ease of use.  Updates to GUI function.  Tabs added. Graphing functions updated 
+to be more intuitive and useful. 
+
+Beta V1 
+
+ 
+    
+
+ 
+
+3/27/2019 Error that if all test data is taken above T0, 
+search function looks in wrong location for T0 and 
+will not find it.  Fix makes it so that search range 
+is not unnecessarily limited for any reason.  
+
+Beta V1 updated to V1_1.  Removed extra limiters on T0 initial 
+search range that were intended to speed up the calculation.    
+
+Beta 
+V1_1 
+
+ 
+    
+
+ 
+
+4/4/2019 Integration over a wider range gives more 
+accurate results and captures a wider range of 
+data in case needed.  The +/-200C range also 
+corresponds to the E1921 recommended range. 
+
+V1_2 created, currently contains noncritical updates, will be 
+released at later date.  Expanded multimodal integration range from 
++/- 100C to +/-200C. 
+
+Beta 
+V1_2 
+
+ 
+    
+
+ 
+
+4/22/2019 Avoid saving over data, creation of title that 
+doesn't automatically interpret carets and 
+underscores and putting T0 data on the graph. 
+Remove bugs in calculation of T0 and margin 
+adjustment tolerance bounds 
+
+Fixed bugs for title and removed automatic overwrite of saved 
+pictures. Added T0 value to the legend on the graph. Fixed 
+censoring criterion. Created more accurate T0 calculation. Fixed the 
+margin adjustment calculations. Added plotting capabilities. 
+
+Beta 
+V1_3 
+
+ 
+      
+
+5/11/2020 Preparations for initial release via SourceForge.   Adjusted censoring criteria to not sensor up.  Streamlined all 
+graphs.  Added mesh calculation option.  Added coefficients option.   
+ 
+Fixed multiple data sets.  Error checking redundancy.  Added splash 
+art and contact info.  Corrected errors in Raw Data export.  
+
+V1_4 
+
+ 
+    
+
+ 
+
+4/20/2021 Coefficient Lock/warning Coefficient modification only allowed after password entry.  Result 
+plots are marked when coefficients have been modified. 
+
+V1_5 
+
+Version check on startup check sourceforge to make sure that you have the most recent 
+version and shows warning if the version you're currently using is 
+not the one in sourceforge 
+
+Create Uncertainty Tab Allows user to enter uncertainties for their measured values (their 
+inputs) and will run a Monte Carlo for however many iterations they 
+choose and spits out a range of T0 values. Higher uncertainties in 
+individual measurements leads to greater uncertainty in T0 
+calculations 
+
+
+
+ 
+
+8 
+
+Fix Manual Upload Bug Bug that didn't allow user to hit save and exit on manual upload was 
+fixed. 
+
+Change Bimodal Plot Changed plot of TaMed from 11+77*exp(0.019*(Ti-Ta))+20 to 
+30+70*exp(0.019*(Ti-Ta)) and the same for TbMed. The coefficients 
+were adjustable as well. 
+
+Mesh Calculation function Inhomogeneity mesh calculation did not account for when the user 
+changed the coefficients. This has been fixed. 
+
+Inhomogeneity Calculations After the bimodal calculations, the program determined if Ta was 
+larger than pa. This was fixed and the comparison is now between 
+Ta and Tb. 
+
+T0 Calculations Previously the program would look up binomial bounds every time 
+the user hit the Go button. Now the binomial values are loaded and 
+saved when the program starts. This drastically cuts down on wait 
+time for the calculations by shifting the upload to startup. 
+
+Upload Excel File T0TEM v1.4 used the xlsread function to get data from Excel. As of 
+v1.5 it uses readcell to increase speed 
+
+Failure Plots T0TEM v1.4 only allowed the 95/5% confidence bound on binomial 
+probability. Now it allows for a any value > 0 and < 100. This 
+removes the need to upload the binomial coefficients file which will 
+save between 10-15 seconds on startup. 
+
+Upload .mat File When a user uploaded a .mat file, the "T0 Tol Bounds" check box 
+was not enabled. It has been fixed. The Mesh Calculation button 
+has also been enabled when .mat file is uploaded. 
+
+Censoring Fixed a censoring flaw that compared 1T adjusted values instead of 
+raw Kjc values. 
+
+Legend Kmin has 20 hard coded. 
+
+Plots Added plot type that shows selected thicknesses (ie 1T, 0.5T, 2T) 
+
+ToIN For data sets greater than 9, ToIN = Toscrn (X5.2.2) 
+
+Figure Maximum likelihood sign change 
+
+Figure Change homogenous to NA for specimens under N = 20 
+
+Master Curve  Kjcmed is not shifted with Kmin. 
+
+Table 1: T0TEM Change Log 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+
+ 
+
+T0TEM Features 
+T0TEM’s integrated analysis and plotting tools allow the user to input raw data in the 
+
+form of standard sample measurements and individual test values.  The sample measurements 
+and values do not require modification prior to input which saves significant time usually 
+required to perform size adjustments.  This data is then processed through the standard master 
+curve evaluation, as well as the inhomogeneity evaluation and the results are plotted and 
+exported in figures and tables as seen below.  In doing so, this software allows for large data 
+sets to be processed quickly with all required outputs and plots generated automatically within 
+seconds.   
+
+Data input can be performed manually, by Excel sheet, or via .mat file.  Data may be 
+entered in either US units or Metric, however uploading an Excel sheet with US units while the 
+units switch is in Metric will produce an error.  Manually input data can be saved into a .mat file 
+so repeated runs do not have to be re-entered each time.  Exported data can be copied with 
+various delimiter types for .csv files or pasted into Excel.  Plots are saved as pictures directly 
+from the plot interface and are a direct capture of the current screen where all bounds can be 
+set.  All generated figures and plot legends are differentiated by shape or line type to allow for 
+black and white publication.   
+ The following figures show the layout and features of T0TEM v1.5.  Each feature is 
+described in detail in the T0TEM user manual.  The graphical interface contains four tabs at the 
+top that allow the user to navigate between the main program functions.  The first two tabs are 
+used for conducting the basic transition temperature analysis as well as the inhomogeneity 
+analysis.  These tabs contain all input and output functions, plot functions, and export capability.  
+Next, the third tab allows the user to apply uncertainty conditions to the current data set and 
+through a Monte Carlo analysis determine the effects of uncertainty within each part of the raw 
+material test data.  Finally, the fourth tab is specially designed to receive multiple data sets as 
+individual input files all at once.  This tab will calculate and report the most basic results for each 
+data set in the tab.  Any individual data set from the fourth tab may be viewed in more detail by 
+selecting the set and refreshing the first two tabs.   
+   
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+
+ 
+
+10 
+
+ 
+
+ 
+Figure 2: Initial T0 Determination Tab 
+
+ 
+ 
+
+1. Initial T0 Determination Tab 
+2. Units Switch 
+3. Data Set Info/Base Results 
+4. Requirement for Size of Data Set 
+5. Chart Selection 
+6. Master Curve Plot Options 
+7. Post Calculation Buttons 
+8. Coefficients 
+9. Graph Options 
+10. Graph Area 
+11. Method to Upload Data 
+
+ 
+ 
+
+
+
+ 
+
+ 
+
+Figure 3: Inhomogeneity Calculations Tab 
+ 
+
+1. Inhomogeneity Calculations Tab 
+2. Mesh Calculation Button 
+3. Export Data Button 
+4. Simple Inhomogeneity Results 
+5. Bimodal Inhomogeneity Results 
+6. Multimodal Inhomogeneity Results 
+7. Bounds Plot Options 
+8. Graph Options 
+9. Graph Area 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+
+ 
+
+12 
+
+ 
+
+Figure 4: Uncertainty Calculations Tab 
+ 
+
+1. Uncertainty Calculations Tab 
+2. Copy Iteration Data Button 
+3. Calculate Uncertainty Button 
+4. Number of Iterations/MC Confidence (%) 
+5. Include Inhomogeneity 
+6. Measurement/Uncertainty Table 
+7. Uncertainty Plot Type 
+8. Graph Area 
+
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+
+ 
+
+Figure 5: Multiple Data Sets Tab 
+1. Multiple Data Sets Tab 
+2. Upload Samples 
+3. Evaluate All 
+4. Show in 1st/2nd Tabs 
+5. Main Table 
+6. Copy Table Data 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+
+
+ 
+
+14 
+
+T0TEM Verification 
+T0TEM was verified against the ASTM agreed upon standard results for the verification 
+
+data set found in Table X3.1 of E1921 (ASTM E08.07).  The following tables demonstrate the 
+accuracy of T0TEM compared to the agreed upon standard.  It is likely that T0TEM is in fact 
+closer to an absolute answer than the standard due to the innate double precision nature of 
+Matlab program and the use of specialized Matlab function solvers which use analytical 
+methods as opposed to the interval solver method described in the standard.  All criteria 
+required by the standard has been reported by T0TEM and compared against the standard 
+results with satisfactory agreement. 
+
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+Table 2: Standard Results Comparison 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+
+ 
+
+ 
+
+Table 3: Bi-Modal Confidence Bounds 
+
+Table 4: Multi Modal Confidence Bounds 
+
+T i  – T m Ti K Jc(0.05) K Jc(0.95) K Jc(0.05) K Jc(0.95) K Jc(0.05) K Jc(0.95)
+
+(oC) (oC) (MPa√m) (MPa√m) (MPa√m) (MPa√m) (MPa√m) (MPa√m)
+
+-51 -95 38.11 79.50 38.11 79.49 0.00 0.00
+-46 -90 39.35 84.09 39.35 84.09 0.00 0.00
+-41 -85 40.72 89.16 40.72 89.15 0.00 0.00
+-36 -80 42.23 94.72 42.22 94.72 0.00 0.00
+-31 -75 43.88 100.85 43.88 100.85 0.00 0.00
+-26 -70 45.69 107.58 45.69 107.58 0.00 0.00
+-21 -65 47.68 114.99 47.68 114.99 0.00 0.00
+-16 -60 49.87 123.15 49.87 123.14 0.00 0.00
+-11 -55 52.28 132.11 52.28 132.11 0.00 0.00
+-6 -50 54.93 141.97 54.92 141.97 0.00 0.00
+-1 -45 57.83 152.82 57.83 152.81 0.00 0.00
+4 -40 61.03 164.74 61.03 164.74 0.00 0.00
+9 -35 64.54 177.86 64.54 177.86 0.00 0.00
+14 -30 68.40 192.28 68.40 192.28 0.00 0.00
+19 -25 72.64 208.15 72.64 208.14 0.00 0.00
+24 -20 77.31 225.59 77.31 225.59 0.00 0.00
+29 -15 82.44 244.78 82.44 244.77 0.00 0.00
+34 -10 88.08 265.88 88.08 265.87 0.00 0.00
+39 -5 94.28 289.08 94.28 289.07 0.00 0.00
+44 0 101.10 314.59 101.10 314.59 0.00 0.00
+
+T0TEM V1.5Standard
+Percent Diff
+
+T0TEM/Standard
+
+
+
+ 
+
+16 
+
+ 
+ In addition to the ASTM standard example problem agreement, T0TEM has been 
+extensively beta tested by the E1921 community.  NASA is a long-standing member of the 
+E1921 committee, and T0TEM has been used to analyze all transition temperature testing 
+conducted as part of the Layered Pressure Vessel project.  T0TEM has produced satisfactory 
+results in over 30 separate data sets which will be published as part of a future technical 
+memorandum.  In each case, T0TEM produced results consistent with the proper analysis and 
+results of each material test.  These data sets were initially analyzed with basic Matlab scripts, 
+and re-run with each new version of T0TEM to ensure consistency.  This effort resulted in 
+hundreds of individual analyses being run through T0TEM during its development. 
+ Version 1.3 was initially distributed to select members of the E1921 committee for beta 
+testing prior to public release.  During this test phase, members of the committee used T0TEM 
+to analyze data on their own and were invited to comment on any issues they found.  Several 
+comments were received regarding plotting functions as well as software bugs and output 
+issues.  However, no critique of the validity of results was raised.  After version 1.4 was 
+released publicly, more comments and questions were submitted.  Most of these comments 
+were related to inhomogeneity analysis and limitations placed on lot sizes, as well as a few 
+minor plot and functionality issues.  Again, no concerns with the validity of results were raised. 
+T0TEM V1.5 is actively in use for an ASTM round robin study on reactor vessel materials under 
+high rate testing.  Results have consistently shown agreement with analysis performed via other 
+methods.  T0TEM has also been stress tested during an ASTM round robin censoring study 
+evaluating problematic data sets against proposed new censoring methods.  During NASA’s 
+participation in this study, T0TEM was used to baseline the results prior to evaluating different 
+censoring methods.  In all cases except one, T0TEM produced satisfactory baseline results.  
+Most importantly, for the one outlier, T0TEM did not give an incorrect result but rather a non-
+result due to a determination of insufficient data.   
+
+Conclusion 
+ T0TEM v1.5 (current release) is the result of years of testing, evaluation, and 
+improvement.  T0TEM’s functionality has improved significantly since conception and its 
+accuracy has been constantly verified against the ASTM standard solutions during all phases of 
+development.  It has performed hundreds of analysis iterations during the NASA Layered 
+Pressure Vessel investigation which entailed over 30 separate lots of materials with many 
+poorly behaving weld and parent data sets.  These data sets served to find several calculation 
+issues in early beta testing, as well as issues with plotting and reporting.  At the time of this 
+report, T0TEM has over 200 downloads worldwide and has received no significant comments or 
+concerns over the accuracy of calculation.  It is somewhat difficult to completely characterize the 
+overall certainty of T0TEM’s calculations in every scenario, for every data set.  Currently there 
+are no standard approved software programs for performing E1921 calculations, it is the goal for 
+T0TEM to be the first.  As shown in the previous tables, T0TEM solves the standard example 
+problem (solutions set by the E1921 committee) with no more than 0.09% difference in any 
+result.  This verification, along with a significant history of internal NASA and external 
+community use without issue, gives a high confidence in the consistency and credibility of 
+results generated by T0TEM.  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+
+ 
+
+ 
+ 
+
+References 
+ASTM E08.07. E1921 - Standard Test Method for Determination of Reference Temperature, T0, 
+
+for Ferritic Steels in the Transition Range. West Conshohocken: ASTM International, 
+2019. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+
+	Abstract:
+	Introduction
+	ASTM E1921 Background
+	T0TEM Development
+	T0TEM Features
+	T0TEM Verification
+	Conclusion
+	References
+

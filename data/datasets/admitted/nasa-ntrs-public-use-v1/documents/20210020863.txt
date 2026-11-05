@@ -1,0 +1,383 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Microsoft Word - mrf_crack_segmentation_as_submitted.docx
+
+
+A Markov Random Field Model for Texture-based Segmentation of Small Cracks in Thin Inconel 
+Tubes 
+
+ 
+Peter Spaetha, Russel A. Wincheskia, Eric Burkea, and David Dawickeb 
+
+ 
+aNASA Langley Research Center, Hampton, VA, 23681-2199 
+bAnalytical Services and Materials, Inc., Hampton, VA 23666 
+
+ 
+ABSTRACT 
+
+ 
+Markov random fields have been used for image segmentation since their introduction in the 
+1980s. This work applies a method from Principal Component Thermography to enhance the 
+contrast in damage regions in 3D images derived from X-ray computed tomography (CT) 
+inspections. The developed method is applied to sizing of small cracks in thin Inconel tubes 
+designed as probability of detection (POD) samples for radiographic inspection. Misclassification 
+errors arising from artifacts due to beam-hardening are reduced by fitting the boundary of the 
+segmented damage region with the arc of an ellipse. Results are compared against those 
+obtained through manual inspection. 
+ 
+Keywords: Image segmentation, Markov Random fields, Principal Component Thermography, 
+Random Sample Consensus (RANSAC), crack inspection and metrology 
+ 
+
+1. INTRODUCTION 
+ 
+Techniques from image analytics and data science were applied to characterize small cracks in 
+thin Inconel tubes. Three-dimensional images derived from x-ray computed tomography were 
+segmented using a texture-based Markov Random Field (MRF) approach [1]. Beam hardening 
+and other artifacts in the CT images cause significant difficulty in automatically segmenting crack 
+regions in the specimens in an obvious fashion. An approach from Principal Component 
+Thermography [2] enhanced the contrast of the crack regions by transforming the 3D image into 
+a more easily segmented 2D summary image. 
+ 
+We observe that the binary segmentation of the summary image into damaged and non-
+damaged regions contains misclassified pixels. A more accurate measurement of the damaged 
+region is produced by estimating the boundary of the segmentation as an arc of an ellipse. 
+Random Sample Consensus (RANSAC) [3] overlays a Least Squares fit of an elliptical arc to the 
+segmented damage region boundary. Finally, our results are compared against those obtained 
+through manual observation. 
+ 
+
+2. EXPERIMENTAL SETUP  
+ 
+Thin Inconel tubes were prepared as fatigue crack specimens to be used in probability of 
+detection (POD) testing of radiographic inspection methods. The tubes, with a nominal 1” 
+diameter, were machined to produce a reduced wall thickness in the central, gauge, section. A 
+
+
+
+small circumferential notch was placed in the midsection of the tubes to act a stress concentrator 
+for fatigue crack growth through high cycle fatigue. Following crack growth, the wall was further 
+thinned, removing the starter notch. The final target wall thickness and crack depth were .030” 
+and .021” respectively.   
+ 
+The experimental design of the POD testing specified the as-manufactured length and depth of 
+each crack in the sample set.  These measurements were to be accomplished using a combination 
+of eddy current (EC), scanning election microscopy (SEM), and CT imaging. High frequency EC 
+scans were performed to locate and mark the location of the cracks after notch removal. SEM 
+imaging was then applied to measure the surface length of the cracks. Finally, CT imaging was 
+applied to measure the crack depth. 
+ 
+High resolution images of the tubes were produced using a micro focus X-ray CT with a maximum 
+resolution of 5 microns and magnification up to 160x. A 16-bit amorphous silicon digital detector 
+with a 2000 x 2000-pixel array was used to collect radiographs at each rotation angle as the X-ray 
+path intersected the sample (360 degrees in 0.11-degree increments). Samples were positioned 
+with the center of rotation aligned with the marked EC crack location. The source to tube distance 
+was minimized to achieve maximum gain, resulting in a voxel size of approximately 10 microns.  
+The three-dimensional reconstruction of the collected radiographs produced tomographic data 
+that could be viewed along any plane in the sample volume. Grayscale 32-bit float images of the 
+region of interest (typical dimensions of 1300 x 900 x 500 voxels) were obtained from the X-ray 
+CT inspections of the Inconel specimens. The tube axis of the images was parallel to the 𝑧-axis 
+and the crack face was in the 𝑥𝑦-plane. A sample image corresponding to 𝑧 = 243 can be seen 
+in  
+Figure 1.   
+ 
+
+          
+ 
+
+Figure 1. Two-dimensional slice corresponding to z=243. Damage region that has been manually characterized is highlighted in 
+the image at right. The direction of 𝑧-axis is out of the plane of the image and measurements are in mm. 
+
+ 
+3. SEGMENTATION AND ESTIMATION MODEL 
+
+ 
+
+
+
+Consider a single 3D volume 𝐷 comprised of voxels at spatial locations in 𝑥, 𝑦, and 𝑧 coordinates 
+of dimensions 𝑁!,𝑁", and 𝑁#, respectively. Motivated by Principal Component Thermography 
+[2], 𝐷 is mapped to a two-dimensional image 𝐴 of dimension (𝑁! ⋅ 𝑁",𝑁#) whose columns are 
+flattened arrays containing the 𝑧-slices of 𝐷. In other words the columns 𝐴$,𝑘 = 1,…,𝑁# are 
+vectors of length 𝑁! ⋅ 𝑁" with (𝐴$)% = 𝐷(𝑖,𝑗,𝑘) where 𝑙 = 𝑖 ⋅ 𝑁" + 𝑗 for 𝑖 = 1,…,𝑁! and 𝑗 =
+1,…,𝑁". In Principal Component (active) Thermography the 𝑧-component of 𝐷 represents time. 
+ 
+
+ 
+Figure 2. Reshaping the 3D CT volume into 2D array for processing with Principal Component Analysis. 
+
+ 
+Consider the Singular Value Decomposition of the matrix 𝐴 after mean-value normalizing the 
+columns 
+
+𝐴 = 𝑈 ⋅ Σ ⋅ 𝑉&. 
+ 
+The right singular eigenvector corresponding the second largest singular value 𝜎' (i.e., the second 
+column of 𝑉 if the diagonal elements of Σ are in descending order) is called the ‘Principal Contrast 
+Mode’ 𝑉()* of 𝐴, and contains important information about the spatial variation in contrast as a 
+function of time. A two-dimensional image B is obtained from 𝐴 by multiplication pixel-by-pixel 
+across the 𝑧-direction with 𝑉()* 
+ 
+
+𝐵+, = 𝐴 ⋅ 𝑉()*& (𝑖𝑁# + 𝑗). 
+ 
+B is referred to as the PCA summary image of 𝐴 and the value of 𝐵 was used to highlight flaw 
+contrast across the 𝑧-direction in the 3D CT images from the Inconel tubes specimens. See Figure 
+3 to see the identification of the flaw region and by projection onto the eigenspace corresponding 
+to 𝑉()*. 
+ 
+
+
+
+ 
+Figure 3. Single slice of 3D CT Image and result after integrating against the Principal Contrast Mode in z-direction. The 
+
+damaged region is identified by the PCM projection. 
+
+ 
+The flaw regions were then identified through supervised texture-based segmentation using the 
+Markov Random Field Model [1]. 
+ 
+Let 𝑋:𝐵 → {0,1} denote a binary labeling of the PCA summary image	𝐵. In the MRF framework 
+a probability measure is defined on the collection of all possible labelings, and the goal was to 
+find the labeling 𝑋C that maximizes the probability 𝑃(𝑋 ∣ 𝐵) of the labeling conditioned on the 
+image 𝐵. By Bayes’ rule: 
+ 
+
+𝑃(𝑋 ∣ 𝐵) =	
+𝑃(𝐵 ∣ 𝑋 )𝑃(𝑋)
+
+𝑃(𝐵)
+∝ 𝑃(𝐵 ∣ 𝑋)𝑃(𝑋). (1) 
+
+ 
+Let the pixels of 𝐵 be indexed by 𝑠 ∈ 1,…,𝑁! ⋅ 𝑁". We assume that the distribution of 𝐵- 
+conditioned on 𝑋- is normal with mean 𝜇.! and variance 𝜎.!, i.e., 
+ 
+
+𝑃(𝐵- ∣∣ 𝑋- ) ∼ 𝑁K𝜇.!,𝜎.!L. (2) 
+ 
+The mean and variance for the damage and non-damage labels were estimated from selected 
+regions in 𝐵 corresponding to the damaged and non-damaged regions. 
+ 
+Following the MRF approach the prior distribution 𝑃(𝑋) was assumed to be a Gibbs distribution 
+of the form: 
+ 
+
+𝑃(𝑋) =	
+1
+𝑍
+expK−𝑈(𝑋)L =
+
+1
+𝑍
+expR S −𝛽𝛿K𝑥+ ≠ 𝑥,L
+
+{+,,}∈)
+
+W (3) 
+
+ 
+
+Damage region 
+Tube walls 
+
+
+
+where 𝑍 is constant and 𝐶 denotes all first order cliques in the image 𝐵. Equation (3) imposes 
+that local regions have homogeneous labelings for 𝛽 > 0. See [4] for additional details. 
+Maximizing 𝑃(𝐵 ∣ 𝑋)𝑃(𝑋) is equivalent to minimizing the negative log-likelihood 𝑙(𝐵 ∣ 𝑋) =
+−log𝑃(𝐵 ∣ 𝑋 )𝑃(𝑋), i.e. 
+ 
+
+K𝑋CL
+-
+= arg min
+
+34∈{5,6}7
+( 	
+
+1
+2𝜎$
+
+' (𝐵- − 𝜇$)
+' +	
+
+1
+2
+log2𝜋𝜎$
+
+' + S −𝛽𝛿(𝑥+ ≠ 𝑘)
+{+}∈8-
+
+). (4) 
+
+ 
+The term 𝜕𝑠 of equation (4) shown below in Figure 4 denotes the first-order neighborhood of the 
+pixel 𝑠. 
+ 
+
+ 
+Figure 4. First order neighborhood 𝜕𝑠 (in grey) of the pixel 𝑠 (in black) consists of the grey nodes. In the MRF model the 
+
+conditional distribution 𝑃(𝑋! ∣ 𝑋",𝑟 ≠ 𝑠) is determined by the neighborhood of 𝑠, i.e., 𝑃(𝑋! ∣∣ 𝑋",𝑟 ≠ 𝑠) = 𝑃(𝑋! ∣ 𝑋",𝑟 ∈ 𝜕𝑠). 
+
+The method of Iterative Conditional Modes [5] was applied to approximate the solution to 
+equation (4), as follows: 
+ 
+
+1) Select initial labeling 𝑋 and set counter 𝑝 = 0 
+2) For each pixel 𝑠, 
+
+𝑋- =	arg min
+34∈{5,6}7
+
+[ 	
+1
+2𝜎$
+
+' (𝐵- − 𝜇$)
+' +	
+
+1
+2
+log2𝜋𝜎$
+
+' + S −𝛽𝛿(𝑥+ ≠ 𝑘)
+{+}∈8-
+
+]. 
+
+3) Repeat step 2 with 𝑝 = 𝑝 + 1 until 𝑝 reaches a prespecified limit. 
+ 
+The quality of the ICM solution depends heavily on the initial segmentation estimate 𝑋5. 
+ 
+Because of beam hardening artifacts and variation in intensity near the boundary of the Inconel 
+tube, segmentation of the two-dimensional slice of the original volume 𝐷 displays many 
+misclassification errors. The segmentation of the PCA image summary 𝐵 is more accurate, as 
+shown in Figure 5. 
+ 
+
+
+
+ 
+Figure 5. Comparison of binary Markov Random Field segmentation before on single slice versus PCM projected image. 
+
+ 
+Although the segmentation on the PCA projected image is more satisfactory it does not capture 
+the shape of the boundary of the flaw and misclassifies non-damaged pixels outside the boundary 
+of the tube as being damaged. A recursive fit of an elliptical arc to the boundary of the segmented 
+region was performed using least squares overlayed with RANSAC. Note that the least squares 
+without also applying RANSAC fails to capture the width of the indication.  
+
+ 
+Figure 6. Least squares versus RANSAC fit of ellipse to upper boundary of the damage segmentation. 
+
+Misclassification errors 
+Damage segmentation 
+
+
+
+The results of the PCA image projection from the above approach, the segmentation, and 
+elliptical fit to the boundary are shown in Figure 7. 
+ 
+
+ 
+Figure 7. The PCA image projection (upper left), boundary of segmented damage region (upper right), elliptical boundary fitted 
+
+using least squares (lower left), and elliptical boundary fitted recursively using RANSAC. Note that the segmentation misclassifies 
+pixels near the boundary of the Inconel tube and that an elliptical boundary better follows flaw boundary. 
+
+The overall model for modeling the small crack region is given in the following chart. 
+ 
+
+ 
+ 
+Finally, a comparison against flaw identification and measurement by manual inspection can be 
+found in Figure 8. The major and minor axes in the model were measured to be 1.465 mm and 
+0.395 mm respectively, versus the manually inspected measurements of 1.6057 mm and 0.4032 
+mm. 
+ 
+
+Damage misclassification 
+(extends beyond wall) 
+
+
+
+ 
+Figure 8. Comparison of the model characterization of the small crack POD specimen against results of manual inspection. 
+
+ 
+4. CONCLUSIONS 
+
+ 
+Initial results suggest that the PCA projection used extensively in active thermography combined 
+with a supervised texture-based segmentation model can be used to quantify crack dimensions 
+in thin Inconel tubes. Fitting the boundary of the segmented damage region by an elliptical arc 
+using a recursive method such as RANSAC provides a more accurate boundary of the indication 
+and agrees well with manual inspection. Ongoing out of sample testing on additional data 
+combined with comparisons against destructive crack measurement data will help assess the 
+quality of the model. 
+
+REFERENCES 
+ 
+[1]  S. Geman and D. Geman, "Stochastic relaxation, Gibbs distributions, and the Bayesian 
+
+restoration of images," IEEE-PAMI, vol. 6, pp. 721-741, 1984.  
+[2]  N. Rajic, "Principal Component Thermography for Flaw Contrast Enhancement and Flaw 
+
+Depth Characterisation in Composite Structures," Composite Structures, vol. 58, pp. 521-
+528, 2002.  
+
+[3]  M. A. Fischler and R. C. Bolles, "Random Sample Consensus: A Paradigm for Model Fitting 
+with Applications to Image Analysis and Automated Cartography," Comm. ACM., vol. 24, 
+no. 6, pp. 381-395, 1981.  
+
+[4]  Z. Kato and J. Zerubia, Markov Random Fields in Image Segmentation, Foundations and 
+Trends in Signal Processing, 2012.  
+
+[5]  J. Besag, "On the Statistical Analysis of Dirty Pictures," Journal of the Royal Statistical 
+Society, Series B, vol. 48, no. 3, pp. 259-302, 1986.  
+
+ 
+ 
+
+
