@@ -41,14 +41,14 @@ def sha256_bytes(payload: bytes) -> str:
 
 
 def clean(value: Any) -> str:
-    return re.sub(r"\\s+", " ", str(value or "")).strip()
+    return re.sub(r"\s+", " ", str(value or "")).strip()
 
 
 def normalize_gsm8k(row: dict[str, Any], index: int) -> dict[str, Any] | None:
     question, answer = clean(row.get("question")), str(row.get("answer") or "").strip()
     if len(question) < 20 or len(answer) < 15 or "####" not in answer:
         return None
-    if not re.search(r"####\\s*\\S", answer):
+    if not re.search(r"####\s*\S", answer):
         return None
     return {
         "id": f"gsm8k-train-{index:05d}",
