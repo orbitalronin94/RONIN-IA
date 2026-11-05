@@ -131,7 +131,7 @@ def main() -> None:
                 held.append(f"{doc_id}:not_admitted")
                 held_counts["not_admitted"] = held_counts.get("not_admitted", 0) + 1
                 continue
-            if license_url not in ALLOWED_LICENSE_URLS or str(row.get("license", "")).strip() not in {"CC BY", "CC0"}:
+            if license_url not in ALLOWED_LICENSE_URLS:
                 held.append(f"{doc_id}:license_not_allowlisted")
                 held_counts["license_not_allowlisted"] = held_counts.get("license_not_allowlisted", 0) + 1
                 continue
