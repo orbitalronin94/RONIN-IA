@@ -54,7 +54,7 @@ def main() -> int:
     seen: set[str] = set()
     source_files = []
     rows_written = 0
-    split_counts = {"train": 0, "train_covost": 0, "dev": 0, "test": 0, "other": 0}
+    split_counts: dict[str, int] = {}
     with output.open("w", encoding="utf-8", newline="") as dst:
         for pair in PAIRS:
             filename = f"covost_v2.{pair}.tsv.tar.gz"
@@ -78,10 +78,9 @@ def main() -> int:
                 pair_rows = 0
                 for source_row_index, row in enumerate(reader, start=1):
                     split = (row.get("split") or "").strip()
-                    if split not in split_counts:
-                        split_counts["other"] += 1
-                        continue
-                    split_counts[split] += 1
+                    split_counts[split] = split_counts.get(split, 0) + 1
+                    if split not in {"train", "train_covost", "dev", "test"}:
+                        raise ValueError(f"unexpected upstream split label {split!r} in {filename}, row {source_row_index}")
                     if split not in {"train", "train_covost"}:
                         continue
                     translation = (row.get("translation") or "").strip()
@@ -110,9 +109,7 @@ def main() -> int:
             if rows_written >= args.max_rows:
                 break
 
-    if split_counts["other"]:
-        raise ValueError(f"unexpected upstream split labels: {split_counts['other']}")
-    if rows_written == 0 or split_counts["train"] + split_counts["train_covost"] == 0:
+    if rows_written == 0 or split_counts.get("train", 0) + split_counts.get("train_covost", 0) == 0:
         raise ValueError("no CoVoST 2 training rows found; refusing empty or non-training export")
 
     payload = output.read_bytes()
