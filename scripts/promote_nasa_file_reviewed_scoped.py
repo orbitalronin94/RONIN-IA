@@ -64,16 +64,21 @@ def main():
     source_by={str(x["document_id"]):x for x in source.get("decisions",[])}
     if len(records)!=6 or len(review_by)!=10: raise RuntimeError("Unexpected file-review inventory")
     # Re-verify the pinned 608-document train artifact and calculate comparison signatures.
-    train=(args.legacy_train_dir/"train.txt").read_bytes()
+    train=(args.legacy_train_dir/"train.txt").read_text(encoding="utf-8")
     sidecar=[json.loads(x) for x in (args.legacy_train_dir/"documents.train.jsonl").read_text(encoding="utf-8").splitlines() if x.strip()]
-    chunks=[x for x in train.split(b"\n\n") if x]
-    if len(chunks)!=len(sidecar) or len(chunks)!=608: raise RuntimeError("Legacy train artifact is not the expected 608-document partition")
-    legacy_hashes=set(); legacy_sigs=[]
-    for chunk,row in zip(chunks,sidecar):
-        digest=sha(chunk)
+    if len(sidecar)!=608: raise RuntimeError("Legacy train artifact is not the expected 608-document partition")
+    legacy_hashes=set(); legacy_sigs=[]; cursor=0
+    for row in sidecar:
+        count=int(row.get("character_count",0))
+        if count<=0: raise RuntimeError("Legacy train sidecar has invalid character_count")
+        chunk=train[cursor:cursor+count]
+        digest=sha(chunk.encode("utf-8"))
         if digest!=row.get("text_sha256"): raise RuntimeError("Legacy train document hash mismatch")
         legacy_hashes.add(digest)
-        legacy_sigs.append((simhash(chunk.decode("utf-8")),row.get("record_id")))
+        legacy_sigs.append((simhash(chunk),row.get("record_id")))
+        cursor += count
+        if train[cursor:cursor+2]=="\\n\\n": cursor += 2
+    if cursor not in {len(train),len(train)-1}: raise RuntimeError("Legacy train payload has unindexed trailing content")
     selected=[]
     for row in records:
         doc_id=str(row["document_id"]); review_row=review_by.get(doc_id,{}); source_row=source_by.get(doc_id,{})
