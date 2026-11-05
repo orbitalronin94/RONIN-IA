@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 10:42 | [Integración continua #1287 (run 42012844318)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42012844318) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: assemble NASA documents into candidate domain libraries. Trigger: push; rama: main; intento: 1. | ba9e3db8 |
 | 2026-11-05 10:41 | [Integración continua #1286 (run 42012821289)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42012821289) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: build verified NASA candidate library packs. Trigger: push; rama: main; intento: 1. | c0f224e5 |
 | 2026-11-05 10:33 | [Integración continua #1284 (run 42011152445)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42011152445) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs: update Level A policy and verified library counts. Trigger: push; rama: main; intento: 1. | 44219524 |
 | 2026-11-05 10:31 | [Integración continua #1280 (run 42010976432)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42010976432) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs: document scoped legacy admission and training run. Trigger: push; rama: main; intento: 1. | 550ef428 |
