@@ -36,7 +36,7 @@ python -m pip install -e '.[dev]'
 pytest -q
 ```
 
-El ciclo oficial sin tutor está en [main-native-no-tutor-holdout.yml](.github/workflows/main-native-no-tutor-holdout.yml). Recupera el checkpoint principal, verifica los corpus de entrenamiento admitidos, mide el modelo antes, ejecuta fine-tuning nativo sin tutores y vuelve a medir exactamente los mismos holdouts. El resultado es un candidato: **no sustituye automáticamente los pesos de main**.
+El ciclo oficial sin tutor está en [main-native-no-tutor-holdout.yml](.github/workflows/main-native-no-tutor-holdout.yml). Recupera el checkpoint principal, verifica los corpus de entrenamiento admitidos, mide el modelo antes, ejecuta fine-tuning nativo sin tutores y vuelve a medir exactamente los mismos holdouts. El resultado es un candidato: **no sustituye automáticamente los pesos de main**. Para explorar semillas, usa el cribado fijo de 64 preguntas; confirma las prometedoras con 128/256 y reserva el test completo de MMLU-Pro para la auditoría de la ganadora. La semilla de entrenamiento cambia, pero la semilla de selección del holdout permanece fija.
 
 Para ejecutar entrenamiento local con un corpus UTF-8 autorizado:
 
