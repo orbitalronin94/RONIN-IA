@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:46 | [Integración continua #1242 (run 42004864603)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42004864603) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: export ScienceVerse full text into auditable JSONL candidates. Trigger: push; rama: main; intento: 1. | b433175f |
 | 2026-11-05 09:45 | [Integración continua #1244 (run 42005008309)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42005008309) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): prevent duplicate DOI objects in ScienceVerse text export. Trigger: push; rama: main; intento: 1. | c408c123 |
 | 2026-11-05 09:45 | [Integración continua #1243 (run 42004891756)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42004891756) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): normalize DOI identities before RDS export. Trigger: push; rama: main; intento: 1. | 083cb2ed |
 | 2026-11-05 09:44 | [Integración continua #1241 (run 42004848786)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42004848786) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): use base R license fallback in ScienceVerse exporter. Trigger: push; rama: main; intento: 1. | 1d26c0c9 |
