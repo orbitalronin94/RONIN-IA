@@ -9,7 +9,7 @@ on:
 
 permissions:
   actions: read
-  contents: read
+  contents: write
 
 jobs:
   extract-and-pin:
@@ -52,12 +52,40 @@ jobs:
           payload = torch.load(source, map_location="cpu", weights_only=False)
           if payload.get("step") != 1000 or not isinstance(payload.get("model"), dict):
               raise SystemExit("El checkpoint no corresponde al modelo main fijado")
-          Path("weights").mkdir(exist_ok=True)
-          target = Path("weights/ronin-main.pt")
-          shutil.copy2(source, target)
-          print(f"checkpoint={target} bytes={target.stat().st_size} sha256={digest}")
+          target = Path("/tmp/ronin-main.pt")
+          torch.save({
+              "model": payload["model"],
+              "step": payload["step"],
+              "profile": "tiny",
+              "training_config": payload.get("training_config"),
+              "weights_only": True,
+          }, target)
+          if target.stat().st_size >= 90_000_000:
+              raise SystemExit(f"Los pesos no caben como archivo Git normal: {target.stat().st_size} bytes")
+          weights_digest = hashlib.sha256(target.read_bytes()).hexdigest()
+          import json
+          manifest_path = Path("weights/main-model.json")
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          manifest["weights_path"] = "weights/ronin-main.pt"
+          manifest["weights_sha256"] = weights_digest
+          manifest["weights_bytes"] = target.stat().st_size
+          manifest["checkpoint_storage"] = "versioned model state_dict; optimizer state intentionally excluded"
+          manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+          print(f"checkpoint_sha256={digest} weights_sha256={weights_digest} weights_bytes={target.stat().st_size}")
           PY
-      - name: Publicar artefacto limpio de pesos
+      - name: Incorporar los pesos verificados a main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          cp /tmp/ronin-main.pt weights/ronin-main.pt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add weights/ronin-main.pt weights/main-model.json
+          git commit -m "model: versionar los pesos verificados de RONIN main"
+          git push origin main
+      - name: Publicar copia de recuperación del checkpoint
         uses: actions/upload-artifact@v6
         with:
           name: ronin-main-weights-v1
