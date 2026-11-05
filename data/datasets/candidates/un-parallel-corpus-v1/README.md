@@ -56,3 +56,16 @@ Citar: United Nations, Department for General Assembly and Conference Management
 - Fecha de revisión: 2026-11-05.
 - Resultado: **apto para iniciar ingestión técnica**, no admitido todavía.
 - Motivo del bloqueo: falta inspección del payload descargado, hashes, calidad, privacidad, deduplicación y particionado.
+
+## Ingestión reproducible en-es añadida a RONIN (2026-11-05)
+
+Se ha incorporado directamente a `main`:
+
+- Workflow: `.github/workflows/ingest-un-parallel-en-es.yml`.
+- Validador: `scripts/prepare_un_parallel_candidate.py`.
+- El workflow descarga las dos partes del bitexto inglés-español, reconstruye el archivo, comprueba gzip, extrae los tres componentes (inglés, español e identificadores), valida UTF-8 estricto y exige igualdad de líneas.
+- Publica el payload y un manifiesto SHA-256 como artefacto `ronin-un-parallel-corpus-en-es-candidate` (retención 90 días).
+- Los IDs de Google Drive proceden de un script público de descarga fijado a la revisión `e22994bdd64c668dc2360871b7e04c8e9d0a5224`; se usan únicamente como espejo de transporte. La fuente y la declaración de derechos siguen siendo las páginas oficiales de Naciones Unidas.
+
+**Límite importante:** este primer paso genera un paquete candidato, no un corpus admitido. Igualar líneas no demuestra alineación semántica ni calidad. Siguen pendientes auditoría documental, privacidad, deduplicación con los 608 textos admitidos, clasificación temática General/HKD, revisión humana y particionado. Los conjuntos de desarrollo/prueba oficiales de 2015 no se descargan. No usar en entrenamiento hasta completar esos controles.
+
