@@ -42,3 +42,10 @@ El ensamblador asigna únicamente documentos con señal temática suficiente. Lo
 - Frontiers in Psychology (1.000), i-Perception (496), Judgment and Decision Making (855) y Journal of Cognition (447): candidatos ScienceVerse declarados CC BY 4.0 en el catálogo upstream; falta auditoría DOI/artículo y extracción.
 - El catálogo declara 15.179 artículos en 18 corpus y conserva manifiestos por DOI y procedencia. Estos documentos aún no están admitidos ni son entrenables.
 - Expediente: `data/datasets/candidates/scienceverse-expanded-corpora/README.md`.
+
+## Adquisición ScienceVerse
+
+- Judgment and Decision Making: **855 artículos esperados**.
+- Journal of Cognition: **447 artículos esperados**.
+- Cada DOI debe declarar CC-BY 4.0; se conservan los manifiestos individuales, payload RDS y SHA-256 en `data/datasets/admitted/scienceverse/`.
+- Estado: adquisición automatizada añadida; no contabilizar hasta workflow correcto. Pendientes privacidad, retractaciones/correcciones, deduplicación y particionado por DOI.
