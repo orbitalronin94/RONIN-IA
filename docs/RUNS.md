@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 11:03 | [Integración continua #1308 (run 42015723866)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42015723866) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data\(dataset\): add owner-authorized paper 1/9. Trigger: push; rama: main; intento: 1. | 06abc008 |
 | 2026-11-05 11:01 | [Integración continua #1304 (run 42015186825)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42015186825) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: propagate file-level review decisions into NASA library packs. Trigger: push; rama: main; intento: 1. | 1739ce03 |
 | 2026-11-05 11:01 | [Integración continua #1306 (run 42015411317)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42015411317) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): publish reproducible NASA pack verification counts. Trigger: push; rama: main; intento: 1. | 1363efa9 |
 | 2026-11-05 10:59 | [Integración continua #1303 (run 42014942778)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42014942778) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): preserve review attestations in NASA pack rebuilds. Trigger: push; rama: main; intento: 1. | 6379b7f7 |
