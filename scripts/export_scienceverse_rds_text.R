@@ -32,7 +32,10 @@ normalise_body <- function(x) {
 EMAIL_RE <- "(?i)\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b"
 SSN_RE <- "\\b\\d{3}-\\d{2}-\\d{4}\\b"
 
-files <- list.files(root, pattern = "\\.rds$", recursive = TRUE, full.names = TRUE)
+roots <- c(root, "data/datasets/candidates/scienceverse-crossref-verified")
+files <- unlist(lapply(roots, function(r) {
+  if (dir.exists(r)) list.files(r, pattern = "\\.rds$", recursive = TRUE, full.names = TRUE) else character()
+}), use.names = FALSE)
 if (!length(files)) stop("No RDS packages found")
 global_hashes <- new.env(parent = emptyenv())
 summary <- list()
@@ -159,7 +162,11 @@ for (rds in files) {
       next
     }
     assign(text_sha, paste(dataset, doi, sep = ":"), envir = global_hashes)
-    license_value <- if ("license" %in% names(eligible)) as.character(eligible$license[[row_index]]) else NA_character_
+    license_value <- if ("crossref_verified_license" %in% names(eligible)) {
+      as.character(eligible$crossref_verified_license[[row_index]])
+    } else if ("license" %in% names(eligible)) {
+      as.character(eligible$license[[row_index]])
+    } else NA_character_
     record <- list(schema_version = "ronin.document.v1", dataset = dataset,
                    paper_id = paper_id, doi = doi, title = title,
                    target_library = provenance$target_library,
