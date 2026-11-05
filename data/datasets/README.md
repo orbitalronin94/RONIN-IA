@@ -88,3 +88,12 @@ Ejecutar \`python scripts/validate_rights_registry.py\` para validar el registro
 - Los conjuntos oficiales de desarrollo/prueba de 2015 quedan fuera de train. El corpus se mantendrá en un pool transversal hasta clasificar cada documento por temática; no se asignará todo en bloque a Derecho o Ciencias Sociales.
 - **Pendiente antes de Grado A:** descarga completa de los fragmentos, SHA-256, validación TEI/bitext y alineaciones, privacidad, calidad, deduplicación global, asignación General/HKD y revisión humana.
 - Fuentes: https://www.un.org/dgacm/es/content/uncorpus/es · https://www.un.org/dgacm/en/content/uncorpus/download · https://www.un.org/dgacm/sites/www.un.org.dgacm/files/files/UNCORPUS/un.pdf
+
+
+## Nuevo bloque revisado — ScienceVerse / papers (expansión científica)
+
+- **Resultado:** repositorio, estructura de procedencia y siete corpus declarados CC BY 4.0 identificados. Son **5.091 artículos de catálogo** en BMC Medicine (1.000), eLife (1.000), Frontiers in Psychology (1.000), i-Perception (496), Judgment and Decision Making (855), Journal of Cognition (447) y Open Mind (293).
+- El upstream conserva manifiesto por artículo con DOI, título, año, archivo y procedencia; cada corpus tiene documentación y script reproducible. Las licencias originales se mantienen por artículo.
+- Expediente: `candidates/scienceverse-expanded-corpora/README.md`.
+- **No son 5.091 artículos admitidos:** falta descargar manifests/assets, verificar cada DOI y PDF/texto, hashes, privacidad, deduplicación y particiones. Los corpus con licencias mixtas o NC/ND quedan excluidos salvo filtro individual inequívoco.
+- Fuente: https://github.com/scienceverse/papers
