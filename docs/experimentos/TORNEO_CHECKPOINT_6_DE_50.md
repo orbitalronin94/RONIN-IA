@@ -2,16 +2,13 @@
 
 ## Estado
 
-Implementación añadida en esta rama. No modifica `main`, no sustituye `weights/ronin-main.pt` y no autoriza promoción automática. El workflow es manual y no se ha lanzado todavía.
+Esta rama continúa el experimento desde las dos candidatas empatadas con 7/50. No modifica `main`, no sustituye `weights/ronin-main.pt` y no autoriza promoción automática. El workflow se ejecuta en la PR para validar los cuatro entrenamientos; los resultados solo se aceptarán tras comprobar artefactos y cobertura.
 
-Checkpoint de partida (ganador del screening):
-- SHA-256: `7cda8dacb0b61d7278ba9990285a6a7e47403de8a00d201da06f5f002224c1cf`
-- Resultado de referencia: 6/50 (12 %) en MMLU-Pro validation, muestra estratificada seed 2026.
-- Su continuación de 500 pasos obtuvo 5/50 (10 %) y no se considera ganadora.
+Como antecedente, el checkpoint 6/50 y su continuación de 500 pasos pertenecen al torneo anterior; no son las semillas de este experimento.
 
 ## Nuevo experimento B/C — 10.000 pasos (2026-11-05)
 
-Se comparan exclusivamente B (replay equilibrado) y C (replay equilibrado + anclaje L2), con 10.000 pasos completos por candidato, ejecutados secuencialmente desde el mismo checkpoint 6/50 y con la misma semilla. El workflow evalúa el checkpoint inicial antes de entrenar y cada resultado después sobre los mismos 50 IDs, revisión y hash del split validation; exige 50/50, cero skips y cobertura 100 %. Se guardan los checkpoints finales, hashes, métricas y diferencias por pregunta. No hay promoción automática. Este validation de 50 preguntas es screening de desarrollo, no confirmación independiente.
+Se comparan B (replay equilibrado) y C (replay equilibrado + anclaje L2) desde dos semillas independientes: B-7/50 y C-7/50. Cada semilla genera ambas variantes con 10.000 pasos por entrenamiento: cuatro entrenamientos y 40.000 pasos totales, ejecutados secuencialmente. El workflow evalúa cada semilla antes de entrenar y cada resultado después sobre los mismos 50 IDs, revisión y hash del split validation; exige 50/50, cero skips y cobertura 100 %. Se guardan checkpoints finales, hashes, métricas y diferencias por pregunta. No hay promoción automática. Este validation de 50 preguntas es screening de desarrollo, no confirmación independiente.
 
 ## Pregunta experimental
 
@@ -62,7 +59,7 @@ Un candidato no gana por mejorar BPB/PPL únicamente.
 
 ## Presupuesto y ejecución
 
-El torneo inicial usó 300 pasos de entrenamiento (A/B/C: 100 cada uno); D no entrenó. El nuevo experimento B/C usa 20.000 pasos totales (10.000 por candidato). Las variantes no se ejecutan en paralelo si compiten por CPU; se ejecutan secuencialmente para mantener throughput y memoria predecibles.
+El torneo inicial usó 300 pasos de entrenamiento (A/B/C: 100 cada uno); D no entrenó. La continuación actual usa 40.000 pasos totales: cuatro entrenamientos de 10.000 pasos, dos variantes desde cada una de las dos semillas 7/50. Las variantes no se ejecutan en paralelo si compiten por CPU; se ejecutan secuencialmente para mantener throughput y memoria predecibles.
 
 La implementación está disponible en `scripts/run_checkpoint_tournament.py`, `ronin/data/source_batches.py` y `ronin/training/loop.py`. El workflow manual está en `.github/workflows/checkpoint-tournament-6of50.yml`. Antes de lanzar el workflow, deben pasar los checks de la PR y verificarse los artefactos de origen. El workflow no promueve pesos automáticamente.
 
