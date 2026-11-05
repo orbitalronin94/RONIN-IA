@@ -101,6 +101,7 @@ El manifiesto `libraries/manifest-64.json` cuenta únicamente el corpus legacy L
 - Seis documentos revisados individualmente; **dos** (32.410 bytes) promovidos a train tras coincidencia exacta de hash/bytes con la atestación, deduplicación frente a los 608 documentos legacy y recheck live de derechos/redistribución NASA.
 - **Cuatro retenidos**: las atestaciones de revisión no coinciden con el payload exacto; no se han corregido hashes a ciegas ni se han admitido.
 - Los dos promovidos son un subconjunto revisado de los 813 NASA NTRS, no dos nuevas adquisiciones. No sumarlos de nuevo al total documental ni al mínimo Level A.
+- Ejecución de promoción y recheck NASA: [run 42028138060](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028138060). Validador del manifiesto actualizado: [run 42028588708](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028588708).
 
 ## Candidatos y líneas de adquisición
 
