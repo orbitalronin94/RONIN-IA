@@ -138,15 +138,18 @@ La inspección RDS está pendiente de una ejecución verde. Los runs 42001889049
 
 ## Adquisición documental verificada — corte 2026-11-05
 
-Estos recuentos separan material descargado de material admitido:
+Los recuentos siguientes separan payloads descargados de material admitido. El total es una **suma de registros por fuente**, no un recuento global deduplicado entre proveedores:
 
-| Línea | Documentos candidatos | Payload descargado |
+| Línea | Documentos/registros candidatos | Payload descargado |
 |---|---:|---:|
-| ScienceVerse (BMC Medicine, JDM, Journal of Cognition, Open Mind, i-Perception) | 3.087 DOI únicos en manifiestos elegibles | 95.948.088 bytes RDS |
-| NASA NTRS public-use | 189 textos completos | 15.417.212 bytes UTF-8 |
+| ScienceVerse (BMC Medicine, JDM, Journal of Cognition, Open Mind, i-Perception) | 3.087 DOI únicos elegibles | 95.948.088 bytes RDS |
 | ScienceVerse Crossref (eLife + Frontiers) | 824 DOI únicos | 87.589.919 bytes RDS |
-| **Total candidato adquirido** | **4.100 registros** | **198.955.219 bytes** |
+| NASA NTRS public-use | 267 textos completos | 17.480.175 bytes UTF-8 |
+| ScienceVerse Collabra | 677 textos extraídos tras retirar 70 con correos/contacto | Tamaño agregado pendiente de registrar |
+| **Total candidato adquirido por fuente** | **4.855 registros** | **201.018.182 bytes conocidos + Collabra pendiente** |
 
-ScienceVerse conserva manifiestos, procedencia y hashes por paquete; eLife y Frontiers se admiten al nivel candidato solo cuando Crossref confirma CC-BY 4.0; cuatro filas JDM con DOI duplicado/conflictivo y una fila de Journal of Cognition sin conversión se excluyen de los manifiestos elegibles. NASA exige metadatos por documento de uso público, sin material de terceros, sin control de exportación y sin indicador de información sensible. Ambos conjuntos siguen en `candidates/`: no se suman a bytes Level A ni habilitan entrenamiento. La deduplicación cruzada, revisión humana de derechos/atribución, privacidad, calidad y clasificación General/HKD siguen pendientes.
+Los 677 textos Collabra se reparten en 541 train, 72 validation y 64 test; validation/test permanecen fuera de entrenamiento. Para Collabra se verificó CC BY 4.0 por DOI en 748 artículos y se excluyó uno con licencia no comercial; faltan revisión humana de menciones a participantes, privacidad y deduplicación global. ScienceVerse conserva manifiestos, procedencia y hashes por paquete; eLife y Frontiers se mantienen a nivel candidato tras la comprobación Crossref, pendiente la revisión de derechos del editor y terceros. NASA exige metadatos por documento de uso público, sin material de terceros, sin control de exportación y sin indicador de información sensible.
 
-El único conjunto admitido sigue siendo `literature-es-v1`: 608 documentos en train y 140.295.523 bytes en su artefacto de materialización. Validation y test no se entrenan.
+**No interpretar 4.855 como documentos únicos globales ni como admitidos.** No se ha completado la deduplicación cruzada entre fuentes, la revisión humana de derechos/atribución, privacidad, calidad ni clasificación General/HKD. Ninguno de estos candidatos suma bytes Level A ni habilita entrenamiento.
+
+El único conjunto admitido bajo el manifiesto legacy sigue siendo `literature-es-v1`: 608 documentos en train y 140.295.523 bytes en su artefacto de materialización. Validation y test no se entrenan. El inventario canónico Level A de 64 bibliotecas sigue en 0 documentos y 0 bytes admitidos; G-0 permanece en FAIL.
