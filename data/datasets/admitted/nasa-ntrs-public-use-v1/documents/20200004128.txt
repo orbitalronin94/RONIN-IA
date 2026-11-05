@@ -1,0 +1,2437 @@
+The summation-by-parts framework for the
+design and analysis of stable discretizations
+David C. Del Rey Fern´ndez2,1
+a
+1 NIA
+2 NASA
+
+LaRC
+
+1 / 62
+
+Collaborators
+NASA Langley Research Center
+• Dr. Mark H. Carpenter
+UTIAS
+• Professor David W. Zingg
+• Dr. Pieter D. Boom
+
+KAUST
+• Professor Matteo Parsani
+• Dr. Lisandro Dalcin
+• Dr. Stephano Zampini
+• Diego Rojas
+
+RPI
+
+University of Cologne
+• Professor Gregor J. Gassner
+• Dr. Lucas L. Fredrich
+• Dr. Gero Schn¨cke
+u
+
+• Professor Jason E. Hicken
+• Jared Crean
+
+Rice University
+• Professor Jesse Chan
+
+Link¨ping University
+o
+• Professor Andrew R. Winters
+
+ODU
+• Professor Nail K. Yamaleev
+• Dr. Jialin Lou
+
+2 / 62
+
+A little bit about myself
+
+Background:
+• PhD 2015 University of Toronto supervisor David W. Zingg
+• Postdoc + teaching 2015-2016 University of Toronto
+• Postdoc 2017-2018 NASA LaRC supervisor Mark H. Carpenter
+• 2019–present research scientist NASA LaRC
+I have two feet and one hand each in a diﬀerent discipline
+• Applied Mathematics: Algorithms with provable properties
+• Computer Science: Algorithms suited for HPC
+• Engineering: Application
+Today I will concentrate on the mathematics
+
+3 / 62
+
+Motivation
+Numerical approximation
+of problems that are:
+• Nonlinear
+• Time-dependent
+• Multiscale
+• Complex geometries
+Example applications at
+NASA:
+• Rotorcraft
+• Fluid structure
+interactions
+• High-lift conﬁgurations
+Images courtesy of Mark Potsdam (Army Aeroﬂight Dynamics Division at NASA Ames)
+
+4 / 62
+
+Motivation
+
+Goal: Develop life-cycle eﬃcient algorithms
+• Robust
+
+=⇒ provable stability
+
+• Eﬃcient:
+
+Accurate
+Adaptive
+
+=⇒ high order/ high accuracy
+=⇒ h/p-adaptation, r −adaptation, . . .
+
+5 / 62
+
+Motivation
+Goal: Develop life-cycle eﬃcient algorithms
+•Robust
+
+=⇒ provable stability
+
+3D Taylor-Green vortex: Successful (green) and failure (red)
+ES
+
+Conv.
+
+Degree
+3x3x3
+6x6x6
+12x12x12
+24x24x24
+48x48x48
+3x3x3
+6x6x6
+12x12x12
+24x24x24
+48x48x48
+96x96x96
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+11
+
+12
+
+13
+
+14
+
+15
+
+Table courtesy of Professor Matteo Parsani
+
+5 / 62
+
+Motivation
+Goal: Develop life-cycle eﬃcient algorithms
+•Eﬃcient: Accurate
+
+=⇒ high order/ high accuracy
+
+3D isentropic vortex
+1st degree ES
+
+3rd degree ES
+
+7th degree ES
+
+15th degree ES
+
+L2 error based on ρ
+
+10−3
+10−5
+10−7
+10−9
+
+10−11
+10−13
+10−15
+10−7 10−6 10−5 10−4 10−3 10−2 10−1 100 101 102 103 104 105
+CPU Time [h]
+
+Table courtesy of Professor Matteo Parsani
+
+5 / 62
+
+Motivation
+Goal: Develop life-cycle eﬃcient algorithms
+•Eﬃcient: Adaptive
+
+=⇒ h/p-adaptation, r −adaptation, . . .
+
+5 / 62
+
+Motivation
+
+Goal: Develop life-cycle eﬃcient algorithms
+• Robust =⇒ provable stability
+• Eﬃcient:
+Accurate =⇒ high order/ high accuracy
+Adaptive =⇒ h/p-adaptation, r −adaptation, . . .
+At the continuous level, stability depend on integration by parts
+Construct methods that come equipped with a discrete counterpart
+to integration by parts
+Summation by parts (SBP)
+
+6 / 62
+
+Outline
+
+• Importance of provable properties (particularly stability)
+
+•
+•
+•
+•
+•
+•
+
+Linear advection
+Burgers’ equation
+SBP framework
+Energy stability analysis linear advection: key tool integration by
+parts
+SBP operators: key property mimics integration by parts and is
+telescopic
+Semidiscret stability analysis: Linear advection
+Entropy stability analysis of the continuous and semidiscrete
+Burgers’ equation
+Some recent work on entropy stable schemes
+
+7 / 62
+
+When discretizations blow up: Linear PDEs
+Consider the linear advection equation
+∂U ∂U
++
+= 0, x ∈ [xL , xR ], t ≥ 0
+∂t
+∂x
+U (xL , t) = G(t), U (x, 0) = I(x)
+
+(1)
+
+Divide the domain into N equally spaced elements (x = fcn(ξ))
+
+On the κth element (1) reads
+∂ξ
+2N
+∂U ∂ξ ∂U
++
+= 0, ξ ∈ [−1, 1], J−1 ≡
+=
+∂t
+∂x ∂ξ
+∂x
+xR − xL
+
+(2)
+
+8 / 62
+
+When discretizations blow up: Linear PDEs
+Generic strong-form discontinuous Galerkin semidiscretization of (2):
+duκ
++ [J]−1 Dξ uκ = CT + BC ,
+κ
+dt
+• Dξ is a diﬀerentiation matrix, i.e., Dξ u ≈
+• [J]κ diag (J(ξ(1)), . . . , J(ξ(n))) =
+
+(3)
+
+∂U
+(ξ)
+∂ξ
+
+2N
+I
+xR −xL
+
+• CT inter-element coupling
+• BC imposition of boundary condition
+
+Consider two variations (identical in form):
+• Diagonal-norm (mass lumped)
+• Dense-norm (not mass lumped)
+
+9 / 62
+
+When discretizations blow up: Linear PDEs
+Numerical simulations: x ∈ [0, 1], t ∈ [0, 1], I = 1 + sin (2πx)
+RK4: CLF = 0.99, n = 14, N = 3
+
+Dense-norm
+2
+1.7
+1.4
+1.1
+0.8
+0.5
+0.2
+−0.1
+0
+U
+
+U
+
+Diagonal-norm
+2
+1.7
+1.4
+1.1
+0.8
+0.5
+0.2
+−0.1
+0
+
+0.5
+x
+
+1
+
+0.5
+x
+
+1
+
+10 / 62
+
+When discretizations blow up: Linear PDEs
+
+Now let us consider the curvilinear case (variable coeﬃcient case):
+ˆ ˆ
+x = fcn(ξ), ξ = fnc(ξ)
+Thus J−1 =
+
+ˆ
+∂ ξ ∂ξ
+ˆ
+∂x ∂ ξ
+
+is no longer constant
+
+This is the critical diﬀerence
+Mesh for n = 14, N = 3
+
+11 / 62
+
+When discretizations blow up: Linear PDEs
+
+Dense-norm
+2
+1.7
+1.4
+1.1
+0.8
+0.5
+0.2
+−0.1
+0
+U
+
+U
+
+Diagonal-norm
+2
+1.7
+1.4
+1.1
+0.8
+0.5
+0.2
+−0.1
+0
+
+0.5
+x
+
+1
+
+0.5
+x
+
+1
+
+t = 0.01137195
+
+12 / 62
+
+When discretizations blow up: Linear PDEs
+Observations
+• The two schemes are very similar
+Have the same form
+Design order diﬀerent
+• The dense-norm scheme, intuitively, should be the same or
+
+better (no approximation in the norm matrix)
+• Cartesian context: Both schemes behaved identically (they are
+
+probably stable)
+• Curvilinear context: The diagonal-norm worked, the dense-norm
+
+scheme blew up
+
+13 / 62
+
+When discretizations blow up: Linear PDEs
+
+What did we learn?
+• Intuitive improvements to a scheme can have unintended
+consequences
+• Stability in one context may not translate to stability in another
+• We need a rigorous way of determining when our schemes are
+
+stable
+• Also want guidance to what design order changes we should
+
+make when they are not
+
+14 / 62
+
+When discretizations blow up: Nonlinear PDEs
+Consider the Burger’s equation:
+∂U
+∂
++
+∂t
+∂x
+
+U2
+2
+
+=0
+
+(4)
+
+Generic strong-form (collocated diagonal-norm) semidiscretization
+of (4) on a Cartesian grid
+duκ 1
++ [J]−1 Dξ [uκ ] uκ = CT + BC
+κ
+dt
+2
+
+(5)
+
+Entropy conservative/stable strong-form (collocated diagonal-norm)
+semidiscretization of (4)
+duκ 1
+1
++ [J]−1 Dξ [uκ ] uκ + [J]−1 [uκ ] Dξ [uκ ] uκ = CT + BC (6)
+κ
+κ
+dt
+3
+3
+
+15 / 62
+
+When discretizations blow up: Nonlinear PDEs
+RK4, number of time steps 80, 000
+Exact solution, t = 1.1
+
+Initial condition
+0.6
+
+0.6
+
+0.4
+
+0.4
+
+0.2
+
+0.2
+
+U
+
+1
+0.8
+
+U
+
+1
+0.8
+
+0
+
+0
+
+−0.2
+
+−0.2
+
+−0.4
+
+−0.4
+
+−0.6
+
+−0.6
+
+−0.8
+
+−0.8
+
+−1
+−2
+
+−1.5
+
+−1
+
+−0.5
+
+0
+
+0.5
+
+x
+
+1
+
+1.5
+
+−1
+−2
+
+2
+
+−1.5
+
+−1
+
+−0.5
+
+0
+
+x
+
+0.5
+
+1
+
+1.5
+
+2
+
+Entropy stable solution, t = 1.1
+
+Entropy conservative solution, t = 1.1
+
+1.5
+
+2
+1.5
+
+1
+
+1
+0.5
+
+U
+
+U
+
+0.5
+0
+
+−0.5
+
+0
+
+−0.5
+
+−1
+−1
+
+−1.5
+−2
+−2
+
+−1.5
+
+−1
+
+−0.5
+
+0
+
+x
+
+0.5
+
+1
+
+1.5
+
+2
+
+−1.5
+−2
+
+−1.5
+
+−1
+
+−0.5
+
+0
+
+x
+
+0.5
+
+1
+
+1.5
+
+2
+
+16 / 62
+
+When discretizations blow up: Nonlinear PDEs
+Stability
+Entropy conservative scheme
+
+p
+1
+2
+3
+4
+5
+6
+7
+8
+9
+
+0
+
+"
+"
+"
+"
+"
+"
+"
+"
+"
+
+Over integration
+1
+2
+3
+4
+
+"
+"
+"
+"
+"
+"
+"
+"
+"
+
+"
+"
+"
+"
+"
+"
+"
+"
+"
+
+"
+"
+"
+"
+"
+"
+"
+"
+"
+
+"
+"
+"
+"
+"
+"
+"
+"
+"
+
+5
+
+"
+"
+"
+"
+"
+"
+"
+"
+"
+
+Nodal DG scheme
+
+p
+1
+2
+3
+4
+5
+6
+7
+8
+9
+
+0
+
+Over integration
+1
+2
+3
+4
+
+$
+$
+$
+$
+$
+$
+$
+$
+$
+
+$ $ $
+$ $ $
+$ $ $ $
+
+" " "
+" " "
+$ " "
+$ " "
+$ $ "
+$ $ "
+
+"
+"
+"
+"
+"
+"
+"
+"
+
+5
+
+"
+"
+"
+"
+"
+"
+"
+"
+"
+17 / 62
+
+When discretizations blow up: Nonlinear PDEs
+Observations
+• The two schemes are fundamentally diﬀerent
+• Diﬀerent volume and interface coupling terms
+• The entropy conservative/stable scheme holds together while the
+
+collocated scheme does not
+
+What did we learn?
+• Linearly stable schemes do not necessarily translate into stable
+schemes for nonlinear problems
+• We need a rigorous way of determining stability in the nonlinear
+
+context as well
+
+18 / 62
+
+The summation-by-parts (SBP) framework
+Most numerical methods can be distilled into matrix operations
+A high level of abstraction is the matrix form (perhaps highest?)
+SBP Framework: A matrix analysis methodology
+• Systematic approach to the design of new schemes that are
+
+Stable, conservative, and accurate
+• Simple: requires basic linear algebra/calculus to do proofs
+• Discretization agnostic (FD, FV, DG, CG, FR/CPR, etc.)
+
+Applicable a large set of numerical methods
+• Design order correction of existing schemes
+• Easily handles any variational crimes that are committed
+
+19 / 62
+
+The summation-by-parts (SBP) framework
+
+Core concept: Prove stability at the continuous level
+• Mimic in a one-to-one fashion at the semi/fully-discrete level
+Stability: Norm of the solution is bounded by the data of the problem
+• Data = initial condition, boundary conditions, etc.
+Continuous stability analysis:
+• For linear and variable coeﬃcient problems: Energy method
+• For nonlinear problems: Entropy stability analysis
+
+20 / 62
+
+Energy method: Linear advection
+1) Multiply the PDE by the solution and integrate over the domain:
+1
+
+U
+−1
+
+∂U
+∂U
+J+U
+∂t
+∂ξ
+
+dξ = 0
+
+2) Volume integral: Integration by parts (IBP)
+1
+
+U
+−1
+
+1
+
+1
+∂U
+Jdξ+
+∂t
+2
+
+U2 nξ dΓ = 0,
+
+V
+−1
+
+∂U
+dξ +
+∂ξ
+
+1
+
+U
+−1
+
+∂V
+dξ =
+∂ξ
+
+VUnξ dΓ
+
+3) Temporal term: product rule and Leibniz’ rule
+1d U
+2 dt
+
+2
+
++
+
+1
+2
+
+1
+
+U2 nξ dΓ = 0,
+
+U
+
+2
+
+U2 Jdξ
+
+≡
+−1
+
+4) Integrate in time and apply data
+t
+
+U(t)
+
+2
+
+t
+
+U2 (xR , t)dτ +
+
+= I 2−
+0
+
+t
+
+G2 dτ → U(t)
+0
+
+2
+
+≤ I
+
+2
+
+G2 dτ
+
++
+0
+
+21 / 62
+
+Summation-by-parts operators
+
+Degree p matrix diﬀerence operator Dξl acting on the ξ
+∂
+approximating ∂ξl :
+1
+2
+
+3
+
+Accuracy: Dξl pj = δξl pj , ∀P ∈ Pp
+j
+Structure:
+Dξl ≡ P−1 Qξl , where the norm matrix P > 0
+1
+Qξl = Sξl + 2 Eξl , Sξl = −ST , Eξl = ET
+ξl
+ξl
+Accuracy on Eξl
+v T Eξl u =
+
+VUnξl dΓ,
+
+∀V, U ∈ Pr , r ≥ p
+
+Γ
+4
+
+v T Eξl u telescopes point wise (separable into point values on
+surfaces)
+
+22 / 62
+
+Mimetic properties
+Properties:
+v T Pu ≈
+
+Ω
+
+v T QT u ≈
+ξl
+
+VUdΩ, v T Qξl u ≈
+Ω
+
+Ω
+
+∂V
+U ∂ξl dΩ, v T Eξl u ≈
+
+V ∂U dΩ,
+∂ξl
+Γ
+
+VUnξl dΓ,
+
+Integration by parts:
+Ω
+
+V ∂U dΩ +
+∂ξl
+
+Ω
+
+∂V
+U ∂ξl dΩ =
+
+Γ
+
+VUnξl dΓ
+
+Summation by parts:
+≈
+
+Ω
+
+∂U
+V ∂ξ dΩ
+l
+
+≈
+
+Ω
+
+∂V
+U ∂ξ dΩ
+l
+
+≈
+
+Γ
+
+VUnξl dΓ
+
+v T PDξl u + u T PDξl v = v Qξl + QT u = v T Eξl u
+ξl
+
+23 / 62
+
+Pointwise telescoping: Simple example Gauss nodes
+
+Eξl = RT RR − RT RL , RR u ≈ U(1), RL u ≈ U(−1)
+R
+L
+
+≈ VUnξl dΓ
+
+v T Eξl u =
+
+≈
+
+xR
+
+≈
+
+VUdΓ=V(1)U(1)
+
+(RR v )T RR u
+
++
+
+xL
+
+VUdΓ=−V(−1)U(−1)
+
+− (RL v )T RL u
+
+Why is this important?
+• Telescope to the boundary for provable stability
+• Apply appropriate boundary conditions
+• Traverse interior surfaces and apply appropriate upwinding
+(dissipation)
+
+24 / 62
+
+Incomplete list of extensions to SBP concept
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+
+Original: Kreiss and Scherer (ﬁnite diﬀerence (FD) single block)
+Spectral element: Carpenter and Gottlieb
+Multiblock/element: Carpenter, Nordstr¨m, and Gottlieb
+o
+General tensor-product: Del Rey Fern´ndez, Boom, and Zingg
+a
+Staggered tensor-product: Carpenter, Parsani, Fisher, and
+Nielsen
+General element: Hicken, Del Rey Fern´ndez, and Zingg
+a
+General element curvilinear: Crean, Hicken, Del Rey Fern´ndez,
+a
+Carpenter, and Zingg
+Staggered general element: Del Rey Fern´ndez, Crean, Hicken,
+a
+and Carpenter
+Modal + decoupled surface and volume cubature nodes: Jesse
+Chan
+Dense-norm, global SBP etc.: Del Rey Fern´ndez, Boom,
+a
+Carpenter, and Zingg
+
+25 / 62
+
+State of the art in SBP operators
+
+solution nodes/modes
+ﬂux nodes (volume quadrature/cubature nodes)
+surface quadrature/cubature nodes
+
+26 / 62
+
+Summary and discussion
+
+The SBP concept can be applied to a rich set of numerical methods
+More extensions are likely
+The local SBP property is extended to the global SBP property via
+• Appropriate coupling procedures (discontinuous approaches)
+• Appropriate imposition of boundary conditions
+• Additions such as dissipation are constructed so as not to
+
+destroy stability estimates
+
+27 / 62
+
+Semidiscrete analysis of the linear advection equation
+
+We consider one element (or an SBP operator constructed over the
+1D mesh)
+Strong form discretization:
+du
++ [J]−1 Dξ u = − [J]−1 P−1 RT (RL u − G)
+L
+dt
+• LHS: discretization of the PDE
+• RHS: Design order zero term (weakly imposes the boundary
+
+condition)
+
+28 / 62
+
+Semidiscrete analysis of the linear advection equation
+
+Continuous:
+1) Multiply by U and integrate over the domain
+U
+
+∂U
+Jdξ +
+∂t
+
+U
+
+∂U
+dξ = 0
+∂ξ
+
+Semidiscrete:
+1) multiply by u T P [J]
+u T P [J]
+
+du
++ u T Qξ u = −u T RT (RL u − G)
+L
+dt
+
+Note: for dense norm [J] P is not generally a norm
+
+29 / 62
+
+Semidiscrete analysis of the linear advection equation
+
+Continuous:
+2) Use integration by parts
+U
+
+∂U
+1
+Jdξ = −
+∂t
+2
+
+U2 nξ dΓ
+
+Semidiscrete:
+2) Use summation-by-parts
+u T Qξ u + u T Qξ u = u T Eξ u → u T Qξ u = 1 u T Eξ u
+2
+u T P [J]
+
+du
+1
+= − u T Eξ u − u T RT (RL u − G)
+L
+dt
+2
+
+30 / 62
+
+Semidiscrete analysis of the linear advection equation
+Continuous:
+3) Use the product rule and Leibniz’ rule
+1d U
+2 dt
+
+2
+
+=−
+
+1
+2
+2
+UR − UL ,
+2
+
+U
+
+2
+
+≡
+
+U2 Jdξ
+
+Semidiscrete:
+3) Use product rule
+2
+1
+1 d u P[J]
+= − u T RT RR u + u T RT RL u − 2u T RT G
+L
+R
+L
+2
+dt
+2
+
+u
+
+2
+P[J]
+
+≡ u T P [J] u
+
+Eξ = RT RR − RT RL
+R
+L
+
+31 / 62
+
+Semidiscrete analysis of the linear advection equation
+Continuous:
+4) Integrate in time and apply the data
+t
+
+U(t)
+
+2
+
+≤ I
+
+2
+
+G2 dτ
+
++
+0
+
+Semidiscrete:
+4) Integrate in time, apply the initial condition, and complete the
+squares
+t
+
+u
+
+2
+P[J]
+
+≤ I
+
+2
+P[J]
+
+u T RT RL u − 2u T RT G dτ
+L
+L
+
+−
+0
+t
+
+≤ I
+
+2
+P[J]
+
+(u − G)2 + G2 dτ,
+˜
+
+−
+
+u ≡ RL u
+˜
+
+0
+t
+
+≤ I
+
+2
+P[J]
+
+G2 dτ
+
++
+0
+
+32 / 62
+
+Entropy stability analysis
+For nonlinear PDEs we need to go beyond the energy method
+Consider the following hyperbolic PDE:
+J
+
+∂U ∂F
++
+=0
+∂t
+∂ξ
+
+Equipped with a convex entropy function S = fnc(U) that satisﬁes
+∂S ∂F
+∂F
+∂f
+∂F ∂U
+∂f
+= WT
+=
+→ WT
+=
+∂U ∂U
+∂U
+∂U
+∂U ∂ξ
+∂ξ
+Integrebility condition
+where f is the entropy ﬂux and W are the entropy variables
+
+33 / 62
+
+Entropy stability analysis
+1) Multiply the PDE by WT and integrate in space
+∂F
+∂U
+Jdξ + WT
+dξ = 0
+∂t
+∂ξ
+2) Use the integration by parts property induced by the integrability
+condition
+∂F
+∂f
+WT
+dξ =
+dξ = fnξ dΓ
+∂ξ
+∂ξ
+WT
+
+WT
+
+∂U
+Jdξ +
+∂t
+
+fnξ dξ ≤ 0
+
+3) Use the deﬁnition of the entropy variables and Leibniz’ rule
+d
+dt
+
+SJdξ +
+
+fnξ dξ ≤ 0
+
+34 / 62
+
+Entropy stability analysis
+
+4) Integrate in time and apply data
+t
+
+S(t)Jdξ ≤
+
+S(0)Jdξ −
+
+fnξ dξdτ
+0
+
+5) Convert the entropy statement into a stability statement on the
+solution
+Will see this shortly
+
+35 / 62
+
+Entropy stability analysis Burgers’ equation
+
+J
+
+∂U
+∂
++
+∂t
+∂ξ
+
+U2
+2
+
+= 0,
+
+(UL + |UL |)
+UL = GL ,
+3
+
+(UR − |UR |)
+UR = GR ,
+3
+
+U(ξ, 0) = I
+Entropy function: S =
+2
+Flux: F = U
+2
+
+U2
+2
+
+Entropy variable: W =
+3
+Entropy ﬂux: f = U
+3
+
+∂S
+∂U
+
+=U
+
+36 / 62
+
+Entropy stability analysis Burgers’ equation
+
+1) Multiply the PDE by W T and integrate in space
+WT
+
+∂U
+Jdξ +
+∂t
+
+WT
+
+∂F
+dξ = 0
+∂ξ
+
+2) Use the integration by parts property induced by the integrability
+condition
+∂U
+WT
+dξ + fnξ dξ ≤ 0
+∂t
+3) Use the deﬁnition of the entropy variables and Leibniz’ rule
+d
+dt
+
+SJdξ +
+
+fnξ dξ ≤ 0
+
+37 / 62
+
+Entropy stability analysis Burgers’ equation
+4) Integrate in time and apply data
+t
+
+S(t)Jdξ ≤
+≤
+
+S(0)Jdξ −
+1
+2
+
+fnξ dξdτ
+0
+t
+
+I2 Jdξ +
+
+−
+0
+
+t
+
++
+0
+
+1
+2
+3UR GR + |UR | UR
+3
+
+1
+2
+3UL GL − |UL | UL
+3
+
+dτ
+
+dτ
+
+5) Convert the entropy statement into a stability statement on the
+solution
+t
+2
+
+U (t)Jdξ ≤
+
+2
+
+I Jdξ +
+0
+
+2
+2
+3GL
+3GR
++
+2 |UL | 2 |UR |
+
+dτ
+
+38 / 62
+
+Semidiscrete nonlinear mechanics
+Objective: construct operators that mimic the following IBP rule
+WT
+
+∂F
+dξ =
+∂ξ
+
+∂f
+dξ =
+∂ξ
+
+fnξ dΓ
+
+Approximate inviscid terms using Hadammard formalism
+∂F
+(x)
+∂x
+The two-point ﬂux matrix is constructed from a two-point ﬂux
+function:
+2Dξ ◦ Fx (u, u) 1 ≈
+
+f
+
+sc
+
+(i)
+
+u ,u
+
+(j)
+
+u (i)
+=
+
+2
+
++ u (i) u (j) + u (j)
+
+2
+
+6
+
+39 / 62
+
+An example
+
+
+3
+−2
+
+2
+
+−1
+2
+
+
+Dξ =  − 1
+ 2
+
+0
+
+1
+2
+3
+2
+
+1
+2
+
+−2
+
+
+
+.
+
+
+The two argument Hadammard matrix ﬂux function, Fx (u, u) is
+given as
+Fx (u, u) =
+
+2
+(u (1) )
+2
+
+
+
+ (u (2) )2 +u (2) u (1) +(u (1) )2
+
+6
+
+
+
+2
+2
+(u (3) ) +u (3) u (1) +(u (1) )
+6
+
+(u (1) )
+
+2
+
+2
+
++u (1) u (2) +(u (2) )
+6
+
+(u (2) )
+
+2
+
+2
+
+(u (3) )
+
+2
+
+2
+
++u (3) u (2) +(u (2) )
+6
+
+2
+
+(u (1) )
+
++u (1) u (3) +(u (3) )
+6
+
+2
+
+
+
+
+
+
+2
+2
+(u (2) ) +u (2) u (3) +(u (3) )  .
+
+6
+
+
+
+2
+(u (3) )
+2
+
+40 / 62
+
+The general case: Curvilinear coordinates, systems,etc.
+
+Discretization: 2 (Dξ ⊗ I5 ) ◦ Fxm (uκ , uκ ) 1 ≈
+
+
+(1)
+
+(1)
+
+fxsc uκ , uκ
+m
+
+.
+
+.
+Fxm (uκ , uκ ) ≡ 
+.
+(n)
+(1)
+fxsc uκ , uκ
+m
+
+...
+
+...
+
+∂Fxm
+:
+∂ξ
+
+(1)
+
+(n)
+
+fxsc uκ , uκ
+m
+.
+.
+.
+(n)
+
+(n)
+
+fxsc uκ , uκ
+m
+
+
+
+
+
+
+41 / 62
+
+The general case: Curvilinear coordinates, systems,etc.
+Two-point ﬂux functions:
+• Tadmor’s shuﬄe condition:
+κ
+κ
+w(i) − w(j)
+
+T
+
+(i)
+
+(j)
+
+fxsc uκ , uκ
+m
+
+(i)
+
+(j)
+
+= ψxm − ψxm
+
+(i)
+
+(j)
+
+= fxsc uκ , uκ
+m
+
+(i)
+
+(i)
+
+= Fxm uκ
+
+• Symmetric: fxsc uκ , uκ
+m
+• Consistent: fxsc uκ , uκ
+m
+
+(j)
+
+(i)
+
+(i)
+
+Entropy potential ﬂux Ψxm = WT Fxm − fxm
+Dyadics are expensive: 1) need to be careful, 2) gives a mechanism
+for communication hiding
+
+42 / 62
+
+Mimetic and telescoping properties
+It can be shown that
+≈
+
+WT
+
+∂Fxm
+dΩ
+∂ξ
+
+WT Fxm − Ψxm nξ dΓ =
+
+fxm nξ dΓ
+
+2w T P (Dξ ⊗ I5 ) ◦ Fxm (u, u) 1 = 1T (Eξ ◦ I5 ) ◦ Fxm (u, u) w − 1T Eξ ψxm
+Nonlinear SBP property
+Mimetic term by term
+
+Telescoping:
+• The term 1T Eξ ψxm is telescopic
+• The term 1T (Eξ ◦ I5 ) ◦ Fxm (u, u) w
+In the general case, it is not telescopic
+For certain SBP operators, it is telescopic
+
+43 / 62
+
+Semidiscrete analysis: Burgers’ equation
+Discretization:
+[J]k
+
+du
+(RL u + |RL u|)
++ 2Dξ ◦ Fx (u, u) 1 = − P−1 RT
+RL u − GL
+L
+dt
+3
+(RR u − |RR u|)
+RR u − GR
++P−1 RT
+R
+3
+
+Where:
+• −P−1 RT
+L
+
+(RL u+|RL u|)
+RL u
+3
+
+weakly imposes
+• P−1 RT
+R
+
+(UL +|UL |)
+UL
+3
+
+(RR u−|RR u|)
+RR u
+3
+
+weakly imposes
+
+− GL
+= GL
+
+− GR
+
+(UR −|UR |)
+UR
+3
+
+= GR
+
+44 / 62
+
+Semidiscrete analysis: Burgers’ equation
+Continuous:
+1) Multiply the PDE by WT and integrate in space
+WT
+
+∂U
+Jdξ +
+∂t
+
+WT
+
+∂F
+dξ = 0
+∂ξ
+
+Semidiscrete:
+1) Multiply through by w T P
+du
++ w T PDξ ◦ Fx (u, u) 1 =
+dt
+(RL u + |RL u|)
+RL u − GL
+− w T RT
+L
+3
+(RR u − |RR u|)
+RR u − GR
++w T RT
+R
+3
+w T P [J]k
+
+45 / 62
+
+Semidiscrete analysis: Burgers’ equation
+Continuous:
+2) Use the integration by parts property induced by the integrability
+condition
+WT
+
+∂U
+Jdξ +
+∂t
+
+fnξ dξ ≤ 0
+
+Semidiscrete:
+2) Use the nonlinear SBP property
+du
++ 1T Eξ ◦ Fx (u, u) w + 1T Eξ ψx =
+dt
+(RL u + |RL u|)
+RL u − GL
+− w T RT
+L
+3
+(RR u − |RR u|)
++w T RT
+RR u − GR
+R
+3
+w T P [J]k
+
+46 / 62
+
+Semidiscrete analysis: Burgers’ equation
+
+Semidiscrete:
+2) Use the nonlinear SBP property
+For RR = [1, 0, . . . , 0]T and RL = [1, 0, . . . , 0]T
+1T Eξ ◦ Fx (u, u) w + 1T Eξ ψx =
+
+u(n)3
+3
+
+−
+
+u(1)3
+3
+
+Thus,
+w T P [J]k
+
+du
+|u(1)|u(1)2
+|u(n)|u(n)2
+=−
++ u(1)GL −
+− u(n)GR
+dt
+3
+3
+
+47 / 62
+
+Semidiscrete analysis: Burgers’ equation
+
+Continuous:
+3) Use the deﬁnition of the entropy variables and Leibniz’ rule
+d
+dt
+
+SJdξ +
+
+fnξ dξ ≤ 0
+
+Semidiscrete:
+3) Use the deﬁnition of the entropy variables
+
+1T P [J]k
+
+ds
+|u(1)|u(1)2
+|u(n)|u(n)2
+=−
++ u(1)GL −
+− u(n)GR
+dt
+3
+3
+
+48 / 62
+
+Semidiscrete analysis: Burgers’ equation
+Continuous:
+4) Integrate in time and apply data
+S(t)Jdξ ≤
+
+1
+2
+
+t
+
+I2 Jdξ +
+
+−
+0
+
+t
+
++
+0
+
+1
+2
+3UR GR + |UR | UR
+3
+
+1
+2
+3UL GL − |UL | UL
+3
+
+dτ
+
+dτ
+
+Semidiscrete:
+4) Integrate in time and apply data
+t
+
+1T P [J]k s(t) = 1T P [J]k s(0)+
+0
+t
+
++
+0
+
+1
+− (3u(n)GR ) + |u(n)|u(n)2 dτ
+3
+1
+3u(1)GL − |u(1)|u(1)2 dτ
+3
+
+49 / 62
+
+Semidiscrete analysis: Burgers’ equation
+Continuous:
+5) Convert the entropy statement into a stability statement on the
+solution
+Using S =
+
+U2
+2
+
+U(t)
+
+2
+
+t
+
+≤ I(0)
+
+2
+
+−
+
++2
+0
+
+t
+
++2
+0
+
+1
+2
+3UL GL − |UL | UL
+3
+
+1
+2
+3UR GR + |UR | UR
+3
+
+dτ
+
+dτ
+
+Completing the square
+t
+
+U(t)
+
+2
+
+≤ I(0)
+
+2
+
++
+0
+
+3GL
+3GR
++
+| dτ
+2|UR | 2|UL
+
+50 / 62
+
+Semidiscrete analysis: Burgers’ equation
+Semidiscrete:
+5) Convert the entropy statement into a stability statement on the
+solution
+Using s = 1 [u] u
+2
+t
+
+u
+
+2
+[J]P
+
+= I
+
+2
+[J]P +2
+0
+t
+
++2
+0
+
+1
+− (3u(n)GR ) + |u(n)|u(n)2 dτ
+3
+1
+3u(1)GL − |u(1)|u(1)2 dτ
+3
+
+Completing the square
+t
+
+u
+
+2
+[J]P
+
+≤ I
+
+2
+[J]P
+
++
+0
+
+3GL
+3GR
++
+2|u(n)| 2|u(1)|
+
+dτ
+
+51 / 62
+
+Summary of entropy stability analysis
+
+Procedure
+1 Perform entropy analysis at the continuous level
+2
+
+Chose an entropy and ﬁnd a a two-point ﬂux function
+
+3
+
+Combine SBP operators with two argument ﬂux function matrix
+to approximate volume terms
+
+4
+
+Construct appropriate coupling and boundary procedures that
+maintain entropy conservation/stability
+This is where most of the technical challenge lies
+particularity for the BC
+
+52 / 62
+
+Recent work on entropy stability
+
+53 / 62
+
+ALE entropy stable scheme
+Paper: Entropy stable spectral collocation schemes for the 3-D Navier-Stokes equations on
+dynamic unstructured grids https://arxiv.org/pdf/1812.10185.pdf
+Authors: Nail K. Yamaleev, David C. Del Rey Fern´ndez, Jialin Lou, and Mark H.
+a
+Carpenter
+•Skew-symmetric split form (splitting on the metric terms and metric Jacobian)
+1 ∂Uκ
+1
+1 Jκ Uκ
++ Jκ
++
+2 ∂τ
+2
+∂τ
+2
+
+3
+
+∂
+∂ξl
+
+l=1
+
+Jκ
+
+∂ξl κ
+U
+∂t
+
+Jκ
+
+∂ξl
+∂t
+
++ Jκ
+
+∂ξl ∂Uκ
+∂t ∂ξl
+
++ space = 0
+
+•Geometric conservation laws (GCL)
+∂Jκ
++
+∂τ
+3
+
+l=1
+
+∂
+∂ξl
+
+3
+
+l=1
+
+∂
+∂ξl
+
+Jκ
+
+∂ξl
+∂xm
+
+= 0,
+
+=0
+
+m = 1, 2, 3
+
+54 / 62
+
+Entropy stable space-time discretizations
+Paper: Entropy stable space-time discontinuous Galerkin schemes with summation-by-parts
+property for hyperbolic conservation laws https://arxiv.org/pdf/1808.08218.pdf
+Authors: Lucas Friedrich, Gero Schn¨cke, Andrew R. Winters, David C. Del Rey
+u
+Fern´ndez, Gregor J. Gassner, and Mark H. Carpenter
+a
+•The critical term is the temporal term
+
+∂Uκ
+∂t .
+
+Discretization
+
+2Dt ◦ Usc (uκ , uκ ) 1Nκ + spatial = SATs
+Dt ◦ Usc (uκ , uκ ) 1Nκ ≈
+•The nonlinear temporal derivative operator
+contracted with the entropy variables
+
+1 ∂U
+2 ∂t
+
+Ct
+
+Dt ◦ Usc (qκ , qκ ) 1Nκ
+
+T
+T
+wκ PDt ◦ Usc (uκ , uκ ) 1Nκ = wκ uκ − s
+
+T
+
+telescopes when
+
+T
+Qτ 1 + 1T Qτ wκ uκ − sκ =
+
+T
+1Eτ wκ uκ − sκ
+
+•Incredibly, the linear temporal upwind SAT leads to entropy stability!!!!
+
+55 / 62
+
+Eﬃcient entropy stable Gauss collocation methods
+Paper: Eﬃcient entropy stable Gauss collocation methods
+https://arxiv.org/pdf/1809.01178.pdf
+Authors: Jesse Chan, David C. Del Rey Fern´ndez, and Mark H. Carpenter
+a
+•Decoupled SBP operators
+
+• Extends SBP concept to modal based methods including numerical cubature
+• Can have separate volume and surface cubature nodes
+•Motivation: collocated Gauss methods are very accurate (no mass lumping)
+
+• GSBP Gauss result in SATs that fully couple elements (really bad for
+entropy stable methods)
+
+• Improve the accuracy of GSBP Gauss for nonlinear problems
+• Construction of nonlinear boundary conditions for GSBP Gauss not clear
+•For a general exposition on decoupled SBP, see
+Discretely entropy stable weight-adjusted discontinuous Galerkin methods on curvilinear meshes
+(JCP, 378(1), 2019, pg. 366-393)
+
+56 / 62
+
+Entropy conservative/stable wall bc
+Paper: Conservative and entropy stable solid wall boundary conditions for the compressible
+Navier-Stokes equations: Adiabatic wall and heat entropy transfer
+https://arxiv.org/pdf/1812.11403.pdf
+Authors: Lisandro Dalcin, Diego B. Rojas, Stefano Zampini, David C. Del Rey
+Fern´ndez, Mark H. Carpenter, and Matteo Parsani
+a
+• Continuous entropy analysis (smooth solutions) (x1 , x2 , x3 ) ∈ [0, 1]3
+d
+dt
+
+fx1 − WT F(v ) dx2 dx3
+
+Sdx1 dx2 dx3 = −DT +
+Ω
+
+x1 =0
+
+• Entropy conservative wall-boundary condition:
+1
+U1 = 0, U2 = G2 (x2 , x3 , t), U3 = G3 (x2 , x3 , t), and κ T ∂T = 0
+∂n
+d
+dt
+
+Sdx1 dx2 dx3 = 0
+Ω
+
+1
+• Entropy stable wall-boundary condition: κ T ∂T = G (x2 , x3 , t)
+∂n
+
+d
+dt
+
+Sdx1 dx2 dx3 = −DT + data + DT
+Ω
+
+57 / 62
+
+Entropy conservative/stable wall bc
+
+• Objective: Construct numerical boundary procedures that
+
+• mimic the continuous entropy analysis
+• functional form identical to interface SATs
+• Accomplished by penalizing against manufactured inviscid and viscous ﬂuxes
+constructed from a combination of boundary data and the numerical solution
+
+58 / 62
+
+h/p entropy stable schemes
+Collaborators: David C. Del Rey Fern´ndez, Mark H. Carpenter, Lisandro Dalcin,
+a
+Stefano Zampini, Lucas Friedrich, Andrew R. Winters, Gregor J. Gassner, and
+Matteo Parsani
+h/p-adaptation
+
+Objectives:
+
+• Entropy conservation/stability
+• Elementwise conservative
+• Freestream preserving
+• Simple
+
+59 / 62
+
+Concluding remarks
+
+•Exciting time to be developing and using SBP
+Mature and has been applied to many PDEs of interest
+Lots of theoretical work to be done
+Many extensions to come
+•In general, provable properties should be at the core of all algorithms
+Stability is the minimum
+•What we should shoot for is provable convergence to the physically realizable
+solution
+
+60 / 62
+
+Thanks
+
+Special thank you to Professor Sv¨rd for hosting
+a
+me
+And to all of the wonderful people who I had the
+opportunity to meet and discuss research with
+
+61 / 62
+
+Questions
+•Entropy Stable p-Nonconforming Discretizations with the Summation-by-Parts Property for
+the Compressible Euler equations https://arxiv.org/abs/1909.12536
+•Entropy Stable p-Nonconforming Discretizations with the Summation-by-Parts Property for
+the Compressible Navier–Stokes Equations https://arxiv.org/abs/1909.12546
+•Entropy Stable h/p-Nonconforming Discretization with the Summation-by-Parts Property for
+the Compressible Euler and Navier–Stokes Equations
+https://repository.kaust.edu.sa/handle/10754/656861
+•Entropy stable spectral collocation schemes for the 3-D Navier-Stokes equations on dynamic
+unstructured grids https://arxiv.org/pdf/1812.10185.pdf
+•Entropy stable space-time discontinuous Galerkin schemes with summation-by-parts property
+for hyperbolic conservation laws https://arxiv.org/pdf/1808.08218.pdf
+•Eﬃcient entropy stable Gauss collocation methods https://arxiv.org/pdf/1809.01178.pdf
+•Conservative and entropy stable solid wall boundary conditions for the compressible
+Navier-Stokes equations: Adiabatic wall and heat entropy transfer
+https://arxiv.org/pdf/1812.11403.pdf
+
+62 / 62
+
