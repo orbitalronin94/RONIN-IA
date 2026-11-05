@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:30 | [Integración continua #1201 (run 42002952292)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002952292) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Align SFTTrainer tokenizer argument with Unsloth Qwen3.5 guide. Trigger: push; rama: main; intento: 1. | 632c3bae |
 | 2026-11-05 09:30 | [Integración continua #1198 (run 42002905525)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002905525) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Allow complete final answer generation during validation. Trigger: push; rama: main; intento: 1. | 0685d35f |
 | 2026-11-05 09:30 | [Integración continua #1197 (run 42002901050)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002901050) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document single-model Qwen3.5 training pipeline in README. Trigger: push; rama: main; intento: 1. | dd13e0c8 |
 | 2026-11-05 09:30 | [Integración continua #1195 (run 42002849778)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002849778) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Fix Qwen corpus source run and trigger preparation. Trigger: push; rama: main; intento: 1. | 43997dc0 |
