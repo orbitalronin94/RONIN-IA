@@ -1,13 +1,13 @@
-name: RONIN — microentrenamiento corpus 4 semillas × 50 pasos
+name: RONIN — entrenamiento extendido corpus semilla 202 × 500 pasos
 on:
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
       steps:
-        description: Pasos de entrenamiento (fijado en 50 para este experimento)
+        description: Pasos de entrenamiento (fijado en 500 para este experimento)
         required: true
-        default: "50"
+        default: "500"
         type: string
       eval_limit:
         description: Preguntas de screening del split validation
@@ -16,15 +16,15 @@ on:
         type: choice
         options: ["50"]
       seeds:
-        description: Exactamente cuatro semillas distintas separadas por comas
+        description: Semilla fija 202; no se admiten otras semillas
         required: true
-        default: "101,202,303,404"
+        default: "202"
         type: string
 permissions:
   actions: read
   contents: read
 concurrency:
-  group: ronin-micro-corpus-4-seeds-50-steps
+  group: ronin-corpus-seed-202-500-steps
   cancel-in-progress: false
 jobs:
   native-cycle:
@@ -38,9 +38,9 @@ jobs:
       MATHLIB_RUN_ID: "42026633643"
       NASA_FILE_REVIEWED_RUN_ID: "42028138060"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
-      STEPS: ${{ inputs.steps || '50' }}
+      STEPS: ${{ inputs.steps || '500' }}
       EVAL_LIMIT: ${{ inputs.eval_limit || '50' }}
-      TRAIN_SEEDS: ${{ inputs.seeds || '101,202,303,404' }}
+      TRAIN_SEEDS: ${{ inputs.seeds || '202' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -55,9 +55,9 @@ jobs:
             scripts
       - name: Validate budget
         run: |
-          [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -eq 50 ]
+          [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -eq 500 ]
           IFS=',' read -ra SEED_LIST <<< "$TRAIN_SEEDS"
-          [ "${#SEED_LIST[@]}" -eq 4 ]
+          [ "${#SEED_LIST[@]}" -eq 1 ]
           declare -A SEEN=()
           for raw in "${SEED_LIST[@]}"; do
             seed="$(echo "$raw" | xargs)"
@@ -65,7 +65,8 @@ jobs:
             [ -z "${SEEN[$seed]+x}" ] || { echo "Semilla duplicada: $seed"; exit 1; }
             SEEN[$seed]=1
           done
-          if [ "$EVAL_LIMIT" = "0" ]; then [ "${#SEED_LIST[@]}" -eq 1 ]; fi
+          [ "${SEED_LIST[0]}" = "202" ]
+          [ "$EVAL_LIMIT" -eq 50 ]
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
@@ -194,7 +195,7 @@ jobs:
       - name: Create internal validation split from train only
         run: |
           python scripts/prepare_legacy_training_split.py --input /tmp/ronin-native-train.txt --output-dir /tmp/ronin-native-split --validation-fraction 0.05 --seed 42006
-      - name: Screen multiple seeds against one cached compact holdout
+      - name: Train seed 202 for 500 steps and compare against the same compact holdout
         run: |
           python scripts/screen_training_seeds.py \
             --text /tmp/ronin-native-split/train-internal.txt \
@@ -214,10 +215,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: ronin-micro-corpus-4seeds-${{ github.run_id }}
+          name: ronin-corpus-seed-202-500steps-${{ github.run_id }}
           path: |
             reports/
-            checkpoints/seed-*/step-00000050.pt
+            checkpoints/seed-202/step-00000500.pt
           if-no-files-found: warn
           retention-days: 90
           compression-level: 6
