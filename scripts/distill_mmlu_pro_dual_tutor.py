@@ -231,6 +231,13 @@ def generate(
             "teacher_licenses": [
                 qwen_manifest["license"], deepseek_manifest["license"]
             ],
+            "teacher_upstream_bases": [
+                qwen_manifest.get("upstream_base"), deepseek_manifest.get("upstream_base")
+            ],
+            "teacher_upstream_base_licenses": [
+                qwen_manifest.get("upstream_base_license"),
+                deepseek_manifest.get("upstream_base_license"),
+            ],
             "teacher_licenses_verified": True,
             "teacher_weights_loaded_locally": True,
             "teacher_weights_imported_into_student": False,
@@ -280,6 +287,8 @@ def generate(
             "model_id": deepseek_manifest["model_id"],
             "revision": deepseek_manifest["base_revision"],
             "license": deepseek_manifest["license"],
+            "upstream_base": deepseek_manifest.get("upstream_base"),
+            "upstream_base_license": deepseek_manifest.get("upstream_base_license"),
             "initial_accuracy": initial_correct_deepseek / count,
             "accuracy_after_challenge": correct_deepseek / count,
         },
