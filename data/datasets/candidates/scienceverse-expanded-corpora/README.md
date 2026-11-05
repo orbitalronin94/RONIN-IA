@@ -7,7 +7,7 @@
 - Repositorio: https://github.com/scienceverse/papers
 - Revisión exacta del manifiesto upstream: 3a6ac0125e576423300a8996e9ad4c5d65ef9fe2.
 - Cada carpeta descargada conserva manifest.csv, eligible-manifest.csv, provenance.json y el asset RDS.
-- El manifiesto upstream declara CC BY 4.0 por artículo en estos cuatro corpus. Esa declaración por DOI es evidencia de candidato; no demuestra por sí sola titularidad, derechos sobre elementos de terceros ni el cumplimiento completo de Level A.
+- El manifiesto upstream declara CC BY 4.0 por artículo en los corpus que incluyen licencia explícita CC-BY 4.0. Esa declaración por DOI es evidencia de candidato; no demuestra por sí sola titularidad, derechos sobre elementos de terceros ni el cumplimiento completo de Level A.
 
 ## Cobertura del catálogo prioritario
 
