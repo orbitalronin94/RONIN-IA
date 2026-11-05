@@ -1,4 +1,5 @@
 import hashlib
+import json
 
 import pytest
 
@@ -26,7 +27,7 @@ def test_dual_tutor_prompt_does_not_leak_gold_answer():
     assert "ANSWER:" in prompt
     assert "RATIONALE:" in prompt
     assert "correct_index" not in prompt
-    assert "No deliberación privada" in prompt
+    assert "no deliberación privada" in prompt
 
 
 def test_parser_extracts_answer_and_explanation():
@@ -43,18 +44,20 @@ def test_parser_rejects_unstructured_or_short_explanations():
     assert parse_response("ANSWER: A\nRATIONALE: Sí.") == ("A", None)
 
 
-def test_manifest_verifies_apache_and_mit_models(tmp_path):
+def test_manifest_verifies_apache_model(tmp_path):
     weights = tmp_path / "model.safetensors"
     weights.write_bytes(b"local model fixture")
-    digest = hashlib.sha256(weights.read_bytes()).hexdigest()
     manifest = {
         "model_id": "Qwen/Qwen3.6-27B",
         "revision": "a" * 40,
         "license": "apache-2.0",
         "license_verified": True,
         "trust_remote_code": False,
-        "files_sha256": {"model.safetensors": digest},
+        "files_sha256": {
+            "model.safetensors": hashlib.sha256(weights.read_bytes()).hexdigest()
+        },
     }
+    (tmp_path / "ronin-teacher-manifest.json").write_text(json.dumps(manifest))
     assert verify_manifest(tmp_path)["license"] == "apache-2.0"
 
 
@@ -71,9 +74,12 @@ def test_manifest_rejects_modified_or_unverified_files(tmp_path):
             "model.safetensors": hashlib.sha256(b"initial").hexdigest()
         },
     }
+    manifest_path = tmp_path / "ronin-teacher-manifest.json"
+    manifest_path.write_text(json.dumps(manifest))
     weights.write_bytes(b"modified")
     with pytest.raises(ValueError, match="Hash incorrecto"):
         verify_manifest(tmp_path)
     manifest["license_verified"] = False
+    manifest_path.write_text(json.dumps(manifest))
     with pytest.raises(ValueError, match="licencia/código remoto"):
         verify_manifest(tmp_path)
