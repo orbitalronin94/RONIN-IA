@@ -119,7 +119,7 @@ Ejecutar \`python scripts/validate_rights_registry.py\` para validar el registro
 
 ## ScienceVerse — adquisición candidata verificada (5 de noviembre de 2026)
 
-Se descargaron cuatro de los siete corpus prioritarios desde la revisión upstream 3a6ac0125e576423300a8996e9ad4c5d65ef9fe2. Son 2.595 filas DOI elegibles y 83.524.872 bytes de assets RDS comprimidos, no texto extraído:
+Se descargaron cinco de los siete corpus prioritarios desde la revisión upstream 3a6ac0125e576423300a8996e9ad4c5d65ef9fe2. Son 3.091 filas DOI elegibles y 95.948.088 bytes de assets RDS comprimidos, no texto extraído:
 
 | Corpus | Filas elegibles | Bytes RDS | SHA-256 |
 |---|---:|---:|---|
