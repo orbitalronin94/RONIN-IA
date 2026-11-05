@@ -11,10 +11,13 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 import zipfile
 from collections import Counter
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from scripts.select_knowledge_dense_corpus import score_record
 
