@@ -116,6 +116,8 @@ def main() -> int:
     }
     target = out / "per-doi-rights-report.json"
     target.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    eligible = sorted(x["doi"] for x in decisions if x["decision"] == "cc_by_4_verified_in_crossref")
+    (out / "eligible-dois.txt").write_text("\n".join(eligible) + "\n", encoding="utf-8")
     print(json.dumps({
         "status": report["status"],
         "manifest_rows": len(rows),
