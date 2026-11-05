@@ -26,6 +26,8 @@ def main() -> None:
     parser.add_argument("--text", type=Path, required=True, help="approved UTF-8 corpus file")
     parser.add_argument("--profile", choices=["tiny"], default="tiny")
     parser.add_argument("--steps", type=int, default=None)
+    parser.add_argument("--learning-rate", type=float, default=None, help="tasa de aprendizaje para fine-tuning")
+    parser.add_argument("--min-learning-rate", type=float, default=None, help="tasa mínima del scheduler")
     parser.add_argument("--context-length", type=int, default=None, help="Contexto en bytes; permite alinear el entrenamiento con el evaluador")
     parser.add_argument("--seed", type=int, default=None, help="semilla de inicialización y muestreo")
     parser.add_argument(
@@ -63,8 +65,20 @@ def main() -> None:
             max_steps=args.steps,
             warmup_steps=min(training_config.warmup_steps, max(1, args.steps // 10)),
         )
+    overrides = {}
     if args.seed is not None:
-        training_config = replace(training_config, seed=args.seed)
+        overrides["seed"] = args.seed
+    if args.learning_rate is not None:
+        if args.learning_rate <= 0:
+            parser.error("--learning-rate must be positive")
+        overrides["learning_rate"] = args.learning_rate
+    if args.min_learning_rate is not None:
+        if args.min_learning_rate < 0:
+            parser.error("--min-learning-rate must be non-negative")
+        overrides["min_learning_rate"] = args.min_learning_rate
+    if overrides:
+        training_config = replace(training_config, **overrides)
+    training_config.validate()
     tokens = encode_text_file(args.text, ByteTokenizer())
     if model_config.vocab_size != ByteTokenizer.vocab_size:
         raise ValueError("tiny profile and byte tokenizer vocabulary do not match")
