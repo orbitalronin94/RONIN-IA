@@ -13,14 +13,14 @@ Este directorio es el registro operativo de adquisición, revisión, admisión y
 | NASA NTRS public-use | 813 de 824 scoped; 6 train file-reviewed; 807 aún no train | 6 documentos / 701.870 bytes en dos manifiestos file-reviewed; 4 OCR/rights holds | Sí, solo los 6 archivos revisados; recheck semanal y near-duplicate global pendientes |
 | Papers propios | 9 Markdown (README excluido) | 750.857 bytes; hashes/bytes verificados; dedup exacta contra 9.108 documentos train existentes; auditoría de estructura y privacidad PASS | Sí, train scoped interno; near-duplicate global y holdout siguen pendientes |
 | NASA file-reviewed | 6 train + 4 retenidos (subconjunto de NASA NTRS) | 701.870 bytes train; 4 nuevos promovidos tras verificar Git blob SHA-1, candidate pack y bytes; 4 OCR/rights holds | Sí, train scoped de los 6 archivos aprobados; near-duplicate global pendiente |
-| ScienceVerse | 7.403 registros fuente; 7.365 admitidos scoped; 6.641 train; 724 retenidos | 399.591.813 bytes train; CC BY/CC0 por DOI; hashes y dedup exacta cruzada PASS | Sí, train scoped en 4 bibliotecas General; near-duplicate global y holdout pendientes |
+| ScienceVerse | 7.403 registros fuente; 7.365 admitidos scoped; 7.103 train; 262 retenidos | 426.975.945 bytes train; CC BY/CC0 por DOI; hashes y dedup exacta cruzada PASS | Sí, train scoped en 4 bibliotecas General; near-duplicate global y holdout pendientes |
 | CoVoST 2 translation-only | 270.244 train; 34.051 validation y 33.678 test aislados | 18.385.485 bytes UTF-8 de texto train; 77.509.998 bytes JSONL; CC0-1.0; inglés y catalán | Sí, train scoped tras materialización verificable; solo traducciones; near-duplicate global y holdout pendientes |
 
-**Cómo leer los totales:** los cuatro manifiestos base registran 10.163 entradas (literatura, Mathlib4, NASA y Papers), más 7.403 registros fuente de ScienceVerse. CoVoST es una fuente independiente: 350.705 filas originales, 337.973 traducciones únicas tras filtros y 270.244 documentos en train. La cifra **entrenable por partición** pasa a **286.006 documentos y 657.354.800 bytes UTF-8**: 608 literatura + 8.498 Mathlib4 + 6 NASA file-reviewed + 9 Papers propios + 6.641 ScienceVerse + 270.244 CoVoST. Validation/test permanecen aislados. No es una afirmación de G-0 global ni de ausencia de near-duplicates; el estado train scoped se limita a cada manifiesto y sus controles.
+**Cómo leer los totales:** los cuatro manifiestos base registran 10.163 entradas (literatura, Mathlib4, NASA y Papers), más 7.403 registros fuente de ScienceVerse. CoVoST es una fuente independiente: 350.705 filas originales, 337.973 traducciones únicas tras filtros y 270.244 documentos en train. La cifra **entrenable por partición** pasa a **286.468 documentos y 684.738.932 bytes UTF-8**: 608 literatura + 8.498 Mathlib4 + 6 NASA file-reviewed + 9 Papers propios + 7.103 ScienceVerse + 270.244 CoVoST. Validation/test permanecen aislados. No es una afirmación de G-0 global ni de ausencia de near-duplicates; el estado train scoped se limita a cada manifiesto y sus controles.
 
-### ScienceVerse: 6.641 documentos train scoped; 724 retenidos
+### ScienceVerse: 7.103 documentos train scoped; 262 retenidos
 
-La auditoría por documento registra 13 colecciones y 7.365 documentos admitidos scoped. De ellos, 6.641 documentos (399.591.813 bytes UTF-8) pasan integridad de payload, SHA-256/bytes, CC BY/CC0 por DOI, atribución, mínimos de calidad, filtros de email/SSN y deduplicación exacta interna y contra el train actual. Se retienen 724: 697 por exceso de caracteres de reemplazo y 27 por títulos no sustantivos (correcciones, editoriales, erratas, etc.). La promoción es train scoped; near-duplicates globales, contaminación de benchmarks/holdouts y G-0 siguen pendientes.
+La auditoría por documento registra 13 colecciones y 7.365 documentos admitidos scoped. De ellos, 7.103 documentos (426.975.945 bytes UTF-8) pasan integridad de payload, SHA-256/bytes, CC BY/CC0 por DOI, atribución, mínimos de calidad, filtros de email/SSN y deduplicación exacta interna y contra el train actual. Se retienen 724: 262 por exceso de caracteres de reemplazo; no se retuvieron títulos no sustantivos en el artefacto verificado. La promoción es train scoped; near-duplicates globales, contaminación de benchmarks/holdouts y G-0 siguen pendientes.
 
 | Colección | Textos examinados | Admitidos scoped | Retenidos |
 |---|---:|---:|---:|
@@ -49,7 +49,7 @@ Fuente de la admisión scoped: `admitted/scienceverse-ccby-v1/manifest.json`. La
 - Train: **270.244 documentos / 18.385.485 bytes UTF-8 de texto** (77.509.998 bytes JSONL; gzip persistido tras el workflow). Inglés: 88.916; catalán: 181.328. Pares: es→en 48.998, ca→en 39.918, en→ca 181.328.
 - Validation: 34.051; test: 33.678. Ambos permanecen fuera de entrenamiento.
 - Revisión humana estratificada: 36/36 muestras (12 por par); texto interpretable y coherente con el idioma; se registró ruido de traducción en tres ejemplos. Los tres falsos positivos del detector de teléfono son rangos de años, no teléfonos.
-- Deduplicación exacta: 0 duplicados internos y 0 frente a ScienceVerse, Mathlib4, NASA file-reviewed y Papers; 0 coincidencias de línea frente a las 449.939 líneas del train literario español. El chequeo de ScienceVerse usó un artefacto conservador de 7.103 documentos, por encima de los 6.641 del manifiesto vigente.
+- Deduplicación exacta: 0 duplicados internos y 0 frente a ScienceVerse, Mathlib4, NASA file-reviewed y Papers; 0 coincidencias de línea frente a las 449.939 líneas del train literario español. El chequeo de ScienceVerse usó un artefacto conservador de 7.103 documentos, coincidente con los 7.103 del manifiesto reconciliado.
 - **Límites explícitos:** train scoped interno; G-0 global sigue FAIL; near-duplicates globales y contaminación de benchmarks/holdouts siguen PENDING. No presentar el corpus como gold-standard de traducción.
 
 Manifiesto de materialización: [CoVoST 2 train scoped](admitted/covost2-cc0-translation-only/manifest.json). Revisión: [muestra manual y deduplicación](reviews/covost2-manual-review-2026-11-05.json).
@@ -127,7 +127,7 @@ Los números siguientes son **inventarios de candidatos**, no admisiones. Hay sn
 | Línea | Adquisición comprobada | Estado y límites |
 |---|---:|---|
 | ScienceVerse / papers (RDS) | 3.087 DOI elegibles en cinco assets RDS; 95.948.088 bytes comprimidos | Exportación textual, derechos por artículo/versión, terceros, privacidad y calidad pendientes. No son bytes de texto admitido. |
-| ScienceVerse (exportaciones de texto) | 7.403 documentos en 13 colecciones; 7.365 admitidos scoped; 6.641 train y 724 retenidos | Train scoped verificado: 399.591.813 bytes UTF-8; no sumar 3.087 + 7.403 con el lote RDS. Near-duplicate global y holdout pendientes. |
+| ScienceVerse (exportaciones de texto) | 7.403 documentos en 13 colecciones; 7.365 admitidos scoped; 7.103 train y 262 retenidos | Train scoped verificado: 426.975.945 bytes UTF-8; no sumar 3.087 + 7.403 con el lote RDS. Near-duplicate global y holdout pendientes. |
 | NASA NTRS | 824 textos completos; 39.262.382 bytes | 813 admitidos scoped en su manifiesto, 11 retenidos; además, seis revisados en un manifiesto separado. Los paquetes por biblioteca son candidatos y no deben sumarse de nuevo. |
 | NASA NTRS — snapshot de expansión | 189 textos completos; 15.417.212 bytes | Lote candidato adicional registrado en el README de adquisición; reconciliar IDs/hashes contra los 824 antes de contarlo como incremento neto. |
 | CoVoST 2 | 350.705 filas originales; 337.973 únicas; 270.244 train, 34.051 validation y 33.678 test | **Admitido train scoped**: 18.385.485 bytes UTF-8 de texto; CC0-1.0; solo traducciones; audio, fuentes, IDs, rutas y Tatoeba excluidos. Near-duplicate global y holdout pendientes. |
@@ -154,8 +154,8 @@ La auditoría de huecos del 5 de noviembre está documentada en [`acquisition/so
 
 No se considerará progreso el crecimiento de `candidates/`, el número de filas con licencia aparente ni los pases de filtros automáticos. El contador que importa es el de documentos con `training_eligible=true` en una partición `train` reproducible y con hashes comprobados.
 
-- **Corpus con partición train actualmente habilitada:** literatura (608 / 140.295.523 bytes), Mathlib4 (8.498 / 97.629.252 bytes), NASA file-reviewed (6 / 701.870 bytes), Papers propios (9 / 750.857 bytes), ScienceVerse (6.641 / 399.591.813 bytes) y CoVoST 2 (270.244 / 18.385.485 bytes): **286.006 documentos y 657.354.800 bytes UTF-8**. Validation/test permanecen excluidos.
-- **NASA NTRS restante (807 scoped) y NASA file-reviewed retenidos por OCR/derechos (4):** siguen excluidos de entrenamiento hasta superar sus comprobaciones específicas. ScienceVerse (6.641 train scoped de 7.365 admitidos) y Papers propios (9) ya están habilitados en train.
+- **Corpus con partición train actualmente habilitada:** literatura (608 / 140.295.523 bytes), Mathlib4 (8.498 / 97.629.252 bytes), NASA file-reviewed (6 / 701.870 bytes), Papers propios (9 / 750.857 bytes), ScienceVerse (7.103 / 426.975.945 bytes) y CoVoST 2 (270.244 / 18.385.485 bytes): **286.468 documentos y 684.738.932 bytes UTF-8**. Validation/test permanecen excluidos.
+- **NASA NTRS restante (807 scoped) y NASA file-reviewed retenidos por OCR/derechos (4):** siguen excluidos de entrenamiento hasta superar sus comprobaciones específicas. ScienceVerse (7.103 train scoped de 7.365 admitidos) y Papers propios (9) ya están habilitados en train.
 - **Siguiente fuente prioritaria:** conjunto oficial BNE *Biblioteca Digital. Documentos en dominio público*, que ofrece distribución TXT/XML de obras declaradas en dominio público y reutilización CC BY 4.0. Se debe adquirir el snapshot, fijar hashes, comprobar cada obra/edición y OCR, retirar aparato editorial/terceros dudosos, deduplicar globalmente y generar splits antes de promover. No se contará ni entrenará hasta superar esos controles.
 - La política de adquisición queda así: primero fuentes con texto completo y permiso explícito sobre la obra, luego calidad verificable, y solo entonces admisión y entrenamiento. Los candidatos que no puedan cerrar los validaciones no desplazan este objetivo.
 
@@ -204,24 +204,24 @@ Los payloads grandes pueden publicarse como artefactos versionados de GitHub Act
 El corpus legacy de **608 documentos** continúa siendo la única fuente contabilizada en los mínimos Level A del inventario de 64 bibliotecas; Mathlib4 tiene una partición train scoped separada, pero no se ha incorporado al inventario Level A de 64 bibliotecas. Los corpus siguientes están admitidos en alcance documental propio, pero **no se suman a esos mínimos**:
 
 - **NASA NTRS:** 813/824 admitidos; 32.313.859 bytes normalizados; 11 retenidos.
-- **ScienceVerse:** 7.365/7.403 admitidos scoped; 6.641 train y 399.591.813 bytes; 724 retenidos (697 por OCR/codificación con demasiados caracteres de reemplazo y 27 por títulos no sustantivos).
+- **ScienceVerse:** 7.365/7.403 admitidos scoped; 7.103 train y 426.975.945 bytes; 262 retenidos (262 por exceso de caracteres de reemplazo).
 - **Papers propio:** 9/9 Markdown admitidos con autorización del propietario; README excluido; 750.857 bytes.
 
-Los 7.365 ScienceVerse admitidos scoped tienen DOI único, SHA-256 de texto único dentro de las 13 exportaciones, licencia por documento CC-BY-4.0 o CC0 y atribución presente. La auditoría train posterior promovió 6.641 documentos (399.591.813 bytes) tras integridad, mínimos de calidad, filtros de email/SSN y deduplicación exacta contra los train actuales; retuvo 724 por exceso de caracteres de reemplazo (697) y títulos no sustantivos (27). La attestation del propietario cubre la revisión humana de las fuentes mapeadas; el manifiesto mantiene trazabilidad por documento.
+Los 7.365 ScienceVerse admitidos scoped tienen DOI único, SHA-256 de texto único dentro de las 13 exportaciones, licencia por documento CC-BY-4.0 o CC0 y atribución presente. La auditoría train posterior promovió 7.103 documentos (426.975.945 bytes) tras integridad, mínimos de calidad, filtros de email/SSN y deduplicación exacta contra los train actuales; retuvo 262 por exceso de caracteres de reemplazo. La attestation del propietario cubre la revisión humana de las fuentes mapeadas; el manifiesto mantiene trazabilidad por documento.
 
-**Entrenamiento scoped:** el mix incorpora 608 literatura, 8.498 Mathlib4, 6 NASA file-reviewed, 9 Papers propios, 6.641 ScienceVerse y 270.244 CoVoST 2. NASA restante (807), los 724 ScienceVerse retenidos, CoVoST validation/test y otros candidatos siguen fuera. Near-duplicates globales, contaminación de benchmarks/holdouts, emparejamiento General/HKD global y G-0 siguen pendientes.
+**Entrenamiento scoped:** el mix incorpora 608 literatura, 8.498 Mathlib4, 6 NASA file-reviewed, 9 Papers propios, 7.103 ScienceVerse y 270.244 CoVoST 2. NASA restante (807), los 724 ScienceVerse retenidos, CoVoST validation/test y otros candidatos siguen fuera. Near-duplicates globales, contaminación de benchmarks/holdouts, emparejamiento General/HKD global y G-0 siguen pendientes.
 
 ## Auditoría integral de candidatos (2026-11-05)
 
 El workflow \`Audit and admit scoped candidate documents\` ejecutó correctamente la auditoría y materialización:
 
 - NASA: [813 documentos admitidos en alcance acotado](admitted/nasa-ntrs-public-use-v1/manifest.json), 11 retenidos.
-- ScienceVerse: [7.365 documentos admitidos scoped](admitted/scienceverse-ccby-v1/manifest.json); [6.641 train scoped](admitted/scienceverse-ccby-v1/train-eligibility-manifest.json), 724 retenidos.
+- ScienceVerse: [7.365 documentos admitidos scoped](admitted/scienceverse-ccby-v1/manifest.json); [7.103 train scoped](admitted/scienceverse-ccby-v1/train-eligibility-manifest.json), 262 retenidos.
 - NASA file-reviewed: [2 documentos originales](admitted/nasa-ntrs-file-reviewed-v1/manifest.json) + [4 adicionales](admitted/nasa-ntrs-file-reviewed-v2/manifest.json), 6 train en total.
 - Papers: [9 documentos propios admitidos](admitted/ronin-authored-papers-v1/manifest.json), README excluido.
 - Informe global por fuente y documento: [candidate-document-audit-2026-11-05.json](reviews/candidate-document-audit-2026-11-05.json).
 
-Los payloads NASA y ScienceVerse preservan hashes del origen y del contenido admitido. El manifiesto de ScienceVerse habilita `training_eligible:true` solo para la partición train scoped de 6.641 documentos; el G-0 global permanece FAIL. NASA restante sigue pendiente. Esta promoción no equivale a G-0 global ni altera los mínimos Level A fuera de las cuatro bibliotecas General indicadas.
+Los payloads NASA y ScienceVerse preservan hashes del origen y del contenido admitido. El manifiesto de ScienceVerse habilita `training_eligible:true` solo para la partición train scoped de 7.103 documentos; el G-0 global permanece FAIL. NASA restante sigue pendiente. Esta promoción no equivale a G-0 global ni altera los mínimos Level A fuera de las cuatro bibliotecas General indicadas.
 
 
 ## Expansión a 200 GB
