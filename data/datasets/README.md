@@ -105,3 +105,10 @@ Ejecutar \`python scripts/validate_rights_registry.py\` para validar el registro
 - **NIST Technical Series/PDR:** política oficial concede derechos mundiales sobre trabajos/datos propios de NIST en los términos publicados y exige atribución; los trabajos de terceros se excluyen. Cada documento/dataset requiere comprobación de autoría y titularidad. Expediente: `candidates/nist-technical-series/README.md`.
 - **Estado de ambos:** candidatos de alta prioridad; todavía sin payload, hashes, revisión de privacidad/calidad, deduplicación ni particiones. No entrenables.
 - Fuentes: https://sti.nasa.gov/disclaimers/ · https://ntrs.nasa.gov/ · https://www.nist.gov/open/copyright-fair-use-and-licensing-statements-srd-data-software-and-technical-series-publications · https://data.nist.gov/pdr/about
+
+
+## Bloque Humanidades — BNE y Project Gutenberg
+
+- **BNE / Biblioteca Digital Hispánica:** catálogo y licencia CC BY 4.0 de metadatos verificados. Los enlaces OCR no heredan automáticamente esa licencia; solo se extraerán obras con derechos individuales claros. Expediente: `candidates/bne-bdh-ocr/README.md`.
+- **Project Gutenberg:** fuente de descubrimiento, no licencia global. El proveedor advierte que dominio público en EE. UU. no equivale a dominio público en España/UE y que permisos individuales no se transfieren. Expediente: `candidates/project-gutenberg/README.md`.
+- Ambas quedan en implementación parcial; sin texto admitido adicional hasta superar la revisión por obra/edición.
