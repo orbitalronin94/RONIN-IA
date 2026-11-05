@@ -343,18 +343,20 @@ The expanded 32-domain / 64-library catalogue now maps 21 audited candidate sour
 
 ## Adjudication of all mapped sources (2026-11-05)
 
-Every one of the 64 entries in `candidates/github-source-audit.json` now has an explicit first-pass disposition in `candidates/library-adjudication-2026-11-05.json`. This is a triage register, not a claim that all 64 have undergone item-level legal review or that any new corpus has passed admission.
+Every one of the 64 entries in `candidates/github-source-audit.json` has an explicit, updated disposition in `candidates/library-adjudication-2026-11-05.json`. This is a source-level triage register, not a substitute for document-level rights decisions or a training admission manifest.
 
 | Disposition | Sources | Treatment |
 |---|---:|---|
-| Candidate — item-level adjudication required | 33 | Acquire/review exact versions, source rights, payload hashes, privacy, quality, deduplication and splits. |
-| Reject under current policy | 13 | Excluded from current text-ingestion scope due to incompatible rights or sensitive-data policy. |
-| Quarantine — no ingestion | 4 | Rights, privacy or provenance conflicts unresolved; remain outside training. |
-| Metadata only — not a training library | 10 | May support discovery, provenance, retrieval or graph enrichment; never count as prose-training libraries. |
-| Metadata/discovery only | 2 | Same separation; structured metadata is not substantive training text. |
-| CoVoST split-integrity hold | 1 | Old mixed-split artifact is ineligible; corrected train-only adapter must pass CI and all content gates. |
-| VoxPopuli rights/privacy hold | 1 | CC0 scope, Parliament notice, attribution, third-party content and speaker privacy require resolution. |
+| Candidate — item-level review still required | 29 | Exact versions, licenses, payloads, privacy, quality, deduplication and splits not yet verified. |
+| CoVoST — rights sign-off/global dedup hold | 1 | Corrected train-only pipeline succeeds; 337,973 filtered rows in Catalan/English; sign-off, sample review and global dedup remain. |
+| ParlaIbero — privacy/payload-quality hold | 1 | CC BY 4.0, 558,940 speech rows and 934.9M text characters; large payload deliberately not downloaded pending privacy review. |
+| DReaM-es-open — document-level rights/quality hold | 1 | 9.1M tokens/717,854 sentences declared; 128 document records need work/edition review and OCR sampling. |
+| GPLSI ClearText CAS/VAL — embedded source-rights hold | 2 | 11 CAS + 6 VAL documents remain candidates; collection-level CC BY does not clear original source documents. One CAS source is explicitly quarantined. |
+| VoxPopuli — rights/privacy hold | 1 | 1,041 CC0-labelled records inspected; Parliament scope, attribution and privacy still unresolved. |
+| Reject under current policy | 13 | Incompatible rights or sensitive-data scope; no ingestion. |
+| Quarantine — no ingestion | 4 | Rights, privacy or provenance conflicts unresolved. |
+| Metadata only — not a training library | 12 | Discovery/provenance/retrieval/graph support only; do not count as text libraries. |
 
-**Result: 0 new text libraries admitted and 0 new payloads training-eligible in this adjudication.** The existing `admitted/literature-es-v1/` remains the only admitted text corpus. Metadata-only sources do not fill any of the 32 General/HKD text libraries. Rejected and quarantined sources are not silently counted as candidates available for training.
+**Result: 0 new text libraries admitted and 0 new payloads training-eligible.** The existing `admitted/literature-es-v1/` remains the only admitted text corpus. The corrected CoVoST candidate and ParlaIbero preflight are now backed by immutable manifests and quality/audit evidence, but neither is promoted. Metadata-only sources do not fill any of the 32 General/HKD text libraries.
 
-The next admission batches should prioritize sources with clear item-level licensing and high text value: the pinned Spanish parliamentary speech files, GPLSI ClearText documents whose original rights can be cleared, the CoVoST train-only rebuild, and bounded CC0/CC-BY scientific text. Sources with non-commercial/share-alike conflicts, sensitive personal data, or packaging-only licenses stay excluded. Each admitted library must add its own immutable manifest, source attribution, split hashes and README entry in the same change.
+The next admission batches prioritize exact-scope CC BY/CC0 text with bounded payloads: document-cleared DReaM works, individual GPLSI documents with verified source licenses, the CoVoST multilingual language pool after sign-off, and scientific full text with per-article licensing. Sources with NC/ND/ShareAlike restrictions, sensitive personal data without a valid processing basis, or packaging-only license claims stay excluded. Every admitted library must be added under `data/datasets/admitted/` with its own immutable manifest, attribution bundle, train/validation/test hashes and README entry in the same change.
