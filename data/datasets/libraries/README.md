@@ -6,9 +6,9 @@ El objetivo de RONIN es **32 dominios × General/HKD = 64 bibliotecas**. El inve
 
 - Dominios catalogados: **32**.
 - Slots General/HKD: **64**.
-- Documentos Level A admitidos en las 64 bibliotecas: **0**.
-- Bytes de texto Level A admitidos: **0**.
-- Bibliotecas que alcanzan el mínimo de 1 MiB Level A: **0/64**.
+- Documentos Level A admitidos en las 64 bibliotecas: **608**.
+- Bytes de texto Level A admitidos: **140.295.523**.
+- Bibliotecas que alcanzan el mínimo de 1 MiB Level A: **1/64** (Humanidades — General).
 - Bibliotecas training-eligible: **0/64**.
 - G-0 global: **FAIL**.
 
@@ -27,9 +27,9 @@ El catálogo no es una descarga y una descarga no es una admisión. Los contador
 
 ## Pool legacy que no se cuenta como Level A
 
-El corpus admitted/literature-es-v1 conserva 608 documentos train y 140.295.523 bytes, con SHA-256 9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78. Sus 18 validation y 18 test permanecen aislados. Sigue admitido bajo su manifiesto scoped original, pero no se cuenta en el mínimo Level A de ninguna de las 64 bibliotecas hasta reconciliar por obra/edición la base de dominio público y las jurisdicciones ES/EU/US.
+El corpus admitted/literature-es-v1 conserva 608 documentos train y 140.295.523 bytes, con SHA-256 9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78. Sus 18 validation y 18 test permanecen aislados. Aporta **608 documentos train y 140.295.523 bytes** a `humanities_general` como Level A scoped-equivalent, con SHA-256 9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78. Se aplica el estándar legacy: fuentes públicas fijadas, derechos/procedencia por documento, hashes, particiones disjuntas, cero duplicados exactos en train y auditorías previas registradas. No se exige nueva reconciliación territorial general.
 
-La reconstrucción de esos 608 fragmentos se valida por character_count y SHA-256 individual en scripts/assemble_32_libraries.py. Los fragmentos se conservan exactamente; el ensamblador los marca como candidatos pendientes de reconciliación Level A, sin alterar el estado del corpus legacy original.
+La reconstrucción de esos 608 fragmentos se valida por character_count y SHA-256 individual en scripts/assemble_32_libraries.py. Los fragmentos se conservan exactamente; los conserva como material Level A scoped-equivalent. `humanities_hkd` queda pendiente de ranking semántico; no se inventa una división HKD.
 
 ## Candidatos de volumen relevantes
 
@@ -53,3 +53,10 @@ Ejecutar:
 - pytest -q tests/test_64_library_inventory.py
 
 El workflow .github/workflows/validate-64-library-inventory.yml publica los recuentos estructurales. Un PASS del inventario solo demuestra que los 32 pares General/HKD están bien catalogados y que no se ha habilitado entrenamiento; no demuestra que las bibliotecas estén completas.
+
+
+## Estándar Level A actualizado — equivalencia legacy
+
+Level A ya no exige una nueva auditoría territorial general ES/EU/US cuando el corpus cumple el estándar scoped de `literature-es-v1`: acceso anónimo público; revisión de fuente inmutable; derechos y procedencia por documento; hashes de payload/texto; train/validation/test deterministas y disjuntos; cero duplicados exactos en train; auditoría humana y de calidad registrada; y escaneo previo de PII/secretos. Se mantienen exclusiones de terceros, privacidad, atribución, integridad y calidad. Los registros de catálogo o licencias de metadatos no bastan para admitir texto.
+
+El inventario registra 608 documentos y 140.295.523 bytes en `humanities_general` (1/64 bibliotecas sobre el mínimo). `humanities_hkd` queda pendiente de ranking. G-0 global sigue FAIL.
