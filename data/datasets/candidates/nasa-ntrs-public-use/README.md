@@ -1,6 +1,6 @@
 # NASA Technical Reports Server (NTRS) — filtro documental
 
-**Estado a 5 de noviembre de 2026: 267 textos completos descargados como candidatos; 17.480.175 bytes de texto UTF-8 (suma de los ficheros `documents/*.txt` presentes en `main`). No admitidos para entrenamiento.**
+**Estado verificado en `main` a 5 de noviembre de 2026: 824 textos completos descargados como candidatos; 39.262.382 bytes de texto UTF-8 (conteo directo de los blobs `documents/*.txt` y del manifiesto de procedencia). No admitidos para entrenamiento.**
 
 ## Valor potencial
 
@@ -26,7 +26,7 @@ Excluir:
 
 ## Adquisición realizada
 
-El workflow `.github/workflows/ingest-nasa-ntrs-public-use.yml` consultó 37 categorías, recibió 3.595 registros y encontró 430 que superaban los filtros de metadatos. La adquisición acumulada en `main` contiene 267 ficheros de texto completo. El último inventario se calcula directamente desde los blobs del repositorio; los descartes y duplicados se mantienen trazados en los manifiestos de cada ejecución. No se presenta este recuento como documentos admitidos ni como total global sin deduplicación entre fuentes. Se conserva un `manifest.jsonl` por documento, `provenance.json`, SHA-256 de cada texto y el fichero en `documents/`.
+El workflow `.github/workflows/ingest-nasa-ntrs-public-use.yml` ha acumulado 824 documentos con texto completo. El manifiesto de procedencia registra 17.015 registros vistos, 1.112 elegibles por metadatos y 824 documentos conservados en el snapshot actual. El último inventario se calcula directamente desde los blobs del repositorio; los descartes y duplicados se mantienen trazados en los manifiestos de cada ejecución. No se presenta este recuento como documentos admitidos ni como total global sin deduplicación entre fuentes. Se conserva un `manifest.jsonl` por documento, `provenance.json`, SHA-256 de cada texto y el fichero en `documents/`.
 
 El filtro aplicado exige `PUBLIC_USE_PERMITTED` o `GOV_PUBLIC_USE_PERMITTED`, `licenseType=NO`, ausencia declarada de material de terceros, distribución pública, `DOCUMENT_AND_METADATA`, estado `CURATED`, `sensitiveInformation=2` (NONE), EAR/ITAR en NO y texto completo disponible. Son candidatos de uso público según el registro NASA; aún requieren revisión humana de derechos, PII y calidad. NASA exige consultar las redistribuciones al menos semanalmente y retirar cualquier documento cuya disponibilidad cambie.
 
@@ -34,4 +34,4 @@ El filtro aplicado exige `PUBLIC_USE_PERMITTED` o `GOV_PUBLIC_USE_PERMITTED`, `l
 
 Fijar cada NTRS Document ID y versión; conservar metadatos completos y campo copyright; descargar PDF público; calcular SHA-256; extraer texto; revisar referencias, figuras, PII, duplicados y calidad; mantener atribución NASA y datos de publicación.
 
-**Resultado:** candidato de alta prioridad para Astronomía/Ciencias de la Tierra, Física e Ingeniería. La declaración general de NASA no basta para admitir un documento concreto; no entrenable hasta completar el filtro documental y G-0.
+**Resultado:** candidato de alta prioridad para Astronomía/Ciencias de la Tierra, Física, Química/Materiales e Ingeniería/Robótica. Se está generando un paquete por biblioteca en `data/datasets/libraries/candidate-packs/nasa-ntrs-public-use/`; los paquetes siguen siendo candidatos, no datos admitidos. La declaración general de NASA no basta para admitir un documento concreto; no entrenable hasta completar la revisión humana, la revalidación semanal de redistribución, la deduplicación global y los gates aplicables.
