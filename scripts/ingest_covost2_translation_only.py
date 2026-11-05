@@ -110,6 +110,11 @@ def main() -> int:
             if rows_written >= args.max_rows:
                 break
 
+    if split_counts["other"]:
+        raise ValueError(f"unexpected upstream split labels: {split_counts['other']}")
+    if rows_written == 0 or split_counts["train"] + split_counts["train_covost"] == 0:
+        raise ValueError("no CoVoST 2 training rows found; refusing empty or non-training export")
+
     payload = output.read_bytes()
     manifest = {
         "dataset_id": "covost2-cc0-translation-only",
