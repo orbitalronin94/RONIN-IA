@@ -6,6 +6,7 @@ import argparse
 import gzip
 import hashlib
 import json
+import os
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -126,8 +127,6 @@ def validate_inputs(root: Path) -> tuple[dict[str, Any], dict[str, Any], dict[st
 def promote(root: Path) -> dict[str, Any]:
     source, quality, review = validate_inputs(root)
     train_path = root / "artifacts/covost-quality/train.jsonl"
-    validation_path = root / "artifacts/covost-quality/validation.jsonl"
-    test_path = root / "artifacts/covost-quality/test.jsonl"
     train_bytes = train_path.read_bytes()
     if len(train_bytes) != EXPECTED["train_jsonl_bytes"]:
         raise ValueError("train JSONL byte count changed")
@@ -175,8 +174,8 @@ def promote(root: Path) -> dict[str, Any]:
 
     validation = read_json(root / "artifacts/covost-quality/quality-report.json")["partitions"]["validation"]
     test = read_json(root / "artifacts/covost-quality/quality-report.json")["partitions"]["test"]
-    run_id = int(__import__("os").environ.get("GITHUB_RUN_ID", "0"))
-    repo = __import__("os").environ.get("GITHUB_REPOSITORY", "orbitalronin94/RONIN-IA")
+    run_id = int(os.environ.get("GITHUB_RUN_ID", "0"))
+    repo = os.environ.get("GITHUB_REPOSITORY", "orbitalronin94/RONIN-IA")
     manifest = {
         "schema_version": "1.0",
         "dataset_id": "covost2-cc0-translation-only",
