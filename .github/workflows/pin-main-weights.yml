@@ -1,0 +1,59 @@
+name: RONIN — fijar pesos del modelo main
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/pin-main-weights.yml"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  extract-and-pin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+      - name: Descargar artefacto histórico del modelo main
+        uses: actions/download-artifact@v6
+        with:
+          name: ronin-legacy-1000-holdout-comparison
+          path: incoming/main
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: "42014728700"
+      - name: Extraer y verificar únicamente los pesos principales
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, shutil
+          from pathlib import Path
+          expected = "a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
+          root = Path("incoming/main")
+          matches = list(root.rglob("step-00001000.pt"))
+          if len(matches) != 1:
+              raise SystemExit(f"Se esperaba un checkpoint main; encontrados: {len(matches)}")
+          source = matches[0]
+          digest = hashlib.sha256(source.read_bytes()).hexdigest()
+          if digest != expected:
+              raise SystemExit(f"SHA-256 inesperado: {digest}")
+          import torch
+          payload = torch.load(source, map_location="cpu", weights_only=False)
+          if payload.get("step") != 1000 or not isinstance(payload.get("model"), dict):
+              raise SystemExit("El checkpoint no corresponde al modelo main fijado")
+          Path("weights").mkdir(exist_ok=True)
+          target = Path("weights/ronin-main.pt")
+          shutil.copy2(source, target)
+          print(f"checkpoint={target} bytes={target.stat().st_size} sha256={digest}")
+          PY
+      - name: Publicar artefacto limpio de pesos
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-main-weights-v1
+          path: weights/ronin-main.pt
+          if-no-files-found: error
+          retention-days: 90
