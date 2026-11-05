@@ -65,7 +65,7 @@ for (rds in files) {
   stats <- list(rds_objects = length(object), eligible_dois = nrow(eligible),
                 exported_documents = 0L, excluded_not_eligible = 0L,
                 excluded_missing_text = 0L, excluded_short_text = 0L,
-                excluded_pii_pattern = 0L, excluded_duplicate_text = 0L,
+                excluded_pii_pattern = 0L, excluded_duplicate_text = 0L, excluded_duplicate_doi = 0L,
                 unmatched_eligible_dois = 0L, exported_text_bytes = 0)
   matched <- character()
   seen_local <- new.env(parent = emptyenv())
@@ -85,7 +85,7 @@ for (rds in files) {
       next
     }
     if (exists(doi, envir = seen_local, inherits = FALSE)) {
-      stats$excluded_duplicate_text <- stats$excluded_duplicate_text + 1L
+      stats$excluded_duplicate_doi <- stats$excluded_duplicate_doi + 1L
       write_jsonl(list(list(dataset = dataset, paper_id = paper_id, doi = doi,
                             reason = "duplicate_doi_object_in_rds")), excluded_con)
       next
