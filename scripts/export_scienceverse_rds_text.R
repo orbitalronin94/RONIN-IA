@@ -142,10 +142,11 @@ for (rds in files) {
       next
     }
     assign(text_sha, paste(dataset, doi, sep = ":"), envir = global_hashes)
+    license_value <- if ("license" %in% names(eligible)) as.character(eligible$license[[row_index]]) else NA_character_
     record <- list(schema_version = "ronin.document.v1", dataset = dataset,
                    paper_id = paper_id, doi = doi, title = title,
                    target_library = provenance$target_library,
-                   license = as.character(eligible$license[[row_index]] %||% NA_character_),
+                   license = license_value,
                    source = "ScienceVerse papers / pinned RDS full-text",
                    text = body, text_sha256 = text_sha, text_bytes = body_bytes,
                    status = "candidate_pending_global_validation", training_eligible = FALSE)
