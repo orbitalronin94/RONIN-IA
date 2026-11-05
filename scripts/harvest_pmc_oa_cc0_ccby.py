@@ -7,9 +7,9 @@ candidate text plus provenance; it never marks documents training_eligible.
 from __future__ import annotations
 
 import argparse
-import datetime as dt
-import concurrent.futures
 import calendar
+import concurrent.futures
+import datetime as dt
 import gzip
 import hashlib
 import json
