@@ -88,14 +88,9 @@ def collect_teacher(
             answer, rationale = parse_response(raw)
             results.append({"raw": raw, "answer": answer, "rationale": rationale})
     finally:
+        model.close()
         del model, tokenizer
         gc.collect()
-        try:
-            import torch
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
-        except ImportError:
-            pass
     return results, manifest
 
 
@@ -182,7 +177,7 @@ def generate(
                 qwen_manifest["model_id"], deepseek_manifest["model_id"]
             ],
             "teacher_revisions": [
-                qwen_manifest["revision"], deepseek_manifest["revision"]
+                qwen_manifest["base_revision"], deepseek_manifest["base_revision"]
             ],
             "teacher_licenses": [
                 qwen_manifest["license"], deepseek_manifest["license"]
@@ -227,13 +222,13 @@ def generate(
         "quantization": quantization,
         "qwen": {
             "model_id": qwen_manifest["model_id"],
-            "revision": qwen_manifest["revision"],
+            "revision": qwen_manifest["base_revision"],
             "license": qwen_manifest["license"],
             "accuracy": correct_qwen / count,
         },
         "deepseek": {
             "model_id": deepseek_manifest["model_id"],
-            "revision": deepseek_manifest["revision"],
+            "revision": deepseek_manifest["base_revision"],
             "license": deepseek_manifest["license"],
             "accuracy": correct_deepseek / count,
         },
@@ -259,19 +254,18 @@ def generate(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--qwen-dir", type=Path, default=Path("models/teachers/qwen3.6-27b"))
-    parser.add_argument(
-        "--deepseek-dir", type=Path,
-        default=Path("models/teachers/deepseek-r1-distill-32b"),
-    )
+    parser.add_argument("--qwen-dir", type=Path, default=None)
+    parser.add_argument("--deepseek-dir", type=Path, default=None)
     parser.add_argument("--output-dir", type=Path, default=Path("artifacts/dual-distillation"))
     parser.add_argument("--count", type=int, default=48)
     parser.add_argument("--quantization", choices=["4bit", "8bit"], default="4bit")
     parser.add_argument("--seed", type=int, default=20261105)
     parser.add_argument("--max-new-tokens", type=int, default=256)
     args = parser.parse_args()
+    qwen_dir = args.qwen_dir or Path("models/teachers/qwen3.6-27b") / args.quantization
+    deepseek_dir = args.deepseek_dir or Path("models/teachers/deepseek-r1-distill-32b") / args.quantization
     result = generate(
-        args.qwen_dir, args.deepseek_dir, args.output_dir,
+        qwen_dir, deepseek_dir, args.output_dir,
         count=args.count, quantization=args.quantization,
         seed=args.seed, max_new_tokens=args.max_new_tokens,
     )
