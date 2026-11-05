@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 12:26 | [Integración continua #1416 (run 42026977621)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42026977621) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): record scoped mathlib4 admission and refresh corpus totals. Trigger: push; rama: main; intento: 1. | 12838cbb |
 | 2026-11-05 12:26 | [Integración continua #1417 (run 42027007017)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42027007017) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): reconcile ScienceVerse and NASA source snapshots. Trigger: push; rama: main; intento: 1. | 7e158743 |
 | 2026-11-05 12:25 | [Integración continua #1415 (run 42026633784)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42026633784) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(data\): admit verified pinned Mathlib4 corpus. Trigger: push; rama: main; intento: 1. | 4681dd44 |
 | 2026-11-05 12:23 | [Integración continua #1412 (run 42026474496)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42026474496) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Vectorize scoped corpus near-duplicate signatures. Trigger: push; rama: main; intento: 1. | b907dad4 |
