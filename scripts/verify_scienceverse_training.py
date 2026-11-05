@@ -193,6 +193,7 @@ def main() -> None:
         )
 
     expected_docs = root_manifest["aggregate"]["admitted_documents"]
+    expected_bytes = root_manifest["aggregate"]["admitted_text_bytes"]
     aggregate_delta = {
         "document_count_delta": len(records) - expected_docs,
         "text_byte_delta": total_text_bytes - expected_bytes,
@@ -220,9 +221,8 @@ def main() -> None:
         "held_examples": held[:100],
         "manifest_documents": expected_docs,
         "text_bytes": total_text_bytes,
-        "manifest_text_bytes": root_manifest["aggregate"]["admitted_text_bytes"],
-        "manifest_byte_delta": total_text_bytes - root_manifest["aggregate"]["admitted_text_bytes"],
         "manifest_text_bytes": expected_bytes,
+        "manifest_byte_delta": total_text_bytes - expected_bytes,
         "manifest_aggregate_delta": aggregate_delta,
         "train_text_file_bytes": train_path.stat().st_size,
         "train_text_sha256": sha256(train_path.read_bytes()),
