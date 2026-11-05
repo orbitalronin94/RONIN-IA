@@ -135,9 +135,22 @@ jobs:
           python-version: "3.11"
       - name: Verificar licencia por DOI y manifiesto fijado
         run: python scripts/preflight_scienceverse_collabra_rights.py
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - name: Descargar RDS fijado y verificar SHA-256
+        run: |
+          curl --fail --location --retry 3 \
+            https://github.com/scienceverse/papers/releases/download/collabra-2026-06-19/collabra.rds \
+            --output /tmp/collabra.rds
+          echo "377a8686404db8cd3b4d26b690bef77780ed0ef7428b57def55f02a4ce2e6ee5  /tmp/collabra.rds" | sha256sum --check
+      - name: Extraer solo texto corporal de los 748 artículos CC BY 4.0
+        run: Rscript scripts/extract_scienceverse_collabra.R /tmp/collabra.rds artifacts/scienceverse-collabra/eligible-dois.txt artifacts/scienceverse-collabra/extracted.csv
+      - name: Construir candidate JSONL con split por DOI y filtros
+        run: python scripts/build_scienceverse_collabra_candidate.py
       - uses: actions/upload-artifact@v6
         with:
-          name: ronin-scienceverse-collabra-rights-preflight
+          name: ronin-scienceverse-collabra-quality-candidate
           path: artifacts/scienceverse-collabra/
           if-no-files-found: error
           retention-days: 90
