@@ -112,7 +112,7 @@ Los números siguientes son **inventarios de candidatos**, no admisiones. Hay sn
 | Línea | Adquisición comprobada | Estado y límites |
 |---|---:|---|
 | ScienceVerse / papers (RDS) | 3.087 DOI elegibles en cinco assets RDS; 95.948.088 bytes comprimidos | Exportación textual, derechos por artículo/versión, terceros, privacidad y calidad pendientes. No son bytes de texto admitido. |
-| ScienceVerse (exportaciones de texto) | 7.403 documentos en 13 colecciones; 7.365 admitidos scoped y 38 retenidos | Manifiesto por DOI/licencia/atribución; sigue sin ser entrenable hasta particiones y validaciones globales. Auditoría separada del lote RDS; no sumar 3.087 + 7.403. |
+| ScienceVerse (exportaciones de texto) | 7.403 documentos en 13 colecciones; 7.365 admitidos scoped; 6.641 train y 724 retenidos | Train scoped verificado: 399.591.813 bytes UTF-8; no sumar 3.087 + 7.403 con el lote RDS. Near-duplicate global y holdout pendientes. |
 | NASA NTRS | 824 textos completos; 39.262.382 bytes | 813 admitidos scoped en su manifiesto, 11 retenidos; además, seis revisados en un manifiesto separado. Los paquetes por biblioteca son candidatos y no deben sumarse de nuevo. |
 | NASA NTRS — snapshot de expansión | 189 textos completos; 15.417.212 bytes | Lote candidato adicional registrado en el README de adquisición; reconciliar IDs/hashes contra los 824 antes de contarlo como incremento neto. |
 | CoVoST 2 | Run posterior: 432.475 filas de traducción, 86.874.752 bytes | Solo campo `translation`; excluir audio, rutas, IDs de cliente y fuentes de oración. Un snapshot anterior registró 337.973 traducciones únicas repartidas en train/validation/test; reconciliar ambos snapshots antes de declarar un total único. |
@@ -177,16 +177,17 @@ Los payloads grandes pueden publicarse como artefactos versionados de GitHub Act
 - [Manifiesto literatura española](admitted/literature-es-v1/manifest.json)
 - [Manifiesto NASA public-use](admitted/nasa-ntrs-public-use-v1/manifest.json)
 - [Manifiesto Papers propios](admitted/ronin-authored-papers-v1/manifest.json)
+- [Manifiesto train scoped ScienceVerse](admitted/scienceverse-ccby-v1/train-eligibility-manifest.json)
 
 ## Decisión operativa
 
 El corpus legacy de **608 documentos** continúa siendo la única fuente contabilizada en los mínimos Level A del inventario de 64 bibliotecas; Mathlib4 tiene una partición train scoped separada, pero no se ha incorporado al inventario Level A de 64 bibliotecas. Los corpus siguientes están admitidos en alcance documental propio, pero **no se suman a esos mínimos**:
 
 - **NASA NTRS:** 813/824 admitidos; 32.313.859 bytes normalizados; 11 retenidos.
-- **ScienceVerse:** 7.365/7.403 admitidos scoped; 6.641 train y 399.591.813 bytes; 724 retenidos por calidad/OCR y títulos no sustantivos.
+- **ScienceVerse:** 7.365/7.403 admitidos scoped; 6.641 train y 399.591.813 bytes; 724 retenidos (697 por OCR/codificación con demasiados caracteres de reemplazo y 27 por títulos no sustantivos).
 - **Papers propio:** 9/9 Markdown admitidos con autorización del propietario; README excluido; 750.857 bytes.
 
-Los 7.365 ScienceVerse tienen DOI único, SHA-256 de texto único dentro de las 13 exportaciones, licencia por documento CC-BY-4.0 o CC0, atribución presente, filtro básico de PII superado y calidad textual suficiente. Se retienen 15 por autoría ausente, tres por anomalías de metadatos/privacidad/ruta temática y 20 por calidad. La attestation del propietario cubre la revisión humana de las fuentes mapeadas; el manifiesto mantiene trazabilidad por documento.
+Los 7.365 ScienceVerse admitidos scoped tienen DOI único, SHA-256 de texto único dentro de las 13 exportaciones, licencia por documento CC-BY-4.0 o CC0 y atribución presente. La auditoría train posterior promovió 6.641 documentos (399.591.813 bytes) tras integridad, mínimos de calidad, filtros de email/SSN y deduplicación exacta contra los train actuales; retuvo 724 por exceso de caracteres de reemplazo (697) y títulos no sustantivos (27). La attestation del propietario cubre la revisión humana de las fuentes mapeadas; el manifiesto mantiene trazabilidad por documento.
 
 **Entrenamiento scoped:** el mix incorpora 608 literatura, 8.498 Mathlib4, 2 NASA file-reviewed, 9 Papers propios y 6.641 ScienceVerse. NASA restante (811), los 724 ScienceVerse retenidos y otros candidatos siguen fuera. Near-duplicates globales, contaminación de benchmarks/holdouts, emparejamiento General/HKD global y G-0 siguen pendientes.
 
