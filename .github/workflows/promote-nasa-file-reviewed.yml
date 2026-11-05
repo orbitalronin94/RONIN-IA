@@ -1,0 +1,58 @@
+name: Promote individually reviewed NASA NTRS documents
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/promote_nasa_file_reviewed_scoped.py"
+      - ".github/workflows/promote-nasa-file-reviewed.yml"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: ronin-nasa-file-reviewed-promotion
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Download the pinned 608-document legacy train partition
+        uses: actions/download-artifact@v6
+        with:
+          name: ronin-admitted-literature-es-v1-train
+          path: incoming/literature
+          repository: orbitalronin94/RONIN-IA
+          run-id: 41926088900
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify and promote six individually reviewed NASA texts
+        run: python scripts/promote_nasa_file_reviewed_scoped.py --legacy-train-dir incoming/literature
+      - name: Publish scoped train artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-nasa-ntrs-file-reviewed-train
+          path: |
+            data/datasets/admitted/nasa-ntrs-file-reviewed-v1/train.txt
+            data/datasets/admitted/nasa-ntrs-file-reviewed-v1/documents.train.jsonl
+            data/datasets/admitted/nasa-ntrs-file-reviewed-v1/manifest.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Commit the verified scoped train partition
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/datasets/admitted/nasa-ntrs-file-reviewed-v1
+          git commit -m "data: promote six individually reviewed NASA NTRS texts"
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - name: Link run ledger
+        if: always()
+        uses: ./.github/actions/run-ledger-link
