@@ -38,5 +38,5 @@ El ensamblador asigna únicamente documentos con señal temática suficiente. Lo
 ## Adquisición ScienceVerse
 
 - BMC Medicine: **1.000 artículos esperados** en el manifiesto upstream, todos declarados CC-BY 4.0 en el catálogo.
-- RONIN descarga el paperlist completo y conserva manifiesto DOI/licencia y SHA-256 en `data/datasets/admitted/scienceverse/bmcmed/`.
+- RONIN descarga el paperlist completo y conserva manifiesto DOI/licencia y SHA-256 en `data/datasets/candidates/scienceverse-fulltext/bmcmed/`.
 - Estado: adquisición automatizada añadida; no contabilizar como admitido hasta que el workflow complete y se compruebe el payload. Pendientes privacidad clínica, retractaciones, deduplicación y particionado.
