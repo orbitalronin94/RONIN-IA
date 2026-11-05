@@ -3,8 +3,8 @@
 
 NASA NTRS: exact per-record public-use allowlist + source hashes + conservative
 text-quality screen. Existing individual human-review holds always override.
-ScienceVerse: audit every exported full-text record for quality/provenance, but
-do not admit while publisher-rights/third-party review remains unresolved.
+ScienceVerse: admit only per-DOI CC-BY/CC0 records after owner-attested
+source review, attribution, quality, privacy and exact-dedup gates.
 All output remains training-ineligible until global G-0 and split gates pass.
 """
 from __future__ import annotations
@@ -253,7 +253,7 @@ def audit_scienceverse() -> dict:
                     if q["email_pattern"] or q["ssn_pattern"]:
                         reasons.append("pii_pattern")
                         counts["pii_pattern_found"]+=1
-                    paper_id=str(item.get("paper_id") or "")
+                    paper_id=str(item.get("paper_id") or "").rsplit(".",1)[-1]
                     if (name,paper_id) in known_holds:
                         reasons.append("known_metadata_or_routing_hold")
                         counts["known_metadata_or_routing_hold"]+=1
