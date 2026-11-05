@@ -1,9 +1,5 @@
 name: RONIN — cribado multi-semilla sin tutor + holdout por etapas
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/main-native-no-tutor-holdout.yml"
   workflow_dispatch:
     inputs:
       steps:
@@ -55,6 +51,8 @@ jobs:
             configs
             ronin
             scripts
+            data/datasets/admitted/covost2-cc0-translation-only
+            data/datasets/rights_registry
       - name: Validate budget
         run: |
           [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -ge 100 ] && [ "$STEPS" -le 1000 ]
@@ -97,6 +95,15 @@ jobs:
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ env.NASA_FILE_REVIEWED_RUN_ID }}
+      - name: Verify CoVoST 2 scoped train partition when materialized
+        run: |
+          if [ -f data/datasets/admitted/covost2-cc0-translation-only/manifest.json ] && [ -f data/datasets/admitted/covost2-cc0-translation-only/train.jsonl.gz ]; then
+            python scripts/verify_covost2_training.py \
+              --manifest data/datasets/admitted/covost2-cc0-translation-only/manifest.json \
+              --output-text incoming/covost2/train.txt
+          else
+            echo "CoVoST payload not materialized; this cycle will use the previously admitted 9,108-document corpus."
+          fi
       - name: Verify checkpoint and every admitted training partition
         run: |
           python - <<'PY'
@@ -166,22 +173,41 @@ jobs:
           lit=Path("incoming/literature/train.txt").read_bytes()
           math=Path("incoming/mathlib4/train.txt").read_bytes()
           nasa=Path("incoming/nasa-file-reviewed/train.txt").read_bytes()
+          covost_path=Path("incoming/covost2/train.txt")
+          covost_blob=covost_path.read_bytes() if covost_path.is_file() else b""
+          covost_docs=0
+          covost_text_bytes=0
+          covost_text_sha256=None
+          if covost_blob:
+            covost_manifest=json.loads(Path("data/datasets/admitted/covost2-cc0-translation-only/manifest.json").read_text(encoding="utf-8"))
+            covost_docs=covost_manifest["aggregate"]["train_documents"]
+            covost_text_bytes=covost_manifest["aggregate"]["train_text_utf8_bytes"]
+            covost_text_sha256=covost_manifest["aggregate"]["train_text_file_sha256"]
+            assert hashlib.sha256(covost_blob).hexdigest()==covost_text_sha256
+            assert covost_docs==270244
+          combined=[lit,math,nasa]
+          if covost_blob:
+            combined.append(covost_blob)
           out=Path("/tmp/ronin-native-train.txt")
-          out.write_bytes(lit+b"\n\n"+math+b"\n\n"+nasa)
+          out.write_bytes(b"\n\n".join(combined))
+          sources=[
+            {"dataset_id":"ronin-spanish-public-domain-literature-v2","documents":608,"bytes":140295523,"sha256":"9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"},
+            {"dataset_id":"mathlib4-lean-proof-corpus-v1","documents":8498,"bytes":97629252,"sha256":"7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"},
+            {"dataset_id":"nasa-ntrs-file-reviewed-v1","documents":2,"bytes":32409,"sha256":"874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"}
+          ]
+          if covost_blob:
+            sources.append({"dataset_id":"covost2-cc0-translation-only","documents":covost_docs,"bytes":covost_text_bytes,"sha256":covost_text_sha256,"languages":["en","ca"]})
           report={
             "experiment":"ronin-native-no-tutor-v1",
             "tutor_used":False,
-            "sources":[
-              {"dataset_id":"ronin-spanish-public-domain-literature-v2","documents":608,"bytes":140295523,"sha256":"9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"},
-              {"dataset_id":"mathlib4-lean-proof-corpus-v1","documents":8498,"bytes":97629252,"sha256":"7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"},
-              {"dataset_id":"nasa-ntrs-file-reviewed-v1","documents":2,"bytes":32409,"sha256":"874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"}
-            ],
-            "train_documents":9108,
-            "source_train_bytes":237957184,
+            "sources":sources,
+            "train_documents":9108+covost_docs,
+            "source_train_bytes":237957184+covost_text_bytes,
             "combined_bytes":out.stat().st_size,
             "combined_sha256":hashlib.sha256(out.read_bytes()).hexdigest(),
             "validation_test_partitions_in_training":False,
-            "excluded_not_training_eligible":["NASA NTRS public-use unreviewed remainder (811 scoped records; only 2 individually promoted)","ScienceVerse (7365 scoped)","owner Papers (9 Markdown)"],
+            "scope_limit":"Source-scoped train partitions only; global G-0, near-duplicate and benchmark-holdout gates remain separately declared. CoVoST validation/test are excluded.",
+            "excluded_not_training_eligible":["NASA NTRS unreviewed remainder","CoVoST validation/test partitions"]
           }
           Path("reports").mkdir(exist_ok=True)
           Path("reports/native-mixture.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
