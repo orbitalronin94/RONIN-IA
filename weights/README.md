@@ -1,5 +1,5 @@
 # Pesos del modelo principal
 
-El checkpoint completo se conserva como artefacto GitHub Actions `ronin-main-weights-v1`, extraído del artefacto original y verificado por SHA-256. El manifiesto `main-model.json` fija identidad, arquitectura, ejecución de origen y hash. No se versiona una copia duplicada de varios gigabytes ni se confunde el manifiesto con los tensores.
+Los pesos del modelo principal se versionan en `ronin-main.pt` como `state_dict` PyTorch (sin el estado del optimizador). El fichero conserva el paso de origen y se verifica por SHA-256 desde `main-model.json`. El checkpoint completo histórico queda como fuente inmutable de procedencia; los ciclos de fine-tuning reinician el optimizador deliberadamente.
 
-El workflow `.github/workflows/pin-main-weights.yml` reconstruye el artefacto limpio desde la ejecución histórica y verifica el hash antes de publicarlo.
+El workflow `.github/workflows/pin-main-weights.yml` extrae los tensores del checkpoint original, comprueba su hash, genera el paquete compacto y lo incorpora a `main`.
