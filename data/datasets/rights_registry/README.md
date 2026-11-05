@@ -1,72 +1,56 @@
-# Rights Registry — admission level A
+# Registro de derechos — admisión de nivel A
 
-This registry is the machine-readable evidence ledger for dataset rights. It is deliberately separate from source discovery and candidate ingestion.
+Este registro es el libro de evidencias de derechos por elemento y versión. Está separado del descubrimiento de fuentes y de la ingestión de candidatos.
 
-## Meaning of level A
+## Niveles de evidencia
 
-A record may receive `rights_level: "A"` only when all mandatory evidence is present and internally consistent:
+- **Nivel A:** evidencia completa y coherente para el texto/archivo y versión exactos, alcance de derechos explícito, proveedor/titular identificado, jurisdicciones objetivo cubiertas y contenido de terceros despejado o excluido. Es un requisito de derechos, no una admisión automática del corpus.
+- **Nivel B:** hay una base jurídica concreta y una fuente oficial identificada, pero falta una comprobación o firma exigida por la política. No admite el texto ni autoriza entrenamiento.
+- **Niveles C/D:** evidencia incompleta, contradictoria o insuficiente; el material sigue retenido.
 
-- immutable source item/version and a public source URL;
-- an item/version-level rights statement, not only a collection card or repository default;
-- canonical license identifier and canonical license URL, or a jurisdiction-specific public-domain determination with evidence for the exact work and edition;
-- identified rights holder/provider and an explicit rights assertion covering the supplied text/version;
-- source metadata snapshot SHA-256 and payload SHA-256;
-- provenance for the exact file/record, including upstream identifier;
-- no unresolved third-party content, contradictory rights metadata, NC/ND/ShareAlike terms, or unknown license.
+Una declaración de derechos del proveedor no demuestra por sí sola que el proveedor sea titular de todos los contenidos. Cuando haya obras incorporadas, adaptaciones, traducciones, citas o autoría de terceros sin aclarar, el registro no puede ser A.
 
-Level A is a rights-evidence classification, not a claim that automated checks prove copyright ownership. The provider's assertion remains an upstream representation. Where ownership, embedded content, or territorial status is unclear, the item stays candidate/quarantine and must not be promoted automatically.
+## Política conservadora
 
-## Conservative policy
-
-Accepted license families for this project's intended model-training and corpus redistribution workflow:
+Licencias admitidas para nivel A:
 
 - CC0-1.0
 - CC-BY-2.0, CC-BY-3.0, CC-BY-4.0
-- MIT
-- Apache-2.0
-- BSD-2-Clause, BSD-3-Clause
+- MIT, Apache-2.0, BSD-2-Clause y BSD-3-Clause
 
-CC-BY requires durable attribution. MIT/Apache/BSD require preservation of notices and license text. CC-BY-SA, NC, ND, unknown, mixed, and generic "open" labels are not level A under this policy.
+NC, ND, ShareAlike, desconocido, mixto y etiquetas genéricas de «abierto» no pasan el nivel A.
 
-Public domain is not inferred from age, author death, repository label, or a US-only declaration. It requires an item-level evidence record and jurisdiction analysis for Spain/EU and the US. A public-domain claim limited to one jurisdiction cannot be treated as worldwide.
+El identificador `PUBLIC-DOMAIN-ES-ART13` registra una base de dominio público española vinculada al artículo 13 del Real Decreto Legislativo 1/1996. **No equivale a una licencia ni pasa automáticamente a nivel A**: la política exige firma jurídica humana para las determinaciones de dominio público. Los registros BOE incorporados el 5 de noviembre de 2026 permanecen en nivel B y solo cubren España.
 
-## Evidence sources and their limits
+El dominio público nunca se infiere por antigüedad, muerte del autor, etiqueta de repositorio ni declaración limitada a Estados Unidos. Requiere evidencia por obra/edición y análisis de jurisdicción.
 
-- SPDX: canonical license identifiers and texts only; it does not establish that an upstream provider owns the work.
-- Europeana: item-level `edm:rights` is useful evidence, but remains a provider-supplied assertion and does not automatically clear embedded third-party material.
-- PMC OA: per-article-version license metadata and source XML integrity are useful; article-level CC0/CC-BY does not automatically clear third-party figures, tables, supplements, or quoted content.
-- Crossref: deposited license metadata is corroboration, not sole rights proof.
-- AWS Open Data Registry: discovery/catalog metadata only; AWS explicitly does not certify rights in provider data.
+## Evidencia y límites
 
-## Admission stages
+- SPDX: identifica licencias canónicas; no prueba que el proveedor sea titular.
+- Europeana: el campo `edm:rights` es evidencia declarada por el proveedor, no una garantía sobre contenido incorporado.
+- PMC OA: la licencia por artículo/versión no despeja automáticamente figuras, tablas, suplementos o citas de terceros.
+- Crossref: los metadatos de licencia depositados por la editorial corroboran el alcance, pero no sustituyen el resto de la revisión.
+- AWS Open Data Registry: sirve para descubrir datasets; no certifica los derechos de sus datos.
 
-1. `candidate`: source found or payload downloaded; never train.
-2. `rights_level_A`: complete item-level rights evidence passes the validator.
-3. `quality_pass`: encoding, language, relevance, PII/secrets, malware, OCR/noise, duplicate and sensitive-content checks pass.
-4. `admitted`: immutable train partition, attribution bundle, manifests, hashes, split isolation and review record are complete.
+## Etapas de admisión
 
-The global G-0 gate remains independent. A local level-A record cannot override a failing global gate or authorize training by itself.
+1. `candidate`: fuente localizada o payload descargado; nunca entrena.
+2. `rights_level_A`: evidencia exacta validada por el registro.
+3. `quality_pass`: idioma, codificación, OCR, privacidad, contenido sensible y duplicados revisados.
+4. `admitted`: particiones inmutables, atribución, hashes, separación train/validation/test y revisión documentada.
 
-## Files
+G-0 es independiente. Ningún registro local de nivel A puede anular un G-0 fallido ni saltarse los controles de calidad, privacidad, deduplicación o particiones.
 
-- `schema.json`: required evidence shape.
-- `policy.json`: machine-readable policy and allowlist.
-- `records.jsonl`: append-only item-level evidence ledger (one JSON object per line).
-- `scripts/validate_rights_registry.py`: deterministic structural and policy validator.
+## Archivos
 
-No candidate is silently promoted. Missing evidence means not A.
+- `schema.json`: campos requeridos.
+- `policy.json`: jurisdicciones, licencias y criterios.
+- `records.jsonl`: libro append-only, un objeto JSON por línea.
+- `scripts/validate_rights_registry.py`: validador determinista.
 
+## Estado del libro (2026-11-05)
 
-## Current exact-scope records
+- **8 registros de nivel A**: CoVoST 2 translation-only y exportaciones de metadatos OpenAlex, ROR, Crossref, DataCite y OpenCitations, además de versiones exactas ya registradas.
+- **2 registros de nivel B**: Estatuto de Autonomía de la Comunidad de Madrid (BOE-A-1983-6317) y Estatuto de los Trabajadores (BOE-A-2015-11430). El artículo 13 de la Ley de Propiedad Intelectual excluye las disposiciones legales o reglamentarias, pero falta la firma jurídica humana exigida por nuestra política y los textos extraídos necesitan limpieza de cabeceras/índices.
 
-The append-only ledger currently contains two level-A rights records:
-
-- CoVoST 2 translation-field export only (CC0; pinned dataset README and archive/payload hashes).
-- OpenAlex JSONL works metadata export only (CC0; pinned official OpenAlex license document, public snapshot manifest, exact shard and export hashes; MAG-format exception is not in scope).
-
-These are rights certifications for the exact candidate exports. They are **not** dataset admission, do not authorize use of other fields/assets from the same upstream sources, and do not override G-0, quality, privacy, deduplication or split gates.
-
-
-## Current ledger status (2026-11-05)
-
-The ledger contains eight exact-scope Level A metadata/text-export records: CoVoST 2 translation-only, OpenAlex metadata, ROR v2.14 metadata, Crossref metadata, DataCite DOI metadata and OpenCitations Index metadata, plus the two earlier exact-scope source versions already recorded. These rights records do not admit any dataset or grant training eligibility. Global G-0 remains FAIL; quality, privacy, deduplication and split gates are independent.
+Los registros de nivel A certifican únicamente el alcance exacto descrito; no convierten automáticamente una fuente en corpus admitido. Los registros de nivel B tampoco permiten admisión. G-0 sigue en FAIL.
