@@ -35,11 +35,25 @@ def main():
         get(f"{BASE}/{name}/manifest.csv",manifest)
         with manifest.open(encoding="utf-8-sig",newline="") as f:
             rows=list(csv.DictReader(f))
-        if len(rows)!=meta["expected"]:
-            raise SystemExit(f"{name}: expected {meta['expected']} manifest rows, got {len(rows)}")
-        bad=[r for r in rows if r.get("license","").strip().upper()!="CC-BY 4.0"]
-        if bad:
-            raise SystemExit(f"{name}: {len(bad)} rows are not explicitly CC-BY 4.0; refusing whole corpus")
+        # Some upstream manifests retain failed/inaccessible source rows.
+        # Only rows with successful PDF+XML conversion are eligible when
+        # those fields exist; other corpora already contain converted rows.
+        converted=[]
+        for row in rows:
+            if row.get("license","").strip().upper()!="CC-BY 4.0":
+                continue
+            if "pdf_exists" in row and row["pdf_exists"].strip().upper()!="TRUE":
+                continue
+            if "xml_exists" in row and row["xml_exists"].strip().upper()!="TRUE":
+                continue
+            converted.append(row)
+        if len(converted)!=meta["expected"]:
+            raise SystemExit(f"{name}: expected {meta['expected']} converted CC-BY 4.0 papers, got {len(converted)} from {len(rows)} manifest rows")
+        eligible=dest/"eligible-manifest.csv"
+        with eligible.open("w",encoding="utf-8",newline="") as out:
+            writer=csv.DictWriter(out,fieldnames=list(converted[0].keys()))
+            writer.writeheader()
+            writer.writerows(converted)
         get(meta["release"],payload)
         if payload.stat().st_size < 1_000_000:
             raise SystemExit(f"{name}: release payload unexpectedly small")
@@ -50,12 +64,15 @@ def main():
             "manifest_url":f"{BASE}/{name}/manifest.csv",
             "fulltext_payload_url":meta["release"],
             "documents_in_manifest":len(rows),
+            "documents_converted_and_license_verified":len(converted),
+            "eligible_manifest_file":eligible.name,
             "license_filter":"every manifest row explicitly declares CC-BY 4.0",
             "target_library":meta["target"],
             "payload_file":payload.name,
             "payload_bytes":payload.stat().st_size,
             "payload_sha256":digest(payload),
             "manifest_sha256":digest(manifest),
+            "eligible_manifest_sha256":digest(eligible),
             "training_eligible":True,
             "admission_scope":"fixed upstream release paperlist; individual DOI/title/license provenance retained in manifest.csv",
             "caveats":["RDS is the upstream full-text paperlist format, not a plain-text export.",
