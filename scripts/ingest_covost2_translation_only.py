@@ -21,6 +21,12 @@ README_BLOB_SHA1 = "f29667eaacba91d35de372001ebc793adb2b5530"
 README_URL = f"https://raw.githubusercontent.com/facebookresearch/covost/{COMMIT}/README.md"
 LICENSE_URL = "https://creativecommons.org/publicdomain/zero/1.0/"
 PAIRS = ("es_en", "ca_en", "en_ca")
+KNOWN_SPLITS = {"train", "train_covost", "dev", "test", "test_covost"}
+
+
+def is_training_split(split: str) -> bool:
+    """Mirror upstream CoVoST v2: train plus train_covost only."""
+    return split in {"train", "train_covost"}
 BASE = "https://dl.fbaipublicfiles.com/covost/"
 USER_AGENT = "RONIN-IA-dataset-auditor/1.0"
 
@@ -79,9 +85,9 @@ def main() -> int:
                 for source_row_index, row in enumerate(reader, start=1):
                     split = (row.get("split") or "").strip()
                     split_counts[split] = split_counts.get(split, 0) + 1
-                    if split not in {"train", "train_covost", "dev", "test"}:
+                    if split not in KNOWN_SPLITS:
                         raise ValueError(f"unexpected upstream split label {split!r} in {filename}, row {source_row_index}")
-                    if split not in {"train", "train_covost"}:
+                    if not is_training_split(split):
                         continue
                     translation = (row.get("translation") or "").strip()
                     if not translation:
