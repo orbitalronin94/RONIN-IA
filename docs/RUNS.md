@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 12:30 | [Integración continua #1424 (run 42027424799)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42027424799) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): reconcile train-eligible corpus inventory. Trigger: push; rama: main; intento: 1. | a235ec74 |
 | 2026-11-05 12:30 | [Integración continua #1425 (run 42027462380)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42027462380) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: hold NASA files whose review hashes do not match payloads. Trigger: push; rama: main; intento: 1. | 1ea52cec |
 | 2026-11-05 12:28 | [Integración continua #1422 (run 42027362832)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42027362832) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): use actual newline separators in literature dedup gate. Trigger: push; rama: main; intento: 1. | 418cc29a |
 | 2026-11-05 12:27 | [Integración continua #1419 (run 42027310027)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42027310027) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: train: include every scoped admitted train-eligible corpus in main cycle. Trigger: push; rama: main; intento: 1. | b2e949bd |
