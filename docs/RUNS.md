@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:07 | [Integración continua #1131 (run 41999646962)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999646962) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Wire dual tutor distillation to local GGUF servers. Trigger: push; rama: main; intento: 1. | b98e80e9 |
 | 2026-11-05 09:07 | [Integración continua #1136 (run 41999711239)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999711239) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Correct README local tutor runtime. Trigger: push; rama: main; intento: 1. | 4744d3b3 |
 | 2026-11-05 09:06 | [Integración continua #1135 (run 41999700353)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999700353) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Switch local tutor docs to GGUF llama.cpp. Trigger: push; rama: main; intento: 1. | 0c29699c |
 | 2026-11-05 09:06 | [Integración continua #1132 (run 41999661604)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999661604) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Test GGUF quantization manifests and tutor sources. Trigger: push; rama: main; intento: 1. | 6b69ff78 |
