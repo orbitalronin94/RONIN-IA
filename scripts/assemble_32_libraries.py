@@ -117,6 +117,46 @@ def choose_domain(text: str) -> tuple[str | None, float, dict[str, Any]]:
     }
 
 
+def literature_records(metadata_payload: bytes, text_payload: bytes) -> list[dict[str, Any]]:
+    """Rebuild the 608 admitted Spanish literature fragments without changing their train split."""
+    metadata = read_jsonl(metadata_payload)
+    text = text_payload.decode("utf-8")
+    offset = 0
+    records: list[dict[str, Any]] = []
+    for row in metadata:
+        size = int(row["character_count"])
+        fragment = text[offset : offset + size]
+        if len(fragment) != size or not fragment.startswith(str(row["source_fragment_title"])):
+            raise ValueError(f"literature fragment boundary mismatch: {row.get('record_id')}")
+        digest = sha256(fragment.encode("utf-8"))
+        if digest != row["text_sha256"]:
+            raise ValueError(f"literature fragment hash mismatch: {row.get('record_id')}")
+        offset += size
+        if text[offset : offset + 2] == "\\n\\n":
+            offset += 2
+        scores = score_record(fragment, "humanities", Counter(), 1)
+        records.append({
+            "document_id": f"literature-es-v1:{row['record_id']}",
+            "text": fragment,
+            "language": "es",
+            "source_id": row["source_id"],
+            "source_revision": row["source_revision"],
+            "source_identifier": row["source_path"],
+            "source_url": row["source_url"],
+            "license": "public-domain",
+            "rights_status": "admitted_pinned_public_domain_train_partition",
+            "rights_level": "A",
+            "admission_status": "admitted",
+            "partition": "train",
+            "semantic_density": scores["semantic_density"],
+            "domain_scores": scores,
+            "text_sha256": digest,
+        })
+    if text[offset:] not in {"", "\\n"}:
+        raise ValueError("unexpected trailing bytes in admitted literature train payload")
+    return records
+
+
 def add_unique_record(
     buckets: dict[str, list[dict[str, Any]]],
     seen_hashes: set[str],
@@ -179,7 +219,7 @@ def write_library(out: Path, domain: str, kind: str, records: list[dict[str, Any
     admission_states = Counter()
     try:
         for row in sorted(records, key=lambda item: item["document_id"]):
-            split = stable_partition(row["document_id"])
+            split = row.get("partition") or stable_partition(row["document_id"])
             payload = (json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
             handles[split].write(payload)
             hashes[split].update(payload)
@@ -336,6 +376,13 @@ def main() -> int:
     # Keep its exact train-only bytes and provenance intact; do not fragment/relabel it.
     literature_bytes = verify_payload("admitted literature train", artifact_member(args.literature_zip, "train.txt"), "9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78")
     literature_manifest = json.loads(artifact_member(args.literature_zip, "dataset-manifest.json"))
+    literature_rows = literature_records(
+        artifact_member(args.literature_zip, "documents.train.jsonl"),
+        literature_bytes,
+    )
+    for record in literature_rows:
+        add_unique_record(buckets, seen_text_hashes, "humanities", record, exclusions)
+    input_counts["literature_admitted_documents"] = len(literature_rows)
     (out / "literature-es-v1-train.txt").write_bytes(literature_bytes)
     (out / "literature-es-v1-dataset-manifest.json").write_text(
         json.dumps(literature_manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
@@ -398,7 +445,9 @@ def main() -> int:
             "bytes": len(literature_bytes),
             "sha256": sha256(literature_bytes),
             "status": "already_admitted_original_manifest_preserved",
-            "not_repartitioned": True,
+            "source_partition_preserved": True,
+            "integrated_into_domain": "humanities",
+            "general_hkd_rebalanced_by_text_bytes": True,
         },
         "training_eligible": False,
         "admission_eligible": False,
