@@ -1,6 +1,6 @@
 # Bibliotecas de datos de RONIN
 
-Este directorio es el registro operativo de adquisición, revisión, admisión y preparación de corpus para RONIN. **Los recuentos distinguen documentos admitidos a nivel de fuente, documentos listos para entrenamiento y candidatos. No deben sumarse categorías que puedan solaparse ni confundirse con el inventario Level A de las 64 bibliotecas.**
+Este directorio es el registro operativo de adquisición, revisión, admisión y preparación de corpus para RONIN. **Los recuentos distinguen documentos admitidos a nivel de fuente, documentos listos para entrenamiento y candidatos. No deben sumarse categorías que puedan solaparse. Esta es la única raíz canónica de datos: `data/datasets/`.**
 
 > Corte documental: 5 de noviembre de 2026. Los manifiestos enlazados son la fuente de verdad; esta página resume su estado y no sustituye sus hashes ni decisiones por documento.
 
@@ -8,18 +8,18 @@ Este directorio es el registro operativo de adquisición, revisión, admisión y
 
 | Fuente / corpus | Documentos | Estado documental | ¿Entrenable ahora? |
 |---|---:|---|---|
-| Literatura española legacy (`literature-es-v1`) | 608 train (+18 validation y 18 test aislados) | Admitido Level A scoped; 140.295.523 bytes train | Sí, bajo su alcance de corpus y controles; G-0 global sigue bloqueando la elegibilidad de las 64 bibliotecas |
-| Lean mathlib4 (`mathlib4-v1`) | 8.697 admitidos (8.498 train, 91 validation, 108 test; 2 retenidos) | Admitido scoped; 97.629.252 bytes train; Apache-2.0; 8.650 matemáticas + 47 lógica | Sí, solo la partición train de este manifiesto; G-0 global sigue FAIL |
+| Literatura española legacy (`literature-es-v1`) | 608 train (+18 validation y 18 test aislados) | Admitido Level A scoped; 140.295.523 bytes train | Sí, bajo su alcance de corpus y controles; la validación global del inventario de bibliotecas sigue pendiente |
+| Lean mathlib4 (`mathlib4-v1`) | 8.697 admitidos (8.498 train, 91 validation, 108 test; 2 retenidos) | Admitido scoped; 97.629.252 bytes train; Apache-2.0; 8.650 matemáticas + 47 lógica | Sí, solo la partición train de este manifiesto; la validación global del inventario sigue pendiente |
 | NASA NTRS public-use | 813 de 824 | Admisión scoped con revisión del propietario; 11 retenidos; 32.313.859 bytes | No: recheck de redistribución, deduplicación cruzada y controles globales pendientes |
-| Papers propios | 9 Markdown (README excluido) | Incorporados con autorización del propietario; 750.857 bytes, 93.499 palabras | No: deduplicación global y gates de calidad/privacidad/particionado pendientes |
+| Papers propios | 9 Markdown (README excluido) | Incorporados con autorización del propietario; 750.857 bytes, 93.499 palabras | No: deduplicación global y revisión de calidad, privacidad y particionado pendientes |
 | NASA file-reviewed | 2 train + 4 retenidos (subconjunto de NASA NTRS) | 32.410 bytes promovidos; 4 hashes/bytes no coinciden con sus atestaciones | Sí, solo los 2 documentos con revisión exacta y recheck NASA superados |
-| ScienceVerse | 7.403 textos en 13 colecciones; 7.365 admitidos scoped, 38 retenidos | Derechos por DOI y atribución auditados; 446.092.799 bytes admitidos | No: particiones y gates globales pendientes |
+| ScienceVerse | 7.403 textos en 13 colecciones; 7.365 admitidos scoped, 38 retenidos | Derechos por DOI y atribución auditados; 446.092.799 bytes admitidos | No: particiones y controles globales pendientes |
 
-**Cómo leer los totales:** hay **10.163 registros en los cuatro manifiestos principales** (644 literatura, incluidos 36 documentos de validation/test aislados + 8.697 mathlib4 + 813 NASA + 9 Papers). La cifra **entrenable por partición** es **9.108 documentos**: 608 literatura + 8.498 mathlib4 + 2 NASA file-reviewed; validation/test permanecen aislados. No es un recuento global de documentos únicos ni un G-0 global PASS. Los seis NASA file-reviewed se muestran aparte y no se suman al total documental porque son un subconjunto de NASA NTRS; dos sí cuentan en la cifra entrenable scoped. ScienceVerse registra 7.365 admitidos scoped, pero aún no entrenables; no se suman al total principal de entrenamiento.
+**Cómo leer los totales:** hay **10.163 registros en los cuatro manifiestos principales** (644 literatura, incluidos 36 documentos de validation/test aislados + 8.697 mathlib4 + 813 NASA + 9 Papers). La cifra **entrenable por partición** es **9.108 documentos**: 608 literatura + 8.498 mathlib4 + 2 NASA file-reviewed; validation/test permanecen aislados. No es un recuento global de documentos únicos ni un validación global completada. Los seis NASA file-reviewed se muestran aparte y no se suman al total documental porque son un subconjunto de NASA NTRS; dos sí cuentan en la cifra entrenable scoped. ScienceVerse registra 7.365 admitidos scoped, pero aún no entrenables; no se suman al total principal de entrenamiento.
 
 ### ScienceVerse: calidad automática no equivale a permiso
 
-La auditoría consolidada registra 13 colecciones y 7.403 documentos; 7.365 pasan la admisión scoped por DOI/licencia/atribución y 38 quedan retenidos. Estos documentos todavía no son entrenables: faltan deduplicación near-duplicate global, particionado y gates globales. La admisión scoped no autoriza redistribución irrestricta.
+La auditoría consolidada registra 13 colecciones y 7.403 documentos; 7.365 pasan la admisión scoped por DOI/licencia/atribución y 38 quedan retenidos. Estos documentos todavía no son entrenables: faltan deduplicación near-duplicate global, particionado y validaciones globales. La admisión scoped no autoriza redistribución irrestricta.
 
 | Colección | Textos examinados | Admitidos scoped | Retenidos |
 |---|---:|---:|---:|
@@ -48,7 +48,7 @@ El objetivo canónico es **64 bibliotecas**. General y HKD deben ser disjuntas g
 - Objetivo de escala: 10 GiB por biblioteca (640 GiB en total).
 - Estado del inventario Level A: **608 documentos / 140.295.523 bytes**, todos contabilizados en `humanities_general`; **1/64** bibliotecas alcanza el mínimo, 63 están por debajo.
 - Bibliotecas training-eligible en el manifiesto de 64: **0/64**.
-- Gate global G-0: **FAIL**.
+- validación global validación global: **FAIL**.
 
 El manifiesto `libraries/manifest-64.json` cuenta únicamente el corpus legacy Level A incorporado al inventario de bibliotecas. Los corpus NASA y Papers tienen admisión documental scoped en manifiestos separados, pero **no se han incorporado al contador Level A de 64 bibliotecas**. Esta distinción es intencional, no una omisión.
 
@@ -56,8 +56,8 @@ El manifiesto `libraries/manifest-64.json` cuenta únicamente el corpus legacy L
 
 | Estado | Significado | ¿Puede entrenar? |
 |---|---|---|
-| Admitido scoped | Documento aceptado dentro del alcance de su manifiesto de fuente, con procedencia y decisión registradas | Solo si el manifiesto de ese corpus y los gates aplicables autorizan la partición train |
-| Level A en biblioteca | Payload incorporado al inventario de bibliotecas y contado tras superar el estándar Level A | Sujeto también a G-0 |
+| Admitido scoped | Documento aceptado dentro del alcance de su manifiesto de fuente, con procedencia y decisión registradas | Solo si el manifiesto de ese corpus y las validaciones aplicables autorizan la partición train |
+| Level A en biblioteca | Payload incorporado al inventario de bibliotecas y contado tras superar el estándar Level A | Sujeto también a validación global |
 | Candidato | Texto descargado/localizado o extraído, pendiente de alguna comprobación | No |
 | Calidad automática pass | Supera filtros mecánicos de integridad/estructura/calidad; no es admisión legal | No |
 | Cuarentena / retenido | Derechos, privacidad, calidad, integridad o procedencia sin resolver | No |
@@ -85,7 +85,7 @@ El manifiesto `libraries/manifest-64.json` cuenta únicamente el corpus legacy L
 - Revisión de origen fijada en `d7bf3ae446f666ce3be73b11aab7090e1605a889`; los blobs Git de origen coinciden con las copias.
 - 9 documentos, 750.857 bytes UTF-8, 93.499 palabras; SHA-256 por documento.
 - Autorización del propietario para el corpus interno de investigación/entrenamiento de RONIN. No implica permiso de redistribución externa ni derechos sobre contenido de terceros.
-- No entrenable hasta completar deduplicación global, calidad/privacidad/citas, asignación y particionado y los gates globales.
+- No entrenable hasta completar deduplicación global, calidad/privacidad/citas, asignación y particionado y los validaciones globales.
 
 ### Lean mathlib4 — `admitted/mathlib4-v1/`
 
@@ -93,7 +93,7 @@ El manifiesto `libraries/manifest-64.json` cuenta únicamente el corpus legacy L
 - Licencia de repositorio Apache-2.0; SHA-256 por archivo y de LICENSE, autoría/cabeceras conservadas. 8.555 archivos contienen cabecera explícita Apache 2.0; los restantes quedan cubiertos por la licencia de repositorio fijada.
 - 8.498 train (97.629.252 bytes), 91 validation (925.844 bytes) y 108 test (1.177.979 bytes). Dos módulos de reenvío menores de 100 caracteres quedaron retenidos.
 - Dominios: 8.650 matemáticas y 47 lógica/epistemología. Cero duplicados exactos internos o contra los payloads admitidos existentes revisados; cero hallazgos de claves/tokens de alta confianza.
-- Train es entrenable solo bajo este manifiesto scoped. Near-duplicate global, revisión humana línea por línea y G-0 global no se declaran superados.
+- Train es entrenable solo bajo este manifiesto scoped. Near-duplicate global, revisión humana línea por línea y validación global global no se declaran superados.
 - Artefacto de admisión: [run 42026633643](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42026633643); payload `ronin-admitted-mathlib4-v1`.
 
 ### NASA file-reviewed — `admitted/nasa-ntrs-file-reviewed-v1/`
@@ -112,7 +112,7 @@ Los números siguientes son **inventarios de candidatos**, no admisiones. Hay sn
 | Línea | Adquisición comprobada | Estado y límites |
 |---|---:|---|
 | ScienceVerse / papers (RDS) | 3.087 DOI elegibles en cinco assets RDS; 95.948.088 bytes comprimidos | Exportación textual, derechos por artículo/versión, terceros, privacidad y calidad pendientes. No son bytes de texto admitido. |
-| ScienceVerse (exportaciones de texto) | 7.403 documentos en 13 colecciones; 7.365 admitidos scoped y 38 retenidos | Manifiesto por DOI/licencia/atribución; sigue sin ser entrenable hasta particiones y gates globales. Auditoría separada del lote RDS; no sumar 3.087 + 7.403. |
+| ScienceVerse (exportaciones de texto) | 7.403 documentos en 13 colecciones; 7.365 admitidos scoped y 38 retenidos | Manifiesto por DOI/licencia/atribución; sigue sin ser entrenable hasta particiones y validaciones globales. Auditoría separada del lote RDS; no sumar 3.087 + 7.403. |
 | NASA NTRS | 824 textos completos; 39.262.382 bytes | 813 admitidos scoped en su manifiesto, 11 retenidos; además, seis revisados en un manifiesto separado. Los paquetes por biblioteca son candidatos y no deben sumarse de nuevo. |
 | NASA NTRS — snapshot de expansión | 189 textos completos; 15.417.212 bytes | Lote candidato adicional registrado en el README de adquisición; reconciliar IDs/hashes contra los 824 antes de contarlo como incremento neto. |
 | CoVoST 2 | Run posterior: 432.475 filas de traducción, 86.874.752 bytes | Solo campo `translation`; excluir audio, rutas, IDs de cliente y fuentes de oración. Un snapshot anterior registró 337.973 traducciones únicas repartidas en train/validation/test; reconciliar ambos snapshots antes de declarar un total único. |
@@ -138,9 +138,9 @@ Los números siguientes son **inventarios de candidatos**, no admisiones. Hay sn
 No se considerará progreso el crecimiento de `candidates/`, el número de filas con licencia aparente ni los pases de filtros automáticos. El contador que importa es el de documentos con `training_eligible=true` en una partición `train` reproducible y con hashes comprobados.
 
 - **Corpus con partición train actualmente habilitada:** `literature-es-v1` (608 documentos / 140.295.523 bytes) y `mathlib4-v1` (8.498 documentos / 97.629.252 bytes): 9.106 documentos y 237.924.775 bytes de texto train. Sus particiones validation/test permanecen excluidas.
-- **NASA NTRS (813 scoped), ScienceVerse (7.365), Papers propios (9) y NASA file-reviewed (6):** admitidos dentro de sus respectivos alcances, pero no entrenables mientras sus manifiestos mantengan `training_eligible=false` o gates pendientes.
+- **NASA NTRS (813 scoped), ScienceVerse (7.365), Papers propios (9) y NASA file-reviewed (6):** admitidos dentro de sus respectivos alcances, pero no entrenables mientras sus manifiestos mantengan `training_eligible=false` o validaciones pendientes.
 - **Siguiente fuente prioritaria:** conjunto oficial BNE *Biblioteca Digital. Documentos en dominio público*, que ofrece distribución TXT/XML de obras declaradas en dominio público y reutilización CC BY 4.0. Se debe adquirir el snapshot, fijar hashes, comprobar cada obra/edición y OCR, retirar aparato editorial/terceros dudosos, deduplicar globalmente y generar splits antes de promover. No se contará ni entrenará hasta superar esos controles.
-- La política de adquisición queda así: primero fuentes con texto completo y permiso explícito sobre la obra, luego calidad verificable, y solo entonces admisión y entrenamiento. Los candidatos que no puedan cerrar los gates no desplazan este objetivo.
+- La política de adquisición queda así: primero fuentes con texto completo y permiso explícito sobre la obra, luego calidad verificable, y solo entonces admisión y entrenamiento. Los candidatos que no puedan cerrar los validaciones no desplazan este objetivo.
 
 ## Controles obligatorios antes de admitir y entrenar
 
@@ -153,7 +153,7 @@ No se considerará progreso el crecimiento de `candidates/`, el número de filas
 7. Calidad, idioma, codificación, OCR, ruido y relevancia temática.
 8. Particiones deterministas y disjuntas; validation/test/holdout nunca se usan en entrenamiento.
 9. Revisión humana y decisión por documento registradas.
-10. Validación de manifiestos, separación General/HKD y gate global G-0.
+10. Validación de manifiestos, separación General/HKD y validación global del inventario.
 
 Una licencia CC0/CC BY de metadatos no convierte automáticamente en reutilizable el contenido enlazado. Se mantienen separados textos, metadatos, código, voz, transcripciones y materiales de terceros.
 
@@ -188,7 +188,7 @@ El corpus legacy de **608 documentos** continúa siendo la única fuente contabi
 
 Los 7.365 ScienceVerse tienen DOI único, SHA-256 de texto único dentro de las 13 exportaciones, licencia por documento CC-BY-4.0 o CC0, atribución presente, filtro básico de PII superado y calidad textual suficiente. Se retienen 15 por autoría ausente, tres por anomalías de metadatos/privacidad/ruta temática y 20 por calidad. La attestation del propietario cubre la revisión humana de las fuentes mapeadas; el manifiesto mantiene trazabilidad por documento.
 
-**No iniciar entrenamiento con estos corpus.** Siguen bloqueados por comparación exacta/aproximada contra todas las demás fuentes y holdouts, revalidación semanal de redistribución NASA, separación General/HKD y particiones deterministas train/validation/test. G-0 global continúa FAIL.
+**No iniciar entrenamiento con estos corpus todavía.** Siguen pendientes la comparación exacta/aproximada contra otras fuentes y holdouts, la revalidación de redistribución NASA, la separación General/HKD y las particiones deterministas train/validation/test.
 
 ## Auditoría integral de candidatos (2026-11-05)
 
