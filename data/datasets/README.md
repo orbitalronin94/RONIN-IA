@@ -172,3 +172,15 @@ Los payloads grandes pueden publicarse como artefactos versionados de GitHub Act
 El corpus legacy de 608 documentos continúa siendo la única fuente contabilizada en el inventario Level A de las 64 bibliotecas. NASA (807) y Papers (9) están admitidos en el alcance documental de sus propios manifiestos, pero no se suman todavía a ese inventario ni se consideran entrenables. ScienceVerse dispone de 9.153 textos auditados y 9.129 pases automáticos de calidad, pero cero admisiones.
 
 **No se debe iniciar un nuevo entrenamiento con los corpus nuevos hasta que se cierren los gates aplicables y G-0.** La prioridad es resolver la admisión legal/técnica por documento, deduplicación global y particionado, y después incorporar el contenido válido a General/HKD sin contaminar validation/test/holdout.
+
+## Auditoría integral de candidatos (2026-11-05)
+
+Se ha ejecutado `scripts/audit_and_admit_scoped_candidates.py` sobre todos los textos materializados:
+
+- **NASA NTRS:** 824/824 textos verificados contra el hash/tamaño fuente y allowlist de derechos por documento; 813 admitidos en un corpus de alcance acotado (**32.313.859 bytes de texto normalizado**) y 11 retenidos. De los retenidos, cuatro tienen retención explícita por revisión de contenido/derechos y siete no superan el filtro conservador de calidad. Los wrappers HTML/Tika se eliminan del texto derivado, conservando SHA-256 del original y del texto admitido.
+- **ScienceVerse:** 7.403 documentos de 13 colecciones inspeccionados; 7.337 superan el filtro de calidad y 66 quedan retenidos; 15 registros no contienen autoría. No se admite todavía ninguno: la atribución/confirmación de derechos de editor y material de terceros debe reconciliarse por documento y completar deduplicación global. El filtro de texto por sí solo no concede derechos.
+- **Papers propio:** 9 documentos, README excluido, incorporados con autorización del propietario y copia exacta de los blobs fuente.
+
+**Ninguno de los nuevos corpus está habilitado para entrenamiento.** G-0 global sigue FAIL; falta deduplicación exacta/aproximada entre todas las fuentes y holdouts, revalidación semanal de redistribución NASA y particionado General/HKD/train/validation/test. El inventario Level A anterior no se incrementa con estos corpus hasta completar esa reconciliación.
+
+Resultados detallados: `reviews/candidate-document-audit-2026-11-05.json`, `admitted/nasa-ntrs-public-use-v1/manifest.json` y `admitted/ronin-authored-papers-v1/manifest.json`.
