@@ -22,13 +22,23 @@ def load_checkpoint(
 ) -> int:
     """Restore a checkpoint and return the next training step to execute."""
     checkpoint = torch.load(path, map_location=map_location, weights_only=False)
-    required = {"model", "step"}
-    missing = required.difference(checkpoint)
-    if missing:
-        raise ValueError(f"checkpoint missing required keys: {sorted(missing)}")
-    if expected_config is not None and checkpoint.get("training_config") != expected_config:
-        raise ValueError("resume configuration differs from checkpoint training_config")
-    model.load_state_dict(checkpoint["model"])
+    if not isinstance(checkpoint, dict):
+        raise ValueError("checkpoint must be a state_dict or checkpoint mapping")
+    if "model" in checkpoint:
+        state_dict = checkpoint["model"]
+        step = int(checkpoint.get("step", 0))
+        if expected_config is not None and checkpoint.get("training_config") != expected_config:
+            raise ValueError("resume configuration differs from checkpoint training_config")
+    else:
+        state_dict = checkpoint
+        step = 0  # compact weights keep provenance in weights/main-model.json
+        if expected_config is not None:
+            raise ValueError("compact state_dict has no training_config")
+    if not isinstance(state_dict, dict) or not state_dict:
+        raise ValueError("checkpoint has no model state_dict")
+    if not all(isinstance(value, torch.Tensor) for value in state_dict.values()):
+        raise ValueError("compact state_dict must contain only tensors")
+    model.load_state_dict(state_dict, strict=True)
     if optimizer is not None:
         if "optimizer" not in checkpoint:
             raise ValueError("checkpoint has no optimizer state")
@@ -51,4 +61,4 @@ def load_checkpoint(
             random.setstate(checkpoint["python_rng_state"])
         if checkpoint.get("numpy_rng_state") is not None:
             np.random.set_state(checkpoint["numpy_rng_state"])
-    return int(checkpoint["step"])
+    return step
