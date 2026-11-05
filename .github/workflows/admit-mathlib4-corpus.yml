@@ -1,0 +1,65 @@
+name: Admit scoped corpus — Lean mathlib4
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/admit_mathlib4.py
+      - .github/workflows/admit-mathlib4-corpus.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ronin-admit-mathlib4-v1
+  cancel-in-progress: false
+
+jobs:
+  admit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout RONIN
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: true
+      - name: Checkout pinned mathlib4
+        uses: actions/checkout@v5
+        with:
+          repository: leanprover-community/mathlib4
+          ref: a84939a26903163e1b98ee002bc94e9563e75c12
+          path: external/mathlib4
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Prepare Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Final audit and scoped admission
+        run: |
+          python scripts/admit_mathlib4.py \
+            --repo-root external/mathlib4 \
+            --ronin-root . \
+            --output-dir data/datasets/admitted/mathlib4-v1 \
+            --revision a84939a26903163e1b98ee002bc94e9563e75c12
+      - name: Upload admitted corpus payloads
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-admitted-mathlib4-v1
+          path: data/datasets/admitted/mathlib4-v1/
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 1
+      - name: Commit admission manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/datasets/admitted/mathlib4-v1/manifest.json
+          if git diff --cached --quiet; then
+            echo "Admission manifest unchanged."
+          else
+            git commit -m "data: admit pinned Lean mathlib4 corpus"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
