@@ -7,7 +7,7 @@ RONIN utilizará dos tutores cuantizados, descargados y ejecutados exclusivament
 | Qwen3.6-27B Instruct | Qwen/Qwen3.6-27B · Apache-2.0 | Q4_K_M (4-bit) o Q8_0 (8-bit) |
 | DeepSeek-R1-Distill-Qwen-32B | deepseek-ai/DeepSeek-R1-Distill-Qwen-32B · MIT | Q4_K_M (4-bit) o Q8_0 (8-bit) |
 
-El ID oficial de Qwen no lleva el sufijo Instruct. La variante publicada como Qwen3.6-27B es el modelo instruct. Las cuantizaciones GGUF se descargan desde ggml-org (Qwen) y bartowski (DeepSeek), y se contrasta su ficha con el modelo base oficial. El manifiesto local registra ambas revisiones, la licencia original y el SHA-256 del archivo cuantizado.
+El ID oficial de Qwen no lleva el sufijo Instruct. La variante publicada como Qwen3.6-27B es el modelo instruct. Las cuantizaciones GGUF se descargan desde ggml-org (Qwen) y bartowski (DeepSeek), y se contrasta su ficha con el modelo base oficial. DeepSeek-R1-Distill-Qwen-32B declara licencia MIT y deriva de Qwen2.5-32B; el descargador verifica y conserva también la procedencia/licencia Apache-2.0 de esa base. El manifiesto local registra ambas revisiones, la licencia original y el SHA-256 del archivo cuantizado.
 
 ## Privacidad y separación de pesos
 
