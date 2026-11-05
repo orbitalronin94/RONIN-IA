@@ -66,7 +66,8 @@ def main() -> None:
     checkpoints = Path("checkpoints")
     checkpoints.mkdir(parents=True, exist_ok=True)
     base_checkpoint = checkpoints / "main.pt"
-    shutil.copy2(args.base_checkpoint, base_checkpoint)
+    if args.base_checkpoint.resolve() != base_checkpoint.resolve():
+        shutil.copy2(args.base_checkpoint, base_checkpoint)
 
     # Load and select once: the training seed never changes holdout membership.
     all_rows = load_external_dataset(args.revision, split="test")
