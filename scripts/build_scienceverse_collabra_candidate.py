@@ -31,7 +31,7 @@ def normalize(value: str) -> str:
     return unicodedata.normalize("NFC", " ".join(value.split()))
 
 
-def build(input_csv: Path, out_dir: Path) -> dict:
+def build(input_csv: Path, out_dir: Path, expected_papers: int = 748) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     handles = {name: (out_dir / f"{name}.jsonl").open("w", encoding="utf-8", newline="") for name in ("train", "validation", "test")}
     hashes = {name: hashlib.sha256() for name in handles}
@@ -86,8 +86,8 @@ def build(input_csv: Path, out_dir: Path) -> dict:
     finally:
         for handle in handles.values():
             handle.close()
-    if total != 748 or sum(counts.values()) != 748:
-        raise ValueError(f"expected 748 eligible papers and outputs, got input={total}, output={sum(counts.values())}")
+    if total != expected_papers or sum(counts.values()) != expected_papers:
+        raise ValueError(f"expected {expected_papers} eligible papers and outputs, got input={total}, output={sum(counts.values())}")
     partitions = {
         name: {
             "documents": counts[name],
