@@ -89,8 +89,8 @@ def build(input_csv: Path, out_dir: Path, expected_papers: int = 748) -> dict:
     finally:
         for handle in handles.values():
             handle.close()
-    if sum(counts.values()) != expected_papers:
-        raise ValueError(f"expected {expected_papers} eligible output papers, got {sum(counts.values())} from {total} input rows")
+    if total != expected_papers:
+        raise ValueError(f"expected {expected_papers} DOI-allowlisted input papers, got {total}")
     partitions = {
         name: {
             "documents": counts[name],
@@ -106,6 +106,7 @@ def build(input_csv: Path, out_dir: Path, expected_papers: int = 748) -> dict:
         "status": "quality_audited_candidate_not_admitted",
         "input_eligible_papers": total,
         "output_papers": sum(counts.values()),
+        "excluded_rows": dict(sorted(exclusions.items())),
         "excluded": dict(sorted(exclusions.items())),
         "partitions": partitions,
         "split_policy": "deterministic 80/10/10 split by DOI; document-level grouping prevents cross-partition leakage",
