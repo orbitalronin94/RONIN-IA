@@ -278,7 +278,7 @@ def main() -> int:
         if domain is None:
             review_only.append(record)
         else:
-            buckets[domain].append(record)
+            add_unique_record(buckets, seen_text_hashes, domain, record, exclusions)
     input_counts["common_corpus_cc0_input"] = len(common)
 
     # GPLSI: useful Spanish/Catalan legal text, but source-document rights remain pending.
