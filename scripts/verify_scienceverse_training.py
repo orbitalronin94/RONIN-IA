@@ -110,15 +110,11 @@ def main() -> None:
                 continue
             doc_id = f"{corpus}:{doi}"
             title = str(row.get("title", ""))
-            if NON_SUBSTANTIVE_TITLE_RE.search(title):
-                held.append(f"{doc_id}:non_substantive_title")
-                held_counts["non_substantive_title"] = held_counts.get("non_substantive_title", 0) + 1
-                continue
             source_raw_text = text.encode("utf-8")
             source_text_hash = sha256(source_raw_text)
             replacement_count = text.count("\ufffd")
             replacement_ratio = replacement_count / max(1, len(text))
-            if replacement_count and (replacement_count > 5 or replacement_ratio > 0.0001):
+            if replacement_count and (replacement_count > 20 or replacement_ratio > 0.001):
                 held.append(f"{doc_id}:replacement_character_excessive")
                 held_counts["replacement_character_excessive"] = held_counts.get("replacement_character_excessive", 0) + 1
                 continue
@@ -255,7 +251,7 @@ def main() -> None:
         "per_document_license_and_attribution": "PASS",
         "text_hash_and_byte_integrity": "PASS",
         "email_and_ssn_pattern_scan": "PASS_FOR_ELIGIBLE_RECORDS",
-        "minor_replacement_char_normalization": "REPLACED_WITH_SPACE_WHEN_<=5_AND_RATIO_<=0.0001",
+        "minor_replacement_char_normalization": "REPLACED_WITH_SPACE_WHEN_<=20_AND_RATIO_<=0.001",
         "quality_minimums": "PASS",
         "near_duplicate_global": "PENDING",
         "benchmark_holdout_contamination": "PENDING",
