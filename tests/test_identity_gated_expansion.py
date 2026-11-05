@@ -50,6 +50,7 @@ def test_identity_gate_receives_gradient():
     assert torch.isfinite(model.extra_layer_scale.grad)
     assert model.extra_layer_scale.grad.abs().item() > 0
 
+
 def test_ninth_layer_parameter_budget_is_explicit():
     base_config, _ = get_profile("tiny")
     expanded_config = type(base_config)(
