@@ -138,7 +138,7 @@ def audit_nasa() -> dict:
                                 "General/HKD disjointness and deterministic train/validation/test isolation"]},
         "decisions":decisions,
     }
-    (OUT/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+    (OUT/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     return manifest
 
 def audit_scienceverse() -> dict:
@@ -185,7 +185,7 @@ def main() -> None:
         "notes":["NASA scoped admission is not training eligibility.","ScienceVerse files are all scanned; no ScienceVerse document is admitted because publisher-level rights and third-party clearance are not resolved by Crossref alone.","Existing NASA manual holds are never overridden by machine scores.","Exact and near duplicates across sources and holdouts remain a blocking gate."]
     }
     REPORT.parent.mkdir(parents=True,exist_ok=True)
-    REPORT.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+    REPORT.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps(report,ensure_ascii=False,indent=2))
 
 if __name__=="__main__":
