@@ -16,8 +16,17 @@ EMAIL=re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
 PHONE=re.compile(r"(?<!\w)(?:\+?\d[\d .()-]{7,}\d)(?!\w)")
 WORD=re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ]{2,}")
 def get(url):
- req=urllib.request.Request(url,headers={"User-Agent":UA})
- with urllib.request.urlopen(req,timeout=120) as r: return r.read()
+ headers={
+  "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+  "Accept":"application/zip,application/octet-stream,*/*",
+  "Referer":"https://datos.gob.es/es/catalogo/ea0019768-biblioteca-digital-documentos-en-dominio-publico1",
+  "Origin":"https://www.bne.es",
+ }
+ req=urllib.request.Request(url,headers=headers)
+ try:
+  with urllib.request.urlopen(req,timeout=120) as r: return r.read()
+ except Exception as exc:
+  raise RuntimeError(f"BNE distribution download failed for {url}: {type(exc).__name__}: {exc}") from exc
 def sha(b): return hashlib.sha256(b).hexdigest()
 def safe_name(n):
  p=PurePosixPath(n)
