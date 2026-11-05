@@ -147,7 +147,7 @@ jobs:
           model_config,_=get_profile("tiny")
           model=RoninLM(model_config)
           model.load_state_dict(state_dict,strict=True)
-          parameter_count=sum(t.numel() for t in state_dict.values())
+          parameter_count=sum(p.numel() for p in model.parameters())
           assert ck.get("step",model_manifest["checkpoint_step"])==model_manifest["checkpoint_step"]==1000
           assert parameter_count==model_manifest["parameters"]==9922880
           print("Modelo verificado:", model_manifest["model_name"], "| parámetros=", parameter_count, "| pesos_sha256=", model_manifest["weights_sha256"])
