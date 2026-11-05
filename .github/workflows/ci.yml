@@ -122,3 +122,80 @@ jobs:
       - name: Enlazar libro de runs
         if: always()
         uses: ./.github/actions/run-ledger-link
+
+
+  assemble-32-libraries:
+    name: Ensamblar 32 bibliotecas parciales
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Probar inventario y reglas de reparto
+        run: |
+          python -m pip install pytest
+          pytest -q tests/test_32_library_inventory.py tests/test_assemble_32_libraries.py
+      - name: Descargar artefacto CoVoST 2 auditado
+        uses: actions/download-artifact@v4
+        with:
+          name: ronin-covost2-translation-only-candidate
+          run-id: 41990563417
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: /tmp/covost
+      - name: Descargar muestra filtrada de Common Corpus
+        uses: actions/download-artifact@v4
+        with:
+          name: ronin-common-corpus-filtered-candidates
+          run-id: 41933372089
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: /tmp/common-corpus
+      - name: Descargar candidatos GPLSI ClearText
+        uses: actions/download-artifact@v4
+        with:
+          name: ronin-gplsi-cleartext-cas-val-candidates
+          run-id: 41935114828
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: /tmp/gplsi
+      - name: Descargar literatura española admitida
+        uses: actions/download-artifact@v4
+        with:
+          name: ronin-admitted-literature-es-v1-train
+          run-id: 41926088900
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: /tmp/literature
+      - name: Descargar candidato ScienceVerse Collabra
+        uses: actions/download-artifact@v4
+        with:
+          name: ronin-scienceverse-collabra-quality-candidate
+          run-id: 41992987567
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: /tmp/collabra
+      - name: Ensamblar las 32 bibliotecas sin promover candidatos
+        run: |
+          python scripts/assemble_32_libraries.py \
+            --covost-zip /tmp/covost \
+            --common-corpus-zip /tmp/common-corpus \
+            --gplsi-zip /tmp/gplsi \
+            --literature-zip /tmp/literature \
+            --collabra-zip /tmp/collabra \
+            --out artifacts/ronin-32-libraries
+      - name: Publicar paquete parcial con hashes
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-32-libraries-partial-candidates
+          path: artifacts/ronin-32-libraries/
+          if-no-files-found: error
+          retention-days: 90
+      - name: Enlazar libro de runs
+        if: always()
+        uses: ./.github/actions/run-ledger-link

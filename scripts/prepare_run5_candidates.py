@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build auditable, non-admitted RUN 5 candidates from the pinned Common Corpus.
 
-One streaming pass feeds thirty-two domain buckets. Each bucket is split by a
+One streaming pass feeds sixteen domain buckets. Each bucket is split by a
 deterministic semantic-density ranking into disjoint 50% General and 50% HKD libraries. This script NEVER marks data as admitted or training-eligible.
 """
 from __future__ import annotations
@@ -59,16 +59,12 @@ COLLECTIONS = {
     "Open Science": {
         "mathematics", "physics", "chemistry_materials", "biology",
         "medicine_health", "statistics_probability", "astronomy_earth_science",
-        "engineering_robotics", "geography", "geology", "climate_meteorology", "oceanography",
-        "electrical_engineering", "mechanical_engineering", "civil_engineering", "data_science", "psychology",
+        "engineering_robotics",
     },
-    # Common Corpus's semantic-data collection is reserved for logic.
     "Semantic data": {"logic_epistemology"},
-    "Open Culture": {"philosophy", "humanities", "history", "linguistics", "literature", "art_architecture", "education"},
-    "Open Source": {"computer_science", "software_engineering", "cybersecurity", "data_science"},
-    "Open Government": {"law", "economics", "social_sciences", "political_science", "geography"},
-    # Additional subject buckets routed from the same explicitly licensed collections.
-
+    "Open Culture": {"philosophy", "humanities"},
+    "Open Source": {"computer_science", "software_engineering"},
+    "Open Government": {"law", "economics", "social_sciences"},
 }
 DOMAIN_SOURCE_PARENT = {
     "mathematics": "mathematics",
@@ -87,23 +83,6 @@ DOMAIN_SOURCE_PARENT = {
     "astronomy_earth_science": "physics",
     "engineering_robotics": "physics",
     "humanities": "philosophy",
-    "history": "philosophy",
-    "linguistics": "philosophy",
-    "literature": "philosophy",
-    "art_architecture": "philosophy",
-    "geography": "physics",
-    "geology": "physics",
-    "climate_meteorology": "physics",
-    "oceanography": "physics",
-    "electrical_engineering": "physics",
-    "mechanical_engineering": "physics",
-    "civil_engineering": "physics",
-    "cybersecurity": "computer_science",
-    "data_science": "computer_science",
-    "education": "philosophy",
-    "psychology": "biology_medicine",
-    "political_science": "law_economics_social_sciences",
-
 }
 LANGUAGES = {"en", "es"}
 LANGUAGE_ALIASES = {"en": "en", "english": "en", "es": "es", "spanish": "es"}
@@ -433,15 +412,15 @@ def domain_kind_name(domain: str, kind: str) -> str:
 
 
 def expected_library_count(domain: str | None) -> int:
-    """A domain worker emits General+HKD; the aggregate emits all 64."""
-    return 2 if domain else 64
+    """A domain worker emits General+HKD; the aggregate emits all 32."""
+    return 2 if domain else 32
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=Path("/tmp/ronin-run5-candidates"))
     parser.add_argument("--max-rows", type=int, default=5_000_000)
-    parser.add_argument("--domain", choices=DOMAIN_PRIORITY, help="Process one of 32 domains per runner to scale storage horizontally")
+    parser.add_argument("--domain", choices=DOMAIN_PRIORITY, help="Process one of 16 domains per runner to scale storage horizontally")
     parser.add_argument("--max-input-bytes", type=int, default=6 * 1024**3)
     parser.add_argument("--min-train-bytes", type=int, default=1 * 1024**2)
     parser.add_argument("--hkd-fraction", type=float, default=HKD_FRACTION)

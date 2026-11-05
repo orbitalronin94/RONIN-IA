@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the 64 independent RONIN corpus libraries before official training."""
+"""Valida las 32 bibliotecas independientes de RONIN antes del entrenamiento oficial."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ def validate(
         errors.append(f"expected exactly {required} libraries, found {len(libraries)}")
     ids = [item["id"] for item in libraries]
     domains = {item.get("domain", "").split(" — ")[0] for item in libraries}
-    if len(domains) != int(policy.get("domain_count", 32)):
+    if len(domains) != int(policy.get("domain_count", 16)):
         errors.append(f"expected {policy.get('domain_count', 32)} distinct domains, found {len(domains)}")
     for domain in domains:
         partitions = [item for item in libraries if item.get("domain", "").split(" — ")[0] == domain]
@@ -141,7 +141,7 @@ def main() -> None:
         for error in errors:
             print(f"FAIL: {error}")
         raise SystemExit(1)
-    print("PASS: 32-domain / 64-library manifest structure and Portfolio exclusion are valid")
+    print("PASS: 16-domain / 32-library manifest structure and Portfolio exclusion are valid")
 
 
 if __name__ == "__main__":
