@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 11:05 | [Validar inventario de 64 bibliotecas Level A #8 (run 42015994386)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42015994386) | success | Ejecución de GitHub Actions; consultar logs y artefactos enlazados para el resultado detallado. Commit: data: index owner-authored paper corpus in 64-library manifest. Trigger: push; rama: main; intento: 1. | 78a226c0 |
 | 2026-11-05 11:04 | [Integración continua #1316 (run 42015832264)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42015832264) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data\(dataset\): add owner-authorized paper 9/9. Trigger: push; rama: main; intento: 1. | 2be4a48e |
 | 2026-11-05 11:03 | [Integración continua #1307 (run 42015474068)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42015474068) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: record ScienceVerse candidate inventory alongside file review. Trigger: push; rama: main; intento: 1. | 71af2b6f |
 | 2026-11-05 11:03 | [Integración continua #1308 (run 42015723866)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42015723866) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data\(dataset\): add owner-authorized paper 1/9. Trigger: push; rama: main; intento: 1. | 06abc008 |
