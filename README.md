@@ -2,23 +2,34 @@
 
 **Un modelo propio. Un pipeline reproducible. Un corpus trazable.**
 
-RONIN es un modelo causal Transformer implementado en PyTorch. La rama `main` fija como referencia **RONIN-tiny-main-001**: 9.922.880 parámetros, RoPE, RMSNorm, SwiGLU, GQA y tokenización byte-v1.
+RONIN es un modelo causal Transformer implementado en PyTorch. El modelo operativo fijado en `main` es **RONIN-tiny-seed202-500-001**: 9.922.880 parámetros, RoPE, RMSNorm, SwiGLU, GQA y tokenización byte-v1.
 
 ## Modelo principal
 
-- Checkpoint: paso 1.000, entrenado desde inicialización aleatoria.
-- Corpus de origen: 608 documentos de literatura española de dominio público.
-- Evaluación literaria fija: BPB de **7,8684 a 2,8219** sobre 18 documentos de test y 65.536 tokens.
-- SHA-256 del checkpoint: `a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25`.
-- Ejecución de origen: [GitHub Actions #42014728700](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42014728700).
+- Base: checkpoint anterior de `main`, SHA-256 de pesos `5aa7cd5a8188784b9fbf2e0c0454b6504d32e2188e3ac0291a0a255d88bce49e`.
+- Entrenamiento: 500 pasos adicionales de next-token prediction, semilla 202, 128.000 tokens, CPU con 2 hilos.
+- Corpus: 9.108 documentos admitidos (literatura española, Mathlib4 y 2 documentos NASA revisados individualmente); sin preguntas, QA sintético ni tutor.
+- Checkpoint de origen: SHA-256 `86d7d97360f1eb0ac35e9dc12f69c366101629641115ba1c2a1341b2b7d257ae`.
+- Run: [GitHub Actions #42071401130](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42071401130).
+- Artefacto de origen: `ronin-corpus-seed-202-500steps-42071401130`. El workflow de fijación extrae y valida el state_dict y lo versiona como `weights/ronin-main.pt`; el manifiesto `weights/main-model.json` conserva hashes y procedencia.
 
-El manifiesto de pesos se conserva en `weights/main-model.json`. El checkpoint completo se conserva como artefacto inmutable de GitHub Actions y se verifica por SHA-256 antes de cada ciclo. No se presenta el manifiesto como si contuviera los pesos.
+### Evaluación pareada antes/después
+
+| Métrica | Main anterior | Seed 202 | Cambio |
+|---|---:|---:|---:|
+| Validación interna BPB | 4,4189 | 3,8783 | -12,23 % |
+| Validación interna PPL | 21,3904 | 14,7058 | -31,25 % |
+| MMLU-Pro validation | 5/50 (10 %) | 5/50 (10 %) | 0 pp |
+
+El screening MMLU-Pro usó los mismos 50 IDs, revisión `b189ec765aa7ed75c8acfea42df31fdae71f97be`, selección estratificada determinista y cobertura del 100 %. La muestra es pequeña (cada acierto equivale a 2 puntos porcentuales), pertenece al split `validation` y **no es el protocolo oficial ni una certificación de razonamiento**. El candidato no mejoró los aciertos MMLU-Pro; la mejora observada corresponde a predicción de texto en la validación interna.
+
+Por decisión del proyecto, este checkpoint queda fijado como **base operativa de los próximos experimentos**, no como una afirmación de superioridad general. Los ciclos siguientes medirán el mismo holdout antes y después, conservarán el checkpoint de partida y no promocionarán automáticamente candidatos.
 
 ## Estructura del repositorio
 
 | Ruta | Contenido |
 |---|---|
-| `weights/` | Identidad, procedencia y hashes del modelo main y sus checkpoints |
+| `weights/` | Identidad, procedencia, hashes y pesos del modelo main |
 | `data/datasets/` | Corpus, bibliotecas, particiones, manifiestos y registros de derechos |
 | `ronin/` | Arquitectura, tokenizador, datos, entrenamiento y evaluación |
 | `scripts/` | Entrada mínima para entrenar y evaluar |
@@ -36,7 +47,9 @@ python -m pip install -e '.[dev]'
 pytest -q
 ```
 
-El ciclo oficial sin tutor está en [main-native-no-tutor-holdout.yml](.github/workflows/main-native-no-tutor-holdout.yml). Recupera el checkpoint principal, verifica los corpus de entrenamiento admitidos, mide el modelo antes, ejecuta fine-tuning nativo sin tutores y vuelve a medir exactamente los mismos holdouts. El resultado es un candidato: **no sustituye automáticamente los pesos de main**. El benchmark de desarrollo predeterminado contiene 1.024 preguntas de MMLU-Pro, seleccionadas de forma estratificada y determinista. Se utiliza para iterar y cribar hasta ocho semillas con una sola evaluación del modelo base compartida. Los límites 64/128/256 siguen disponibles para pruebas rápidas. El test completo de MMLU-Pro se conserva como certificación externa y se reserva para cuando el modelo alcance el 75 % en el benchmark de desarrollo. La selección del holdout permanece fija entre el modelo base y todos los candidatos; no hay promoción automática.
+El ciclo oficial sin tutor está en [main-native-no-tutor-holdout.yml](.github/workflows/main-native-no-tutor-holdout.yml). Recupera los pesos fijados en `main`, verifica los corpus admitidos, mide el modelo antes, ejecuta fine-tuning nativo sin tutores y vuelve a medir exactamente los mismos holdouts. Cada ejecución produce un candidato; la promoción requiere revisión explícita.
+
+El benchmark de desarrollo MMLU-Pro puede ejecutarse con muestras de screening o con el split completo. Una muestra pequeña sirve para cribar, no para declarar capacidad general. El test oficial se mantiene separado de entrenamiento y selección.
 
 Para ejecutar entrenamiento local con un corpus UTF-8 autorizado:
 
