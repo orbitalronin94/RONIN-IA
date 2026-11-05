@@ -231,7 +231,7 @@ def main() -> None:
     trainer = SFTTrainer(
         model=model,
         train_dataset=dataset,
-        processing_class=tokenizer,
+        tokenizer=tokenizer,
         args=config,
     )
     train_result = trainer.train()
