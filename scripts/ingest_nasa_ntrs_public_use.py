@@ -31,7 +31,11 @@ CATEGORIES = {
     "physics_general": [
         "Physics (General)", "Optics", "Acoustics", "Atomic and Molecular Physics", "Nuclear Physics", "Plasma Physics", "Solid-State Physics", "Physics of Elementary Particles and Fields", "Energy Production and Conversion",
     ],
-    "chemistry_materials_general": [\n        "Chemistry and Materials (General)", "Composite Materials", "Metals and Metallic Materials",\n        "Propellants and Fuels", "Inorganic, Organic and Physical Chemistry",\n    ],\n    "engineering_robotics_general": [
+    "chemistry_materials_general": [
+        "Chemistry and Materials (General)", "Composite Materials", "Metals and Metallic Materials",
+        "Propellants and Fuels", "Inorganic, Organic and Physical Chemistry",
+    ],
+    "engineering_robotics_general": [
         "Engineering (General)", "Cybernetics, Artificial Intelligence and Robotics",
         "Spacecraft Design, Testing and Performance", "Aerodynamics", "Fluid Mechanics and Thermodynamics", "Mechanical Engineering", "Structural Mechanics", "Launch Vehicles and Launch Operations", "Spacecraft Propulsion and Power", "Aircraft Design, Testing and Performance", "Space Transportation and Safety", "Computer Programming and Software", "Numerical Analysis",
     ],
