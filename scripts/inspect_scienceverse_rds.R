@@ -182,14 +182,19 @@ for (f in files) {
           local_errors <- c(local_errors, paste("Crossref audit missing/uncertain for DOI", doi))
           next
         }
-        urls <- unlist(record$license_urls, use.names = FALSE)
+        urls <- if (!is.null(record$confirmed_license_urls)) {
+          unlist(record$confirmed_license_urls, use.names = FALSE)
+        } else {
+          unlist(record$license_urls, use.names = FALSE)
+        }
         ccby4 <- any(grepl("creativecommons\\.org/licenses/by/4\\.0/?$", urls, ignore.case = TRUE))
-        if (!ccby4) {
-          local_errors <- c(local_errors, paste("Crossref does not explicitly confirm CC BY 4.0 for DOI", doi))
+        cc0 <- any(grepl("creativecommons\\.org/publicdomain/zero/1\\.0/?$", urls, ignore.case = TRUE))
+        if (!ccby4 && !cc0) {
+          local_errors <- c(local_errors, paste("Crossref does not confirm an accepted CC BY 4.0/CC0 license for DOI", doi))
         }
       }
     } else {
-      normalized_license <- tolower(gsub("[^a-z0-9]", "", trimws(as.character(eligible$license))))
+      normalized_license <- gsub("[^a-z0-9]", "", tolower(trimws(as.character(eligible$license))))
       if (any(normalized_license != "ccby40")) {
         local_errors <- c(local_errors, "eligible manifest contains a license other than exact CC BY 4.0")
       }
