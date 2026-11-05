@@ -1,0 +1,738 @@
+{
+  "schema_version": 1,
+  "title": "RONIN high-knowledge-density source adapters",
+  "policy": {
+    "default_enabled": false,
+    "require_immutable_revision": true,
+    "require_explicit_document_or_repository_license": true,
+    "require_provenance": true,
+    "reject_unknown_license": true,
+    "no_credentials": true,
+    "no_auto_training_admission": true,
+    "note": "The eight Common Corpus adapters remain enabled for limited candidate extraction. The biology/medicine and chemistry PMC Cloud adapters are also enabled for limited candidate extraction under their exact per-version CC0/CC BY authorization. No adapter is training-admitted; source presence or candidate generation never bypasses global G-0 or human review. arXiv OAI metadata preflight is enabled; it does not download full text or authorize training."
+  },
+  "metric": {
+    "id": "RONIN-HKD-0.1",
+    "basis": [
+      {
+        "paper": "Duan et al. 2025, AAAI",
+        "doi": "10.1609/aaai.v39i22.34555",
+        "use": "knowledge density and coverage"
+      },
+      {
+        "paper": "Xie et al. 2023, NeurIPS",
+        "doi": "10.52202/075280-1482",
+        "use": "target-distribution selection and KL/importance resampling"
+      },
+      {
+        "paper": "Lai et al. 2020, LREC",
+        "url": "https://aclanthology.org/2020.lrec-1.215/",
+        "use": "collection density/diversity/homogeneity"
+      }
+    ],
+    "weights": {
+      "domain_relevance": 0.25,
+      "knowledge_density": 0.3,
+      "specificity": 0.15,
+      "information_content": 0.15,
+      "structure": 0.15
+    },
+    "note": "RONIN-HKD is an initial deterministic heuristic, not a reproduced implementation of HKS or DSIR. Calibrate against human-ranked samples and downstream ablations."
+  },
+  "sources": [
+    {
+      "id": "openwebmath_hkd",
+      "domain": "mathematics",
+      "adapter": "huggingface",
+      "dataset_id": "open-web-math/open-web-math",
+      "config": null,
+      "split": "train",
+      "revision": null,
+      "text_field": "text",
+      "license_field": null,
+      "provenance_field": null,
+      "allowed_licenses": [
+        "ODC-By-1.0"
+      ],
+      "enabled": false,
+      "license_audit": null,
+      "notes": "14.7B tokens/6.3M docs reported; fields text/url/date/metadata verified. ODC-By-1.0 is stated, but card explicitly says underlying data licenses are not altered and Common Crawl ToU applies. Disabled pending upstream rights analysis."
+    },
+    {
+      "id": "mathpile_hkd",
+      "domain": "mathematics",
+      "adapter": "huggingface",
+      "dataset_id": "GAIR/MathPile",
+      "config": null,
+      "split": "train",
+      "revision": null,
+      "text_field": null,
+      "license_field": null,
+      "provenance_field": null,
+      "allowed_licenses": [],
+      "enabled": false,
+      "license_audit": null,
+      "notes": "9.5B tokens reported; mixed inherited source licenses. Only source-level shards after allowlist."
+    },
+    {
+      "id": "proofpile2_hkd",
+      "domain": "logic_epistemology",
+      "adapter": "huggingface",
+      "dataset_id": "EleutherAI/proof-pile-2",
+      "config": null,
+      "split": "train",
+      "revision": null,
+      "text_field": null,
+      "license_field": null,
+      "provenance_field": null,
+      "allowed_licenses": [],
+      "enabled": false,
+      "license_audit": null,
+      "notes": "Mixed sources and formal proofs; no blanket admission."
+    },
+    {
+      "id": "lean_mathlib_hkd",
+      "domain": "logic_epistemology",
+      "adapter": "jsonl",
+      "path": "data/staging/lean_mathlib_records.jsonl",
+      "revision": null,
+      "text_field": "text",
+      "license_field": "license",
+      "provenance_field": "path",
+      "allowed_licenses": [
+        "Apache-2.0"
+      ],
+      "enabled": false,
+      "license_audit": null,
+      "notes": "Build JSONL from pinned Lean/mathlib source tree; verify each file's SPDX header and vendored dependencies."
+    },
+    {
+      "id": "pleias_spanish_pd_hkd",
+      "domain": "philosophy",
+      "adapter": "huggingface",
+      "dataset_id": "PleIAs/Spanish-PD-Books",
+      "config": null,
+      "split": "train",
+      "revision": null,
+      "text_field": null,
+      "license_field": null,
+      "provenance_field": null,
+      "allowed_licenses": [],
+      "enabled": false,
+      "license_audit": null,
+      "notes": "52.1GB reported; require work/edition/translation/jurisdiction proof, not merely public-domain dataset label."
+    },
+    {
+      "id": "common_corpus_openculture_hkd",
+      "domain": "philosophy",
+      "adapter": "huggingface",
+      "dataset_id": "PleIAs/common_corpus",
+      "config": null,
+      "split": "train",
+      "revision": "307910e4c5d040d6f318e6edf2a2b97849155771",
+      "text_field": "text",
+      "license_field": "license",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC0",
+        "CC0 1.0",
+        "CC0-1.0",
+        "CC BY 2.0",
+        "CC BY 3.0",
+        "CC BY 4.0",
+        "CC-BY-2.0",
+        "CC-BY-3.0",
+        "CC-BY-4.0",
+        "MIT",
+        "Apache-2.0",
+        "BSD-2-Clause",
+        "BSD-3-Clause"
+      ],
+      "enabled": true,
+      "license_audit": "reports/license_audit.json",
+      "notes": "Select OpenCulture collection, philosophy subject and Spanish/English with exact document rights. Actual HF fields: text, license, identifier, collection, language. Pin dataset revision and inspect exact license strings before enabling. Verified HF row fields: text, license, identifier, open_type and language. Allowlist is intentionally limited to exact CC0/Public Domain/MIT labels; null, ShareAlike, 'Various...' and unknown values are rejected.",
+      "filters": {
+        "in": {
+          "open_type": [
+            "Open Culture"
+          ],
+          "language": [
+            "English",
+            "Spanish"
+          ]
+        }
+      },
+      "candidate_authorization": "LIMITED_PASS",
+      "training_eligible": false,
+      "admitted": false
+    },
+    {
+      "id": "arxiv_physics_hkd",
+      "domain": "physics",
+      "adapter": "arxiv_oai_metadata",
+      "path": "reports/arxiv-oai-license-preflight.json",
+      "revision": null,
+      "text_field": null,
+      "license_field": "license_uri",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC-BY-4.0",
+        "CC0-1.0"
+      ],
+      "enabled": false,
+      "license_audit": null,
+      "notes": "Metadata-only OAI preflight for physics. No full-text download is enabled. Future candidate extraction requires a pinned article version, exact CC BY 4.0/CC0 1.0 URI, scoped legal authorization, third-party-content review and cross-source deduplication."
+    },
+    {
+      "id": "common_corpus_openscience_physics_hkd",
+      "domain": "physics",
+      "adapter": "huggingface",
+      "dataset_id": "PleIAs/common_corpus",
+      "config": null,
+      "split": "train",
+      "revision": "307910e4c5d040d6f318e6edf2a2b97849155771",
+      "text_field": "text",
+      "license_field": "license",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC0",
+        "CC0 1.0",
+        "CC0-1.0",
+        "CC BY 2.0",
+        "CC BY 3.0",
+        "CC BY 4.0",
+        "CC-BY-2.0",
+        "CC-BY-3.0",
+        "CC-BY-4.0",
+        "MIT",
+        "Apache-2.0",
+        "BSD-2-Clause",
+        "BSD-3-Clause"
+      ],
+      "enabled": true,
+      "license_audit": "reports/license_audit.json",
+      "notes": "Only documents with explicit compatible rights and physics classification. Actual HF fields: text, license, identifier, collection, language. Pin dataset revision and inspect exact license strings before enabling. Verified HF row fields: text, license, identifier, open_type and language. Allowlist is intentionally limited to exact CC0/Public Domain/MIT labels; null, ShareAlike, 'Various...' and unknown values are rejected.",
+      "filters": {
+        "in": {
+          "open_type": [
+            "Open Science"
+          ],
+          "language": [
+            "English",
+            "Spanish"
+          ]
+        }
+      },
+      "candidate_authorization": "LIMITED_PASS",
+      "training_eligible": false,
+      "admitted": false
+    },
+    {
+      "id": "pmc_oa_chemistry_hkd",
+      "domain": "chemistry",
+      "adapter": "pmc_oa_cloud",
+      "path": "scripts/pmc_oa_source.py",
+      "revision": "per-article-version-etag-v1",
+      "text_field": "text",
+      "license_field": "license_code",
+      "provenance_field": "source_identifier",
+      "allowed_licenses": [
+        "CC0",
+        "CC0 1.0",
+        "CC BY",
+        "CC BY 2.0",
+        "CC BY 3.0",
+        "CC BY 4.0"
+      ],
+      "enabled": true,
+      "license_audit": "reports/license_audit.json",
+      "notes": "Use current PMC Cloud Service; resolve every article version via metadata JSON, require exact CC0/CC BY and open-access/non-retracted/non-OCR/non-manuscript flags, verify XML MD5, strip figures/tables/supplements/references, retain per-version ETag and SHA-256. Candidate-only; no training admission.",
+      "dataset_id": "pmc-oa-opendata"
+    },
+    {
+      "id": "patentsview_chemistry_hkd",
+      "domain": "chemistry",
+      "adapter": "jsonl",
+      "path": "data/staging/patentsview_chemistry_records.jsonl",
+      "revision": null,
+      "text_field": "text",
+      "license_field": "license",
+      "provenance_field": "patent_id",
+      "allowed_licenses": [
+        "US-GOV-PUBLIC-DOMAIN"
+      ],
+      "enabled": false,
+      "license_audit": null,
+      "notes": "Pin release and review embedded third-party content; this identifier is an internal allowlist label, not a SPDX license."
+    },
+    {
+      "id": "pmc_oa_biology_hkd",
+      "domain": "biology_medicine",
+      "adapter": "pmc_oa_cloud",
+      "path": "scripts/pmc_oa_source.py",
+      "revision": "per-article-version-etag-v1",
+      "text_field": "text",
+      "license_field": "license_code",
+      "provenance_field": "source_identifier",
+      "allowed_licenses": [
+        "CC0",
+        "CC0 1.0",
+        "CC BY",
+        "CC BY 2.0",
+        "CC BY 3.0",
+        "CC BY 4.0"
+      ],
+      "enabled": true,
+      "license_audit": "reports/license_audit.json",
+      "notes": "Use current PMC Cloud Service; resolve every article version via metadata JSON, require exact CC0/CC BY and open-access/non-retracted/non-OCR/non-manuscript flags, verify XML MD5, strip figures/tables/supplements/references, retain per-version ETag and SHA-256. Candidate-only; no training admission.",
+      "dataset_id": "pmc-oa-opendata"
+    },
+    {
+      "id": "europe_pmc_oa_hkd",
+      "domain": "biology_medicine",
+      "adapter": "jsonl",
+      "path": "data/staging/europe_pmc_oa_records.jsonl",
+      "revision": null,
+      "text_field": "fullText",
+      "license_field": "license",
+      "provenance_field": "id",
+      "allowed_licenses": [
+        "CC0-1.0",
+        "CC-BY-4.0"
+      ],
+      "enabled": false,
+      "license_audit": null,
+      "notes": "Official OA API/downloads; pin release and deduplicate against PMC."
+    },
+    {
+      "id": "the_stack_v2_hkd",
+      "domain": "computer_science",
+      "adapter": "jsonl",
+      "path": "data/staging/the_stack_v2_records.jsonl",
+      "revision": null,
+      "text_field": "content",
+      "license_field": "spdx_license",
+      "provenance_field": "blob_id",
+      "allowed_licenses": [],
+      "enabled": false,
+      "license_audit": null,
+      "notes": "EXCLUDED from automated acquisition: Hugging Face requires login/acceptance and bulk download requires a Software Heritage/INRIA agreement. Conflicts with no-gated/no-credential policy. Prefer Common Corpus Open Source."
+    },
+    {
+      "id": "common_corpus_opensource_hkd",
+      "domain": "computer_science",
+      "adapter": "huggingface",
+      "dataset_id": "PleIAs/common_corpus",
+      "config": null,
+      "split": "train",
+      "revision": "307910e4c5d040d6f318e6edf2a2b97849155771",
+      "text_field": "text",
+      "license_field": "license",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC0",
+        "CC0 1.0",
+        "CC0-1.0",
+        "CC BY 2.0",
+        "CC BY 3.0",
+        "CC BY 4.0",
+        "CC-BY-2.0",
+        "CC-BY-3.0",
+        "CC-BY-4.0",
+        "MIT",
+        "Apache-2.0",
+        "BSD-2-Clause",
+        "BSD-3-Clause"
+      ],
+      "enabled": true,
+      "license_audit": "reports/license_audit.json",
+      "notes": "OpenSource collection, per-document license; exclude software secrets and copyrighted docs. Actual HF fields: text, license, identifier, collection, language. Pin dataset revision and inspect exact license strings before enabling. Verified HF row fields: text, license, identifier, open_type and language. Allowlist is intentionally limited to exact CC0/Public Domain/MIT labels; null, ShareAlike, 'Various...' and unknown values are rejected.",
+      "filters": {
+        "in": {
+          "open_type": [
+            "Open Source"
+          ],
+          "language": [
+            "English"
+          ]
+        }
+      },
+      "candidate_authorization": "LIMITED_PASS",
+      "training_eligible": false,
+      "admitted": false
+    },
+    {
+      "id": "common_corpus_opengov_hkd",
+      "domain": "law_economics_social_sciences",
+      "adapter": "huggingface",
+      "dataset_id": "PleIAs/common_corpus",
+      "config": null,
+      "split": "train",
+      "revision": "307910e4c5d040d6f318e6edf2a2b97849155771",
+      "text_field": "text",
+      "license_field": "license",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC0",
+        "CC0 1.0",
+        "CC0-1.0",
+        "CC BY 2.0",
+        "CC BY 3.0",
+        "CC BY 4.0",
+        "CC-BY-2.0",
+        "CC-BY-3.0",
+        "CC-BY-4.0",
+        "MIT",
+        "Apache-2.0",
+        "BSD-2-Clause",
+        "BSD-3-Clause"
+      ],
+      "enabled": true,
+      "license_audit": "reports/license_audit.json",
+      "notes": "OpenGovernment collection; check jurisdiction, document license, PII and legal currency. Actual HF fields: text, license, identifier, collection, language. Pin dataset revision and inspect exact license strings before enabling. Verified HF row fields: text, license, identifier, open_type and language. Allowlist is intentionally limited to exact CC0/Public Domain/MIT labels; null, ShareAlike, 'Various...' and unknown values are rejected.",
+      "filters": {
+        "in": {
+          "open_type": [
+            "Open Government"
+          ],
+          "language": [
+            "English",
+            "Spanish"
+          ]
+        }
+      },
+      "candidate_authorization": "LIMITED_PASS",
+      "training_eligible": false,
+      "admitted": false
+    },
+    {
+      "id": "harvard_caselaw_hkd",
+      "domain": "law_economics_social_sciences",
+      "adapter": "jsonl",
+      "path": "data/staging/harvard_caselaw_records.jsonl",
+      "revision": null,
+      "text_field": "text",
+      "license_field": "license",
+      "provenance_field": "case_id",
+      "allowed_licenses": [],
+      "enabled": false,
+      "license_audit": null,
+      "notes": "Do not enable until CAP release terms and state-by-state rights are audited."
+    },
+    {
+      "id": "common_corpus_openscience_math_hkd",
+      "domain": "mathematics",
+      "adapter": "huggingface",
+      "dataset_id": "PleIAs/common_corpus",
+      "config": null,
+      "split": "train",
+      "revision": "307910e4c5d040d6f318e6edf2a2b97849155771",
+      "text_field": "text",
+      "license_field": "license",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC0",
+        "CC0 1.0",
+        "CC0-1.0",
+        "CC BY 2.0",
+        "CC BY 3.0",
+        "CC BY 4.0",
+        "CC-BY-2.0",
+        "CC-BY-3.0",
+        "CC-BY-4.0",
+        "MIT",
+        "Apache-2.0",
+        "BSD-2-Clause",
+        "BSD-3-Clause"
+      ],
+      "filters": {
+        "in": {
+          "open_type": [
+            "Open Science"
+          ],
+          "language": [
+            "English",
+            "Spanish"
+          ]
+        }
+      },
+      "enabled": true,
+      "license_audit": "reports/license_audit.json",
+      "notes": "Scientific maths papers; classify subdomain and license per record. Dataset card declares document-level license and provenance; adapter remains disabled until pinned revision and exact allowlist are audited. Verified HF row fields: text, license, identifier, open_type and language. Allowlist is intentionally limited to exact CC0/Public Domain/MIT labels; null, ShareAlike, 'Various...' and unknown values are rejected.",
+      "candidate_authorization": "LIMITED_PASS",
+      "training_eligible": false,
+      "admitted": false
+    },
+    {
+      "id": "common_corpus_opensemantic_logic_hkd",
+      "domain": "logic_epistemology",
+      "adapter": "huggingface",
+      "dataset_id": "PleIAs/common_corpus",
+      "config": null,
+      "split": "train",
+      "revision": "307910e4c5d040d6f318e6edf2a2b97849155771",
+      "text_field": "text",
+      "license_field": "license",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC0",
+        "CC0 1.0",
+        "CC0-1.0",
+        "CC BY 2.0",
+        "CC BY 3.0",
+        "CC BY 4.0",
+        "CC-BY-2.0",
+        "CC-BY-3.0",
+        "CC-BY-4.0",
+        "MIT",
+        "Apache-2.0",
+        "BSD-2-Clause",
+        "BSD-3-Clause"
+      ],
+      "filters": {
+        "in": {
+          "open_type": [
+            "Semantic data"
+          ],
+          "language": [
+            "English",
+            "Spanish"
+          ]
+        }
+      },
+      "enabled": true,
+      "license_audit": "reports/license_audit.json",
+      "notes": "Knowledge graph triples verbalized as natural language; treat as relational facts, not proofs. Dataset card declares document-level license and provenance; adapter remains disabled until pinned revision and exact allowlist are audited. Verified HF row fields: text, license, identifier, open_type and language. Allowlist is intentionally limited to exact CC0/Public Domain/MIT labels; null, ShareAlike, 'Various...' and unknown values are rejected.",
+      "candidate_authorization": "LIMITED_PASS",
+      "training_eligible": false,
+      "admitted": false
+    },
+    {
+      "id": "common_corpus_openscience_chemistry_hkd",
+      "domain": "chemistry",
+      "adapter": "huggingface",
+      "dataset_id": "PleIAs/common_corpus",
+      "config": null,
+      "split": "train",
+      "revision": "307910e4c5d040d6f318e6edf2a2b97849155771",
+      "text_field": "text",
+      "license_field": "license",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC0",
+        "CC0 1.0",
+        "CC0-1.0",
+        "CC BY 2.0",
+        "CC BY 3.0",
+        "CC BY 4.0",
+        "CC-BY-2.0",
+        "CC-BY-3.0",
+        "CC-BY-4.0",
+        "MIT",
+        "Apache-2.0",
+        "BSD-2-Clause",
+        "BSD-3-Clause"
+      ],
+      "filters": {
+        "in": {
+          "open_type": [
+            "Open Science"
+          ],
+          "language": [
+            "English",
+            "Spanish"
+          ]
+        }
+      },
+      "enabled": true,
+      "license_audit": "reports/license_audit.json",
+      "notes": "Chemistry/materials scientific texts; use article-level license allowlist. Dataset card declares document-level license and provenance; adapter remains disabled until pinned revision and exact allowlist are audited. Verified HF row fields: text, license, identifier, open_type and language. Allowlist is intentionally limited to exact CC0/Public Domain/MIT labels; null, ShareAlike, 'Various...' and unknown values are rejected.",
+      "candidate_authorization": "LIMITED_PASS",
+      "training_eligible": false,
+      "admitted": false
+    },
+    {
+      "id": "common_corpus_openscience_biology_hkd",
+      "domain": "biology_medicine",
+      "adapter": "huggingface",
+      "dataset_id": "PleIAs/common_corpus",
+      "config": null,
+      "split": "train",
+      "revision": "307910e4c5d040d6f318e6edf2a2b97849155771",
+      "text_field": "text",
+      "license_field": "license",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC0",
+        "CC0 1.0",
+        "CC0-1.0",
+        "CC BY 2.0",
+        "CC BY 3.0",
+        "CC BY 4.0",
+        "CC-BY-2.0",
+        "CC-BY-3.0",
+        "CC-BY-4.0",
+        "MIT",
+        "Apache-2.0",
+        "BSD-2-Clause",
+        "BSD-3-Clause"
+      ],
+      "filters": {
+        "in": {
+          "open_type": [
+            "Open Science"
+          ],
+          "language": [
+            "English",
+            "Spanish"
+          ]
+        }
+      },
+      "enabled": true,
+      "license_audit": "reports/license_audit.json",
+      "notes": "Biology/medicine scientific texts; filter sensitive clinical/personal information and deduplicate with PMC. Dataset card declares document-level license and provenance; adapter remains disabled until pinned revision and exact allowlist are audited. Verified HF row fields: text, license, identifier, open_type and language. Allowlist is intentionally limited to exact CC0/Public Domain/MIT labels; null, ShareAlike, 'Various...' and unknown values are rejected.",
+      "candidate_authorization": "LIMITED_PASS",
+      "training_eligible": false,
+      "admitted": false
+    },
+    {
+      "adapter": "arxiv_oai_metadata",
+      "path": "reports/arxiv-oai-license-preflight.json",
+      "revision": null,
+      "text_field": null,
+      "license_field": "license_uri",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC-BY-4.0",
+        "CC0-1.0"
+      ],
+      "enabled": false,
+      "license_audit": null,
+      "id": "arxiv_oai_math_hkd",
+      "domain": "mathematics",
+      "notes": "Metadata-only OAI preflight. No full-text download is enabled. Future candidate extraction requires a pinned article version, exact CC BY 4.0/CC0 1.0 URI, scoped legal authorization, third-party-content review and cross-source deduplication."
+    },
+    {
+      "adapter": "arxiv_oai_metadata",
+      "path": "reports/arxiv-oai-license-preflight.json",
+      "revision": null,
+      "text_field": null,
+      "license_field": "license_uri",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC-BY-4.0",
+        "CC0-1.0"
+      ],
+      "enabled": false,
+      "license_audit": null,
+      "id": "arxiv_oai_logic_hkd",
+      "domain": "logic_epistemology",
+      "notes": "Metadata-only OAI preflight. No full-text download is enabled. Future candidate extraction requires a pinned article version, exact CC BY 4.0/CC0 1.0 URI, scoped legal authorization, third-party-content review and cross-source deduplication."
+    },
+    {
+      "adapter": "arxiv_oai_metadata",
+      "path": "reports/arxiv-oai-license-preflight.json",
+      "revision": null,
+      "text_field": null,
+      "license_field": "license_uri",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC-BY-4.0",
+        "CC0-1.0"
+      ],
+      "enabled": false,
+      "license_audit": null,
+      "id": "arxiv_oai_philosophy_hkd",
+      "domain": "philosophy",
+      "notes": "Metadata-only OAI preflight. No full-text download is enabled. Future candidate extraction requires a pinned article version, exact CC BY 4.0/CC0 1.0 URI, scoped legal authorization, third-party-content review and cross-source deduplication."
+    },
+    {
+      "adapter": "arxiv_oai_metadata",
+      "path": "reports/arxiv-oai-license-preflight.json",
+      "revision": null,
+      "text_field": null,
+      "license_field": "license_uri",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC-BY-4.0",
+        "CC0-1.0"
+      ],
+      "enabled": false,
+      "license_audit": null,
+      "id": "arxiv_oai_chemistry_hkd",
+      "domain": "chemistry",
+      "notes": "Metadata-only OAI preflight. No full-text download is enabled. Future candidate extraction requires a pinned article version, exact CC BY 4.0/CC0 1.0 URI, scoped legal authorization, third-party-content review and cross-source deduplication."
+    },
+    {
+      "adapter": "arxiv_oai_metadata",
+      "path": "reports/arxiv-oai-license-preflight.json",
+      "revision": null,
+      "text_field": null,
+      "license_field": "license_uri",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC-BY-4.0",
+        "CC0-1.0"
+      ],
+      "enabled": false,
+      "license_audit": null,
+      "id": "arxiv_oai_biology_hkd",
+      "domain": "biology_medicine",
+      "notes": "Metadata-only OAI preflight. No full-text download is enabled. Future candidate extraction requires a pinned article version, exact CC BY 4.0/CC0 1.0 URI, scoped legal authorization, third-party-content review and cross-source deduplication."
+    },
+    {
+      "adapter": "arxiv_oai_metadata",
+      "path": "reports/arxiv-oai-license-preflight.json",
+      "revision": null,
+      "text_field": null,
+      "license_field": "license_uri",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC-BY-4.0",
+        "CC0-1.0"
+      ],
+      "enabled": false,
+      "license_audit": null,
+      "id": "arxiv_oai_cs_hkd",
+      "domain": "computer_science",
+      "notes": "Metadata-only OAI preflight. No full-text download is enabled. Future candidate extraction requires a pinned article version, exact CC BY 4.0/CC0 1.0 URI, scoped legal authorization, third-party-content review and cross-source deduplication."
+    },
+    {
+      "adapter": "arxiv_oai_metadata",
+      "path": "reports/arxiv-oai-license-preflight.json",
+      "revision": null,
+      "text_field": null,
+      "license_field": "license_uri",
+      "provenance_field": "identifier",
+      "allowed_licenses": [
+        "CC-BY-4.0",
+        "CC0-1.0"
+      ],
+      "enabled": false,
+      "license_audit": null,
+      "id": "arxiv_oai_econ_hkd",
+      "domain": "law_economics_social_sciences",
+      "notes": "Metadata-only OAI preflight. No full-text download is enabled. Future candidate extraction requires a pinned article version, exact CC BY 4.0/CC0 1.0 URI, scoped legal authorization, third-party-content review and cross-source deduplication."
+    },
+    {
+      "id": "arxiv_ccby_cc0_multidomain",
+      "domain": "cross_domain_science",
+      "adapter": "arxiv_oai_metadata",
+      "path": "reports/arxiv-oai-license-preflight.json",
+      "revision": "daily-oai-snapshot",
+      "text_field": null,
+      "license_field": "license_uri",
+      "provenance_field": "arxiv_id",
+      "allowed_licenses": [
+        "CC-BY-4.0",
+        "CC0-1.0"
+      ],
+      "enabled": true,
+      "candidate_authorization": "METADATA_PREFLIGHT_ONLY",
+      "training_eligible": false,
+      "admitted": false,
+      "notes": "OAI-PMH metadata-only preflight. Full text may only be fetched later for exact CC BY 4.0 or CC0 per-version license. Default arXiv nonexclusive distribution license is excluded. journal-ref is only a peer-review discovery signal; Crossref/publisher confirmation required. Third-party figures, tables, datasets and supplements need separate clearance."
+    }
+  ],
+  "policy_note": "HF viewer for PleIAs/common_corpus currently exposes 69.9k rows while card claims 2.27T tokens; reconcile parquet inventory and token totals before relying on headline scale."
+}
