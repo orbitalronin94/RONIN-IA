@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/audit-and-admit-scoped-candidates.yml"
       - "scripts/audit_and_admit_scoped_candidates.py"
+      - "scripts/refresh_ronin_authored_papers_hashes.py"
       - "data/datasets/candidates/nasa-ntrs-public-use/**"
       - "data/datasets/candidates/scienceverse-text-export-v1/**"
       - "data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json"
@@ -31,13 +32,15 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
+      - name: Refresh exact owner-authored payload hashes
+        run: python scripts/refresh_ronin_authored_papers_hashes.py
       - name: Audit all candidate documents and materialize scoped admissions
         run: python scripts/audit_and_admit_scoped_candidates.py
       - name: Commit audited admissions and report
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/datasets/admitted/nasa-ntrs-public-use-v1 data/datasets/admitted/scienceverse-ccby-v1 data/datasets/reviews/candidate-document-audit-2026-11-05.json
+          git add data/datasets/admitted/nasa-ntrs-public-use-v1 data/datasets/admitted/scienceverse-ccby-v1 data/datasets/admitted/ronin-authored-papers-v1/manifest.json data/datasets/reviews/candidate-document-audit-2026-11-05.json
           if git diff --cached --quiet; then
             echo "Candidate audit outputs are unchanged."
             exit 0
