@@ -35,3 +35,10 @@ El ensamblador asigna únicamente documentos con señal temática suficiente. Lo
 - Se conserva en el pool transversal de candidatos; **no se asigna todavía a esta biblioteca** hasta clasificar cada documento por tema y densidad.
 - Payload, hashes, controles de privacidad/calidad, deduplicación, particiones y revisión humana pendientes. No entrenable.
 - Expediente: `data/datasets/candidates/un-parallel-corpus-v1/README.md`.
+
+
+## Candidatos científicos ScienceVerse
+
+- Frontiers in Psychology (1.000), i-Perception (496), Judgment and Decision Making (855) y Journal of Cognition (447): candidatos ScienceVerse declarados CC BY 4.0 en el catálogo upstream; falta auditoría DOI/artículo y extracción.
+- El catálogo declara 15.179 artículos en 18 corpus y conserva manifiestos por DOI y procedencia. Estos documentos aún no están admitidos ni son entrenables.
+- Expediente: `data/datasets/candidates/scienceverse-expanded-corpora/README.md`.
