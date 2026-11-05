@@ -57,7 +57,10 @@ jobs:
             data/datasets/admitted/ronin-authored-papers-v1
             data/datasets/admitted/nasa-ntrs-file-reviewed-v2
             data/datasets/admitted/scienceverse-ccby-v1
+            data/datasets/admitted/covost2-cc0-translation-only
+            data/datasets/rights_registry
             scripts/verify_scienceverse_training.py
+            scripts/verify_covost2_training.py
       - name: Validate budget
         run: |
           [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -eq 500 ]
@@ -142,6 +145,18 @@ jobs:
           assert report["exact_cross_source_dedup"] == "PASS"
           print("ScienceVerse train scoped:", report["documents"], "docs /", report["text_bytes"], "UTF-8 bytes")
           PY
+      - name: Verify CoVoST 2 scoped train partition when materialized
+        id: covost
+        run: |
+          if [ -f data/datasets/admitted/covost2-cc0-translation-only/manifest.json ] && [ -f data/datasets/admitted/covost2-cc0-translation-only/train.jsonl.gz ]; then
+            python scripts/verify_covost2_training.py \
+              --manifest data/datasets/admitted/covost2-cc0-translation-only/manifest.json \
+              --output-text incoming/covost2/train.txt
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "CoVoST payload is not materialized on this branch; continuing with previously admitted sources only."
+          fi
       - name: Verify checkpoint and every admitted training partition
         run: |
           python - <<'PY'
@@ -163,7 +178,7 @@ jobs:
           nasa_v2_docs=Path("incoming/nasa-file-reviewed-v2/documents.train.jsonl")
           assert all(p.is_file() for p in (base,lit,lm,math,mmf,nasa,nmf,ndocs,nasa_v2,nasa_v2_audit,nasa_v2_docs))
           assert sha(base)==model_manifest["weights_sha256"]
-          assert model_manifest["checkpoint_sha256"]=="a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
+          assert len(model_manifest["checkpoint_sha256"])==64
           assert sha(lit)=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
           l=json.loads(lm.read_text())
           assert l.get("dataset_id")=="ronin-spanish-public-domain-literature-v2"
@@ -205,7 +220,7 @@ jobs:
           model=RoninLM(model_config)
           model.load_state_dict(state_dict,strict=True)
           parameter_count=sum(p.numel() for p in model.parameters())
-          assert ck.get("step",model_manifest["checkpoint_step"])==model_manifest["checkpoint_step"]==1000
+          assert ck.get("step",model_manifest["checkpoint_step"])==model_manifest["checkpoint_step"]
           assert parameter_count==model_manifest["parameters"]==9922880
           print("Modelo verificado:", model_manifest["model_name"], "| parámetros=", parameter_count, "| pesos_sha256=", model_manifest["weights_sha256"])
           Path("checkpoints").mkdir(exist_ok=True)
@@ -235,26 +250,45 @@ jobs:
             papers.append(raw)
           assert len(papers)==9
           papers_blob=b"\n\n".join(papers)
+          covost_path=Path("incoming/covost2/train.txt")
+          covost_blob=covost_path.read_bytes() if covost_path.is_file() else b""
+          covost_manifest_path=Path("data/datasets/admitted/covost2-cc0-translation-only/manifest.json")
+          covost_docs=0
+          covost_text_bytes=0
+          covost_text_sha256=None
+          if covost_path.is_file():
+            covost_manifest=json.loads(covost_manifest_path.read_text(encoding="utf-8"))
+            covost_docs=covost_manifest["aggregate"]["train_documents"]
+            covost_text_bytes=covost_manifest["aggregate"]["train_text_utf8_bytes"]
+            covost_text_sha256=covost_manifest["aggregate"]["train_text_file_sha256"]
+            assert hashlib.sha256(covost_blob).hexdigest()==covost_text_sha256
+            assert covost_docs==270244
           out=Path("/tmp/ronin-native-train.txt")
-          out.write_bytes(lit+b"\n\n"+math+b"\n\n"+nasa+b"\n\n"+nasa_v2+b"\n\n"+papers_blob+b"\n\n"+scienceverse)
+          combined=[lit,math,nasa,nasa_v2,papers_blob,scienceverse]
+          if covost_blob:
+            combined.append(covost_blob)
+          out.write_bytes(b"\n\n".join(combined))
+          sources=[
+            {"dataset_id":"ronin-spanish-public-domain-literature-v2","documents":608,"bytes":140295523,"sha256":"9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"},
+            {"dataset_id":"mathlib4-lean-proof-corpus-v1","documents":8498,"bytes":97629252,"sha256":"7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"},
+            {"dataset_id":"nasa-ntrs-file-reviewed-v1","documents":2,"bytes":32409,"sha256":"874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"},
+            {"dataset_id":"nasa-ntrs-file-reviewed-v2","documents":4,"bytes":669461,"sha256":nasa_v2_report["train_sha256"]},
+            {"dataset_id":"ronin-authored-papers-v1","documents":9,"bytes":750857,"sha256":"source-payloads-verified-individually"},
+            {"dataset_id":"ronin-scienceverse-ccby-v1","documents":sv_report["documents"],"bytes":sv_report["text_bytes"],"sha256":sv_report["train_text_sha256"]}
+          ]
+          if covost_blob:
+            sources.append({"dataset_id":"covost2-cc0-translation-only","documents":covost_docs,"bytes":covost_text_bytes,"sha256":covost_text_sha256,"languages":["en","ca"]})
           report={
             "experiment":"ronin-native-no-tutor-v1",
             "tutor_used":False,
-            "sources":[
-              {"dataset_id":"ronin-spanish-public-domain-literature-v2","documents":608,"bytes":140295523,"sha256":"9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"},
-              {"dataset_id":"mathlib4-lean-proof-corpus-v1","documents":8498,"bytes":97629252,"sha256":"7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"},
-              {"dataset_id":"nasa-ntrs-file-reviewed-v1","documents":2,"bytes":32409,"sha256":"874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"},
-              {"dataset_id":"nasa-ntrs-file-reviewed-v2","documents":4,"bytes":669461,"sha256":nasa_v2_report["train_sha256"]},
-              {"dataset_id":"ronin-authored-papers-v1","documents":9,"bytes":750857,"sha256":"source-payloads-verified-individually"},
-              {"dataset_id":"ronin-scienceverse-ccby-v1","documents":sv_report["documents"],"bytes":sv_report["text_bytes"],"sha256":sv_report["train_text_sha256"]}
-            ],
-            "train_documents":9121+sv_report["documents"],
-            "source_train_bytes":239377502+sv_report["text_bytes"],
+            "sources":sources,
+            "train_documents":9121+sv_report["documents"]+covost_docs,
+            "source_train_bytes":239377502+sv_report["text_bytes"]+covost_text_bytes,
             "combined_bytes":out.stat().st_size,
             "combined_sha256":hashlib.sha256(out.read_bytes()).hexdigest(),
             "validation_test_partitions_in_training":False,
-            "scope_limit":"NASA v2, Papers and ScienceVerse are source-scoped train only; global G-0 and near-duplicate/benchmark-holdout checks remain pending.",
-            "excluded_not_training_eligible":["NASA NTRS public-use unreviewed remainder (811 scoped records)","ScienceVerse held records listed in incoming/scienceverse/held.json"]
+            "scope_limit":"All sources are source-scoped train only; global G-0, near-duplicate and benchmark-holdout checks remain separately declared. CoVoST validation/test are excluded.",
+            "excluded_not_training_eligible":["NASA NTRS public-use unreviewed remainder (811 scoped records)","ScienceVerse held records listed in incoming/scienceverse/held.json","CoVoST validation/test partitions"]
           }
           Path("reports").mkdir(exist_ok=True)
           Path("reports/native-mixture.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")

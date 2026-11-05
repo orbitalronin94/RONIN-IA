@@ -1,0 +1,82 @@
+name: Admit CoVoST 2 CC0 translation-only train partition
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/ingest_covost2_translation_only.py"
+      - "scripts/audit_covost2_candidate.py"
+      - "scripts/promote_covost2_scoped_train.py"
+      - "scripts/validate_rights_registry.py"
+      - "data/datasets/reviews/covost2-manual-review-2026-11-05.json"
+      - "data/datasets/rights_registry/records.jsonl"
+      - "data/datasets/rights_registry/policy.json"
+      - ".github/workflows/admit-covost2-scoped-train.yml"
+  pull_request:
+    paths:
+      - "scripts/ingest_covost2_translation_only.py"
+      - "scripts/audit_covost2_candidate.py"
+      - "scripts/promote_covost2_scoped_train.py"
+      - "scripts/validate_rights_registry.py"
+      - "data/datasets/reviews/covost2-manual-review-2026-11-05.json"
+      - "data/datasets/rights_registry/records.jsonl"
+      - "data/datasets/rights_registry/policy.json"
+      - ".github/workflows/admit-covost2-scoped-train.yml"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: ronin-covost2-scoped-admission
+  cancel-in-progress: false
+
+jobs:
+  admit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Build pinned translation-only CoVoST candidate
+        run: python scripts/ingest_covost2_translation_only.py --max-rows 500000
+      - name: Validate exact CoVoST rights record and registry
+        run: python scripts/validate_rights_registry.py --record artifacts/covost/rights-record.candidate.json
+      - name: Quality audit and deterministic train/validation/test split
+        run: python scripts/audit_covost2_candidate.py
+      - name: Promote only the manually reviewed train partition
+        run: python scripts/promote_covost2_scoped_train.py
+      - name: Re-verify the materialized train partition
+        run: python scripts/verify_covost2_training.py --manifest data/datasets/admitted/covost2-cc0-translation-only/manifest.json --output-text /tmp/covost2-train.txt
+      - name: Upload source evidence and scoped train payload
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-covost2-scoped-train-${{ github.run_id }}
+          path: |
+            artifacts/covost/
+            artifacts/covost-quality/
+            data/datasets/admitted/covost2-cc0-translation-only/manifest.json
+            data/datasets/admitted/covost2-cc0-translation-only/train.jsonl.gz
+            /tmp/covost2-train.txt
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 1
+      - name: Persist verified train payload and manifest on main
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/datasets/admitted/covost2-cc0-translation-only/manifest.json
+          git add data/datasets/admitted/covost2-cc0-translation-only/train.jsonl.gz
+          if git diff --cached --quiet; then
+            echo "CoVoST payload already matches the committed manifest; nothing to persist."
+          else
+            git commit -m "data(covost): persist verified scoped train partition"
+            git push origin HEAD:main
+          fi
