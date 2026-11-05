@@ -55,9 +55,15 @@ jobs:
               print(f"{report}: {data['status']}")
               for name, item in data.get("datasets", {}).items():
                   print(f"- {name}: {item['eligible_rows']} eligible DOI rows; {item['payload_bytes']} bytes; SHA-256 {item['payload_sha256']}")
-                  for error in item.get("validation_errors", []):
+                  item_errors = item.get("validation_errors", [])
+                  if isinstance(item_errors, str):
+                      item_errors = [item_errors]
+                  for error in item_errors:
                       print(f"  ERROR: {error}")
-              for error in data.get("errors", []):
+              report_errors = data.get("errors", [])
+              if isinstance(report_errors, str):
+                  report_errors = [report_errors]
+              for error in report_errors:
                   print(f"ERROR: {error}")
               failed = failed or data.get("status") != "PASS_STRUCTURE_AND_PROVENANCE_HASHES"
           if failed:
