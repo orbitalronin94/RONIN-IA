@@ -1,0 +1,57 @@
+name: Build benchmark reasoning corpus
+
+on:
+  workflow_dispatch:
+    inputs:
+      audit_per_source:
+        description: Number of records per source in the human-audit sample
+        required: true
+        default: "40"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install pinned dataset tooling
+        run: python -m pip install "datasets==3.6.0" "huggingface_hub==0.36.0"
+      - name: Build corpus candidate
+        run: |
+          python scripts/build_benchmark_reasoning_corpus.py \
+            --output-dir benchmark-reasoning-output \
+            --audit-per-source "${{ inputs.audit_per_source }}"
+      - name: Validate output structure and leakage gates
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("benchmark-reasoning-output")
+          manifest = json.loads((root / "manifest.json").read_text())
+          assert manifest["checks"]["only_train_splits_loaded"]
+          assert not manifest["checks"]["mmlu_pro_loaded"]
+          assert not manifest["checks"]["training_eligible"]
+          assert manifest["total_records"] > 0
+          assert (root / "records.train.jsonl").stat().st_size > 0
+          assert (root / "train.txt").stat().st_size > 0
+          assert (root / "audit.sample.jsonl").stat().st_size > 0
+          print(json.dumps({
+              "total_records": manifest["total_records"],
+              "counts": manifest["counts"],
+              "training_eligible": manifest["checks"]["training_eligible"]
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ronin-benchmark-reasoning-candidate-v1
+          path: benchmark-reasoning-output/
+          if-no-files-found: error
+          retention-days: 90
