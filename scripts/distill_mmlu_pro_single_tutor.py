@@ -13,7 +13,7 @@ from ronin.data.local_dual_teacher import generate_completion, load_local_teache
 from scripts.distill_mmlu_pro_dual_tutor import parse_response, tutor_prompt
 
 
-def generate(model_dir: Path, output_dir: Path, *, count: int, quantization: str, seed: int) -> dict:
+def generate(model_dir: Path, output_dir: Path, *, count: int, quantization: str, seed: int, gpu_layers: int) -> dict:
     if not 8 <= count <= 512:
         raise ValueError("count debe estar entre 8 y 512")
     from datasets import load_dataset
@@ -25,7 +25,7 @@ def generate(model_dir: Path, output_dir: Path, *, count: int, quantization: str
     # cargamos train por una ruta separada y normalizamos el mismo esquema.
     raw_rows = load_dataset(DATASET_ID, split="train", revision=revision)
     rows = select_stratified(normalize_rows(raw_rows), count, seed)
-    model, tokenizer, manifest = load_local_teacher(model_dir, quantization)
+    model, tokenizer, manifest = load_local_teacher(\n        model_dir, quantization, gpu_layers=gpu_layers\n    )
     accepted = []
     audit = []
     try:
