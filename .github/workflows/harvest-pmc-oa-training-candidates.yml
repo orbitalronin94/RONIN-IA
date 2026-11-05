@@ -36,9 +36,24 @@ jobs:
           filter: blob:none
           sparse-checkout: |
             scripts/harvest_pmc_oa_cc0_ccby.py
+            scripts/verify_pmc_oa_candidate_corpus.py
             data/datasets/candidates/pmc-oa-cc0-ccby-v2
 
+      - name: Check first one-percent milestone
+        id: gate
+        run: |
+          python scripts/verify_pmc_oa_candidate_corpus.py
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          p = Path("data/datasets/candidates/pmc-oa-cc0-ccby-v2/corpus-verification.json")
+          data = json.loads(p.read_text()) if p.exists() else {}
+          print("complete=" + str(bool(data.get("one_percent_milestone_reached"))).lower())
+          print("verified_text_bytes=" + str(data.get("unique_utf8_text_bytes", 0)))
+          PY
+
       - name: Harvest license-verified full text
+        if: steps.gate.outputs.complete != 'true'
         env:
           MAX_TEXT_GIB: ${{ inputs.max_text_gib || '2' }}
         run: |
@@ -53,7 +68,12 @@ jobs:
             --max-candidates 50000 \
             --workers 12
 
+      - name: Verify corpus hashes and byte totals
+        if: steps.gate.outputs.complete != 'true'
+        run: python scripts/verify_pmc_oa_candidate_corpus.py
+
       - name: Commit corpus shards and provenance to main
+        if: steps.gate.outputs.complete != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
