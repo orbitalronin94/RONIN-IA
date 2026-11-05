@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 14:15 | [Integración continua #1486 (run 42042989900)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42042989900) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Refactor: README centrado en el modelo RONIN y conservar aviso histórico. Trigger: push; rama: main; intento: 1. | 147cfa98 |
 | 2026-11-05 14:14 | [Integración continua #1490 (run 42043077716)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42043077716) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Eliminar referencias heredadas a Gates del entrenamiento principal. Trigger: push; rama: main; intento: 1. | f1a1f348 |
 | 2026-11-05 14:14 | [Integración continua #1487 (run 42043027146)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42043027146) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Añadir manifiesto de pesos del modelo main. Trigger: push; rama: main; intento: 1. | 1cd3e2a6 |
 | 2026-11-05 14:12 | [Integración continua #1485 (run 42042289477)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42042289477) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: chore: remove obsolete root datasets directory. Trigger: push; rama: main; intento: 1. | 03e39633 |
