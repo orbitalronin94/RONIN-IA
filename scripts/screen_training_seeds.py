@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Screen several training seeds against one cached, fixed compact holdout.
 
-The compact MMLU-Pro test sample is selected once and reused unchanged for the
-base checkpoint and every candidate. This is a screening report, not a final
+The compact MMLU-Pro sample from the explicitly selected split is selected once
+and reused unchanged for the base checkpoint and every candidate. This is a screening report, not a final
 benchmark claim or an automatic promotion mechanism.
 """
 from __future__ import annotations
@@ -91,7 +91,7 @@ def main() -> None:
         "method": "deterministic round-robin stratified by category",
         "seed": 2026,
         "limit": args.eval_limit,
-        "split": "test",
+        "split": args.eval_split,
         "total_available": len(all_rows),
     }
     write_json(reports / "mmlu-holdout-before.json", base_mmlu)
@@ -208,7 +208,8 @@ def main() -> None:
         reverse=True,
     )
     summary = {
-        "experiment": "ronin-native-no-tutor-multi-seed-screen-v1",
+        "experiment": "ronin-native-no-tutor-seed-202-500-step-v1",
+        "training_steps": args.steps,
         "evaluation_tier": ("full_test_audit" if args.eval_split == "test" and args.eval_limit == 0 else "compact_seed_screen"),
         "evaluation_split": args.eval_split,
         "tutor_used": False,
