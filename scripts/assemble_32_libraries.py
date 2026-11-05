@@ -52,8 +52,17 @@ def read_jsonl(data: bytes) -> list[dict[str, Any]]:
 
 
 def artifact_member(path: Path, member: str) -> bytes:
+    if path.is_dir():
+        return (path / member).read_bytes()
     with zipfile.ZipFile(path) as archive:
         return archive.read(member)
+
+
+def verify_payload(label: str, payload: bytes, expected_sha256: str) -> bytes:
+    actual = sha256(payload)
+    if actual != expected_sha256:
+        raise ValueError(f"{label} SHA-256 mismatch: {actual}")
+    return payload
 
 
 def domain_scores(text: str) -> dict[str, dict[str, float]]:
@@ -168,7 +177,8 @@ def main() -> int:
     input_counts = Counter()
 
     # CoVoST: exact CC0 translation field, train-only source partition, quality-filtered.
-    covost = read_jsonl(artifact_member(args.covost_zip, "covost-quality/train.jsonl"))
+    covost_payload = verify_payload("CoVoST train", artifact_member(args.covost_zip, "covost-quality/train.jsonl"), "3ab1f073fdafc0a458add4102c01d114f1797ec245e0ddb47891bc3d39ed2744")
+    covost = read_jsonl(covost_payload)
     input_counts["covost_train_input"] = len(covost)
     for row in covost:
         text = " ".join(str(row.get("text") or "").split())
@@ -198,7 +208,8 @@ def main() -> int:
 
     # Common Corpus: retain the full CC0 subset in a separate review-only payload.
     # Do not route VoxPopuli, Wikidata, code or multilingual rows into training libraries.
-    common = read_jsonl(artifact_member(args.common_corpus_zip, "common-corpus-cc0-1.0.jsonl"))
+    common_payload = verify_payload("Common Corpus CC0", artifact_member(args.common_corpus_zip, "common-corpus-cc0-1.0.jsonl"), "899380093e232ff266d724bd2eb44430a033930104fc859bd8d7eefb491e1bb8")
+    common = read_jsonl(common_payload)
     review_only = []
     for row in common:
         collection = str(row.get("collection") or "")
@@ -236,8 +247,11 @@ def main() -> int:
 
     # GPLSI: useful Spanish/Catalan legal text, but source-document rights remain pending.
     with zipfile.ZipFile(args.gplsi_zip) as archive:
-        for member in ("gplsi-cleartext-cas.jsonl", "gplsi-cleartext-val.jsonl"):
-            for row in read_jsonl(archive.read(member)):
+        for member, expected in (
+            ("gplsi-cleartext-cas.jsonl", "e7cc5b66aa50dc2ba296ffeb348ea0f4e9a3c10fe22de93860bfe6fd0c1945cd"),
+            ("gplsi-cleartext-val.jsonl", "15ea1a2495f312ee95e213cc4d851f9e3dca7c7d1e5c13259f3c859479a8219d"),
+        ):
+            for row in read_jsonl(verify_payload(member, artifact_member(args.gplsi_zip, member), expected)):
                 text = " ".join(str(row.get("text") or "").split())
                 record = {
                     "document_id": f"gplsi:{row.get('source_repo')}:{row.get('source_path')}",
@@ -255,10 +269,9 @@ def main() -> int:
 
     # Collabra is optional until the per-DOI candidate builder has completed.
     if args.collabra_zip and args.collabra_zip.exists():
-        with zipfile.ZipFile(args.collabra_zip) as archive:
-            member = "candidate/train.jsonl"
-            if member in archive.namelist():
-                for row in read_jsonl(archive.read(member)):
+        member = "candidate/train.jsonl"
+        collabra_payload = verify_payload("Collabra train", artifact_member(args.collabra_zip, member), "4b7349457afd3f41cd3b05f5e72f833cd63b21362dd08a2075f52fa2a35225b9")
+        for row in read_jsonl(collabra_payload):
                     text = " ".join(str(row.get("text") or "").split())
                     record = {
                         "document_id": f"collabra:{row.get('doi')}",
@@ -276,7 +289,7 @@ def main() -> int:
 
     # The existing admitted Spanish literature stays an independent admitted corpus.
     # Keep its exact train-only bytes and provenance intact; do not fragment/relabel it.
-    literature_bytes = artifact_member(args.literature_zip, "train.txt")
+    literature_bytes = verify_payload("admitted literature train", artifact_member(args.literature_zip, "train.txt"), "9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78")
     literature_manifest = json.loads(artifact_member(args.literature_zip, "dataset-manifest.json"))
     (out / "literature-es-v1-train.txt").write_bytes(literature_bytes)
     (out / "literature-es-v1-dataset-manifest.json").write_text(
