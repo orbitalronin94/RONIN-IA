@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:32 | [Integración continua #1212 (run 42003263834)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003263834) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Fix lint and record model and package provenance. Trigger: push; rama: main; intento: 1. | 8b8e301c |
 | 2026-11-05 09:32 | [Integración continua #1203 (run 42003008866)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003008866) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: trigger bounded PMC candidate expansion from source updates. Trigger: push; rama: main; intento: 1. | 0882f934 |
 | 2026-11-05 09:32 | [Integración continua #1209 (run 42003151763)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003151763) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: acquire bounded NASA NTRS public-use text candidates. Trigger: push; rama: main; intento: 1. | 6f645c60 |
 | 2026-11-05 09:32 | [Integración continua #1208 (run 42003139490)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003139490) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): include i-Perception candidate payload and exact totals. Trigger: push; rama: main; intento: 1. | 143a860f |
