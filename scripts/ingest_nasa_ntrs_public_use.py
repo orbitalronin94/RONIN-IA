@@ -99,8 +99,31 @@ def main() -> None:
     excluded: list[dict] = []
     seen_ids: set[str] = set()
     seen_hashes: set[str] = set()
+    # Preserve and verify the previously committed documents. A new harvest
+    # must be additive; it must never replace the old manifest with only the
+    # latest page of results.
+    if manifest_path.exists():
+        for line_no, line in enumerate(manifest_path.read_text(encoding="utf-8").splitlines(), 1):
+            if not line.strip():
+                continue
+            record = json.loads(line)
+            doc_id = str(record.get("id", "")).strip()
+            rel = record.get("text_file")
+            if not doc_id or not rel:
+                raise RuntimeError(f"Malformed existing manifest row {line_no}")
+            target = ROOT / rel
+            if not target.is_file():
+                raise RuntimeError(f"Manifest text missing for NASA document {doc_id}: {target}")
+            data = target.read_bytes()
+            digest = sha256(data)
+            if digest != record.get("text_sha256") or len(data) != record.get("text_bytes"):
+                raise RuntimeError(f"Integrity mismatch in existing NASA document {doc_id}")
+            accepted[doc_id] = record
+            seen_ids.add(doc_id)
+            seen_hashes.add(digest)
     stats = {"queries": 0, "records_seen": 0, "metadata_eligible": 0,
-             "downloaded": 0, "duplicate_ids": 0, "duplicate_texts": 0,
+             "downloaded": 0, "existing_verified": len(accepted),
+             "duplicate_ids": 0, "duplicate_texts": 0,
              "pii_rejected": 0, "download_failures": 0}
 
     for domain, categories in CATEGORIES.items():
