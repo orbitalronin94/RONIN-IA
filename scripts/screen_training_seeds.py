@@ -51,8 +51,8 @@ def main() -> None:
     args = parser.parse_args()
 
     seeds = [int(part.strip()) for part in args.seeds.split(",") if part.strip()]
-    if not seeds or len(seeds) > 8 or len(set(seeds)) != len(seeds):
-        raise ValueError("Indica entre 1 y 8 semillas únicas")
+    if not seeds or len(seeds) > 100 or len(set(seeds)) != len(seeds):
+        raise ValueError("Indica entre 1 y 100 semillas únicas")
     if any(seed < 0 or seed > 2_147_483_647 for seed in seeds):
         raise ValueError("Cada semilla debe estar entre 0 y 2147483647")
     if args.eval_limit == 0 and len(seeds) != 1:
@@ -208,8 +208,10 @@ def main() -> None:
         reverse=True,
     )
     summary = {
-        "experiment": "ronin-native-no-tutor-seed-202-500-step-v1",
+        "experiment": "ronin-native-no-tutor-100-runs-100-step-v1",
         "training_steps": args.steps,
+        "run_count": len(seeds),
+        "optimizer_updates_total": len(seeds) * args.steps,
         "evaluation_tier": ("full_test_audit" if args.eval_split == "test" and args.eval_limit == 0 else "compact_seed_screen"),
         "evaluation_split": args.eval_split,
         "tutor_used": False,
