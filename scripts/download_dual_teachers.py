@@ -16,8 +16,8 @@ MODELS = {
         "license": "apache-2.0",
         "license_url": "https://huggingface.co/Qwen/Qwen3-8B",
         "files": {
-            "4bit": "qwen3-8b-q4_k_m.gguf",
-            "8bit": "qwen3-8b-q8_0.gguf",
+            "4bit": "Qwen3-8B-Q4_K_M.gguf",
+            "8bit": "Qwen3-8B-Q8_0.gguf",
         },
     },
     "qwen3.6-27b": {
