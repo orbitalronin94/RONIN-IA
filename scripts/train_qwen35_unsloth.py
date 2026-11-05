@@ -10,6 +10,10 @@ import re
 from pathlib import Path
 from typing import Any
 
+import torch
+
+import scripts.evaluate_mmlu_pro as mmlu_eval
+
 MODEL_ID = "Qwen/Qwen3.5-4B"
 DATASET_REVISION = "b189ec765aa7ed75c8acfea42df31fdae71f97be"
 ANSWER_RE = re.compile(r"(?i)(?:final\s+)?answer\s*[:：]?\s*([A-J])\b")
@@ -51,15 +55,13 @@ def make_text_chunks(path: Path, max_chars: int) -> list[str]:
 
 
 def load_validation_rows(limit: int, seed: int) -> tuple[list[dict[str, Any]], str]:
-    from scripts.evaluate_mmlu_pro import (
-        load_external_dataset,
-        rows_sha256,
-        select_stratified,
-        DATASET_REVISION as REVISION,
+    rows = mmlu_eval.load_external_dataset(
+        mmlu_eval.DATASET_REVISION, split="validation"
     )
-
-    rows = load_external_dataset(REVISION, split="validation")
-    return select_stratified(rows, limit, seed), rows_sha256(rows)
+    return (
+        mmlu_eval.select_stratified(rows, limit, seed),
+        mmlu_eval.rows_sha256(rows),
+    )
 
 
 def extract_answer(generated: str) -> str | None:
@@ -80,10 +82,6 @@ def evaluate_model(
     *,
     max_new_tokens: int = 64,
 ) -> dict[str, Any]:
-    import torch
-
-    from scripts.evaluate_mmlu_pro import format_prompt
-
     model.eval()
     details = []
     for index, row in enumerate(rows, start=1):
@@ -95,7 +93,7 @@ def evaluate_model(
                     "ANSWER: seguida de una letra entre A y J. No inventes opciones."
                 ),
             },
-            {"role": "user", "content": format_prompt(row)},
+            {"role": "user", "content": mmlu_eval.format_prompt(row)},
         ]
         prompt = tokenizer.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=True
@@ -157,20 +155,15 @@ def main() -> None:
     if not 1 <= args.eval_limit <= 500:
         parser.error("--eval-limit debe estar entre 1 y 500")
 
-    import torch
+    import datasets
+    import huggingface_hub
     import transformers
     import trl
     import unsloth
 
-    from datasets import Dataset
-    from huggingface_hub import model_info
-    from transformers import set_seed
-    from trl import SFTConfig, SFTTrainer
-    from unsloth import FastLanguageModel
-
     if not torch.cuda.is_available():
         raise RuntimeError("Este entrenamiento requiere una GPU CUDA; no se iniciará en CPU.")
-    set_seed(args.seed)
+    transformers.set_seed(args.seed)
     dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
     print(
         f"GPU: {torch.cuda.get_device_name(0)} | "
@@ -179,12 +172,12 @@ def main() -> None:
     )
 
     chunks = make_text_chunks(args.train_file, max_chars=args.max_seq_length * 3)
-    dataset = Dataset.from_dict({"text": chunks})
+    dataset = datasets.Dataset.from_dict({"text": chunks})
     eval_rows, eval_dataset_sha = load_validation_rows(args.eval_limit, args.seed)
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    model_revision = model_info(MODEL_ID).sha
-    model, tokenizer = FastLanguageModel.from_pretrained(
+    model_revision = huggingface_hub.model_info(MODEL_ID).sha
+    model, tokenizer = unsloth.FastLanguageModel.from_pretrained(
         model_name=MODEL_ID,
         revision=model_revision,
         max_seq_length=args.max_seq_length,
@@ -193,7 +186,7 @@ def main() -> None:
         load_in_16bit=True,
         full_finetuning=False,
     )
-    model = FastLanguageModel.get_peft_model(
+    model = unsloth.FastLanguageModel.get_peft_model(
         model,
         r=16,
         target_modules=[
@@ -214,7 +207,7 @@ def main() -> None:
         json.dumps(before, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
 
-    config = SFTConfig(
+    config = trl.SFTConfig(
         output_dir=str(args.output_dir / "trainer"),
         max_seq_length=args.max_seq_length,
         dataset_text_field="text",
@@ -236,7 +229,7 @@ def main() -> None:
         bf16=dtype == torch.bfloat16,
         report_to="none",
     )
-    trainer = SFTTrainer(
+    trainer = trl.SFTTrainer(
         model=model,
         train_dataset=dataset,
         tokenizer=tokenizer,
