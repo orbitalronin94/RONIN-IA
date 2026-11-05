@@ -1,0 +1,58 @@
+# Corpus paralelo de las Naciones Unidas v1.0 — preadmisión
+
+**Estado RONIN: fuente y alcance de derechos verificados; payload pendiente de ingestión. No es todavía Grado A ni entrenable.**
+
+## Fuente primaria y alcance
+
+- Proveedor: Departamento de la Asamblea General y de Gestión de Conferencias de Naciones Unidas (DGACM).
+- Versión: UN Parallel Corpus v1.0.
+- Periodo documental: 1990–2014.
+- Idiomas: árabe, chino, inglés, francés, ruso y español.
+- Contenido: registros oficiales y otros documentos parlamentarios de Naciones Unidas, redactados y traducidos manualmente, con alineación por frases.
+- Declaración del proveedor: los documentos del corpus son documentos oficiales y parlamentarios de Naciones Unidas que están en dominio público.
+- Descarga oficial: https://www.un.org/dgacm/en/content/uncorpus/download
+- Descripción oficial en español: https://www.un.org/dgacm/es/content/uncorpus/es
+- Artículo técnico y nota legal: https://www.un.org/dgacm/sites/www.un.org.dgacm/files/files/UNCORPUS/un.pdf
+
+La documentación del proveedor declara expresamente el dominio público del material y adjunta un descargo de responsabilidad que debe conservarse. Esta verificación se limita a la colección UN v1.0 y no se extiende a documentos de terceros que pudieran aparecer fuera de ella.
+
+## Descargas y exclusiones
+
+El proveedor publica:
+- archivos TEI/XML por idioma, año y símbolo documental;
+- bitextos en texto plano por pares de idiomas;
+- un subconjunto alineado en los seis idiomas;
+- conjuntos oficiales de desarrollo y prueba separados, basados en documentos de 2015.
+
+**RONIN excluye íntegramente los conjuntos oficiales de test/dev de 2015 del entrenamiento.** Se conservarán separados como material de evaluación únicamente si se decide utilizarlos y se registra esa decisión; nunca se mezclarán con train.
+
+Los archivos se distribuyen en fragmentos de hasta 1 GB. La ingestión debe descargar todos los fragmentos del paquete elegido, comprobar tamaño y SHA-256, reconstruir el archivo y validar el contenido antes de extraer textos.
+
+## Decisión de integración
+
+- Derechos de la colección: **verificados en la fuente oficial** para UN Parallel Corpus v1.0.
+- Descarga del payload: pendiente.
+- Hashes de archivo y de texto normalizado: pendientes.
+- Parser TEI/bitext y validación de alineaciones: pendientes.
+- Filtrado de PII, ruido y duplicados: pendiente.
+- Clasificación temática: pendiente; no asignar automáticamente todo el corpus a Derecho o Ciencias Sociales.
+- Revisión humana de muestras: pendiente.
+- Particiones internas deterministas: pendientes.
+
+**Destino provisional:** pool transversal de candidatos multilingües. Tras la clasificación documental, los textos pertinentes podrán repartirse entre las bibliotecas General/HKD por tema y densidad. Cada documento se asignará a una sola biblioteca y a una sola partición.
+
+## Atribución
+
+Citar: United Nations, Department for General Assembly and Conference Management, *United Nations Parallel Corpus v1.0*, documentos publicados entre 1990 y 2014. Conservar además el identificador documental, símbolo de publicación, idioma, año y ruta original del archivo.
+
+## Fuentes consultadas
+
+- https://www.un.org/dgacm/es/content/uncorpus/es
+- https://www.un.org/dgacm/en/content/uncorpus/download
+- https://www.un.org/dgacm/sites/www.un.org.dgacm/files/files/UNCORPUS/un.pdf
+
+## Registro de auditoría
+
+- Fecha de revisión: 2026-11-05.
+- Resultado: **apto para iniciar ingestión técnica**, no admitido todavía.
+- Motivo del bloqueo: falta inspección del payload descargado, hashes, calidad, privacidad, deduplicación y particionado.
