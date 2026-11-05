@@ -2,7 +2,7 @@
 
 ## Decisión de modelo
 
-El pipeline experimental principal usa un único modelo: unsloth/Qwen3.5-4B.
+El pipeline experimental principal usa un único modelo: Qwen/Qwen3.5-4B.
 
 - Método: SFT de continuación de texto con LoRA en BF16 (FP16 si la GPU no soporta BF16).
 - No se usa QLoRA de 4 bits: la guía actual de Unsloth desaconseja QLoRA para Qwen3.5 por las diferencias de cuantización.
@@ -10,7 +10,7 @@ El pipeline experimental principal usa un único modelo: unsloth/Qwen3.5-4B.
 - El adaptador se guarda por separado; no se suben pesos ni datos privados a GitHub.
 - No se descargan ni ejecutan modelos tutores. Solo hay un modelo en esta línea.
 
-## Corpus de arranque
+Modelo oficial: https://huggingface.co/Qwen/Qwen3.5-4B (Apache-2.0). El script fija el SHA de la revisión consultada y registra versiones de PyTorch, Transformers, TRL y Unsloth en el manifiesto de cada entrenamiento.\n\n## Corpus de arranque
 
 El único corpus documental admitido en el catálogo al 5-11-2026 es admitted/literature-es-v1, con 608 documentos y particiones separadas. El workflow .github/workflows/qwen35-prepare-corpus.yml recupera el artefacto ronin-admitted-literature-es-v1-train del run fijado 41926088900, comprueba UTF-8, tamaño y SHA-256, y publica ronin-qwen35-admitted-corpus-v1.
 
