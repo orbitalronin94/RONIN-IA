@@ -88,8 +88,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add weights/ronin-main.pt weights/main-model.json
-          git commit -m "model: versionar los pesos verificados de RONIN main"
-          git push origin main
+          if git diff --cached --quiet; then
+            echo "Los pesos y el manifiesto ya están actualizados en main."
+          else
+            git commit -m "model: versionar los pesos verificados de RONIN main"
+            git push origin main
+          fi
       - name: Publicar copia de recuperación del checkpoint
         uses: actions/upload-artifact@v6
         with:
