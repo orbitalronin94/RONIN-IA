@@ -300,6 +300,7 @@ def test_domain_workers_use_distinct_reproducible_shuffle_seeds():
     second = domain_shuffle_seed("physics")
     assert first == domain_shuffle_seed("mathematics")
     assert first != second
+    assert first != domain_shuffle_seed("mathematics", 42007)
     assert 0 <= first < 2**32
 
 
@@ -342,6 +343,9 @@ def test_common_corpus_expansion_workflow_publishes_32_library_index():
     workflow = yaml.load(workflow_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
     assert "prepare" in workflow["jobs"]
     assert "aggregate-and-index" in workflow["jobs"]
+    assert "pull_request" in workflow
+    assert workflow["on"]["schedule"][0]["cron"] == "47 1 * * *"
+    assert workflow["on"]["workflow_dispatch"]["inputs"]["max_input_gib"]["default"] == "2"
     domains = workflow["jobs"]["prepare"]["strategy"]["matrix"]["domain"]
     assert len(domains) == 16
     aggregate = workflow["jobs"]["aggregate-and-index"]
