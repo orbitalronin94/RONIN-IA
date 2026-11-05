@@ -61,8 +61,8 @@ class VisibleHTML(HTMLParser):
 def visible_text(raw: str) -> str:
     if "<html" not in raw[:2000].lower() and "<body" not in raw[:2000].lower():
         return raw
-    body=re.search(r"<body\\b[^>]*>(.*?)</body\\s*>",raw,flags=re.I|re.S)
-    source=body.group(1) if body else re.sub(r"<head\\b[^>]*>.*?</head\\s*>","",raw,flags=re.I|re.S)
+    body=re.search(r"<body\b[^>]*>(.*?)</body\s*>",raw,flags=re.I|re.S)
+    source=body.group(1) if body else re.sub(r"<head\b[^>]*>.*?</head\s*>","",raw,flags=re.I|re.S)
     parser=VisibleHTML()
     parser.feed(source)
     return re.sub(r"[ \\t]+", " ", "".join(parser.parts)).strip()
