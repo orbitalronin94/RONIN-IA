@@ -86,6 +86,14 @@ jobs:
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ env.NASA_RUN_ID }}
+      - name: Download prior 7/50 B/C tournament checkpoints
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-checkpoint-tournament-6of50-42081603425
+          path: incoming/previous-tournament
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 42081603425
       - name: Verify checkpoints and prepare train-only corpus
         run: |
           python - <<'PY'
@@ -99,8 +107,16 @@ jobs:
           winner=winner_candidates[0]; second=second_candidates[0]
           assert sha(winner)=="7cda8dacb0b61d7278ba9990285a6a7e47403de8a00d201da06f5f002224c1cf", sha(winner)
           assert sha(second)=="64c9ea763f716c12f78f7f71b8b4ee27558e852369ba28eb54846c474889b058", sha(second)
+          previous=Path("incoming/previous-tournament")
+          b=list(previous.rglob("step-00000100.pt"))
+          b=[p for p in b if "B-balanced-replay" in str(p)]
+          c=[p for p in previous.rglob("step-00000100.pt") if "C-balanced-anchor" in str(p)]
+          assert len(b)==1 and len(c)==1, (b,c)
+          assert sha(b[0])=="bcef0ec6db635f7f75d1fd84bf2e407aa50e86d34b1e7849516c158708256123", sha(b[0])
+          assert sha(c[0])=="e27f11c2eb93e2c8c3d95da6b4249a793fdc9d042981d1a5cdd98715c5addc92", sha(c[0])
           Path("checkpoints").mkdir(exist_ok=True)
           shutil.copy2(winner,"checkpoints/winner.pt"); shutil.copy2(second,"checkpoints/second.pt")
+          shutil.copy2(b[0],"checkpoints/B-7of50.pt"); shutil.copy2(c[0],"checkpoints/C-7of50.pt")
           lit=Path("incoming/literature/train.txt"); math=Path("incoming/mathlib4/train.txt"); nasa=Path("incoming/nasa/train.txt")
           assert all(p.is_file() for p in (lit,math,nasa))
           out=Path("/tmp/ronin-tournament-combined.txt")
@@ -116,10 +132,25 @@ jobs:
           python scripts/prepare_legacy_training_split.py --input incoming/literature/train.txt --output-dir /tmp/ronin-lit-split --validation-fraction 0.05 --seed 42006
           python scripts/prepare_legacy_training_split.py --input incoming/mathlib4/train.txt --output-dir /tmp/ronin-math-split --validation-fraction 0.05 --seed 42006
           python scripts/prepare_legacy_training_split.py --input incoming/nasa/train.txt --output-dir /tmp/ronin-nasa-split --validation-fraction 0.05 --seed 42006
-      - name: Run A/B/C training and D interpolation tournament
+      - name: Repeat the 100-step B/C cycle from both 7/50 checkpoints
         run: |
-          python scripts/run_checkpoint_tournament.py \
-            --base-checkpoint checkpoints/winner.pt \
+          for candidate in B C; do
+            python scripts/run_checkpoint_tournament.py \
+            --base-checkpoint "checkpoints/${candidate}-7of50.pt" \
+            --second-checkpoint checkpoints/second.pt \
+            --combined-text /tmp/ronin-tournament-split/train-internal.txt \
+            --literature-text /tmp/ronin-lit-split/train-internal.txt \
+            --mathlib-text /tmp/ronin-math-split/train-internal.txt \
+            --nasa-text /tmp/ronin-nasa-split/train-internal.txt \
+            --validation-text /tmp/ronin-tournament-split/validation-internal.txt \
+            --revision "$MMLU_REVISION" \
+            --context-length 4096 \
+            --batch-token-budget 8192 \
+            --num-threads 2 \
+            --training-steps 100 \
+            --output-dir "tournament-results/from-${candidate}-7of50"
+          done
+      # Previous 10,000-step invocation intentionally superseded.
             --second-checkpoint checkpoints/second.pt \
             --combined-text /tmp/ronin-tournament-split/train-internal.txt \
             --literature-text /tmp/ronin-lit-split/train-internal.txt \
