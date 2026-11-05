@@ -1,0 +1,71 @@
+name: RONIN — auditar NASA file-reviewed para train scoped
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/verify_nasa_scoped_train.py"
+      - "data/datasets/admitted/nasa-ntrs-public-use-v1/**"
+      - "data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json"
+      - ".github/workflows/verify-nasa-scoped-train.yml"
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+concurrency:
+  group: ronin-nasa-file-reviewed-train-audit
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            scripts/verify_nasa_scoped_train.py
+            data/datasets/admitted/nasa-ntrs-public-use-v1
+            data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json
+            data/datasets/admitted/ronin-authored-papers-v1/manifest.json
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@v7
+        with:
+          name: ronin-admitted-literature-es-v1-train
+          path: incoming/literature
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 41926088900
+      - uses: actions/download-artifact@v7
+        with:
+          name: ronin-admitted-mathlib4-v1
+          path: incoming/mathlib4
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 42026633643
+      - uses: actions/download-artifact@v7
+        with:
+          name: ronin-nasa-ntrs-file-reviewed-train
+          path: incoming/nasa-reviewed
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 42028138060
+      - name: Verify six manually reviewed NASA files and exact dedup
+        run: |
+          python scripts/verify_nasa_scoped_train.py \
+            --manifest data/datasets/admitted/nasa-ntrs-public-use-v1/manifest.json \
+            --review data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json \
+            --documents data/datasets/admitted/nasa-ntrs-public-use-v1/documents \
+            --literature incoming/literature/documents.train.jsonl \
+            --mathlib incoming/mathlib4/documents.train.jsonl.gz \
+            --nasa-reviewed-train incoming/nasa-reviewed/documents.train.jsonl \
+            --papers-manifest data/datasets/admitted/ronin-authored-papers-v1/manifest.json \
+            --output reports/nasa-reviewed
+      - name: Upload NASA train audit and materialized partition
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-nasa-reviewed-train-${{ github.run_id }}
+          path: reports/nasa-reviewed
+          if-no-files-found: warn
+          retention-days: 90
