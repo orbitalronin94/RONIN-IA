@@ -49,6 +49,7 @@ def main() -> None:
         "--text", str(corpus),
         "--profile", "tiny",
         "--steps", str(args.steps),
+        "--context-length", "2048",
         "--seed", str(args.seed + 1),
         "--device", device,
         "--checkpoints", str(args.checkpoints),
@@ -56,8 +57,24 @@ def main() -> None:
     ]
     print(f"Dispositivo de entrenamiento del estudiante: {device}")
     subprocess.run(training, check=True)
-    print(f"Entrenamiento completado. Checkpoints: {args.checkpoints}")
-    print("La promoción queda pendiente de evaluación holdout independiente.")
+    checkpoint = args.checkpoints / f"step-{args.steps:08d}.pt"
+    if not checkpoint.is_file():
+        raise RuntimeError(f"No se generó el checkpoint esperado: {checkpoint}")
+
+    evaluation = [
+        sys.executable, "scripts/evaluate_mmlu_pro.py",
+        "--checkpoint", str(checkpoint),
+        "--profile", "tiny",
+        "--context-length", "2048",
+        "--limit", "140",
+        "--split", "test",
+        "--device", device,
+        "--output", str(args.output_dir / "mmlu-pro-test-eval.json"),
+    ]
+    subprocess.run(evaluation, check=True)
+    print(f"Entrenamiento completado. Checkpoint: {checkpoint}")
+    print(f"Holdout MMLU-Pro test: {args.output_dir / 'mmlu-pro-test-eval.json'}")
+    print("La promoción sigue pendiente de comparación con el checkpoint de main.")
 
 
 if __name__ == "__main__":
