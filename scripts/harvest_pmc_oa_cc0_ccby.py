@@ -119,6 +119,33 @@ def eligible_license(value: str) -> bool:
     return normalized in ALLOWED_LICENSES
 
 
+def has_payment_card(raw: bytes) -> bool:
+    for match in CARD_RE.finditer(raw):
+        digits = re.sub(rb"\\D", b"", match.group(0))
+        if not 13 <= len(digits) <= 19:
+            continue
+        total = 0
+        parity = len(digits) % 2
+        for index, byte in enumerate(digits):
+            number = int(chr(byte))
+            if index % 2 == parity:
+                number *= 2
+                if number > 9:
+                    number -= 9
+            total += number
+        if total % 10 == 0:
+            return True
+    return False
+
+
+def license_url(value: str) -> str:
+    upper = value.upper()
+    if upper.startswith("CC0"):
+        return "https://creativecommons.org/publicdomain/zero/1.0/"
+    version = next((item for item in ("4.0", "3.0", "2.0", "1.0") if item in upper), "4.0")
+    return f"https://creativecommons.org/licenses/by/{version}/"
+
+
 def fetch_record(pmcid: str, min_text_bytes: int) -> dict | None:
     try:
         meta = metadata_for(pmcid)
