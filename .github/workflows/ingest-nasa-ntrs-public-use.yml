@@ -1,0 +1,55 @@
+name: Acquire NASA NTRS public-use full text candidates
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/ingest-nasa-ntrs-public-use.yml"
+      - "scripts/ingest_nasa_ntrs_public_use.py"
+  workflow_dispatch:
+  schedule:
+    - cron: "35 4 * * 1"
+permissions:
+  actions: read
+  contents: write
+concurrency:
+  group: ronin-nasa-ntrs-public-use
+  cancel-in-progress: false
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      MAX_PER_CATEGORY: "12"
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Acquire only explicit NASA public-use records and full text
+        run: python scripts/ingest_nasa_ntrs_public_use.py
+      - name: Commit candidate text files and provenance
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/datasets/candidates/nasa-ntrs-public-use
+          if git diff --cached --quiet; then
+            echo "No new NASA candidate documents."
+            exit 0
+          fi
+          git commit -m "data: add NASA NTRS public-use full-text candidates"
+          for attempt in $(seq 1 20); do
+            pending=$(gh run list --workflow run-ledger.yml --limit 30 --json status --jq '[.[] | select(.status == "queued" or .status == "in_progress" or .status == "pending")] | length')
+            if [ "$pending" = "0" ]; then
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then exit 0; fi
+            fi
+            sleep 5
+          done
+          echo "Unable to push NASA candidate payload after run-ledger writes" >&2
+          exit 1
