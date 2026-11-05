@@ -65,3 +65,18 @@ Un candidato no gana por mejorar BPB/PPL únicamente.
 El torneo inicial usó 300 pasos de entrenamiento (A/B/C: 100 cada uno); D no entrenó. El nuevo experimento B/C usa 20.000 pasos totales (10.000 por candidato). Las variantes no se ejecutan en paralelo si compiten por CPU; se ejecutan secuencialmente para mantener throughput y memoria predecibles.
 
 La implementación está disponible en `scripts/run_checkpoint_tournament.py`, `ronin/data/source_batches.py` y `ronin/training/loop.py`. El workflow manual está en `.github/workflows/checkpoint-tournament-6of50.yml`. Antes de lanzar el workflow, deben pasar los checks de la PR y verificarse los artefactos de origen. El workflow no promueve pesos automáticamente.
+
+
+## Continuación desde las dos candidatas 7/50
+
+El experimento de continuación toma como semillas independientes los checkpoints B y C del run
+[42081603425](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42081603425):
+
+- B — SHA-256 `bcef0ec6db635f7f75d1fd84bf2e407aa50e86d34b1e7849516c158708256123`.
+- C — SHA-256 `e27f11c2eb93e2c8c3d95da6b4249a793fdc9d042981d1a5cdd98715c5addc92`.
+
+Sobre cada semilla se repite el ciclo B/C original de 100 pasos: dos continuaciones por semilla,
+cuatro entrenamientos de 100 pasos en total. Cada resultado se compara con su propia semilla
+mediante los mismos 50 IDs de MMLU-Pro validation, revisión y hash de dataset, con cobertura
+completa y cero regresiones reportadas por separado. No se ejecuta el plan de 10.000 pasos,
+no hay promoción automática y no se modifica `main`.
