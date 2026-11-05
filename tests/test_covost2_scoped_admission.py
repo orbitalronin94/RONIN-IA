@@ -41,6 +41,7 @@ def test_covost2_manual_review_covers_all_three_pairs_and_phone_flags():
         )
     )
     assert report["review_status"] == "PASS_WITH_TRANSLATION_NOISE"
+    assert report["count_unit"] == "translation_segment"
     assert report["sample_design"]["total_records"] == 36
     assert len(report["sampled_records"]) == 36
     counts = {}
