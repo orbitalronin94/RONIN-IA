@@ -22,7 +22,7 @@ def test_builder_excludes_email_and_nc_article_and_keeps_document_splits(tmp_pat
         writer = csv.DictWriter(handle, fieldnames=["doi", "title", "text"])
         writer.writeheader()
         writer.writerows(rows)
-    report = build(source, tmp_path / "out", expected_papers=2)
+    report = build(source, tmp_path / "out", expected_papers=4)
     assert report["output_papers"] == 2
     assert report["excluded"]["email_or_contact"] == 1
     assert report["excluded"]["excluded_or_missing_doi"] == 1
