@@ -61,7 +61,7 @@ Para Q8_0, repite con `--quantization 8bit`. Los modelos quedan en `models/teach
 Primera ejecución recomendada:
 
 ```bash
-python scripts/train_from_local_dual_tutors.py --count 48 --quantization 4bit --steps 250 --device cuda
+python scripts/train_from_local_dual_tutors.py --count 48 --quantization 4bit --steps 250 --device auto
 ```
 
 Para comparar 8 bits sin sobrescribir resultados:
