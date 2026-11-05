@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 12:34 | [Integración continua #1431 (run 42028079100)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028079100) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(training\): correct no-tutor corpus separators and holdout comparison. Trigger: push; rama: main; intento: 1. | 06675ea5 |
 | 2026-11-05 12:33 | [Integración continua #1432 (run 42028124226)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028124226) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(training\): write real line separators in no-tutor artifacts. Trigger: push; rama: main; intento: 1. | 8b5ed4a6 |
 | 2026-11-05 12:33 | [Integración continua #1428 (run 42027851105)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42027851105) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: record Mathlib legacy train exact-dedup evidence. Trigger: push; rama: main; intento: 1. | 757fb703 |
 | 2026-11-05 12:32 | [Integración continua #1429 (run 42027945805)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42027945805) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): report the verified legacy sidecar count. Trigger: push; rama: main; intento: 1. | 005d1bb6 |
