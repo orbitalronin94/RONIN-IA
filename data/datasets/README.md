@@ -10,7 +10,7 @@ El catálogo ampliado de 32 dominios y 64 particiones es una hoja de ruta poster
 
 ## Estado real del corpus
 
-<badge color="success">1 corpus admitido</badge> <badge color="warning">32 bibliotecas en implementación parcial</badge>
+**Estado:** 1 corpus admitido; 32 bibliotecas en implementación parcial.
 
 - **Único corpus admitido:** \`admitted/literature-es-v1/\`, con 608 documentos de entrenamiento en español. Sus particiones de validación y prueba permanecen fuera del entrenamiento.
 - **CoVoST 2:** la exportación exacta contiene solo el campo \`translation\` de tres archivos fijados, bajo la declaración CC0 del conjunto. El control de calidad retuvo 337.973 traducciones únicas; la partición train contiene 270.244 filas, validation 34.051 y test 33.678. Tres filas con patrón telefónico quedaron señaladas para revisión manual. Es un candidato con registro de derechos de alcance exacto, no un corpus admitido.
