@@ -1,4 +1,4 @@
-from scripts.assemble_32_libraries import balance_general_hkd, choose_domain, literature_records, stable_partition
+from scripts.assemble_32_libraries import balance_general_hkd, choose_domain, stable_partition
 
 
 def test_general_hkd_are_disjoint_and_byte_balanced() -> None:
