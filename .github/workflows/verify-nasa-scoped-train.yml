@@ -4,7 +4,8 @@ on:
     branches: [main]
     paths:
       - "scripts/verify_nasa_scoped_train.py"
-      - "data/datasets/admitted/nasa-ntrs-public-use-v1/**"
+      - "data/datasets/candidates/nasa-ntrs-public-use/**
+      - "data/datasets/libraries/candidate-packs/nasa-ntrs-public-use/**""
       - "data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json"
       - ".github/workflows/verify-nasa-scoped-train.yml"
   workflow_dispatch:
@@ -23,7 +24,8 @@ jobs:
         with:
           sparse-checkout: |
             scripts/verify_nasa_scoped_train.py
-            data/datasets/admitted/nasa-ntrs-public-use-v1
+            data/datasets/candidates/nasa-ntrs-public-use
+            data/datasets/libraries/candidate-packs/nasa-ntrs-public-use
             data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json
             data/datasets/admitted/ronin-authored-papers-v1/manifest.json
       - uses: actions/setup-python@v6
@@ -53,9 +55,9 @@ jobs:
       - name: Verify six manually reviewed NASA files and exact dedup
         run: |
           python scripts/verify_nasa_scoped_train.py \
-            --manifest data/datasets/admitted/nasa-ntrs-public-use-v1/manifest.json \
+            --manifest data/datasets/libraries/candidate-packs/nasa-ntrs-public-use/manifest.json \
             --review data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json \
-            --documents data/datasets/admitted/nasa-ntrs-public-use-v1/documents \
+            --documents data/datasets/candidates/nasa-ntrs-public-use/documents \
             --literature incoming/literature/documents.train.jsonl \
             --mathlib incoming/mathlib4/documents.train.jsonl.gz \
             --nasa-reviewed-train incoming/nasa-reviewed/documents.train.jsonl \
