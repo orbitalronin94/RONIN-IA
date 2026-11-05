@@ -17,3 +17,5 @@ Estos bloques amplían las fuentes localizadas, no el contador de bibliotecas ad
 
 - **NASA NTRS:** candidato técnico-científico con más de 200.000 documentos completos en catálogo; solo pasan registros con copyright público explícito y sin partes de terceros no autorizadas. Expediente: `../candidates/nasa-ntrs-public-use/README.md`.
 - **NIST Technical Series/PDR:** candidato para informes y datos propios de NIST con política oficial de reutilización y atribución; se excluyen trabajos de terceros y se exige revisión por registro. Expediente: `../candidates/nist-technical-series/README.md`.
+
+- **BNE / Biblioteca Digital Hispánica:** metadatos de catálogo CC BY 4.0; OCR condicionado a derechos por obra y edición. **Project Gutenberg:** revisión territorial e individual, sin admisión global. Expedientes en `../candidates/bne-bdh-ocr/README.md` y `../candidates/project-gutenberg/README.md`.
