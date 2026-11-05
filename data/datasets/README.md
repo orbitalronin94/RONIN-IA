@@ -169,18 +169,23 @@ Los payloads grandes pueden publicarse como artefactos versionados de GitHub Act
 
 ## Decisión operativa
 
-El corpus legacy de 608 documentos continúa siendo la única fuente contabilizada en el inventario Level A de las 64 bibliotecas. NASA (807) y Papers (9) están admitidos en el alcance documental de sus propios manifiestos, pero no se suman todavía a ese inventario ni se consideran entrenables. ScienceVerse dispone de 9.153 textos auditados y 9.129 pases automáticos de calidad, pero cero admisiones.
+El corpus legacy de **608 documentos** continúa siendo la única fuente contabilizada en los mínimos Level A del inventario de 64 bibliotecas. Los corpus siguientes ya están admitidos en alcance documental propio, pero **no son entrenables ni se suman a esos mínimos** hasta cerrar G-0, deduplicación global y particionado:
 
-**No se debe iniciar un nuevo entrenamiento con los corpus nuevos hasta que se cierren los gates aplicables y G-0.** La prioridad es resolver la admisión legal/técnica por documento, deduplicación global y particionado, y después incorporar el contenido válido a General/HKD sin contaminar validation/test/holdout.
+- **NASA NTRS:** 813/824 admitidos; 32.313.859 bytes normalizados; 11 retenidos.
+- **ScienceVerse:** 7.365/7.403 admitidos en 13 colecciones; 446.092.799 bytes de texto; 38 retenidos.
+- **Papers propio:** 9/9 Markdown admitidos con autorización del propietario; README excluido; 750.857 bytes.
+
+Los 7.365 ScienceVerse tienen DOI único, SHA-256 de texto único dentro de las 13 exportaciones, licencia por documento CC-BY-4.0 o CC0, atribución presente, filtro básico de PII superado y calidad textual suficiente. Se retienen 15 por autoría ausente, tres por anomalías de metadatos/privacidad/ruta temática y 20 por calidad. La attestation del propietario cubre la revisión humana de las fuentes mapeadas; el manifiesto mantiene trazabilidad por documento.
+
+**No iniciar entrenamiento con estos corpus.** Siguen bloqueados por comparación exacta/aproximada contra todas las demás fuentes y holdouts, revalidación semanal de redistribución NASA, separación General/HKD y particiones deterministas train/validation/test. G-0 global continúa FAIL.
 
 ## Auditoría integral de candidatos (2026-11-05)
 
-Se ha ejecutado `scripts/audit_and_admit_scoped_candidates.py` sobre todos los textos materializados:
+El workflow \`Audit and admit scoped candidate documents\` ejecutó correctamente la auditoría y materialización:
 
-- **NASA NTRS:** 824/824 textos verificados contra el hash/tamaño fuente y allowlist de derechos por documento; 813 admitidos en un corpus de alcance acotado (**32.313.859 bytes de texto normalizado**) y 11 retenidos. De los retenidos, cuatro tienen retención explícita por revisión de contenido/derechos y siete no superan el filtro conservador de calidad. Los wrappers HTML/Tika se eliminan del texto derivado, conservando SHA-256 del original y del texto admitido.
-- **ScienceVerse:** 7.403 documentos de 13 colecciones inspeccionados; 7.337 superan el filtro de calidad y 66 quedan retenidos; 15 registros no contienen autoría. No se admite todavía ninguno: la atribución/confirmación de derechos de editor y material de terceros debe reconciliarse por documento y completar deduplicación global. El filtro de texto por sí solo no concede derechos.
-- **Papers propio:** 9 documentos, README excluido, incorporados con autorización del propietario y copia exacta de los blobs fuente.
+- NASA: [813 documentos admitidos en alcance acotado](admitted/nasa-ntrs-public-use-v1/manifest.json), 11 retenidos.
+- ScienceVerse: [7.365 documentos admitidos en alcance acotado](admitted/scienceverse-ccby-v1/manifest.json), 38 retenidos.
+- Papers: [9 documentos propios admitidos](admitted/ronin-authored-papers-v1/manifest.json), README excluido.
+- Informe global por fuente y documento: [candidate-document-audit-2026-11-05.json](reviews/candidate-document-audit-2026-11-05.json).
 
-**Ninguno de los nuevos corpus está habilitado para entrenamiento.** G-0 global sigue FAIL; falta deduplicación exacta/aproximada entre todas las fuentes y holdouts, revalidación semanal de redistribución NASA y particionado General/HKD/train/validation/test. El inventario Level A anterior no se incrementa con estos corpus hasta completar esa reconciliación.
-
-Resultados detallados: `reviews/candidate-document-audit-2026-11-05.json`, `admitted/nasa-ntrs-public-use-v1/manifest.json` y `admitted/ronin-authored-papers-v1/manifest.json`.
+Los payloads NASA y ScienceVerse preservan hashes del origen y del contenido admitido; los manifiestos marcan explícitamente \`training_eligible:false\`. La incorporación documental no implica promoción a entrenamiento ni altera los contadores Level A actuales.
