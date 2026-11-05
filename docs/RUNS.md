@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 11:33 | [Integración continua #1371 (run 42019678587)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42019678587) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: improve HTML body extraction and retain concise readable NASA reports. Trigger: push; rama: main; intento: 1. | e3834730 |
 | 2026-11-05 11:32 | [Integración continua #1373 (run 42019731971)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42019731971) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: support explicitly labelled assistant content-review passes. Trigger: push; rama: main; intento: 1. | 15e3c2fc |
 | 2026-11-05 11:32 | [Integración continua #1372 (run 42019706991)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42019706991) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): use correct HTML tag boundaries in NASA extraction. Trigger: push; rama: main; intento: 1. | 8d4780de |
 | 2026-11-05 11:29 | [Integración continua #1370 (run 42018982386)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42018982386) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): parse NASA HTML bodies without swallowing metadata boundaries. Trigger: push; rama: main; intento: 1. | dc51cff4 |
