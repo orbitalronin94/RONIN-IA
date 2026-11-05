@@ -90,7 +90,7 @@ jobs:
           assert actual == os.environ["EXPECTED_INITIAL_CHECKPOINT_SHA256"], f"Checkpoint SHA mismatch: {actual}"
           checkpoint = torch.load(initial, map_location="cpu", weights_only=False)
           assert isinstance(checkpoint, dict) and isinstance(checkpoint.get("model"), dict)
-          assert checkpoint.get("step") == 1000, checkpoint.get("step")
+          assert checkpoint.get("step") == 500, checkpoint.get("step")
           lit, lm = Path("incoming/literature/train.txt"), Path("incoming/literature/dataset-manifest.json")
           math, mm = Path("incoming/mathlib4/train.txt"), Path("incoming/mathlib4/manifest.json")
           nasa, nm = Path("incoming/nasa-file-reviewed/train.txt"), Path("incoming/nasa-file-reviewed/manifest.json")
@@ -148,6 +148,7 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+          Path("reports").mkdir(exist_ok=True)
           before_path,after_path=Path("reports/language-before.json"),Path("reports/language-after.json")
           if before_path.is_file() and after_path.is_file():
               before,after=json.loads(before_path.read_text()),json.loads(after_path.read_text())
