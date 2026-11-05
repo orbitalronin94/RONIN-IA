@@ -73,6 +73,9 @@ jobs:
             SEEN[$seed]=1
           done
           [ "$EVAL_LIMIT" -eq 50 ]
+          expected="$(seq -s, 1 100)"
+          [ "$TRAIN_SEEDS" = "$expected" ] || { echo "::error::The experiment must use exactly seeds 1–100."; exit 1; }
+          echo "Validated experiment: 100 independent candidates × 100 optimizer steps = 10,000 updates."
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
@@ -295,6 +298,27 @@ jobs:
             --device cpu \
             --num-threads 2 \
             --output-dir reports/seed-screen
+      - name: Validate complete 100-run result before publishing
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("reports/native-no-tutor-summary.json")
+          assert p.is_file(), "missing screening summary"
+          result=json.loads(p.read_text(encoding="utf-8"))
+          assert result["run_count"]==100, result.get("run_count")
+          assert result["training_steps"]==100, result.get("training_steps")
+          assert result["optimizer_updates_total"]==10000, result.get("optimizer_updates_total")
+          assert result["training_seeds"]==list(range(1,101))
+          assert len(result["candidates_ranked"])==100
+          assert result["selected_items"]==50
+          assert all(item["same_holdout_before_after"] for item in result["candidates_ranked"])
+          print("PASS: 100/100 candidates; 10,000 optimizer updates; fixed 50-question validation sample.")
+          print("Base accuracy:", result["base_mmlu_accuracy"])
+          print("Top candidates:")
+          for item in result["candidates_ranked"][:10]:
+              print(item["seed"], item["mmlu_before_correct"], "->", item["mmlu_after_correct"], item["mmlu_delta_percentage_points"], "pp", "bpb", item["language_after_bits_per_byte"])
+          PY
       - name: Upload paired benchmark, corpus manifest and candidate
         if: always()
         uses: actions/upload-artifact@v6
