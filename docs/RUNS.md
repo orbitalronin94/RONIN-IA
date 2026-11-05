@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:19 | [Integración continua #1176 (run 42001244874)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001244874) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(data\): add strict 64-library inventory validator. Trigger: push; rama: main; intento: 1. | 4f3a0047 |
 | 2026-11-05 09:18 | [Integración continua #1173 (run 42001033173)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001033173) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: add ScienceVerse RDS inspection workflow. Trigger: push; rama: main; intento: 1. | a30f2b76 |
 | 2026-11-05 09:18 | [Integración continua #1175 (run 42001183047)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001183047) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: add honest 64-library Level-A inventory. Trigger: push; rama: main; intento: 1. | 72b9378d |
 | 2026-11-05 09:17 | [Integración continua #1174 (run 42001139152)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001139152) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): record acquired ScienceVerse full-text payloads. Trigger: push; rama: main; intento: 1. | 65116d24 |
