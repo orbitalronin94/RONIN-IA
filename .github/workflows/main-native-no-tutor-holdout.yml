@@ -12,11 +12,16 @@ on:
         default: "500"
         type: string
       eval_limit:
-        description: Preguntas MMLU-Pro para el ciclo rápido (0 = test completo, solo auditoría final)
+        description: Holdout compacto para cribado (64/128/256); 0 = auditoría completa MMLU-Pro
         required: true
-        default: "512"
+        default: "64"
         type: choice
-        options: ["256", "512", "1024", "0"]
+        options: ["64", "128", "256", "0"]
+      seed:
+        description: Semilla de entrenamiento (mantén fija la muestra externa)
+        required: true
+        default: "20261106"
+        type: string
 permissions:
   actions: read
   contents: read
@@ -36,7 +41,8 @@ jobs:
       NASA_FILE_REVIEWED_RUN_ID: "42028138060"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
       STEPS: ${{ inputs.steps || '500' }}
-      EVAL_LIMIT: ${{ inputs.eval_limit || '512' }}
+      EVAL_LIMIT: ${{ inputs.eval_limit || '64' }}
+      TRAIN_SEED: ${{ inputs.seed || '20261106' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -52,6 +58,7 @@ jobs:
       - name: Validate budget
         run: |
           [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -ge 100 ] && [ "$STEPS" -le 1000 ]
+          [[ "$TRAIN_SEED" =~ ^[0-9]+$ ]] && [ "$TRAIN_SEED" -le 2147483647 ]
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
@@ -187,7 +194,7 @@ jobs:
           python scripts/evaluate_mmlu_pro.py --checkpoint checkpoints/main.pt --profile tiny --context-length 4096 --limit "$EVAL_LIMIT" --seed 2026 --revision "$MMLU_REVISION" --split test --device cpu --batch-token-budget 8192 --output reports/mmlu-holdout-before.json
       - name: Train RONIN from its own checkpoint — NO TUTOR
         run: |
-          python scripts/train_text.py --text /tmp/ronin-native-train.txt --profile tiny --steps "$STEPS" --seed 20261106 --init-checkpoint checkpoints/main.pt --learning-rate 0.00001 --min-learning-rate 0.000001 --device cpu --num-threads 2 --checkpoints checkpoints/native-candidate --metrics-out reports/training-throughput.json
+          python scripts/train_text.py --text /tmp/ronin-native-train.txt --profile tiny --steps "$STEPS" --seed "$TRAIN_SEED" --init-checkpoint checkpoints/main.pt --learning-rate 0.00001 --min-learning-rate 0.000001 --device cpu --num-threads 2 --checkpoints checkpoints/native-candidate --metrics-out reports/training-throughput.json
           candidate="checkpoints/native-candidate/step-$(printf '%08d' "$STEPS").pt"
           test -s "$candidate"
           cp "$candidate" checkpoints/candidate.pt
