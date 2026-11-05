@@ -100,7 +100,7 @@ El manifiesto `libraries/manifest-64.json` cuenta únicamente el corpus legacy L
 
 - Seis documentos revisados individualmente, 701.871 bytes.
 - Registro separado y acotado; `training_eligible=false` y no cuenta hacia el mínimo Level A.
-- No sumarlo a los 807 NASA sin comprobar solapamiento documental.
+- No sumarlo a los 813 NASA sin comprobar solapamiento documental.
 
 ## Candidatos y líneas de adquisición
 
@@ -111,8 +111,8 @@ Los números siguientes son **inventarios de candidatos**, no admisiones. Hay sn
 | Línea | Adquisición comprobada | Estado y límites |
 |---|---:|---|
 | ScienceVerse / papers (RDS) | 3.087 DOI elegibles en cinco assets RDS; 95.948.088 bytes comprimidos | Exportación textual, derechos por artículo/versión, terceros, privacidad y calidad pendientes. No son bytes de texto admitido. |
-| ScienceVerse (exportaciones de texto) | 9.153 documentos en 13 colecciones; 9.129 pases automáticos y 24 holds | Auditoría separada del lote RDS; posible solapamiento. 0 admitidos por derechos editoriales/terceros y revisión final pendientes. No sumar 3.087 + 9.153. |
-| NASA NTRS | 824 textos completos; 39.262.382 bytes | 807 admitidos scoped en su manifiesto, 17 retenidos; además, seis revisados en un manifiesto separado. Los paquetes por biblioteca son candidatos y no deben sumarse de nuevo. |
+| ScienceVerse (exportaciones de texto) | 7.403 documentos en 13 colecciones; 7.365 admitidos scoped y 38 retenidos | Manifiesto por DOI/licencia/atribución; sigue sin ser entrenable hasta particiones y gates globales. Auditoría separada del lote RDS; no sumar 3.087 + 7.403. |
+| NASA NTRS | 824 textos completos; 39.262.382 bytes | 813 admitidos scoped en su manifiesto, 11 retenidos; además, seis revisados en un manifiesto separado. Los paquetes por biblioteca son candidatos y no deben sumarse de nuevo. |
 | NASA NTRS — snapshot de expansión | 189 textos completos; 15.417.212 bytes | Lote candidato adicional registrado en el README de adquisición; reconciliar IDs/hashes contra los 824 antes de contarlo como incremento neto. |
 | CoVoST 2 | Run posterior: 432.475 filas de traducción, 86.874.752 bytes | Solo campo `translation`; excluir audio, rutas, IDs de cliente y fuentes de oración. Un snapshot anterior registró 337.973 traducciones únicas repartidas en train/validation/test; reconciliar ambos snapshots antes de declarar un total único. |
 | PleIAs Common Corpus | 2.159 filas, 5.971.320 bytes | 2.149 CC0, 4 CC BY 3.0 y 6 CC BY 4.0; 17.472 filas con licencias no permitidas, 311 con patrones básicos de email/teléfono y 8 inválidas/sobredimensionadas excluidas. Revisión humana, privacidad, calidad y splits pendientes. |
