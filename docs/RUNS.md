@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:47 | [Integración continua #1245 (run 42005037217)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42005037217) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): report duplicate DOI and duplicate text separately. Trigger: push; rama: main; intento: 1. | e5185b7d |
 | 2026-11-05 09:47 | [Integración continua #1246 (run 42005157127)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42005157127) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: include Crossref-verified ScienceVerse RDS in text export. Trigger: push; rama: main; intento: 1. | 04ad31aa |
 | 2026-11-05 09:46 | [Integración continua #1242 (run 42004864603)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42004864603) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: export ScienceVerse full text into auditable JSONL candidates. Trigger: push; rama: main; intento: 1. | b433175f |
 | 2026-11-05 09:45 | [Integración continua #1244 (run 42005008309)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42005008309) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): prevent duplicate DOI objects in ScienceVerse text export. Trigger: push; rama: main; intento: 1. | c408c123 |
