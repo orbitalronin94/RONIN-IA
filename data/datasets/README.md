@@ -136,8 +136,8 @@ Los números siguientes son **inventarios de candidatos**, no admisiones. Hay sn
 
 No se considerará progreso el crecimiento de `candidates/`, el número de filas con licencia aparente ni los pases de filtros automáticos. El contador que importa es el de documentos con `training_eligible=true` en una partición `train` reproducible y con hashes comprobados.
 
-- **Único corpus con partición train actualmente habilitada:** `literature-es-v1`, 608 documentos / 140.295.523 bytes. Sus 18 validation y 18 test permanecen excluidos.
-- **NASA NTRS (809 scoped) y Papers propios (9):** no se contabilizan como entrenables mientras sus manifiestos mantengan `training_eligible=false`.
+- **Corpus con partición train actualmente habilitada:** `literature-es-v1` (608 documentos / 140.295.523 bytes) y `mathlib4-v1` (8.498 documentos / 97.629.252 bytes): 9.106 documentos y 237.924.775 bytes de texto train. Sus particiones validation/test permanecen excluidas.
+- **NASA NTRS (813 scoped), ScienceVerse (7.365), Papers propios (9) y NASA file-reviewed (6):** admitidos dentro de sus respectivos alcances, pero no entrenables mientras sus manifiestos mantengan `training_eligible=false` o gates pendientes.
 - **Siguiente fuente prioritaria:** conjunto oficial BNE *Biblioteca Digital. Documentos en dominio público*, que ofrece distribución TXT/XML de obras declaradas en dominio público y reutilización CC BY 4.0. Se debe adquirir el snapshot, fijar hashes, comprobar cada obra/edición y OCR, retirar aparato editorial/terceros dudosos, deduplicar globalmente y generar splits antes de promover. No se contará ni entrenará hasta superar esos controles.
 - La política de adquisición queda así: primero fuentes con texto completo y permiso explícito sobre la obra, luego calidad verificable, y solo entonces admisión y entrenamiento. Los candidatos que no puedan cerrar los gates no desplazan este objetivo.
 
@@ -179,7 +179,7 @@ Los payloads grandes pueden publicarse como artefactos versionados de GitHub Act
 
 ## Decisión operativa
 
-El corpus legacy de **608 documentos** continúa siendo la única fuente contabilizada en los mínimos Level A del inventario de 64 bibliotecas. Los corpus siguientes ya están admitidos en alcance documental propio, pero **no son entrenables ni se suman a esos mínimos** hasta cerrar G-0, deduplicación global y particionado:
+El corpus legacy de **608 documentos** continúa siendo la única fuente contabilizada en los mínimos Level A del inventario de 64 bibliotecas; Mathlib4 tiene una partición train scoped separada, pero no se ha incorporado al inventario Level A de 64 bibliotecas. Los corpus siguientes están admitidos en alcance documental propio, pero **no se suman a esos mínimos**:
 
 - **NASA NTRS:** 813/824 admitidos; 32.313.859 bytes normalizados; 11 retenidos.
 - **ScienceVerse:** 7.365/7.403 admitidos en 13 colecciones; 446.092.799 bytes de texto; 38 retenidos.
