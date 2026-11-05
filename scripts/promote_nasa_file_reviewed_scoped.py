@@ -86,6 +86,7 @@ def main():
         if train[cursor:cursor+2]=="\n\n": cursor += 2
     if cursor not in {len(train),len(train)-1}: raise RuntimeError("Legacy train payload has unindexed trailing content")
     selected=[]
+    held_review_payload_mismatch=[]
     for row in records:
         doc_id=str(row["document_id"]); review_row=review_by.get(doc_id,{}); source_row=source_by.get(doc_id,{})
         if review_row.get("disposition")!="file_review_pass_candidate_only": raise RuntimeError(f"{doc_id}: not individually file-reviewed PASS")
@@ -93,7 +94,9 @@ def main():
         if source_row.get("rights_allowlist_pass") is not True: raise RuntimeError(f"{doc_id}: source rights allowlist failed")
         payload=(args.root/"documents"/f"{doc_id}.txt").read_bytes()
         if sha(payload)!=row.get("sha256") or len(payload)!=row.get("bytes"): raise RuntimeError(f"{doc_id}: payload integrity mismatch")
-        if sha(payload)!=review_row.get("text_sha256") or len(payload)!=review_row.get("text_bytes"): raise RuntimeError(f"{doc_id}: review payload mismatch")
+        if sha(payload)!=review_row.get("text_sha256") or len(payload)!=review_row.get("text_bytes"):
+            held_review_payload_mismatch.append({"document_id":doc_id,"reason":"Review attestation hash/byte count does not match the exact payload; excluded from training promotion."})
+            continue
         if EMAIL.search(payload) or SSN.search(payload): raise RuntimeError(f"{doc_id}: sensitive pattern detected")
         digest=sha(payload)
         if digest in legacy_hashes: raise RuntimeError(f"{doc_id}: exact duplicate of legacy train")
@@ -102,6 +105,8 @@ def main():
         near=[other for other,_ in legacy_sigs if (signature^other).bit_count()<=3]
         if near: raise RuntimeError(f"{doc_id}: near-duplicate signature collision with legacy train")
         selected.append((doc_id,payload,row,review_row))
+    if len(selected) < 3:
+        raise RuntimeError(f"Too few payloads exactly matching their individual review attestations: {len(selected)}")
     ids={x[0] for x in selected}
     recheck=api_recheck(ids)
     # Stable train-only partition: all six are individually reviewed and remain outside validation/test.
@@ -119,11 +124,14 @@ def main():
       "status":"admitted_scoped_training_partition",
       "training_eligible":True,
       "counted_toward_level_a_minimum":False,
+      "source_reviewed_documents":len(records),
       "documents":len(selected),
+      "held_documents":len(held_review_payload_mismatch),
+      "held_review_payload_mismatch":held_review_payload_mismatch,
       "utf8_bytes":sum(len(x[1]) for x in selected),
       "partitions":{"train":{"documents":len(selected),"bytes":len(train_payload),"sha256":sha(train_payload),"training_eligible":True},"validation":{"documents":0,"training_eligible":False},"test":{"documents":0,"training_eligible":False}},
       "global_gates":{"cross_source_exact_and_near_duplicate":"PASS_AGAINST_CURRENT_LEGACY_TRAIN_608","nasa_redistribution_recheck":"PASS","partition_isolation":"PASS_TRAIN_ONLY","global_g0":"FAIL"},
-      "promotion_checks":{"legacy_train_documents_compared":len(chunks),"exact_duplicates":0,"near_duplicate_hamming_le_3":0,"sensitive_patterns":0,"individually_reviewed_documents":len(selected),"nasa_live_recheck":recheck},
+      "promotion_checks":{"legacy_train_documents_compared":len(chunks),"exact_duplicates":0,"near_duplicate_hamming_le_3":0,"sensitive_patterns":0,"individually_reviewed_documents":len(selected),"review_payload_mismatches_held":len(held_review_payload_mismatch),"nasa_live_recheck":recheck},
       "scope_note":"Source-scoped train partition. This does not claim global G-0, does not enter the 64-library Level A inventory, and does not supersede NASA citation URLs."
     })
     (args.root/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
