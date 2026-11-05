@@ -207,6 +207,14 @@ def main() -> None:
     if len(seen_dois) != len(records) or len(seen_hashes) != len(records):
         raise SystemExit("ScienceVerse DOI/text hashes are not globally unique within the admitted export")
 
+    for corpus in corpus_counts:
+        corpus_counts[corpus]["training_documents"] = sum(
+            row["source_corpus"] == corpus for row in records
+        )
+        corpus_counts[corpus]["held_documents"] = sum(
+            item.startswith(f"{corpus}:") for item in held
+        )
+
     args.output_dir.mkdir(parents=True, exist_ok=True)
     train_path = args.output_dir / "train.txt"
     train_path.write_text("\n\n".join(corpus_texts) + "\n", encoding="utf-8")
