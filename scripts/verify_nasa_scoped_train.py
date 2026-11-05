@@ -66,6 +66,8 @@ def main() -> None:
     rows = []
     texts = []
     seen = set()
+    duplicate_existing = []
+    duplicate_within_review = []
     for doc_id, verdict in sorted(approved.items()):
         decision = decisions.get(doc_id)
         if not decision or decision.get("decision") != "admitted_scoped_training_blocked":
@@ -79,8 +81,12 @@ def main() -> None:
             raise SystemExit(f"{doc_id}: text SHA mismatch across review/manifest/payload")
         if len(raw) != verdict.get("text_bytes") or len(raw) != decision.get("admitted_text_bytes"):
             raise SystemExit(f"{doc_id}: text byte mismatch")
-        if actual in existing or actual in seen:
-            raise SystemExit(f"{doc_id}: exact duplicate against existing train or approved NASA files")
+        if actual in existing:
+            duplicate_existing.append(doc_id)
+            continue
+        if actual in seen:
+            duplicate_within_review.append(doc_id)
+            continue
         text = raw.decode("utf-8")
         if len(text.split()) < 150 or len(text) < 1000:
             raise SystemExit(f"{doc_id}: insufficient substantive text")
@@ -124,10 +130,14 @@ def main() -> None:
             "nasa_file_reviewed_train": sum(x.get("partition") == "train" for x in nasa_existing),
             "ronin_papers": len(papers.get("records", [])),
         },
+        "individually_reviewed_files": len(approved),
+        "new_train_documents": len(rows),
+        "already_train_exact_duplicates_skipped": duplicate_existing,
+        "within_review_exact_duplicates_skipped": duplicate_within_review,
         "individual_rights_and_content_review": "PASS_6_OF_6",
         "payload_hash_and_bytes": "PASS_6_OF_6",
-        "exact_cross_source_dedup": "PASS",
-        "privacy_pattern_scan": "PASS_6_OF_6",
+        "exact_cross_source_dedup": "PASS_NEW_RECORDS_ONLY",
+        "privacy_pattern_scan": "PASS_FOR_ALL_NEW_RECORDS",
         "near_duplicate_global": "PENDING",
         "benchmark_holdout_contamination": "PENDING",
         "weekly_nasa_redistribution_recheck": "REQUIRED_AT_TRAINING_SNAPSHOT",
