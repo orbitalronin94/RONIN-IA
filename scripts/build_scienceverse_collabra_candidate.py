@@ -120,8 +120,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=Path("artifacts/scienceverse-collabra/extracted.csv"))
     parser.add_argument("--out", type=Path, default=Path("artifacts/scienceverse-collabra/candidate"))
+    parser.add_argument("--expected-papers", type=int, default=747)
     args = parser.parse_args()
-    report = build(args.input, args.out)
+    report = build(args.input, args.out, expected_papers=args.expected_papers)
     print(json.dumps({"status": report["status"], "output_papers": report["output_papers"], "partitions": report["partitions"]}, indent=2))
     return 0
 
