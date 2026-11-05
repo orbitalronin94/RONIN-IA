@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:04 | [Integración continua #1116 (run 41999322226)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999322226) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add local dual tutor MMLU-Pro distillation. Trigger: push; rama: main; intento: 1. | 7b646e0d |
 | 2026-11-05 09:03 | [Integración continua #1114 (run 41999265378)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999265378) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add pinned local dual tutor downloader. Trigger: push; rama: main; intento: 1. | 6d6696b4 |
 | 2026-11-05 08:55 | [Integración continua #1112 (run 41997881747)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997881747) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): document UN en-es payload ingestion. Trigger: push; rama: main; intento: 1. | d56f77bc |
 | 2026-11-05 08:54 | [Integración continua #1100 (run 41997417723)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997417723) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): track NASA and NIST candidates in chemistry_materials_hkd. Trigger: push; rama: main; intento: 1. | 7ca94725 |
