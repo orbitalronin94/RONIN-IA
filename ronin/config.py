@@ -21,6 +21,7 @@ class ModelConfig:
     d_ff: int | None = None
     rope_theta: float = 10_000.0
     rms_norm_eps: float = 1e-6
+    tie_embeddings: bool = True
 
     def __post_init__(self) -> None:
         if self.n_kv_heads is None:
