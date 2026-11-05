@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+"""Ejecuta una iteración completa: dos tutores locales, filtro gold y entrenamiento RONIN."""
+
+from __future__ import annotations
+
+import argparse
+import subprocess
+import sys
+from pathlib import Path
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--count", type=int, default=48)
+    parser.add_argument("--quantization", choices=["4bit", "8bit"], default="4bit")
+    parser.add_argument("--steps", type=int, default=250)
+    parser.add_argument("--seed", type=int, default=20261105)
+    parser.add_argument("--device", choices=["cpu", "cuda"], default="cuda")
+    parser.add_argument("--output-dir", type=Path, default=Path("artifacts/dual-distillation"))
+    parser.add_argument("--checkpoints", type=Path, default=Path("checkpoints/dual-teacher-candidate"))
+    args = parser.parse_args()
+    if not 1 <= args.steps <= 1000:
+        parser.error("--steps debe estar entre 1 y 1000")
+    if args.device == "cuda":
+        try:
+            import torch
+            if not torch.cuda.is_available():
+                parser.error("--device cuda solicitado pero CUDA no está disponible")
+        except ImportError:
+            parser.error("PyTorch no está instalado")
+
+    generation = [
+        sys.executable, "scripts/distill_mmlu_pro_dual_tutor.py",
+        "--count", str(args.count),
+        "--quantization", args.quantization,
+        "--seed", str(args.seed),
+        "--output-dir", str(args.output_dir),
+    ]
+    subprocess.run(generation, check=True)
+
+    corpus = args.output_dir / "train.txt"
+    if not corpus.is_file() or corpus.stat().st_size == 0:
+        raise RuntimeError("El filtro dual no produjo un corpus; entrenamiento cancelado")
+
+    training = [
+        sys.executable, "scripts/train_text.py",
+        "--text", str(corpus),
+        "--profile", "tiny",
+        "--steps", str(args.steps),
+        "--seed", str(args.seed + 1),
+        "--device", args.device,
+        "--checkpoints", str(args.checkpoints),
+        "--metrics-out", str(args.output_dir / "training-metrics.json"),
+    ]
+    subprocess.run(training, check=True)
+    print(f"Entrenamiento completado. Checkpoints: {args.checkpoints}")
+    print("La promoción queda pendiente de evaluación holdout independiente.")
+
+
+if __name__ == "__main__":
+    main()
