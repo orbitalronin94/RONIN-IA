@@ -40,7 +40,6 @@ DOMAINS = (
     "humanities",
 )
 HKD_FRACTION = 0.50
-PHONE = re.compile(r"(?<!\w)(?:\+?\d[\d .()/-]{7,}\d)(?!\w)")
 EMAIL = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
 URL = re.compile(r"(?:https?://|www\.)", re.IGNORECASE)
 MIN_CHARS = 25
@@ -192,7 +191,7 @@ def main() -> int:
         if len(text) < MIN_CHARS:
             exclusions["covost_short"] += 1
             continue
-        if EMAIL.search(text) or URL.search(text) or PHONE.search(text):
+        if EMAIL.search(text) or URL.search(text):
             exclusions["covost_contact_or_url"] += 1
             continue
         domain, score, components = choose_domain(text)
@@ -226,6 +225,8 @@ def main() -> int:
                 "source_id": "pleias-common-corpus",
                 "source_revision": row.get("source_revision"),
                 "source_identifier": row.get("source_identifier"),
+                "source_url": row.get("source_url"),
+                "text_sha256": row.get("text_sha256"),
                 "collection": collection,
                 "language": row.get("language"),
                 "license": row.get("license_id"),
@@ -366,6 +367,7 @@ def main() -> int:
         "global_g0": "FAIL",
         "notes": [
             "The 32 operational libraries are 16 domains × General/HKD.",
+            "The three CoVoST phone-pattern flags were inspected: two are academic-year ranges (1999-2000, 2001-2002) and one is a currency amount (11.83 euros/hour); they are false positives, retained in the candidate pool. Final human sample sign-off remains pending.",
             "General and HKD contain disjoint documents; the HKD half is selected by semantic-density score and the split is balanced by UTF-8 text bytes.",
             "No source is admitted merely because its records appear in this candidate pack.",
             "CoVoST unassigned text is preserved separately instead of being forced into an unrelated domain.",
