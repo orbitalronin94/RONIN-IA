@@ -95,21 +95,44 @@ def esearch_ids(term: str, limit: int) -> list[str]:
     return found
 
 
+def s3_public_https(url: str) -> str:
+    """Convert the bucket's documented s3:// URLs to public HTTPS object URLs."""
+    if url.startswith("https://"):
+        return url
+    prefix = "s3://pmc-oa-opendata/"
+    if not url.startswith(prefix):
+        raise ValueError(f"Unexpected PMC object URL: {url!r}")
+    return BASE + "/" + url[len(prefix):]
+
+
 def metadata_for(pmcid: str) -> list[dict]:
-    """Return every currently listed version; version 1 is not guaranteed to exist."""
-    query = urllib.parse.urlencode({"list-type": "2", "prefix": f"metadata/PMC{pmcid}."})
-    root = ET.fromstring(request_bytes(BASE + "/?" + query))
-    keys = [node.text for node in root.findall(".//{*}Key") if node.text and node.text.endswith(".json")]
+    """Return every current PMC article-version metadata object from the bucket."""
     records: list[dict] = []
-    for key in keys:
-        try:
-            value = json.loads(request_bytes(BASE + "/" + urllib.parse.quote(key, safe="/")))
-            if isinstance(value, dict):
-                records.append(value)
-        except urllib.error.HTTPError as exc:
-            if exc.code != 404:
-                raise
+    token = None
+    while True:
+        params = {"list-type": "2", "prefix": f"PMC{pmcid}."}
+        if token:
+            params["continuation-token"] = token
+        root = ET.fromstring(request_bytes(BASE + "/?" + urllib.parse.urlencode(params)))
+        keys = [
+            node.text for node in root.findall(".//{*}Key")
+            if node.text and node.text.endswith(".json")
+            and node.text.rsplit("/", 1)[-1].startswith(f"PMC{pmcid}.")
+        ]
+        for key in keys:
+            try:
+                value = json.loads(request_bytes(BASE + "/" + urllib.parse.quote(key, safe="/")))
+                if isinstance(value, dict):
+                    records.append(value)
+            except urllib.error.HTTPError as exc:
+                if exc.code != 404:
+                    raise
+        truncated = (root.findtext(".//{*}IsTruncated") or "false").lower() == "true"
+        token = root.findtext(".//{*}NextContinuationToken")
+        if not truncated or not token:
+            break
     return records
+
 
 def eligible_license(value: str) -> bool:
     normalized = " ".join((value or "").upper().replace("-", " ").split())
@@ -159,7 +182,10 @@ def fetch_record(pmcid: str, min_text_bytes: int) -> dict | None:
         meta = eligible[0]
         license_code = str(meta.get("license_code") or "").strip()
         text_url = meta.get("text_url")
-        if not isinstance(text_url, str) or not text_url.startswith(BASE + "/"):
+        if not isinstance(text_url, str):
+            return None
+        text_url = s3_public_https(text_url)
+        if not text_url.startswith(BASE + "/"):
             return None
         raw = request_bytes(text_url)
         if len(raw) < min_text_bytes or EMAIL_RE.search(raw) or SSN_RE.search(raw) or has_payment_card(raw):
