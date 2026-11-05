@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 08:50 | [Integración continua #1106 (run 41997503768)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997503768) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): record BNE and Gutenberg rights decisions. Trigger: push; rama: main; intento: 1. | f8886cf4 |
 | 2026-11-05 08:49 | [Integración continua #1101 (run 41997437374)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997437374) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): track NASA and NIST candidates in engineering_robotics_general. Trigger: push; rama: main; intento: 1. | 4b44c2ec |
 | 2026-11-05 08:49 | [Integración continua #1098 (run 41997405171)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997405171) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): track NASA and NIST candidates in physics_hkd. Trigger: push; rama: main; intento: 1. | 7c1fb9e1 |
 | 2026-11-05 08:48 | [Integración continua #1092 (run 41997358265)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997358265) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: define document-level NASA NTRS ingestion filter. Trigger: push; rama: main; intento: 1. | a1db6045 |
