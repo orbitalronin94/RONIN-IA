@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 11:48 | [Integración continua #1396 (run 42021481088)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42021481088) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): record exact compressed ScienceVerse payload hashes. Trigger: push; rama: main; intento: 1. | 85791bc0 |
 | 2026-11-05 11:46 | [Integración continua #1385 (run 42021021787)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42021021787) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: add reproducible BNE public-domain text acquisition audit. Trigger: push; rama: main; intento: 1. | 535c7866 |
 | 2026-11-05 11:45 | [Integración continua #1395 (run 42021451743)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42021451743) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(data\): publish scoped ScienceVerse admissions from audit. Trigger: push; rama: main; intento: 1. | 66be6b42 |
 | 2026-11-05 11:44 | [Integración continua #1394 (run 42021421271)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42021421271) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: admit ScienceVerse documents with verified per-DOI rights and quality. Trigger: push; rama: main; intento: 1. | 79c274ea |
