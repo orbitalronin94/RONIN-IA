@@ -179,7 +179,7 @@ def main() -> None:
     save(output_dir / "main-1024.json", baseline)
 
     stage_one: dict[int, Path] = {}
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    with ThreadPoolExecutor(max_workers=2) as executor:
         futures = {
             executor.submit(
                 train_seed,
@@ -240,7 +240,7 @@ def main() -> None:
     finalists = ranked[:4]
 
     stage_two: dict[int, Path] = {}
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    with ThreadPoolExecutor(max_workers=2) as executor:
         futures = {
             executor.submit(
                 train_seed,
@@ -315,7 +315,7 @@ def main() -> None:
         "dataset_revision": args.revision,
         "dataset_sha256": dataset_hash,
         "seed_count": len(seeds),
-        "workers": 4,
+        "workers": 2,
         "threads_per_worker": 1,
         "phase1_steps": 100,
         "final_steps": 500,
