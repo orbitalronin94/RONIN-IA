@@ -15,11 +15,11 @@ from collections import Counter
 from pathlib import Path
 
 MIN_CHARS = 25
-EMAIL = re.compile(r"[\\w.+-]+@[\\w.-]+\\.[A-Za-z]{2,}")
-URL = re.compile(r"(?:https?://|www\\.)", re.IGNORECASE)
-PHONE_LIKE = re.compile(r"(?<!\\w)(?:\\+?\\d[\\d\\s().-]{7,}\\d)(?!\\w)")
+EMAIL = re.compile(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}")
+URL = re.compile(r"(?:https?://|www\.)", re.IGNORECASE)
+PHONE_LIKE = re.compile(r"(?<!\w)(?:\+?\d[\d\s().-]{7,}\d)(?!\w)")
 PAIR_LANGUAGE = {"es_en": "en", "ca_en": "en", "en_ca": "ca"}
-SPLIT_NAMESPACE = b"RONIN-COVOST2-TRAIN-v1\\0"
+SPLIT_NAMESPACE = b"RONIN-COVOST2-TRAIN-v1\0"
 
 
 def normalized_text(value: str) -> str:
@@ -27,7 +27,7 @@ def normalized_text(value: str) -> str:
 
 
 def partition_for(source_file: str, source_row: int) -> str:
-    key = f"{source_file}\\0{source_row}".encode("utf-8")
+    key = f"{source_file}\0{source_row}".encode("utf-8")
     bucket = int.from_bytes(hashlib.sha256(SPLIT_NAMESPACE + key).digest()[:8], "big") % 100
     if bucket < 80:
         return "train"
@@ -39,7 +39,7 @@ def partition_for(source_file: str, source_row: int) -> str:
 def audit(input_path: Path, output_dir: Path) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
     outputs = {
-        name: (output_dir / f"{name}.jsonl").open("w", encoding="utf-8", newline="\\n")
+        name: (output_dir / f"{name}.jsonl").open("w", encoding="utf-8", newline="")
         for name in ("train", "validation", "test")
     }
     seen: set[tuple[str, str]] = set()
@@ -98,7 +98,7 @@ def audit(input_path: Path, output_dir: Path) -> dict:
                     "source_row": source_row,
                     "upstream_revision": "4cddf32dedd6bfef86ca3a40f49b27e252650f3f",
                 }
-                encoded = (json.dumps(record, ensure_ascii=False, sort_keys=True) + "\\n").encode("utf-8")
+                encoded = (json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
                 outputs[split].write(encoded.decode("utf-8"))
                 split_hashes[split].update(encoded)
                 split_bytes[split] += len(encoded)
@@ -113,7 +113,6 @@ def audit(input_path: Path, output_dir: Path) -> dict:
 
     partitions = {}
     for name in outputs:
-        path = output_dir / f"{name}.jsonl"
         partitions[name] = {
             "documents": split_counts[name],
             "bytes": split_bytes[name],
@@ -138,7 +137,7 @@ def audit(input_path: Path, output_dir: Path) -> dict:
         "training_eligible": False,
         "admission_eligible": False,
     }
-    (output_dir / "quality-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    (output_dir / "quality-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return report
 
 
