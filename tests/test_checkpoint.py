@@ -25,3 +25,16 @@ def test_loading_for_evaluation_does_not_require_training_sampler(tmp_path):
     assert step == 3
     for expected, actual in zip(model.parameters(), restored.parameters(), strict=True):
         assert torch.equal(expected, actual)
+
+def test_loading_compact_state_dict_for_training_and_evaluation(tmp_path):
+    config = ModelConfig(vocab_size=16, context_length=8, n_layers=1, n_heads=2, d_model=8)
+    model = RoninLM(config)
+    checkpoint = tmp_path / "compact-main.pt"
+    torch.save(model.state_dict(), checkpoint)
+
+    restored = RoninLM(config)
+    step = load_checkpoint(checkpoint, restored, restore_rng=False)
+
+    assert step == 0  # compact weights keep provenance in the model manifest
+    for expected, actual in zip(model.parameters(), restored.parameters(), strict=True):
+        assert torch.equal(expected, actual)
