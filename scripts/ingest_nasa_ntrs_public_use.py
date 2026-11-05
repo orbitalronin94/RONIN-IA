@@ -26,14 +26,14 @@ MIN_TEXT_BYTES = 4000
 CATEGORIES = {
     "astronomy_earth_science_general": [
         "Astronomy", "Astrophysics", "Lunar and Planetary Science and Exploration",
-        "Meteorology and Climatology", "Earth Resources and Remote Sensing",
+        "Meteorology and Climatology", "Earth Resources and Remote Sensing", "Geophysics", "Oceanography", "Environment Pollution", "Solar Physics", "Space Sciences (General)",
     ],
     "physics_general": [
-        "Physics (General)", "Optics", "Acoustics", "Atomic and Molecular Physics",
+        "Physics (General)", "Optics", "Acoustics", "Atomic and Molecular Physics", "Nuclear Physics", "Plasma Physics", "Solid-State Physics", "Physics of Elementary Particles and Fields", "Energy Production and Conversion",
     ],
-    "engineering_robotics_general": [
+    "chemistry_materials_general": [\n        "Chemistry and Materials (General)", "Composite Materials", "Metals and Metallic Materials",\n        "Propellants and Fuels", "Inorganic, Organic and Physical Chemistry",\n    ],\n    "engineering_robotics_general": [
         "Engineering (General)", "Cybernetics, Artificial Intelligence and Robotics",
-        "Spacecraft Design, Testing and Performance", "Aerodynamics",
+        "Spacecraft Design, Testing and Performance", "Aerodynamics", "Fluid Mechanics and Thermodynamics", "Mechanical Engineering", "Structural Mechanics", "Launch Vehicles and Launch Operations", "Spacecraft Propulsion and Power", "Aircraft Design, Testing and Performance", "Space Transportation and Safety", "Computer Programming and Software", "Numerical Analysis",
     ],
 }
 
