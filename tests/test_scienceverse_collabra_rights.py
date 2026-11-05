@@ -1,4 +1,4 @@
-from scripts.preflight_scienceverse_collabra_rights import classify_license_urls
+from scripts.preflight_scienceverse_collabra_rights import MANUAL_RESTRICTIONS, classify_license_urls
 
 
 def test_cc_by_4_http_and_trailing_slash_variants_are_accepted() -> None:
@@ -11,3 +11,9 @@ def test_missing_or_restrictive_licenses_are_not_accepted() -> None:
     assert classify_license_urls(["https://creativecommons.org/licenses/by-nc/4.0/"]) == "reject_or_quarantine_restrictive_license"
     assert classify_license_urls(["https://creativecommons.org/licenses/by/4.0/", "https://creativecommons.org/licenses/by-sa/4.0/"]) == "reject_or_quarantine_restrictive_license"
     assert classify_license_urls([], item_found=False) == "hold_not_found_in_crossref_issn_query"
+
+
+def test_known_collabra_nc_article_is_explicitly_rejected() -> None:
+    record = MANUAL_RESTRICTIONS["10.1525/collabra.18032"]
+    assert record["decision"] == "reject_or_quarantine_restrictive_license"
+    assert record["license"] == "CC-BY-NC"
