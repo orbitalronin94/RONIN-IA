@@ -1,0 +1,68 @@
+name: Harvest PMC OA CC0 and CC-BY corpus
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/harvest_pmc_oa_cc0_ccby.py"
+      - ".github/workflows/harvest-pmc-oa-training-candidates.yml"
+  workflow_dispatch:
+    inputs:
+      max_text_gib:
+        description: Maximum UTF-8 article text to add in this run (GiB)
+        required: true
+        default: "2"
+        type: string
+  schedule:
+    - cron: "23 2 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pmc-oa-corpus-harvest
+  cancel-in-progress: false
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Checkout only corpus harvester paths
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            scripts/harvest_pmc_oa_cc0_ccby.py
+            data/datasets/candidates/pmc-oa-cc0-ccby-v2
+
+      - name: Harvest license-verified full text
+        env:
+          MAX_TEXT_GIB: ${{ inputs.max_text_gib || '2' }}
+        run: |
+          case "$MAX_TEXT_GIB" in
+            ''|*[!0-9]*) echo "max_text_gib must be an integer"; exit 2 ;;
+          esac
+          if [ "$MAX_TEXT_GIB" -lt 1 ] || [ "$MAX_TEXT_GIB" -gt 2 ]; then
+            echo "Allowed range is 1-2 GiB per run"; exit 2
+          fi
+          python scripts/harvest_pmc_oa_cc0_ccby.py \
+            --max-text-bytes "$((MAX_TEXT_GIB * 1024 * 1024 * 1024))" \
+            --max-candidates 50000 \
+            --workers 12
+
+      - name: Commit corpus shards and provenance to main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/datasets/candidates/pmc-oa-cc0-ccby-v2
+          if git diff --cached --quiet; then
+            echo "No new eligible PMC documents in this run."
+            exit 0
+          fi
+          git commit -m "Add license-screened PMC OA text corpus batch"
+          git push origin HEAD:main
