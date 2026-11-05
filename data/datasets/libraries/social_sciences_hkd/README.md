@@ -7,7 +7,7 @@ Esta biblioteca forma parte del inventario operativo de **32 bibliotecas (16 dom
 ## Contenido localizado
 
 - CoVoST 2: fragmentos con señal temática
-- ScienceVerse Collabra: 748 licencias por DOI, 747 textos extraíbles; privacidad/calidad pendientes
+- ScienceVerse Collabra: 748 licencias CC BY 4.0 por DOI, 747 cuerpos extraídos; 70 con correos/contacto retirados, 677 candidatos restantes (541 train)
 
 El ensamblador asigna únicamente documentos con señal temática suficiente. Los textos sin asignación clara permanecen en el pool transversal; no se fuerzan a este dominio.
 
