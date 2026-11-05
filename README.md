@@ -23,7 +23,22 @@ RONIN es un modelo causal Transformer implementado en PyTorch. El modelo operati
 
 El screening MMLU-Pro usó los mismos 50 IDs, revisión `b189ec765aa7ed75c8acfea42df31fdae71f97be`, selección estratificada determinista y cobertura del 100 %. La muestra es pequeña (cada acierto equivale a 2 puntos porcentuales), pertenece al split `validation` y **no es el protocolo oficial ni una certificación de razonamiento**. El candidato no mejoró los aciertos MMLU-Pro; la mejora observada corresponde a predicción de texto en la validación interna.
 
-Por decisión del proyecto, este checkpoint queda fijado como **base operativa de los próximos experimentos**, no como una afirmación de superioridad general. Los ciclos siguientes medirán el mismo holdout antes y después, conservarán el checkpoint de partida y no promocionarán automáticamente candidatos.
+Por decisión del proyecto, este checkpoint queda fijado como **base operativa de los próximos experimentos**, no como una afirmación de superioridad general.
+
+### Puerta obligatoria para cada ciclo de 500 pasos
+
+El workflow `main-native-no-tutor-holdout.yml` impone una evaluación pareada antes de permitir entrenamiento:
+
+1. Carga y verifica el checkpoint de `main`; registra su SHA-256.
+2. Evalúa antes del entrenamiento un mínimo de 50 preguntas de MMLU-Pro `validation`, seleccionadas de forma estratificada y determinista.
+3. Exige cobertura del 100 %; si el holdout previo está incompleto, el ciclo aborta **antes de calcular gradientes**.
+4. Ejecuta exactamente 500 pasos sobre el corpus admitido, sin preguntas, QA sintético ni tutor.
+5. Guarda el checkpoint candidato y su SHA-256.
+6. Evalúa los mismos IDs, revisión, split y configuración. Si cambia la muestra o falta cobertura, el candidato queda rechazado y el workflow falla.
+7. Registra aciertos, accuracy, resultados por dominio, IDs de predicciones cambiadas, nuevos aciertos y regresiones.
+8. Registra BPB/PPL en la misma validación interna como métricas secundarias.
+
+Cada artefacto incluye los informes before/after y la configuración del holdout. No se promociona automáticamente ningún candidato. Una mejora de BPB/PPL no se interpreta como mejora de razonamiento si el holdout de preguntas no la respalda.
 
 ## Estructura del repositorio
 
