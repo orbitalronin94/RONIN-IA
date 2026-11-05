@@ -18,6 +18,8 @@ def test_dual_tutor_registry_uses_official_model_ids_and_licenses():
         "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
     )
     assert MODELS["deepseek-r1-distill-32b"]["license"] == "mit"
+    assert MODELS["deepseek-r1-distill-32b"]["upstream_base"] == "Qwen/Qwen2.5-32B"
+    assert MODELS["deepseek-r1-distill-32b"]["upstream_base_license"] == "apache-2.0"
     assert MODELS["deepseek-r1-distill-32b"]["quant_repo"] == (
         "bartowski/DeepSeek-R1-Distill-Qwen-32B-GGUF"
     )
