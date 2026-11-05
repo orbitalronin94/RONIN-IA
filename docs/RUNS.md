@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 10:22 | [Integración continua #1274 (run 42010044473)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42010044473) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: revert: remove premature MMLU-Pro single-tutor trainer. Trigger: push; rama: main; intento: 1. | b1e5655b |
 | 2026-11-05 10:22 | [Integración continua #1276 (run 42010114100)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42010114100) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): record RUN5 failure and admission counts. Trigger: push; rama: main; intento: 1. | f1cfc65c |
 | 2026-11-05 10:21 | [Integración continua #1267 (run 42009859954)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42009859954) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: feat\(teachers\): add verified Qwen3-8B GGUF tutor. Trigger: push; rama: main; intento: 1. | 2335789a |
 | 2026-11-05 10:21 | [Integración continua #1273 (run 42010039600)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42010039600) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: revert: remove premature MMLU-Pro single-tutor trainer. Trigger: push; rama: main; intento: 1. | bf861b27 |
