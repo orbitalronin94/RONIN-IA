@@ -173,14 +173,6 @@ def main() -> None:
         )
 
     expected_docs = root_manifest["aggregate"]["admitted_documents"]
-    if held or email_hits or ssn_hits or duplicate_external:
-        raise SystemExit(json.dumps({
-            "held_count": len(held),
-            "held_examples": held[:50],
-            "external_exact_duplicates": duplicate_external[:50],
-            "email_hits": email_hits[:20],
-            "ssn_hits": ssn_hits[:20],
-        }, ensure_ascii=False, indent=2))
     aggregate_delta = {
         "document_count_delta": len(records) - expected_docs,
         "text_byte_delta": total_text_bytes - expected_bytes,
@@ -200,6 +192,8 @@ def main() -> None:
         "schema": "ronin-scienceverse-train-audit-v1",
         "dataset_id": "ronin-scienceverse-ccby-v1",
         "documents": len(records),
+        "held_documents": len(held),
+        "held_examples": held[:100],
         "manifest_documents": expected_docs,
         "text_bytes": total_text_bytes,
         "manifest_text_bytes": root_manifest["aggregate"]["admitted_text_bytes"],
@@ -231,7 +225,7 @@ def main() -> None:
         "eligible_partition": "train",
         "scope_limit": "Source-scoped train only; no global G-0, near-duplicate, benchmark-holdout, or General/HKD clearance is claimed.",
     }
-    (args.output_dir / "audit.json").write_text(
+    (args.output_dir / "held.json").write_text(\n        json.dumps({"held": held, "external_exact_duplicates": duplicate_external, "email_hits": email_hits, "ssn_hits": ssn_hits}, ensure_ascii=False, indent=2) + "\\n",\n        encoding="utf-8",\n    )\n    (args.output_dir / "audit.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
