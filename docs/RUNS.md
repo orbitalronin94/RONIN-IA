@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:39 | [Integración continua #1230 (run 42004159513)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42004159513) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: extend Crossref license checks to PLOS, SCAN and ECE3. Trigger: push; rama: main; intento: 1. | fb7cb6ea |
 | 2026-11-05 09:39 | [Integración continua #1229 (run 42004037253)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42004037253) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: rerun five-package ScienceVerse integrity inspection. Trigger: push; rama: main; intento: 1. | 12481be4 |
 | 2026-11-05 09:38 | [Integración continua #1225 (run 42003811377)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003811377) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): record ScienceVerse and NASA acquired candidate payloads. Trigger: push; rama: main; intento: 1. | 8250dccb |
 | 2026-11-05 09:38 | [Integración continua #1227 (run 42003928727)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003928727) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: broaden NASA NTRS acquisition across four technical domains. Trigger: push; rama: main; intento: 1. | 6889e7bc |
