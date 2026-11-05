@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 11:26 | [Integración continua #1369 (run 42018957330)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42018957330) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): remove escaped newline from admission records. Trigger: push; rama: main; intento: 1. | 4cb9713b |
 | 2026-11-05 11:26 | [Integración continua #1368 (run 42018928927)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42018928927) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): correct admission manifest record formatting. Trigger: push; rama: main; intento: 1. | 51666e8e |
 | 2026-11-05 11:25 | [Integración continua #1366 (run 42018476285)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42018476285) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: align ScienceVerse provenance with owner review and global dedup scope. Trigger: push; rama: main; intento: 1. | c531275a |
 | 2026-11-05 11:23 | [Integración continua #1361 (run 42018361877)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42018361877) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(data\): validate six file-reviewed NASA corpus copies. Trigger: push; rama: main; intento: 1. | 7f63d827 |
