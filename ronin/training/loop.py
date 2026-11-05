@@ -84,6 +84,8 @@ def train(
     checkpoint_dir: str | Path = "checkpoints",
     resume_from: str | Path | None = None,
     metrics_path: str | Path | None = None,
+    stop_after_step: int | None = None,
+    optimizer_mode: str = "default",
 ) -> list[float]:
     """Train to config.max_steps; optionally resume from a full checkpoint.
 
@@ -92,12 +94,17 @@ def train(
     training config and a batch source whose generator state can be restored.
     """
     config.validate()
+    if stop_after_step is not None and not 0 <= stop_after_step <= config.max_steps:
+        raise ValueError("stop_after_step must be between zero and config.max_steps")
+    if optimizer_mode not in {"default", "foreach", "fused"}:
+        raise ValueError("optimizer_mode must be default, foreach, or fused")
     seed_everything(config.seed)
     device = torch.device(device)
     model.to(device)
-    optimizer = torch.optim.AdamW(
-        model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay
-    )
+    optimizer_kwargs = {"lr": config.learning_rate, "weight_decay": config.weight_decay}
+    if optimizer_mode != "default":
+        optimizer_kwargs[optimizer_mode] = True
+    optimizer = torch.optim.AdamW(model.parameters(), **optimizer_kwargs)
     dtype = resolve_precision(config.precision, device)
     use_scaler = dtype == torch.float16 and device.type == "cuda"
     scaler = torch.amp.GradScaler("cuda", enabled=use_scaler)
@@ -121,7 +128,10 @@ def train(
     checkpoint_seconds = 0.0
     training_started = time.perf_counter()
 
-    for step in range(start_step, config.max_steps):
+    effective_stop = config.max_steps if stop_after_step is None else stop_after_step
+    if effective_stop < start_step:
+        raise ValueError("stop_after_step precedes the restored checkpoint step")
+    for step in range(start_step, effective_stop):
         step_started = time.perf_counter()
         lr = learning_rate_at(step, config)
         for group in optimizer.param_groups:
@@ -175,6 +185,8 @@ def train(
             "steps_completed": len(step_seconds),
             "start_step": start_step,
             "target_steps": config.max_steps,
+            "stop_after_step": effective_stop,
+            "optimizer_mode": optimizer_mode,
             "total_training_seconds": total_seconds,
             "step_seconds_mean": statistics.mean(step_seconds) if step_seconds else 0.0,
             "step_seconds_median": statistics.median(step_seconds) if step_seconds else 0.0,

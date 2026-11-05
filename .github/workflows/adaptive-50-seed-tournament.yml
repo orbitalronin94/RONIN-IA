@@ -1,0 +1,156 @@
+name: RONIN — torneo adaptativo de 50 semillas
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/adaptive-50-seed-tournament.yml"
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: write
+concurrency:
+  group: ronin-adaptive-50-seed-tournament
+  cancel-in-progress: false
+jobs:
+  tournament:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      LITERATURE_RUN_ID: "41926088900"
+      MATHLIB_RUN_ID: "42026633643"
+      NASA_FILE_REVIEWED_RUN_ID: "42028138060"
+      MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: true
+          sparse-checkout: |
+            .github
+            LICENSE
+            pyproject.toml
+            weights
+            ronin
+            scripts
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "dill==0.3.8" "multiprocess==0.70.16" "huggingface_hub==0.36.0"
+          python -m compileall -q scripts/train_text.py scripts/evaluate_mmlu_pro.py scripts/run_seed_tournament.py ronin
+      - name: Download admitted training partitions
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-admitted-literature-es-v1-train
+          path: incoming/literature
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.LITERATURE_RUN_ID }}
+      - uses: actions/download-artifact@v7
+        with:
+          name: ronin-admitted-mathlib4-v1
+          path: incoming/mathlib4
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.MATHLIB_RUN_ID }}
+      - uses: actions/download-artifact@v7
+        with:
+          name: ronin-nasa-ntrs-file-reviewed-train
+          path: incoming/nasa-file-reviewed
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.NASA_FILE_REVIEWED_RUN_ID }}
+      - name: Verify MAIN and admitted corpus
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          import torch
+          def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+          base=Path("weights/ronin-main.pt")
+          manifest=json.loads(Path("weights/main-model.json").read_text())
+          assert sha(base)==manifest["weights_sha256"]
+          assert manifest["checkpoint_step"]==1000
+          assert sha(Path("incoming/literature/train.txt"))=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
+          assert sha(Path("incoming/mathlib4/train.txt"))=="7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"
+          assert sha(Path("incoming/nasa-file-reviewed/train.txt"))=="874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"
+          ck=torch.load(base,map_location="cpu",weights_only=False)
+          from ronin.config import get_profile
+          from ronin.models.transformer import RoninLM
+          mc,_=get_profile("tiny"); model=RoninLM(mc); model.load_state_dict(ck,strict=True)
+          assert sum(p.numel() for p in model.parameters())==9922880
+          print("MAIN y corpus verificados; SHA de MAIN:",manifest["weights_sha256"])
+          PY
+      - name: Assemble the admitted corpus only
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          parts=[Path("incoming/literature/train.txt"),Path("incoming/mathlib4/train.txt"),Path("incoming/nasa-file-reviewed/train.txt")]
+          out=Path("/tmp/ronin-tournament-train.txt")
+          out.write_bytes(b"\n\n".join(p.read_bytes() for p in parts))
+          report={"documents":9108,"source_bytes":237957184,"combined_bytes":out.stat().st_size,"combined_sha256":hashlib.sha256(out.read_bytes()).hexdigest(),"tutor_used":False,"validation_test_in_training":False}
+          Path("reports").mkdir(exist_ok=True); Path("reports/native-mixture.json").write_text(json.dumps(report,indent=2)+"\n")
+          print(json.dumps(report,indent=2))
+          PY
+      - name: Run 50-seed adaptive tournament
+        run: |
+          SEEDS=$(python - <<'PY'
+          print(",".join(str(20261108+i) for i in range(50)))
+          PY
+          )
+          python scripts/run_seed_tournament.py --text /tmp/ronin-tournament-train.txt --base-checkpoint weights/ronin-main.pt --seeds "$SEEDS" --revision "$MMLU_REVISION" --context-length 4096 --batch-token-budget 8192 --output-dir reports/seed-tournament
+      - name: Promote a unique validated winner to MAIN
+        if: success()
+        run: |
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          import torch
+          report=json.loads(Path("reports/seed-tournament/tournament-summary.json").read_text())
+          winner=report.get("winner")
+          if winner is None:
+              print("NO_PROMOTION: no unique candidate beats MAIN under all integrity gates")
+              Path("reports/seed-tournament/promotion.txt").write_text("NO_PROMOTION\n")
+              raise SystemExit(0)
+          source=Path(report["winner_checkpoint"])
+          ck=torch.load(source,map_location="cpu",weights_only=False)
+          state=ck["model"]
+          dest=Path("weights/ronin-main.pt")
+          tmp=dest.with_suffix(".pt.tmp"); torch.save(state,tmp); tmp.replace(dest)
+          def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+          manifest_path=Path("weights/main-model.json"); m=json.loads(manifest_path.read_text())
+          m.update({"model_name":"RONIN-tiny-main-tournament","status":"main","source_workflow_run_id":int(os.environ["GITHUB_RUN_ID"]),"source_workflow_url":f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}","source_commit":os.environ["GITHUB_SHA"],"checkpoint_sha256":sha(source),"checkpoint_step":500,"weights_sha256":sha(dest),"weights_bytes":dest.stat().st_size,"checkpoint_path":"weights/ronin-main.pt","weights_path":"weights/ronin-main.pt","source_checkpoint_path":str(source),"checkpoint_storage":"promoted model state_dict; optimizer state excluded"})
+          m["training"].update({"steps":500,"seed":winner,"dataset":"admitted literature + Mathlib4 + reviewed NASA corpus","documents":9108,"train_bytes":237957184,"tutor_used":False})
+          candidate=report["finalists"][str(winner)]
+          m["evaluation"]={"holdout_dataset":"MMLU-Pro test, RONIN zero-shot next-byte protocol","holdout_questions":1024,"main_correct_before":report["main_correct"],"candidate_correct":candidate["correct"],"accuracy":candidate["accuracy"],"dataset_revision":report["dataset_revision"],"dataset_sha256":report["dataset_sha256"],"adaptive_test_set_exposure":True}
+          manifest_path.write_text(json.dumps(m,ensure_ascii=False,indent=2)+"\n")
+          Path("reports/seed-tournament/promotion.txt").write_text(f"PROMOTED seed={winner} weights_sha256={sha(dest)}\n")
+          print("PROMOTED",winner,"weights_sha256",sha(dest))
+          PY
+          if grep -q '^PROMOTED ' reports/seed-tournament/promotion.txt; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add weights/ronin-main.pt weights/main-model.json
+            git commit -m "Promote validated adaptive tournament winner"
+            git push origin HEAD:main
+          fi
+      - name: Upload complete tournament evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-adaptive-50-seed-${{ github.run_id }}
+          path: |
+            reports/
+            checkpoints/
+          if-no-files-found: warn
+          retention-days: 90
+          compression-level: 6

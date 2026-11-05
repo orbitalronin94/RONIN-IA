@@ -28,6 +28,9 @@ def main() -> None:
     parser.add_argument("--profile", choices=["tiny"], default="tiny")
     parser.add_argument("--steps", type=int, default=None)
     parser.add_argument("--checkpoint-every", type=int, default=None, help="Intervalo de checkpoints completos; siempre se guarda el paso final")
+    parser.add_argument("--stop-after-step", type=int, default=None, help="Pausa en este paso sin cambiar el plan global max_steps")
+    parser.add_argument("--resume-from", type=Path, default=None, help="Reanuda un checkpoint completo, incluyendo AdamW, RNG y muestreador")
+    parser.add_argument("--optimizer-mode", choices=["default", "foreach", "fused"], default="default")
     parser.add_argument("--learning-rate", type=float, default=None, help="tasa de aprendizaje para fine-tuning")
     parser.add_argument("--min-learning-rate", type=float, default=None, help="tasa mínima del scheduler")
     parser.add_argument("--context-length", type=int, default=None, help="Contexto en bytes; permite alinear el entrenamiento con el evaluador")
@@ -36,7 +39,7 @@ def main() -> None:
         "--init-checkpoint",
         type=Path,
         default=None,
-        help="checkpoint previo del que cargar solo los pesos del modelo",
+        help="checkpoint previo del que cargar solo los pesos del modelo (no usar para reanudación)",
     )
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--checkpoints", type=Path, default=Path("checkpoints/tiny"))
@@ -90,6 +93,10 @@ def main() -> None:
         raise ValueError("tiny profile and byte tokenizer vocabulary do not match")
     seed_everything(training_config.seed)
     model = RoninLM(model_config)
+    if args.init_checkpoint is not None and args.resume_from is not None:
+        parser.error("--init-checkpoint y --resume-from son mutuamente excluyentes")
+    if args.resume_from is not None and not args.resume_from.is_file():
+        parser.error(f"no existe el checkpoint de reanudación: {args.resume_from}")
     if args.init_checkpoint is not None:
         if not args.init_checkpoint.is_file():
             parser.error(f"no existe el checkpoint inicial: {args.init_checkpoint}")
@@ -110,6 +117,9 @@ def main() -> None:
         device=args.device,
         checkpoint_dir=args.checkpoints,
         metrics_path=args.metrics_out,
+        resume_from=args.resume_from,
+        stop_after_step=args.stop_after_step,
+        optimizer_mode=args.optimizer_mode,
     )
     print(
         f"Completed {len(losses)} steps; final loss={losses[-1]:.5f}. "
