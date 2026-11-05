@@ -19,7 +19,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.select_knowledge_dense_corpus import score_record
+from scripts.select_knowledge_dense_corpus import score_record  # noqa: E402
 
 DOMAINS = (
     "mathematics",
