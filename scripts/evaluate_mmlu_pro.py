@@ -207,6 +207,7 @@ def evaluate_rows(
     last_token_only: bool = True,
     dataset_split: str = "test",
     dataset_split_size: int | None = None,
+    identity_gated_ninth_layer: bool = False,
 ) -> dict[str, Any]:
     """Evalúa por lotes sin truncar: el padding derecho no altera tokens previos."""
     if context_length < 1:
@@ -215,6 +216,8 @@ def evaluate_rows(
         raise ValueError("batch_token_budget debe ser positivo")
     base_config, _ = get_profile(profile)
     config = replace(base_config, context_length=context_length)
+    if identity_gated_ninth_layer:
+        config = replace(config, n_layers=config.n_layers + 1, identity_last_layer=True)
     target_device = torch.device(device)
     model = RoninLM(config)
     step = load_checkpoint(checkpoint, model, map_location="cpu", restore_rng=False)
@@ -360,9 +363,12 @@ def main() -> None:
     parser.add_argument("--revision", default=DATASET_REVISION)
     parser.add_argument("--split", choices=["validation", "test"], default="test")
     parser.add_argument("--device", default="cpu")
+    parser.add_argument("--identity-gated-ninth-layer", action="store_true")
     parser.add_argument("--batch-token-budget", type=int, default=8192)
+    parser.add_argument("--identity-gated-ninth-layer", action="store_true")
     parser.add_argument("--require-full-coverage", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--identity-gated-ninth-layer", action="store_true")
     args = parser.parse_args()
 
     all_rows = load_external_dataset(args.revision, split=args.split)
@@ -379,6 +385,7 @@ def main() -> None:
         batch_token_budget=args.batch_token_budget,
         dataset_split=args.split,
         dataset_split_size=len(all_rows),
+        identity_gated_ninth_layer=args.identity_gated_ninth_layer,
     )
     report["dataset_revision"] = args.revision
     report["sampling"] = {
