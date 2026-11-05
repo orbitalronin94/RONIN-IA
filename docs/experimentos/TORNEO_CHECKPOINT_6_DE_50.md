@@ -9,17 +9,21 @@ Checkpoint de partida (ganador del screening):
 - Resultado de referencia: 6/50 (12 %) en MMLU-Pro validation, muestra estratificada seed 2026.
 - Su continuación de 500 pasos obtuvo 5/50 (10 %) y no se considera ganadora.
 
-## Nuevo experimento B/C — 10.000 pasos (2026-11-05)\n\nSe amplía la comparación a dos candidatos exclusivamente: B (replay equilibrado) y C (replay equilibrado + anclaje L2), con 10.000 pasos completos por candidato, ejecutados secuencialmente desde el mismo checkpoint 6/50 y con la misma semilla. El workflow evalúa el checkpoint inicial antes de entrenar y cada resultado después sobre los mismos 50 IDs, revisión y hash del split validation; exige 50/50, cero skips y cobertura 100 %. Se guardan los checkpoints finales, hashes, métricas y diferencias por pregunta. No hay promoción automática. Este validation de 50 preguntas es screening de desarrollo, no confirmación independiente.\n\n## Pregunta experimental
+## Nuevo experimento B/C — 10.000 pasos (2026-11-05)
 
-¿Podemos obtener mejoras de predicción del corpus sin perder el comportamiento que produjo el 6/50? Los cuatro candidatos deben partir exactamente del mismo checkpoint, corpus, partición interna, contexto, semilla de muestreo y holdout pareado.
+Se comparan exclusivamente B (replay equilibrado) y C (replay equilibrado + anclaje L2), con 10.000 pasos completos por candidato, ejecutados secuencialmente desde el mismo checkpoint 6/50 y con la misma semilla. El workflow evalúa el checkpoint inicial antes de entrenar y cada resultado después sobre los mismos 50 IDs, revisión y hash del split validation; exige 50/50, cero skips y cobertura 100 %. Se guardan los checkpoints finales, hashes, métricas y diferencias por pregunta. No hay promoción automática. Este validation de 50 preguntas es screening de desarrollo, no confirmación independiente.
+
+## Pregunta experimental
+
+¿Podemos obtener mejoras de predicción del corpus sin perder el comportamiento que produjo el 6/50? Los candidatos deben partir exactamente del mismo checkpoint, corpus, partición interna, contexto, semilla de muestreo y holdout pareado.
 
 ## Candidatos
 
 | ID | Método | Presupuesto | Parámetros iniciales |
 |---|---|---:|---|
-| A | Fine-tuning conservador con anclaje L2 a los pesos iniciales | 100 pasos | LR 2.5e-6; min LR 2.5e-7; grad clip 1.0; penalización anclada normalizada |
-| B | Replay equilibrado por fuente | 100 pasos | Literatura 50 %, Mathlib4 49.5 %, NASA revisado máximo 0.5 % |
-| C | Replay equilibrado + anclaje L2 | 100 pasos | Igual que B más LR conservador y anclaje |
+| A | Fine-tuning conservador con anclaje L2 a los pesos iniciales | 100 pasos (torneo inicial) | LR 2.5e-6; min LR 2.5e-7; grad clip 1.0; penalización anclada normalizada |
+| B | Replay equilibrado por fuente | 10.000 pasos (nuevo experimento) | Literatura 50 %, Mathlib4 49.5 %, NASA revisado máximo 0.5 % |
+| C | Replay equilibrado + anclaje L2 | 10.000 pasos (nuevo experimento) | Igual que B más LR conservador y anclaje |
 | D | Interpolación de checkpoints, sin entrenamiento | 0 pasos | alpha 0.10, 0.25 y 0.50 |
 
 La mezcla no asigna 5 % a NASA: con solo dos documentos esa proporción los sobremuestrearía intensamente. El límite 0.5 % es un techo experimental, no una afirmación de que NASA aporte más señal. Se comparará también contra muestreo proporcional al corpus como control de B/C.
@@ -40,7 +44,7 @@ La mezcla no asigna 5 % a NASA: con solo dos documentos esa proporción los sobr
 
 La muestra de 50 preguntas validation ya se ha usado para comparar ciclos anteriores y por tanto está parcialmente expuesta a selección. Se permite usarla solo como screening de desarrollo, no como confirmación independiente.
 
-- Screening: comparar los cuatro métodos en los mismos 50 IDs de validation, antes/después.
+- Screening inicial: comparar los métodos en los mismos 50 IDs de validation, antes/después. Nuevo experimento: B y C con 10.000 pasos cada uno.
 - Selección: conservar como máximo un candidato provisional; no promoverlo.
 - Confirmación: evaluar el candidato provisional y el ganador original en un conjunto independiente no usado para selección (preferentemente split test completo, o una muestra pre-registrada de al menos 100 ítems si el protocolo y el presupuesto lo permiten). No ajustar hiperparámetros después de ver esa confirmación.
 - Reportar aciertos, accuracy, delta en puntos porcentuales, predicciones cambiadas, nuevos aciertos, regresiones, categorías, cobertura y skips.
@@ -58,6 +62,6 @@ Un candidato no gana por mejorar BPB/PPL únicamente.
 
 ## Presupuesto y ejecución
 
-El torneo inicial usó 300 pasos de entrenamiento (A/B/C: 100 cada uno); D no entrenó. El nuevo experimento B/C usa 20.000 pasos totales (10.000 por candidato). La interpolación produce tres variantes sin consumir pasos. Las variantes no se ejecutan en paralelo si compiten por CPU; se ejecutan secuencialmente para mantener throughput y memoria predecibles.
+El torneo inicial usó 300 pasos de entrenamiento (A/B/C: 100 cada uno); D no entrenó. El nuevo experimento B/C usa 20.000 pasos totales (10.000 por candidato). Las variantes no se ejecutan en paralelo si compiten por CPU; se ejecutan secuencialmente para mantener throughput y memoria predecibles.
 
 La implementación está disponible en `scripts/run_checkpoint_tournament.py`, `ronin/data/source_batches.py` y `ronin/training/loop.py`. El workflow manual está en `.github/workflows/checkpoint-tournament-6of50.yml`. Antes de lanzar el workflow, deben pasar los checks de la PR y verificarse los artefactos de origen. El workflow no promueve pesos automáticamente.
