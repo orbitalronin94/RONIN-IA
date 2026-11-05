@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:06 | [Integración continua #1123 (run 41999548825)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999548825) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: add ScienceVerse CC-BY corpus ingestion workflow. Trigger: push; rama: main; intento: 1. | 12a1fe63 |
 | 2026-11-05 09:06 | [Integración continua #1129 (run 41999615935)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999615935) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): record ScienceVerse acquisition batch. Trigger: push; rama: main; intento: 1. | 535ae7f9 |
 | 2026-11-05 09:06 | [Integración continua #1125 (run 41999581114)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999581114) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): track ScienceVerse full-text acquisition. Trigger: push; rama: main; intento: 1. | 92f6071a |
 | 2026-11-05 09:05 | [Integración continua #1122 (run 41999543726)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999543726) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: add ScienceVerse full-text CC-BY acquisition script. Trigger: push; rama: main; intento: 1. | b32e16ea |
