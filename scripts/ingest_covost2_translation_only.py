@@ -21,7 +21,16 @@ README_BLOB_SHA1 = "f29667eaacba91d35de372001ebc793adb2b5530"
 README_URL = f"https://raw.githubusercontent.com/facebookresearch/covost/{COMMIT}/README.md"
 LICENSE_URL = "https://creativecommons.org/publicdomain/zero/1.0/"
 PAIRS = ("es_en", "ca_en", "en_ca")
-KNOWN_SPLITS = {"train", "train_covost", "dev", "test", "test_covost"}
+BASE_SPLITS = {"train", "dev", "test"}
+KNOWN_SUFFIXES = {"covost", "dup"}
+
+
+def is_known_split(split: str) -> bool:
+    """Accept upstream split families while rejecting unrecognized labels."""
+    if split in BASE_SPLITS:
+        return True
+    parts = split.rsplit("_", 1)
+    return len(parts) == 2 and parts[0] in BASE_SPLITS and parts[1] in KNOWN_SUFFIXES
 
 
 def is_training_split(split: str) -> bool:
@@ -85,7 +94,7 @@ def main() -> int:
                 for source_row_index, row in enumerate(reader, start=1):
                     split = (row.get("split") or "").strip()
                     split_counts[split] = split_counts.get(split, 0) + 1
-                    if split not in KNOWN_SPLITS:
+                    if not is_known_split(split):
                         raise ValueError(f"unexpected upstream split label {split!r} in {filename}, row {source_row_index}")
                     if not is_training_split(split):
                         continue
