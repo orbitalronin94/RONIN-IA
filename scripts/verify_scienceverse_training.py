@@ -109,7 +109,6 @@ def main() -> None:
                 held_counts["missing_doi_or_text"] = held_counts.get("missing_doi_or_text", 0) + 1
                 continue
             doc_id = f"{corpus}:{doi}"
-            title = str(row.get("title", ""))
             source_raw_text = text.encode("utf-8")
             source_text_hash = sha256(source_raw_text)
             replacement_count = text.count("\ufffd")
@@ -229,8 +228,6 @@ def main() -> None:
         "documents": len(records),
         "held_documents": len(held),
         "held_reason_counts": held_counts,
-        "held_examples": held[:100],
-        "held_documents": len(held),
         "held_examples": held[:100],
         "manifest_documents": expected_docs,
         "text_bytes": total_text_bytes,
