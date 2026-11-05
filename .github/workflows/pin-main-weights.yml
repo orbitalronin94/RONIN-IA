@@ -20,11 +20,11 @@ jobs:
       - name: Descargar artefacto histórico del modelo main
         uses: actions/download-artifact@v6
         with:
-          name: ronin-legacy-1000-holdout-comparison
+          name: ronin-main-cycle2-mmlu-pro-full
           path: incoming/main
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
-          run-id: "42014728700"
+          run-id: "42017319862"
       - name: Extraer y verificar únicamente los pesos principales
         shell: bash
         run: |
@@ -34,7 +34,7 @@ jobs:
           from pathlib import Path
           expected = "a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
           root = Path("incoming/main")
-          matches = list(root.rglob("step-00001000.pt"))
+          matches = list(root.rglob("main.pt"))
           if len(matches) != 1:
               raise SystemExit(f"Se esperaba un checkpoint main; encontrados: {len(matches)}")
           source = matches[0]
