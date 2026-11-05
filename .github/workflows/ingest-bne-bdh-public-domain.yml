@@ -1,0 +1,38 @@
+name: Acquire BNE public-domain text snapshot
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/ingest-bne-bdh-public-domain.yml"
+      - "scripts/ingest_bne_bdh_public_domain.py"
+  workflow_dispatch:
+  schedule:
+    - cron: "15 5 1 * *"
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: ronin-bne-bdh-acquisition
+  cancel-in-progress: false
+jobs:
+  acquire-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Download official BNE public-domain TXT and JSON distributions
+        run: python scripts/ingest_bne_bdh_public_domain.py
+      - name: Upload exact source archives, extracted texts and audit report
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-bne-bdh-public-domain-candidate-snapshot
+          path: |
+            data/datasets/candidates/bne-bdh-ocr/
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 1
