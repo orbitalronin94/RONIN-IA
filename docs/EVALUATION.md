@@ -37,3 +37,11 @@ python scripts/evaluate_domains.py \
   --dataset benchmarks/domains_v1.jsonl \
   --profile tiny --device cpu --output reports/domains.json
 ```
+
+
+## Dos niveles de evaluación
+
+- **Desarrollo (predeterminado: 1.024 preguntas):** muestra estratificada y determinista del split `test`, identificada por revisión, hash, semilla de selección e IDs. Se usa para entrenamiento iterativo, cribado multi-semilla y comparación emparejada contra `main`.
+- **Certificación (12.032 preguntas disponibles en la revisión fijada):** test completo de MMLU-Pro. Se reserva para el hito de alcanzar al menos el 75 % de aciertos en el benchmark de desarrollo. No se usa para entrenar ni para seleccionar repetidamente hiperparámetros.
+
+Los límites 64, 128 y 256 se mantienen como modos de diagnóstico rápido. El benchmark de 1.024 preguntas es el criterio de progreso cotidiano, no una puntuación oficial de MMLU-Pro ni una garantía de generalización. La certificación completa seguirá siendo obligatoria antes de cualquier afirmación de rendimiento general y antes de una promoción importante del checkpoint. En ambos niveles se exige comparar base y candidato sobre exactamente los mismos IDs, revisión, protocolo y cobertura; nunca hay promoción automática.
