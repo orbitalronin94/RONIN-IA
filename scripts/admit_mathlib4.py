@@ -26,8 +26,8 @@ def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def existing_text_hashes(root: Path) -> set[str]:
-    """Read admitted payloads only; ignore manifests and candidate directories."""
+def existing_text_hashes(root: Path, literature_train_dir: Path | None = None) -> set[str]:
+    """Read admitted payloads and the pinned legacy literature train artifact."""
     hashes: set[str] = set()
     admitted = root / "data/datasets/admitted"
     if not admitted.exists():
@@ -60,6 +60,29 @@ def existing_text_hashes(root: Path) -> set[str]:
                     text = item.get("text")
                     if isinstance(text, str) and text:
                         hashes.add(sha(text.encode("utf-8")))
+    if literature_train_dir is not None:
+        train_path = literature_train_dir / "train.txt"
+        sidecar_path = literature_train_dir / "documents.train.jsonl"
+        if not train_path.is_file() or not sidecar_path.is_file():
+            raise SystemExit("Pinned literature train artifact is incomplete")
+        train_text = train_path.read_text(encoding="utf-8")
+        sidecar = [json.loads(line) for line in sidecar_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        if len(sidecar) != 608:
+            raise SystemExit(f"Expected 608 legacy train records, got {len(sidecar)}")
+        cursor = 0
+        for row in sidecar:
+            count = int(row.get("character_count", 0))
+            chunk = train_text[cursor:cursor + count]
+            digest = sha(chunk.encode("utf-8"))
+            if count <= 0 or digest != row.get("text_sha256"):
+                raise SystemExit(f"Legacy literature payload integrity mismatch: {row.get('record_id')}")
+            hashes.add(digest)
+            cursor += count
+            if train_text[cursor:cursor + 2] == "\\n\\n":
+                cursor += 2
+        if cursor not in {len(train_text), len(train_text) - 1}:
+            raise SystemExit("Legacy literature train artifact has unindexed trailing content")
+
     return hashes
 
 
@@ -77,6 +100,7 @@ def main() -> None:
     parser.add_argument("--repo-root", type=Path, required=True, help="Pinned mathlib4 checkout")
     parser.add_argument("--ronin-root", type=Path, default=Path("."))
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--literature-train-dir", type=Path, default=None)
     parser.add_argument("--revision", default=REVISION)
     args = parser.parse_args()
 
@@ -100,7 +124,7 @@ def main() -> None:
     if not source_files:
         raise SystemExit("No Mathlib Lean source files found")
 
-    old_hashes = existing_text_hashes(args.ronin_root)
+    old_hashes = existing_text_hashes(args.ronin_root, args.literature_train_dir)
     seen_hashes: set[str] = set()
     records: list[dict[str, Any]] = []
     held: list[dict[str, str]] = []
@@ -242,6 +266,7 @@ def main() -> None:
             "high_confidence_secret_scan": "pass",
             "exact_internal_dedup": "pass",
             "exact_cross_source_dedup_against_current_admitted_payloads": "pass",
+            "legacy_literature_train_documents_compared": 608 if args.literature_train_dir else 0,
             "near_duplicate_cross_source_audit": "not_performed",
             "train_validation_test_file_disjointness": True,
             "deterministic_partition": "sha256(document_id) bucket; 98% train / 1% validation / 1% test",
