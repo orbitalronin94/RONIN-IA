@@ -15,7 +15,7 @@ Este directorio es el registro operativo de adquisición, revisión, admisión y
 | NASA file-reviewed | 6 | Revisión documental acotada; 701.871 bytes | No; no sumar a NASA NTRS sin resolver posible solapamiento |
 | ScienceVerse | 7.403 textos en 13 colecciones; 7.365 admitidos scoped, 38 retenidos | Derechos por DOI y atribución auditados; 446.092.799 bytes admitidos | No: particiones y gates globales pendientes |
 
-**Cómo leer los totales:** hay **10.127 registros admitidos scoped** en los cuatro manifiestos principales (608 literatura + 8.697 mathlib4 + 813 NASA + 9 Papers). La cifra **entrenable por partición** es **9.106 documentos**: 608 literatura + 8.498 mathlib4; validation/test permanecen aislados. No es un recuento global de documentos únicos ni un G-0 global PASS. Los seis NASA file-reviewed se muestran aparte por posible solapamiento. ScienceVerse registra 7.365 admitidos scoped, pero aún no entrenables; no se suman al total principal de entrenamiento.
+**Cómo leer los totales:** hay **10.163 registros en los cuatro manifiestos principales** (644 literatura, incluidos 36 documentos de validation/test aislados + 8.697 mathlib4 + 813 NASA + 9 Papers). La cifra **entrenable por partición** es **9.106 documentos**: 608 literatura + 8.498 mathlib4; validation/test permanecen aislados. No es un recuento global de documentos únicos ni un G-0 global PASS. Los seis NASA file-reviewed se muestran aparte por posible solapamiento. ScienceVerse registra 7.365 admitidos scoped, pero aún no entrenables; no se suman al total principal de entrenamiento.
 
 ### ScienceVerse: calidad automática no equivale a permiso
 
