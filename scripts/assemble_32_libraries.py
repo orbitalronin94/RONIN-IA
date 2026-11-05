@@ -16,7 +16,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from scripts.select_knowledge_density_corpus import score_record
+from scripts.select_knowledge_dense_corpus import score_record
 
 DOMAINS = (
     "mathematics",
