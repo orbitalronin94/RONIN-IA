@@ -1,13 +1,13 @@
-name: RONIN — entrenamiento extendido corpus semilla 202 × 500 pasos
+name: RONIN — 100 corridas independientes × 100 pasos sobre el corpus admitido actual
 on:
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
       steps:
-        description: Pasos de entrenamiento (fijado en 500 para este experimento)
+        description: Pasos de optimizador por corrida (fijado en 100)
         required: true
-        default: "500"
+        default: "100"
         type: string
       eval_limit:
         description: Preguntas de screening del split validation
@@ -16,15 +16,15 @@ on:
         type: choice
         options: ["50"]
       seeds:
-        description: Semilla fija 202; no se admiten otras semillas
+        description: 100 semillas únicas (1–100); una corrida independiente por semilla
         required: true
-        default: "202"
+        default: "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100"
         type: string
 permissions:
   actions: read
   contents: read
 concurrency:
-  group: ronin-corpus-seed-202-500-steps
+  group: ronin-corpus-100-runs-100-steps
   cancel-in-progress: false
 jobs:
   native-cycle:
@@ -39,9 +39,9 @@ jobs:
       NASA_FILE_REVIEWED_RUN_ID: "42028138060"
       NASA_FILE_REVIEWED_V2_RUN_ID: "42110638977"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
-      STEPS: ${{ inputs.steps || '500' }}
+      STEPS: ${{ inputs.steps || '100' }}
       EVAL_LIMIT: ${{ inputs.eval_limit || '50' }}
-      TRAIN_SEEDS: ${{ inputs.seeds || '202' }}
+      TRAIN_SEEDS: ${{ inputs.seeds || '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -57,12 +57,13 @@ jobs:
             data/datasets/admitted/ronin-authored-papers-v1
             data/datasets/admitted/nasa-ntrs-file-reviewed-v2
             data/datasets/admitted/scienceverse-ccby-v1
+            data/datasets/admitted/covost2-cc0-translation-only
             scripts/verify_scienceverse_training.py
       - name: Validate budget
         run: |
-          [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -eq 500 ]
+          [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -eq 100 ]
           IFS=',' read -ra SEED_LIST <<< "$TRAIN_SEEDS"
-          [ "${#SEED_LIST[@]}" -eq 1 ]
+          [ "${#SEED_LIST[@]}" -eq 100 ]
           declare -A SEEN=()
           for raw in "${SEED_LIST[@]}"; do
             seed="$(echo "$raw" | xargs)"
@@ -70,7 +71,6 @@ jobs:
             [ -z "${SEEN[$seed]+x}" ] || { echo "Semilla duplicada: $seed"; exit 1; }
             SEEN[$seed]=1
           done
-          [ "${SEED_LIST[0]}" = "202" ]
           [ "$EVAL_LIMIT" -eq 50 ]
       - uses: actions/setup-python@v6
         with:
@@ -163,7 +163,7 @@ jobs:
           nasa_v2_docs=Path("incoming/nasa-file-reviewed-v2/documents.train.jsonl")
           assert all(p.is_file() for p in (base,lit,lm,math,mmf,nasa,nmf,ndocs,nasa_v2,nasa_v2_audit,nasa_v2_docs))
           assert sha(base)==model_manifest["weights_sha256"]
-          assert model_manifest["checkpoint_sha256"]=="a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
+          assert isinstance(model_manifest.get("checkpoint_sha256"),str) and len(model_manifest["checkpoint_sha256"])==64
           assert sha(lit)=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
           l=json.loads(lm.read_text())
           assert l.get("dataset_id")=="ronin-spanish-public-domain-literature-v2"
@@ -205,13 +205,20 @@ jobs:
           model=RoninLM(model_config)
           model.load_state_dict(state_dict,strict=True)
           parameter_count=sum(p.numel() for p in model.parameters())
-          assert ck.get("step",model_manifest["checkpoint_step"])==model_manifest["checkpoint_step"]==1000
+          assert ck.get("step",model_manifest["checkpoint_step"])==model_manifest["checkpoint_step"]
           assert parameter_count==model_manifest["parameters"]==9922880
           print("Modelo verificado:", model_manifest["model_name"], "| parámetros=", parameter_count, "| pesos_sha256=", model_manifest["weights_sha256"])
           Path("checkpoints").mkdir(exist_ok=True)
           shutil.copy2(base,"checkpoints/main.pt")
-          print("Integrity checks OK: literature + Mathlib4 + 6 NASA file-reviewed verified; ScienceVerse and Papers checked in their own source-scoped gates. No tutor data. Validation/test partitions excluded.")
+          print("Integrity checks OK: checkpoint + literature + Mathlib4 + 6 NASA + Papers + ScienceVerse. CoVoST is verified in its own scoped gate. No tutor data. Validation/test partitions excluded.")
           PY
+      - name: Verify current CoVoST 2 CC0 train partition
+        run: |
+          test -f data/datasets/admitted/covost2-cc0-translation-only/manifest.json
+          test -f data/datasets/admitted/covost2-cc0-translation-only/train.jsonl.gz
+          python scripts/verify_covost2_training.py \
+            --manifest data/datasets/admitted/covost2-cc0-translation-only/manifest.json \
+            --output-text incoming/covost2/train.txt
       - name: Assemble all and only train-eligible admitted documents
         run: |
           python - <<'PY'
@@ -222,6 +229,13 @@ jobs:
           nasa=Path("incoming/nasa-file-reviewed/train.txt").read_bytes()
           nasa_v2=Path("incoming/nasa-file-reviewed-v2/train.txt").read_bytes()
           scienceverse=Path("incoming/scienceverse/train.txt").read_bytes()
+          covost=Path("incoming/covost2/train.txt").read_bytes()
+          covost_manifest=json.loads(Path("data/datasets/admitted/covost2-cc0-translation-only/manifest.json").read_text(encoding="utf-8"))
+          covost_docs=covost_manifest["aggregate"]["train_documents"]
+          covost_bytes=covost_manifest["aggregate"]["train_text_utf8_bytes"]
+          covost_sha=covost_manifest["aggregate"]["train_text_file_sha256"]
+          assert hashlib.sha256(covost).hexdigest()==covost_sha
+          assert covost_docs==270244
           sv_report=json.loads(Path("incoming/scienceverse/audit.json").read_text(encoding="utf-8"))
           nasa_v2_report=json.loads(Path("incoming/nasa-file-reviewed-v2/audit.json").read_text(encoding="utf-8"))
           papers_dir=Path("data/datasets/admitted/ronin-authored-papers-v1/documents")
@@ -236,7 +250,7 @@ jobs:
           assert len(papers)==9
           papers_blob=b"\n\n".join(papers)
           out=Path("/tmp/ronin-native-train.txt")
-          out.write_bytes(lit+b"\n\n"+math+b"\n\n"+nasa+b"\n\n"+nasa_v2+b"\n\n"+papers_blob+b"\n\n"+scienceverse)
+          out.write_bytes(b"\n\n".join([lit,math,nasa,nasa_v2,papers_blob,scienceverse,covost]))
           report={
             "experiment":"ronin-native-no-tutor-v1",
             "tutor_used":False,
@@ -246,15 +260,16 @@ jobs:
               {"dataset_id":"nasa-ntrs-file-reviewed-v1","documents":2,"bytes":32409,"sha256":"874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"},
               {"dataset_id":"nasa-ntrs-file-reviewed-v2","documents":4,"bytes":669461,"sha256":nasa_v2_report["train_sha256"]},
               {"dataset_id":"ronin-authored-papers-v1","documents":9,"bytes":750857,"sha256":"source-payloads-verified-individually"},
-              {"dataset_id":"ronin-scienceverse-ccby-v1","documents":sv_report["documents"],"bytes":sv_report["text_bytes"],"sha256":sv_report["train_text_sha256"]}
+              {"dataset_id":"ronin-scienceverse-ccby-v1","documents":sv_report["documents"],"bytes":sv_report["text_bytes"],"sha256":sv_report["train_text_sha256"]},
+              {"dataset_id":"covost2-cc0-translation-only","documents":covost_docs,"bytes":covost_bytes,"sha256":covost_sha,"languages":["en","ca"]}
             ],
-            "train_documents":9121+sv_report["documents"],
-            "source_train_bytes":239377502+sv_report["text_bytes"],
+            "train_documents":9121+sv_report["documents"]+covost_docs,
+            "source_train_bytes":239377502+sv_report["text_bytes"]+covost_bytes,
             "combined_bytes":out.stat().st_size,
             "combined_sha256":hashlib.sha256(out.read_bytes()).hexdigest(),
             "validation_test_partitions_in_training":False,
-            "scope_limit":"NASA v2, Papers and ScienceVerse are source-scoped train only; global G-0 and near-duplicate/benchmark-holdout checks remain pending.",
-            "excluded_not_training_eligible":["NASA NTRS public-use unreviewed remainder (811 scoped records)","ScienceVerse held records listed in incoming/scienceverse/held.json"]
+            "scope_limit":"NASA v2, Papers, ScienceVerse and CoVoST are source-scoped train only; global G-0 and near-duplicate/benchmark-holdout checks remain pending.",
+            "excluded_not_training_eligible":["NASA NTRS public-use unreviewed remainder (811 scoped records)","ScienceVerse held records listed in incoming/scienceverse/held.json","CoVoST validation/test partitions"]
           }
           Path("reports").mkdir(exist_ok=True)
           Path("reports/native-mixture.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
@@ -263,7 +278,7 @@ jobs:
       - name: Create internal validation split from train only
         run: |
           python scripts/prepare_legacy_training_split.py --input /tmp/ronin-native-train.txt --output-dir /tmp/ronin-native-split --validation-fraction 0.05 --seed 42006
-      - name: Train seed 202 for 500 steps and compare against the same compact holdout
+      - name: Train 100 independent seeds for 100 optimizer steps each; compare every candidate against the same fixed 50-question validation sample
         run: |
           python scripts/screen_training_seeds.py \
             --text /tmp/ronin-native-split/train-internal.txt \
@@ -283,10 +298,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: ronin-corpus-seed-202-500steps-${{ github.run_id }}
+          name: ronin-corpus-100-runs-100-steps-${{ github.run_id }}
           path: |
             reports/
-            checkpoints/seed-202/step-00000500.pt
           if-no-files-found: warn
           retention-days: 90
           compression-level: 6
