@@ -1,0 +1,68 @@
+name: RONIN — auditar ScienceVerse para train scoped
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/verify_scienceverse_training.py"
+      - "data/datasets/admitted/scienceverse-ccby-v1/**"
+      - ".github/workflows/verify-scienceverse-training.yml"
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+concurrency:
+  group: ronin-scienceverse-train-audit
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            scripts/verify_scienceverse_training.py
+            data/datasets/admitted/scienceverse-ccby-v1
+            data/datasets/admitted/ronin-authored-papers-v1/manifest.json
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Download exact current train partitions
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-admitted-literature-es-v1-train
+          path: incoming/literature
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 41926088900
+      - uses: actions/download-artifact@v7
+        with:
+          name: ronin-admitted-mathlib4-v1
+          path: incoming/mathlib4
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 42026633643
+      - uses: actions/download-artifact@v7
+        with:
+          name: ronin-nasa-ntrs-file-reviewed-train
+          path: incoming/nasa
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 42028138060
+      - name: Verify every ScienceVerse payload and document
+        run: |
+          python scripts/verify_scienceverse_training.py \
+            --root data/datasets/admitted/scienceverse-ccby-v1 \
+            --literature-jsonl incoming/literature/documents.train.jsonl \
+            --mathlib-jsonl-gz incoming/mathlib4/documents.train.jsonl.gz \
+            --nasa-jsonl incoming/nasa/documents.train.jsonl \
+            --papers-manifest data/datasets/admitted/ronin-authored-papers-v1/manifest.json \
+            --output-dir reports/scienceverse
+      - name: Upload ScienceVerse train audit
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-scienceverse-train-audit-${{ github.run_id }}
+          path: reports/scienceverse/audit.json
+          if-no-files-found: warn
+          retention-days: 90
