@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 12:22 | [Integración continua #1413 (run 42026485794)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42026485794) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Install NumPy for fast scoped near-duplicate audit. Trigger: push; rama: main; intento: 1. | dfc139da |
 | 2026-11-05 12:21 | [Integración continua #1411 (run 42026056063)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42026056063) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Parse legacy train documents by verified sidecar character counts. Trigger: push; rama: main; intento: 1. | fbbaeb6e |
 | 2026-11-05 12:19 | [Integración continua #1410 (run 42025784223)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42025784223) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add workflow to validate and promote reviewed NASA train docs. Trigger: push; rama: main; intento: 1. | afbebc1a |
 | 2026-11-05 12:18 | [Integración continua #1409 (run 42025766372)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42025766372) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add scoped NASA file-reviewed promotion gate. Trigger: push; rama: main; intento: 1. | d0ec77cb |
