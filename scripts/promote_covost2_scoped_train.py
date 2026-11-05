@@ -188,6 +188,8 @@ def promote(root: Path) -> dict[str, Any]:
         "schema_version": "1.0",
         "dataset_id": "covost2-cc0-translation-only",
         "status": "admitted_scoped_training_partition",
+        "count_unit": "translation_segment",
+        "count_semantics": "One JSONL row is one translated text segment, not a full-length document.",
         "scope": "Exact CoVoST 2 translation field values only; source-scoped internal train partition. No audio, Common Voice source sentences, speaker IDs, paths, Tatoeba, or repository code.",
         "source": {
             "repository": "facebookresearch/covost",
@@ -207,6 +209,7 @@ def promote(root: Path) -> dict[str, Any]:
         },
         "aggregate": {
             "train_documents": len(text_lines),
+            "train_segments": len(text_lines),
             "train_text_utf8_bytes": text_bytes,
             "train_text_file_bytes": len(train_text),
             "train_text_file_sha256": sha256(train_text),
@@ -221,6 +224,8 @@ def promote(root: Path) -> dict[str, Any]:
         "partitions": {
             "train": {
                 "documents": len(text_lines),
+                "segments": len(text_lines),
+                "count_unit": "translation_segment",
                 "text_utf8_bytes": text_bytes,
                 "jsonl_bytes": len(train_bytes),
                 "jsonl_sha256": sha256(train_bytes),
@@ -269,6 +274,7 @@ def promote(root: Path) -> dict[str, Any]:
             "workflow_run_url": f"https://github.com/{repo}/actions/runs/{run_id}" if run_id else None,
         },
         "limitations": [
+            "Each exported JSONL row is one translation segment, not a full-length document.",
             "The exported target text contains English and Catalan only; the es_en pair contributes English translations, not Spanish target text.",
             "This is a translation corpus with known translation noise, not gold-standard translation supervision.",
             "Global near-duplicate and benchmark/holdout contamination gates remain pending.",
