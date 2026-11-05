@@ -107,6 +107,7 @@ def main() -> None:
                 held.append(f"{corpus}:missing_doi_or_text")
                 held_counts["missing_doi_or_text"] = held_counts.get("missing_doi_or_text", 0) + 1
                 continue
+            doc_id = f"{corpus}:{doi}"
             source_raw_text = text.encode("utf-8")
             source_text_hash = sha256(source_raw_text)
             replacement_count = text.count("\ufffd")
@@ -118,7 +119,6 @@ def main() -> None:
             normalized_text = text.replace("\ufffd", " ")
             raw_text = normalized_text.encode("utf-8")
             text_hash = sha256(raw_text)
-            doc_id = f"{corpus}:{doi}"
             license_url = str(row.get("license_url", "")).strip().rstrip("/") + "/"
             authors = row.get("authors")
             if row.get("admitted") is not True:
@@ -184,7 +184,7 @@ def main() -> None:
                 "text_bytes": len(raw_text),
                 "normalization": {"replacement_characters_replaced": replacement_count},
                 "partition": "train",
-                "text": text,
+                "text": normalized_text,
             })
 
         corpus_counts[corpus]["manifest_text_bytes"] = expected["admitted_text_bytes"]
