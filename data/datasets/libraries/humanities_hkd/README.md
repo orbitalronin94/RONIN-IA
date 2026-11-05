@@ -6,7 +6,7 @@ Esta biblioteca forma parte del inventario operativo de **32 bibliotecas (16 dom
 
 ## Contenido localizado
 
-- Literatura española admitida: 608 documentos, corpus separado hasta reparto documental
+- Literatura española admitida: 608 documentos train-only, integrada en Humanidades y repartida entre General/HKD tras verificar cada hash
 - CoVoST 2: fragmentos con señal temática
 - Common Corpus Open Culture: candidato
 
