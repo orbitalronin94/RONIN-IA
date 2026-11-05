@@ -17,7 +17,7 @@ def main() -> int:
     manifest_path = ROOT / "manifest.jsonl"
     manifest = {}
     if manifest_path.exists():
-        for line_number, line in enumerate(manifest_path.read_text(encoding="utf-8").splitlines(), 1):
+        for line in manifest_path.read_text(encoding="utf-8").splitlines():
             if not line.strip():
                 continue
             item = json.loads(line)
