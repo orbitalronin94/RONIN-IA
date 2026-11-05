@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 10:44 | [Integración continua #1288 (run 42012903324)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42012903324) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs: correct NASA candidate inventory and library routing. Trigger: push; rama: main; intento: 1. | 1af154e5 |
 | 2026-11-05 10:43 | [Integración continua #1290 (run 42012988670)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42012988670) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: make NASA candidate pack assembly idempotent. Trigger: push; rama: main; intento: 1. | 0581b523 |
 | 2026-11-05 10:43 | [Validar inventario de 64 bibliotecas Level A #3 (run 42012971407)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42012971407) | failure | Ejecución de GitHub Actions; consultar logs y artefactos enlazados para el resultado detallado. Commit: data: index NASA candidate documents in library inventory. Trigger: push; rama: main; intento: 1. | 3cf72e21 |
 | 2026-11-05 10:42 | [Integración continua #1289 (run 42012971319)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42012971319) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: index NASA candidate documents in library inventory. Trigger: push; rama: main; intento: 1. | 3cf72e21 |
