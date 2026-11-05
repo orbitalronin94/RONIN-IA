@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 10:20 | [Integración continua #1268 (run 42009883519)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42009883519) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: feat\(distillation\): add single Qwen tutor with gold-filtered train split. Trigger: push; rama: main; intento: 1. | 1f8562df |
 | 2026-11-05 10:15 | [Integración continua #1266 (run 42008825777)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42008825777) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): reconcile acquired candidate counts and admission status. Trigger: push; rama: main; intento: 1. | 0eb4f283 |
 | 2026-11-05 10:13 | [Integración continua #1265 (run 42008620886)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42008620886) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): accept empty validation and test splits in PMC audit. Trigger: push; rama: main; intento: 1. | 83024af7 |
 | 2026-11-05 10:11 | [Integración continua #1264 (run 42008446742)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42008446742) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): verify nested PMC shards and retry transient source errors. Trigger: push; rama: main; intento: 1. | ebbdd6f9 |
