@@ -78,7 +78,7 @@ def evaluate_model(
     tokenizer: Any,
     rows: list[dict[str, Any]],
     *,
-    max_new_tokens: int = 24,
+    max_new_tokens: int = 64,
 ) -> dict[str, Any]:
     import torch
     from scripts.evaluate_mmlu_pro import format_prompt
