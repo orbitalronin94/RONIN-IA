@@ -363,7 +363,6 @@ def main() -> None:
     parser.add_argument("--revision", default=DATASET_REVISION)
     parser.add_argument("--split", choices=["validation", "test"], default="test")
     parser.add_argument("--device", default="cpu")
-    parser.add_argument("--identity-gated-ninth-layer", action="store_true")
     parser.add_argument("--batch-token-budget", type=int, default=8192)
     parser.add_argument("--identity-gated-ninth-layer", action="store_true")
     parser.add_argument("--require-full-coverage", action="store_true")
