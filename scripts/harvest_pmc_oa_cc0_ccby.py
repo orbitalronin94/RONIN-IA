@@ -11,7 +11,6 @@ import concurrent.futures
 import gzip
 import hashlib
 import json
-import os
 import re
 import sys
 import time
@@ -56,21 +55,19 @@ def esearch_ids(term: str, limit: int) -> list[str]:
     retstart = 0
     while len(ids) < limit:
         params = urllib.parse.urlencode({
-            "db": "pmc", "term": term, "retmode": "json",
+            "db": "pmc", "term": term, "retmode": "xml",
             "retmax": min(10000, limit - len(ids)), "retstart": retstart,
             "sort": "pub date", "tool": "ronin_ia_corpus_harvester",
         })
-        raw = request_bytes(EUTILS + "?" + params)
-        try:
-            payload = json.loads(raw)
-        except json.JSONDecodeError:
-            print("NCBI ESearch non-JSON response: " + raw[:500].decode("utf-8", "replace"), file=sys.stderr)
-            raise
-        result = payload["esearchresult"]
-        batch = result.get("idlist", [])
+        root = ET.fromstring(request_bytes(EUTILS + "?" + params))
+        error = root.findtext("ERROR")
+        if error:
+            raise RuntimeError("NCBI ESearch error: " + error)
+        batch = [node.text for node in root.findall(".//Id") if node.text]
+        count = int(root.findtext("Count") or "0")
         ids.extend(batch)
         retstart += len(batch)
-        if not batch or retstart >= int(result.get("count", "0")):
+        if not batch or retstart >= count:
             break
         time.sleep(0.36)
     return ids
@@ -100,7 +97,7 @@ def eligible_license(value: str) -> bool:
     return normalized in ALLOWED_LICENSES
 
 
-def fetch_record(pmcid: str) -> dict | None:
+def fetch_record(pmcid: str, min_text_bytes: int) -> dict | None:
     try:
         meta = metadata_for(pmcid)
         if not meta or not meta.get("is_pmc_openaccess"):
@@ -114,7 +111,9 @@ def fetch_record(pmcid: str) -> dict | None:
         if not isinstance(text_url, str) or not text_url.startswith(BASE + "/"):
             return None
         raw = request_bytes(text_url)
-        if len(raw) < 2000 or EMAIL_RE.search(raw) or SSN_RE.search(raw) or CARD_RE.search(raw):
+        card_match = CARD_RE.search(raw)
+        card_digits = re.sub(rb"\\D", b"", card_match.group(0)) if card_match else b""
+        if len(raw) < min_text_bytes or EMAIL_RE.search(raw) or SSN_RE.search(raw) or (13 <= len(card_digits) <= 19):
             return None
         text = raw.decode("utf-8", errors="replace").strip()
         if len(text) < 1500 or text.count("\ufffd") > max(3, len(text) // 10000):
@@ -128,7 +127,13 @@ def fetch_record(pmcid: str) -> dict | None:
             "title": meta.get("title"),
             "citation": meta.get("citation"),
             "license": license_code,
-            "license_url": "https://creativecommons.org/publicdomain/zero/1.0/" if license_code.upper().startswith("CC0") else "https://creativecommons.org/licenses/by/4.0/",
+            "license_url": (
+                "https://creativecommons.org/publicdomain/zero/1.0/"
+                if license_code.upper().startswith("CC0")
+                else "https://creativecommons.org/licenses/by/"
+                + next((version for version in ("4.0", "3.0", "2.0", "1.0") if version in license_code), "4.0")
+                + "/"
+            ),
             "source": "PubMed Central Article Datasets on AWS",
             "source_url": "https://pmc.ncbi.nlm.nih.gov/tools/pmcaws/",
             "retrieved_text_url": text_url,
@@ -177,7 +182,7 @@ def main() -> int:
     manifest_file = manifest.open("a", encoding="utf-8")
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as pool:
-            for record in pool.map(fetch_record, ids):
+            for record in pool.map(lambda value: fetch_record(value, args.min_text_bytes), ids):
                 if record is None:
                     continue
                 size = record["text_bytes"]
