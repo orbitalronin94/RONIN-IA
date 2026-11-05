@@ -27,6 +27,21 @@ def verify(manifest_path: Path, output_text: Path | None = None) -> dict:
         raise ValueError("CoVoST training scope is not source-scoped")
     if training.get("validation_test_in_training") is not False:
         raise ValueError("validation/test partition leakage is not ruled out")
+    rights_record_id = manifest.get("rights", {}).get("rights_record_id")
+    registry_path = Path("data/datasets/rights_registry/records.jsonl")
+    rights_records = [
+        json.loads(line)
+        for line in registry_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    matches = [item for item in rights_records if item.get("record_id") == rights_record_id]
+    if len(matches) != 1:
+        raise ValueError("exact CoVoST rights record is missing or duplicated")
+    if matches[0].get("payload_sha256") != manifest.get("source", {}).get("raw_translation_payload_sha256"):
+        raise ValueError("CoVoST rights record does not match the exact source payload")
+    if matches[0].get("license_id") != "CC0-1.0" or matches[0].get("rights_level") != "A":
+        raise ValueError("CoVoST rights record is not level A CC0")
+
     gates = manifest.get("global_gates", {})
     if gates.get("global_g0") != "FAIL":
         raise ValueError("manifest must preserve the current global G-0 state")
@@ -75,6 +90,8 @@ def verify(manifest_path: Path, output_text: Path | None = None) -> dict:
         raise ValueError("CoVoST materialized train text byte count mismatch")
     if sha256(train_text) != aggregate["train_text_file_sha256"]:
         raise ValueError("CoVoST materialized train text SHA-256 mismatch")
+    if characters != aggregate["train_characters"]:
+        raise ValueError("CoVoST character count mismatch")
     if dict(sorted(languages.items())) != aggregate["language_counts"]:
         raise ValueError("CoVoST language distribution mismatch")
     if dict(sorted(pairs.items())) != aggregate["language_pair_counts"]:
