@@ -5,7 +5,7 @@
 
 Este corte corrige y amplía los resúmenes históricos que aparecen más abajo. El inventario canónico vigente es de **32 dominios × General/HKD = 64 bibliotecas** (\`data/datasets/libraries/manifest-64.json\`):
 
-- **608 documentos** de train en el corpus legacy \ `literature-es-v1\`, admitidos bajo su manifiesto legacy separado. Sus 18 validation y 18 test permanecen excluidos del entrenamiento.
+- **608 documentos** de train en el corpus legacy `literature-es-v1`, admitidos bajo su manifiesto legacy separado. Sus 18 validation y 18 test permanecen excluidos del entrenamiento.
 - **4.855 registros candidatos adquiridos por fuente**: 3.087 ScienceVerse, 824 DOI de ScienceVerse/Crossref, 267 textos NASA NTRS y 677 textos ScienceVerse Collabra. Es una suma por fuente, no un total global deduplicado ni documentos Level A admitidos.
 - **0 documentos y 0 bytes Level A** dentro del inventario canónico de 64 bibliotecas; **0/64** alcanzan el mínimo. G-0 continúa en FAIL y no se autoriza entrenamiento documental con estos candidatos.
 
