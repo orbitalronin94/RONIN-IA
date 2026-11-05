@@ -1,40 +1,33 @@
 # Tutor MoE local de RONIN
 
-## Modelo fijado
+## Checkpoint
 
 - Modelo: [Qwen3-30B-A3B-GGUF](https://huggingface.co/Qwen/Qwen3-30B-A3B-GGUF)
-- Cuantización: `Q4_K_M`, aproximadamente 18,6 GB.
-- Parámetros: 30,5B totales; 3,3B activos por token; 128 expertos, 8 activados.
-- Licencia declarada por el repositorio upstream: Apache-2.0.
-- Runtime: Ollama con backend llama.cpp, CPU.
-- Configuración versionada: `configs/local-tutor-qwen3-30b-a3b.json`.
+- Archivo: `Qwen3-30B-A3B-Q4_K_M.gguf` (18,56 GB aprox.).
+- Parámetros: 30,5B totales; 3,3B activos/token; 128 expertos, 8 activos.
+- Licencia upstream: Apache-2.0.
+- Inferencia: `llama.cpp` CLI, CPU. **No se utiliza Ollama.**
 
-No se guardan los pesos en Git: son demasiado grandes. El workflow los descarga a un directorio persistente del runner propio y Ollama los reutiliza en las siguientes ejecuciones.
+El GGUF se descarga la primera vez a `${runner.tool_cache}/ronin-checkpoints/qwen3-30b-a3b-q4km`. El archivo permanece como checkpoint en el almacenamiento persistente del runner y se reutiliza en ejecuciones posteriores. Cada ejecución calcula y publica SHA-256. No se comitea un binario de 18,56 GB en Git ni se depende de la retención temporal de Actions artifacts para los pesos.
 
-## Requisito real de hardware
+## Infraestructura
 
-No confundir parámetros activos con tamaño de pesos. Aunque se activen unos 3,3B por token, el GGUF Q4 contiene los pesos de todos los expertos y ocupa alrededor de 18,6 GB. El workflow exige al menos 28 GiB de RAM disponible y 55 GiB de disco libre antes de descargar. No se ejecuta en runners hosted estándar ni degrada silenciosamente a un modelo pequeño.
+Runner propio Linux x64 con etiqueta `ronin-32gb-cpu`, al menos 28 GiB de RAM disponible y 55 GiB de disco libre. Los 3,3B activos no reducen el tamaño almacenado: todos los pesos del MoE deben estar disponibles. El workflow falla explícitamente si el runner no cumple los mínimos.
 
-Registrar un runner propio Linux x64 con la etiqueta adicional `ronin-32gb-cpu`. Después ejecutar manualmente **RONIN — tutor MoE local Qwen3 30B-A3B** desde GitHub Actions.
+## Pipeline: 100 pasos
 
-## Flujo de trabajo
+1. Comprueba RAM y disco.
+2. Descarga el GGUF solo si no existe el checkpoint local.
+3. Compila `llama.cpp` para CPU y ejecuta un smoke test usando directamente el archivo GGUF.
+4. Opcionalmente genera un máximo de **100 trazas** (un prompt por paso) mediante el CLI.
+5. Guarda manifiesto, SHA-256, trazas y tiempos en un artifact de Actions.
 
-1. Comprueba memoria y almacenamiento.
-2. Instala Ollama y descarga `hf.co/Qwen/Qwen3-30B-A3B-GGUF:Q4_K_M`.
-3. Ejecuta una inferencia de prueba forzada en CPU.
-4. Opcionalmente lee un JSONL de prompts versionado y produce trazas JSONL con ID, prompt, respuesta, tiempos y contadores de tokens.
-5. Publica manifiesto y trazas como artefacto de Actions.
-
-Formato de entrada opcional, una línea por ejemplo:
+Entrada JSONL opcional, una línea por ejemplo:
 
 ```json
 {"id":"ejemplo-001","prompt":"Explica por qué una prueba de regresión es necesaria."}
 ```
 
-Las salidas del tutor quedan marcadas como `candidate_unreviewed`. **No son entrenables automáticamente**: requieren revisión, comprobación factual, procedencia y promoción explícita a una partición train admitida. El benchmark MMLU-Pro y cualquier split de evaluación quedan fuera de los prompts y de la generación.
-
-## Ejecución
+Las trazas se etiquetan `candidate_unreviewed`: no se incorporan automáticamente al corpus ni a gradientes. Exigen revisión factual, procedencia y promoción explícita. MMLU-Pro y los splits de evaluación quedan fuera.
 
 Workflow: [local-moe-tutor.yml](../.github/workflows/local-moe-tutor.yml)
-
-El primer run descargará los pesos; los siguientes reutilizarán el directorio `OLLAMA_MODELS` persistente del runner. El manifiesto del artefacto debe conservar la revisión exacta de upstream y los datos de `ollama show` para auditoría. No declarar el tutor instalado hasta que el workflow termine con descarga y smoke test correctos.
