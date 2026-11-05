@@ -15,7 +15,7 @@ MANIFEST_BLOB_SHA1 = "05497e33fe60dd9a557abbc4f178f4bdceef7545"
 MANIFEST_URL = f"https://raw.githubusercontent.com/scienceverse/papers/{REPO_COMMIT}/collabra/manifest.csv"
 CROSSREF_URL = "https://api.crossref.org/works"
 ISSN = "2474-7394"
-USER_AGENT = "RONIN-IA-Collabra-rights-audit/1.0"
+USER_AGENT = "RONIN-IA-Collabra-rights-audit/1.1"
 CC_BY_4 = {
     "https://creativecommons.org/licenses/by/4.0/",
     "http://creativecommons.org/licenses/by/4.0",
