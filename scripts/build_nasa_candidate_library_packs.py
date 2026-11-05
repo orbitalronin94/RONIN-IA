@@ -182,11 +182,27 @@ def main() -> None:
         "human_review_status": "owner_attested_complete",
         "file_level_review": "data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json",
         "file_level_review_summary": {
-            "nasa_files_reviewed": 4,
-            "content_review_pass_candidate_only": 2,
-            "hold_ocr_repair": 2,
+            "nasa_files_reviewed": len(file_reviews),
+            "content_review_pass_candidate_only": sum(
+                item.get("disposition") == "file_review_pass_candidate_only"
+                for item in file_reviews.values()
+            ),
+            "hold_ocr_repair": sum(
+                item.get("disposition") == "candidate_hold_quality"
+                for item in file_reviews.values()
+            ),
             "newly_admitted_documents": 0,
-            "note": "Two individually reviewed files pass a manual content-legibility spot check but remain candidates pending global exact/near-duplicate checks, current NASA redistribution recheck, and partition isolation.",
+            "pack_documents_with_file_level_review": sum(
+                bool(item.get("file_review_status") != "not_individually_reviewed")
+                for rows in buckets.values()
+                for item in rows
+            ),
+            "pack_documents_without_file_level_review": sum(
+                bool(item.get("file_review_status") == "not_individually_reviewed")
+                for rows in buckets.values()
+                for item in rows
+            ),
+            "note": "File-level dispositions are embedded in each JSONL record. Passes remain candidates; OCR holds are excluded from training. Global deduplication, redistribution recheck and partition isolation remain pending.",
         },
         "scienceverse_metadata_review": "data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json",
         "status": "candidate_human_review_attested_technical_gates_pending",
