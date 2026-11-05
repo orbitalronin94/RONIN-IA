@@ -14,7 +14,7 @@ def load_checkpoint(
     path: str | Path,
     model: nn.Module,
     optimizer: torch.optim.Optimizer | None = None,
-    scaler: torch.cuda.amp.GradScaler | None = None,
+    scaler: torch.amp.GradScaler | None = None,
     batch_generator: torch.Generator | None = None,
     map_location: str | torch.device = "cpu",
     restore_rng: bool = True,
