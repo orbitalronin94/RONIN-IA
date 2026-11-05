@@ -95,14 +95,14 @@ def main():
     unique.append(group[0])
     for x in group[1:]:excluded.append({"doi":x.get("doi"),"title":x.get("title"),"reasons":["duplicate_manifest_row_same_doi_title"]})
   if not unique:
-   (dest/"crossref-license-audit.json").write_text(json.dumps(audit,ensure_ascii=False,indent=2,sort_keys=True)+"\\n",encoding="utf-8")
-   (dest/"excluded.json").write_text(json.dumps(excluded,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+   (dest/"crossref-license-audit.json").write_text(json.dumps(audit,ensure_ascii=False,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+   (dest/"excluded.json").write_text(json.dumps(excluded,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
    record={"dataset_id":f"scienceverse-{name}-crossref-cc-by-4.0-v1","upstream":"https://github.com/scienceverse/papers",
     "upstream_revision":REV,"release_tag":meta["tag"],"manifest_url":geturl,"manifest_rows":len(rows),
     "crossref_confirmed_rows":0,"unique_doi_documents":0,"excluded_rows":len(excluded),
     "target_library":meta["target"],"crossref_audit_file":"crossref-license-audit.json",
     "status":"no_crossref_license_confirmed_no_fulltext_payload_acquired","training_eligible":False}
-   (dest/"provenance.json").write_text(json.dumps(record,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+   (dest/"provenance.json").write_text(json.dumps(record,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
    print(f"{name}: no Crossref-confirmed documents; payload not downloaded")
    continue
   eligible=dest/"eligible-manifest.csv"
