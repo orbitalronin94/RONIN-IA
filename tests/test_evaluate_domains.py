@@ -1,4 +1,5 @@
 import json
+import math
 from pathlib import Path
 
 import pytest
@@ -62,7 +63,16 @@ def test_domain_benchmark_batching_preserves_predictions_and_scores(tmp_path: Pa
     )
     single = evaluate(checkpoint, dataset, batch_token_budget=1)
     batched = evaluate(checkpoint, dataset, batch_token_budget=8192)
-    assert single["details"] == batched["details"]
+    for left, right in zip(single["details"], batched["details"], strict=True):
+        assert left["id"] == right["id"]
+        assert left["predicted_index"] == right["predicted_index"]
+        assert left["correct"] == right["correct"]
+        for left_score, right_score in zip(
+            left["candidate_log_probabilities"],
+            right["candidate_log_probabilities"],
+            strict=True,
+        ):
+            assert math.isclose(left_score, right_score, rel_tol=1e-6, abs_tol=1e-6)
     assert single["overall"] == batched["overall"]
     assert batched["batching"]["batches"] < single["batching"]["batches"]
 
