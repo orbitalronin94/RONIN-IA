@@ -86,6 +86,38 @@ ROUTING_TERMS = {
     "humanities": ("linguistics", "literature", "philology", "archaeology", "art history", "historical linguistics", "poetry", "novel", "drama", "theatre", "literary", "historian", "cultural heritage"),
 }
 
+ROUTING_EXTRA_TERMS = {
+    "mathematics": ("teorema", "álgebra", "algebra", "cálculo", "càlcul", "matriz", "matriu", "derivada", "integral", "polinomio", "polinomi", "espacio vectorial", "espai vectorial"),
+    "logic_epistemology": ("proposición", "proposició", "predicado", "predicat", "cuantificador", "quantificador", "inferencia", "inferència", "falacia", "fal·làcia", "lógica modal", "lògica modal"),
+    "philosophy": ("ontología", "ontologia", "metafísica", "metafisica", "ética", "ètica", "epistemología", "epistemologia", "fenomenología", "fenomenologia", "existencialismo", "existencialisme", "racionalismo", "racionalisme"),
+    "physics": ("física cuántica", "física quàntica", "termodinámica", "termodinàmica", "relatividad", "relativitat", "electromagnetismo", "electromagnetisme", "fotón", "fotó", "entropía", "entropia", "momento angular"),
+    "chemistry_materials": ("molécula", "molècula", "compuesto químico", "compost químic", "catalizador", "catalitzador", "síntesis", "síntesi", "polímero", "polímer", "oxidación", "oxidació", "enlace covalente"),
+    "biology": ("genoma", "enzima", "enzim", "cromosoma", "organismo", "organisme", "ecología", "ecologia", "evolución", "evolució", "especie", "espècie", "genética", "genètica", "proteína", "proteïna", "célula", "cèl·lula", "ADN", "ARN"),
+    "medicine_health": ("clínica", "diagnóstico", "diagnòstic", "farmacología", "farmacologia", "patología", "patologia", "cirugía", "cirurgia", "síntoma", "símptoma", "epidemiología", "epidemiologia", "anatomía", "anatomia", "fisiología", "fisiologia", "paciente", "enfermedad", "malaltia", "tratamiento", "tractament", "medicación", "medicació"),
+    "computer_science": ("algoritmo", "algorisme", "compilador", "base de datos", "base de dades", "protocolo", "protocol", "concurrencia", "concurrència", "criptografía", "criptografia", "núcleo", "nucli", "sistema operativo", "sistema operatiu", "estructura de datos", "estructura de dades", "lenguaje de programación", "llenguatge de programació"),
+    "software_engineering": ("repositorio", "repositori", "depuración", "depuració", "refactorización", "refactorització", "prueba unitaria", "prova unitària", "integración continua", "integració contínua", "despliegue", "desplegament", "control de versiones", "control de versions", "revisión de código", "revisió de codi"),
+    "law": ("estatuto", "ley", "llei", "jurisdicción", "jurisdicció", "jurisprudencia", "jurisprudència", "legislación", "legislació", "tribunal", "apelación", "apel·lació", "contrato", "contracte", "responsabilidad", "responsabilitat", "sentencia", "sentència"),
+    "economics": ("econometría", "econometria", "inflación", "inflació", "política monetaria", "política monetària", "política fiscal", "PIB", "elasticidad", "elasticitat", "tipo de interés", "tipus d'interès", "comercio internacional", "comerç internacional", "finanzas", "finances"),
+    "social_sciences": ("sociología", "sociologia", "antropología", "antropologia", "psicología", "psicologia", "demografía", "demografia", "ciencia política", "ciència política", "política social", "cognición", "cognició", "desigualdad social", "desigualtat social"),
+    "statistics_probability": ("estocástico", "estocàstic", "distribución", "distribució", "estimador", "hipótesis", "hipòtesi", "varianza", "variància", "regresión", "regressió", "muestreo", "mostreig", "intervalo de confianza", "interval de confiança", "desviación estándar", "desviació estàndard", "variable aleatoria", "variable aleatòria"),
+    "astronomy_earth_science": ("astrofísica", "cosmología", "cosmologia", "planeta", "galaxia", "galàxia", "nebulosa", "exoplaneta", "órbita", "òrbita", "geología", "geologia", "clima", "meteorología", "meteorologia", "oceanografía", "oceanografia", "tectónica", "tectònica", "atmósfera", "atmosfera"),
+    "engineering_robotics": ("robótica", "robòtica", "sistema de control", "circuito", "circuit", "actuador", "sensor", "fabricación", "fabricació", "automatización", "automatització", "ingeniería mecánica", "enginyeria mecànica", "ingeniería eléctrica", "enginyeria elèctrica", "sistema embebido", "sistema encastat"),
+    "humanities": ("lingüística", "literatura", "filología", "filologia", "arqueología", "arqueologia", "historia del arte", "història de l'art", "poesía", "poesia", "novela", "novel·la", "teatro", "teatre", "patrimonio cultural", "patrimoni cultural"),
+}
+
+ROUTING_TERMS = {
+    domain: tuple(terms) + ROUTING_EXTRA_TERMS.get(domain, ())
+    for domain, terms in ROUTING_TERMS.items()
+}
+ROUTING_SINGLE_TERMS = {
+    domain: {tokens(term)[0] for term in terms if len(tokens(term)) == 1}
+    for domain, terms in ROUTING_TERMS.items()
+}
+ROUTING_PHRASES = {
+    domain: tuple(" ".join(tokens(term)) for term in terms if len(tokens(term)) > 1)
+    for domain, terms in ROUTING_TERMS.items()
+}
+
 
 def density_for_domain(text: str, domain: str) -> float:
     return score_record(text, domain, Counter(), 1)["semantic_density"]
@@ -95,10 +127,12 @@ def choose_domain(text: str) -> tuple[str | None, float, dict[str, Any]]:
     normalized = " ".join(tokens(text))
     if not normalized:
         return None, 0.0, {}
-    matches = {
-        domain: [term for term in terms if " ".join(tokens(term)) in normalized]
-        for domain, terms in ROUTING_TERMS.items()
-    }
+    unique_words = set(normalized.split())
+    matches = {}
+    for domain in DOMAINS:
+        single_hits = unique_words & ROUTING_SINGLE_TERMS[domain]
+        phrase_hits = [phrase for phrase in ROUTING_PHRASES[domain] if phrase in normalized]
+        matches[domain] = sorted(single_hits) + phrase_hits
     ranked = sorted(
         DOMAINS,
         key=lambda domain: (len(matches[domain]), domain),
