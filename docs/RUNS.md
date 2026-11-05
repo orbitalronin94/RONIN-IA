@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 14:12 | [Integración continua #1485 (run 42042289477)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42042289477) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: chore: remove obsolete root datasets directory. Trigger: push; rama: main; intento: 1. | 03e39633 |
 | 2026-11-05 14:11 | [Integración continua #1484 (run 42042283806)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42042283806) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs: retire obsolete dataset gates terminology. Trigger: push; rama: main; intento: 1. | c468185c |
 | 2026-11-05 14:09 | [Integración continua #1483 (run 42041780611)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42041780611) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: queue native no-tutor cycle after admitted library updates. Trigger: push; rama: main; intento: 1. | ab59042f |
 | 2026-11-05 14:07 | [Integración continua #1482 (run 42041692384)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42041692384) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: train: include individually reviewed NASA partition in native library mix. Trigger: push; rama: main; intento: 1. | 45317835 |
