@@ -151,11 +151,17 @@ def aggregate(
         # (ronin-pmc-oa-<domain>-candidates). The source manifest predates
         # an explicit top-level domain field, so derive it from this exact
         # artifact contract and cross-check every library ID below.
+        # GitHub download-artifact may preserve either the artifact directory
+        # directly or an additional source-domain directory inside it.
         artifact_dir = manifest_path.parent.name
         prefix, suffix = "ronin-pmc-oa-", "-candidates"
-        if not (artifact_dir.startswith(prefix) and artifact_dir.endswith(suffix)):
-            raise SystemExit(f"Unexpected PMC artifact directory: {artifact_dir}")
-        domain = artifact_dir[len(prefix):-len(suffix)]
+        if artifact_dir.startswith(prefix) and artifact_dir.endswith(suffix):
+            domain = artifact_dir[len(prefix):-len(suffix)]
+        else:
+            artifact_root = manifest_path.parent.parent.name
+            if artifact_root != "ronin-pmc-oa-candidates":
+                raise SystemExit(f"Unexpected PMC artifact directory: {artifact_root}")
+            domain = artifact_dir
         if domain not in expected:
             raise SystemExit(f"Unexpected PMC domain in {manifest_path}: {domain!r}")
         if domain in seen_domains:
