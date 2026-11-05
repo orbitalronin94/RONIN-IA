@@ -155,11 +155,11 @@ def main() -> None:
     if not 1 <= args.eval_limit <= 500:
         parser.error("--eval-limit debe estar entre 1 y 500")
 
-    import datasets
     import huggingface_hub
     import transformers
     import trl
     import unsloth
+    import datasets
 
     if not torch.cuda.is_available():
         raise RuntimeError("Este entrenamiento requiere una GPU CUDA; no se iniciará en CPU.")
