@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:41 | [Integración continua #1236 (run 42004441043)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42004441043) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): update acquired corpus counts after NASA expansion. Trigger: push; rama: main; intento: 1. | 00149a9b |
 | 2026-11-05 09:41 | [Integración continua #1235 (run 42004421698)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42004421698) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): update acquired corpus counts after NASA expansion. Trigger: push; rama: main; intento: 1. | 8fe1ace0 |
 | 2026-11-05 09:41 | [Integración continua #1234 (run 42004411925)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42004411925) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): update acquired corpus counts after NASA expansion. Trigger: push; rama: main; intento: 1. | 57ca32bd |
 | 2026-11-05 09:41 | [Integración continua #1231 (run 42004182816)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42004182816) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): accept only Crossref-confirmed CC-BY 4.0 or CC0. Trigger: push; rama: main; intento: 1. | 7d6914aa |
