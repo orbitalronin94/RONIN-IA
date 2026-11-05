@@ -171,3 +171,16 @@ Referencias de artefactos: [índice maestro](https://github.com/orbitalronin94/R
 Se elimina la exigencia adicional de reconciliación territorial general ES/EU/US para materiales que ya satisfacen el estándar scoped legacy: acceso público anónimo; revisión upstream inmutable; derechos y procedencia por documento; payload y SHA-256; particiones deterministas y disjuntas; cero duplicados exactos en train; auditoría humana/calidad registrada; y escaneo previo de privacidad/secretos. Se mantienen exclusiones de terceros, privacidad, integridad, atribución y calidad. La licencia de metadatos nunca sustituye los derechos del texto.
 
 Resultado: `literature-es-v1` aporta **608 documentos / 140.295.523 bytes** a `humanities_general`. No se rellena HKD sin ejecutar su ranking semántico. G-0 permanece FAIL y bloquea la elegibilidad global de entrenamiento.
+
+
+## Corpus propio de RONIN — Papers v1 (2026-11-05)
+
+Se ha incorporado como corpus de autoría autorizada el contenido de los **9 archivos Markdown** de `orbitalronin94/Papers`, excluyendo expresamente `README.md`. La revisión fija la revisión fuente `d7bf3ae446f666ce3be73b11aab7090e1605a889` y conserva cada Markdown sin transformación.
+
+- **9 documentos**, **750.857 bytes UTF-8**, **93.499 palabras**.
+- Los nueve hashes Git blob SHA-1 del origen coinciden exactamente con los blobs copiados al repositorio RONIN-IA.
+- SHA-256 por payload, procedencia, licencia declarada y asignación temática están registrados en `admitted/ronin-authored-papers-v1/manifest.json`.
+- Asignación inicial a bibliotecas General: lógica/epistemología (2), lingüística (1), medicina/salud (2), biología (1), ingeniería de software (1), estadística/probabilidad (1) y filosofía (1). No se asigna ningún documento a HKD todavía.
+- La autorización del propietario cubre la incorporación al corpus interno de investigación y entrenamiento de RONIN. No se infiere permiso adicional de redistribución externa ni de despliegue comercial fuera del alcance expresamente autorizado y de los términos de cada documento.
+
+**Estado:** incorporados como corpus propio autorizado y versionado; todavía no habilitados para una ejecución de entrenamiento. Faltan deduplicación exacta y aproximada contra todas las fuentes/corpus de evaluación, auditoría final de calidad, privacidad y citas, separación General/HKD y aislamiento de particiones. Por ello no se alteran aún los contadores Level A ni el estado G-0 global.
