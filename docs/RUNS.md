@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 13:53 | [Integración continua #1476 (run 42039649860)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42039649860) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: perf\(pipeline\): reduce checkpoint I/O and record end-to-end metrics. Trigger: push; rama: main; intento: 1. | b1e46391 |
 | 2026-11-05 13:52 | [Integración continua #1474 (run 42039315662)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42039315662) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(eval\): ensure batched domain scoring preserves results. Trigger: push; rama: main; intento: 1. | b0ccbd90 |
 | 2026-11-05 13:50 | [Integración continua #1472 (run 42038929733)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42038929733) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(model\): verify cached RoPE parity and checkpoint compatibility. Trigger: push; rama: main; intento: 1. | 005e80d9 |
 | 2026-11-05 13:50 | [Integración continua #1473 (run 42039291797)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42039291797) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: perf\(eval\): batch domain benchmark inference by prompt length. Trigger: push; rama: main; intento: 1. | f29ef4cb |
