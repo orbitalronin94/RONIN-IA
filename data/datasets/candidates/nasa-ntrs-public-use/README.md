@@ -52,10 +52,13 @@ Se ha registrado una revisión a nivel de archivo en `data/datasets/reviews/nasa
 
 La auditoría por archivo se amplió de cuatro a **ocho textos**. El resultado acumulado queda así:
 
-- **4 pasan revisión manual de legibilidad como candidatos:** `19620002819`, `19630000935`, `19620004488` y `19630000937`. En los cuatro se contrastaron título/autoría y la determinación de distribución/copyright con sus fichas NTRS oficiales, y se inspeccionó OCR en secciones representativas.
+- **5 pasan revisión manual de legibilidad como candidatos:** `19620002819`, `19630000935`, `19620004488`, `19630000937` y `19640011871`. En los cuatro se contrastaron título/autoría y la determinación de distribución/copyright con sus fichas NTRS oficiales, y se inspeccionó OCR en secciones representativas.
 - **3 retenidos por OCR severo:** `19620000001`, `19620002834` y `19620002866`.
 - **1 retenido por derechos y OCR no resueltos a nivel de documento:** `19630000936`. Su texto parece corresponder a una sección del volumen NASA-TN-D-1510, pero no se resolvió una ficha individual con determinación de derechos propia; la ficha del volumen advierte que algunas partes pueden contener material protegido. No se hereda automáticamente el permiso del volumen.
 
 Los cuatro pases siguen siendo candidatos: no se admiten todavía. Los otros cuatro permanecen en hold. El detalle de los ocho, incluidos SHA de blob, tamaños, enlaces NTRS, hallazgos y disposición, está en `data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json`.
 
 El constructor comprueba para los 824 textos NASA del paquete los SHA-256 y tamaños contra el manifiesto fuente, aplica la allowlist de derechos por documento y rechaza duplicados exactos dentro de la propia colección. Eso no sustituye la deduplicación global entre fuentes ni la revalidación de redistribución previa al snapshot de entrenamiento.
+
+
+Revisión añadida: el documento NASA-SP-7002 / NTRS 19640011871 (*High Energy Propellants: A Continuing Bibliography*) se inspeccionó en portada, introducción, entradas bibliográficas y sección posterior. Su ficha individual confirma autoría institucional NASA, distribución pública y uso público gubernamental. El OCR separa letras y contiene errores locales, pero la estructura de bibliografía anotada y las referencias siguen siendo legibles. Se clasifica como candidato con ruido OCR; no se admite hasta superar las puertas globales.
