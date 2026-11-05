@@ -107,15 +107,20 @@ jobs:
         run: python scripts/prepare_legacy_training_split.py --input /tmp/ronin-tournament-combined.txt --output-dir /tmp/ronin-tournament-split --validation-fraction 0.05 --seed 42006
       - name: Compile tournament implementation
         run: python -m compileall -q ronin scripts/run_checkpoint_tournament.py scripts/evaluate_mmlu_pro.py scripts/evaluate_text.py
+      - name: Create isolated internal train partitions for each source
+        run: |
+          python scripts/prepare_legacy_training_split.py --input incoming/literature/train.txt --output-dir /tmp/ronin-lit-split --validation-fraction 0.05 --seed 42006
+          python scripts/prepare_legacy_training_split.py --input incoming/mathlib4/train.txt --output-dir /tmp/ronin-math-split --validation-fraction 0.05 --seed 42006
+          python scripts/prepare_legacy_training_split.py --input incoming/nasa/train.txt --output-dir /tmp/ronin-nasa-split --validation-fraction 0.05 --seed 42006
       - name: Run A/B/C training and D interpolation tournament
         run: |
           python scripts/run_checkpoint_tournament.py \
             --base-checkpoint checkpoints/winner.pt \
             --second-checkpoint checkpoints/second.pt \
             --combined-text /tmp/ronin-tournament-split/train-internal.txt \
-            --literature-text incoming/literature/train.txt \
-            --mathlib-text incoming/mathlib4/train.txt \
-            --nasa-text incoming/nasa/train.txt \
+            --literature-text /tmp/ronin-lit-split/train-internal.txt \
+            --mathlib-text /tmp/ronin-math-split/train-internal.txt \
+            --nasa-text /tmp/ronin-nasa-split/train-internal.txt \
             --validation-text /tmp/ronin-tournament-split/validation-internal.txt \
             --revision "$MMLU_REVISION" \
             --context-length 4096 \
