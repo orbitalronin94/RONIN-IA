@@ -41,7 +41,7 @@ def write_library(root: Path, library_id: str, text: str) -> dict:
 
 
 def write_domain_shard(root: Path, domain: str, texts: tuple[str, str]) -> None:
-    domain_root = root / "ronin-pmc-oa-candidates" / domain
+    domain_root = root / f"ronin-pmc-oa-{domain}-candidates"
     domain_root.mkdir(parents=True)
     libraries = [
         write_library(domain_root, f"{domain}_general", texts[0]),

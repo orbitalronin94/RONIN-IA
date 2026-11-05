@@ -20,6 +20,7 @@ def test_mathlib_record_keeps_pinned_provenance_and_hash(tmp_path: Path):
     root = tmp_path / "mathlib4"
     source = root / "Mathlib" / "Logic" / "Basic.lean"
     source.parent.mkdir(parents=True)
+    (root / "LICENSE").write_text("Apache License\\nVersion 2.0, January 2004\\n", encoding="utf-8")
     source.write_text("theorem example : True := by trivial\n", encoding="utf-8")
     record = build_record(source, root, REVISION)
 
