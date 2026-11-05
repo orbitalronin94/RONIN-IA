@@ -122,6 +122,9 @@ jobs:
           assert {row.get("text_sha256") for row in nasa_rows}=={"039f1edab34becc04e9a367814acc3a5ec08ba510d7913813468ca2d9598aebe","d3177bef2b74f196f125e55bb928f751e41d1e16e7063805c502aa96d380cc24"}
           ck=torch.load(base,map_location="cpu",weights_only=False)
           assert ck.get("step")==1000 and isinstance(ck.get("model"),dict)
+          parameter_count=sum(t.numel() for t in ck["model"].values())
+          assert parameter_count==model_manifest["parameters"]==9922880
+          print("Modelo verificado:", model_manifest["model_name"], "| parámetros=", parameter_count, "| pesos_sha256=", model_manifest["weights_sha256"])
           Path("checkpoints").mkdir(exist_ok=True)
           shutil.copy2(base,"checkpoints/main.pt")
           print("Integrity checks OK: 608 literature + 8498 Mathlib4 + 2 NASA file-reviewed = 9108 scoped train docs; 237957184 source bytes. No tutor data. Validation/test partitions excluded.")
