@@ -141,7 +141,7 @@ def audit_nasa() -> dict:
         if not rights_ok:
             status="hold_rights"
             reason="Per-record NASA rights/export/privacy allowlist failed"
-        elif override and override.get("disposition") != "file_review_pass_candidate_only":
+        elif override and override.get("disposition") not in {"file_review_pass_candidate_only","assistant_review_pass_candidate_only"}:
             status="hold_manual_review"
             reason=override.get("reason","Existing human-review hold")
         elif override and override.get("disposition") in {"file_review_pass_candidate_only","assistant_review_pass_candidate_only"}:
