@@ -8,13 +8,13 @@ El objetivo canónico es **64 bibliotecas: 32 dominios × General/HKD**. El inve
 
 General y HKD deben ser disjuntas globalmente, sin duplicados exactos ni near-duplicates compartidos. HKD se selecciona por densidad semántica RONIN, con desempate estable por identificador documental, y el reparto se equilibra por bytes de texto UTF-8.
 
-Cada biblioteca necesita al menos **1 MiB de texto admitido Level A**; el objetivo posterior es **10 GiB por biblioteca**. Por tanto, el mínimo total es 64 MiB y el objetivo de escala es 640 GiB. Solo cuentan bytes de texto admitido con evidencia Level A; no cuentan metadatos, candidatos, RDS comprimidos ni corpus legacy sin reconciliación territorial.
+Cada biblioteca necesita al menos **1 MiB de texto admitido Level A**; el objetivo posterior es **10 GiB por biblioteca**. Por tanto, el mínimo total es 64 MiB y el objetivo de escala es 640 GiB. Level A aplica el estándar scoped del corpus legacy: fuente pública fijada, derechos/procedencia por documento, hashes, particiones disjuntas, cero duplicados exactos en train y auditorías previas de calidad y privacidad. No se exige nueva reconciliación territorial general ES/EU/US si ya existe esa evidencia. Metadatos, candidatos y RDS comprimidos siguen sin contar.
 
 G-0 es independiente: mientras permanezca en FAIL, ninguna biblioteca puede ser training-eligible aunque su fuente tenga una licencia compatible.
 
 ## Estado real del corpus
 
-**Estado:** 32 dominios y 64 bibliotecas catalogados; **0/64** alcanzan el mínimo Level A; **0 bytes** de texto Level A admitido en el inventario; G-0 sigue en FAIL.
+**Estado:** 32 dominios y 64 bibliotecas catalogados; **1/64** alcanza el mínimo Level A; **608 documentos / 140.295.523 bytes** admitidos en Humanidades — General; G-0 sigue en FAIL.
 
 - **Único corpus admitido:** \`admitted/literature-es-v1/\`, con 608 documentos de entrenamiento en español. Sus particiones de validación y prueba permanecen fuera del entrenamiento.
 - **CoVoST 2:** la exportación exacta contiene solo el campo \`translation\` de tres archivos fijados, bajo la declaración CC0 del conjunto. El control de calidad retuvo 337.973 traducciones únicas; la partición train contiene 270.244 filas, validation 34.051 y test 33.678. Tres filas con patrón telefónico se revisaron: dos eran rangos de curso académico y una era una cantidad en euros por hora; se conservan como falsos positivos. Sigue pendiente la revisión humana final de muestras. Es un candidato con registro de derechos de alcance exacto, no un corpus admitido.
@@ -164,3 +164,10 @@ Los logs permiten identificar un bloqueo concreto: RUN 5 exigía **2.560 MiB de 
 **Decisión:** RUN 5 suma cero documentos admitidos y cero bytes Level A. No se relaja el control legal ni se promocionan muestras automáticamente. El siguiente arreglo técnico debe separar el umbral mínimo para materializar un *candidato auditable* del umbral de escala de una biblioteca completa; conservar el umbral de admisión Level A de 1 MiB y G-0 como gates independientes; corregir la recolección de artefactos para que el índice maestro encuentre los payloads realmente publicados; y repetir deduplicación global solo cuando el inventario esté completo.
 
 Referencias de artefactos: [índice maestro](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41904620741/artifacts/13382512138), [informe de candidatos y deduplicación](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41904620741/artifacts/13382377370).
+
+
+## Cambio de política Level A — equivalencia con literature-es-v1 (2026-11-05)
+
+Se elimina la exigencia adicional de reconciliación territorial general ES/EU/US para materiales que ya satisfacen el estándar scoped legacy: acceso público anónimo; revisión upstream inmutable; derechos y procedencia por documento; payload y SHA-256; particiones deterministas y disjuntas; cero duplicados exactos en train; auditoría humana/calidad registrada; y escaneo previo de privacidad/secretos. Se mantienen exclusiones de terceros, privacidad, integridad, atribución y calidad. La licencia de metadatos nunca sustituye los derechos del texto.
+
+Resultado: `literature-es-v1` aporta **608 documentos / 140.295.523 bytes** a `humanities_general`. No se rellena HKD sin ejecutar su ranking semántico. G-0 permanece FAIL y bloquea la elegibilidad global de entrenamiento.
