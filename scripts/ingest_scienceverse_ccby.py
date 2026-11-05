@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Acquire fixed ScienceVerse full-text paperlists with per-article CC-BY audit."""
-import csv, hashlib, json, pathlib, urllib.request
+import csv, hashlib, json, pathlib, urllib.request, shutil
 
-ROOT = pathlib.Path("data/datasets/admitted/scienceverse")
+ROOT = pathlib.Path("data/datasets/candidates/scienceverse-fulltext")
 CORPORA = {
     "bmcmed": {"tag":"bmcmed-2026-06-19","expected":1000,"target":"medicine_health_general","release":"https://github.com/scienceverse/papers/releases/download/bmcmed-2026-06-19/bmcmed.rds"},
     "jdm": {"tag":"jdm-2026-06-21","expected":855,"target":"social_sciences_general","release":"https://github.com/scienceverse/papers/releases/download/jdm-2026-06-21/jdm.rds"},
@@ -73,7 +73,7 @@ def main():
             "payload_sha256":digest(payload),
             "manifest_sha256":digest(manifest),
             "eligible_manifest_sha256":digest(eligible),
-            "training_eligible":True,
+            "status":"candidate_fulltext_acquired_pending_global_validation",\n            "training_eligible":False,
             "admission_scope":"fixed upstream release paperlist; individual DOI/title/license provenance retained in manifest.csv",
             "caveats":["RDS is the upstream full-text paperlist format, not a plain-text export.",
                        "Recheck upstream retractions/corrections before each training snapshot.",
@@ -83,5 +83,5 @@ def main():
         (dest/"provenance.json").write_text(json.dumps(record,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
         total+=len(rows)
         print(f"{name}: {len(rows)} docs; payload {payload.stat().st_size} bytes; sha256 {record['payload_sha256']}")
-    print(f"VERIFIED_MANIFEST_DOCS={total}")
+    # Remove any prior misplaced copy from the admitted tree after the candidate\n    # payload has been downloaded and verified successfully.\n    old=pathlib.Path("data/datasets/admitted/scienceverse")\n    if old.exists(): shutil.rmtree(old)\n    print(f"VERIFIED_CANDIDATE_DOCS={total}")
 if __name__=="__main__": main()
