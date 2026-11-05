@@ -9,8 +9,16 @@ on:
       - "scripts/select_knowledge_dense_corpus.py"
       - "data/manifests/knowledge_dense_sources.json"
       - "reports/license_audit.json"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/expand-common-corpus-candidates.yml"
+      - "scripts/prepare_run5_candidates.py"
+      - "scripts/select_knowledge_dense_corpus.py"
+      - "data/manifests/knowledge_dense_sources.json"
+      - "reports/license_audit.json"
   schedule:
-    - cron: "47 1 * * 0"
+    - cron: "47 1 * * *"
   workflow_dispatch:
     inputs:
       max_rows:
@@ -21,7 +29,7 @@ on:
       max_input_gib:
         description: Maximum text bytes inspected per domain in GiB
         required: true
-        default: "1"
+        default: "2"
         type: string
 
 permissions:
@@ -60,7 +68,7 @@ jobs:
     env:
       DOMAIN: ${{ matrix.domain }}
       MAX_ROWS: ${{ inputs.max_rows || '1000000' }}
-      MAX_INPUT_GIB: ${{ inputs.max_input_gib || '1' }}
+      MAX_INPUT_GIB: ${{ inputs.max_input_gib || '2' }}
       PYTHONPATH: .
       HF_HUB_DISABLE_TELEMETRY: "1"
       HF_DATASETS_CACHE: /tmp/hf-datasets-cache
@@ -74,7 +82,7 @@ jobs:
       - name: Validate bounded limits
         run: |
           [[ "$MAX_ROWS" =~ ^[0-9]+$ ]] && [ "$MAX_ROWS" -ge 1000 ] && [ "$MAX_ROWS" -le 1000000 ]
-          [[ "$MAX_INPUT_GIB" =~ ^[0-9]+$ ]] && [ "$MAX_INPUT_GIB" -ge 1 ] && [ "$MAX_INPUT_GIB" -le 1 ]
+          [[ "$MAX_INPUT_GIB" =~ ^[0-9]+$ ]] && [ "$MAX_INPUT_GIB" -ge 1 ] && [ "$MAX_INPUT_GIB" -le 2 ]
       - name: Install anonymous streaming reader
         run: |
           python -m pip install --upgrade pip
@@ -103,6 +111,7 @@ jobs:
             --domain "$DOMAIN" \
             --max-rows "$MAX_ROWS" \
             --max-input-bytes "$((MAX_INPUT_GIB * 1024 * 1024 * 1024))" \
+            --shuffle-seed "$((GITHUB_RUN_ID % 4294967296))" \
             --min-train-bytes "$((1 * 1024 * 1024))" \
             --output-root "/tmp/ronin-common-corpus/$DOMAIN"
       - name: Assert candidate-only output and preserve partial diagnostics
