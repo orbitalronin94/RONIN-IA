@@ -86,8 +86,8 @@ def build(input_csv: Path, out_dir: Path, expected_papers: int = 748) -> dict:
     finally:
         for handle in handles.values():
             handle.close()
-    if total != expected_papers or sum(counts.values()) != expected_papers:
-        raise ValueError(f"expected {expected_papers} eligible papers and outputs, got input={total}, output={sum(counts.values())}")
+    if sum(counts.values()) != expected_papers:
+        raise ValueError(f"expected {expected_papers} eligible output papers, got {sum(counts.values())} from {total} input rows")
     partitions = {
         name: {
             "documents": counts[name],
