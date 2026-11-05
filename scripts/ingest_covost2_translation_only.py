@@ -72,7 +72,7 @@ def main() -> int:
                 if extracted is None:
                     raise ValueError(f"{filename}: TSV cannot be read")
                 text = io.TextIOWrapper(extracted, encoding="utf-8", newline="")
-                reader = csv.DictReader(text, delimiter="\t")
+                reader = csv.DictReader(text, delimiter="\t", escapechar="\\", quoting=csv.QUOTE_NONE)
                 if not reader.fieldnames or not {"translation", "split"}.issubset(set(reader.fieldnames)):
                     raise ValueError(f"{filename}: expected translation and split columns; refusing unsplit export")
                 pair_rows = 0
