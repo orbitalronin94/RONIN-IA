@@ -56,9 +56,12 @@ def evaluate(
     dataset: Path,
     profile: str = "tiny",
     device: str = "cpu",
+    identity_gated_ninth_layer: bool = False,
 ) -> dict[str, Any]:
     items = load_items(dataset)
     config, _ = get_profile(profile)
+    if identity_gated_ninth_layer:
+        config = replace(config, n_layers=config.n_layers + 1, identity_last_layer=True)
     target_device = torch.device(device)
     model = RoninLM(config)
     step = load_checkpoint(checkpoint, model, map_location="cpu", restore_rng=False)
@@ -137,9 +140,11 @@ def main() -> None:
     parser.add_argument("--dataset", type=Path, default=Path("benchmarks/domains_v1.jsonl"))
     parser.add_argument("--profile", choices=["tiny"], default="tiny")
     parser.add_argument("--device", default="cpu")
+    parser.add_argument("--identity-gated-ninth-layer", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--identity-gated-ninth-layer", action="store_true")
     args = parser.parse_args()
-    report = evaluate(args.checkpoint, args.dataset, args.profile, args.device)
+    report = evaluate(args.checkpoint, args.dataset, args.profile, args.device, args.identity_gated_ninth_layer)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
