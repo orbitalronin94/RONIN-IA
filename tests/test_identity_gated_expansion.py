@@ -49,3 +49,18 @@ def test_identity_gate_receives_gradient():
     assert model.extra_layer_scale.grad is not None
     assert torch.isfinite(model.extra_layer_scale.grad)
     assert model.extra_layer_scale.grad.abs().item() > 0
+
+def test_ninth_layer_parameter_budget_is_explicit():
+    base_config, _ = get_profile("tiny")
+    expanded_config = type(base_config)(
+        **{
+            **base_config.__dict__,
+            "n_layers": base_config.n_layers + 1,
+            "identity_last_layer": True,
+        }
+    )
+    base = RoninLM(base_config)
+    expanded = RoninLM(expanded_config)
+    assert base.parameter_count == 9_922_880
+    # Includes the scalar residual gate in addition to the new Transformer block.
+    assert expanded.parameter_count == 11_152_961
