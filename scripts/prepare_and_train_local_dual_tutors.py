@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -22,6 +23,15 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, default=Path("artifacts/dual-distillation"))
     parser.add_argument("--checkpoints", type=Path, default=Path("checkpoints/dual-teacher-candidate"))
     args = parser.parse_args()
+    if not 8 <= args.count <= 128:
+        parser.error("--count debe estar entre 8 y 128")
+    if not 1 <= args.steps <= 1000:
+        parser.error("--steps debe estar entre 1 y 1000")
+    if shutil.which("llama-server") is None:
+        parser.error(
+            "No se encuentra llama-server en PATH. Instala llama.cpp con soporte Qwen3.6 "
+            "antes de descargar los modelos."
+        )
 
     # Descargas y verificaciones separadas; no se necesita ningún token de API.
     download("qwen3.6-27b", args.quantization, args.models_dir)
