@@ -8,7 +8,7 @@ RONIN es un modelo causal Transformer implementado en PyTorch. El modelo operati
 
 - Base: checkpoint anterior de `main`, SHA-256 de pesos `5aa7cd5a8188784b9fbf2e0c0454b6504d32e2188e3ac0291a0a255d88bce49e`.
 - Entrenamiento: 500 pasos adicionales de next-token prediction, semilla 202, 128.000 tokens, CPU con 2 hilos.
-- Corpus: 9.108 documentos admitidos (literatura española, Mathlib4 y 2 documentos NASA revisados individualmente); sin preguntas, QA sintético ni tutor.
+- Corpus usado para crear este checkpoint: 9.108 documentos admitidos; no se le atribuye el corpus ampliado posterior. El inventario train-scoped actual suma 286.468 unidades: literatura española, Mathlib4, NASA revisado, Papers propios, ScienceVerse CC-BY y CoVoST 2 CC0 (270.244 segmentos de traducción). Cada fuente se verifica por separado y solo se ensamblan particiones train; validation/test quedan fuera.
 - Checkpoint de origen: SHA-256 `86d7d97360f1eb0ac35e9dc12f69c366101629641115ba1c2a1341b2b7d257ae`.
 - Run: [GitHub Actions #42071401130](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42071401130).
 - Artefacto de origen: `ronin-corpus-seed-202-500steps-42071401130`. El workflow de fijación extrae y valida el state_dict y lo versiona como `weights/ronin-main.pt`; el manifiesto `weights/main-model.json` conserva hashes y procedencia.
@@ -41,6 +41,12 @@ Se incorpora Qwen3-30B-A3B Q4_K_M como checkpoint GGUF persistente en el runner 
 | `.github/workflows/` | CI y ciclos reproducibles de entrenamiento |
 
 Los corpus candidatos permanecen separados de los documentos habilitados para entrenamiento. Un documento no se considera entrenable por el mero hecho de estar descargado: se exige procedencia, derechos compatibles, integridad del payload y partición explícita. Los conjuntos de validación y test nunca se incorporan a los gradientes.
+
+## Experimento de 100 corridas sobre el corpus actual
+
+La PR de cribado ejecuta **100 candidatos independientes**, con semillas 1–100 y **100 pasos de optimizador por candidato** (10.000 actualizaciones agregadas). Cada candidato parte del mismo checkpoint operativo y se compara con los mismos 50 IDs del split validation de MMLU-Pro, además de la validación interna de texto. El corpus de entrada incorpora las particiones train admitidas de literatura, Mathlib4, NASA revisado, Papers propios, ScienceVerse y CoVoST 2 CC0. No se usa tutor en estas 100 corridas. Se conservan los informes completos y los tres checkpoints mejor clasificados; no hay promoción automática.
+
+Esta configuración es un experimento de cribado, no una certificación del benchmark oficial. Los resultados solo estarán disponibles cuando finalice una ejecución satisfactoria de GitHub Actions.
 
 ## Entrenar y evaluar
 
