@@ -1,5 +1,7 @@
 name: RONIN — microentrenamiento corpus 4 semillas × 50 pasos
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
       steps:
@@ -14,7 +16,7 @@ on:
         type: choice
         options: ["50"]
       seeds:
-        description: Semillas separadas por comas (máximo 8); con eval_limit=0 usa solo la ganadora
+        description: Exactamente cuatro semillas distintas separadas por comas
         required: true
         default: "101,202,303,404"
         type: string
@@ -36,9 +38,9 @@ jobs:
       MATHLIB_RUN_ID: "42026633643"
       NASA_FILE_REVIEWED_RUN_ID: "42028138060"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
-      STEPS: ${{ inputs.steps || '500' }}
-      EVAL_LIMIT: ${{ inputs.eval_limit || '1024' }}
-      TRAIN_SEEDS: ${{ inputs.seeds || '20261108' }}
+      STEPS: ${{ inputs.steps || '50' }}
+      EVAL_LIMIT: ${{ inputs.eval_limit || '50' }}
+      TRAIN_SEEDS: ${{ inputs.seeds || '101,202,303,404' }}
     steps:
       - uses: actions/checkout@v5
         with:
