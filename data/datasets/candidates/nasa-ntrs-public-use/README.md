@@ -1,6 +1,6 @@
 # NASA Technical Reports Server (NTRS) — filtro documental
 
-**Estado a 5 de noviembre de 2026: 53 textos completos descargados como candidatos; 7.853.246 bytes de texto UTF-8. No admitidos para entrenamiento.**
+**Estado a 5 de noviembre de 2026: 189 textos completos descargados como candidatos; 15.417.212 bytes de texto UTF-8. No admitidos para entrenamiento.**
 
 ## Valor potencial
 
@@ -26,7 +26,7 @@ Excluir:
 
 ## Adquisición realizada
 
-El workflow `.github/workflows/ingest-nasa-ntrs-public-use.yml` consultó 13 categorías, recibió 1.245 registros y encontró 107 que superaban los filtros de metadatos. Se descargaron 53 textos completos; 21 documentos se rechazaron por patrones de correo/SSN, 6 IDs repetidos y 0 fallos de descarga. Se conserva un `manifest.jsonl` por documento, `provenance.json`, SHA-256 de cada texto y el fichero en `documents/`.
+El workflow `.github/workflows/ingest-nasa-ntrs-public-use.yml` consultó 37 categorías, recibió 3.595 registros y encontró 430 que superaban los filtros de metadatos. Se descargaron 189 textos completos; 73 documentos se rechazaron por patrones de correo/SSN, 91 IDs repetidos, 0 textos duplicados y 0 fallos de descarga. Se conserva un `manifest.jsonl` por documento, `provenance.json`, SHA-256 de cada texto y el fichero en `documents/`.
 
 El filtro aplicado exige `PUBLIC_USE_PERMITTED` o `GOV_PUBLIC_USE_PERMITTED`, `licenseType=NO`, ausencia declarada de material de terceros, distribución pública, `DOCUMENT_AND_METADATA`, estado `CURATED`, `sensitiveInformation=2` (NONE), EAR/ITAR en NO y texto completo disponible. Son candidatos de uso público según el registro NASA; aún requieren revisión humana de derechos, PII y calidad. NASA exige consultar las redistribuciones al menos semanalmente y retirar cualquier documento cuya disponibilidad cambie.
 
