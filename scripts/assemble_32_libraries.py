@@ -106,7 +106,7 @@ ROUTING_EXTRA_TERMS = {
 }
 
 ROUTING_TERMS = {
-    domain: tuple(terms) + ROUTING_EXTRA_TERMS.get(domain, ())
+    domain: tuple(dict.fromkeys(tuple(terms) + ROUTING_EXTRA_TERMS.get(domain, ())))
     for domain, terms in ROUTING_TERMS.items()
 }
 ROUTING_SINGLE_TERMS = {
