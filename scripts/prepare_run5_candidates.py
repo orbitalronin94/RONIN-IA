@@ -34,9 +34,9 @@ SHUFFLE_SEED = 20261104
 SHUFFLE_BUFFER_SIZE = 10_000
 
 
-def domain_shuffle_seed(domain: str) -> int:
-    """Stable, domain-specific seed so parallel workers do not scan the same prefix."""
-    digest = hashlib.sha256(f"{SHUFFLE_SEED}:{domain}".encode()).digest()
+def domain_shuffle_seed(domain: str, base_seed: int = SHUFFLE_SEED) -> int:
+    """Stable, domain-specific seed; a new run seed explores a different bounded stream sample."""
+    digest = hashlib.sha256(f"{base_seed}:{domain}".encode()).digest()
     return int.from_bytes(digest[:4], "big")
 
 
@@ -430,6 +430,7 @@ def main() -> int:
     parser.add_argument("--max-rows", type=int, default=5_000_000)
     parser.add_argument("--domain", choices=DOMAIN_PRIORITY, help="Process one of 16 operational domains per runner to scale storage horizontally")
     parser.add_argument("--max-input-bytes", type=int, default=6 * 1024**3)
+    parser.add_argument("--shuffle-seed", type=int, default=SHUFFLE_SEED)
     parser.add_argument("--min-train-bytes", type=int, default=1 * 1024**2)
     parser.add_argument("--hkd-fraction", type=float, default=HKD_FRACTION)
     parser.add_argument("--license-audit", type=Path, default=Path("reports/license_audit.json"))
@@ -519,7 +520,7 @@ def main() -> int:
     scanned_rows = 0
     accepted_bytes = 0
     scanned_text_bytes = 0
-    stream_seed = domain_shuffle_seed(args.domain or "all-domains")
+    stream_seed = domain_shuffle_seed(args.domain or "all-domains", args.shuffle_seed)
     dataset = shuffle_dataset_stream(load_dataset(
         DATASET_ID,
         split="train",
