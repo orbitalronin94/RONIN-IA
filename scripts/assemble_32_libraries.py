@@ -242,6 +242,95 @@ def write_library(out: Path, domain: str, kind: str, records: list[dict[str, Any
     }
 
 
+
+def literature_records(metadata_jsonl: bytes, train_text: bytes) -> list[dict[str, Any]]:
+    """Reconstruct the 608 train-only literature fragments with byte-level integrity.
+
+    The upstream materializer stores one metadata JSON object per fragment and
+    concatenates fragment text in train.txt, separated by exactly two newlines.
+    character_count is measured in Unicode code points, so reconstruction must
+    decode UTF-8 before slicing. The legacy scoped admission is preserved as
+    provenance, but it is not silently promoted to the new Level-A ledger.
+    """
+    try:
+        text = train_text.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise ValueError("admitted literature train.txt is not valid UTF-8") from exc
+
+    metadata: list[dict[str, Any]] = []
+    for line_number, line in enumerate(metadata_jsonl.decode("utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"invalid literature metadata JSONL at line {line_number}") from exc
+        if not isinstance(row, dict):
+            raise ValueError(f"literature metadata line {line_number} is not an object")
+        if row.get("partition") != "train":
+            raise ValueError(f"literature metadata line {line_number} is not train-only")
+        metadata.append(row)
+
+    records: list[dict[str, Any]] = []
+    offset = 0
+    for index, row in enumerate(metadata):
+        count = row.get("character_count")
+        if not isinstance(count, int) or count <= 0:
+            raise ValueError(f"invalid character_count for literature record {index}")
+        fragment = text[offset:offset + count]
+        if len(fragment) != count:
+            raise ValueError(f"literature train text ended inside record {index}")
+        digest = sha256(fragment.encode("utf-8"))
+        expected = row.get("text_sha256")
+        if digest != expected or row.get("record_id") != expected:
+            raise ValueError(f"literature text hash mismatch for record {index}")
+        offset += count
+        if index < len(metadata) - 1:
+            if text[offset:offset + 2] != "\n\n":
+                raise ValueError(f"missing fragment separator after literature record {index}")
+            offset += 2
+
+        required = ("source_id", "source_revision", "source_path", "source_url")
+        missing = [key for key in required if not row.get(key)]
+        if missing:
+            raise ValueError(f"literature record {index} lacks provenance fields: {missing}")
+
+        record_text = fragment.strip()
+        if not record_text:
+            raise ValueError(f"empty literature fragment at record {index}")
+        records.append({
+            "document_id": f"literature-es-v1:{row['record_id']}",
+            "text": record_text,
+            "language": "es",
+            "source_id": row["source_id"],
+            "source_revision": row["source_revision"],
+            "source_identifier": row["source_path"],
+            "source_url": row["source_url"],
+            "source_file_sha256": row.get("source_file_sha256"),
+            "source_fragment_index": row.get("source_fragment_index"),
+            "source_fragment_title": row.get("source_fragment_title"),
+            "text_sha256": digest,
+            "legacy_license_text": row.get("license_text"),
+            "metadata_license": row.get("license_metadata"),
+            "license": "PUBLIC-DOMAIN-CLAIM-REQUIRES-TERRITORIAL-RECONCILIATION",
+            "rights_level": "unreconciled",
+            "rights_status": "legacy_scoped_admission_not_reconciled_to_level_a",
+            "admission_status": "candidate_pending_level_a_reconciliation",
+            "legacy_admission_manifest": "admitted/literature-es-v1/manifest.json",
+            "legacy_partition": "train",
+            "semantic_density": density_for_domain(record_text, "humanities"),
+        })
+
+    if offset < len(text):
+        trailing = text[offset:]
+        if trailing not in ("", "\n"):
+            raise ValueError("unexpected trailing data after literature train fragments")
+    if len(records) != 608:
+        raise ValueError(f"expected 608 literature train fragments, found {len(records)}")
+    if len({row["text_sha256"] for row in records}) != len(records):
+        raise ValueError("duplicate literature fragment hashes found")
+    return records
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--covost-zip", type=Path, required=True)
