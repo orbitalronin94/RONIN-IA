@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:14 | [Integración continua #1167 (run 42000539887)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000539887) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Remove stale unused library assembler import. Trigger: push; rama: main; intento: 1. | 91f7e2c2 |
 | 2026-11-05 09:13 | [Integración continua #1166 (run 42000388070)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000388070) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Preflight llama.cpp before large model downloads. Trigger: push; rama: main; intento: 1. | 705c2b32 |
 | 2026-11-05 09:12 | [Integración continua #1165 (run 42000379499)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000379499) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): provide GitHub token to wait for run ledger. Trigger: push; rama: main; intento: 1. | f3d6d83c |
 | 2026-11-05 09:11 | [Integración continua #1164 (run 42000352341)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000352341) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Link README to one-command local tutor training. Trigger: push; rama: main; intento: 1. | d0dfa035 |
