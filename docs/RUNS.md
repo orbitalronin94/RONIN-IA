@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 12:36 | [Integración continua #1438 (run 42028588712)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028588712) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(data\): validate two NASA train promotions and four held records. Trigger: push; rama: main; intento: 1. | 33910e9c |
 | 2026-11-05 12:36 | [Integración continua #1433 (run 42028138055)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028138055) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): use verified sidecar count in promotion report. Trigger: push; rama: main; intento: 1. | 6bfb4cb8 |
 | 2026-11-05 12:35 | [Integración continua #1436 (run 42028445739)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028445739) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: keep Mathlib manifest reproducible from admission workflow. Trigger: push; rama: main; intento: 1. | c743ca72 |
 | 2026-11-05 12:35 | [Integración continua #1435 (run 42028416218)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028416218) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): update training-eligible count with two verified NASA texts. Trigger: push; rama: main; intento: 1. | 7425e099 |
