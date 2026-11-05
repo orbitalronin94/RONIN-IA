@@ -223,10 +223,11 @@ def main() -> None:
         "base_mmlu_accuracy": base_mmlu["overall"]["accuracy"],
         "base_language_bits_per_byte": base_language["bits_per_byte"],
         "candidates_ranked": candidates,
-        "decision": "SCREENING_ONLY",
+        "decision": ("FULL_AUDIT_REVIEW_REQUIRED" if args.eval_limit == 0 else "SCREENING_ONLY"),
         "note": (
-            "Una mejora en el holdout compacto solo prioriza una semilla para "
-            "confirmación 128/256 y, finalmente, auditoría completa. No autoriza promoción."
+            "Auditoría completa del split test; resultado sujeto a revisión y sin promoción automática."
+            if args.eval_limit == 0 else
+            "Una mejora en el holdout compacto solo prioriza una semilla para confirmación; no autoriza promoción."
         ),
     }
     mixture_path = reports / "native-mixture.json"
