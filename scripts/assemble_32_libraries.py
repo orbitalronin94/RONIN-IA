@@ -272,20 +272,20 @@ def main() -> int:
         member = "candidate/train.jsonl"
         collabra_payload = verify_payload("Collabra train", artifact_member(args.collabra_zip, member), "4b7349457afd3f41cd3b05f5e72f833cd63b21362dd08a2075f52fa2a35225b9")
         for row in read_jsonl(collabra_payload):
-                    text = " ".join(str(row.get("text") or "").split())
-                    record = {
-                        "document_id": f"collabra:{row.get('doi')}",
-                        "text": text,
-                        "language": "en",
-                        "source_id": "scienceverse-collabra-psychology",
-                        "source_revision": row.get("source_revision"),
-                        "source_identifier": row.get("doi"),
-                        "license": "CC-BY-4.0",
-                        "rights_status": "per_doi_license_verified_candidate_privacy_quality_review_pending",
-                        "semantic_density": choose_domain(text)[1],
-                    }
-                    buckets["social_sciences"].append(record)
-                    input_counts["collabra_candidate_documents"] += 1
+            text = " ".join(str(row.get("text") or "").split())
+            record = {
+                "document_id": f"collabra:{row.get('doi')}",
+                "text": text,
+                "language": "en",
+                "source_id": "scienceverse-collabra-psychology",
+                "source_revision": row.get("source_revision"),
+                "source_identifier": row.get("doi"),
+                "license": "CC-BY-4.0",
+                "rights_status": "per_doi_license_verified_candidate_privacy_quality_review_pending",
+                "semantic_density": choose_domain(text)[1],
+            }
+            buckets["social_sciences"].append(record)
+            input_counts["collabra_candidate_documents"] += 1
 
     # The existing admitted Spanish literature stays an independent admitted corpus.
     # Keep its exact train-only bytes and provenance intact; do not fragment/relabel it.
