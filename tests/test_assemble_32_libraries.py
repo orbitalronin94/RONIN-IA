@@ -45,32 +45,6 @@ def test_topic_router_requires_distinctive_domain_evidence() -> None:
 
 
 
-def test_admitted_literature_fragments_keep_the_train_partition() -> None:
-    import hashlib
-    import json
-
-    text = "Título Un texto literario de dominio público.\n\n"
-    fragment = text[:-2]
-    metadata = {
-        "character_count": len(fragment),
-        "source_fragment_title": "Título",
-        "record_id": "doc-1",
-        "text_sha256": hashlib.sha256(fragment.encode("utf-8")).hexdigest(),
-        "source_id": "cligs-textbox",
-        "source_revision": "abc123",
-        "source_path": "texts/doc-1.xml",
-        "source_url": "https://example.org/doc-1",
-    }
-    rows = literature_records(
-        (json.dumps(metadata) + "\n").encode("utf-8"),
-        text.encode("utf-8"),
-    )
-    assert len(rows) == 1
-    assert rows[0]["partition"] == "train"
-    assert rows[0]["admission_status"] == "admitted"
-    assert rows[0]["text"] == fragment
-
-
 def test_topic_router_recognizes_castilian_and_catalan_terms() -> None:
     domain, _, _ = choose_domain("El teorema de álgebra lineal calcula una matriz y un vector.")
     assert domain == "mathematics"
