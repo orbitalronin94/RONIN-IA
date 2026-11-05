@@ -17,13 +17,13 @@ La ficha de Hugging Face declara MIT y documenta 12.032 elementos de test y 70 d
 
 El coste dominante del ciclo no es el entrenamiento: es evaluar repetidamente MMLU-Pro. Por ello se separan tres niveles, sin cambiar el protocolo de puntuación:
 
-1. **Cribado de semillas:** 64 preguntas del split `test`, seleccionadas por round-robin estratificado con semilla fija `2026`. Ejecuta el workflow varias veces cambiando solo la semilla de entrenamiento (`seed`). Esta muestra sirve para descartar regresiones claras y detectar candidatos; no basta para proclamar una mejora.
+1. **Cribado de semillas:** 64 preguntas del split `test`, seleccionadas por round-robin estratificado con semilla fija `2026`. El workflow admite hasta ocho semillas de entrenamiento en una sola ejecución (`seeds`, separadas por comas) y evalúa el checkpoint base una sola vez. Esta muestra sirve para descartar regresiones claras y detectar candidatos; no basta para proclamar una mejora.
 2. **Confirmación compacta:** repetir las semillas prometedoras con `eval_limit=128` o `256`, manteniendo la misma selección determinista para cada tamaño y el mismo checkpoint base.
 3. **Auditoría final:** solo la mejor candidata pasa a `eval_limit=0` (las 12.032 preguntas del test, si todas caben en contexto). Esta evaluación grande decide si la mejora resiste; el cribado no autoriza promoción.
 
-La semilla de entrenamiento (`seed`) y la semilla de selección externa (`2026`) son independientes. **Nunca se cambia la muestra para favorecer una semilla de entrenamiento.** Todos los informes deben conservar revisión, SHA-256, IDs, cobertura y tamaño evaluado. Un candidato que gane en 64 preguntas pero pierda en 128/256 no pasa a auditoría completa.
+Las semillas de entrenamiento (`seeds`) y la semilla de selección externa (`2026`) son independientes. **Nunca se cambia la muestra para favorecer una semilla de entrenamiento.** Todos los informes deben conservar revisión, SHA-256, IDs, cobertura y tamaño evaluado. Un candidato que gane en 64 preguntas pero pierda en 128/256 no pasa a auditoría completa.
 
-La comparación base/candidato dentro de cada ejecución mantiene exactamente los mismos IDs. El protocolo de siguiente byte A–J sigue siendo propio de RONIN y no es comparable con el leaderboard oficial de MMLU-Pro. Las cifras de cribado se etiquetan como muestra compacta, no como test completo.
+La comparación base/candidato para todas las semillas mantiene exactamente los mismos IDs y reutiliza la evaluación del modelo base, evitando repetir ese coste por candidato. El protocolo de siguiente byte A–J sigue siendo propio de RONIN y no es comparable con el leaderboard oficial de MMLU-Pro. Las cifras de cribado se etiquetan como muestra compacta, no como test completo.
 
 ## Protocolo RONIN
 
