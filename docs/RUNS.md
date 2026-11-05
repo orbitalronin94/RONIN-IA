@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:36 | [Integración continua #1221 (run 42003629869)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003629869) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): record DOI deduplication and exact ScienceVerse counts. Trigger: push; rama: main; intento: 1. | cd61df53 |
 | 2026-11-05 09:36 | [Integración continua #1224 (run 42003758739)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003758739) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: acquire Crossref-verified eLife and Frontiers candidates. Trigger: push; rama: main; intento: 1. | 90c126a8 |
 | 2026-11-05 09:36 | [Integración continua #1223 (run 42003744454)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003744454) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: add Crossref per-DOI license verification for ScienceVerse. Trigger: push; rama: main; intento: 1. | cddb731a |
 | 2026-11-05 09:36 | [Integración continua #1222 (run 42003663056)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003663056) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): correct unique ScienceVerse document totals. Trigger: push; rama: main; intento: 1. | 6a74527c |
