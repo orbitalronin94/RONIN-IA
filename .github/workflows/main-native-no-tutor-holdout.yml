@@ -1,8 +1,5 @@
 name: RONIN — entrenamiento propio sin tutor + holdout antes/después
 on:
-  push:
-    branches: [main]
-    paths: [".github/workflows/main-native-no-tutor-holdout.yml"]
   workflow_dispatch:
     inputs:
       steps:
@@ -10,12 +7,18 @@ on:
         required: true
         default: "500"
         type: string
+      eval_limit:
+        description: Preguntas MMLU-Pro para el ciclo rápido (0 = test completo, solo auditoría final)
+        required: true
+        default: "512"
+        type: choice
+        options: ["256", "512", "1024", "0"]
 permissions:
   actions: read
   contents: read
 concurrency:
   group: ronin-main-native-no-tutor-holdout
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   native-cycle:
     runs-on: ubuntu-latest
@@ -29,6 +32,7 @@ jobs:
       MATHLIB_RUN_ID: "42026633643"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
       STEPS: ${{ inputs.steps || '500' }}
+      EVAL_LIMIT: ${{ inputs.eval_limit || '512' }}
     steps:
       - uses: actions/checkout@v5
       - name: Validate budget
@@ -137,7 +141,7 @@ jobs:
         run: |
           python scripts/evaluate_text.py --checkpoint checkpoints/main.pt --validation-text /tmp/ronin-native-split/validation-internal.txt --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu --output reports/language-before.json
           python scripts/evaluate_domains.py --checkpoint checkpoints/main.pt --dataset benchmarks/domains_v1.jsonl --profile tiny --device cpu --output reports/domains-before.json
-          python scripts/evaluate_mmlu_pro.py --checkpoint checkpoints/main.pt --profile tiny --context-length 4096 --limit 0 --seed 2026 --revision "$MMLU_REVISION" --split test --device cpu --batch-token-budget 8192 --output reports/mmlu-holdout-before.json
+          python scripts/evaluate_mmlu_pro.py --checkpoint checkpoints/main.pt --profile tiny --context-length 4096 --limit "$EVAL_LIMIT" --seed 2026 --revision "$MMLU_REVISION" --split test --device cpu --batch-token-budget 8192 --output reports/mmlu-holdout-before.json
       - name: Train RONIN from its own checkpoint — NO TUTOR
         run: |
           python scripts/train_text.py --text /tmp/ronin-native-train.txt --profile tiny --steps "$STEPS" --seed 20261106 --init-checkpoint checkpoints/main.pt --learning-rate 0.00001 --min-learning-rate 0.000001 --device cpu --num-threads 2 --checkpoints checkpoints/native-candidate --metrics-out reports/training-throughput.json
@@ -148,7 +152,7 @@ jobs:
         run: |
           python scripts/evaluate_text.py --checkpoint checkpoints/candidate.pt --validation-text /tmp/ronin-native-split/validation-internal.txt --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu --output reports/language-after.json
           python scripts/evaluate_domains.py --checkpoint checkpoints/candidate.pt --dataset benchmarks/domains_v1.jsonl --profile tiny --device cpu --output reports/domains-after.json
-          python scripts/evaluate_mmlu_pro.py --checkpoint checkpoints/candidate.pt --profile tiny --context-length 4096 --limit 0 --seed 2026 --revision "$MMLU_REVISION" --split test --device cpu --batch-token-budget 8192 --output reports/mmlu-holdout-after.json
+          python scripts/evaluate_mmlu_pro.py --checkpoint checkpoints/candidate.pt --profile tiny --context-length 4096 --limit "$EVAL_LIMIT" --seed 2026 --revision "$MMLU_REVISION" --split test --device cpu --batch-token-budget 8192 --output reports/mmlu-holdout-after.json
       - name: Compare paired full holdout and publish decision — never auto-promote
         if: always()
         run: |
@@ -170,7 +174,7 @@ jobs:
             ids1=[x.get("id") for x in a.get("details",[])]
             same=(b.get("dataset_revision")==a.get("dataset_revision")==__import__("os").environ["MMLU_REVISION"] and b.get("dataset_split")==a.get("dataset_split")=="test" and b.get("dataset_sha256")==a.get("dataset_sha256") and b.get("selected_items")==a.get("selected_items") and b.get("evaluated_items")==a.get("evaluated_items") and ids0==ids1 and b.get("coverage",0)>=0.95 and a.get("coverage",0)>=0.95)
             delta=(a["overall"]["accuracy"]-b["overall"]["accuracy"])*100
-            result["mmlu_pro_full_holdout"]={"revision":a["dataset_revision"],"dataset_sha256":a["dataset_sha256"],"selected_items":a["selected_items"],"evaluated_before":b["evaluated_items"],"evaluated_after":a["evaluated_items"],"coverage_before":b["coverage"],"coverage_after":a["coverage"],"before_correct":b["overall"]["correct"],"after_correct":a["overall"]["correct"],"before_accuracy":b["overall"]["accuracy"],"after_accuracy":a["overall"]["accuracy"],"delta_percentage_points":delta,"same_full_holdout_before_after":same,"complete_test_set_before":b.get("complete_test_set"),"complete_test_set_after":a.get("complete_test_set")}
+            result["mmlu_pro_full_holdout"]={"revision":a["dataset_revision"],"dataset_sha256":a["dataset_sha256"],"selected_items":a["selected_items"],"evaluated_before":b["evaluated_items"],"evaluated_after":a["evaluated_items"],"coverage_before":b["coverage"],"coverage_after":a["coverage"],"before_correct":b["overall"]["correct"],"after_correct":a["overall"]["correct"],"before_accuracy":b["overall"]["accuracy"],"after_accuracy":a["overall"]["accuracy"],"delta_percentage_points":delta,"same_full_holdout_before_after":same,"complete_test_set_before":b.get("complete_test_set"),"complete_test_set_after":a.get("complete_test_set"),"evaluation_tier":"full_test_audit" if b.get("complete_test_set") and a.get("complete_test_set") else "fixed_stratified_iteration_holdout"}
             if l0 and l1:
               nonreg=l1["bits_per_byte"]<=l0["bits_per_byte"]
               result["language_validation_non_regression"]=nonreg
