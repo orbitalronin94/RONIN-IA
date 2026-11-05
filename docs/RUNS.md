@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:53 | [Integración continua #1252 (run 42005985721)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42005985721) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): make NASA document harvesting cumulative and hash-verified. Trigger: push; rama: main; intento: 1. | 42ed19a8 |
 | 2026-11-05 09:53 | [Integración continua #1255 (run 42006096933)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42006096933) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: paginate NASA NTRS search to harvest beyond first 100 records. Trigger: push; rama: main; intento: 1. | b254a9f0 |
 | 2026-11-05 09:53 | [Integración continua #1254 (run 42006017898)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42006017898) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(data\): use setup-r for reliable ScienceVerse export runtime. Trigger: push; rama: main; intento: 1. | f72db186 |
 | 2026-11-05 09:52 | [Integración continua #1253 (run 42005999914)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42005999914) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: expand NASA full-text acquisition to 30 per category. Trigger: push; rama: main; intento: 1. | 5dd86064 |
