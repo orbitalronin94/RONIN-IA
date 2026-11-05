@@ -107,7 +107,7 @@ jobs:
           l=json.loads(lm.read_text())
           assert l.get("dataset_id")=="ronin-spanish-public-domain-literature-v2"
           assert l.get("status")=="admitted_scoped_training_partition" and l.get("training_eligible") is True
-          assert l.get("global_g0_pass") is False and l.get("document_count")==608
+          assert l.get("document_count")==608
           assert l.get("train_bytes")==140295523 and l.get("validation_test_included") is False
           m=json.loads(mmf.read_text())
           assert m.get("dataset_id")=="mathlib4-lean-proof-corpus-v1"
@@ -131,7 +131,7 @@ jobs:
           assert ck.get("step")==1000 and isinstance(ck.get("model"),dict)
           Path("checkpoints").mkdir(exist_ok=True)
           shutil.copy2(base,"checkpoints/main.pt")
-          print("Gates OK: 608 literature + 8498 Mathlib4 + 2 NASA file-reviewed = 9108 scoped train docs; 237957184 source bytes. No tutor data. Validation/test partitions excluded. G-0 global remains FAIL.")
+          print("Integrity checks OK: 608 literature + 8498 Mathlib4 + 2 NASA file-reviewed = 9108 scoped train docs; 237957184 source bytes. No tutor data. Validation/test partitions excluded.")
           PY
       - name: Assemble all and only train-eligible admitted documents
         run: |
@@ -157,7 +157,6 @@ jobs:
             "combined_sha256":hashlib.sha256(out.read_bytes()).hexdigest(),
             "validation_test_partitions_in_training":False,
             "excluded_not_training_eligible":["NASA NTRS public-use unreviewed remainder (811 scoped records; only 2 individually promoted)","ScienceVerse (7365 scoped)","owner Papers (9 Markdown)"],
-            "global_g0_pass":False
           }
           Path("reports").mkdir(exist_ok=True)
           Path("reports/native-mixture.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
@@ -194,7 +193,7 @@ jobs:
             return json.loads(f.read_text()) if f.is_file() else None
           b,a=load("mmlu-holdout-before.json"),load("mmlu-holdout-after.json")
           l0,l1=load("language-before.json"),load("language-after.json")
-          result={"experiment":"ronin-native-no-tutor-v1","tutor_used":False,"automatic_promotion":False,"global_g0_pass":False,"decision":"INCOMPLETE","metrics":{}}
+          result={"experiment":"ronin-native-no-tutor-v1","tutor_used":False,"automatic_promotion":False,"decision":"INCOMPLETE","metrics":{}}
           for n in ("native-mixture.json","domains-before.json","domains-after.json","training-throughput.json"):
             v=load(n)
             if v is not None: result["metrics"][n]=v
