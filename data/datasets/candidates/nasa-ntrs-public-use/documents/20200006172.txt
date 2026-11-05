@@ -1,0 +1,693 @@
+1
+
+TISA Edition4 LW Improvement Working
+Progress
+
+Moguo Sun, Cathy Nguyen, Natividad Smith, Raja Raju, Forest
+Wrenn
+SSAI
+David Doelling, Norman Loeb, Patrick Minnis
+NASA-Langley
+
+CERES Science Team Meeting, 2013
+May 7-9, 2013, NASA Langley, Hampton
+
+2
+
+Outline
+
+•
+
+Current GEO LW flux Status
+
+•
+
+Ed4 NB-BB Radiance algorithm based on CERES
+
+•
+
+Ed4 GGEO LW Flux: NB2BB, ADM, Normalization
+
+•
+
+Preliminary Results
+
+•
+
+Summary
+
+•
+
+Future work
+
+3
+
+New stuff
+
+•
+
+Procedures
+
+•
+
+Validation: before vs. after
+•
+•
+
+•
+
+Map
+A region
+
+Conclusion
+
+4
+
+CERES GEO LW Processing
+
+Doelling
+
+5
+
+Current GEO NB-BB Flux
+Matched GEO vs. Terra, January 2006
+
+Global Mean RMS: 8.39
+GEO LW and Terra LW Matched within 1.5 hours
+
+6
+
+Current GEO LW NB->BB Flux Algorithm
+•
+
+WN => Nadir NB flux
+WN Rad
+
+VZA
+
+FNB 1.97LWN ( )/  ( )
+
+1
+ ( )  
+1.000665 +0.0324721ln(cos  )
+
+
+
+•
+
+
+
+  11.7
+  11.7
+
+Limb darkening function
+
+NB flux => BB flux (OLR)
+
+Column Relative Humidity
+
+2
+OLRBB  a0  a1FNB  a2FNB  a3 ln(RH)
+
+NB flux
+
+a0,a1,a2,a3
+
+
+
+
+Coefficients for ocean and land separately
+
+7
+
+Current GEO NB->BB Flux Algorithm
+
+•
+
+The algorithm is based on Minnis et al. 1991 and not
+updated since then.
+
+•
+
+Doelling et al. (1998 and 2003) validate the
+algorithm over ocean and land area and investigate
+the effects of different channels and relative
+humidity on RMS.
+
+•
+
+LW RMS (~3-5%).
+
+8
+
+Areas for Improvement
+
+•
+
+Use Ed4 GEO multiple channels vs. Ed2/Ed3 WN only
+
+•
+
+Use WV channel to replace GEOS Relative Humidity
+
+•
+
+Use ADM-like scene types vs. global land/ocean formula
+
+9
+
+Ed4 NB->BB Radiance Development
+
+•
+
+Data: SSF-Ed4 (MODIS radiance and CERES flux)
+
+•
+
+Test multiple channels:
+3.79μm (Night only), 6.72μm, 11.03μm, 12.02μm
+
+•
+
+Create scene types:
+•
+
+Ocean/land (6): Ocean, Forests, Savannas, Grass-Crop, Dark and Bright Deserts.
+
+•
+
+Day/Night (2)
+
+•
+
+Clear/cloud (2)
+
+•
+
+Precipitable Water (4): 0-1, 1-3, 3-5, 5-10 cm
+
+•
+
+Viewing Zenith Angle (7): 0o-70o, every 10o
+
+•
+
+Total: 672 scene types
+
+10
+
+Ed4 NB->BB Radiance Development
+
+•
+
+For each scene type:
+Linear regress: CERES LWBB vs. MODIS (Radnb1 , Radnb2 , Radnb3)
+
+LWest  a0  a1Rad11m  a2 Rad6.7m  a3 Rad12m
+•
+
+
+
+
+
+Evaluation of the algorithm:
+RMS 
+
+n
+
+1
+(LWiest  LWi BB )2
+n i1
+
+11
+
+NB Rad -> BB Flux Algorithm
+
+Method
+1. Calculate NB-BB flux directly using 11.03µm and 6.72µm
+for all scenes.
+2. Calculate NB-BB flux using current 11.03µm global formula
+and then sort the data according to the same scene types as
+in 1.
+
+12
+
+NB Rad - BB Flux
+Land and Ocean
+
+Land Scenes
+
+Ocean Scenes
+
+13
+
+NB Rad -> BB Flux
+Clear and Cloud
+
+Clear Scenes
+
+Cloud Scenes
+
+14
+
+NB Rad -> BB Flux
+Table
+Types
+
+Total
+Scenes
+
+Ed2/Ed3
+WN-only
+
+Ed4
+vs.
+Ed2/3
+(%)
+RMS diff
+(%)
+RMS < 5
+
+Ed4
+WN + WV
+
+Mean
+RMS
+
+(%)
+RMS < 5
+
+Mean
+RMS
+
+All
+
+600
+
+10.21
+
+8.8
+
+4.49
+
+66.3
+
+56.02
+
+land
+
+490
+
+10.26
+
+8.0
+
+4.47
+
+65.7
+
+56.43
+
+ocean
+
+110
+
+10.01
+
+12.7
+
+4.56
+
+69.1
+
+54.45
+
+day
+
+296
+
+11.18
+
+11.5
+
+5.59
+
+49.0
+
+50.00
+
+night
+
+304
+
+9.27
+
+6.3
+
+3.42
+
+83.2
+
+63.11
+
+clear
+
+287
+
+8.61
+
+18.5
+
+2.64
+
+99.0
+
+69.34
+
+cloud
+
+313
+
+11.68
+
+0.0
+
+6.19
+
+36.4
+
+47.00
+
+15
+
+NB -> BB Radiance
+All Scenes
+
+April, 2000
+
+16
+
+NB Rad -> BB Rad
+Day and Night, April 2000
+
+Day
+
+Night
+
+17
+
+NB Rad -> BB Rad
+Table
+Types
+
+Total
+Scenes
+
+Ed2/Ed3
+WN-only
+
+Ed4
+WN + WV
+
+Mean
+RMS
+
+(%)
+RMS < 1
+
+Mean
+RMS
+
+Ed4
+WN+WV+12µm
+
+Ed4
+vs.
+Ed2/3
+(%)
+RMS diff Mean
+RMS < 1
+(%)
+RMS
+
+(%)
+RMS < 1
+
+All
+
+601
+
+1.99
+
+14.0
+
+1.19
+
+69.1
+
+40.20 1.14
+
+69.6
+
+land
+
+490
+
+2.03
+
+13.1
+
+1.22
+
+66.3
+
+39.90 1.17
+
+66.9
+
+ocean
+
+111
+
+1.84
+
+18.0
+
+1.08
+
+81.1
+
+41.30 1.02
+
+81.1
+
+day
+
+297
+
+2.35
+
+7.1
+
+1.63
+
+40.1
+
+30.64 1.58
+
+41.1
+
+night
+
+304
+
+1.65
+
+20.7
+
+0.77
+
+97.4
+
+53.33 0.72
+
+97.4
+
+clear
+
+287
+
+1.72
+
+17.1
+
+0.79
+
+89.2
+
+54.07 0.74
+
+90.2
+
+cloud
+
+314
+
+2.25
+
+11.1
+
+1.56
+
+50.6
+
+30.67 1.52
+
+50.6
+
+18
+
+Ed4 GGEO LW Flux Improvement
+
+•
+
+LW Narrowband-Broadband Radiance Conversion
+
+•
+
+LW BB Radiance-Flux Conversion by ADM
+(Angular Distribution Model)
+
+•
+
+GGEO LW Flux Normalization
+
+19
+
+LW Narrowband-Broadband Radiance Conversion
+
+•
+
+Apply MODIS-CERES based NB-BB coefficients
+to GGEO data assuming GGEO and MODIS have
+similar spectral response function (SRF).
+
+•
+
+Problems:
+•
+
+GGEO and MODIS do have different SRF, this may cause some
+bias.
+
+20
+
+LW BB Radiance-Flux Conversion by ADM (Angular
+Distribution Model)
+•
+
+Use current LW ADM to convert Broadband
+Radiance to Flux. Supposedly this is better than the
+current simple-limb darkening correction.
+
+•
+
+Problems:
+•
+
+The ADM is based on CERES and may have problem
+applying to GGEO data.
+
+21
+
+GGEO LW Flux Normalization
+
+•
+
+Normalize the GGEO Flux against matched CERES
+flux.
+
+•
+
+This method has been applied to SW and cloud
+properties and it shows great improvement.
+
+22
+
+Preliminary Results
+
+•
+
+The results here are very preliminary and represent
+work in progress.
+
+23
+
+Preliminary Results
+
+April 2010 CERES Flux over MET9 Satellite Area
+
+24
+
+Preliminary Results
+April, 2010 BIAS
+Old GGEO – CERES Flux
+
+New GGEO – CERES Flux
+
+The new method shows regional improvement
+but not for the whole domain.
+
+25
+
+Preliminary Results
+April, 2010 RMS
+Old GGEO – CERES Flux
+
+New GGEO – CERES Flux
+
+The new method shows worse results, need to
+double check.
+
+26
+
+Summary
+
+•
+
+For NB-BB radiance conversion, 2-channel algorithm reduce
+RMS by about 40% compared with 1-channel algorithm
+averaged for all scenes.
+
+•
+
+Adding other channels to the 2-channel algorithm improves
+RMS only slightly.
+
+•
+
+The New NB-BB Radiance algorithm combined with LW
+ADM show no improvement for this preliminary results. This
+needs further validation and code checking.
+
+27
+
+Future Work
+
+•
+
+Continue to work on Ed4 GGEO LW algorithm to correct any
+bugs and refine algorithms to improve accuracy compared with
+current LW algorithm.
+
+28
+
+Thank You!
+
+29
+
+Backup
+
+2-channel NB-BB flx
+April, 2000
+

@@ -1,0 +1,1313 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Efficient Parametric Uncertainty Analysis of an Earth Entry
+Vehicle Concept using Least Angle Regression
+
+Thomas K. West IV∗ and Christopher O. Johnston†
+
+NASA Langley Research Center, Hampton, VA, 23681
+
+The objective of this work was to outline and apply an efficient and accurate parametric un-
+certainty propagation approach to the analysis of convective heating on an Earth entry vehicle
+concept. The described approach was based on Least Angle Regression used to solve a sparse
+and underdetermined linear system in the point-collocation non-intrusive polynomial chaos
+surrogate method. This approach involved an iterative process to computing the non-zero
+terms of the underlying polynomial chaos model using only enough samples to converge uncer-
+tainty interval predictions and Sobol index values based global nonlinear sensitivity estimates.
+The Earth entry vehicle was analyzed at three points along a representative trajectory for a
+Mars return mission. 329 sources of uncertainty were identified in the computational fluid
+dynamics model used to predict the forebody convective heating. These included uncertainty
+in flow field chemical rates, collision integrals, heats of formation, surface finite rate char model
+reaction rates, wall roughness height, and the turbulent Schmidt number. Results from this
+study showed that convective heating uncertainty as high as±50% of the nominal was predicted
+with only about 50 evaluations of the computational model. This was far fewer than would be
+required for a sampling-based approach or a full basis polynomial chaos model, which would
+have required over 50,000 samples. Additionally, results showed that over 90% of the total
+convective heating uncertainty was due to uncertainty in the N2 catalytic rate on the surface,
+while the remainder of the uncertainty was attributed to the turbulent Schmidt number and
+the wall roughness uncertainties.
+
+Nomenclature
+
+A Active Set
+A𝑐 Active Set Complement
+𝐶 Absolute Maximum Correlation
+𝑐 Correlation
+𝐷 Total Variance
+𝑁𝑡 Number of Terms
+𝑛 Number of Random Dimensions
+𝑝 Polynomial Order
+𝑅 Stochastic Response
+𝑟 Least Angle Regression Predicted Response
+
+𝑆 Sobol Index
+𝑆𝑐𝑇 Turbulent Schmidt Number
+𝒖 Equiangular Vector
+𝑥 Deterministic Variables
+𝒚 Training Data Vector
+𝛼 Polynomial Chaos Expansion Coefficient
+𝛾 Update Magnitude
+𝜖 Truncation Error
+Ψ Random Basis Function
+b Standard Input Random Variable
+
+I. Introduction
+As NASA begins the development of a Mars sample return mission, uncertainty quantification (UQ) will serve
+
+as a key capability for estimating risk and identifying key sources of uncertainty that drive margins. While an Earth
+entry vehicle (EEV) system as a whole is subject to significant uncertainty, the thermal protection system (TPS) is one
+subsystem that is plagued by numerous sources of uncertainty due to the complex physics associated with both the
+aerothermodyamics modeling and the material response. A reliable TPS design is absolutely critical to ensuring not
+only the survival of the collected samples but also to avoid potentially contaminating the Earth due to the uncontrolled
+release of the samples by a compromised entry vehicle.
+
+∗Aerospace Engineer, Vehicle Analysis Branch, Systems Analysis and Concepts Directorate, Senior Member AIAA.
+†Aerospace Engineer, Aerothermodynamics Branch, Research Directorate, Associate Fellow AIAA.
+
+1
+
+
+
+Previous work by Johnston et al. [1] investigated the impact of uncertainty on stagnation point convective and
+radiative heating predictions during hyperbolic Earth entry, similar to that of a Mars sample return mission. Their UQ
+approach was to assume the impact of uncertainty sources were independent from one another and that heating was
+monotonic with the uncertainty. This approach significantly reduced the number of simulations needed to obtain an
+overall heating uncertainty prediction but required assumptions with unknown impact. Additionally, Johnston and
+Kleb [2] performed a detailed uncertainty analysis of forebody radiative heating during lunar-return Earth entry using
+fuzzy set logic. This approach used a Cauchy deviates method, which required approximately 10,000 evaluations of the
+computational model.
+
+Following these previous works on UQ of planetary entry vehicle heating, West et al. [3] leveraged a technique
+based on compressed sensing [4] and polynomial chaos. This optimization-based approach was shown to drastically
+reduce the computational cost of propagating numerous sources of uncertainty through an expensive computational
+model. West et al. [5] applied the compressed sensing-based polynomial chaos approach to the analysis of radiative
+heating uncertainty on the Stardust sample return capsule backshell. While these past works both investigated the
+impact of uncertainty on heating predictions and reduced the computational cost of doing so, there is a need for less
+computationally complex techniques and additional computational savings.
+
+The overall objective of this work is to outline a methodology for propagating numerous sources of uncertainty
+through a computationally expensive model. A technique termed least angle regression (LAR) [6] is used in conjunction
+with point-collocation based non-intrusive polynomial chaos (NIPC) [7] to construct a sparse polynomial chaos
+representation of the uncertainty. Previous work by Blatman and Sudret [8] explored using LAR in conjunction with
+NIPC. They showed that the technique was viable for the problems considered, demonstrating accurate statistical
+moment predictions when compared to Monte Carlo sampling. The LAR-NIPC iterative approach enables potentially
+significant computational savings over both traditional sampling-based approaches and full basis regression models. In
+addition to outlining this approach and proposed convergence techniques, this paper provides comparisons between other
+uncertainty propagation methods, such as compressed sensing, to highlight LAR-NIPC accuracy and computational
+savings.
+
+The LAR-NIPC approach is applied to a computational fluid dynamics (CFD) model of convective heating on the
+surface of an EEV returning from Mars. Hundreds of parametric uncertainty sources are considered in this study. In
+the flow field, these include uncertainties in the chemical rate model for each reaction and species heats of formation.
+Uncertainty in binary collision integrals used to approximate transport properties, the turbulent Schmidt number, and
+wall roughness height are also considered, as well as uncertainties associated with the finite rate char process used to
+model the TPS surface chemistry. Key uncertainty sources are identified that may serve as indicators for prioritizing
+future investments to reduce overall parametric uncertainty.
+
+In the next section, the UQ approach used in this study is described in detail. Section III then outlines the CFD
+model used to simulate the EEV during entry into Earth’s atmosphere. Section IV presents the results of this study
+including a description of the baseline forebody heating predictions, followed by details of the uncertainty analysis
+study. The last section highlights key findings from this work.
+
+II. Uncertainty Quantification Approach
+In this section the uncertainty quantification approach is described in detail. First, an overview of polynomial chaos
+
+is given, followed by an description of the least angle regression technique. Lastly, a discussion of convergence measures
+is given along with details of performing variance deposition algebraically with a polynomial chaos expansion.
+
+A. Generalized Polynomial Chaos
+Polynomial chaos is a surrogate modeling technique based on a spectral representation of the uncertainty. An
+
+important aspect of spectral representations is the decomposition of a response value or random function, 𝑅, into a
+linear combination of separable deterministic and stochastic components, as shown in Eq. (1) for a polynomial of order
+𝑝 and dimension 𝑛.
+
+𝑅(𝒙, 𝝃) ≈
+𝑁𝑡−1∑︁
+𝑖=0
+
+𝛼𝑖 (𝒙)Ψ𝑖 (𝝃) + 𝜖 (1)
+
+Here, 𝛼𝑖 is the deterministic component, and Ψ𝑖 is the random variable basis functions corresponding to the 𝑖𝑡ℎ mode.
+The basis functions, Ψ𝑖 , of each random variable are determined using the Askey key [9] and are dependent on the
+distribution of each random variable. The response, 𝑅, is a function of independent, deterministic variables, 𝒙, and 𝑛
+
+2
+
+
+
+independent, standard random variables, 𝝃. Note that this series is, by definition, an infinite series; however, in practice,
+it is truncated, and a sum is taken over a discrete number of output modes, leaving a finite truncation error, 𝜖 . To form a
+complete basis or a total order expansion, 𝑁𝑡 terms are required, which can be computed from Eq. (2) for a polynomial
+chaos expansion (PCE) of order 𝑝 and a number of random dimensions or variables, 𝑛.
+
+𝑁𝑡 =
+(𝑛 + 𝑝)!
+𝑛!𝑝!
+
+(2)
+
+Special consideration is needed when epistemic variables are present, which is the case in the present study. For
+epistemic variables with a bounded domain (i.e., intervals), the Legendre polynomials can serve as an appropriate
+basis, as they too have a bounded domain. Then, the second-order probability approach described by Eldred and Swiler
+[10] can be applied to propagate mixed uncertainty though the PCE and obtain intervals at select probability levels of
+interest. Further details on polynomial chaos theory is given by Ghanem and Spanos [11]. A description of more recent
+developments, including the analysis of mixed uncertainty with stochastic expansions is given by Eldred [12].
+
+B. Point-Collocation, Non-Intrusive Polynomial Chaos
+The objective with any PCE method is to determine the expansion coefficients, 𝛼𝑖 . To do this, polynomial chaos
+
+methods can be implemented using an intrusive or a non-intrusive approach. While an intrusive method may appear
+straightforward in theory, for complex problems this process may be computationally expensive and difficult to implement
+as changing the deterministic model is required [13]. In contrast, the non-intrusive approach can be easily implemented
+to construct a surrogate model that represents a complex computational simulation because no modification to the
+deterministic model is required. The non-intrusive methods require only the response (or sensitivity [14–16]) values at
+selected sample points to approximate the stochastic response surface.
+
+Several methods have been developed for NIPC. Of these, the point-collocation NIPC method has been used
+extensively in many aerospace simulation and CFD problems [7, 14, 17, 18] for improved computational efficiency
+and tractability for high-dimension problems over other spectral-projection-based approaches. The point-collocation
+method starts with replacing a stochastic response or random function with its PCE by using Eq. (1). 𝑁𝑠 sample vectors
+are chosen in random space, and the deterministic code is evaluated at these points, which is the left hand side of Eq. (1).
+Following this, a linear system of 𝑁𝑠 equations can be formulated and solved for the expansion coefficients of the PCE.
+This system is shown in Eq. (3).
+
+©­­­­­«
+𝑅(x, 𝝃1)
+𝑅(x, 𝝃2)
+
+...
+
+𝑅(x, 𝝃𝑁𝑠
+)
+
+ª®®®®®¬
+=
+
+©­­­­­«
+Ψ0 (𝝃1) Ψ1 (𝝃1) · · · Ψ𝑁𝑡−1 (𝝃1)
+Ψ0 (𝝃2) Ψ1 (𝝃2) · · · Ψ𝑁𝑡−1 (𝝃2)
+
+...
+...
+
+. . .
+...
+
+Ψ0 (𝝃𝑁𝑠
+) Ψ1 (𝝃𝑁𝑠
+
+) · · · Ψ𝑁𝑡−1 (𝝃𝑁𝑠
+)
+
+ª®®®®®¬
+©­­­­­«
+
+𝛼0
+
+𝛼1
+...
+
+𝛼𝑁𝑡−1
+
+ª®®®®®¬
+(3)
+
+Note that for this linear system, 𝑁𝑡 is equal to the minimum number of deterministic samples, 𝑁𝑠 , required to obtain an
+exact solution. If more linearly independent samples are available, the system is considered overdetermined and can be
+solved using a least squares approach. On the contrary, if the number of samples is less than the number of terms in the
+PCE, 𝑁𝑡 , then the linear system in Eq. (3) has infinitely many solutions. West et al. [3] proposed using compressed
+sensing [4] to seek out a solution with a minimum number of nonzero PCE coefficients. This approach, while highly
+effective and efficient, requires the solution of an L1-minimization problem. A desired approach may be to obtain the
+same level of (or better) efficiency without relying on solving an optimization problem, which may induce error in the
+solution and subsequent uncertainty estimation.
+
+C. Sparse Approximation via Least Angle Regression
+One approach to obtaining a unique solution to an underdetermined linear system of equations is to use a technique
+
+called LAR. LAR was proposed by Efron et al. [6] as a means of efficiently obtaining the solution of a linear system
+with the minimum number of nonzero terms, similar to compressed sensing [3, 4]. However, the LAR approach does
+not require the solution of an optimization problem, which may reduce complexity and minimize potential error.
+
+LAR is an iterative or stagewise procedure that incrementally adds terms to a polynomial model of the response.
+Here, that model is the polynomial chaos expansion. The number of terms added is based on the number of samples, 𝑁𝑠 ,
+available for the regression. LAR begins by setting a prediction vector, 𝒓, to zero. The correlations, 𝑐𝑖 , between the
+
+3
+
+
+
+polynomial terms and the current residual between the training data, 𝒚, and the current LAR predicted responses is
+given by (4).
+
+𝒄 = Ψ′ (𝒚 − 𝒓) (4)
+
+At each step in the iterative procedure, the set of active terms (or covariates), A, contains the indices of PCE terms
+included in the current model (i.e., the columns of Ψ). At each iteration, the term with the absolute maximum correlation,
+defined by Eq. (5), to the training data is added to the active set.
+
+𝐶 = max
+𝑖
+
+{|𝑐𝑖 |} (5)
+
+After updating the active set with a new term, the next step is to update the prediction vector, 𝑟 . To do this, LAR uses an
+equiangular step direction. The equiangular vector is defined by Eq. (6).
+
+𝒖A = ΨA
+(
+1′
+A
+(
+Ψ′
+
+AΨA
+)−1 1A
+
+)−1/2 (
+Ψ′
+
+AΨA
+)−1 1A (6)
+
+Here, the vector of ones, 1A , has length equal to that of the active set (i.e., the number of terms in the current prediction).
+The prediction vector update is then given by Eq. (7).
+
+𝒓A+ = 𝒓A + 𝛾𝒖A (7)
+
+The prediction update magnitude, 𝛾, is defined by Eq. (8).
+
+𝛾 = min
+𝑖∈A𝑐
+
++
+{
+𝐶 − 𝑐𝑖
+
+𝐴A − 𝑎𝑖
+,
+𝐶 + 𝑐𝑖
+
+𝐴A + 𝑎𝑖
+
+}
+(8)
+
+Here, 𝐴A and 𝑎𝑖 are given by Eq. (9) and Eq. (10), respectively. Also, the + indicates only positive components for each
+𝑖, and A𝑐 is the complement set to A.
+
+𝐴A =
+
+(
+1′
+A
+(
+Ψ′
+
+AΨA
+)−1 1A
+
+)−1/2
+(9)
+
+𝒂 = Ψ′𝒖A (10)
+
+Starting with the active set A empty, the stagewise process outlined in Eqs. (6) through (10) is repeated, adding one
+term to the active set at each iteration. This is done until convergence of the predicted responses is observed, or all of the
+available training data are included in the active set. Note that the active set length is limited by the number of available
+training data. As the active set length approaches that of a full polynomial model, the LAR procedure tends to a least
+squares result, and no additional error is incurred by including more data. The final LAR predicted response, 𝒓, can then
+be used to estimate the PCE coefficients, 𝜶, by solving the linear system in Eq. (3) with only the terms in the active set.
+
+For computationally expensive problems, monitoring convergence of the PCE model as the LAR approach progresses
+is the key to reducing computational cost. Stopping the procedure when an acceptable level of error is achieved may
+limit the number of times a computational model needs to be executed. With the LAR approach, even one training
+point will return a result. However, enough data should be included to reach a desired level of polynomial chaos model
+convergence. Note that adaptive sampling approaches are the subject of future work. In this study, a large sample set of
+points are chosen from a Latin hypercube design, and points are randomly added to the set of training data.
+
+D. Least Angle Regression Convergence
+While monitoring the coefficients individually would be ideal, this may be unrealistic for large problems with
+
+hundreds or thousands of terms. Test points and cross validation approaches may be feasible but are often subject to
+significant error, particularly for small sample sizes. In this work, the approach was to track convergence of the total
+Sobol index [19] values for each uncertain variable. Because these values are based on the polynomial model terms
+directly, they are ideal for monitoring convergence, as well as determining a relative ranking of each uncertainty source
+in terms of their contribution to the total uncertainty. Sobol indices can be derived via 𝑆𝑜𝑏𝑜𝑙 𝐷𝑒𝑐𝑜𝑚𝑝𝑜𝑠𝑖𝑡𝑖𝑜𝑛, which
+is a variance-based global sensitivity analysis method. First, the total variance, 𝐷, can be written in terms of the PCE,
+as shown in Eq. (11).
+
+4
+
+
+
+𝐷 =
+
+𝑃∑︁
+𝑗=1
+
+𝛼2
+𝑗 (𝑡, ®𝑥)
+
+〈
+Ψ2
+𝑗 ( ®b)
+
+〉
+(11)
+
+Then, as shown by Sudret [19], the total variance can be decomposed as:
+
+𝐷 =
+
+𝑖=𝑛∑︁
+𝑖=1
+
+𝐷𝑖 +
+𝑖=𝑛−1∑︁
+
+1≤𝑖< 𝑗≤𝑛
+𝐷𝑖, 𝑗 +
+
+𝑖=𝑛−2∑︁
+1≤𝑖< 𝑗<𝑘≤𝑛
+
+𝐷𝑖, 𝑗 ,𝑘 + · · · + 𝐷1,2,...,𝑛 (12)
+
+where the partial variances (𝐷𝑖1 ,...,𝑖𝑠 ) are given by:
+
+𝐷𝑖1 ,...,𝑖𝑠 =
+∑︁
+
+𝛽∈{𝑖1 ,...,𝑖𝑠 }
+𝛼2
+𝛽
+
+〈
+Ψ2
+𝛽 ( ®b)
+
+〉
+, 1 ≤ 𝑖1 < . . . < 𝑖𝑠 ≤ 𝑛 (13)
+
+Then the Sobol indices (𝑆𝑖1 · · ·𝑖𝑠 ) are defined as,
+
+𝑆𝑖1 · · ·𝑖𝑠 =
+𝐷𝑖1 ,...,𝑖𝑠
+
+𝐷
+(14)
+
+which satisfy the following equation:
+
+𝑖=𝑛∑︁
+𝑖=1
+
+𝑆𝑖 +
+𝑖=𝑛−1∑︁
+
+1≤𝑖< 𝑗≤𝑛
+𝑆𝑖, 𝑗 +
+
+𝑖=𝑛−2∑︁
+1≤𝑖< 𝑗<𝑘≤𝑛
+
+𝑆𝑖, 𝑗 ,𝑘 + · · · + 𝑆1,2,...,𝑛 = 1.0 (15)
+
+The Sobol indices provide a sensitivity measure due to individual contribution from each input uncertain variable, 𝑆𝑖 , as
+well as the mixed contributions ({𝑆𝑖, 𝑗 }, {𝑆𝑖, 𝑗 ,𝑘 }, · · · ). As shown by Sudret [19], the total (combined) effect,𝑆𝑇𝑖 , of an
+input parameter 𝑖 is defined as the summation of the partial Sobol indices that include the particular parameter:
+
+𝑆𝑇𝑖 =
+∑︁
+𝐿𝑖
+
+𝐷𝑖1 ,...,𝑖𝑠
+
+𝐷
+; 𝐿𝑖 = {(𝑖1, . . . , 𝑖𝑠) : ∃ 𝑘, 1 ≤ 𝑘 ≤ 𝑠, 𝑖𝑘 = 𝑖} (16)
+
+For example, with 𝑛 = 3, the total contribution to the overall variance from the first uncertain variable (𝑖 = 1) can be
+written as:
+
+𝑆𝑇1 = 𝑆1 + 𝑆1,2 + 𝑆1,3 + 𝑆1,2,3 (17)
+
+The accuracy of the Sobol indices depends highly on the PCE coefficients, making them an ideal measure of PCE
+convergence. Also, because the number of total Sobol indices is the same as the number of uncertain parameters, 𝑛,
+there are less parameters to track, as 𝑛 < 𝑁𝑡 for a total order expansion. Tracking Sobol indices also enables a global
+ranking of each uncertain variable in terms of relative contribution to the total predicted uncertainty. This may be
+particularly useful for dimension reduction strategies [3, 14] and to help guide investments into effectively reducing
+uncertainty with future efforts.
+
+An additional approach to tracking convergence of the LAR-NIPC approach is to track statistics of interest to a
+given analysis. This may include statistical moments or a desired uncertainty interval. Tracking convergence based on
+the first moment alone should be cautiously considered as the mean is known to converge rapidly, while other moments,
+such as the variance, often require much more information. Convergence of the variance, defined back in Eq. (11),
+is part of the Sobol indices approach described above. Convergence of an uncertainty interval may be useful as it is
+generally a desired output from an uncertainty analysis. However, uncertainty measures are determined after propagating
+uncertainty sources through the NIPC model, which makes them subject to sampling error. Enough samples are needed
+to minimize this error.
+
+III. Computational Modeling Approach and Sources of Uncertainty
+This section describes the CFD model used to predict the convective heating on the forebody of an EEV concept of
+
+interest. The first section details the geometry and computational domain used in this study. The next section describes
+the CFD model, followed by a detailed description of the uncertainty sources considered in this study.
+
+5
+
+
+
+A. Geometry and Computational Domain
+The aeroshell geometry was a 45 deg. sphere-cone with a 0.3 meter nose radius and a base diameter of 1.3 meters.
+
+Images of the geometry used in this study are given in Fig. 1. The computational domain was axisymmetric about the
+centerline with 106 nodes in the streamwise direction, up to the shoulder, and 141 nodes normal to the wall. The grid
+for the final solution is shock-aligned with 80% of the grid normal to the wall lying inside the shock layer. Wall normal
+grid spacing was achieved via grid adaption with a target cell Reynolds number of 1.0.
+
+(a) Isometric view. (b) Side view. (c) Shoulder.
+
+Fig. 1 Earth entry vehicle conceptual geometry.
+
+B. Computational Fluid Dynamics Model
+The flow field was modeled using the Langley Aerothermodynamic Upwind Relaxation Algorithm (LAURA)
+
+software, which is a finite-volume, Navier-Stokes flow solver [20]. LAURA uses a second-order, upwind, discretization
+scheme with Roe’s flux-difference splitting and Yee’s Symmetric Total Variation Diminishing (STVD) formulation of
+the inviscid flux. The flow field was assumed to be steady state, and the boundary layer was modeled as fully-turbulent
+employing the Baldwin-Lomax algebraic turbulence model [21]. Additionally, a roughness augmentation model
+described by Krogstad [22] was used to model a mean wall roughness height of 0.7 millimeters. A coupled ablation
+wall boundary condition is modeled on the vehicle forebody surface.
+
+The gas properties were modeled with a thermochemical nonequilibrium assumption using the two temperature
+model [23, 24]. Freestream mass fractions were assumed to be 76% N2 and 24% O2 by mass. The coupled ablation
+flowfield was modeled using the following 30 species: N2, O2, N, N+, NO, NO+, N+
+
+2 , O+
+2 , O, O+, e−, C, C+, CO, CO+,
+
+CO2, C2, C3, C2H, CN, CN+, H, H+, H2, C2H2, HCN, CH, CH4, CH3, and CH2. The rate model used in this study is
+presented in Tables 4, 5, and 6 in the appendix. Note that the parameters in these tables are those of an Arrhenius form.
+The forward reaction rate for each mechanism was computed with Eq. (18), where 𝑈𝑖 is the rate uncertainty factor.
+
+𝑘 𝑓 ,𝑖 = 𝑈𝑖𝐴 𝑓 ,𝑖𝑇
+𝑛 𝑓 ,𝑖
+
+𝑓 ,𝑖
+𝑒𝑥𝑝(−𝐷 𝑓 ,𝑖/𝑇 𝑓 ,𝑖) (18)
+
+In the ablation model, the surface char rate was determined assuming the finite rate chemistry model described by
+Johnston [25]. The pyrolysis rate and wall temperatures are fixed at values based on a material response at the nominal
+conditions of each trajectory point studied. Additional details of the material model are left out of this paper due to the
+sensitive nature of the information. Quantifying the impact of uncertainty in the material response model that would
+ultimately affect the pyrolysis rate wall temperature is the subject of future work. However, the UQ process described in
+the previous section would accommodate this additional level of modeling fidelity without alteration.
+
+Shock-layer radiation was modeled using the High-Temperature Aerothermodynamic Radiation (HARA) code
+[26, 27]. HARA uses atomic levels and lines obtained from the National Institute of Standards and Technology (NIST)
+database [28], Opacity Project databases [29], and atomic bound-free (photoionization) cross-sections from TOPbase
+[30]. Molecular radiation mechanisms modeled include CO, CN, H2, N2, N+
+
+2 , and NO. Capturing uncertainty in the
+radiative heating predictions is the subject of future work. Spectral line and continuum radiation from excited N and
+O are also modeled. Collisional Radiative (CR) or non-Boltzmann modeling was used for all atomic and molecular
+electronic states. The non-Boltzmann approach used in this study is described by Johnston et al. [31]. Coupled radiation
+
+6
+
+
+
+was modeled in the flowfield energy equations. A ray-tracing approach [32] was applied for computing the radiative
+heating at the wall, while the tangent-slab approach was used to compute the divergence of the radiative flux.
+
+C. Parametric Sources of Uncertainty
+Numerous parametric uncertainty sources were considered in this study. In the flow field, uncertainties in the
+
+chemical rate model for each reaction (see Tables 4, 5, and 6 for uncertainty ranges and references) were considered.
+Transport properties (diffusion, thermal conductivity, and viscosity) were approximated using binary collision integrals
+given by Gupta et al. [33]. Available higher order curve fits provided by Wright et al. [34, 35], who also estimated
+collision pair specific uncertainties, were used when possible. Uncertainty for all collision pairs not identified by Wright
+et al. was assumed to be ±30%. In total, 210 collision pair uncertainties were considered.
+
+The heats of formation of many ablation products have uncertainty that may impact surface chemistry. Specifically,
+heat of formation uncertainty in C2, C3, and C2H have been previously investigated in detail as these are common
+products produced from sublimation of primarily carbon ablators [36–38]. These uncertainties are listed in Table 1.
+This uncertainty may impact the species compositions within the ablation layer, which in turn impacts the heat flux on
+the surface, as shown by Moss and Simmonds [39]. The uncertainties used for these three species were given by Gurvich
+et al. [36]. These are also in agreement with uncertainties identified more recently by Sharma et al. [38]. Johnston et
+al. [1] used these same uncertainties for a Mars return Earth entry scenario but did not find significant impact due to
+relatively low ablation rates. Heats of formation for the other species modeled in the flowfield were assumed to be ±3%.
+
+Table 1 Heat of formation uncertainty for C2, C3, and C2H.
+
+Species Δ 𝑓 𝐻 (0), (kJ/mol) Uncertainty
+C2 822.4 +/-1.22%
+C3 831.0 +/-1.56%
+
+C2H 565.0 +/-1.10%
+
+The exact value of the turbulent Schmidt number, 𝑆𝑐𝑇 , especially for high enthalpy flows, is a subject of debate. The
+turbulent Schmidt number is effectively the diffusion rate of mass to the wall. Edquist et al. [40] found that published
+values of the turbulent Schmidt number typically fall in the range of 0.5 ≤ 𝑆𝑐𝑇 ≤ 1.0. Recent work by Erb et al. [41] on
+Galileo probe forebody recession reconstruction suggested that the lower bound on the turbulent Schmidt number should
+be 0.8. However, the massive blowing by the Galileo probe TPS makes it unique and may not be representative of the
+Mars return environments considered in this study. While the current baseline solution employs a value of 𝑆𝑐𝑇 = 0.9,
+the full range of 0.5 ≤ 𝑆𝑐𝑇 ≤ 1.0 is considered in this study. Additionally, a ±30% roughness height uncertainty was
+assumed in this study.
+
+Because the current work considers a nonequilibrium char ablation model on the vehicle surface, uncertainties
+associated with the surface chemistry model were also considered. These uncertainties are given in Table 2, along with
+references for each uncertainty magnitude. Finite rate surface model uncertainty sources considered included surface
+oxidation rates, carbonous sublimation rates, the surface nitridation rate, and the N2 catalytic recombination rate.
+
+Table 2 Coupled ablation uncertainties.
+
+Parameter Uncertainty Reference
+O + C(s) → CO Oxidation Rate [0.5, 10.0] [42]
+
+O2 + 2C(s) → 2CO Oxidation Rate [0.5, 1.5] [42]
+C Sublimation Rate [0.1, 10.0] [43]
+C2 Sublimation Rate [0.1, 10.0] [43]
+C3 Sublimation Rate [0.1, 10.0] [43]
+
+N + C(s) → CN Nitridation Rate [0.2, 5.0] [44]
+N + N(s) → N2 Recombination Rate [0.1, 10.0] [44]
+
+7
+
+
+
+IV. Results and Discussion
+In this section, results of the current study are presented, along with discussion of key findings. First, the baseline
+
+or nominal solution of the EEV forebody flow field is described. Then, the parametric uncertainty in the predicted
+convective heating is given, based on the LAR-NIPC approach outlined in section II. Key sources of uncertainty are
+identified, and a comparison with alternative uncertainty propagation approaches is provided.
+
+A. Baseline Solutions
+Three freestream conditions of interest were considered in this study and are listed in Table 3. These conditions are
+
+representative of a plausible entry trajectory for a Mars sample return vehicle.
+
+Table 3 Freestream conditions studied.
+
+Case Velocity (m/s) Density (kg/m3) Temperature (K)
+1 11152.0 3.372e-04 244.4
+2 10183.0 8.550e-04 260.0
+3 6844.5 3.327e-03 249.1
+
+Convective and radiative heating rates and wall temperatures for the three conditions are shown in Fig. 2. Peak
+total heating occurs at the conditions for case 2 where total convective and radiative heating is about 830 W/cm2. Peak
+radiative heating occurs earlier in the trajectory at case 1 conditions with the stagnation point being subject to about 243
+W/cm2 of radiative heating versus only about 210 W/cm2 at case 2 conditions. At case 3 conditions, radiative heating
+has diminished to near zero, while convective heating is only slightly decreased from case 2. This is primarily due
+to diffusion limited oxidation remaining high at conditions past those of peak heating (i.e., case 2). The decrease in
+convective heating is more pronounced along the flank or cone portion of the vehicle for case 3.
+
+(a) Case 1. (b) Case 2. (c) Case 3.
+
+Fig. 2 Baseline heating and wall temperatures.
+
+B. Uncertainty Analysis
+To assess the impact of the 329 uncertainty sources identified above, the LAR-NIPC approach was applied directly
+
+to the full dimension problem. A second order PCE with 329 uncertainty sources has nearly 55,000 terms, determined
+using Eq. (2). Construction of a full order expansion would require at least 55,000 CFD model evaluations, which is not
+feasible. Using the LAR-NIPC iterative approach, a sample size of only 50 was determined to be sufficient for accurate
+prediction of both the uncertainty bounds and the Sobol sensitivity indices. The resulting convective heating uncertainty
+bounds along the surface of the EEV forebody are shown in Fig. 3 for each of the three freestream conditions. For case
+1, the uncertainty ranges from about ±30-35% along the entire surface. At case 2 conditions, the uncertainty can range
+from nearly ± 40% on the spherical portion of the vehicle to about [+50%, -40%] near the shoulder. These percentages
+are similar for case 3. Recall that these results do not include the impact of uncertainty in the material response, which
+is the subject of future work. This would likely push the uncertainty intervals wider, particularly at the stagnation point
+where blowing is the highest.
+
+Convergence of the above convective heating uncertainty bounds is shown in Fig. 4 as a function of the number
+of samples used in the LAR-NIPC routine. This figure shows the convergence for three points on the surface: the
+
+8
+
+
+
+(a) Case 1. (b) Case 2. (c) Case 3.
+
+Fig. 3 Maximum and minimum uncertainty bounds.
+
+stagnation point (X = -0.02 m), X = 0.10 m, and X = 0.40 m). Notice that for all three cases and at all three points on the
+body, the maximum and minimum uncertainty bounds converge rapidly, requiring less than 20-30 samples to reach
+near asymptotic heating values. This rapid convergence is a function of the polynomial chaos model sparsity. With
+three parameters accounting for over 90% of the total variance in the convective heating output, only about four of the
+nearly 55,000 terms in the second order polynomial have values of significant magnitude. This problem highlights the
+applicability of the LAR-NIPC approach to very high dimension stochastic problems.
+
+(a) Case 1. (b) Case 2. (c) Case 3.
+
+Fig. 4 Convective heating convergence as a function of LAR samples.
+
+The top contributors to the total uncertainty along the surface are shown in Fig. 5. For each of the three cases, the
+N2 catalytic rate uncertainty constitutes over 90% of the convective heating uncertainty at the stagnation point. This
+percentage decreases to between 70-75% approaching the shoulder where the turbulent Schmidt number and roughness
+height uncertainties begin to contribute more significantly due to the impact of turbulent augmentation. Near the
+shoulder, the turbulent Schmidt number contributes about 15% of the total uncertainty with the roughness reaching
+between 5-10% of the uncertainty. All together these three parameters make up 92-98% of the total uncertainty on
+the surface, at each of the three trajectory points investigated. The other 326 uncertainty sources are found to each
+contribute less than 1% to the convective heating uncertainty.
+
+Similar to the uncertainty intervals, convergence of the above total Sobol indices can also be used to verify sample
+independence and convergence of PCE. Plots of total Sobol index convergence for case 4 are shown in Fig. 6 for
+the stagnation point and a point near the shoulder. Each of these convergence plots contains 329 lines for each of
+the uncertain parameters, yet only one parameter at the stagnation point and three parameters near the shoulder are
+distinguishable. Notice that convergence of the percent parameter contributions is achieved rapidly for both locations.
+The low level of samples required to rank the key parameters is attributed to the sparse nature of EEV convective heating
+uncertainty problem.
+
+To assess how well the LAR approach compares to other techniques, case 2 was analyzed using the compressed
+sensing approach [3, 4], which has previously been shown to accurately predict heating uncertainty magnitudes on
+planetary entry vehicles. A comparison of the uncertainty bounds for the same 50 samples is shown in Fig. 7. Notice
+
+9
+
+
+
+(a) Case 1. (b) Case 2. (c) Case 3.
+
+Fig. 5 Top uncertain parameters along the surface.
+
+(a) Stagnation point. (b) Near shoulder region.
+
+Fig. 6 Sobol indices convergence for case 4.
+
+that both approaches yield nearly the same convective heating along the surface, with the largest difference of about ±2.5
+W/cm2 (or about 0.3% of the nominal convective heating) being near the shoulder. The compressed sensing approach
+also identifies the same top three uncertainty sources with similar contributions to the total uncertainty. For example,
+LAR-NIPC estimated that 92% of the uncertainty at the stagnation point came from the the N2 recombination rate while
+compressed sensing estimated a contribution of 93%. Overall, this illustrates that the LAR-NIPC approach is adequate
+for problems of this nature, but this approach involves much less complexity than optimization-based approaches, such
+as compressed sensing.
+
+V. Conclusions
+Efficient parametric uncertainty analysis for planetary entry systems is critical for informing vehicle design and
+
+assessing thermal protection system margins. The large number of uncertainty sources and associated computational
+expense of the modeling can make obtaining accurate heating uncertainty predictions challenging. The least angle
+regression based non-intrusive polynomial chaos expansion (LAR-NIPC) described in this work was shown to provide
+accurate heating uncertainty estimates and global nonlinear sensitivities at significantly less computational cost when
+compared to sampling or other surrogate-based approaches. Key uncertainties found to impact convective heating
+included N2 surface catalysis, the turbulent Schmidt number, and the surface roughness height. Future investments
+could be made to further understand and perhaps reduce these uncertainties. Results from the LAR-NIPC approach
+were compared to those produced by a compressed sensing technique, which is generally accepted as the benchmark
+
+10
+
+
+
+Fig. 7 Comparison of LAR-NIPC and compressed sensing based uncertainty bound predictions.
+
+for sparse, high-dimension problems. This work showed that similar results could be obtained using this LAR-NIPC
+approach, which is much easier to implement than compressed sensing due to the optimization requirement.
+
+References
+[1] Johnston, C. O., Mazaheri, A., Gnoffo, P., Kleb, B., and Bose, D., “Radiative Heating Uncertainty for Hyperbolic Earth Entry,
+
+Part 1: Flight Simulation Modeling and Uncertainty,” Journal of Spacecraft and Rockets, Vol. 50, No. 1, 2013, pp. 19–38.
+doi:10.2514/1.A32254.
+
+[2] Johnston, C. O., and Kleb, B., “Uncertainty Analysis of Air Radiation for Lunar-Return Shock Layers,” Journal of Spacecraft
+and Rockets, Vol. 49, No. 3, 2012, pp. 425–434.
+
+[3] West, T. K., and Hosder, S., “Uncertainty Quantification of Hypersonic Reentry Flows with Sparse Sampling and Stochastic
+Expansions,” Journal of Spacecraft and Rockets, Vol. 52, No. 1, 2015, pp. 120–133. doi:10.2514/1.A32947.
+
+[4] Donoho, D. L., “Compressed Sensing,” IEEE Transactions on Information Theory, Vol. 52, No. 4, 2006, pp. 1289–1306.
+doi:10.1109/TIT.2006.871582.
+
+[5] West, T. K., Johnston, C. O., and Hosder, S., “Uncertainty and Sensitivity Analysis of Afterbody Radiative Heating Predictions
+for Earth Entry,” Journal of Thermophysics and Heat Transfer, Vol. 31, No. 2, 2017, pp. 294–306. doi:10.2514/1.T4948.
+
+[6] Efron, B., Hastie, T., Johnstone, I., and Tibshirani, R., “Least angle regression,” The Annals of Statistics, Vol. 32, No. 2, 2004,
+pp. 407 – 499. doi:10.1214/009053604000000067.
+
+[7] Hosder, S., Walters, R. W., and Balch, M., “Point-Collocation Nonintrusive Polynomial Chaos Method for Stochastic
+Computational Fluid Dynamics,” AIAA Journal, Vol. 48, No. 12, 2010, pp. 2721–2730. doi:10.2514/1.39389.
+
+[8] Blatman, G., and Sudret, B., “Adaptive sparse polynomial chaos expansion based on least angle regression,” Journal of
+Computational Physics, Vol. 230, No. 6, 2011, pp. 2345–2367. doi:https://doi.org/10.1016/j.jcp.2010.12.021.
+
+[9] Xiu, D., and Karniadakis, G., “The Wiener–Askey Polynomial Chaos for Stochastic Differential Equations,” SIAM Journal on
+Scientific Computing, Vol. 24, No. 2, 2002, pp. 619–644. doi:10.1137/S1064827501387826.
+
+[10] Swiler, L. P., and Eldred, M. S., “Efficient algorithms for mixed aleatory-epistemic uncertainty quantification with application
+to radiation-hardened electronics. Part I, algorithms and benchmark results.” , September 2009. doi:10.2172/972887.
+
+[11] Ghanem, R. G., and Spanos, P. D., Stochastic Finite Elements: A Spectral Approach, Springer-Verlag, New York, 1991.
+doi:10.1007/978-1-4612-3094-6.
+
+[12] Eldred, M. S., “Recent Advances in Non-Intrusive Polynomial Chaos and Stochastic Collocation Methods for Uncertainty
+Analysis and Design,” AIAA Paper 2009-2274, 2009. doi:10.2514/6.2009-2274.
+
+11
+
+
+
+[13] Hosder, S., and Bettis, B., “Uncertainty and Sensitivity Analysis for Reentry Flows with Inherent and Model-Form Uncertainties,”
+Journal of Spacecraft and Rockets, Vol. 49, No. 2, 2012, pp. 193–206. doi:10.2514/1.A32102.
+
+[14] West, T. K., Hosder, S., and Johnston, C. O., “Multistep Uncertainty Quantification Approach Applied to Hypersonic Reentry
+Flows,” Journal of Spacecraft and Rockets, Vol. 51, No. 1, 2014, pp. 296–310. doi:10.2514/1.A32592.
+
+[15] Lockwood, B., and Mavriplis, D., “Gradient-based methods for uncertainty quantification in hypersonic flows,” Computers and
+Fluids, Vol. 85, 2013, pp. 27 – 38. doi:10.1016/j.compfluid.2012.09.003.
+
+[16] Roderick, O., Anitescu, M., and Fischer, P., “Polynomial Regression Approaches Using Derivative Information for Uncertainty
+Quantification,” Nuclear Science and Engineering, Vol. 164, No. 2, 2010, pp. 122–139. doi:10.13182/NSE08-79.
+
+[17] Bettis, B., Hosder, S., and Winter, T., “Efficient Uncertainty Quantification in Multidisciplinary Analysis of a Reusable Launch
+Vehicle,” AIAA Paper 2011-2393, 2011. doi:10.2514/6.2011-2393.
+
+[18] Han, D., and Hosder, S., “Inherent and Model-Form Uncertainty Analysis for CFD Simulation of Synthetic Jet Actuators,”
+AIAA Paper 2012-0082, 2012. doi:10.2514/6.2012-82.
+
+[19] Sudret, B., “Global sensitivity analysis using polynomial chaos expansions,” Reliability Engineering & System Safety, Vol. 93,
+No. 7, 2008, pp. 964 – 979. doi:10.1016/j.ress.2007.04.002.
+
+[20] Thompson, K. B., Hollis, B. R., Johnston, C. O., Kleb, B., Lessard, V. R., and Mazaheri, A., “LAURA Users Manual: 5.6,”
+Tech. rep., NASA/TM-2020-2220566, Feb. 2020.
+
+[21] Baldwin, B., and Lomax, H., “Thin-layer approximation and algebraic model for separated turbulentflows,” AIAA Paper
+1978-257, 1978. doi:10.2514/6.1978-257.
+
+[22] Krogstad, P.-A., “Modification of the van Driest damping function to include the effects of surface roughness,” AIAA Journal,
+Vol. 29, No. 6, 1991, pp. 888–894. doi:10.2514/3.10675.
+
+[23] Gnoffo, P. A., Gupta, R. N., and Shinn, J. L., “Conservation Equations and Physical Models for Hypersonic Air Flows in
+Thermal and Chemical Nonequilibrium,” Tech. rep., NASA TP 2867, Feb. 1989.
+
+[24] Park, C., Howe, J. T., Jaffe, R. L., and Candle, G. V., “Review of Chemical-Kinetic Problems for Future NASA Missions, II:
+Mars Entries,” Journal of Thermophysics and Heat Transfer, Vol. 8, No. 1, 1994, pp. 9–23.
+
+[25] Johnston, C. O., “Study of Aerothermodynamic Modeling Issues Relevantto High-Speed Sample Return Vehicles,” VKI Lecture
+STO-AVT-218, 2014.
+
+[26] Johnson, C. O., Hollis, B. R., and Sutton, K., “Spectrum Modeling for Air Shock-layer Radiation at Lunar-Return Conditions,”
+Journal of Spacecraft and Rockets, Vol. 45, No. 5, 2008, pp. 865–878.
+
+[27] Johnson, C. O., Hollis, B. R., and Sutton, K., “Non-Boltzman Modeling for Air Shock Layers at Lunar Return Conditions,”
+Journal of Spacecraft and Rockets, Vol. 45, No. 5, 2008, pp. 879–890.
+
+[28] Ralchenko, Y., “NIST Atomic Spectra Database, Version 3.1.0,” 2006. URL physics.nist.gov/PhysRefData/ASD/.
+
+[29] The Opacity Project Team, The Opacity Project, Vol. 1, 1995.
+
+[30] Cunto, W., Mendoza, C., Ochsenbein, F., and Zeippen, C., “TOPbase at the CDS,” Astronomy and Astrophysics, Vol. 275, 1993,
+pp. L5–L8.
+
+[31] Johnston, C. O., Brandis, A. M., , and Sutton, K., “Shock Layer Radiation Modeling and Uncertainty for Mars Entry, AIAA
+2012-2866,” 43𝑟𝑑 AIAA Thermophysics Conference, New Orleans, LA, 2012.
+
+[32] Mazaheri, A., Johnston, C. O., and Sefidbakht, S., “Three-Dimensional Radiation Ray-Tracing for Shock-Layer Radiative
+Heating Simulations,” Journal of Spacecraft and Rockets, Vol. 50, No. 3, 2013, pp. 485–493.
+
+[33] Gupta, R., Yos, J., Thompson, R. A., and Lee, K., “A Review of Reaction Rates and Thermodynamic and Transport Properties
+for an 11-Species Air Model for Chemical and Thermal Nonequilibrium Calculations to 30,000 K,” NASA RP 1232, Aug. 1990.
+
+[34] Wright, M., “Recommended Collision Integrals for Transport Property Computations Part 1: Air Species,” AIAA Journal,
+Vol. 43, No. 12, 2005, pp. 2558–2564.
+
+[35] Wright, M., “Recommended Collision Integrals for Transport Property Computations Part 2: Mars and Venus Entries,” AIAA
+Journal, Vol. 45, No. 1, 2005, pp. 281–288.
+
+12
+
+physics.nist.gov/PhysRefData/ASD/
+
+
+[36] Gurvich, L. V., Veyts, I. V., and Alcock, C. B., Thermodynamic Properties of Individual Substances, Hemisphere Publishing
+Corp., New York, 1989.
+
+[37] Jones, J. J., “The Optical Absorption of Triatomic Carbon C3 for the Wavelength Range 260 to 560 nm,” Tech. rep., NASA
+TP-1141, 1978.
+
+[38] Sharmai, M. P., Jaffe, R. L., Munafò, A., and Panesi, M., “Calculation of Thermochemical Properties of Carbon-cluster Ablation
+Species,” AIAA paper 2018-4179, 2018. doi:10.2514/6.2018-4179.
+
+[39] Moss, J. N., and Simmonds, A. L., “Galileo Probe Forebody Flowfield Predictions,” AIAA paper 82-0874, 1982.
+
+[40] K, T. E., Dyakonov, A. A., Wright, M. J., and Tang, C. Y., “Aerothermodynamic Design of the Mars Science Laboratory
+Heatshield,” AIAA paper 2009-4075, 2009.
+
+[41] Erb, A. J., West, T. K., and Johnston, C. O., “Investigation of Galileo Probe Entry Heating with Coupled Radiation and Ablation,”
+Journal of Spacecraft and Rockets, Vol. 57, No. 4, 2020, pp. 692–706. doi:10.2514/1.A34751.
+
+[42] Park, C., “Effects of atomic oxygen on graphite ablation,” AIAA Journal, Vol. 14, No. 11, 1976, pp. 1640–1642. doi:
+10.2514/3.7267.
+
+[43] Palmer, H. B., and Shelef, M., Vaporization of Carbon, Marcel Dekker, Inc., New York, 1968, Vol. Chemistry and Physics of
+Carbon 4, pp. 85–135.
+
+[44] Driver, D., and MacLean, M., “Improved Predictions of PICA Recession in Arc Jet Shear Tests,” AIAA paper 2011-141, 2011.
+doi:10.2514/6.2011-141.
+
+[45] Johnston, C. O., and Brandis, A. M., “Modeling of nonequilibrium CO Fourth-Positive and CN Violet emission in CO2
+-– N2 gases,” Journal of Quantitative Spectroscopy and Radiative Transfer, Vol. 149, No. 1, 2014, pp. 303–317. doi:
+10.1016/j.jqsrt.2014.08.025.
+
+[46] Fujita, K., Yamada, T., and Ishii, N., “Impact of Ablation Gas Kinetics on Hyperbolic Entry Radiative Heating,” AIAA paper
+2006-1185, 2006. doi:10.2514/6.2006-1185.
+
+[47] Gokcen, T., “N2-CH4-Ar Chemical Kinetic Model for Simulations of Atmospheric Entry to Titan,” Journal of Thermophysics
+and Heat Transfer, Vol. 21, No. 1, 2007, pp. 9–18. doi:10.2514/1.22095.
+
+[48] Johnston, C. O., West, T. K., and Brandis, A. M., “Features of Afterbody Radiative Heating for Titan Entry,” AIAA paper
+2019-3010, 2019. doi:10.2514/6.2019-3010.
+
+[49] Park, C., Nonequilibrium Hypersonic Aerothermodynamics, 1st ed., Wiley, New York, 1990.
+
+[50] Grover, M. S., Suchyta, C. J., and Josyula, E., “Ab Initio Based Rate Coefficients For Two-Temperature Nonequilibrium Models
+In Hypersonic Blunt Body Flow,” AIAA paper 2019-0790, 2019. doi:10.2514/6.2019-0790.
+
+[51] Hanson, R. K., and Baganoff, D., “Shock-Tube Study of Nitrogen Dissociation Rates Using Pressure Measurements,” AIAA
+Journal, Vol. 10, No. 2, 1972, pp. 211–215. doi:10.2514/3.50082.
+
+[52] Jaffe, R., Schwenke, D., and Chaban, G., “Theoretical Analysis of N2 Collisional Dissociation and Rotation-Vibration Energy
+Transfer,” AIAA paper 2009-1569, 2019. doi:10.2514/6.2009-1569.
+
+[53] Koshi, M., Bando, S., Saito, M., and Asaba, T., “Dissociation of nitric oxide in shock waves,” Symposium (International) on
+Combustion, Vol. 17, No. 1, 1979, pp. 553–562. doi:10.1016/S0082-0784(79)80056-9.
+
+[54] Wray, K. L., and Teare, J. D., “Shock-Tube Study of the Kinetics of Nitric Oxide at High Temperatures,” The Journal of
+Chemical Physics, Vol. 36, No. 10, 1962, pp. 2582–2596. doi:10.1063/1.1732338.
+
+[55] Gorelov, V. A., Gladyshev, M. K., Kireev, A. Y., Yegorov, I. V., Plastinin, Y. A., and Karabadzhak, G. F., “Experimental and
+Numerical Study of Nonequilibrium Ultraviolet NO and N Emission in Shock Layer,” Journal of Thermophysics and Heat
+Transfer, Vol. 12, No. 2, 1998, pp. 172–179. doi:10.2514/2.6342.
+
+[56] Kim, J. G., and Park, G., “Thermochemical nonequilibrium parameter modification of oxygen for a two-temperature model,”
+Physics of Fluids, Vol. 30, No. 1, 2018, p. 016101. doi:10.1063/1.4996799.
+
+[57] Kulakhmetov, M., Gallis, M., and Alexeenko, A., “Ab initio-informed maximum entropy modeling of rovibrational relaxation
+and state-specific dissociation with application to the O2 + O system,” The Journal of Chemical Physics, Vol. 144, No. 17,
+2016, p. 174302. doi:10.1063/1.4947590.
+
+13
+
+
+
+[58] Park, C., Jaffe, R. L., and Partridge, H., “Chemical-Kinetic Parameters of Hyperbolic Earth Entry,” Journal of Thermophysics
+and Heat Transfer, Vol. 15, No. 1, 2001, pp. 76–90. doi:10.2514/2.6582.
+
+[59] Ibragimova, L., “Recommended rate constants of CO + O2 - reversible - CO2 + O reactions,” Khim. Fiz., Vol. 10, 1991, pp.
+307–310.
+
+[60] Cruden, B. A., and Brandis, A. M., “Measurements and Prediction of Radiative Non-equilibrium for Air Shocks Between 7-9
+km/s,” AIAA paper 2017-4535, 2017. doi:10.2514/6.2017-4535.
+
+[61] Nelson, H. F., Park, C., and Whiting, E. E., “Titan atmospheric composition by hypervelocity shock-layer analysis,” Journal of
+Thermophysics and Heat Transfer, Vol. 5, No. 2, 1991, pp. 157–165. doi:10.2514/3.243.
+
+[62] Park, C., “Effects of Lyman Radiation on Nonequilibrium Ionization of Atomic Hydrogen,” AIAA Paper 2004–2277, 2004.
+
+[63] Leibowitz, L. P., and Kuo, T., “Ionizational Nonequilibrium Heating During Outer Planetary Entries,” AIAA Journal, Vol. 14,
+No. 9, 1976, pp. 1324–1329.
+
+[64] Park, C., “Assessment of a two-temperature kinetic model for dissociating and weakly ionizing nitrogen,” Journal of
+Thermophysics and Heat Transfer, Vol. 2, No. 1, 1988, pp. 8–16. doi:10.2514/3.55.
+
+[65] Dunn, M. G., and Kang, S., “Theoretical and experimental studies of reentry plasmas,” NASA CR 2232, Apr. 1973.
+
+[66] Dunn, M. G., and Lordi, J. A., “Measurement of O2+ plus e− dissociative recombination in expanding oxygen flows,” AIAA
+Journal, Vol. 8, No. 4, 1970, pp. 614–618. doi:10.2514/3.5730.
+
+[67] Park, C., “Review of chemical-kinetic problems of future NASA missions. I - Earth entries,” Journal of Thermophysics and
+Heat Transfer, Vol. 7, No. 3, 1993, pp. 385–398. doi:10.2514/3.431.
+
+[68] Annaloro, J., Morel, V., Bultel, A., and Omaly, P., “Global rate coefficients for ionization and recombination of carbon, nitrogen,
+oxygen, and argon,” Physics of Plasmas, Vol. 19, No. 7, 2012, p. 073515. doi:10.1063/1.4737147.
+
+[69] Losev, S. A., Makarov, V. N., and Pogosbekyan, M. Y., “Model of the physico-chemical kinetics behind the front of a very
+intense shock wave in air,” Fluid Dynamics, Vol. 30, 1995, pp. 299–309.
+
+[70] Carlson, L. A., and Gally, T. A., “Effect of electron temperature and impact ionization on Martian return AOTV flowfields,”
+Journal of Thermophysics and Heat Transfer, Vol. 5, No. 1, 1991, pp. 9–20. doi:10.2514/3.220.
+
+[71] Bourdon, A., and Vervisch, P., “Study of a low-pressure nitrogen plasma boundary layer over a metallic plate,” Physics of
+Plasmas, Vol. 4, No. 11, 1997, pp. 4144–4157. doi:10.1063/1.872535.
+
+[72] Teulet, P., Gonzalez, J. J., Mercado-Cabrera, A., Cressault, Y., and Gleizes, A., “One-dimensional hydro-kinetic modelling of
+the decaying arc in AIR–PA66–copper mixtures: I. Chemical kinetics, thermodynamics, transport and radiative properties,”
+Journal of Physics D: Applied Physics, Vol. 42, No. 17, 2009, p. 175201. doi:10.1088/0022-3727/42/17/175201.
+
+[73] Kang, S., Jones, W. L., and Dunn, M. G., “Theoretical and Measured Electron-Density Distributions at High Altitudes,” AIAA
+Journal, Vol. 11, No. 2, 1973, pp. 141–149. doi:10.2514/3.50446.
+
+VI. Appendix
+The following appendix gives tables of the four groups of uncertain parameters for the convective heat transfer
+
+model used in this study. Note that the parameters of Tables 4, 5, and 6 are those of an Arrhenius form.
+
+14
+
+
+
+Table 4 Flow Field Dissociation Reactions
+
+Reaction 𝐴 𝑓 ,𝑖
+
+(
+𝑐𝑚3
+
+𝑚𝑜𝑙−𝑠
+
+)
+𝑛 𝑓 ,𝑖 𝐷 𝑓 ,𝑖 (𝐾 ) 𝑇𝑓 ,𝑖 Third Body, M 𝑈𝑖 Reference
+
+C2 + M ↔ 2C + M 4.50e+18 -1.00 7.15e+04 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 All 0.1, 10.0 [45]
+
+C2H + M ↔ C2 + H + M 1.70e+35 -5.16 5.74e+04 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 All 0.1, 10.0 [46]
+
+C2H2 + M ↔ C2H + H + M 4.00e+16 0.00 5.40e+04 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 All 0.1, 10.0 [46]
+
+C3 + M ↔ C2 + C + M 1.68e+21 -1.50 8.77e+04 𝑇 0.7
+𝑡𝑟 𝑇
+
+0.3
+𝑣𝑒 H, C, N, O 0.1, 10.0 [46]
+
+8.40e+20 -1.50 8.77e+04 𝑇 0.7
+𝑡𝑟 𝑇
+
+0.3
+𝑣𝑒 others 0.1, 10.0 [46]
+
+CH + M ↔ C + H + M 1.90e+14 0.00 3.37e+04 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 All 0.5, 2.0 [47]
+
+CH2 + M ↔ CH + H + M 4.00E+15 0.00 4.18e+04 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 All 0.1, 10.0 [47]
+
+CH2 + M ↔ C + H2 + M 1.30E+14 0.00 2.97e+04 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 All 0.1, 10.0 [47]
+
+CH3 + M ↔ CH + H2 + M 5.00E+15 0.00 4.28e+04 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 All 0.1, 10.0 [47]
+
+CH3 + M ↔ CH2 + H + M 1.02E+16 0.00 4.56e+04 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 All 0.1, 10.0 [47]
+
+CH4 + M ↔ CH3 + H + M 2.25E+27 -1.87 5.29e+04 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 All 0.1, 10.0
+
+CN + M ↔ C + N + M 6.00e+15 -0.40 7.10e+04 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 All 0.3, 1.9 [48]
+
+CO + M ↔ C + O + M 2.70e+21 -1.00 1.29e+05 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 H, C, N, O 0.25, 1.5 [45]
+
+1.20e+21 -1.00 1.29e+05 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 others 0.25, 1.5 [45]
+
+CO2 + M ↔ CO + O + M 1.38e+22 -1.50 6.33e+04 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 H, C, N, O 0.1, 1.0 [45]
+
+6.90e+21 -1.50 6.33e+04 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 others 0.1, 1.0 [45]
+
+H2 + M ↔ 2H + M 0.00e+00 0.00 4.84e+04 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 H 0.25, 1.5 [46, 47]
+
+9.00e+14 0.00 4.84e+04 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 others 0.25, 1.5 [46, 47]
+
+HCN + M ↔ CN + H + M 3.57e+26 -2.60 6.28e+04 𝑇 0.7
+𝑡𝑟 𝑇
+
+0.3
+𝑣𝑒 All 0.15, 3.0 [48]
+
+N2 + M ↔ 2N + M 3.00e+22 -1.60 1.13e+05 𝑇 0.7
+𝑡𝑟 𝑇
+
+0.3
+𝑣𝑒 C, N, O 0.2, 3.0 [48–52]
+
+3.00e+22 -1.60 1.13e+05 𝑇 0.7
+𝑡𝑟 𝑇
+
+0.3
+𝑣𝑒 H 0.1, 0.8 [48]
+
+7.00e+21 -1.60 1.13e+05 𝑇 0.7
+𝑡𝑟 𝑇
+
+0.3
+𝑣𝑒 others 0.5, 4.0 [48–51]
+
+NO + M ↔ N + O + M 4.57e+17 0.00 7.55e+04 𝑇 0.7
+𝑡𝑟 𝑇
+
+0.3
+𝑣𝑒 H, C, N, O, NO, CO2 0.2, 2.5 [45, 49, 53–55]
+
+2.08e+16 0.00 7.55e+04 𝑇 0.7
+𝑡𝑟 𝑇
+
+0.3
+𝑣𝑒 others 0.2, 2.5 [45, 49, 53–55]
+
+O2 + M ↔ 2O + M 1.00e+22 -1.50 5.94e+04 𝑇 0.7
+𝑡𝑟 𝑇
+
+0.3
+𝑣𝑒 H, C, O, N 0.3,1.3 [49, 50, 56, 57]
+
+2.00e+21 -1.50 5.94e+04 𝑇 0.7
+𝑡𝑟 𝑇
+
+0.3
+𝑣𝑒 others 0.3, 1.3 [49, 50, 56, 57]
+
+Table 5 Flow Field Exchange Reactions
+
+Reaction 𝐴 𝑓 ,𝑖
+
+(
+𝑐𝑚3
+
+𝑚𝑜𝑙−𝑠
+
+)
+𝑛 𝑓 ,𝑖 𝐷 𝑓 ,𝑖 (𝐾 ) 𝑇𝑓 ,𝑖 𝑈𝑖 Reference
+
+C2 + C2H2 ↔ 2C2H 1.10e+14 -0.38 6.87e+03 𝑇𝑡𝑟 0.1, 10.0 [46]
+C2 + N2 ↔ CN + CN 1.50e+13 0.00 2.10e+04 𝑇𝑡𝑟 0.5, 150.0 [48]
+C2H + H ↔ C2 + H2 1.60e+13 0.15 1.46e+04 𝑇𝑡𝑟 0.1, 10.0 [46]
+C3 + C ↔ C2 + C2 6.00e+11 1.07 1.65e+04 𝑇𝑡𝑟 0.1, 10.0 [46]
+C3 + N ↔ CN + C2 1.00e+12 0.00 3.42e+04 𝑇𝑡𝑟 0.1, 10.0 [58]
+CH + C ↔ C2 + H 2.00e+14 0.00 0.00e+04 𝑇𝑡𝑟 0.1, 10.0 [47]
+CH + CO ↔ C2H + O 2.50e+10 0.67 3.90e+04 𝑇𝑡𝑟 0.1, 10.0 [46]
+CH + N2 ↔ HCN + N 4.40e+12 0.0 1.11e+04 𝑇𝑡𝑟 0.1, 10.0 [47]
+CH2 + H ↔ CH + H2 6.03e+12 0.00 -9.00e+02 𝑇 0.5
+
+𝑡𝑟 𝑇
+0.5
+𝑣𝑒 0.1, 10.0 [47]
+
+CH2 + N ↔ HCN + H 5.00e+13 0.00 0.00e+00 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 0.1, 10.0 [47]
+
+CH3 + H ↔ CH2 + H2 6.03e+12 0.00 7.60e+03 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 0.1, 10.0 [47]
+
+CH3 + N ↔ HCN + 2H 7.00e+13 0.00 0.00e+00 𝑇 0.5
+𝑡𝑟 𝑇
+
+0.5
+𝑣𝑒 0.1, 10.0 [47]
+
+CN + C ↔ C2 + N 3.00e+14 0.00 1.81e+04 𝑇𝑡𝑟 0.5, 3.0 [48]
+CN + H2 ↔ HCN + H 2.95e+05 0.00 1.13e+03 𝑇𝑡𝑟 0.5, 1.5 [48]
+CN + O ↔ NO + C 1.60e+12 0.10 1.46e+04 𝑇𝑡𝑟 1.0, 10.0 [45]
+CO + C ↔ C2 + O 2.40e+17 -1.00 5.80e+04 𝑇𝑡𝑟 0.1, 10.0 [24]
+CO + C2 ↔ C3 + O 1.00e+12 0.00 4.12e+04 𝑇𝑡𝑟 0.1, 10.0 [58]
+CO + N ↔ CN + O 1.00e+14 0.00 3.86e+04 𝑇𝑡𝑟 0.1, 10.0 [45]
+CO + NO ↔ CO2 + N 8.00e+06 0.88 1.33e+04 𝑇𝑡𝑟 0.1, 10.0 [46]
+CO + O ↔ O2 + C 3.90e+13 -0.18 6.92e+04 𝑇𝑡𝑟 1.0, 10.0 [45]
+CO2 + O ↔ O2 + CO 2.71e+14 0.00 3.38e+04 𝑇𝑡𝑟 0.1, 10.0 [59]
+H + C2H2 ↔ C2H + H2 1.00e+16 -0.50 1.55e+04 𝑇𝑡𝑟 0.1, 10.0 [46]
+H + CH4 ↔ CH3 + H2 1.32e+04 3.00 4.05e+03 𝑇𝑡𝑟 0.1, 10.0 [47]
+H + CN ↔ CH + N 1.50e+15 -0.12 4.978e+04 𝑇𝑡𝑟 0.1, 10.0 [46]
+H + CO ↔ CH + O 6.70e+14 0.15 8.85e+04 𝑇𝑡𝑟 0.1, 10.0 [46]
+H2 + C ↔ CH + H 4.00e+14 0.00 1.17e+04 𝑇𝑡𝑟 0.1, 10.0 [47]
+H2 + H ↔ 2H + H 8.50e+19 -1.10 5.23e+04 𝑇 0.5
+
+𝑡𝑟 𝑇
+0.5
+𝑣𝑒 0.1, 10.0 [46]
+
+N + CO ↔ NO + C 1.10e+14 0.07 5.35e+04 𝑇𝑡𝑟 0.1, 10.0 [46]
+N2 + C ↔ CN + N 5.24e+13 0.0 2.26e+04 𝑇𝑡𝑟 0.5, 1.5 [48]
+N2 + CO ↔ CN + NO 1.20e+16 -1.23 7.70e+04 𝑇𝑡𝑟 0.1, 10.0 [46]
+N2 + O ↔ NO + N 6.00e+13 0.10 3.80e+04 𝑇𝑡𝑟 0.4, 1.3 [46, 49, 58, 60],
+O2 + N ↔ NO + O 2.49e+09 1.18 4.01e+03 𝑇𝑡𝑟 0.1, 10.0 [46]
+
+15
+
+
+
+Table 6 Flow Field Ionization Reactions
+
+Reaction 𝐴 𝑓 ,𝑖
+
+(
+𝑐𝑚3
+
+𝑚𝑜𝑙−𝑠
+
+)
+𝑛 𝑓 ,𝑖 𝐷 𝑓 ,𝑖 (𝐾 ) 𝑇𝑓 ,𝑖 𝑈𝑖 Reference
+
+C + e− ↔ C+ + e− + e− 3.90e+33 -3.78 1.31e+05 𝑇𝑣𝑒 0.1, 10.0 [24, 58]
+C + N ↔ CN+ + e− 1.00e+15 1.50 1.64e+05 𝑇𝑣𝑒 0.1, 10.0 [61]
+C + O ↔ CO+ + e− 8.80e+08 1.00 3.31e+04 𝑇𝑣𝑒 0.1, 10.0 [24]
+C+ + CO ↔ CO+ + C 1.00e+13 0.00 3.14e+04 𝑇𝑡𝑟 0.1, 10.0 [24]
+C+ + N2 ↔ N+
+
+2 + C 1.11e+14 -0.11 5.00e+04 𝑇𝑡𝑟 0.1, 10.0 [61]
+CN+ + N ↔ CN + N+ 9.80e+12 0.00 4.07e+04 𝑇𝑒𝑙 0.1, 10.0 [61]
+H + e− ↔ H+ + e− + e- 2.20e+30 -2.80 1.58e+05 𝑇𝑣𝑒 0.1, 10.0 [58, 62, 63]
+N + N ↔ N+
+
+2 + e− 4.40e+07 1.50 6.75e+04 𝑇𝑣𝑒 0.3, 1.3 [49, 64–66]
+N + O ↔ NO+ + e− 5.30e+12 0.00 3.19e+04 𝑇𝑣𝑒 0.1, 10.0 [67]
+N + e− ↔ N++ e− + e− 2.50e+34 -3.82 1.68e+05 𝑇𝑣𝑒 0.5, 2.0 [49, 68–70]
+N+ + N2 ↔ N+
+
+2 + N 1.00e+12 0.50 1.22e+04 𝑇𝑣𝑒 0.05, 1.7 [60, 65–67, 71, 72]
+N2 + O+ ↔ N+
+
+2 + O 9.10e+11 0.36 2.28e+04 𝑇𝑡𝑟 0.1, 10.0 [49]
+N2 + e− ↔ 2N + e− 6.00e+3 2.60 1.13e+05 𝑇𝑣𝑒 0.1, 10.0 [49, 60, 71]
+NO + O+ ↔ N+ + O2 1.40e+05 1.90 2.66e+04 𝑇𝑡𝑟 0.1, 10.0 [49]
+NO+ + C ↔ C+ + NO 1.0e+13 0.00 2.32e+04 𝑇𝑡𝑟 0.1, 10.0 [24]
+NO+ + N ↔ N+
+
+2 + O 7.20e+13 0.00 3.55e+04 𝑇𝑡𝑟 0.1, 10.0 [49]
+NO+ + N ↔ O+ + N2 3.40e+13 -1.08 1.28e+04 𝑇𝑡𝑟 0.1, 10.0 [49]
+NO+ + O ↔ N+ + O2 1.00e+12 0.50 7.72e+04 𝑇𝑡𝑟 0.1, 10.0 [49]
+NO+ + O ↔ O+
+
+2 + N 7.20e+12 0.29 4.86e+04 𝑇𝑡𝑟 0.1, 10.0 [49]
+NO+ + O2 ↔ NO + O+
+
+2 2.40e+13 0.41 3.26e+04 𝑇𝑡𝑟 0.1, 10.0 [49]
+O + O ↔ O+
+
+2 + e− 7.10e+02 2.70 8.06e+04 𝑇𝑣𝑒 0.1, 10.0 [67]
+O + e− ↔ O+ + e− + e− 3.90e+33 -3.78 1.59e+05 𝑇𝑣𝑒 0.4, 3.0 [49, 68–70, 73]
+O2 + C+ ↔ O+
+
+2 + C 1.00e+13 0.00 9.40e+03 𝑇𝑡𝑟 0.1, 10.0 [24]
+O+
+
+2 + N ↔ O2 + N+ 8.700e+13 0.14 2.86e+04 𝑇𝑡𝑟 0.1, 10.0 [49]
+O+
+
+2 + N2 ↔ N+
+2 + O2 9.90e+12 0.00 4.07e+04 𝑇𝑡𝑟 0.1, 10.0 [49]
+
+O+
+2 + O ↔ O+ + O2 4.00e+12 -0.09 1.80e+04 𝑇𝑡𝑟 0.1, 10.0 [67]
+
+16
+
+
+	Introduction
+	Uncertainty Quantification Approach
+	Generalized Polynomial Chaos
+	Point-Collocation, Non-Intrusive Polynomial Chaos
+	Sparse Approximation via Least Angle Regression
+	Least Angle Regression Convergence
+
+	Computational Modeling Approach and Sources of Uncertainty
+	Geometry and Computational Domain
+	Computational Fluid Dynamics Model
+	Parametric Sources of Uncertainty
+
+	Results and Discussion
+	Baseline Solutions
+	Uncertainty Analysis
+
+	Conclusions
+	Appendix
+

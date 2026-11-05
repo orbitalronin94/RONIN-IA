@@ -1,0 +1,472 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PowerPoint Presentation
+
+A Robust Schema for Storing and Managing Machine Learning Data and Models
+Transformational Tools and Technologies (T3) Project
+2023 AIAA SciTech Forum, January 23-27
+Brandon L. Hearley, Steven M. Arnold, Joshua Stuckner
+NASA Glenn Research Center
+Notice for Copyrighted Information
+This manuscript is a work of the United States Government authored as part of the official duties of employee(s) of the National Aeronautics and Space Administration.  No copyright is claimed in the United States under Title 17, U.S. Code.  All other rights are reserved by the United States Government. Any publisher accepting this manuscript for publication acknowledges that the United States Government retains a non-exclusive, irrevocable, worldwide license to prepare derivative works, publish, or reproduce the published form of this manuscript, or allow others to do so, for United States government purposes.
+
+
+National Aeronautics and Space Administration
+www.nasa.gov
+Innovative solutions through foundational research and cross-cutting tools
+
+1
+
+Machine Learning (ML) has enabled models 
+that can improve efficiency and decrease computational cost
+
+ML models are crucial in enabling Integrated Computational Materials Engineering (ICME)
+
+Large data sets require robust means of storing ML data and models
+Motivation
+
+MicroNet: Automatic segmentation of micrographs
+
+NASMAT: Nasa’s Multiscale Analysis Tool used to train ML models
+
+
+National Aeronautics and Space Administration
+‹#›
+
+2
+
+Best Practices for effective data management:
+Data should be easy to find / searchable
+Full traceability between data creation and model development
+Data should only be defined once and viewed elsewhere
+Access Control
+
+Machine Learning schema presented in the context of Ansys Granta MI database software system
+Relational database for material information
+Overall schema/approach can be applied to any data management system
+Database Management Best Practices
+
+
+
+National Aeronautics and Space Administration
+‹#›
+
+3
+
+Table
+Highest level of organization in a database
+All records in the same table have the same schema
+Folder
+Similar to computer directory
+Record
+Collection of attributes used to define data
+Generic Record
+Combination of a folder and record
+Granta MI Definitions
+
+1
+2
+3
+4
+
+1
+2
+3
+4
+
+
+National Aeronautics and Space Administration
+‹#›
+
+4
+
+Heading
+Layout organization of the attributes
+Attribute
+Populatable field used to describe the data stored
+
+Granta MI Definitions (Continued)
+
+5
+6
+5
+6
+
+
+National Aeronautics and Space Administration
+‹#›
+
+5
+
+NASA GRC ICME Schema
+
+
+ML Data and Models naturally fit within the current ICME schema
+
+
+
+
+
+National Aeronautics and Space Administration
+‹#›
+
+6
+
+Created two new tables in the NASA GRC Database
+Reference Data: Machine Learning
+Models: Machine Learning
+Flexibility in model definition prevents data from being duplicated multiple places in the database
+
+Motivation for Current Philosophy
+
+
+
+National Aeronautics and Space Administration
+‹#›
+
+7
+
+All members of a data set stored within the same generic record
+
+Data Series Information stored in the generic record
+
+Records created for each member in the training set
+Generically named attributes for flexibility
+
+Reference Data: Machine Learning Schema
+
+
+File tree structure
+Headings and Attributes
+
+
+National Aeronautics and Space Administration
+‹#›
+
+8
+
+Trained models are stored individual records
+Model information, accessibility, and required software, architecture, etc.
+
+Define how the data set was split into training, validation and testing
+
+Link to (View) data in the Reference Data: Machine Learning Table
+
+Define validation/test predictions made by the model
+
+Models: Machine Learning Schema
+Headings and Attributes
+
+
+
+National Aeronautics and Space Administration
+‹#›
+
+9
+
+Trained two different ML Models for predicting fatigue life curves of composites from the same virtual data set (MAC/GMC)
+Demonstration Example
+Recurrent Neural Network (RNN)
+Model predicts the fatigue life curve vector from an applied load vector
+Applied load input as a vector, life prediction made at each load step
+
+Artificial Neural Network (ANN)
+Model called in a loop to produce the fatigue life curve
+Repeat with different applied 
+loads to get a fatigue life curve
+
+
+
+National Aeronautics and Space Administration
+‹#›
+
+10
+
+Virtual data defined once in the database in the Reference Data: Machine Learning Table
+Store general information in the generic record
+Storing Virtual Data: Generic Record
+
+
+
+
+
+National Aeronautics and Space Administration
+‹#›
+
+11
+
+
+Storing Virtual Data: Generic Record
+
+
+National Aeronautics and Space Administration
+‹#›
+
+12
+
+Each example in the data set is stored in its own record
+Given a unique ID
+
+Storing Virtual Data: Data Record
+
+
+
+National Aeronautics and Space Administration
+‹#›
+
+13
+
+Why not store data in a single tabular attribute for all members in the data set?
+
+
+
+
+
+
+
+Currently in Granta MI, there is no capability to link to an individual row in a tabular attribute
+No way to specify which dataset members were used for training, validation, and testing
+
+Granta Limitations for Linking (Viewing) Data
+
+
+
+National Aeronautics and Space Administration
+‹#›
+
+14
+
+
+Proposed Enhancement to the Tabular Attribute
+Modified Granta Linked Table Capability for viewing
+Linked Row
+1
+Current Granta Linked Table Capability for viewing
+5
+
+
+
+Record 1
+Record 2
+Record 1
+
+
+Link 
+Val 1
+Link Val 2
+Link Val 1
+
+Each column is a different attribute in the different linked record
+Link to a single tabular attribute in a single record. Columns take on same values as the columns in the linked record.
+
+
+
+National Aeronautics and Space Administration
+‹#›
+
+15
+
+Create separate records for each model
+Blue = ANN, Green = RNN, Black = Both
+
+Storing ML Models: Model Information
+
+
+
+National Aeronautics and Space Administration
+‹#›
+
+16
+
+Store the ML model architecture in a tabular attribute 
+Can use this information to recreate the ML model in any programming suite (TensorFlow, PyTorch, etc.)
+
+Storing ML Models: Model Architecture
+
+
+
+National Aeronautics and Space Administration
+‹#›
+
+17
+
+View data used for training, validation, and testing in two different model records without duplicating the data
+
+
+
+
+
+Advantages
+User only defines the Data ID 
+Data can be shuffled differently for each model
+
+
+Storing ML Models: Data Definition
+
+
+
+National Aeronautics and Space Administration
+‹#›
+
+18
+
+View data two different model records without duplication
+
+
+
+
+
+
+
+Storing ML Models: Data Definition
+
+
+
+National Aeronautics and Space Administration
+‹#›
+
+19
+
+Model predictions are defined in the model record
+Specific to the model
+
+
+
+
+
+
+
+Storing ML Models: Model Validation
+
+
+
+National Aeronautics and Space Administration
+‹#›
+
+20
+
+Machine learning is critical to ICME
+Need for effective and efficient storage of data and models with full traceability
+NASA GRC ICME schema separates data and models into two different tables
+Reference Data: ML stores virtual data created to train ML models
+Models: ML stores actual models
+Each example in a training set is stored in its own individual record
+Necessary to follow database best practices within Granta MI
+Identified feature requests that can enable machine learning data/models to be efficiently and effectively stored in the Granta MI platform
+
+
+
+
+
+Conclusion/Summary
+
+
+National Aeronautics and Space Administration
+‹#›
+
+21
+
+Thank You for Your Attention
+
+Acknowledgements
+The authors would like to acknowledge the support of the NASA Transformational Tools and Technologies (TTT) project within the Aeronautics Research Mission Directorate.
+
+
+
+National Aeronautics and Space Administration
+‹#›
+Motivation and Background on Database Management
+Overview of Granta MI Database Platform
+NASA GRC ICME Schema and Machine Learning storage philosophy
+Overview of the database attributes and organization
+Demonstration of the schema and philosophy
+Conclusions/Summary
+Outline
+
+
+National Aeronautics and Space Administration
+‹#›
+
+23
+
+image3.png
+
+image6.png
+
+image7.png
+
+image8.png
+
+image9.png
+
+image10.png
+
+image11.png
+
+image12.png
+
+image13.png
+
+image14.png
+
+image15.png
+
+image16.emf
+
+image17.png
+
+image18.png
+
+image19.png
+
+image20.png
+
+image21.png
+
+image22.png
+
+image23.png
+
+image24.png
+
+image25.png
+
+image26.png
+
+image27.png
+
+image28.png
+
+image29.png
+
+image30.png
+
+image1.jpeg
+
+image2.emf
+
+image4.jpeg
+
+
