@@ -1,0 +1,208 @@
+name: RONIN — ciclo main con tutor socrático Qwen3
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/main-qwen-socratic-cycle.yml"]
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: Pasos incrementales desde main
+        required: true
+        default: "500"
+        type: string
+      examples:
+        description: Ejemplos Qwen (24, 48 o 64)
+        required: true
+        default: "48"
+        type: choice
+        options: ["24", "48", "64"]
+permissions:
+  actions: read
+  contents: read
+concurrency:
+  group: ronin-main-qwen-socratic-cycle
+  cancel-in-progress: false
+jobs:
+  qwen-cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      BASE_RUN_ID: "42017319862"
+      LITERATURE_RUN_ID: "41926088900"
+      MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+      STEPS: ${{ inputs.steps || '500' }}
+      EXAMPLES: ${{ inputs.examples || '48' }}
+      QWEN_DIR: models/teachers/qwen3-8b/4bit
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate budget
+        run: |
+          [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -ge 100 ] && [ "$STEPS" -le 1000 ]
+          [[ "$EXAMPLES" =~ ^(24|48|64)$ ]]
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake git libcurl4-openssl-dev
+      - name: Build llama.cpp CPU server
+        run: |
+          git clone --depth 1 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          git -C /tmp/llama.cpp rev-parse HEAD | tee reports-llama-commit.txt
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DGGML_OPENMP=ON
+          cmake --build /tmp/llama.cpp/build --config Release --target llama-server -j2
+          test -x /tmp/llama.cpp/build/bin/llama-server
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "dill==0.3.8" "multiprocess==0.70.16" "huggingface_hub==0.36.0"
+          python -m compileall -q scripts/distill_mmlu_pro_qwen_socratic.py scripts/build_main_qwen_mixture.py
+      - name: Download main checkpoint artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: ronin-main-cycle2-mmlu-pro-full
+          path: incoming/main
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.BASE_RUN_ID }}
+      - name: Download eligible literature train artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: ronin-admitted-literature-es-v1-train
+          path: incoming/literature
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.LITERATURE_RUN_ID }}
+      - name: Verify scoped gates and checkpoint
+        run: |
+          python - <<'PY'
+          import hashlib, json, shutil
+          from pathlib import Path
+          import torch
+          def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+          base=Path("incoming/main/checkpoints/main.pt")
+          corpus=Path("incoming/literature/train.txt")
+          mp=Path("incoming/literature/dataset-manifest.json")
+          assert base.is_file() and corpus.is_file() and mp.is_file()
+          assert sha(base)=="a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
+          assert sha(corpus)=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
+          m=json.loads(mp.read_text())
+          checks=[
+            m.get("dataset_id")=="ronin-spanish-public-domain-literature-v2",
+            m.get("status")=="admitted_scoped_training_partition",
+            m.get("training_eligible") is True,
+            m.get("global_g0_pass") is False,
+            m.get("document_count")==608,
+            m.get("train_bytes")==140295523,
+            m.get("train_sha256")=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78",
+            m.get("validation_test_included") is False]
+          if not all(checks): raise SystemExit(f"Scoped corpus gate failed: {checks}")
+          ck=torch.load(base,map_location="cpu",weights_only=False)
+          if ck.get("step")!=1000 or not isinstance(ck.get("model"),dict): raise SystemExit("Invalid main checkpoint")
+          Path("checkpoints").mkdir(exist_ok=True)
+          shutil.copy2(base,"checkpoints/main.pt")
+          print("Scoped train verified: 608 docs; global G-0 remains FAIL; NASA/Papers excluded.")
+          PY
+      - name: Restore Qwen GGUF cache
+        id: qwen-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: models/teachers/qwen3-8b/4bit
+          key: ronin-qwen3-8b-q4km-${{ hashFiles('scripts/download_dual_teachers.py') }}
+      - name: Download Qwen3-8B Q4_K_M if needed
+        if: steps.qwen-cache.outputs.cache-hit != 'true'
+        run: python scripts/download_dual_teachers.py --model qwen3-8b --quantization 4bit --output-dir models/teachers
+      - name: Verify Qwen license and GGUF hash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from ronin.data.local_dual_teacher import verify_manifest
+          m=verify_manifest(Path("models/teachers/qwen3-8b/4bit"),"4bit")
+          assert m["model_id"]=="Qwen/Qwen3-8B" and m["license"]=="apache-2.0"
+          assert m["license_verified"] is True and m["trust_remote_code"] is False
+          print(m["model_id"],m["base_revision"],m["quantization_revision"],m["quantized_file_sha256"])
+          PY
+      - name: Prepare train-only internal validation
+        run: |
+          python scripts/prepare_legacy_training_split.py --input incoming/literature/train.txt --output-dir /tmp/ronin-qwen-split --validation-fraction 0.05 --seed 42005
+      - name: Distill Socratic Qwen examples from MMLU-Pro validation
+        timeout-minutes: 240
+        run: |
+          python scripts/distill_mmlu_pro_qwen_socratic.py --model-dir "$QWEN_DIR" --server-bin /tmp/llama.cpp/build/bin/llama-server --output-dir artifacts/qwen-distillation --count "$EXAMPLES" --max-new-tokens 160 --quantization 4bit
+      - name: Build verified scoped mixture
+        run: |
+          python scripts/build_main_qwen_mixture.py --literature-train incoming/literature/train.txt --literature-manifest incoming/literature/dataset-manifest.json --internal-split-manifest /tmp/ronin-qwen-split/split-manifest.json --internal-train /tmp/ronin-qwen-split/train-internal.txt --teacher-jsonl artifacts/qwen-distillation/qwen-verified-validation.jsonl --output /tmp/ronin-qwen-mixed-train.txt --teacher-repeat 32
+          cp /tmp/ronin-qwen-mixed-train.manifest.json reports-qwen-mixture.json
+      - name: Evaluate main before
+        run: |
+          mkdir -p reports
+          python scripts/evaluate_text.py --checkpoint checkpoints/main.pt --validation-text /tmp/ronin-qwen-split/validation-internal.txt --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu --output reports/language-before.json
+          python scripts/evaluate_domains.py --checkpoint checkpoints/main.pt --dataset benchmarks/domains_v1.jsonl --profile tiny --device cpu --output reports/domains-before.json
+          python scripts/evaluate_mmlu_pro.py --checkpoint checkpoints/main.pt --profile tiny --context-length 4096 --limit 0 --seed 2026 --revision "$MMLU_REVISION" --split test --device cpu --batch-token-budget 8192 --output reports/mmlu-test-before.json
+      - name: Fine tune from current main
+        run: |
+          python scripts/train_text.py --text /tmp/ronin-qwen-mixed-train.txt --profile tiny --steps "$STEPS" --seed 20261105 --init-checkpoint checkpoints/main.pt --learning-rate 0.00001 --min-learning-rate 0.000001 --device cpu --num-threads 2 --checkpoints checkpoints/qwen-candidate --metrics-out reports/training-throughput.json
+          candidate="checkpoints/qwen-candidate/step-$(printf '%08d' "$STEPS").pt"
+          test -s "$candidate"
+          cp "$candidate" checkpoints/candidate.pt
+      - name: Evaluate candidate after
+        run: |
+          python scripts/evaluate_text.py --checkpoint checkpoints/candidate.pt --validation-text /tmp/ronin-qwen-split/validation-internal.txt --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu --output reports/language-after.json
+          python scripts/evaluate_domains.py --checkpoint checkpoints/candidate.pt --dataset benchmarks/domains_v1.jsonl --profile tiny --device cpu --output reports/domains-after.json
+          python scripts/evaluate_mmlu_pro.py --checkpoint checkpoints/candidate.pt --profile tiny --context-length 4096 --limit 0 --seed 2026 --revision "$MMLU_REVISION" --split test --device cpu --batch-token-budget 8192 --output reports/mmlu-test-after.json
+      - name: Consolidate paired metrics without auto promotion
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("reports")
+          def load(n):
+            f=p/n
+            return json.loads(f.read_text()) if f.is_file() else None
+          b,a=load("mmlu-test-before.json"),load("mmlu-test-after.json")
+          l0,l1=load("language-before.json"),load("language-after.json")
+          result={"experiment":"ronin-main-qwen3-8b-socratic-cycle-v1","automatic_promotion":False,"global_g0_pass":False,"NASA_and_user_papers_included":False,"metrics":{},"decision":"INCOMPLETE"}
+          t=Path("artifacts/qwen-distillation/qwen-distillation-summary.json")
+          m=Path("reports-qwen-mixture.json")
+          if t.is_file(): result["teacher"]=json.loads(t.read_text())
+          if m.is_file(): result["mixture"]=json.loads(m.read_text())
+          for n in ("domains-before.json","domains-after.json","training-throughput.json"):
+            v=load(n)
+            if v is not None: result["metrics"][n]=v
+          if b and a:
+            ids0=[x.get("id") for x in b.get("details",[])]
+            ids1=[x.get("id") for x in a.get("details",[])]
+            same=(b.get("dataset_revision")==a.get("dataset_revision") and b.get("dataset_split")==a.get("dataset_split")=="test" and b.get("dataset_sha256")==a.get("dataset_sha256") and b.get("selected_items")==a.get("selected_items") and b.get("evaluated_items")==a.get("evaluated_items") and ids0==ids1 and b.get("coverage",0)>=0.95 and a.get("coverage",0)>=0.95)
+            delta=(a["overall"]["accuracy"]-b["overall"]["accuracy"])*100
+            result["mmlu_pro_test"]={"revision":a["dataset_revision"],"dataset_sha256":a["dataset_sha256"],"selected_items":a["selected_items"],"evaluated_before":b["evaluated_items"],"evaluated_after":a["evaluated_items"],"coverage_before":b["coverage"],"coverage_after":a["coverage"],"before_correct":b["overall"]["correct"],"after_correct":a["overall"]["correct"],"before_accuracy":b["overall"]["accuracy"],"after_accuracy":a["overall"]["accuracy"],"delta_percentage_points":delta,"same_items_revision_split_and_coverage":same,"complete_test_set_before":b.get("complete_test_set"),"complete_test_set_after":a.get("complete_test_set")}
+            if l0 and l1:
+              result["language_validation_non_regression"]=l1["bits_per_byte"]<=l0["bits_per_byte"]
+              result["decision"]="CANDIDATE_READY_FOR_REVIEW" if same and delta>0 and result["language_validation_non_regression"] else "DO_NOT_PROMOTE"
+          for n in ("language-before.json","language-after.json"):
+            v=load(n)
+            if v is not None: result["metrics"][n]=v
+          (p/"qwen-main-cycle-summary.json").write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n")
+          print(json.dumps(result,ensure_ascii=False,indent=2))
+          PY
+      - name: Upload report and candidate checkpoint
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-main-qwen-socratic-${{ github.run_id }}
+          path: |
+            reports/
+            checkpoints/main.pt
+            checkpoints/candidate.pt
+            reports-qwen-mixture.json
+            reports-llama-commit.txt
+          if-no-files-found: warn
+          retention-days: 90
+          compression-level: 6
