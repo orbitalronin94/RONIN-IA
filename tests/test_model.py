@@ -78,3 +78,20 @@ def test_causal_attention_does_not_leak_future_tokens():
         logits_a, _ = model(first)
         logits_b, _ = model(changed_future)
     torch.testing.assert_close(logits_a[:, :4], logits_b[:, :4], rtol=0, atol=1e-6)
+
+
+
+def test_cached_rope_matches_reference_and_is_not_checkpointed():
+    config = ModelConfig(vocab_size=32, context_length=16, n_layers=1, n_heads=2, d_model=16)
+    model = RoninLM(config).eval()
+    attention = model.blocks[0].attention
+    x = torch.randn(2, 2, 9, attention.head_dim)
+    with torch.no_grad():
+        cached = apply_rope(x, attention.rope_theta, (attention._rope_cos, attention._rope_sin))
+        reference = apply_rope(x, attention.rope_theta)
+    torch.testing.assert_close(cached, reference, rtol=0, atol=0)
+    assert not any("rope_" in key for key in model.state_dict())
+    tokens = torch.randint(0, config.vocab_size, (2, 9))
+    with torch.no_grad():
+        logits, _ = model(tokens)
+    assert logits.shape == (2, 9, config.vocab_size)
