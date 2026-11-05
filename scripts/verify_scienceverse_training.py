@@ -19,6 +19,7 @@ ALLOWED_LICENSE_URLS = {
 }
 EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
 SSN_RE = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
+NON_SUBSTANTIVE_TITLE_RE = re.compile(r"(?i)\b(retracted|correction|erratum|corrigendum|editorial|commentary|book review|letter to the editor)\b")
 
 
 def sha256(raw: bytes) -> str:
