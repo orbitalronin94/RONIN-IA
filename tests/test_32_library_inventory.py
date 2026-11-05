@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
 
-
 ROOT = Path(__file__).parents[1]
 MANIFEST = ROOT / "data/datasets/libraries/manifest-32.json"
 
