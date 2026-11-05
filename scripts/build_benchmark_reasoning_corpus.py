@@ -123,7 +123,7 @@ def load_sources() -> dict[str, list[dict[str, Any]]]:
             if record is None:
                 continue
             fingerprint = sha256_bytes(
-                (record["question"].casefold() + "\\n" +
+                (record["question"].casefold() + "\n" +
                  json.dumps(record.get("options", []), ensure_ascii=False, sort_keys=True)).encode("utf-8")
             )
             if fingerprint in seen:
@@ -157,7 +157,7 @@ def main() -> None:
     records_path = args.output_dir / "records.train.jsonl"
     text_path = args.output_dir / "train.txt"
     records_payload = "".join(
-        json.dumps(item, ensure_ascii=False, sort_keys=True) + "\\n" for item in merged
+        json.dumps(item, ensure_ascii=False, sort_keys=True) + "\n" for item in merged
     ).encode("utf-8")
     text_payload = "".join(render(item) for item in merged).encode("utf-8")
     records_path.write_bytes(records_payload)
@@ -171,7 +171,7 @@ def main() -> None:
                         key=lambda item: item["id"])
         audit.extend(chosen)
     audit_payload = "".join(
-        json.dumps(item, ensure_ascii=False, sort_keys=True) + "\\n" for item in audit
+        json.dumps(item, ensure_ascii=False, sort_keys=True) + "\n" for item in audit
     ).encode("utf-8")
     (args.output_dir / "audit.sample.jsonl").write_bytes(audit_payload)
 
@@ -215,7 +215,7 @@ def main() -> None:
             "The byte-level model has a short training context; long solutions may be seen as windows rather than complete trajectories.",
         ],
     }
-    manifest_payload = (json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\\n").encode("utf-8")
+    manifest_payload = (json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
     (args.output_dir / "manifest.json").write_bytes(manifest_payload)
     print(json.dumps({
         "total_records": len(merged),
