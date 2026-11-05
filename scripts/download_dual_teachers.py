@@ -10,6 +10,16 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 MODELS = {
+    "qwen3-8b": {
+        "base_id": "Qwen/Qwen3-8B",
+        "quant_repo": "Qwen/Qwen3-8B-GGUF",
+        "license": "apache-2.0",
+        "license_url": "https://huggingface.co/Qwen/Qwen3-8B",
+        "files": {
+            "4bit": "qwen3-8b-q4_k_m.gguf",
+            "8bit": "qwen3-8b-q8_0.gguf",
+        },
+    },
     "qwen3.6-27b": {
         "base_id": "Qwen/Qwen3.6-27B",
         "quant_repo": "ggml-org/Qwen3.6-27B-GGUF",
