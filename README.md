@@ -69,7 +69,7 @@ El carril anterior de GPT-2/GPT-Neo/Phi-4 queda como referencia histórica. La n
 
 ### Tutoría dual local y primer entrenamiento socrático verificable
 
-La implementación está en [docs/LOCAL_DUAL_TEACHERS.md](docs/LOCAL_DUAL_TEACHERS.md). Incluye descarga con revisión y SHA-256 fijados, verificación de licencias, inferencia GGUF local con llama.cpp enlazado a loopback, comparación entre ambos tutores y filtro contra la etiqueta gold de MMLU-Pro validation. Solo se entrena con ejemplos en los que ambos coinciden entre sí y con el oráculo independiente. El estudiante se inicializa desde cero. La ejecución completa se lanza desde una máquina local con GPU CUDA mediante `scripts/train_from_local_dual_tutors.py`; no se suben prompts ni corpus a GitHub Actions ni a APIs externas.
+La implementación está en [docs/LOCAL_DUAL_TEACHERS.md](docs/LOCAL_DUAL_TEACHERS.md). Incluye descarga con revisión y SHA-256 fijados, verificación de licencias, inferencia GGUF local con llama.cpp enlazado a loopback, comparación entre ambos tutores y filtro contra la etiqueta gold de MMLU-Pro validation. Solo se entrena con ejemplos en los que ambos coinciden entre sí y con el oráculo independiente. El estudiante se inicializa desde cero. La ejecución completa se lanza desde una máquina local con GPU CUDA mediante `scripts/prepare_and_train_local_dual_tutors.py`; no se suben prompts ni corpus a GitHub Actions ni a APIs externas.
 
 ### Workflow oficial: entrenamiento desde cero + holdout externo
 
