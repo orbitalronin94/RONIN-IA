@@ -58,7 +58,7 @@ def test_domain_benchmark_batching_preserves_predictions_and_scores(tmp_path: Pa
     ]
     dataset = tmp_path / "items.jsonl"
     dataset.write_text(
-        "".join(json.dumps(row) + "\\n" for row in rows), encoding="utf-8"
+        "".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8"
     )
     single = evaluate(checkpoint, dataset, batch_token_budget=1)
     batched = evaluate(checkpoint, dataset, batch_token_budget=8192)
@@ -78,6 +78,6 @@ def test_domain_benchmark_rejects_invalid_batch_token_budget(tmp_path: Path):
         "options": ["A", "B", "C", "D"], "correct_index": 1,
     }
     dataset = tmp_path / "items.jsonl"
-    dataset.write_text(json.dumps(row) + "\\n", encoding="utf-8")
+    dataset.write_text(json.dumps(row) + "\n", encoding="utf-8")
     with pytest.raises(ValueError, match="batch_token_budget"):
         evaluate(checkpoint, dataset, batch_token_budget=0)
