@@ -173,7 +173,6 @@ def main() -> None:
         )
 
     expected_docs = root_manifest["aggregate"]["admitted_documents"]
-    expected_bytes = root_manifest["aggregate"]["admitted_text_bytes"]
     if held or email_hits or ssn_hits or duplicate_external:
         raise SystemExit(json.dumps({
             "held_count": len(held),
@@ -203,6 +202,8 @@ def main() -> None:
         "documents": len(records),
         "manifest_documents": expected_docs,
         "text_bytes": total_text_bytes,
+        "manifest_text_bytes": root_manifest["aggregate"]["admitted_text_bytes"],
+        "manifest_byte_delta": total_text_bytes - root_manifest["aggregate"]["admitted_text_bytes"],
         "manifest_text_bytes": expected_bytes,
         "manifest_aggregate_delta": aggregate_delta,
         "train_text_file_bytes": train_path.stat().st_size,
