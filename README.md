@@ -9,6 +9,7 @@ RONIN es un modelo causal Transformer implementado en PyTorch. El modelo operati
 - Base: checkpoint anterior de `main`, SHA-256 de pesos `5aa7cd5a8188784b9fbf2e0c0454b6504d32e2188e3ac0291a0a255d88bce49e`.
 - Entrenamiento: 500 pasos adicionales de next-token prediction, semilla 202, 128.000 tokens, CPU con 2 hilos.
 - Corpus: 9.108 documentos admitidos (literatura española, Mathlib4 y 2 documentos NASA revisados individualmente); sin preguntas, QA sintético ni tutor.
+- Corpus train scoped disponible para los siguientes ciclos: **286.006 documentos y 657.354.800 bytes UTF-8**; incluye 270.244 traducciones CoVoST 2 en inglés/catalán. Sus validation/test permanecen excluidos. Este inventario ampliado no se atribuye retroactivamente al checkpoint actual, que sigue entrenado con el corpus indicado arriba.
 - Checkpoint de origen: SHA-256 `86d7d97360f1eb0ac35e9dc12f69c366101629641115ba1c2a1341b2b7d257ae`.
 - Run: [GitHub Actions #42071401130](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42071401130).
 - Artefacto de origen: `ronin-corpus-seed-202-500steps-42071401130`. El workflow de fijación extrae y valida el state_dict y lo versiona como `weights/ronin-main.pt`; el manifiesto `weights/main-model.json` conserva hashes y procedencia.
