@@ -83,7 +83,7 @@ def main():
     for path in (args.base_checkpoint,args.second_checkpoint,args.combined_text,args.literature_text,args.mathlib_text,args.nasa_text,args.validation_text):
         if not path.is_file(): raise FileNotFoundError(path)
     base_sha=sha(args.base_checkpoint)
-    if base_sha != "7cda8dacb0b61d7278ba9990285a6a7e47403de8a00d201da06f5f002224c1cf": raise RuntimeError(f"unexpected winner checkpoint SHA: {base_sha}")
+    if base_sha not in {"bcef0ec6db635f7f75d1fd84bf2e407aa50e86d34b1e7849516c158708256123","e27f11c2eb93e2c8c3d95da6b4249a793fdc9d042981d1a5cdd98715c5addc92"}: raise RuntimeError(f"unexpected 7/50 candidate checkpoint SHA: {base_sha}")
     rows_all=load_external_dataset(args.revision,split="validation"); rows=select_stratified(rows_all,50,seed=2026); all_hash=rows_sha256(rows_all); args.dataset_size=len(rows_all)
     base_mmlu=evaluate(args.base_checkpoint,rows,all_hash,args)
     if base_mmlu["selected_items"]!=50 or base_mmlu["evaluated_items"]!=50 or base_mmlu["coverage"]!=1.0 or base_mmlu.get("skipped_context_items",0)!=0: raise RuntimeError("ABORT BEFORE TRAINING: base holdout did not achieve 50/50 coverage")
