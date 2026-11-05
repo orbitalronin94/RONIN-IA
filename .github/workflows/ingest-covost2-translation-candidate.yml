@@ -6,6 +6,10 @@ on:
     paths:
       - "scripts/ingest_covost2_translation_only.py"
       - ".github/workflows/ingest-covost2-translation-candidate.yml"
+  pull_request:
+    paths:
+      - "scripts/ingest_covost2_translation_only.py"
+      - ".github/workflows/ingest-covost2-translation-candidate.yml"
   workflow_dispatch:
     inputs:
       max_rows:
@@ -32,9 +36,13 @@ jobs:
           python scripts/ingest_covost2_translation_only.py --max-rows "${{ inputs.max_rows || '500000' }}"
       - name: Validate proposed rights record
         run: python scripts/validate_rights_registry.py --record artifacts/covost/rights-record.candidate.json
+      - name: Audit quality, privacy patterns, deduplication and deterministic splits
+        run: python scripts/audit_covost2_candidate.py
       - uses: actions/upload-artifact@v6
         with:
           name: ronin-covost2-translation-only-candidate
-          path: artifacts/covost/
+          path: |
+            artifacts/covost/
+            artifacts/covost-quality/
           if-no-files-found: error
           retention-days: 90

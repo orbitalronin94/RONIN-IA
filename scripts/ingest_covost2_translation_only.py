@@ -15,12 +15,27 @@ import tarfile
 import urllib.request
 from pathlib import Path
 
-ADAPTER_VERSION = "1.0.1"
+ADAPTER_VERSION = "1.1.0"
 COMMIT = "4cddf32dedd6bfef86ca3a40f49b27e252650f3f"
 README_BLOB_SHA1 = "f29667eaacba91d35de372001ebc793adb2b5530"
 README_URL = f"https://raw.githubusercontent.com/facebookresearch/covost/{COMMIT}/README.md"
 LICENSE_URL = "https://creativecommons.org/publicdomain/zero/1.0/"
 PAIRS = ("es_en", "ca_en", "en_ca")
+BASE_SPLITS = {"train", "dev", "test"}
+KNOWN_SUFFIXES = {"covost", "dup"}
+
+
+def is_known_split(split: str) -> bool:
+    """Accept upstream split families while rejecting unrecognized labels."""
+    if split in BASE_SPLITS:
+        return True
+    parts = split.rsplit("_", 1)
+    return len(parts) == 2 and parts[0] in BASE_SPLITS and parts[1] in KNOWN_SUFFIXES
+
+
+def is_training_split(split: str) -> bool:
+    """Mirror upstream CoVoST v2: train plus train_covost only."""
+    return split in {"train", "train_covost"}
 BASE = "https://dl.fbaipublicfiles.com/covost/"
 USER_AGENT = "RONIN-IA-dataset-auditor/1.0"
 
@@ -54,6 +69,7 @@ def main() -> int:
     seen: set[str] = set()
     source_files = []
     rows_written = 0
+    split_counts: dict[str, int] = {}
     with output.open("w", encoding="utf-8", newline="") as dst:
         for pair in PAIRS:
             filename = f"covost_v2.{pair}.tsv.tar.gz"
@@ -71,11 +87,17 @@ def main() -> int:
                 if extracted is None:
                     raise ValueError(f"{filename}: TSV cannot be read")
                 text = io.TextIOWrapper(extracted, encoding="utf-8", newline="")
-                reader = csv.DictReader(text, delimiter="\t")
-                if not reader.fieldnames or "translation" not in reader.fieldnames:
-                    raise ValueError(f"{filename}: missing translation column")
+                reader = csv.DictReader(text, delimiter="\t", escapechar="\\", quoting=csv.QUOTE_NONE)
+                if not reader.fieldnames or not {"translation", "split"}.issubset(set(reader.fieldnames)):
+                    raise ValueError(f"{filename}: expected translation and split columns; refusing unsplit export")
                 pair_rows = 0
                 for source_row_index, row in enumerate(reader, start=1):
+                    split = (row.get("split") or "").strip()
+                    split_counts[split] = split_counts.get(split, 0) + 1
+                    if not is_known_split(split):
+                        raise ValueError(f"unexpected upstream split label {split!r} in {filename}, row {source_row_index}")
+                    if not is_training_split(split):
+                        continue
                     translation = (row.get("translation") or "").strip()
                     if not translation:
                         continue
@@ -102,10 +124,16 @@ def main() -> int:
             if rows_written >= args.max_rows:
                 break
 
+    if rows_written == 0 or split_counts.get("train", 0) + split_counts.get("train_covost", 0) == 0:
+        raise ValueError("no CoVoST 2 training rows found; refusing empty or non-training export")
+
     payload = output.read_bytes()
     manifest = {
         "dataset_id": "covost2-cc0-translation-only",
-        "status": "candidate_not_admitted",
+        "status": "candidate_train_partition_not_admitted",
+        "partition": "train",
+        "split_policy": "CoVoST 2 upstream: train + train_covost only; dev/test excluded",
+        "split_counts": split_counts,
         "training_eligible": False,
         "admission_eligible": False,
         "upstream_repository": "https://github.com/facebookresearch/covost",
@@ -143,11 +171,11 @@ def main() -> int:
         "third_party_content_review": "excluded_or_separately_cleared",
         "jurisdictions_cleared": ["ES", "EU", "US"],
         "rights_level": "A",
-        "decision_reason": "Candidate covers only CoVoST translation field values under the upstream CC0 data declaration. Common Voice source sentences, audio, speaker IDs, paths, Tatoeba and code are not exported. Candidate record is not appended to the ledger until human review.",
+        "decision_reason": "Candidate covers only CoVoST 2 translation field values from train and train_covost partitions under the pinned CC0 declaration. Dev/test are excluded using upstream split labels; Common Voice source sentences, audio, speaker IDs, paths, Tatoeba and code are not exported. Candidate record is not appended until payload, quality, privacy, deduplication and split checks are reviewed.",
         "policy_version": "RONIN-RIGHTS-A-1",
     }
     (args.out / "rights-record.candidate.json").write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(json.dumps({"rows": rows_written, "bytes": len(payload), "sha256": digest(payload), "status": "candidate_only"}, indent=2))
+    print(json.dumps({"rows": rows_written, "bytes": len(payload), "sha256": digest(payload), "split_counts": split_counts, "status": "train_partition_candidate_only"}, indent=2))
     return 0
 
 if __name__ == "__main__":

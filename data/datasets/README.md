@@ -340,3 +340,25 @@ The exact workflow IDs, artifact IDs, row counts, payload byte counts, SHA-256 v
 
 
 The expanded 32-domain / 64-library catalogue now maps 21 audited candidate source IDs to their relevant domain libraries through `candidate_source_links`. The mapping is traceability only: it includes metadata-only, preflight-only and quarantined sources with explicit roles; no source link promotes a library to admitted or training-eligible. CI validates that every mapped ID exists in the source audit register.
+
+
+## CoVoST 2 split-integrity correction (2026-11-05)
+
+The earlier CoVoST candidate artifacts (41931759338 and 41932647180) are **not admissible for training**: the first adapter exported raw translation TSV rows before applying the upstream train/dev/test partitioning. The official CoVoST 2 split procedure distinguishes train and train_covost from dev and test; the previous export discarded that field.
+
+The adapter has therefore been corrected to require the upstream split column and export only train plus train_covost. It fails closed if the column is missing, records counts for all observed split labels, and never exports dev/test. The pull-request workflow now runs this acquisition path so the new train-only payload can be inspected before any admission decision.
+
+**Current decision:** CoVoST remains candidate-only. The corrected artifact now exists and is recorded in `candidates/covost2-cc0-translation-only/manifest.json`; its payload and rights candidate are newly hashed, so earlier rights-level-A records do not transfer to it. The quality/split report is stored alongside the manifest. Global near-duplicate checks and the remaining rights sign-off are still required.
+
+### CoVoST 2 train-split parser correction (2026-11-05)
+
+The corrected parser revealed additional upstream row labels (`test_covost`, then `test_dup`) that are not part of the v2 training partition. The pinned upstream `get_covost_splits.py` defines the exact training selection as `train` plus `train_covost`, validation as `dev`, and test as `test`; rows with `_covost` or `_dup` suffixes outside the two training labels must remain excluded. The adapter now recognizes only the closed split families `train|dev|test` with optional `_covost` or `_dup` suffixes, exports exactly `train` and `train_covost`, and rejects any other label. Unit tests cover the selection and reject unknown families. TSV parsing matches upstream (`escapechar="\\\\", quoting=csv.QUOTE_NONE`). This remains candidate-only: no payload has yet passed admission, and previous unsplit payloads remain permanently ineligible.
+
+
+### CoVoST 2 quality audit result (2026-11-05)
+
+The corrected train-only workflow succeeded in run [41990356928](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41990356928), artifact `ronin-covost2-translation-only-candidate` (artifact SHA-256 `ab74eae35edf4415248cbd0d6d8e191ec1f6e8d8fb2357ac842cf69d8eefde4e`). The raw candidate contains 350,705 translation rows (70,851,102 bytes; SHA-256 `d3a235f41906e78da12aa286eea57d51a71e4a3ec03b3d712f53c97f24b77fe9`).
+
+The reproducible quality pass retains **337,973** rows after excluding 12,684 fragments shorter than 25 characters, 43 exact duplicates within language, one email/contact row and four URL rows. Three phone-like matches were manually inspected and are date/year ranges, not telephone numbers. The retained content is **227,054 Catalan** and **110,919 English** texts; it contains no Spanish target-language partition. The deterministic 80/10/10 split yields 270,244 train, 34,051 validation and 33,678 test rows. Per-partition hashes and sizes are in the candidate manifest and quality report.
+
+This is a useful multilingual language resource, not a Spanish corpus and not a subject-domain library. Proposed placement is a Catalan/English General language library, subject to the 32-library mapping decision. **It is not admitted or training-eligible yet:** CC0/public-domain sign-off under policy, human sample review and global near-duplicate checks remain open. The source text, audio, speaker IDs, paths and Tatoeba material are not exported.
