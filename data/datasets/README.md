@@ -85,7 +85,8 @@ El manifiesto `libraries/manifest-64.json` cuenta el corpus legacy y ScienceVers
 - Revisión de origen fijada en `d7bf3ae446f666ce3be73b11aab7090e1605a889`; los blobs Git de origen coinciden con las copias.
 - 9 documentos, 750.857 bytes UTF-8, 93.499 palabras; SHA-256 por documento.
 - Autorización del propietario para el corpus interno de investigación/entrenamiento de RONIN. No implica permiso de redistribución externa ni derechos sobre contenido de terceros.
-- **Train scoped habilitado** tras verificar los nueve SHA-256 y tamaños, estructura sustantiva, ausencia de patrones de email y deduplicación exacta contra 608 literatura + 8.498 Mathlib4 + 2 NASA file-reviewed. Auditoría: [run 42106428381](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42106428381).\n- La promoción no equivale a G-0 global: near-duplicates, contaminación de holdouts y General/HKD global siguen pendientes. Uso autorizado solo para entrenamiento/investigación interna; no redistribuir externamente.
+- **Train scoped habilitado** tras verificar los nueve SHA-256 y tamaños, estructura sustantiva, ausencia de patrones de email y deduplicación exacta contra 608 literatura + 8.498 Mathlib4 + 2 NASA file-reviewed. Auditoría: [run 42106428381](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42106428381).
+- La promoción no equivale a G-0 global: near-duplicates, contaminación de holdouts y General/HKD global siguen pendientes. Uso autorizado solo para entrenamiento/investigación interna; no redistribuir externamente.
 
 ### Lean mathlib4 — `admitted/mathlib4-v1/`
 
@@ -200,7 +201,7 @@ El workflow \`Audit and admit scoped candidate documents\` ejecutó correctament
 - Papers: [9 documentos propios admitidos](admitted/ronin-authored-papers-v1/manifest.json), README excluido.
 - Informe global por fuente y documento: [candidate-document-audit-2026-11-05.json](reviews/candidate-document-audit-2026-11-05.json).
 
-Los payloads NASA y ScienceVerse preservan hashes del origen y del contenido admitido; los manifiestos marcan explícitamente \`training_eligible:false\`. La incorporación documental no implica promoción a entrenamiento ni altera los contadores Level A actuales.
+Los payloads NASA y ScienceVerse preservan hashes del origen y del contenido admitido. El manifiesto de admisión global de ScienceVerse mantiene `training_eligible:false`; el manifiesto separado `train-eligibility-manifest.json` habilita solo la partición train scoped de 6.641 documentos. NASA restante sigue pendiente. Esta promoción no equivale a G-0 global ni altera los mínimos Level A fuera de las cuatro bibliotecas General indicadas.
 
 
 ## Expansión a 200 GB
