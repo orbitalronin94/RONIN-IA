@@ -35,3 +35,14 @@ El filtro aplicado exige `PUBLIC_USE_PERMITTED` o `GOV_PUBLIC_USE_PERMITTED`, `l
 Fijar cada NTRS Document ID y versión; conservar metadatos completos y campo copyright; descargar PDF público; calcular SHA-256; extraer texto; revisar referencias, figuras, PII, duplicados y calidad; mantener atribución NASA y datos de publicación.
 
 **Resultado:** candidato de alta prioridad para Astronomía/Ciencias de la Tierra, Física, Química/Materiales e Ingeniería/Robótica. Se está generando un paquete por biblioteca en `data/datasets/libraries/candidate-packs/nasa-ntrs-public-use/`; los paquetes siguen siendo candidatos, no datos admitidos. La declaración general de NASA no basta para admitir un documento concreto; no entrenable hasta completar la revisión humana, la revalidación semanal de redistribución, la deduplicación global y los gates aplicables.
+
+
+## Revisión manual de archivos concretos (2026-11-05)
+
+Se ha registrado una revisión a nivel de archivo en `data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json`, enlazada también desde el manifiesto del paquete de bibliotecas.
+
+- **Revisión de contenido superada como candidato (2):** NTRS `19620002819` (*Paraglider Recovery Systems*) y `19630000935` (*Development of Design Strength Levels for the Elastic Stability of Monocoque Cones Under Axial Compression*). Se contrastaron título, autoría, distribución/copyright con sus registros oficiales y se inspeccionó la legibilidad del texto extraído.
+- **Retenidos para reparar OCR (2):** `19620000001` y `19620002834`. Sus registros NASA indican uso público, pero la extracción actual contiene suficientes sustituciones y corrupción de columnas como para no incorporarlos al entrenamiento todavía.
+- La revisión también detectó tres incidencias de metadatos/ruta en ScienceVerse: fragmentos que parecen dirección postal en autores de `jdm.jdm06002`, autor malformado en `ece3.ece310954` y asignación temática dudosa de `openmind.opmia00001`. Están documentadas en el mismo informe y siguen retenidas.
+
+**Importante:** los dos archivos NASA con revisión de contenido positiva siguen siendo candidatos, no documentos admitidos. No se ha ejecutado aún la deduplicación exacta y aproximada global, la revalidación semanal de redistribución NASA ni la separación General/HKD y train/validation/test. Esta revisión añade trazabilidad y decisiones concretas, pero no altera los contadores de admisión ni habilita entrenamiento.
