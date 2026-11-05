@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 08:48 | [Integración continua #1085 (run 41997258983)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997258983) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): track ScienceVerse candidates in biology_general. Trigger: push; rama: main; intento: 1. | 1b0152cb |
 | 2026-11-05 08:47 | [Integración continua #1080 (run 41997197157)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997197157) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): track UN corpus candidate in economics_hkd. Trigger: push; rama: main; intento: 1. | 41fc29d7 |
 | 2026-11-05 08:47 | [Integración continua #1079 (run 41997191806)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997191806) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): track UN corpus candidate in humanities_hkd. Trigger: push; rama: main; intento: 1. | a2c8c108 |
 | 2026-11-05 08:47 | [Integración continua #1078 (run 41997186654)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997186654) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): track UN corpus candidate in social_sciences_hkd. Trigger: push; rama: main; intento: 1. | 8b2100c7 |
