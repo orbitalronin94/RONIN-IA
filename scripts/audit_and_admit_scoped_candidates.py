@@ -34,23 +34,28 @@ def sha(data: bytes) -> str:
 
 class VisibleHTML(HTMLParser):
     BLOCKS = {"p","div","br","li","tr","td","th","h1","h2","h3","h4","section"}
+    SKIP_CONTAINERS = {"head","script","style","title"}
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.parts=[]
-        self.skip=0
-        self.in_head=False
+        self.skip_stack=[]
     def handle_starttag(self, tag, attrs):
-        if tag in {"head","script","style","meta","title"}:
-            self.skip += 1
-        elif tag in self.BLOCKS and not self.skip:
+        if tag in self.SKIP_CONTAINERS:
+            self.skip_stack.append(tag)
+        elif tag == "meta":
+            return
+        elif tag in self.BLOCKS and not self.skip_stack:
             self.parts.append("\n")
     def handle_endtag(self, tag):
-        if tag in {"head","script","style","meta","title"} and self.skip:
-            self.skip -= 1
-        elif tag in self.BLOCKS and not self.skip:
+        if tag in self.SKIP_CONTAINERS:
+            for i in range(len(self.skip_stack)-1,-1,-1):
+                if self.skip_stack[i] == tag:
+                    del self.skip_stack[i]
+                    break
+        elif tag in self.BLOCKS and not self.skip_stack:
             self.parts.append("\n")
     def handle_data(self, data):
-        if not self.skip:
+        if not self.skip_stack:
             self.parts.append(data)
 
 def visible_text(raw: str) -> str:
