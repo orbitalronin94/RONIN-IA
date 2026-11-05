@@ -35,6 +35,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/datasets/libraries/candidate-packs/nasa-ntrs-public-use
+          if git diff --cached --quiet; then
+            echo "Candidate library packs are unchanged."
+            exit 0
+          fi
           git commit -m "data: add NASA NTRS candidate packs to domain libraries"
           for attempt in $(seq 1 10); do
             git fetch origin main
