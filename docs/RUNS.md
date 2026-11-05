@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:10 | [Integración continua #1154 (run 42000050647)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000050647) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: pin ScienceVerse manifest revision for reproducibility. Trigger: push; rama: main; intento: 1. | 33b17c8a |
 | 2026-11-05 09:10 | [Integración continua #1157 (run 42000079367)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000079367) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): repair pinned ScienceVerse revision syntax. Trigger: push; rama: main; intento: 1. | 0a2148ce |
 | 2026-11-05 09:09 | [Integración continua #1156 (run 42000068519)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000068519) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Use automatic student device selection in docs. Trigger: push; rama: main; intento: 1. | 5ad0ff81 |
 | 2026-11-05 09:09 | [Integración continua #1146 (run 41999945550)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999945550) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Fix local llama runtime lint. Trigger: push; rama: main; intento: 1. | 93d0a2e1 |
