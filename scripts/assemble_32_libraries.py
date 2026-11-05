@@ -295,8 +295,8 @@ def literature_records(metadata_jsonl: bytes, train_text: bytes) -> list[dict[st
         if missing:
             raise ValueError(f"literature record {index} lacks provenance fields: {missing}")
 
-        record_text = fragment.strip()
-        if not record_text:
+        record_text = fragment
+        if not record_text.strip():
             raise ValueError(f"empty literature fragment at record {index}")
         records.append({
             "document_id": f"literature-es-v1:{row['record_id']}",
