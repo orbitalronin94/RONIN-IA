@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:31 | [Integración continua #1194 (run 42002757402)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002757402) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): make 64-library Level-A target canonical. Trigger: push; rama: main; intento: 1. | bb78a6cf |
 | 2026-11-05 09:31 | [Integración continua #1202 (run 42002958854)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002958854) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): correct i-Perception acquisition ledger. Trigger: push; rama: main; intento: 1. | c2ad1fa1 |
 | 2026-11-05 09:30 | [Integración continua #1201 (run 42002952292)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002952292) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Align SFTTrainer tokenizer argument with Unsloth Qwen3.5 guide. Trigger: push; rama: main; intento: 1. | 632c3bae |
 | 2026-11-05 09:30 | [Integración continua #1198 (run 42002905525)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002905525) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Allow complete final answer generation during validation. Trigger: push; rama: main; intento: 1. | 0685d35f |
