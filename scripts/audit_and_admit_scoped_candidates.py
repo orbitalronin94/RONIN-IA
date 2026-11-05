@@ -14,8 +14,8 @@ import hashlib
 import json
 import re
 import shutil
+from collections import Counter
 from html.parser import HTMLParser
-from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -107,7 +107,8 @@ def audit_nasa() -> dict:
     })
     OUT.mkdir(parents=True,exist_ok=True)
     docs=OUT/"documents"
-    if docs.exists(): shutil.rmtree(docs)
+    if docs.exists():
+        shutil.rmtree(docs)
     docs.mkdir(parents=True,exist_ok=True)
     decisions=[]
     admitted=0
