@@ -9,35 +9,36 @@ Este directorio es el registro operativo de adquisición, revisión, admisión y
 | Fuente / corpus | Documentos | Estado documental | ¿Entrenable ahora? |
 |---|---:|---|---|
 | Literatura española legacy (`literature-es-v1`) | 608 train (+18 validation y 18 test aislados) | Admitido Level A scoped; 140.295.523 bytes train | Sí, bajo su alcance de corpus y controles; G-0 global sigue bloqueando la elegibilidad de las 64 bibliotecas |
-| NASA NTRS public-use | 809 de 824 | Admisión scoped con revisión del propietario; 15 retenidos; 32.259.432 bytes | No: recheck de redistribución, deduplicación cruzada y controles globales pendientes |
+| Lean mathlib4 (`mathlib4-v1`) | 8.697 admitidos (8.498 train, 91 validation, 108 test; 2 retenidos) | Admitido scoped; 97.629.252 bytes train; Apache-2.0; 8.650 matemáticas + 47 lógica | Sí, solo la partición train de este manifiesto; G-0 global sigue FAIL |
+| NASA NTRS public-use | 813 de 824 | Admisión scoped con revisión del propietario; 11 retenidos; 32.313.859 bytes | No: recheck de redistribución, deduplicación cruzada y controles globales pendientes |
 | Papers propios | 9 Markdown (README excluido) | Incorporados con autorización del propietario; 750.857 bytes, 93.499 palabras | No: deduplicación global y gates de calidad/privacidad/particionado pendientes |
 | NASA file-reviewed | 6 | Revisión documental acotada; 701.871 bytes | No; no sumar a NASA NTRS sin resolver posible solapamiento |
-| ScienceVerse | 9.153 textos en 13 colecciones auditadas | Candidatos; filtros automáticos de calidad ejecutados | No: 0 admitidos; derechos editoriales, terceros y revisión final pendientes |
+| ScienceVerse | 7.403 textos en 13 colecciones; 7.365 admitidos scoped, 38 retenidos | Derechos por DOI y atribución auditados; 446.092.799 bytes admitidos | No: particiones y gates globales pendientes |
 
-**Cómo leer el total:** 608 + 809 + 9 = **1.426 registros en los tres corpus principales con admisión documental registrada**. No es un recuento global de documentos únicos: la deduplicación entre fuentes todavía no está cerrada. Los seis NASA file-reviewed se muestran aparte y no se añaden al total por posible solapamiento. Tampoco se cuentan los 9.153 textos de ScienceVerse como admitidos.
+**Cómo leer los totales:** hay **10.127 registros admitidos scoped** en los cuatro manifiestos principales (608 literatura + 8.697 mathlib4 + 813 NASA + 9 Papers). La cifra **entrenable por partición** es **9.106 documentos**: 608 literatura + 8.498 mathlib4; validation/test permanecen aislados. No es un recuento global de documentos únicos ni un G-0 global PASS. Los seis NASA file-reviewed se muestran aparte por posible solapamiento. ScienceVerse registra 7.365 admitidos scoped, pero aún no entrenables; no se suman al total principal de entrenamiento.
 
 ### ScienceVerse: calidad automática no equivale a permiso
 
-La auditoría de contenido registra 13 colecciones, con 9.153 documentos examinados. El filtro automático marcó 9.129 como *machine quality pass* y retuvo 24 por calidad; esto **no** equivale a una aprobación legal ni a admisión. En todas las colecciones la admisión permanece en cero porque falta resolver derechos editoriales por artículo, material de terceros y revisión final de privacidad/calidad.
+La auditoría consolidada registra 13 colecciones y 7.403 documentos; 7.365 pasan la admisión scoped por DOI/licencia/atribución y 38 quedan retenidos. Estos documentos todavía no son entrenables: faltan deduplicación near-duplicate global, particionado y gates globales. La admisión scoped no autoriza redistribución irrestricta.
 
-| Colección | Textos examinados | Calidad automática pass | Hold | Admitidos |
-|---|---:|---:|---:|---:|
-| BMC Medicine | 946 | 946 | 0 | 0 |
-| Collabra | 666 | 666 | 0 | 0 |
-| ECE3 | 26 | 26 | 0 | 0 |
-| eLife | 654 | 654 | 0 | 0 |
-| Frontiers | 155 | 155 | 0 | 0 |
-| i-Perception | 489 | 489 | 0 | 0 |
-| Judgment and Decision Making | 710 | 710 | 0 | 0 |
-| Journal of Cognition | 427 | 427 | 0 | 0 |
-| Open Mind | 293 | 293 | 0 | 0 |
-| PLOS Biology | 970 | 970 | 0 | 0 |
-| PLOS Medicine | 822 | 817 | 5 | 0 |
-| PLOS ONE | 946 | 931 | 15 | 0 |
-| Science Advances (SCAN) | 299 | 299 | 0 | 0 |
-| **Total** | **9.153** | **9.129** | **24** | **0** |
+| Colección | Textos examinados | Admitidos scoped | Retenidos |
+|---|---:|---:|---:|
+| BMC Medicine | 946 | 946 | 0 |
+| Collabra | 666 | 666 | 0 |
+| ECE3 | 26 | 25 | 1 |
+| eLife | 654 | 648 | 6 |
+| Frontiers | 155 | 155 | 0 |
+| i-Perception | 489 | 489 | 0 |
+| Judgment and Decision Making | 710 | 709 | 1 |
+| Journal of Cognition | 427 | 423 | 4 |
+| Open Mind | 293 | 291 | 2 |
+| PLOS Biology | 970 | 970 | 0 |
+| PLOS Medicine | 822 | 813 | 9 |
+| PLOS ONE | 946 | 931 | 15 |
+| Science Advances (SCAN) | 299 | 299 | 0 |
+| **Total** | **7.403** | **7.365** | **38** |
 
-Fuente de estos recuentos: `reviews/candidate-document-audit-2026-11-05.json`. No usar el total antiguo de 4.855 registros: correspondía a un corte anterior de adquisiciones y no representa el inventario actual de textos examinados.
+Fuente de estos recuentos: `admitted/scienceverse-ccby-v1/manifest.json`. No confundir documentos admitidos scoped con documentos habilitados para entrenamiento.
 
 ## Bibliotecas objetivo: 32 dominios × General/HKD
 
@@ -73,8 +74,8 @@ El manifiesto `libraries/manifest-64.json` cuenta únicamente el corpus legacy L
 
 ### NASA NTRS — `admitted/nasa-ntrs-public-use-v1/`
 
-- 824 textos completos en la adquisición original; el manifiesto vigente registra 809 admitidos scoped y 15 retenidos.
-- 32.259.432 bytes de texto admitido; SHA-256 único dentro de la fuente.
+- 824 textos completos en la adquisición original; el manifiesto vigente registra 813 admitidos scoped y 11 retenidos.
+- 32.313.859 bytes de texto admitido; SHA-256 único dentro de la fuente.
 - Se exige evidencia por documento de public-use, ausencia de material de terceros no autorizado, controles de exportación y revisión de información sensible.
 - No entrenable todavía: falta recheck de redistribución en el snapshot de entrenamiento, deduplicación exacta/aproximada contra otras fuentes, revisión final y particionado General/HKD con train/validation/test disjuntos.
 
@@ -85,6 +86,15 @@ El manifiesto `libraries/manifest-64.json` cuenta únicamente el corpus legacy L
 - 9 documentos, 750.857 bytes UTF-8, 93.499 palabras; SHA-256 por documento.
 - Autorización del propietario para el corpus interno de investigación/entrenamiento de RONIN. No implica permiso de redistribución externa ni derechos sobre contenido de terceros.
 - No entrenable hasta completar deduplicación global, calidad/privacidad/citas, asignación y particionado y los gates globales.
+
+### Lean mathlib4 — `admitted/mathlib4-v1/`
+
+- 8.697 archivos Lean 4 admitidos desde `leanprover-community/mathlib4`, revisión inmutable `a84939a26903163e1b98ee002bc94e9563e75c12`.
+- Licencia de repositorio Apache-2.0; SHA-256 por archivo y de LICENSE, autoría/cabeceras conservadas. 8.555 archivos contienen cabecera explícita Apache 2.0; los restantes quedan cubiertos por la licencia de repositorio fijada.
+- 8.498 train (97.629.252 bytes), 91 validation (925.844 bytes) y 108 test (1.177.979 bytes). Dos módulos de reenvío menores de 100 caracteres quedaron retenidos.
+- Dominios: 8.650 matemáticas y 47 lógica/epistemología. Cero duplicados exactos internos o contra los payloads admitidos existentes revisados; cero hallazgos de claves/tokens de alta confianza.
+- Train es entrenable solo bajo este manifiesto scoped. Near-duplicate global, revisión humana línea por línea y G-0 global no se declaran superados.
+- Artefacto de admisión: [run 42026633643](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42026633643); payload `ronin-admitted-mathlib4-v1`.
 
 ### NASA file-reviewed — `admitted/nasa-ntrs-file-reviewed-v1/`
 
