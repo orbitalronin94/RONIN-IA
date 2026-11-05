@@ -19,7 +19,7 @@ def save(path,obj):
 def train(seed,base,text,out,stop,resume=None):
     d=out/f"seed-{seed}"; d.mkdir(parents=True,exist_ok=True)
     cmd=[sys.executable,"scripts/train_text.py","--text",str(text),"--profile","tiny","--steps","500","--seed",str(seed),"--learning-rate","0.00001","--min-learning-rate","0.000001","--device","cpu","--num-threads","1","--interop-threads","1","--checkpoints",str(d)]
-    cmd += ["--resume-from",str(resume)] if resume else ["--init-checkpoint",str(base),"--stop-after-step",str(stop)]
+    cmd += ["--learning-rate","0.00001","--min-learning-rate","0.000001","--metrics-out",str(d/"training-metrics.json")]\n    cmd += ["--resume-from",str(resume)] if resume else ["--init-checkpoint",str(base),"--stop-after-step",str(stop)]
     env=os.environ.copy(); env.update(OMP_NUM_THREADS="1",MKL_NUM_THREADS="1",OPENBLAS_NUM_THREADS="1")
     subprocess.run(cmd,check=True,env=env)
     step=100 if resume is None else 500
@@ -55,7 +55,7 @@ def main():
     tied=[s for s in seeds if q8[s]["overall"]["correct"]==cut]
     q32={s:score(stage1[s],r32,all_hash,a,total) for s in tied} if len(tied)>1 else {}
     for s,v in q32.items(): save(out/f"seed-{s}-32-tiebreak.json",v)
-    order=sorted(seeds,key=lambda s:((q32[s]["overall"]["correct"]/32) if s in q32 else (q8[s]["overall"]["correct"]/8)),reverse=True)
+    order=sorted(seeds,key=lambda s:(q8[s]["overall"]["correct"], q32[s]["overall"]["correct"] if s in q32 else -1),reverse=True)
     top4=order[:4]; stage2={}
     with ThreadPoolExecutor(max_workers=4) as ex:
         fs={ex.submit(train,s,base,a.text,out,100,stage1[s]):s for s in top4}
