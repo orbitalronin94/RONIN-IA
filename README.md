@@ -8,7 +8,8 @@ RONIN es un modelo causal Transformer implementado en PyTorch. El modelo operati
 
 - Base: checkpoint anterior de `main`, SHA-256 de pesos `5aa7cd5a8188784b9fbf2e0c0454b6504d32e2188e3ac0291a0a255d88bce49e`.
 - Entrenamiento: 500 pasos adicionales de next-token prediction, semilla 202, 128.000 tokens, CPU con 2 hilos.
-- Corpus usado para crear este checkpoint: 9.108 documentos admitidos; no se le atribuye el corpus ampliado posterior. El inventario train-scoped actual suma 286.468 unidades: literatura española, Mathlib4, NASA revisado, Papers propios, ScienceVerse CC-BY y CoVoST 2 CC0 (270.244 segmentos de traducción). Cada fuente se verifica por separado y solo se ensamblan particiones train; validation/test quedan fuera.
+- Corpus usado para crear este checkpoint: 9.108 documentos admitidos (literatura española, Mathlib4 y NASA revisado); no se le atribuye el corpus ampliado posterior.
+- Inventario train-scoped disponible para los siguientes ciclos: **286.468 unidades y 684.738.932 bytes UTF-8**; incluye 270.244 segmentos de traducción CoVoST 2 en inglés/catalán. Sus particiones validation/test permanecen excluidas.
 - Checkpoint de origen: SHA-256 `86d7d97360f1eb0ac35e9dc12f69c366101629641115ba1c2a1341b2b7d257ae`.
 - Run: [GitHub Actions #42071401130](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42071401130).
 - Artefacto de origen: `ronin-corpus-seed-202-500steps-42071401130`. El workflow de fijación extrae y valida el state_dict y lo versiona como `weights/ronin-main.pt`; el manifiesto `weights/main-model.json` conserva hashes y procedencia.
@@ -27,7 +28,13 @@ Por decisión del proyecto, este checkpoint queda fijado como **base operativa d
 
 ## Tutor local MoE
 
-Se incorpora Qwen3-30B-A3B Q4_K_M como checkpoint GGUF persistente en el runner propio. Se descarga una vez, se verifica con SHA-256 y se reutiliza; inferencia directa con `llama.cpp` CLI en CPU, sin Ollama. El pipeline limita la generación a 100 pasos/trazas por ejecución. Las trazas requieren revisión y promoción explícita: nunca entran automáticamente en entrenamiento. Consulta [docs/TUTOR_MOE_LOCAL.md](docs/TUTOR_MOE_LOCAL.md).
+El workflow está preparado para descargar **Qwen3-30B-A3B Q4_K_M** en el almacenamiento persistente `tool_cache` de un runner propio y ejecutar inferencia local con `llama.cpp` CPU, sin Ollama. El GGUF **todavía no está verificado como descargado**: hace falta un runner Linux x64 con etiqueta `ronin-32gb-cpu`, 28 GiB de RAM disponible y 55 GiB libres. El pipeline permite hasta 100 trazas; son generaciones del tutor, no pasos de optimizador del estudiante. Las trazas quedan sin admitir y nunca se ingieren automáticamente. Consulta [docs/TUTOR_MOE_LOCAL.md](docs/TUTOR_MOE_LOCAL.md).
+
+## Experimento de 100 corridas sobre el corpus actual
+
+La PR ejecuta **100 candidatos independientes**, semillas 1–100, con **100 pasos de optimizador cada uno** (10.000 actualizaciones agregadas). Todos parten del checkpoint operativo de `main` (**9.922.880 parámetros**, no el experimento de 95,5 M) y se comparan con los mismos 50 IDs de MMLU-Pro `validation`, además de la validación interna de texto. Se usan particiones train admitidas de literatura, Mathlib4, NASA revisado, Papers propios, ScienceVerse CC-BY y CoVoST 2 CC0. No se usa tutor. Se conservan los informes completos y los tres mejores checkpoints; no hay promoción automática.
+
+**Referencia previa, no equivalente al experimento 100×100:** la run [#42120055946](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42120055946) ejecutó la semilla 202 durante 500 pasos. En su muestra fija de 50 preguntas validation pasó de 5/50 a 7/50 (+4 puntos porcentuales); BPB interno pasó de 4,5654 a 4,0541 y la loss final fue 2,77316. Es un screening pequeño, no el benchmark oficial ni una prueba de mejora general. La nueva run [#42120970310](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42120970310) es la ejecución 100×100 y sus resultados solo se publicarán cuando termine.
 
 ## Estructura del repositorio
 
@@ -42,12 +49,6 @@ Se incorpora Qwen3-30B-A3B Q4_K_M como checkpoint GGUF persistente en el runner 
 
 Los corpus candidatos permanecen separados de los documentos habilitados para entrenamiento. Un documento no se considera entrenable por el mero hecho de estar descargado: se exige procedencia, derechos compatibles, integridad del payload y partición explícita. Los conjuntos de validación y test nunca se incorporan a los gradientes.
 
-## Experimento de 100 corridas sobre el corpus actual
-
-La PR de cribado ejecuta **100 candidatos independientes**, con semillas 1–100 y **100 pasos de optimizador por candidato** (10.000 actualizaciones agregadas). Cada candidato parte del mismo checkpoint operativo y se compara con los mismos 50 IDs del split validation de MMLU-Pro, además de la validación interna de texto. El corpus de entrada incorpora las particiones train admitidas de literatura, Mathlib4, NASA revisado, Papers propios, ScienceVerse y CoVoST 2 CC0. No se usa tutor en estas 100 corridas. Se conservan los informes completos y los tres checkpoints mejor clasificados; no hay promoción automática.
-
-Esta configuración es un experimento de cribado, no una certificación del benchmark oficial. Los resultados solo estarán disponibles cuando finalice una ejecución satisfactoria de GitHub Actions.
-
 ## Entrenar y evaluar
 
 Requisitos: Python 3.11 y PyTorch 2.2 o posterior.
@@ -57,7 +58,7 @@ python -m pip install -e '.[dev]'
 pytest -q
 ```
 
-El ciclo oficial sin tutor está en [main-native-no-tutor-holdout.yml](.github/workflows/main-native-no-tutor-holdout.yml). Recupera los pesos fijados en `main`, verifica los corpus admitidos, mide el modelo antes, ejecuta fine-tuning nativo sin tutores y vuelve a medir exactamente los mismos holdouts. Cada ejecución produce un candidato; la promoción requiere revisión explícita.
+El ciclo oficial sin tutor está en [main-native-no-tutor-holdout.yml](.github/workflows/main-native-no-tutor-holdout.yml) (ejecución manual). Recupera los pesos fijados en `main`, verifica los corpus admitidos y añade CoVoST 2 cuando su payload scoped ya está materializado; mide el modelo antes, ejecuta fine-tuning nativo sin tutores y vuelve a medir exactamente los mismos holdouts. El checkpoint actual no incorpora retroactivamente este corpus ampliado. Cada ejecución produce un candidato; la promoción requiere revisión explícita.
 
 El benchmark de desarrollo MMLU-Pro puede ejecutarse con muestras de screening o con el split completo. Una muestra pequeña sirve para cribar, no para declarar capacidad general. El test oficial se mantiene separado de entrenamiento y selección.
 

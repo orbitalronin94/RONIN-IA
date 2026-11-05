@@ -8,7 +8,7 @@
 - Licencia upstream: Apache-2.0.
 - Inferencia: `llama.cpp` CLI, CPU. **No se utiliza Ollama.**
 
-El GGUF se descarga la primera vez a `${runner.tool_cache}/ronin-checkpoints/qwen3-30b-a3b-q4km`. El archivo permanece como checkpoint en el almacenamiento persistente del runner y se reutiliza en ejecuciones posteriores. Cada ejecución calcula y publica SHA-256. No se comitea un binario de 18,56 GB en Git ni se depende de la retención temporal de Actions artifacts para los pesos.
+Cuando se ejecute correctamente en el runner propio, el GGUF se descargará la primera vez a `${runner.tool_cache}/ronin-checkpoints/qwen3-30b-a3b-q4km`. El diseño conserva el archivo en el almacenamiento persistente del runner y lo reutiliza en ejecuciones posteriores. Hasta que una ejecución satisfactoria registre tamaño y SHA-256, no debe afirmarse que ya está descargado. Cada ejecución calcula y publica SHA-256. No se comitea un binario de 18,56 GB en Git ni se depende de la retención temporal de Actions artifacts para los pesos.
 
 ## Infraestructura
 

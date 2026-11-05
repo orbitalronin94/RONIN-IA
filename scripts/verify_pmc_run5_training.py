@@ -263,7 +263,7 @@ def main() -> None:
 
     accepted: list[dict] = []
     internal_duplicates: list[dict] = []
-    for _text_hash, group in by_hash.items():
+    for group in by_hash.values():
         group.sort(
             key=lambda record: (
                 -record["semantic_density"],
