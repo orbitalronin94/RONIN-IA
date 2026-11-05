@@ -12,7 +12,7 @@
 
 ### Nuevo holdout externo
 
-Se adopta **MMLU-Pro test completo** como benchmark externo principal: 12.032 preguntas, 14 dominios, licencia MIT declarada y revisión inmutable `b189ec765aa7ed75c8acfea42df31fdae71f97be`. El protocolo RONIN informa accuracy por dominio con selección zero-shot de la etiqueta A–J por siguiente byte; no es la puntuación oficial CoT del leaderboard. El test no entra en entrenamiento. Fuente y protocolo: [Holdout externo MMLU-Pro](docs/HOLDOUT_EXTERNO_MMLU_PRO.md).
+Se adopta **MMLU-Pro** como benchmark externo principal: 12.032 preguntas disponibles en 14 dominios, licencia MIT declarada y revisión inmutable `b189ec765aa7ed75c8acfea42df31fdae71f97be`. El ciclo 2 usa una muestra inicial de 140 preguntas estratificadas del split test, con control de cobertura e identidad de los ítems antes/después. El protocolo RONIN es zero-shot por siguiente byte de la etiqueta A–J; no equivale a la puntuación oficial CoT del leaderboard. El test no entra en entrenamiento. Fuente y protocolo: [Holdout externo MMLU-Pro](docs/HOLDOUT_EXTERNO_MMLU_PRO.md).
 
 ### Ciclo 2 desde el modelo main
 
