@@ -12,6 +12,7 @@ CORPORA = {
     "jdm": {"tag":"jdm-2026-06-21","expected":855,"target":"social_sciences_general","release":"https://github.com/scienceverse/papers/releases/download/jdm-2026-06-21/jdm.rds"},
     "joc": {"tag":"joc-2026-06-20","expected":447,"target":"social_sciences_general","release":"https://github.com/scienceverse/papers/releases/download/joc-2026-06-20/joc.rds"},
     "openmind": {"tag":"openmind-2026-06-21","expected":293,"target":"philosophy_general","release":"https://github.com/scienceverse/papers/releases/download/openmind-2026-06-21/openmind.rds"},
+    "iperc": {"tag":"iperc-2026-06-21","expected":490,"target":"social_sciences_general","release":"https://github.com/scienceverse/papers/releases/download/iperc-2026-06-21/iperc.rds"},
 }
 UPSTREAM_REVISION = "3a6ac0125e576423300a8996e9ad4c5d65ef9fe2"
 BASE = f"https://raw.githubusercontent.com/scienceverse/papers/{UPSTREAM_REVISION}"
