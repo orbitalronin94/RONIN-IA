@@ -207,6 +207,7 @@ def evaluate_rows(
     last_token_only: bool = True,
     dataset_split: str = "test",
     dataset_split_size: int | None = None,
+    model_config_override=None,
 ) -> dict[str, Any]:
     """Evalúa por lotes sin truncar: el padding derecho no altera tokens previos."""
     if context_length < 1:
@@ -214,7 +215,11 @@ def evaluate_rows(
     if batch_token_budget < 1:
         raise ValueError("batch_token_budget debe ser positivo")
     base_config, _ = get_profile(profile)
-    config = replace(base_config, context_length=context_length)
+    config = (
+        replace(base_config, context_length=context_length)
+        if model_config_override is None
+        else replace(model_config_override, context_length=context_length)
+    )
     target_device = torch.device(device)
     model = RoninLM(config)
     step = load_checkpoint(checkpoint, model, map_location="cpu", restore_rng=False)

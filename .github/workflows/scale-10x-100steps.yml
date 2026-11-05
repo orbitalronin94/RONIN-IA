@@ -1,0 +1,129 @@
+name: RONIN — expansión 10x y entrenamiento 100 pasos
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: ronin-scale-10x-100steps-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  expand-and-train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      BASE_RUN_ID: "42087797691"
+      LITERATURE_RUN_ID: "41926088900"
+      MATHLIB_RUN_ID: "42026633643"
+      NASA_RUN_ID: "42028138060"
+      MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "dill==0.3.8" "multiprocess==0.70.16" "huggingface_hub==0.36.0"
+
+      - name: Download verified B winner from the 10k-step tournament
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-checkpoint-tournament-6of50-42087797691
+          path: incoming/winner
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.BASE_RUN_ID }}
+
+      - name: Download admitted literature training partition
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-admitted-literature-es-v1-train
+          path: incoming/literature
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.LITERATURE_RUN_ID }}
+
+      - name: Download admitted Mathlib4 training partition
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-admitted-mathlib4-v1
+          path: incoming/mathlib4
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.MATHLIB_RUN_ID }}
+
+      - name: Download individually reviewed NASA training partition
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-nasa-ntrs-file-reviewed-train
+          path: incoming/nasa
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.NASA_RUN_ID }}
+
+      - name: Verify B checkpoint and prepare isolated corpus partitions
+        run: |
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+          candidates = list(Path("incoming/winner").rglob("B-balanced-replay/checkpoints/step-00010000.pt"))
+          assert len(candidates) == 1, candidates
+          checkpoint = candidates[0]
+          digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+          expected = "a21d18cd42bec1e12aab1d93ee4a3efa1f67c485f51198c038a2ee90880ce696"
+          assert digest == expected, (digest, expected)
+          print("Verified B checkpoint:", digest, checkpoint.stat().st_size)
+          sources = [
+              Path("incoming/literature/train.txt"),
+              Path("incoming/mathlib4/train.txt"),
+              Path("incoming/nasa/train.txt"),
+          ]
+          assert all(path.is_file() for path in sources), sources
+          Path("/tmp/ronin-scale-corpus.txt").write_bytes(
+              b"\n\n".join(path.read_bytes() for path in sources)
+          )
+          PY
+          python scripts/prepare_legacy_training_split.py --input incoming/literature/train.txt --output-dir /tmp/ronin-lit-split --validation-fraction 0.05 --seed 42006
+          python scripts/prepare_legacy_training_split.py --input incoming/mathlib4/train.txt --output-dir /tmp/ronin-math-split --validation-fraction 0.05 --seed 42006
+          python scripts/prepare_legacy_training_split.py --input incoming/nasa/train.txt --output-dir /tmp/ronin-nasa-split --validation-fraction 0.05 --seed 42006
+          python scripts/prepare_legacy_training_split.py --input /tmp/ronin-scale-corpus.txt --output-dir /tmp/ronin-scale-split --validation-fraction 0.05 --seed 42006
+
+      - name: Compile model and experiment
+        run: python -m compileall -q ronin scripts/run_10x_expansion_100_steps.py scripts/evaluate_mmlu_pro.py
+
+      - name: Expand to approximately 10x parameters and train 100 steps
+        run: |
+          python scripts/run_10x_expansion_100_steps.py \
+            --base-checkpoint incoming/winner/B-balanced-replay/checkpoints/step-00010000.pt \
+            --literature-text /tmp/ronin-lit-split/train-internal.txt \
+            --mathlib-text /tmp/ronin-math-split/train-internal.txt \
+            --nasa-text /tmp/ronin-nasa-split/train-internal.txt \
+            --validation-text /tmp/ronin-scale-split/validation-internal.txt \
+            --revision "$MMLU_REVISION" \
+            --num-threads 2 \
+            --output-dir scale-10x-results
+
+      - name: Upload expansion and paired evaluation results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-scale-10x-100steps-${{ github.run_id }}
+          path: scale-10x-results/
+          if-no-files-found: warn
+          retention-days: 90
+          compression-level: 6
