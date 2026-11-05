@@ -9,10 +9,10 @@ import shutil
 import socket
 import subprocess
 import time
-import urllib.error
-import urllib.request
 from pathlib import Path
 from typing import Any
+import urllib.error
+import urllib.request
 
 
 LICENSES = {"mit", "apache-2.0"}
@@ -165,7 +165,7 @@ class LocalLlamaServer:
                 process.kill()
                 process.wait(timeout=10)
 
-    def __enter__(self) -> "LocalLlamaServer":
+    def __enter__(self) -> LocalLlamaServer:
         return self
 
     def __exit__(self, exc_type: Any, exc: Any, traceback: Any) -> None:
