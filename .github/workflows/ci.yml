@@ -34,6 +34,25 @@ jobs:
         run: ruff check ronin tests scripts
       - name: Comprobar instalación
         run: python -m pip check
+      - name: Verificar pesos del modelo main
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          import torch
+          from ronin.config import get_profile
+          from ronin.models.transformer import RoninLM
+          manifest = json.loads(Path("weights/main-model.json").read_text(encoding="utf-8"))
+          checkpoint = Path(manifest["weights_path"])
+          digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+          assert digest == manifest["weights_sha256"]
+          payload = torch.load(checkpoint, map_location="cpu", weights_only=False)
+          model = RoninLM(get_profile("tiny")[0])
+          model.load_state_dict(payload["model"], strict=True)
+          assert payload["step"] == manifest["checkpoint_step"]
+          assert sum(parameter.numel() for parameter in model.parameters()) == manifest["parameters"]
+          print("Pesos main íntegros:", manifest["model_name"], digest)
+          PY
       - name: Ejecutar pruebas unitarias
         run: pytest --cov=ronin --cov-report=term-missing
 
