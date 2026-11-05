@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:59 | [Integración continua #1261 (run 42006653404)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42006653404) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(ci\): print R inspection errors as complete messages. Trigger: push; rama: main; intento: 1. | 3ce695b6 |
 | 2026-11-05 09:58 | [Integración continua #1259 (run 42006419696)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42006419696) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(training\): trigger immediate experimental RoninLM training cycle. Trigger: push; rama: main; intento: 1. | b482a29d |
 | 2026-11-05 09:57 | [Integración continua #1260 (run 42006624782)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42006624782) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): normalize uppercase licenses and accept exact CC0 evidence. Trigger: push; rama: main; intento: 1. | b4d040d8 |
 | 2026-11-05 09:56 | [Integración continua #1258 (run 42006218096)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42006218096) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(data\): isolate ScienceVerse exporter from stalled legacy run. Trigger: push; rama: main; intento: 1. | 8151565e |
