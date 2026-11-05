@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:22 | [Integración continua #1179 (run 42001769943)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001769943) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci\(data\): register corpus acquisition and 64-library workflows. Trigger: push; rama: main; intento: 1. | 677fae24 |
 | 2026-11-05 09:21 | [Integración continua #1177 (run 42001273617)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001273617) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(data\): enforce 64-library Level-A inventory invariants. Trigger: push; rama: main; intento: 1. | cb06f7ed |
 | 2026-11-05 09:19 | [Integración continua #1176 (run 42001244874)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001244874) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(data\): add strict 64-library inventory validator. Trigger: push; rama: main; intento: 1. | 4f3a0047 |
 | 2026-11-05 09:18 | [Integración continua #1173 (run 42001033173)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001033173) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: add ScienceVerse RDS inspection workflow. Trigger: push; rama: main; intento: 1. | a30f2b76 |
