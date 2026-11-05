@@ -25,6 +25,10 @@ El screening MMLU-Pro usó los mismos 50 IDs, revisión `b189ec765aa7ed75c8acfea
 
 Por decisión del proyecto, este checkpoint queda fijado como **base operativa de los próximos experimentos**, no como una afirmación de superioridad general. Los ciclos siguientes medirán el mismo holdout antes y después, conservarán el checkpoint de partida y no promocionarán automáticamente candidatos.
 
+## Tutor local MoE
+
+Se incorpora un pipeline separado para Qwen3-30B-A3B en CPU. La descarga y generación se ejecutan en un runner propio con RAM/disco suficientes; los pesos no se versionan en Git. Las trazas del tutor son candidatas no admitidas y nunca entran automáticamente en el entrenamiento. Consulta [docs/TUTOR_MOE_LOCAL.md](docs/TUTOR_MOE_LOCAL.md).
+
 ## Estructura del repositorio
 
 | Ruta | Contenido |
