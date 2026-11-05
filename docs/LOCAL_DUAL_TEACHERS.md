@@ -74,7 +74,7 @@ Los dos tutores se ejecutan **secuencialmente**, nunca a la vez. El proceso leva
 
 El generador usa únicamente MMLU-Pro `validation`. Ningún tutor ve la respuesta correcta. Un ejemplo solo se admite si, **después del contraste socrático, los dos tutores responden la misma opción, ambos coinciden con la etiqueta gold independiente y ambos producen una explicación no vacía**. El acuerdo entre modelos no es por sí solo un oráculo. El JSONL de auditoría conserva las respuestas iniciales y finales, pero no almacena cadenas privadas de pensamiento. Si no se alcanza el mínimo de ejemplos aceptados, se aborta antes de entrenar.
 
-El JSONL de auditoría y `train.txt` permanecen locales. RONIN se inicializa desde cero y entrena con el texto admitido. El split `test` no se carga durante la generación. Completar el entrenamiento no equivale a demostrar mejora: la promoción del checkpoint queda pendiente de una evaluación holdout independiente.
+El JSONL de auditoría y `train.txt` permanecen locales. RONIN se inicializa desde cero y entrena con el texto admitido, con contexto de 2048 bytes para que coincida con el evaluador. El split `test` no se carga durante la generación: después del entrenamiento, el orquestador evalúa automáticamente una muestra estratificada de 140 preguntas del test y guarda `mmlu-pro-test-eval.json`. Completar el entrenamiento o lograr una puntuación aislada no equivale a demostrar mejora: la promoción del checkpoint sigue pendiente de compararlo en el mismo holdout contra el checkpoint de `main`.
 
 ## Pruebas de contrato
 
