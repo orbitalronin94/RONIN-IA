@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:32 | [Integración continua #1209 (run 42003151763)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003151763) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: acquire bounded NASA NTRS public-use text candidates. Trigger: push; rama: main; intento: 1. | 6f645c60 |
 | 2026-11-05 09:32 | [Integración continua #1208 (run 42003139490)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003139490) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): include i-Perception candidate payload and exact totals. Trigger: push; rama: main; intento: 1. | 143a860f |
 | 2026-11-05 09:31 | [Integración continua #1207 (run 42003127700)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003127700) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Fix import ordering in Qwen training runner. Trigger: push; rama: main; intento: 1. | 3281b764 |
 | 2026-11-05 09:31 | [Integración continua #1205 (run 42003074618)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42003074618) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Record official Qwen license and pinned model provenance. Trigger: push; rama: main; intento: 1. | c54e3266 |
