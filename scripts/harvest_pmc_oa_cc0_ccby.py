@@ -134,6 +134,9 @@ def metadata_for(pmcid: str) -> list[dict]:
     return records
 
 
+def is_yes(value: object) -> bool:
+    return value is True or str(value).strip().lower() in {"yes", "true", "1"}
+
 def eligible_license(value: str) -> bool:
     normalized = " ".join((value or "").upper().replace("-", " ").split())
     return normalized in ALLOWED_LICENSES
@@ -171,9 +174,9 @@ def fetch_record(pmcid: str, min_text_bytes: int) -> dict | None:
         versions = metadata_for(pmcid)
         eligible = [
             item for item in versions
-            if item.get("is_pmc_openaccess")
+            if is_yes(item.get("is_pmc_openaccess"))
             and eligible_license(str(item.get("license_code") or ""))
-            and item.get("is_retracted") is not True
+            and not is_yes(item.get("is_retracted"))
         ]
         if not eligible:
             return None
