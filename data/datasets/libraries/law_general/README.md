@@ -7,7 +7,7 @@ Esta biblioteca forma parte del inventario operativo de **32 bibliotecas (16 dom
 ## Contenido localizado
 
 - CoVoST 2: fragmentos con señal temática
-- GPLSI CAS/VAL: 17 textos candidatos; derechos de origen pendientes
+- GPLSI CAS/VAL: 17 textos candidatos; 2 textos BOE con base Art. 13 en nivel B (firma jurídica y limpieza pendientes); el resto requiere derechos de origen
 - ParlaIbero-ES: solo preflight de metadatos
 
 El ensamblador asigna únicamente documentos con señal temática suficiente. Los textos sin asignación clara permanecen en el pool transversal; no se fuerzan a este dominio.
