@@ -46,17 +46,19 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - name: Install build dependencies
+      - name: Download pinned prebuilt llama.cpp CPU runtime
+        env:
+          LLAMA_RELEASE_ASSET: https://github.com/ggml-org/llama.cpp/releases/download/b12125/llama-b12125-bin-ubuntu-x64.tar.gz
+          LLAMA_RELEASE_SHA256: d23ae67c28cdae4b1fa5a4687442c787d0ef0e89d93512056e353b10495251ae
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake git libcurl4-openssl-dev
-      - name: Build llama.cpp CPU server
-        run: |
-          git clone --depth 1 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
-          git -C /tmp/llama.cpp rev-parse HEAD | tee reports-llama-commit.txt
-          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DGGML_OPENMP=ON
-          cmake --build /tmp/llama.cpp/build --config Release --target llama-server -j2
-          test -x /tmp/llama.cpp/build/bin/llama-server
+          mkdir -p /tmp/llama-runtime
+          curl --fail --location --retry 3 "$LLAMA_RELEASE_ASSET" -o /tmp/llama-runtime.tar.gz
+          echo "$LLAMA_RELEASE_SHA256  /tmp/llama-runtime.tar.gz" | sha256sum --check
+          tar -xzf /tmp/llama-runtime.tar.gz -C /tmp/llama-runtime
+          server="$(find /tmp/llama-runtime -type f -name llama-server -print -quit)"
+          test -n "$server" && test -x "$server"
+          echo "LLAMA_SERVER_BIN=$server" >> "$GITHUB_ENV"
+          printf 'llama.cpp prebuilt release: b12125\\n' | tee reports-llama-commit.txt
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -135,7 +137,7 @@ jobs:
       - name: Distill Socratic Qwen examples from MMLU-Pro validation
         timeout-minutes: 240
         run: |
-          python scripts/distill_mmlu_pro_qwen_socratic.py --model-dir "$QWEN_DIR" --server-bin /tmp/llama.cpp/build/bin/llama-server --output-dir artifacts/qwen-distillation --count "$EXAMPLES" --max-new-tokens 160 --quantization 4bit
+          python scripts/distill_mmlu_pro_qwen_socratic.py --model-dir "$QWEN_DIR" --server-bin "$LLAMA_SERVER_BIN" --output-dir artifacts/qwen-distillation --count "$EXAMPLES" --max-new-tokens 160 --quantization 4bit
       - name: Build verified scoped mixture
         run: |
           python scripts/build_main_qwen_mixture.py --literature-train incoming/literature/train.txt --literature-manifest incoming/literature/dataset-manifest.json --internal-split-manifest /tmp/ronin-qwen-split/split-manifest.json --internal-train /tmp/ronin-qwen-split/train-internal.txt --teacher-jsonl artifacts/qwen-distillation/qwen-verified-validation.jsonl --output /tmp/ronin-qwen-mixed-train.txt --teacher-repeat 32
