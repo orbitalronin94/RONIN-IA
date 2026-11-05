@@ -191,6 +191,14 @@ def main() -> None:
                 item.get("disposition") == "candidate_hold_quality"
                 for item in file_reviews.values()
             ),
+            "hold_rights_and_quality": sum(
+                item.get("disposition") == "candidate_hold_rights_and_quality"
+                for item in file_reviews.values()
+            ),
+            "total_held_for_rights_or_quality": sum(
+                item.get("disposition") != "file_review_pass_candidate_only"
+                for item in file_reviews.values()
+            ),
             "newly_admitted_documents": 0,
             "pack_documents_with_file_level_review": sum(
                 bool(item.get("file_review_status") != "not_individually_reviewed")
