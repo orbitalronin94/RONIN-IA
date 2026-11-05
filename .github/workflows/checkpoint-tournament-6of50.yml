@@ -19,9 +19,10 @@ permissions:
   contents: read
 concurrency:
   group: ronin-checkpoint-tournament-6of50-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   tournament:
+    if: github.event_name != 'pull_request' || github.head_ref == 'experiment/checkpoint-strategy-tournament-6of50'
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
