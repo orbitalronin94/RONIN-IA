@@ -33,7 +33,7 @@ Los siguientes tamaños son del RDS comprimido, no del texto extraído.
 | joc-2026-06-20 | 448 | 447 | 1 | 15.559.915 | 12766fe41d80dcffc1da26056c929c7e39fb56be772809fa1620887df8838ae5 |
 | openmind-2026-06-21 | 293 | 293 | 0 | 12.639.050 | c27fd53e8e640f7ac4cb3cfe43d04bfdc8a80c050956df3ec8abc6931d796feb |
 | iperc-2026-06-21 | 496 | 496 | 0 | 12.423.216 | bf444b56b364d4f6697ce28f4f67d507b4bf57409ebefda0fa4a6ea960f45ed0 |
-| **Total** | **3.092** | **3.091** | **1** | **95.948.088** | — |
+| **Total** | **3.092** | **3.087** | **5** | **95.948.088** | — |
 
 Hashes SHA-256 de los manifiestos originales y elegibles, junto con revisión, tag, tamaño y hash de cada RDS, están en el provenance.json de cada corpus. Los cuatro primeros paquetes se incorporaron en el commit 68497f153e06c18cd693c3ef77e229bfd3defbb8; i-Perception se incorporó en el commit 3eef3ce (resultado de la ejecución [42002756026](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42002756026), que terminó SUCCESS).
 
