@@ -71,6 +71,16 @@ def main() -> None:
     if provenance.get("training_eligible") is not False:
         raise ValueError("Source candidate manifest must remain non-training-eligible")
 
+    review_path = ROOT / "data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json"
+    file_reviews: dict[str, dict[str, Any]] = {}
+    if review_path.is_file():
+        review_data = json.loads(review_path.read_text(encoding="utf-8"))
+        file_reviews = {
+            str(item["document_id"]): item
+            for item in review_data.get("decisions", [])
+            if item.get("path", "").startswith("data/datasets/candidates/nasa-ntrs-public-use/documents/")
+        }
+
     buckets: dict[str, list[dict[str, Any]]] = defaultdict(list)
     seen_ids: set[str] = set()
     seen_hashes: set[str] = set()
@@ -102,8 +112,15 @@ def main() -> None:
         if len(payload) < 4000 or EMAIL.search(text) or SSN.search(text):
             exclusions["text_quality_or_basic_pii"] += 1
             continue
+        file_review = file_reviews.get(doc_id)
         buckets[library].append({
             "document_id": doc_id,
+            "file_review_status": (
+                file_review.get("disposition")
+                if file_review
+                else "not_individually_reviewed"
+            ),
+            "file_review_reason": file_review.get("reason") if file_review else None,
             "title": row.get("title"),
             "domain": domain,
             "library": library,
