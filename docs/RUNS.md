@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:15 | [Integración continua #1170 (run 42000796229)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000796229) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): preserve exact admitted literature fragment bytes. Trigger: push; rama: main; intento: 1. | 2a49aa12 |
 | 2026-11-05 09:14 | [Integración continua #1169 (run 42000764290)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000764290) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): restore verified literature fragment reconstruction. Trigger: push; rama: main; intento: 1. | 06113c36 |
 | 2026-11-05 09:14 | [Integración continua #1167 (run 42000539887)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000539887) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Remove stale unused library assembler import. Trigger: push; rama: main; intento: 1. | 91f7e2c2 |
 | 2026-11-05 09:13 | [Integración continua #1166 (run 42000388070)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000388070) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Preflight llama.cpp before large model downloads. Trigger: push; rama: main; intento: 1. | 705c2b32 |
