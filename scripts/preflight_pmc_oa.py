@@ -12,6 +12,7 @@ import hashlib
 import json
 import re
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -70,13 +71,22 @@ def request_search(query: str, page_size: int) -> dict[str, Any]:
 
 
 def _http_json(url: str) -> tuple[dict[str, Any], str | None]:
-    request = urllib.request.Request(
-        url,
-        headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
-    )
-    with urllib.request.urlopen(request, timeout=90) as response:
-        payload = json.loads(response.read().decode("utf-8"))
-        return payload, response.headers.get("ETag", "").strip('"') or None
+    last_error: Exception | None = None
+    for attempt in range(6):
+        request = urllib.request.Request(
+            url,
+            headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=90) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+                return payload, response.headers.get("ETag", "").strip('"') or None
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as exc:
+            last_error = exc
+            if isinstance(exc, urllib.error.HTTPError) and exc.code not in {429, 500, 502, 503, 504}:
+                raise
+            time.sleep(min(2 ** attempt, 30))
+    raise RuntimeError(f"PMC metadata request failed after retries: {url}") from last_error
 
 
 def parse_s3_version_prefixes(xml_payload: bytes) -> list[str]:
@@ -97,9 +107,18 @@ def list_s3_version_prefixes(pmcid: str) -> list[str]:
         "max-keys": "100",
     })
     url = f"{S3_BASE}/?{params}"
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=90) as response:
-        return parse_s3_version_prefixes(response.read())
+    last_error: Exception | None = None
+    for attempt in range(6):
+        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        try:
+            with urllib.request.urlopen(request, timeout=90) as response:
+                return parse_s3_version_prefixes(response.read())
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as exc:
+            last_error = exc
+            if isinstance(exc, urllib.error.HTTPError) and exc.code not in {429, 500, 502, 503, 504}:
+                raise
+            time.sleep(min(2 ** attempt, 30))
+    raise RuntimeError(f"PMC S3 version listing failed after retries: {url}") from last_error
 
 
 def license_family(value: Any) -> str:
