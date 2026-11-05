@@ -27,3 +27,10 @@ El ensamblador asigna únicamente documentos con señal temática suficiente. Lo
 - Gate global G-0.
 
 **Entrenamiento bloqueado.** La presencia de un texto en un artefacto candidato no lo convierte en material admitido. Los recuentos y hashes de cada ejecución se conservan en `library-pack-manifest.json`.
+
+
+## Candidatos de documentación técnica pública
+
+- NASA NTRS: candidato de alta prioridad; solo documentos públicos cuyo registro indique “Work of the US Gov. Public Use Permitted”. Copyright de cada documento y material de terceros deben revisarse.
+- No se admite el catálogo completo. Payload, hashes, revisión de PII/calidad, deduplicación y particiones siguen pendientes.
+- Expedientes: `data/datasets/candidates/nasa-ntrs-public-use/README.md` y `data/datasets/candidates/nist-technical-series/README.md`.
