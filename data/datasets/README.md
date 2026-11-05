@@ -38,7 +38,7 @@ La auditoría por documento registra 13 colecciones y 7.365 documentos admitidos
 | Science Advances (SCAN) | 299 | 299 | 0 |
 | **Total** | **7.403** | **7.365** | **38** |
 
-Fuente de estos recuentos: `admitted/scienceverse-ccby-v1/manifest.json`. No confundir documentos admitidos scoped con documentos habilitados para entrenamiento.
+Fuente de la admisión scoped: `admitted/scienceverse-ccby-v1/manifest.json`. La partición train verificada y sus hashes están en `admitted/scienceverse-ccby-v1/train-eligibility-manifest.json`; auditoría: [run 42109182914](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42109182914).
 
 ## Bibliotecas objetivo: 32 dominios × General/HKD
 
@@ -137,8 +137,8 @@ Los números siguientes son **inventarios de candidatos**, no admisiones. Hay sn
 
 No se considerará progreso el crecimiento de `candidates/`, el número de filas con licencia aparente ni los pases de filtros automáticos. El contador que importa es el de documentos con `training_eligible=true` en una partición `train` reproducible y con hashes comprobados.
 
-- **Corpus con partición train actualmente habilitada:** `literature-es-v1` (608 documentos / 140.295.523 bytes) y `mathlib4-v1` (8.498 documentos / 97.629.252 bytes): 9.106 documentos y 237.924.775 bytes de texto train. Sus particiones validation/test permanecen excluidas.
-- **NASA NTRS restante (811 scoped), ScienceVerse (7.365) y NASA file-reviewed retenidos (4):** siguen excluidos de entrenamiento hasta superar sus comprobaciones específicas. Papers propios (9) ya tienen train scoped habilitado.
+- **Corpus con partición train actualmente habilitada:** literatura (608 / 140.295.523 bytes), Mathlib4 (8.498 / 97.629.252 bytes), NASA file-reviewed (2 / 32.409 bytes), Papers propios (9 / 750.857 bytes) y ScienceVerse (6.641 / 399.591.813 bytes): **15.758 documentos y 638.299.854 bytes UTF-8**. Sus particiones validation/test permanecen excluidas.
+- **NASA NTRS restante (811 scoped) y NASA file-reviewed retenidos (4):** siguen excluidos de entrenamiento hasta superar sus comprobaciones específicas. ScienceVerse (6.641 train scoped de 7.365 admitidos) y Papers propios (9) ya están habilitados en train.
 - **Siguiente fuente prioritaria:** conjunto oficial BNE *Biblioteca Digital. Documentos en dominio público*, que ofrece distribución TXT/XML de obras declaradas en dominio público y reutilización CC BY 4.0. Se debe adquirir el snapshot, fijar hashes, comprobar cada obra/edición y OCR, retirar aparato editorial/terceros dudosos, deduplicar globalmente y generar splits antes de promover. No se contará ni entrenará hasta superar esos controles.
 - La política de adquisición queda así: primero fuentes con texto completo y permiso explícito sobre la obra, luego calidad verificable, y solo entonces admisión y entrenamiento. Los candidatos que no puedan cerrar los validaciones no desplazan este objetivo.
 
