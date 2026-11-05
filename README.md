@@ -27,7 +27,7 @@ Por decisión del proyecto, este checkpoint queda fijado como **base operativa d
 
 ## Tutor local MoE
 
-Se incorpora un pipeline separado para Qwen3-30B-A3B en CPU. La descarga y generación se ejecutan en un runner propio con RAM/disco suficientes; los pesos no se versionan en Git. Las trazas del tutor son candidatas no admitidas y nunca entran automáticamente en el entrenamiento. Consulta [docs/TUTOR_MOE_LOCAL.md](docs/TUTOR_MOE_LOCAL.md).
+Se incorpora Qwen3-30B-A3B Q4_K_M como checkpoint GGUF persistente en el runner propio. Se descarga una vez, se verifica con SHA-256 y se reutiliza; inferencia directa con `llama.cpp` CLI en CPU, sin Ollama. El pipeline limita la generación a 100 pasos/trazas por ejecución. Las trazas requieren revisión y promoción explícita: nunca entran automáticamente en entrenamiento. Consulta [docs/TUTOR_MOE_LOCAL.md](docs/TUTOR_MOE_LOCAL.md).
 
 ## Estructura del repositorio
 
