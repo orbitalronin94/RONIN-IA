@@ -23,7 +23,6 @@ concurrency:
 
 jobs:
   train-and-evaluate:
-    if: false # Disabled: global G-0 is FAIL; legacy corpus is not current Level A.
     runs-on: ubuntu-latest
     timeout-minutes: 240
     env:
@@ -32,7 +31,7 @@ jobs:
       MKL_NUM_THREADS: "2"
       TRAIN_RUN_ID: "41926088900"
       PARTITIONS_RUN_ID: "41825919840"
-      STEPS: ${{ inputs.steps || '2000' }}
+      STEPS: ${{ inputs.steps || '1000' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -40,7 +39,7 @@ jobs:
       - name: Validar presupuesto
         run: |
           if ! [[ "$STEPS" =~ ^[0-9]+$ ]] || [ "$STEPS" -lt 1 ] || [ "$STEPS" -gt 1000 ]; then
-            echo "::error::STEPS debe estar entre 1 y 3000."
+            echo "::error::STEPS debe estar entre 1 y 1000."
             exit 1
           fi
 
@@ -160,7 +159,7 @@ jobs:
           from pathlib import Path
           p = Path("reports")
           result = {
-              "experiment": "roninlm-legacy-2000-holdout-before-after-v1",
+              "experiment": "roninlm-legacy-1000-holdout-before-after-v2",
               "steps": int(os.environ["STEPS"]),
               "training": {
                   "dataset": "ronin-spanish-public-domain-literature-v2",
@@ -210,7 +209,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: ronin-legacy-2000-holdout-comparison
+          name: ronin-legacy-1000-holdout-comparison
           path: |
             reports/
             checkpoints/initial.pt
