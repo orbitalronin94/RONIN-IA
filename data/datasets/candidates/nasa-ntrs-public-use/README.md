@@ -1,6 +1,6 @@
 # NASA Technical Reports Server (NTRS) — filtro documental
 
-**Estado a 5 de noviembre de 2026: 189 textos completos descargados como candidatos; 15.417.212 bytes de texto UTF-8. No admitidos para entrenamiento.**
+**Estado a 5 de noviembre de 2026: 267 textos completos descargados como candidatos; 17.480.175 bytes de texto UTF-8 (suma de los ficheros `documents/*.txt` presentes en `main`). No admitidos para entrenamiento.**
 
 ## Valor potencial
 
@@ -26,7 +26,7 @@ Excluir:
 
 ## Adquisición realizada
 
-El workflow `.github/workflows/ingest-nasa-ntrs-public-use.yml` consultó 37 categorías, recibió 3.595 registros y encontró 430 que superaban los filtros de metadatos. Se descargaron 189 textos completos; 73 documentos se rechazaron por patrones de correo/SSN, 91 IDs repetidos, 0 textos duplicados y 0 fallos de descarga. Se conserva un `manifest.jsonl` por documento, `provenance.json`, SHA-256 de cada texto y el fichero en `documents/`.
+El workflow `.github/workflows/ingest-nasa-ntrs-public-use.yml` consultó 37 categorías, recibió 3.595 registros y encontró 430 que superaban los filtros de metadatos. La adquisición acumulada en `main` contiene 267 ficheros de texto completo. El último inventario se calcula directamente desde los blobs del repositorio; los descartes y duplicados se mantienen trazados en los manifiestos de cada ejecución. No se presenta este recuento como documentos admitidos ni como total global sin deduplicación entre fuentes. Se conserva un `manifest.jsonl` por documento, `provenance.json`, SHA-256 de cada texto y el fichero en `documents/`.
 
 El filtro aplicado exige `PUBLIC_USE_PERMITTED` o `GOV_PUBLIC_USE_PERMITTED`, `licenseType=NO`, ausencia declarada de material de terceros, distribución pública, `DOCUMENT_AND_METADATA`, estado `CURATED`, `sensitiveInformation=2` (NONE), EAR/ITAR en NO y texto completo disponible. Son candidatos de uso público según el registro NASA; aún requieren revisión humana de derechos, PII y calidad. NASA exige consultar las redistribuciones al menos semanalmente y retirar cualquier documento cuya disponibilidad cambie.
 
