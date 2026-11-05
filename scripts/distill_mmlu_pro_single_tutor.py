@@ -10,15 +10,21 @@ import json
 from pathlib import Path
 
 from ronin.data.local_dual_teacher import generate_completion, load_local_teacher
-from scripts.distill_mmlu_pro_dual_tutor import load_evaluator, parse_response, tutor_prompt
+from scripts.distill_mmlu_pro_dual_tutor import parse_response, tutor_prompt
 
 
 def generate(model_dir: Path, output_dir: Path, *, count: int, quantization: str, seed: int) -> dict:
     if not 8 <= count <= 512:
         raise ValueError("count debe estar entre 8 y 512")
-    revision, _format_prompt, load_dataset, select = load_evaluator()
-    # El tutor trabaja sobre train; validation queda intacto para medir generalización.
-    rows = select(load_dataset(revision, split="train"), count, seed)
+    from datasets import load_dataset
+    from scripts.evaluate_mmlu_pro import (
+        DATASET_ID, DATASET_REVISION, normalize_rows, select_stratified,
+    )
+    revision = DATASET_REVISION
+    # El loader de evaluación bloquea train deliberadamente. Para destilación,
+    # cargamos train por una ruta separada y normalizamos el mismo esquema.
+    raw_rows = load_dataset(DATASET_ID, split="train", revision=revision)
+    rows = select_stratified(normalize_rows(raw_rows), count, seed)
     model, tokenizer, manifest = load_local_teacher(model_dir, quantization)
     accepted = []
     audit = []
