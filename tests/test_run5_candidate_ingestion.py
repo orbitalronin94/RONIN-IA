@@ -4,7 +4,9 @@ from pathlib import Path
 import yaml
 
 from scripts.audit_run5_cross_library_dedup import audit
+from scripts.prepare_pmc_oa_candidates import HKD_FRACTION as PMC_HKD_FRACTION
 from scripts.prepare_run5_candidates import (
+    HKD_FRACTION,
     ALLOWED_LICENSES,
     COLLECTIONS,
     DATASET_REVISION,
@@ -281,9 +283,6 @@ def test_run5_stream_shuffle_rejects_invalid_buffer():
 
 
 def test_run5_default_split_is_half_base_and_half_hkd_to_meet_x10_minimums():
-    from scripts.prepare_pmc_oa_candidates import HKD_FRACTION as PMC_HKD_FRACTION
-    from scripts.prepare_run5_candidates import HKD_FRACTION
-
     assert HKD_FRACTION == 0.50
     assert PMC_HKD_FRACTION == 0.50
     total = 1000
