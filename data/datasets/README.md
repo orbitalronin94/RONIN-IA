@@ -200,3 +200,8 @@ El workflow \`Audit and admit scoped candidate documents\` ejecutó correctament
 - Informe global por fuente y documento: [candidate-document-audit-2026-11-05.json](reviews/candidate-document-audit-2026-11-05.json).
 
 Los payloads NASA y ScienceVerse preservan hashes del origen y del contenido admitido; los manifiestos marcan explícitamente \`training_eligible:false\`. La incorporación documental no implica promoción a entrenamiento ni altera los contadores Level A actuales.
+
+
+## Expansión a 200 GB
+
+La hoja de ruta multi-fuente y sus reglas de contabilidad están en [`acquisition/200gb-expansion-roadmap-2026-11.md`](acquisition/200gb-expansion-roadmap-2026-11.md). El primer flujo de adquisición de texto completo está en [`candidates/pmc-oa-cc0-ccby-v2/`](candidates/pmc-oa-cc0-ccby-v2/): PMC OA con verificación de licencia por artículo, manifiestos SHA-256 y estado no entrenable hasta superar G-0. El tamaño de texto UTF-8 se contabiliza por separado del tamaño comprimido.
