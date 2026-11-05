@@ -75,8 +75,5 @@ El experimento de continuación toma como semillas independientes los checkpoint
 - B — SHA-256 `bcef0ec6db635f7f75d1fd84bf2e407aa50e86d34b1e7849516c158708256123`.
 - C — SHA-256 `e27f11c2eb93e2c8c3d95da6b4249a793fdc9d042981d1a5cdd98715c5addc92`.
 
-Sobre cada semilla se repite el ciclo B/C original de 100 pasos: dos continuaciones por semilla,
-cuatro entrenamientos de 100 pasos en total. Cada resultado se compara con su propia semilla
-mediante los mismos 50 IDs de MMLU-Pro validation, revisión y hash de dataset, con cobertura
-completa y cero regresiones reportadas por separado. No se ejecuta el plan de 10.000 pasos,
-no hay promoción automática y no se modifica `main`.
+Sobre cada semilla se ejecutan las dos variantes B/C con 10.000 pasos cada una: B y C desde la semilla B, y B y C desde la semilla C. Son cuatro entrenamientos de 10.000 pasos, 40.000 pasos totales. Cada resultado se compara con su propia semilla
+mediante los mismos 50 IDs de MMLU-Pro validation, revisión y hash de dataset, con cobertura completa y cero regresiones reportadas por separado. No hay promoción automática y no se modifica `main`.
