@@ -2,6 +2,7 @@
 """Promote only the six individually reviewed NASA files after scoped gates pass."""
 from __future__ import annotations
 import argparse, hashlib, json, re, urllib.parse, urllib.request
+import numpy as np
 from datetime import date, timedelta, datetime, timezone
 from pathlib import Path
 from collections import Counter
@@ -13,11 +14,16 @@ TOKEN = re.compile(r"[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_+.-]{1,}|\d+(?:[.,]\d+)?|[=<>�
 def sha(b: bytes) -> str: return hashlib.sha256(b).hexdigest()
 def tokens(text: str) -> list[str]: return [x.lower() for x in TOKEN.findall(text)]
 def simhash(text: str) -> int:
-    v=[0]*64
-    for token in set(tokens(text)):
-        n=int.from_bytes(hashlib.blake2b(token.encode(),digest_size=8).digest(),"big")
-        for bit in range(64): v[bit] += 1 if n & (1<<bit) else -1
-    return sum(1<<i for i,x in enumerate(v) if x>=0)
+    hashes=np.fromiter(
+        (int.from_bytes(hashlib.blake2b(token.lower().encode(),digest_size=8).digest(),"big")
+         for token in set(tokens(text))),
+        dtype=np.uint64,
+    )
+    if not len(hashes): return 0
+    bits=(hashes[:,None] >> np.arange(64,dtype=np.uint64)) & 1
+    weights=bits.sum(axis=0,dtype=np.int64)*2-len(hashes)
+    return sum(1<<i for i,value in enumerate(weights.tolist()) if value>=0)
+
 def fetch_json(url: str) -> dict:
     req=urllib.request.Request(url,headers={"User-Agent":"RONIN-IA-corpus-recheck/1.0","Accept":"application/json"})
     with urllib.request.urlopen(req,timeout=45) as r: return json.loads(r.read().decode("utf-8"))
