@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:45 | [Integración continua #1243 (run 42004891756)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42004891756) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): normalize DOI identities before RDS export. Trigger: push; rama: main; intento: 1. | 083cb2ed |
 | 2026-11-05 09:44 | [Integración continua #1241 (run 42004848786)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42004848786) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): use base R license fallback in ScienceVerse exporter. Trigger: push; rama: main; intento: 1. | 1d26c0c9 |
 | 2026-11-05 09:44 | [Integración continua #1240 (run 42004808458)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42004808458) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: add per-document ScienceVerse RDS text exporter. Trigger: push; rama: main; intento: 1. | 6a354e92 |
 | 2026-11-05 09:42 | [Inspect ScienceVerse RDS structure #7 (run 42004037236)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42004037236) | success | Ejecución de GitHub Actions; consultar logs y artefactos enlazados para el resultado detallado. Commit: ci: rerun five-package ScienceVerse integrity inspection. Trigger: push; rama: main; intento: 1. | 12481be4 |
