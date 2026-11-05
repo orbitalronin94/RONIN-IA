@@ -112,3 +112,7 @@ Ejecutar \`python scripts/validate_rights_registry.py\` para validar el registro
 - **BNE / Biblioteca Digital Hispánica:** catálogo y licencia CC BY 4.0 de metadatos verificados. Los enlaces OCR no heredan automáticamente esa licencia; solo se extraerán obras con derechos individuales claros. Expediente: `candidates/bne-bdh-ocr/README.md`.
 - **Project Gutenberg:** fuente de descubrimiento, no licencia global. El proveedor advierte que dominio público en EE. UU. no equivale a dominio público en España/UE y que permisos individuales no se transfieren. Expediente: `candidates/project-gutenberg/README.md`.
 - Ambas quedan en implementación parcial; sin texto admitido adicional hasta superar la revisión por obra/edición.
+
+## Adquisición ScienceVerse automatizada (2026-11-05)
+
+Se han añadido script y workflow para incorporar a `main` cuatro paperlists de texto completo con manifiestos por artículo: BMC Medicine (1.000), Judgment and Decision Making (855), Journal of Cognition (447) y Open Mind (293). **Objetivo: 2.595 documentos.** El proceso rechaza un corpus si alguna fila del manifiesto no declara CC-BY 4.0; conserva CSV DOI/licencia, payload RDS, procedencia y SHA-256. Solo se sumarán al recuento de admisión cuando el workflow termine correctamente y los ficheros estén verificados. Deduplicación global, retractaciones, privacidad y particiones siguen siendo gates obligatorios.
