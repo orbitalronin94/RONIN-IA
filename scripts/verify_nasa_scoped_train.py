@@ -7,8 +7,8 @@ import json
 import re
 from pathlib import Path
 
-EMAIL_RE = re.compile(r"(?i)\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b")
-SSN_RE = re.compile(r"\\b\\d{3}-\\d{2}-\\d{4}\\b")
+EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
+SSN_RE = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
 
 
 def sha256(raw: bytes) -> str:
@@ -147,9 +147,9 @@ def main() -> None:
 
     a.output.mkdir(parents=True, exist_ok=True)
     train = a.output / "train.txt"
-    train.write_text("\\n\\n".join(texts) + "\\n", encoding="utf-8")
+    train.write_text("\n\n".join(texts) + "\n", encoding="utf-8")
     docs = a.output / "documents.train.jsonl"
-    docs.write_text("".join(json.dumps(row, ensure_ascii=False) + "\\n" for row in rows), encoding="utf-8")
+    docs.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows), encoding="utf-8")
     report = {
         "schema": "ronin-nasa-reviewed-train-audit-v2",
         "dataset_id": "nasa-ntrs-file-reviewed-v2",
@@ -176,7 +176,7 @@ def main() -> None:
         "scope_limit": "Only newly verified files are included; the two already admitted NASA records are skipped as exact duplicates.",
         "records": rows,
     }
-    (a.output / "audit.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    (a.output / "audit.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
 
