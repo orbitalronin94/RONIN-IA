@@ -90,4 +90,4 @@ def test_manifest_rejects_modified_or_unverified_files(tmp_path):
     manifest["license_verified"] = False
     manifest_path.write_text(json.dumps(manifest))
     with pytest.raises(ValueError, match="licencia/código remoto"):
-        verify_manifest(tmp_path)
+        verify_manifest(tmp_path, "4bit")
