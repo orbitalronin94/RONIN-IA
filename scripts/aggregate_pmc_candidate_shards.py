@@ -146,14 +146,17 @@ def aggregate(
     seen_domains: set[str] = set()
 
     for manifest_path in manifests:
-        domain = manifest_path.parent.name
+        data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        # download-artifact@v6 nests each shard under its artifact name
+        # (ronin-pmc-oa-<domain>-candidates), not the original domain name.
+        # The manifest is the authoritative source for the domain identity.
+        domain = str(data.get("domain", "")).strip()
         if domain not in expected:
-            raise SystemExit(f"Unexpected PMC domain directory: {domain}")
+            raise SystemExit(f"Unexpected PMC domain in {manifest_path}: {domain!r}")
         if domain in seen_domains:
             raise SystemExit(f"Duplicate PMC shard for domain: {domain}")
         seen_domains.add(domain)
 
-        data = json.loads(manifest_path.read_text(encoding="utf-8"))
         source = data.get("source", {})
         if source.get("dataset_id") != SOURCE or source.get("revision") != REVISION:
             raise SystemExit(f"Unexpected source/revision in {manifest_path}")
