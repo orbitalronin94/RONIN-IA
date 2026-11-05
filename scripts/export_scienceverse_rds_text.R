@@ -84,6 +84,13 @@ for (rds in files) {
                             reason = "not_in_eligible_manifest")), excluded_con)
       next
     }
+    if (exists(doi, envir = seen_local, inherits = FALSE)) {
+      stats$excluded_duplicate_text <- stats$excluded_duplicate_text + 1L
+      write_jsonl(list(list(dataset = dataset, paper_id = paper_id, doi = doi,
+                            reason = "duplicate_doi_object_in_rds")), excluded_con)
+      next
+    }
+    assign(doi, TRUE, envir = seen_local)
     matched <- c(matched, doi)
     title <- as.character(eligible$title[[row_index]])
     text_df <- paper$text
@@ -106,13 +113,17 @@ for (rds in files) {
     parts <- character()
     last_section <- NA_character_
     for (j in seq_len(nrow(text_df))) {
+      if (is.na(text_df$text[[j]])) next
       paragraph <- normalise_body(text_df$text[[j]])
       if (!nzchar(paragraph)) next
       section_id <- if ("section_id" %in% names(text_df)) as.character(text_df$section_id[[j]]) else NA_character_
       if (!is.na(section_id) && nzchar(section_id) && !identical(section_id, last_section) &&
           section_id %in% names(section_headers)) {
-        header <- normalise_body(section_headers[[section_id]])
-        if (nzchar(header)) parts <- c(parts, paste0("## ", header))
+        raw_header <- section_headers[[section_id]]
+        if (!is.na(raw_header)) {
+          header <- normalise_body(raw_header)
+          if (nzchar(header)) parts <- c(parts, paste0("## ", header))
+        }
       }
       parts <- c(parts, paragraph)
       last_section <- section_id
