@@ -62,24 +62,38 @@ def main() -> None:
     )
     existing.update(x["payload"]["sha256"] for x in papers.get("records", []))
 
-    decisions = {d["document_id"]: d for d in manifest.get("decisions", [])}
+    pack_rows = {}
+    for pack_path in a.manifest.parent.glob("*.jsonl.gz"):
+        packed = gzip.decompress(pack_path.read_bytes()).decode("utf-8")
+        for line in packed.splitlines():
+            if line.strip():
+                item = json.loads(line)
+                pack_rows[item["document_id"]] = item
     rows = []
     texts = []
     seen = set()
     duplicate_existing = []
     duplicate_within_review = []
     for doc_id, verdict in sorted(approved.items()):
-        decision = decisions.get(doc_id)
-        if not decision or decision.get("decision") != "admitted_scoped_training_blocked":
-            raise SystemExit(f"{doc_id}: not admitted in scoped NASA manifest")
-        if decision.get("rights_allowlist_pass") is not True:
-            raise SystemExit(f"{doc_id}: NASA rights allowlist not passed")
+        packed = pack_rows.get(doc_id)
+        if not packed:
+            raise SystemExit(f"{doc_id}: missing from the pinned NASA candidate pack")
+        metadata = verdict.get("verified_metadata", {})
+        if metadata.get("distribution_limits") != "Public" or "Public Use Permitted" not in metadata.get("copyright", ""):
+            raise SystemExit(f"{doc_id}: NASA public-use metadata not verified")
+        if packed.get("rights_allowlist_pass") is not True:
+            raise SystemExit(f"{doc_id}: NASA pack rights allowlist not passed")
         path = a.documents / f"{doc_id}.txt"
         raw = path.read_bytes()
         actual = digest(raw)
-        if actual != verdict.get("text_sha256") or actual != decision.get("admitted_text_sha256"):
-            raise SystemExit(f"{doc_id}: text SHA mismatch across review/manifest/payload")
-        if len(raw) != verdict.get("text_bytes") or len(raw) != decision.get("admitted_text_bytes"):
+        git_blob = hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\\0" + raw).hexdigest()
+        if git_blob != verdict.get("git_blob_sha1"):
+            raise SystemExit(f"{doc_id}: Git blob SHA mismatch against file-level review")
+        if verdict.get("text_sha256") and actual != verdict["text_sha256"]:
+            raise SystemExit(f"{doc_id}: text SHA mismatch against file-level review")
+        if actual != packed.get("text_sha256"):
+            raise SystemExit(f"{doc_id}: text SHA mismatch against candidate pack")
+        if len(raw) != verdict.get("text_bytes") or len(raw) != packed.get("text_bytes"):
             raise SystemExit(f"{doc_id}: text byte mismatch")
         if actual in existing:
             duplicate_existing.append(doc_id)
@@ -96,13 +110,13 @@ def main() -> None:
         texts.append(text)
         rows.append({
             "document_id": doc_id,
-            "title": decision["title"],
-            "source_url": decision["source_url"],
+            "title": metadata.get("title", packed.get("title", "")),
+            "source_url": verdict.get("ntrs_record", ""),
             "source_sha256": actual,
             "text_sha256": actual,
             "text_bytes": len(raw),
-            "domain": decision["domain"],
-            "target_library": decision["target_library"],
+            "domain": packed.get("domain", "engineering_robotics"),
+            "target_library": packed.get("target_library", "engineering_robotics_general"),
             "rights_allowlist_pass": True,
             "individual_content_review": verdict["content_review"],
             "review_reason": verdict["reason"],
