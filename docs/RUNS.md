@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 11:44 | [Integración continua #1394 (run 42021421271)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42021421271) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: admit ScienceVerse documents with verified per-DOI rights and quality. Trigger: push; rama: main; intento: 1. | 79c274ea |
 | 2026-11-05 11:42 | [Integración continua #1392 (run 42021107477)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42021107477) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Persist verified Qwen GGUF cache between cycles. Trigger: push; rama: main; intento: 1. | 626adcd2 |
 | 2026-11-05 11:42 | [Integración continua #1389 (run 42021069330)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42021069330) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Fix official Qwen3-8B GGUF filenames. Trigger: push; rama: main; intento: 1. | 7effec71 |
 | 2026-11-05 11:41 | [Integración continua #1383 (run 42020843528)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42020843528) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): correct NASA counts and prioritize train-eligible corpus growth. Trigger: push; rama: main; intento: 1. | 40e64eaa |
