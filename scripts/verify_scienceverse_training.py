@@ -221,11 +221,31 @@ def main() -> None:
         "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in records),
         encoding="utf-8",
     )
+
+    train_eligibility = json.loads(
+        (args.root / "train-eligibility-manifest.json").read_text(encoding="utf-8")
+    )
+    exact_train_checks = {
+        "document_count": len(records) == train_eligibility["train_documents"],
+        "text_bytes": total_text_bytes == train_eligibility["train_utf8_text_bytes"],
+        "train_file_bytes": train_path.stat().st_size == train_eligibility["train_file_bytes"],
+        "train_file_sha256": sha256(train_path.read_bytes()) == train_eligibility["train_file_sha256"],
+        "documents_jsonl_bytes": docs_path.stat().st_size == train_eligibility["documents_jsonl_bytes"],
+        "documents_jsonl_sha256": sha256(docs_path.read_bytes()) == train_eligibility["documents_jsonl_sha256"],
+    }
+    failed_train_checks = [name for name, passed in exact_train_checks.items() if not passed]
+    if failed_train_checks:
+        raise SystemExit(
+            "ScienceVerse train artifact does not match the current train-eligibility manifest: "
+            + ", ".join(failed_train_checks)
+        )
+
     report = {
         "schema": "ronin-scienceverse-train-audit-v1",
         "dataset_id": "ronin-scienceverse-ccby-v1",
         "source_documents": expected_docs,
         "documents": len(records),
+        "train_eligibility_manifest_checks": exact_train_checks,
         "held_documents": len(held),
         "held_reason_counts": held_counts,
         "held_examples": held[:100],
