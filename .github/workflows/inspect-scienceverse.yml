@@ -1,0 +1,45 @@
+name: RONIN — inspección estructural ScienceVerse
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/inspect-scienceverse.yml"
+      - "data/datasets/admitted/scienceverse-ccby-v1/**"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            data/datasets/admitted/scienceverse-ccby-v1
+      - name: Inspect JSONL schema and corpus payload integrity
+        run: |
+          python - <<'PY'
+          import gzip, hashlib, json
+          from pathlib import Path
+          root=Path("data/datasets/admitted/scienceverse-ccby-v1")
+          total_docs=0
+          total_bytes=0
+          samples={}
+          for folder in sorted(p for p in root.iterdir() if p.is_dir()):
+            payload=folder/"documents.jsonl.gz"
+            raw=payload.read_bytes()
+            gz=gzip.decompress(raw)
+            rows=[json.loads(line) for line in gz.decode("utf-8").splitlines() if line.strip()]
+            samples[folder.name]={
+              "compressed_bytes":len(raw),
+              "decompressed_bytes":len(gz),
+              "rows":len(rows),
+              "first_row_type":type(rows[0]).__name__ if rows else None,
+              "first_row_keys":sorted(rows[0].keys()) if rows and isinstance(rows[0],dict) else None,
+              "first_row_values":{k:(str(v)[:160] if not isinstance(v,(dict,list)) else type(v).__name__) for k,v in rows[0].items()} if rows and isinstance(rows[0],dict) else None
+            }
+            total_docs+=len(rows)
+            total_bytes+=sum(len(str(r.get("text","")).encode("utf-8")) for r in rows if isinstance(r,dict))
+          print(json.dumps({"collections":samples,"total_documents":total_docs,"text_bytes_if_text_field":total_bytes},ensure_ascii=False,indent=2))
+          PY
