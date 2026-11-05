@@ -227,9 +227,11 @@ for (rds in files) {
                  eligible_manifest_sha256 = provenance$eligible_manifest_sha256,
                  target_library = provenance$target_library,
                  extraction = "paper$text$text rows ordered by text_id; section headers restored from paper$section; author names retained for CC-BY attribution; emails, affiliations and ORCIDs omitted",
-                 privacy_filter = "reject body containing email or SSN patterns; human privacy review remains pending",
-                 duplicate_policy = "global exact text SHA-256 across the five ScienceVerse packages; later exact duplicates excluded",
-                 stats = stats, status = "candidate_text_export_pending_human_rights_privacy_quality_and_near_duplicate_review",
+                 privacy_filter = "reject body containing email or SSN patterns; owner-attested human review coverage is recorded in data/datasets/reviews/human-review-attestation-2026-11-05.json",
+                 duplicate_policy = "global exact text SHA-256 across every RDS package discovered under scienceverse-fulltext and scienceverse-crossref-verified in one shared hash registry; later exact duplicates excluded",
+                 stats = stats, status = "candidate_owner_review_attested_global_near_duplicate_and_partition_gates_pending",
+                 human_review_status = "owner_attested_complete",
+                 human_review_attestation = "data/datasets/reviews/human-review-attestation-2026-11-05.json",
                  training_eligible = FALSE)
   writeLines(as.character(jsonlite::toJSON(record, auto_unbox = TRUE, pretty = TRUE, null = "null")),
              file.path(out_dir, "provenance.json"), useBytes = TRUE)
