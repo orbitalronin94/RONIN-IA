@@ -30,6 +30,7 @@ jobs:
       BASE_RUN_ID: "42017319862"
       LITERATURE_RUN_ID: "41926088900"
       MATHLIB_RUN_ID: "42026633643"
+      NASA_FILE_REVIEWED_RUN_ID: "42028138060"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
       STEPS: ${{ inputs.steps || '500' }}
       EVAL_LIMIT: ${{ inputs.eval_limit || '512' }}
@@ -73,6 +74,14 @@ jobs:
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ env.MATHLIB_RUN_ID }}
+      - name: Download individually reviewed NASA train partition
+        uses: actions/download-artifact@v6
+        with:
+          name: ronin-nasa-ntrs-file-reviewed-train
+          path: incoming/nasa-file-reviewed
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.NASA_FILE_REVIEWED_RUN_ID }}
       - name: Verify checkpoint and every admitted training partition
         run: |
           python - <<'PY'
@@ -85,7 +94,10 @@ jobs:
           lm=Path("incoming/literature/dataset-manifest.json")
           math=Path("incoming/mathlib4/train.txt")
           mmf=Path("incoming/mathlib4/manifest.json")
-          assert all(p.is_file() for p in (base,lit,lm,math,mmf))
+          nasa=Path("incoming/nasa-file-reviewed/train.txt")
+          nmf=Path("incoming/nasa-file-reviewed/manifest.json")
+          ndocs=Path("incoming/nasa-file-reviewed/documents.train.jsonl")
+          assert all(p.is_file() for p in (base,lit,lm,math,mmf,nasa,nmf,ndocs))
           assert sha(base)=="a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
           assert sha(lit)=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
           l=json.loads(lm.read_text())
@@ -100,11 +112,22 @@ jobs:
           assert part["training_eligible"] is True and part["documents"]==8498
           expected="7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"
           assert part["text_sha256"]==expected and sha(math)==expected
+          n=json.loads(nmf.read_text())
+          npart=n["partitions"]["train"]
+          assert n.get("dataset_id")=="nasa-ntrs-file-reviewed-v1"
+          assert n.get("status")=="admitted_scoped_training_partition" and n.get("training_eligible") is True
+          assert npart.get("training_eligible") is True and npart.get("documents")==2
+          assert sha(nasa)==npart["sha256"]=="874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"
+          nasa_rows=[json.loads(line) for line in ndocs.read_text(encoding="utf-8").splitlines() if line.strip()]
+          assert len(nasa_rows)==2 and all(row.get("partition")=="train" for row in nasa_rows)
+          assert {row.get("document_id") for row in nasa_rows}=={"19620002819","19630000935"}
+          assert all(row.get("content_review")=="PASS_WITH_OCR_NOISE" and row.get("rights")=="NASA NTRS record-level Public Use Permitted" for row in nasa_rows)
+          assert all(hashlib.sha256((nasa.parent / "documents" / f"{row['document_id']}.txt").read_bytes()).hexdigest()==row["text_sha256"] for row in nasa_rows) if (nasa.parent / "documents").exists() else True
           ck=torch.load(base,map_location="cpu",weights_only=False)
           assert ck.get("step")==1000 and isinstance(ck.get("model"),dict)
           Path("checkpoints").mkdir(exist_ok=True)
           shutil.copy2(base,"checkpoints/main.pt")
-          print("Gates OK: 608 literature + 8498 Mathlib4 = 9106 train docs; 237924775 source bytes. No tutor data. Validation/test partitions excluded. G-0 global remains FAIL.")
+          print("Gates OK: 608 literature + 8498 Mathlib4 + 2 NASA file-reviewed = 9108 scoped train docs; 237957184 source bytes. No tutor data. Validation/test partitions excluded. G-0 global remains FAIL.")
           PY
       - name: Assemble all and only train-eligible admitted documents
         run: |
@@ -113,21 +136,23 @@ jobs:
           from pathlib import Path
           lit=Path("incoming/literature/train.txt").read_bytes()
           math=Path("incoming/mathlib4/train.txt").read_bytes()
+          nasa=Path("incoming/nasa-file-reviewed/train.txt").read_bytes()
           out=Path("/tmp/ronin-native-train.txt")
-          out.write_bytes(lit+b"\n\n"+math)
+          out.write_bytes(lit+b"\n\n"+math+b"\n\n"+nasa)
           report={
             "experiment":"ronin-native-no-tutor-v1",
             "tutor_used":False,
             "sources":[
               {"dataset_id":"ronin-spanish-public-domain-literature-v2","documents":608,"bytes":140295523,"sha256":"9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"},
-              {"dataset_id":"mathlib4-lean-proof-corpus-v1","documents":8498,"bytes":97629252,"sha256":"7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"}
+              {"dataset_id":"mathlib4-lean-proof-corpus-v1","documents":8498,"bytes":97629252,"sha256":"7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"},
+              {"dataset_id":"nasa-ntrs-file-reviewed-v1","documents":2,"bytes":32409,"sha256":"874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"}
             ],
-            "train_documents":9106,
-            "source_train_bytes":237924775,
+            "train_documents":9108,
+            "source_train_bytes":237957184,
             "combined_bytes":out.stat().st_size,
             "combined_sha256":hashlib.sha256(out.read_bytes()).hexdigest(),
             "validation_test_partitions_in_training":False,
-            "excluded_not_training_eligible":["NASA NTRS (813 scoped)","ScienceVerse (7365 scoped)","owner Papers (9 Markdown)"],
+            "excluded_not_training_eligible":["NASA NTRS public-use unreviewed remainder (811 scoped records; only 2 individually promoted)","ScienceVerse (7365 scoped)","owner Papers (9 Markdown)"],
             "global_g0_pass":False
           }
           Path("reports").mkdir(exist_ok=True)
