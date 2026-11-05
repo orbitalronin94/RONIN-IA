@@ -108,6 +108,11 @@ def main() -> None:
                 held_counts["missing_doi_or_text"] = held_counts.get("missing_doi_or_text", 0) + 1
                 continue
             doc_id = f"{corpus}:{doi}"
+            title = str(row.get("title", ""))
+            if NON_SUBSTANTIVE_TITLE_RE.search(title):
+                held.append(f"{doc_id}:non_substantive_title")
+                held_counts["non_substantive_title"] = held_counts.get("non_substantive_title", 0) + 1
+                continue
             source_raw_text = text.encode("utf-8")
             source_text_hash = sha256(source_raw_text)
             replacement_count = text.count("\ufffd")
@@ -125,7 +130,7 @@ def main() -> None:
                 held.append(f"{doc_id}:not_admitted")
                 held_counts["not_admitted"] = held_counts.get("not_admitted", 0) + 1
                 continue
-            if license_url not in ALLOWED_LICENSE_URLS:
+            if license_url not in ALLOWED_LICENSE_URLS or str(row.get("license", "")).strip() not in {"CC BY", "CC0"}:
                 held.append(f"{doc_id}:license_not_allowlisted")
                 held_counts["license_not_allowlisted"] = held_counts.get("license_not_allowlisted", 0) + 1
                 continue
