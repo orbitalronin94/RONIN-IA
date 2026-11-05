@@ -143,9 +143,9 @@ Estos recuentos separan material descargado de material admitido:
 | Línea | Documentos candidatos | Payload descargado |
 |---|---:|---:|
 | ScienceVerse (BMC Medicine, JDM, Journal of Cognition, Open Mind, i-Perception) | 3.087 DOI únicos en manifiestos elegibles | 95.948.088 bytes RDS |
-| NASA NTRS public-use | 53 textos completos | 7.853.246 bytes UTF-8 |
-| **Total candidato de estas dos líneas** | **3.140 registros** | **103.801.334 bytes** |
+| NASA NTRS public-use | 189 textos completos | 15.417.212 bytes UTF-8 |
+| ScienceVerse Crossref (eLife + Frontiers) | 824 DOI únicos | 87.589.919 bytes RDS |\n| **Total candidato adquirido** | **4.100 registros** | **198.955.219 bytes** |
 
-ScienceVerse conserva manifiestos, procedencia y hashes por paquete; cuatro filas JDM con DOI duplicado/conflictivo y una fila de Journal of Cognition sin conversión se excluyen de los manifiestos elegibles. NASA exige metadatos por documento de uso público, sin material de terceros, sin control de exportación y sin indicador de información sensible. Ambos conjuntos siguen en `candidates/`: no se suman a bytes Level A ni habilitan entrenamiento. La deduplicación cruzada, revisión humana de derechos/atribución, privacidad, calidad y clasificación General/HKD siguen pendientes.
+ScienceVerse conserva manifiestos, procedencia y hashes por paquete; eLife y Frontiers se admiten al nivel candidato solo cuando Crossref confirma CC-BY 4.0; cuatro filas JDM con DOI duplicado/conflictivo y una fila de Journal of Cognition sin conversión se excluyen de los manifiestos elegibles. NASA exige metadatos por documento de uso público, sin material de terceros, sin control de exportación y sin indicador de información sensible. Ambos conjuntos siguen en `candidates/`: no se suman a bytes Level A ni habilitan entrenamiento. La deduplicación cruzada, revisión humana de derechos/atribución, privacidad, calidad y clasificación General/HKD siguen pendientes.
 
 El único conjunto admitido sigue siendo `literature-es-v1`: 608 documentos en train y 140.295.523 bytes en su artefacto de materialización. Validation y test no se entrenan.
