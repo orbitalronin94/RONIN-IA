@@ -23,7 +23,7 @@ FILES = {
     "process_report_es.md": ("14215136", "cb15f456ff7c33327d78ff305d82bb83", 5239),
     "corpus_info.json": ("14215032", "ac585499a3391bf26c6201e1209a4af9", 26567),
 }
-USER_AGENT = "RONIN-IA-parlaibero-audit/1.0"
+USER_AGENT = "RONIN-IA-parlaibero-audit/1.1"
 
 def fetch(url: str, limit: int) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})

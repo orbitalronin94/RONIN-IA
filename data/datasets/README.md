@@ -340,3 +340,9 @@ The exact workflow IDs, artifact IDs, row counts, payload byte counts, SHA-256 v
 
 
 The expanded 32-domain / 64-library catalogue now maps 21 audited candidate source IDs to their relevant domain libraries through `candidate_source_links`. The mapping is traceability only: it includes metadata-only, preflight-only and quarantined sources with explicit roles; no source link promotes a library to admitted or training-eligible. CI validates that every mapped ID exists in the source audit register.
+
+## ParlaIbero-ES v2.0 — metadata and audit review (2026-11-05)
+
+The public Harvard Dataverse v2.0 metadata and five small Spanish audit documents have been fetched and checksum-verified in PR #105. The dataset declares CC BY 4.0 and contains 558,940 parliamentary-speech rows across 3,559 sessions (1977–2025), with 934,962,974 text characters. The 1.06 GB `ES_interventions.csv` remains **not downloaded**; its provider MD5 and file ID are pinned in `candidates/parlaibero-es-v2.0/manifest.json`.
+
+The data dictionary exposes speaker name, speaker ID, sex, party and district alongside text. Those fields will not be included in any proposed training export. The corpus contains political speech and may include sensitive political opinions or third-party personal data; the audit also documents 606 rows with undecoded characters. Therefore this is a **high-value candidate on privacy/quality hold**, not an admitted library. Next step is a documented privacy basis and a minimized text-only acquisition plan, followed by payload hashing, PII/corruption filtering, session-grouped partitions and global deduplication.

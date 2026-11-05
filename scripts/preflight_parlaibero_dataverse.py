@@ -16,7 +16,7 @@ from pathlib import Path
 SERVER = "https://dataverse.harvard.edu"
 DOI = "doi:10.7910/DVN/OKHGAB"
 VERSION = "2.0"
-USER_AGENT = "RONIN-IA-dataverse-preflight/1.0"
+USER_AGENT = "RONIN-IA-dataverse-preflight/1.1"
 
 def fetch_json(url: str) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
