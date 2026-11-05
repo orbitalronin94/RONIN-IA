@@ -17,6 +17,12 @@ write_jsonl <- function(items, con) {
                                              na = "null", digits = NA)), con, useBytes = TRUE)
   }
 }
+normalise_doi <- function(x) {
+  x <- tolower(trimws(as.character(x)))
+  x <- sub("^https?://(dx\\.)?doi\\.org/", "", x, perl = TRUE)
+  x <- sub("^doi:\\s*", "", x, perl = TRUE)
+  x
+}
 normalise_body <- function(x) {
   x <- enc2utf8(as.character(x))
   x <- gsub("\r\n?", "\n", x, perl = TRUE)
@@ -42,7 +48,7 @@ for (rds in files) {
   eligible <- read.csv(eligible_path, stringsAsFactors = FALSE, check.names = FALSE,
                        na.strings = character(), encoding = "UTF-8")
   if (!all(c("doi", "title") %in% names(eligible))) stop(dataset, ": eligible manifest needs DOI and title")
-  eligible_doi <- tolower(trimws(as.character(eligible$doi)))
+  eligible_doi <- normalise_doi(eligible$doi)
   if (anyDuplicated(eligible_doi)) stop(dataset, ": eligible DOI manifest is not unique")
 
   message("Exporting ", dataset, " (", nrow(eligible), " eligible DOIs)")
@@ -68,7 +74,7 @@ for (rds in files) {
     paper <- object[[idx]]
     info <- paper$info
     doi <- if (is.data.frame(info) && "doi" %in% names(info) && nrow(info)) {
-      tolower(trimws(as.character(info$doi[[1L]])))
+      normalise_doi(info$doi[[1L]])
     } else ""
     paper_id <- if (!is.null(paper$paper_id) && length(paper$paper_id)) as.character(paper$paper_id[[1L]]) else names(object)[[idx]]
     row_index <- match(doi, eligible_doi)
