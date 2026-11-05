@@ -10,12 +10,12 @@ Este directorio es el registro operativo de adquisición, revisión, admisión y
 |---|---:|---|---|
 | Literatura española legacy (`literature-es-v1`) | 608 train (+18 validation y 18 test aislados) | Admitido Level A scoped; 140.295.523 bytes train | Sí, bajo su alcance de corpus y controles; la validación global del inventario de bibliotecas sigue pendiente |
 | Lean mathlib4 (`mathlib4-v1`) | 8.697 admitidos (8.498 train, 91 validation, 108 test; 2 retenidos) | Admitido scoped; 97.629.252 bytes train; Apache-2.0; 8.650 matemáticas + 47 lógica | Sí, solo la partición train de este manifiesto; la validación global del inventario sigue pendiente |
-| NASA NTRS public-use | 813 de 824 | Admisión scoped con revisión del propietario; 11 retenidos; 32.313.859 bytes | No: recheck de redistribución, deduplicación cruzada y controles globales pendientes |
+| NASA NTRS public-use | 813 de 824 scoped; 6 train file-reviewed; 807 aún no train | 6 documentos / 701.870 bytes en dos manifiestos file-reviewed; 4 OCR/rights holds | Sí, solo los 6 archivos revisados; recheck semanal y near-duplicate global pendientes |
 | Papers propios | 9 Markdown (README excluido) | 750.857 bytes; hashes/bytes verificados; dedup exacta contra 9.108 documentos train existentes; auditoría de estructura y privacidad PASS | Sí, train scoped interno; near-duplicate global y holdout siguen pendientes |
-| NASA file-reviewed | 2 train + 4 retenidos (subconjunto de NASA NTRS) | 32.410 bytes promovidos; 4 hashes/bytes no coinciden con sus atestaciones | Sí, solo los 2 documentos con revisión exacta y recheck NASA superados |
+| NASA file-reviewed | 6 train + 4 retenidos (subconjunto de NASA NTRS) | 701.870 bytes train; 4 nuevos promovidos tras verificar Git blob SHA-1, candidate pack y bytes; 4 OCR/rights holds | Sí, train scoped de los 6 archivos aprobados; near-duplicate global pendiente |
 | ScienceVerse | 7.403 registros fuente; 7.365 admitidos scoped; 6.641 train; 724 retenidos | 399.591.813 bytes train; CC BY/CC0 por DOI; hashes y dedup exacta cruzada PASS | Sí, train scoped en 4 bibliotecas General; near-duplicate global y holdout pendientes |
 
-**Cómo leer los totales:** los cuatro manifiestos base registran 10.163 entradas (literatura, Mathlib4, NASA y Papers), más 7.403 registros fuente de ScienceVerse. La cifra **entrenable por partición** pasa a **15.758 documentos y 638.299.854 bytes UTF-8**: 608 literatura + 8.498 Mathlib4 + 2 NASA file-reviewed + 9 Papers propios + 6.641 ScienceVerse. Validation/test permanecen aislados. No es una afirmación de G-0 global ni de ausencia de near-duplicates; el estado train scoped se limita a cada manifiesto y sus controles.
+**Cómo leer los totales:** los cuatro manifiestos base registran 10.163 entradas (literatura, Mathlib4, NASA y Papers), más 7.403 registros fuente de ScienceVerse. La cifra **entrenable por partición** pasa a **15.762 documentos y 638.969.315 bytes UTF-8**: 608 literatura + 8.498 Mathlib4 + 6 NASA file-reviewed + 9 Papers propios + 6.641 ScienceVerse. Validation/test permanecen aislados. No es una afirmación de G-0 global ni de ausencia de near-duplicates; el estado train scoped se limita a cada manifiesto y sus controles.
 
 ### ScienceVerse: 6.641 documentos train scoped; 724 retenidos
 
@@ -101,7 +101,7 @@ El manifiesto `libraries/manifest-64.json` cuenta el corpus legacy y ScienceVers
 
 - Seis documentos revisados individualmente; **dos** (32.410 bytes) promovidos a train tras coincidencia exacta de hash/bytes con la atestación, deduplicación frente a los 608 documentos legacy y recheck live de derechos/redistribución NASA.
 - **Cuatro retenidos**: las atestaciones de revisión no coinciden con el payload exacto; no se han corregido hashes a ciegas ni se han admitido.
-- Los dos promovidos son un subconjunto revisado de los 813 NASA NTRS, no dos nuevas adquisiciones. No sumarlos de nuevo al total documental ni al mínimo Level A.
+- Los seis NASA file-reviewed son un subconjunto revisado de los 813 NASA NTRS, no una nueva adquisición. No sumarlos de nuevo al total documental ni al mínimo Level A.
 - Ejecución de promoción y recheck NASA: [run 42028138060](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028138060). Validador del manifiesto actualizado: [run 42028588708](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028588708).
 
 ## Candidatos y líneas de adquisición
@@ -190,7 +190,7 @@ El corpus legacy de **608 documentos** continúa siendo la única fuente contabi
 
 Los 7.365 ScienceVerse admitidos scoped tienen DOI único, SHA-256 de texto único dentro de las 13 exportaciones, licencia por documento CC-BY-4.0 o CC0 y atribución presente. La auditoría train posterior promovió 6.641 documentos (399.591.813 bytes) tras integridad, mínimos de calidad, filtros de email/SSN y deduplicación exacta contra los train actuales; retuvo 724 por exceso de caracteres de reemplazo (697) y títulos no sustantivos (27). La attestation del propietario cubre la revisión humana de las fuentes mapeadas; el manifiesto mantiene trazabilidad por documento.
 
-**Entrenamiento scoped:** el mix incorpora 608 literatura, 8.498 Mathlib4, 2 NASA file-reviewed, 9 Papers propios y 6.641 ScienceVerse. NASA restante (811), los 724 ScienceVerse retenidos y otros candidatos siguen fuera. Near-duplicates globales, contaminación de benchmarks/holdouts, emparejamiento General/HKD global y G-0 siguen pendientes.
+**Entrenamiento scoped:** el mix incorpora 608 literatura, 8.498 Mathlib4, 6 NASA file-reviewed, 9 Papers propios y 6.641 ScienceVerse. NASA restante (807), los 724 ScienceVerse retenidos y otros candidatos siguen fuera. Near-duplicates globales, contaminación de benchmarks/holdouts, emparejamiento General/HKD global y G-0 siguen pendientes.
 
 ## Auditoría integral de candidatos (2026-11-05)
 
@@ -198,6 +198,7 @@ El workflow \`Audit and admit scoped candidate documents\` ejecutó correctament
 
 - NASA: [813 documentos admitidos en alcance acotado](admitted/nasa-ntrs-public-use-v1/manifest.json), 11 retenidos.
 - ScienceVerse: [7.365 documentos admitidos scoped](admitted/scienceverse-ccby-v1/manifest.json); [6.641 train scoped](admitted/scienceverse-ccby-v1/train-eligibility-manifest.json), 724 retenidos.
+- NASA file-reviewed: [2 documentos originales](admitted/nasa-ntrs-file-reviewed-v1/manifest.json) + [4 adicionales](admitted/nasa-ntrs-file-reviewed-v2/manifest.json), 6 train en total.
 - Papers: [9 documentos propios admitidos](admitted/ronin-authored-papers-v1/manifest.json), README excluido.
 - Informe global por fuente y documento: [candidate-document-audit-2026-11-05.json](reviews/candidate-document-audit-2026-11-05.json).
 
