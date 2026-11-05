@@ -251,20 +251,20 @@ def main() -> int:
         ("gplsi-cleartext-val.jsonl", "15ea1a2495f312ee95e213cc4d851f9e3dca7c7d1e5c13259f3c859479a8219d"),
     ):
         for row in read_jsonl(verify_payload(member, artifact_member(args.gplsi_zip, member), expected)):
-                text = " ".join(str(row.get("text") or "").split())
-                record = {
-                    "document_id": f"gplsi:{row.get('source_repo')}:{row.get('source_path')}",
-                    "text": text,
-                    "language": row.get("language"),
-                    "source_id": row.get("source_repo"),
-                    "source_revision": row.get("source_commit"),
-                    "source_identifier": row.get("source_url"),
-                    "license": row.get("license_id_claimed_for_collection"),
-                    "rights_status": "collection_cc_by_claim_item_source_rights_pending",
-                    "semantic_density": choose_domain(text)[1],
-                }
-                buckets["law"].append(record)
-                input_counts["gplsi_candidate_documents"] += 1
+            text = " ".join(str(row.get("text") or "").split())
+            record = {
+                "document_id": f"gplsi:{row.get('source_repo')}:{row.get('source_path')}",
+                "text": text,
+                "language": row.get("language"),
+                "source_id": row.get("source_repo"),
+                "source_revision": row.get("source_commit"),
+                "source_identifier": row.get("source_url"),
+                "license": row.get("license_id_claimed_for_collection"),
+                "rights_status": "collection_cc_by_claim_item_source_rights_pending",
+                "semantic_density": choose_domain(text)[1],
+            }
+            buckets["law"].append(record)
+            input_counts["gplsi_candidate_documents"] += 1
 
     # Collabra is optional until the per-DOI candidate builder has completed.
     if args.collabra_zip and args.collabra_zip.exists():
