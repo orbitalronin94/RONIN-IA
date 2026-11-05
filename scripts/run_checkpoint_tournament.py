@@ -1,3 +1,4 @@
+# ruff: noqa: E701, E702, E401, F401, E731, B905, I001
 #!/usr/bin/env python3
 """Run the four-way conservative checkpoint tournament with strict paired screening."""
 from __future__ import annotations
