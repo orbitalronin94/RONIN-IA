@@ -19,7 +19,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.select_knowledge_dense_corpus import DOMAIN_TERMS, score_record, tokens  # noqa: E402
+from scripts.select_knowledge_dense_corpus import score_record, tokens  # noqa: E402
 
 DOMAINS = (
     "mathematics",
@@ -67,10 +67,54 @@ def verify_payload(label: str, payload: bytes, expected_sha256: str) -> bytes:
     return payload
 
 
-DOMAIN_TERM_SETS = {
-    domain: set(tokens(DOMAIN_TERMS[domain]))
-    for domain in DOMAINS
+ROUTING_TERMS = {
+    "mathematics": ("theorem", "lemma", "corollary", "algebra", "calculus", "topology", "eigenvalue", "derivative", "integral", "polynomial", "matrix", "vector space", "optimization"),
+    "logic_epistemology": ("predicate", "quantifier", "entailment", "soundness", "falsifiability", "modus ponens", "syllogism", "modal logic", "epistemic", "deontic", "proposition", "inference rule"),
+    "philosophy": ("ontology", "metaphysics", "ethics", "epistemology", "phenomenology", "utilitarianism", "deontology", "existentialism", "empiricism", "rationalism", "dialectic", "causality"),
+    "physics": ("quantum", "thermodynamics", "relativity", "electromagnetism", "wavefunction", "momentum", "photon", "boson", "quark", "neutron", "spectroscopy", "entropy", "gravitational", "particle physics"),
+    "chemistry_materials": ("molecule", "compound", "catalyst", "synthesis", "stoichiometry", "polymer", "covalent", "oxidation", "isotope", "chemical reaction", "molar", "chemical bond", "spectrometry"),
+    "biology": ("genome", "enzyme", "chromosome", "organism", "ecology", "evolution", "species", "genetics", "microbiology", "protein", "cell", "gene", "DNA", "RNA"),
+    "medicine_health": ("clinical", "diagnosis", "pharmacology", "pathology", "surgery", "symptom", "epidemiology", "anatomy", "physiology", "patient", "disease", "treatment", "medication"),
+    "computer_science": ("algorithm", "compiler", "database", "protocol", "concurrency", "cryptography", "runtime", "kernel", "CPU", "operating system", "data structure", "type system", "programming language", "network protocol", "memory management"),
+    "software_engineering": ("codebase", "repository", "debugging", "refactoring", "unit test", "continuous integration", "deployment", "version control", "code review", "software architecture", "API", "test suite", "build system", "dependency management"),
+    "law": ("statute", "regulation", "jurisdiction", "jurisprudence", "legislation", "constitutional", "tribunal", "appeal", "contract", "liability", "court ruling", "judgment", "legal framework"),
+    "economics": ("econometrics", "inflation", "monetary policy", "fiscal policy", "GDP", "elasticity", "supply", "demand", "interest rate", "capital", "international trade", "finance", "market", "production", "consumption"),
+    "social_sciences": ("sociology", "anthropology", "psychology", "demography", "political science", "social policy", "survey", "cognition", "behavioral", "culture", "institution", "social group", "social inequality"),
+    "statistics_probability": ("stochastic", "distribution", "estimator", "hypothesis", "variance", "regression", "sampling", "p-value", "confidence interval", "standard deviation", "random variable", "statistical inference"),
+    "astronomy_earth_science": ("astrophysics", "cosmology", "planet", "galaxy", "nebula", "exoplanet", "orbit", "geology", "climate", "meteorology", "oceanography", "tectonic", "atmosphere", "star formation"),
+    "engineering_robotics": ("robotics", "control system", "circuit", "actuator", "sensor", "manufacturing", "automation", "mechanical engineering", "electrical engineering", "robot", "motor", "embedded system", "industrial engineering"),
+    "humanities": ("linguistics", "literature", "philology", "archaeology", "art history", "historical linguistics", "poetry", "novel", "drama", "theatre", "literary", "historian", "cultural heritage"),
 }
+
+
+def density_for_domain(text: str, domain: str) -> float:
+    return score_record(text, domain, Counter(), 1)["semantic_density"]
+
+
+def choose_domain(text: str) -> tuple[str | None, float, dict[str, Any]]:
+    normalized = " ".join(tokens(text))
+    if not normalized:
+        return None, 0.0, {}
+    matches = {
+        domain: [term for term in terms if " ".join(tokens(term)) in normalized]
+        for domain, terms in ROUTING_TERMS.items()
+    }
+    ranked = sorted(
+        DOMAINS,
+        key=lambda domain: (len(matches[domain]), domain),
+        reverse=True,
+    )
+    best = ranked[0]
+    # Two independent, distinctive terms are required; a single generic hit
+    # (for example "system", "law" or "society") must not assign a topic.
+    if len(matches[best]) < 2:
+        return None, 0.0, {}
+    details = score_record(text, best, Counter(), 1)
+    return best, details["semantic_density"], {
+        **details,
+        "routing_hit_count": len(matches[best]),
+        "routing_hits": matches[best],
+    }
 
 
 def density_for_domain(text: str, domain: str) -> float:
@@ -232,47 +276,24 @@ def main() -> int:
         else:
             add_unique_record(buckets, seen_text_hashes, domain, record, exclusions)
 
-    # Common Corpus: retain the full CC0 subset in a separate review-only payload.
-    # Do not route VoxPopuli, Wikidata, code or multilingual rows into training libraries.
+    # Common Corpus: keep every CC0-labelled row in review-only storage.
+    # The collection label does not clear underlying source-item rights/privacy.
     common_payload = verify_payload("Common Corpus CC0", artifact_member(args.common_corpus_zip, "common-corpus-cc0-1.0.jsonl"), "899380093e232ff266d724bd2eb44430a033930104fc859bd8d7eefb491e1bb8")
     common = read_jsonl(common_payload)
     review_only = []
     for row in common:
-        collection = str(row.get("collection") or "")
-        language = str(row.get("language") or "").casefold()
-        if collection in {"VoxPopuli", "Wikidata", "Github Open Source"} or language not in {"english", "spanish"}:
-            review_only.append({
-                "source_id": "pleias-common-corpus",
-                "source_revision": row.get("source_revision"),
-                "source_identifier": row.get("source_identifier"),
-                "source_url": row.get("source_url"),
-                "text_sha256": row.get("text_sha256"),
-                "collection": collection,
-                "language": row.get("language"),
-                "license": row.get("license_id"),
-                "text": row.get("text"),
-                "rights_status": "item_source_rights_privacy_or_content_type_review_pending",
-            })
-            continue
-        domain, score, components = choose_domain(str(row.get("text") or ""))
-        record = {
-            "document_id": f"common-corpus:{row.get('text_sha256')}",
-            "text": row.get("text") or "",
-            "language": row.get("language"),
+        review_only.append({
             "source_id": "pleias-common-corpus",
             "source_revision": row.get("source_revision"),
             "source_identifier": row.get("source_identifier"),
+            "source_url": row.get("source_url"),
+            "text_sha256": row.get("text_sha256"),
+            "collection": row.get("collection"),
+            "language": row.get("language"),
             "license": row.get("license_id"),
-            "rights_status": "item_source_rights_privacy_quality_review_pending",
-            "rights_level": "C",
-            "admission_status": "candidate",
-            "semantic_density": score,
-            "domain_scores": components,
-        }
-        if domain is None:
-            review_only.append(record)
-        else:
-            add_unique_record(buckets, seen_text_hashes, domain, record, exclusions)
+            "text": row.get("text"),
+            "rights_status": "item_source_rights_privacy_or_content_type_review_pending",
+        })
     input_counts["common_corpus_cc0_input"] = len(common)
 
     # GPLSI: useful Spanish/Catalan legal text, but source-document rights remain pending.
