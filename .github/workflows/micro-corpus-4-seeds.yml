@@ -37,6 +37,7 @@ jobs:
       LITERATURE_RUN_ID: "41926088900"
       MATHLIB_RUN_ID: "42026633643"
       NASA_FILE_REVIEWED_RUN_ID: "42028138060"
+      NASA_FILE_REVIEWED_V2_RUN_ID: "42110638977"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
       STEPS: ${{ inputs.steps || '500' }}
       EVAL_LIMIT: ${{ inputs.eval_limit || '50' }}
@@ -54,6 +55,7 @@ jobs:
             ronin
             scripts
             data/datasets/admitted/ronin-authored-papers-v1
+            data/datasets/admitted/nasa-ntrs-file-reviewed-v2
             data/datasets/admitted/scienceverse-ccby-v1
             scripts/verify_scienceverse_training.py
       - name: Validate budget
@@ -105,6 +107,14 @@ jobs:
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ env.NASA_FILE_REVIEWED_RUN_ID }}
+      - name: Download additional NASA file-reviewed train partition
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-nasa-reviewed-train-42110638977
+          path: incoming/nasa-file-reviewed-v2
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.NASA_FILE_REVIEWED_V2_RUN_ID }}
       - name: Verify nine owner-authorized Papers documents for scoped train
         run: |
           python scripts/verify_ronin_authored_papers_training.py \
@@ -148,7 +158,10 @@ jobs:
           nasa=Path("incoming/nasa-file-reviewed/train.txt")
           nmf=Path("incoming/nasa-file-reviewed/manifest.json")
           ndocs=Path("incoming/nasa-file-reviewed/documents.train.jsonl")
-          assert all(p.is_file() for p in (base,lit,lm,math,mmf,nasa,nmf,ndocs))
+          nasa_v2=Path("incoming/nasa-file-reviewed-v2/train.txt")
+          nasa_v2_audit=Path("incoming/nasa-file-reviewed-v2/audit.json")
+          nasa_v2_docs=Path("incoming/nasa-file-reviewed-v2/documents.train.jsonl")
+          assert all(p.is_file() for p in (base,lit,lm,math,mmf,nasa,nmf,ndocs,nasa_v2,nasa_v2_audit,nasa_v2_docs))
           assert sha(base)==model_manifest["weights_sha256"]
           assert model_manifest["checkpoint_sha256"]=="a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
           assert sha(lit)=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
@@ -175,6 +188,12 @@ jobs:
           assert {row.get("document_id") for row in nasa_rows}=={"19620002819","19630000935"}
           assert all(row.get("content_review")=="PASS_WITH_OCR_NOISE" and row.get("rights")=="NASA NTRS record-level Public Use Permitted" for row in nasa_rows)
           assert {row.get("text_sha256") for row in nasa_rows}=={"039f1edab34becc04e9a367814acc3a5ec08ba510d7913813468ca2d9598aebe","d3177bef2b74f196f125e55bb928f751e41d1e16e7063805c502aa96d380cc24"}
+          n2=json.loads(nasa_v2_audit.read_text(encoding="utf-8"))
+          assert n2.get("dataset_id")=="nasa-ntrs-file-reviewed-v2" and n2.get("training_eligible") is True
+          assert n2.get("new_train_documents")==4 and n2.get("new_train_utf8_bytes")==669461
+          assert n2.get("exact_cross_source_dedup")=="PASS"
+          nasa_rows_v2=[json.loads(line) for line in nasa_v2_docs.read_text(encoding="utf-8").splitlines() if line.strip()]
+          assert len(nasa_rows_v2)==4 and all(row.get("partition")=="train" and row.get("training_eligible") is True for row in nasa_rows_v2)
           ck=torch.load(base,map_location="cpu",weights_only=False)
           assert isinstance(ck,dict)
           state_dict=ck.get("model",ck)
@@ -191,7 +210,7 @@ jobs:
           print("Modelo verificado:", model_manifest["model_name"], "| parámetros=", parameter_count, "| pesos_sha256=", model_manifest["weights_sha256"])
           Path("checkpoints").mkdir(exist_ok=True)
           shutil.copy2(base,"checkpoints/main.pt")
-          print("Integrity checks OK: 608 literature + 8498 Mathlib4 + 2 NASA file-reviewed = 9108 scoped train docs; 237957184 source bytes. No tutor data. Validation/test partitions excluded.")
+          print("Integrity checks OK: literature + Mathlib4 + 6 NASA file-reviewed verified; ScienceVerse and Papers checked in their own source-scoped gates. No tutor data. Validation/test partitions excluded.")
           PY
       - name: Assemble all and only train-eligible admitted documents
         run: |
@@ -201,6 +220,7 @@ jobs:
           lit=Path("incoming/literature/train.txt").read_bytes()
           math=Path("incoming/mathlib4/train.txt").read_bytes()
           nasa=Path("incoming/nasa-file-reviewed/train.txt").read_bytes()
+          nasa_v2=Path("incoming/nasa-file-reviewed-v2/train.txt").read_bytes()
           scienceverse=Path("incoming/scienceverse/train.txt").read_bytes()
           sv_report=json.loads(Path("incoming/scienceverse/audit.json").read_text(encoding="utf-8"))
           papers_dir=Path("data/datasets/admitted/ronin-authored-papers-v1/documents")
@@ -223,15 +243,16 @@ jobs:
               {"dataset_id":"ronin-spanish-public-domain-literature-v2","documents":608,"bytes":140295523,"sha256":"9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"},
               {"dataset_id":"mathlib4-lean-proof-corpus-v1","documents":8498,"bytes":97629252,"sha256":"7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"},
               {"dataset_id":"nasa-ntrs-file-reviewed-v1","documents":2,"bytes":32409,"sha256":"874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"},
+              {"dataset_id":"nasa-ntrs-file-reviewed-v2","documents":4,"bytes":669461,"sha256":n2["train_sha256"]},
               {"dataset_id":"ronin-authored-papers-v1","documents":9,"bytes":750857,"sha256":"source-payloads-verified-individually"},
               {"dataset_id":"ronin-scienceverse-ccby-v1","documents":sv_report["documents"],"bytes":sv_report["text_bytes"],"sha256":sv_report["train_text_sha256"]}
             ],
-            "train_documents":9117+sv_report["documents"],
-            "source_train_bytes":238708041+sv_report["text_bytes"],
+            "train_documents":9121+sv_report["documents"],
+            "source_train_bytes":239377502+sv_report["text_bytes"],
             "combined_bytes":out.stat().st_size,
             "combined_sha256":hashlib.sha256(out.read_bytes()).hexdigest(),
             "validation_test_partitions_in_training":False,
-            "scope_limit":"Papers is source-scoped train only; global G-0 and near-duplicate/benchmark-holdout checks remain pending.",
+            "scope_limit":"NASA v2, Papers and ScienceVerse are source-scoped train only; global G-0 and near-duplicate/benchmark-holdout checks remain pending.",
             "excluded_not_training_eligible":["NASA NTRS public-use unreviewed remainder (811 scoped records)","ScienceVerse held records listed in incoming/scienceverse/held.json"]
           }
           Path("reports").mkdir(exist_ok=True)
