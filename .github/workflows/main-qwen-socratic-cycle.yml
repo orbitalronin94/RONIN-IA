@@ -32,6 +32,7 @@ jobs:
       MKL_NUM_THREADS: "2"
       BASE_RUN_ID: "42017319862"
       LITERATURE_RUN_ID: "41926088900"
+      MATHLIB_RUN_ID: "42026633643"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
       STEPS: ${{ inputs.steps || '500' }}
       EXAMPLES: ${{ inputs.examples || '48' }}
@@ -82,6 +83,14 @@ jobs:
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ env.LITERATURE_RUN_ID }}
+      - name: Download eligible Mathlib4 train artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: ronin-admitted-mathlib4-v1
+          path: incoming/mathlib4
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.MATHLIB_RUN_ID }}
       - name: Verify scoped gates and checkpoint
         run: |
           python - <<'PY'
@@ -92,7 +101,10 @@ jobs:
           base=Path("incoming/main/checkpoints/main.pt")
           corpus=Path("incoming/literature/train.txt")
           mp=Path("incoming/literature/dataset-manifest.json")
+          mathlib=Path("incoming/mathlib4/train.txt")
+          mathlib_manifest=Path("incoming/mathlib4/manifest.json")
           assert base.is_file() and corpus.is_file() and mp.is_file()
+          assert mathlib.is_file() and mathlib_manifest.is_file()
           assert sha(base)=="a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
           assert sha(corpus)=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
           m=json.loads(mp.read_text())
@@ -106,11 +118,19 @@ jobs:
             m.get("train_sha256")=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78",
             m.get("validation_test_included") is False]
           if not all(checks): raise SystemExit(f"Scoped corpus gate failed: {checks}")
+          mm=json.loads(mathlib_manifest.read_text())
+          mathlib_sha="7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"
+          assert mm.get("dataset_id")=="mathlib4-lean-proof-corpus-v1"
+          assert mm.get("status")=="admitted_scoped_training_partition"
+          assert mm.get("aggregate",{}).get("partitions",{}).get("train",{}).get("training_eligible") is True
+          assert mm["aggregate"]["partitions"]["train"]["documents"]==8498
+          assert mm["aggregate"]["partitions"]["train"]["text_sha256"]==mathlib_sha
+          assert sha(mathlib)==mathlib_sha
           ck=torch.load(base,map_location="cpu",weights_only=False)
           if ck.get("step")!=1000 or not isinstance(ck.get("model"),dict): raise SystemExit("Invalid main checkpoint")
           Path("checkpoints").mkdir(exist_ok=True)
           shutil.copy2(base,"checkpoints/main.pt")
-          print("Scoped train verified: 608 docs; global G-0 remains FAIL; NASA/Papers excluded.")
+          print("Scoped train verified: 608 literature + 8498 Mathlib4 documents; validation/test excluded; G-0 remains FAIL; NASA/Papers/ScienceVerse excluded because not training-eligible.")
           PY
       - name: Restore Qwen GGUF cache
         id: qwen-cache
@@ -167,6 +187,36 @@ jobs:
         run: |
           python scripts/build_main_qwen_mixture.py --literature-train incoming/literature/train.txt --literature-manifest incoming/literature/dataset-manifest.json --internal-split-manifest /tmp/ronin-qwen-split/split-manifest.json --internal-train /tmp/ronin-qwen-split/train-internal.txt --teacher-jsonl artifacts/qwen-distillation/qwen-verified-validation.jsonl --output /tmp/ronin-qwen-mixed-train.txt --teacher-repeat 32
           cp /tmp/ronin-qwen-mixed-train.manifest.json reports-qwen-mixture.json
+      - name: Add all other admitted training-eligible partitions
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          base=Path("/tmp/ronin-qwen-mixed-train.txt")
+          mathlib=Path("incoming/mathlib4/train.txt")
+          expected="7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"
+          actual=hashlib.sha256(mathlib.read_bytes()).hexdigest()
+          assert actual==expected, f"Mathlib4 train hash mismatch: {actual}"
+          with base.open("ab") as out:
+            out.write(b"\\n\\n")
+            out.write(mathlib.read_bytes())
+          report=json.loads(Path("reports-qwen-mixture.json").read_text())
+          report["additional_scoped_training_corpora"]=[{
+            "dataset_id":"mathlib4-lean-proof-corpus-v1",
+            "documents":8498,
+            "text_bytes":97629252,
+            "train_sha256":expected,
+            "validation_test_excluded":True
+          }]
+          report["total_admitted_training_documents"]=9106
+          report["total_scoped_source_train_bytes"]=237924775
+          report["scope"]="608 literature + 8498 Mathlib4 train documents + gold-verified Qwen explanations; NASA, owner Papers and ScienceVerse excluded because their manifests do not authorize training"
+          report["global_g0_pass"]=False
+          report["combined_train_sha256"]=hashlib.sha256(base.read_bytes()).hexdigest()
+          report["combined_train_bytes"]=base.stat().st_size
+          Path("reports-qwen-mixture.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\\n")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
       - name: Evaluate main before
         run: |
           mkdir -p reports
@@ -196,7 +246,7 @@ jobs:
             return json.loads(f.read_text()) if f.is_file() else None
           b,a=load("mmlu-test-before.json"),load("mmlu-test-after.json")
           l0,l1=load("language-before.json"),load("language-after.json")
-          result={"experiment":"ronin-main-qwen3-8b-socratic-cycle-v1","automatic_promotion":False,"global_g0_pass":False,"NASA_and_user_papers_included":False,"metrics":{},"decision":"INCOMPLETE"}
+          result={"experiment":"ronin-main-qwen3-8b-socratic-cycle-v1","automatic_promotion":False,"global_g0_pass":False,"NASA_and_user_papers_included":False,"mathlib4_training_included":True,"metrics":{},"decision":"INCOMPLETE"}
           t=Path("artifacts/qwen-distillation/qwen-distillation-summary.json")
           m=Path("reports-qwen-mixture.json")
           if t.is_file(): result["teacher"]=json.loads(t.read_text())
