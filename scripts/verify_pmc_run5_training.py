@@ -153,7 +153,7 @@ def main() -> None:
             "human_review_file_marked_reviewed": review.get("reviewed") is True,
         }
 
-        for row, text in zip(rows, chunks):
+        for row, text in zip(rows, chunks, strict=True):
             doc_id = row["document_id"]
             raw_source = text.encode("utf-8")
             source_hash = sha256(raw_source)
@@ -263,7 +263,7 @@ def main() -> None:
 
     accepted: list[dict] = []
     internal_duplicates: list[dict] = []
-    for text_hash, group in by_hash.items():
+    for _text_hash, group in by_hash.items():
         group.sort(
             key=lambda record: (
                 -record["semantic_density"],
