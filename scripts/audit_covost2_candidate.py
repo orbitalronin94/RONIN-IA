@@ -27,7 +27,7 @@ def normalized_text(value: str) -> str:
 
 
 def partition_for(source_file: str, source_row: int) -> str:
-    key = f"{source_file}\0{source_row}".encode("utf-8")
+    key = f"{source_file}\0{source_row}".encode()
     bucket = int.from_bytes(hashlib.sha256(SPLIT_NAMESPACE + key).digest()[:8], "big") % 100
     if bucket < 80:
         return "train"
