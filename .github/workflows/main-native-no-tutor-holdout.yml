@@ -17,10 +17,10 @@ on:
         default: "64"
         type: choice
         options: ["64", "128", "256", "0"]
-      seed:
-        description: Semilla de entrenamiento (mantén fija la muestra externa)
+      seeds:
+        description: Semillas separadas por comas (máximo 8); con eval_limit=0 usa solo la ganadora
         required: true
-        default: "20261106"
+        default: "20261106,20261107,20261108,20261109"
         type: string
 permissions:
   actions: read
@@ -42,7 +42,7 @@ jobs:
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
       STEPS: ${{ inputs.steps || '500' }}
       EVAL_LIMIT: ${{ inputs.eval_limit || '64' }}
-      TRAIN_SEED: ${{ inputs.seed || '20261106' }}
+      TRAIN_SEEDS: ${{ inputs.seeds || '20261106,20261107,20261108,20261109' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -58,7 +58,10 @@ jobs:
       - name: Validate budget
         run: |
           [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -ge 100 ] && [ "$STEPS" -le 1000 ]
-          [[ "$TRAIN_SEED" =~ ^[0-9]+$ ]] && [ "$TRAIN_SEED" -le 2147483647 ]
+          IFS=',' read -ra SEED_LIST <<< "$TRAIN_SEEDS"
+          [ "${#SEED_LIST[@]}" -ge 1 ] && [ "${#SEED_LIST[@]}" -le 8 ]
+          for seed in "${SEED_LIST[@]}"; do [[ "$seed" =~ ^[0-9]+$ ]] && [ "$seed" -le 2147483647 ]; done
+          if [ "$EVAL_LIMIT" = "0" ]; then [ "${#SEED_LIST[@]}" -eq 1 ]; fi
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
@@ -69,7 +72,7 @@ jobs:
           python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
           python -m pip install -e . --no-deps
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "dill==0.3.8" "multiprocess==0.70.16" "huggingface_hub==0.36.0"
-          python -m compileall -q scripts/prepare_legacy_training_split.py scripts/train_text.py scripts/evaluate_mmlu_pro.py
+          python -m compileall -q scripts/prepare_legacy_training_split.py scripts/train_text.py scripts/evaluate_mmlu_pro.py scripts/evaluate_text.py scripts/screen_training_seeds.py
       - name: Download admitted literature train partition
         uses: actions/download-artifact@v6
         with:
@@ -187,55 +190,21 @@ jobs:
       - name: Create internal validation split from train only
         run: |
           python scripts/prepare_legacy_training_split.py --input /tmp/ronin-native-train.txt --output-dir /tmp/ronin-native-split --validation-fraction 0.05 --seed 42006
-      - name: Evaluate native main BEFORE on fixed holdouts
+      - name: Screen multiple seeds against one cached compact holdout
         run: |
-          python scripts/evaluate_text.py --checkpoint checkpoints/main.pt --validation-text /tmp/ronin-native-split/validation-internal.txt --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu --output reports/language-before.json
-          python scripts/evaluate_domains.py --checkpoint checkpoints/main.pt --dataset benchmarks/domains_v1.jsonl --profile tiny --device cpu --output reports/domains-before.json
-          python scripts/evaluate_mmlu_pro.py --checkpoint checkpoints/main.pt --profile tiny --context-length 4096 --limit "$EVAL_LIMIT" --seed 2026 --revision "$MMLU_REVISION" --split test --device cpu --batch-token-budget 8192 --output reports/mmlu-holdout-before.json
-      - name: Train RONIN from its own checkpoint — NO TUTOR
-        run: |
-          python scripts/train_text.py --text /tmp/ronin-native-train.txt --profile tiny --steps "$STEPS" --seed "$TRAIN_SEED" --init-checkpoint checkpoints/main.pt --learning-rate 0.00001 --min-learning-rate 0.000001 --device cpu --num-threads 2 --checkpoints checkpoints/native-candidate --metrics-out reports/training-throughput.json
-          candidate="checkpoints/native-candidate/step-$(printf '%08d' "$STEPS").pt"
-          test -s "$candidate"
-          cp "$candidate" checkpoints/candidate.pt
-      - name: Evaluate native candidate AFTER on identical fixed holdouts
-        run: |
-          python scripts/evaluate_text.py --checkpoint checkpoints/candidate.pt --validation-text /tmp/ronin-native-split/validation-internal.txt --profile tiny --batches 128 --batch-size 2 --seed 2026 --device cpu --output reports/language-after.json
-          python scripts/evaluate_domains.py --checkpoint checkpoints/candidate.pt --dataset benchmarks/domains_v1.jsonl --profile tiny --device cpu --output reports/domains-after.json
-          python scripts/evaluate_mmlu_pro.py --checkpoint checkpoints/candidate.pt --profile tiny --context-length 4096 --limit "$EVAL_LIMIT" --seed 2026 --revision "$MMLU_REVISION" --split test --device cpu --batch-token-budget 8192 --output reports/mmlu-holdout-after.json
-      - name: Compare paired full holdout and publish decision — never auto-promote
-        if: always()
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          p=Path("reports")
-          p.mkdir(parents=True,exist_ok=True)
-          def load(n):
-            f=p/n
-            return json.loads(f.read_text()) if f.is_file() else None
-          b,a=load("mmlu-holdout-before.json"),load("mmlu-holdout-after.json")
-          l0,l1=load("language-before.json"),load("language-after.json")
-          result={"experiment":"ronin-native-no-tutor-v1","tutor_used":False,"automatic_promotion":False,"decision":"INCOMPLETE","metrics":{}}
-          for n in ("native-mixture.json","domains-before.json","domains-after.json","training-throughput.json"):
-            v=load(n)
-            if v is not None: result["metrics"][n]=v
-          if b and a:
-            ids0=[x.get("id") for x in b.get("details",[])]
-            ids1=[x.get("id") for x in a.get("details",[])]
-            same=(b.get("dataset_revision")==a.get("dataset_revision")==__import__("os").environ["MMLU_REVISION"] and b.get("dataset_split")==a.get("dataset_split")=="test" and b.get("dataset_sha256")==a.get("dataset_sha256") and b.get("selected_items")==a.get("selected_items") and b.get("evaluated_items")==a.get("evaluated_items") and ids0==ids1 and b.get("coverage",0)>=0.95 and a.get("coverage",0)>=0.95)
-            delta=(a["overall"]["accuracy"]-b["overall"]["accuracy"])*100
-            result["mmlu_pro_full_holdout"]={"revision":a["dataset_revision"],"dataset_sha256":a["dataset_sha256"],"selected_items":a["selected_items"],"evaluated_before":b["evaluated_items"],"evaluated_after":a["evaluated_items"],"coverage_before":b["coverage"],"coverage_after":a["coverage"],"before_correct":b["overall"]["correct"],"after_correct":a["overall"]["correct"],"before_accuracy":b["overall"]["accuracy"],"after_accuracy":a["overall"]["accuracy"],"delta_percentage_points":delta,"same_full_holdout_before_after":same,"complete_test_set_before":b.get("complete_test_set"),"complete_test_set_after":a.get("complete_test_set"),"evaluation_tier":"full_test_audit" if b.get("complete_test_set") and a.get("complete_test_set") else "fixed_stratified_iteration_holdout"}
-            if l0 and l1:
-              nonreg=l1["bits_per_byte"]<=l0["bits_per_byte"]
-              result["language_validation_non_regression"]=nonreg
-              result["decision"]="CANDIDATE_READY_FOR_REVIEW" if same and delta>0 and nonreg else "DO_NOT_PROMOTE"
-          for n in ("language-before.json","language-after.json"):
-            v=load(n)
-            if v is not None: result["metrics"][n]=v
-          (p/"native-no-tutor-summary.json").write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n")
-          print(json.dumps(result,ensure_ascii=False,indent=2))
-          PY
+          python scripts/screen_training_seeds.py \
+            --text /tmp/ronin-native-train.txt \
+            --validation-text /tmp/ronin-native-split/validation-internal.txt \
+            --base-checkpoint checkpoints/main.pt \
+            --seeds "$TRAIN_SEEDS" \
+            --steps "$STEPS" \
+            --eval-limit "$EVAL_LIMIT" \
+            --revision "$MMLU_REVISION" \
+            --context-length 4096 \
+            --batch-token-budget 8192 \
+            --device cpu \
+            --num-threads 2 \
+            --output-dir reports/seed-screen
       - name: Upload paired benchmark, corpus manifest and candidate
         if: always()
         uses: actions/upload-artifact@v6
@@ -244,7 +213,7 @@ jobs:
           path: |
             reports/
             checkpoints/main.pt
-            checkpoints/candidate.pt
+            checkpoints/
           if-no-files-found: warn
           retention-days: 90
           compression-level: 6
