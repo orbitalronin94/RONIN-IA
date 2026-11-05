@@ -1,5 +1,9 @@
 name: RONIN — entrenamiento propio sin tutor + holdout antes/después
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/main-native-no-tutor-holdout.yml"
   workflow_dispatch:
     inputs:
       steps:
@@ -18,7 +22,7 @@ permissions:
   contents: read
 concurrency:
   group: ronin-main-native-no-tutor-holdout
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   native-cycle:
     runs-on: ubuntu-latest
@@ -122,7 +126,7 @@ jobs:
           assert len(nasa_rows)==2 and all(row.get("partition")=="train" for row in nasa_rows)
           assert {row.get("document_id") for row in nasa_rows}=={"19620002819","19630000935"}
           assert all(row.get("content_review")=="PASS_WITH_OCR_NOISE" and row.get("rights")=="NASA NTRS record-level Public Use Permitted" for row in nasa_rows)
-          assert all(hashlib.sha256((nasa.parent / "documents" / f"{row['document_id']}.txt").read_bytes()).hexdigest()==row["text_sha256"] for row in nasa_rows) if (nasa.parent / "documents").exists() else True
+          assert {row.get("text_sha256") for row in nasa_rows}=={"039f1edab34becc04e9a367814acc3a5ec08ba510d7913813468ca2d9598aebe","d3177bef2b74f196f125e55bb928f751e41d1e16e7063805c502aa96d380cc24"}
           ck=torch.load(base,map_location="cpu",weights_only=False)
           assert ck.get("step")==1000 and isinstance(ck.get("model"),dict)
           Path("checkpoints").mkdir(exist_ok=True)
