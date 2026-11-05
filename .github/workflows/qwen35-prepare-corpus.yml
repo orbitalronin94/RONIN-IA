@@ -27,6 +27,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
+      - name: Validar sintaxis y estilo del entrenador GPU
+        run: |
+          python -m pip install --quiet ruff
+          python -m py_compile scripts/train_qwen35_unsloth.py
+          ruff check scripts/train_qwen35_unsloth.py
       - name: Validar ejecución de origen
         run: |
           if ! [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]]; then
