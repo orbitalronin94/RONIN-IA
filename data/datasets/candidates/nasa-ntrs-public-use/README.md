@@ -46,3 +46,16 @@ Se ha registrado una revisión a nivel de archivo en `data/datasets/reviews/nasa
 - La revisión también detectó tres incidencias de metadatos/ruta en ScienceVerse: fragmentos que parecen dirección postal en autores de `jdm.jdm06002`, autor malformado en `ece3.ece310954` y asignación temática dudosa de `openmind.opmia00001`. Están documentadas en el mismo informe y siguen retenidas.
 
 **Verificación reproducible del paquete:** el artefacto de GitHub Actions `42015186814` se descargó y se inspeccionaron sus 824 filas descomprimidas: 824/824 SHA-256 y tamaños coinciden con cada texto; 824/824 cumplen la allowlist de metadatos de derechos; no hay duplicados exactos dentro del paquete NASA. Los recuentos por biblioteca son 147/119/430/128. La deduplicación global contra las demás fuentes sigue pendiente.\n\n**Importante:** los dos archivos NASA con revisión de contenido positiva siguen siendo candidatos, no documentos admitidos. No se ha ejecutado aún la deduplicación exacta y aproximada global, la revalidación semanal de redistribución NASA ni la separación General/HKD y train/validation/test. Esta revisión añade trazabilidad y decisiones concretas, pero no altera los contadores de admisión ni habilita entrenamiento.
+
+
+## Ampliación de revisión de archivos NASA (2026-11-05)
+
+La auditoría por archivo se amplió de cuatro a **ocho textos**. El resultado acumulado queda así:
+
+- **4 pasan revisión manual de legibilidad como candidatos:** `19620002819`, `19630000935`, `19620004488` y `19630000937`. En los cuatro se contrastaron título/autoría y la determinación de distribución/copyright con sus fichas NTRS oficiales, y se inspeccionó OCR en secciones representativas.
+- **3 retenidos por OCR severo:** `19620000001`, `19620002834` y `19620002866`.
+- **1 retenido por derechos y OCR no resueltos a nivel de documento:** `19630000936`. Su texto parece corresponder a una sección del volumen NASA-TN-D-1510, pero no se resolvió una ficha individual con determinación de derechos propia; la ficha del volumen advierte que algunas partes pueden contener material protegido. No se hereda automáticamente el permiso del volumen.
+
+Los cuatro pases siguen siendo candidatos: no se admiten todavía. Los otros cuatro permanecen en hold. El detalle de los ocho, incluidos SHA de blob, tamaños, enlaces NTRS, hallazgos y disposición, está en `data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json`.
+
+El constructor comprueba para los 824 textos NASA del paquete los SHA-256 y tamaños contra el manifiesto fuente, aplica la allowlist de derechos por documento y rechaza duplicados exactos dentro de la propia colección. Eso no sustituye la deduplicación global entre fuentes ni la revalidación de redistribución previa al snapshot de entrenamiento.
