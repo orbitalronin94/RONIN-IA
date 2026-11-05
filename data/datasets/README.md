@@ -340,3 +340,21 @@ The exact workflow IDs, artifact IDs, row counts, payload byte counts, SHA-256 v
 
 
 The expanded 32-domain / 64-library catalogue now maps 21 audited candidate source IDs to their relevant domain libraries through `candidate_source_links`. The mapping is traceability only: it includes metadata-only, preflight-only and quarantined sources with explicit roles; no source link promotes a library to admitted or training-eligible. CI validates that every mapped ID exists in the source audit register.
+
+## Adjudication of all mapped sources (2026-11-05)
+
+Every one of the 64 entries in `candidates/github-source-audit.json` now has an explicit first-pass disposition in `candidates/library-adjudication-2026-11-05.json`. This is a triage register, not a claim that all 64 have undergone item-level legal review or that any new corpus has passed admission.
+
+| Disposition | Sources | Treatment |
+|---|---:|---|
+| Candidate — item-level adjudication required | 33 | Acquire/review exact versions, source rights, payload hashes, privacy, quality, deduplication and splits. |
+| Reject under current policy | 13 | Excluded from current text-ingestion scope due to incompatible rights or sensitive-data policy. |
+| Quarantine — no ingestion | 4 | Rights, privacy or provenance conflicts unresolved; remain outside training. |
+| Metadata only — not a training library | 10 | May support discovery, provenance, retrieval or graph enrichment; never count as prose-training libraries. |
+| Metadata/discovery only | 2 | Same separation; structured metadata is not substantive training text. |
+| CoVoST split-integrity hold | 1 | Old mixed-split artifact is ineligible; corrected train-only adapter must pass CI and all content gates. |
+| VoxPopuli rights/privacy hold | 1 | CC0 scope, Parliament notice, attribution, third-party content and speaker privacy require resolution. |
+
+**Result: 0 new text libraries admitted and 0 new payloads training-eligible in this adjudication.** The existing `admitted/literature-es-v1/` remains the only admitted text corpus. Metadata-only sources do not fill any of the 32 General/HKD text libraries. Rejected and quarantined sources are not silently counted as candidates available for training.
+
+The next admission batches should prioritize sources with clear item-level licensing and high text value: the pinned Spanish parliamentary speech files, GPLSI ClearText documents whose original rights can be cleared, the CoVoST train-only rebuild, and bounded CC0/CC-BY scientific text. Sources with non-commercial/share-alike conflicts, sensitive personal data, or packaging-only licenses stay excluded. Each admitted library must add its own immutable manifest, source attribution, split hashes and README entry in the same change.
