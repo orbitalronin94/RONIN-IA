@@ -207,6 +207,15 @@ def main() -> None:
         ),
         reverse=True,
     )
+
+    # Preserve only the three highest-ranked checkpoints; all 100 metric reports remain available.
+    top_dir = checkpoints / "top-candidates"
+    top_dir.mkdir(parents=True, exist_ok=True)
+    for rank, candidate in enumerate(candidates[:3], start=1):
+        source = Path(candidate["checkpoint"])
+        destination = top_dir / f"rank-{rank}-seed-{candidate['seed']}.pt"
+        shutil.copy2(source, destination)
+        candidate["retained_checkpoint"] = str(destination)
     summary = {
         "experiment": "ronin-native-no-tutor-100-runs-100-step-v1",
         "training_steps": args.steps,
