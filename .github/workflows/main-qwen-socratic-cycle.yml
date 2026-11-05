@@ -134,10 +134,35 @@ jobs:
       - name: Prepare train-only internal validation
         run: |
           python scripts/prepare_legacy_training_split.py --input incoming/literature/train.txt --output-dir /tmp/ronin-qwen-split --validation-fraction 0.05 --seed 42005
+      - name: Restore verified Qwen distillation cache
+        id: distillation-cache
+        uses: actions/cache@v5
+        with:
+          path: artifacts/qwen-distillation
+          key: ronin-qwen-socratic-${{ env.MMLU_REVISION }}-${{ env.EXAMPLES }}-${{ hashFiles('scripts/distill_mmlu_pro_qwen_socratic.py', 'models/teachers/qwen3-8b/4bit/ronin-teacher-manifest.json') }}
       - name: Distill Socratic Qwen examples from MMLU-Pro validation
+        if: steps.distillation-cache.outputs.cache-hit != 'true'
         timeout-minutes: 240
         run: |
           python scripts/distill_mmlu_pro_qwen_socratic.py --model-dir "$QWEN_DIR" --server-bin "$LLAMA_SERVER_BIN" --output-dir artifacts/qwen-distillation --count "$EXAMPLES" --max-new-tokens 160 --quantization 4bit
+      - name: Verify reusable distillation artifact
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path("artifacts/qwen-distillation")
+          summary=json.loads((root/"qwen-distillation-summary.json").read_text())
+          rows=[json.loads(line) for line in (root/"qwen-verified-validation.jsonl").read_text().splitlines() if line.strip()]
+          teacher=json.loads(Path("models/teachers/qwen3-8b/4bit/ronin-teacher-manifest.json").read_text())
+          assert summary["source_revision"]==os.environ["MMLU_REVISION"]
+          assert summary["source_split"]=="validation" and summary["test_split_loaded"] is False
+          assert summary["teacher_model"]=="Qwen/Qwen3-8B"
+          assert summary["teacher_revision"]==teacher["base_revision"]
+          assert summary["teacher_file_sha256"]==teacher["quantized_file_sha256"]
+          assert summary["accepted_examples"]==len(rows)>=8
+          assert all(row["teacher_correct"] is True and row["source_split"]=="validation" and row["teacher_revision"]==teacher["base_revision"] for row in rows)
+          print(f"Distillation artifact verified: {len(rows)} examples; cache reusable.")
+          PY
       - name: Build verified scoped mixture
         run: |
           python scripts/build_main_qwen_mixture.py --literature-train incoming/literature/train.txt --literature-manifest incoming/literature/dataset-manifest.json --internal-split-manifest /tmp/ronin-qwen-split/split-manifest.json --internal-train /tmp/ronin-qwen-split/train-internal.txt --teacher-jsonl artifacts/qwen-distillation/qwen-verified-validation.jsonl --output /tmp/ronin-qwen-mixed-train.txt --teacher-repeat 32
