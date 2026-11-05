@@ -1,0 +1,91 @@
+name: Preparar corpus admitido para Qwen3.5-4B
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/qwen35-prepare-corpus.yml"
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Run que publicó el corpus de literatura española admitido"
+        required: true
+        default: "41926088900"
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: ronin-qwen35-corpus
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SOURCE_RUN_ID: \${{ inputs.source_run_id || '41926088900' }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Validar ejecución de origen
+        run: |
+          if ! [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]]; then
+            echo "::error::source_run_id debe ser numérico."
+            exit 1
+          fi
+      - name: Descargar el único corpus admitido actual
+        uses: actions/download-artifact@v6
+        with:
+          name: ronin-admitted-literature-es-v1-train
+          path: /tmp/ronin-admitted-literature
+          github-token: \${{ github.token }}
+          repository: \${{ github.repository }}
+          run-id: \${{ env.SOURCE_RUN_ID }}
+      - name: Localizar, validar y empaquetar train.txt
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import shutil
+          from pathlib import Path
+
+          root = Path("/tmp/ronin-admitted-literature")
+          candidates = [p for p in root.rglob("train.txt") if p.is_file() and p.stat().st_size]
+          if len(candidates) != 1:
+              raise SystemExit(f"Se esperaba un único train.txt no vacío; encontrados: {candidates}")
+          source = candidates[0]
+          raw = source.read_bytes()
+          raw.decode("utf-8")
+          target = Path("artifacts/qwen35-corpus/train.txt")
+          target.parent.mkdir(parents=True, exist_ok=True)
+          shutil.copy2(source, target)
+          manifest = {
+              "schema": "ronin-qwen35-corpus-v1",
+              "source_run_id": "\${{ env.SOURCE_RUN_ID }}",
+              "source_artifact": "ronin-admitted-literature-es-v1-train",
+              "source_corpus": "admitted/literature-es-v1",
+              "admission_status": "admitted",
+              "partition": "train",
+              "documents_reported_by_catalog": 608,
+              "bytes": len(raw),
+              "sha256": hashlib.sha256(raw).hexdigest(),
+              "file": "train.txt",
+              "holdouts_included": False,
+          }
+          Path("artifacts/qwen35-corpus/manifest.json").write_text(
+              json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+          )
+          print(json.dumps(manifest, ensure_ascii=False, indent=2))
+          PY
+      - name: Publicar corpus reproducible para Colab
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-qwen35-admitted-corpus-v1
+          path: artifacts/qwen35-corpus/
+          if-no-files-found: error
+          retention-days: 90
