@@ -1,0 +1,46 @@
+name: Validar inventario de 64 bibliotecas Level A
+
+on:
+  push:
+    paths:
+      - "data/datasets/libraries/manifest-64.json"
+      - "scripts/validate_64_library_inventory.py"
+      - "tests/test_64_library_inventory.py"
+      - ".github/workflows/validate-64-library-inventory.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ronin-64-library-inventory
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Validate exact 32-domain / 64-library catalogue
+        run: python scripts/validate_64_library_inventory.py
+      - name: Run inventory regression tests
+        run: |
+          python -m pip install pytest
+          pytest -q tests/test_64_library_inventory.py
+      - name: Publish auditable counts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("data/datasets/libraries/manifest-64.json").read_text(encoding="utf-8"))
+          counts = data["inventory_counts"]
+          print(f"Domains: {counts['domains']}")
+          print(f"Libraries: {counts['libraries']}")
+          print(f"Level-A admitted text: {counts['level_a_admitted_text_bytes']} bytes")
+          print(f"Libraries at 1 MiB Level-A: {counts['libraries_meeting_minimum']}/64")
+          print(f"Global G-0: {data['policy']['global_g0']}")
+          PY
