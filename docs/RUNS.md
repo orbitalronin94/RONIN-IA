@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:12 | [Integración continua #1165 (run 42000379499)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000379499) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): provide GitHub token to wait for run ledger. Trigger: push; rama: main; intento: 1. | f3d6d83c |
 | 2026-11-05 09:11 | [Integración continua #1164 (run 42000352341)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000352341) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Link README to one-command local tutor training. Trigger: push; rama: main; intento: 1. | d0dfa035 |
 | 2026-11-05 09:11 | [Integración continua #1163 (run 42000343093)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000343093) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Document one-command local training bootstrap. Trigger: push; rama: main; intento: 1. | 8ab4369f |
 | 2026-11-05 09:11 | [Integración continua #1162 (run 42000317401)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000317401) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Add one-command local tutor bootstrap and training. Trigger: push; rama: main; intento: 1. | 7e0af0f4 |
