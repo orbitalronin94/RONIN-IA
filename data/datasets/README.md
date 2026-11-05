@@ -349,3 +349,7 @@ The earlier CoVoST candidate artifacts (41931759338 and 41932647180) are **not a
 The adapter has therefore been corrected to require the upstream split column and export only train plus train_covost. It fails closed if the column is missing, records counts for all observed split labels, and never exports dev/test. The pull-request workflow now runs this acquisition path so the new train-only payload can be inspected before any admission decision.
 
 **Current decision:** CoVoST remains candidate-only until the corrected artifact is generated and its payload hash, language/quality sample, privacy scan, duplicate checks against admitted corpora and evaluation holdouts, and attribution/provenance bundle are reviewed. Existing rights-level-A records certify their exact earlier payloads only; they do not transfer to the corrected payload hash.
+
+### CoVoST 2 train-split parser correction (2026-11-05)
+
+The first PR validation run for the train-only adapter failed closed because the default Python TSV dialect interpreted escaped fields differently from the upstream CoVoST preparation code. The adapter now uses the upstream-compatible tab-delimited parser settings (`escapechar="\\\\"`, `quoting=csv.QUOTE_NONE`) and still rejects unknown split labels. This is a parser correction only: it does not validate a new payload, change any rights record, or admit CoVoST. A successful rerun must report explicit upstream split counts and export only `train` + `train_covost`; `dev` and `test` remain excluded. Previous unsplit payloads remain permanently ineligible.
