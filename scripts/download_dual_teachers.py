@@ -25,6 +25,8 @@ MODELS = {
         "quant_repo": "bartowski/DeepSeek-R1-Distill-Qwen-32B-GGUF",
         "license": "mit",
         "license_url": "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+        "upstream_base": "Qwen/Qwen2.5-32B",
+        "upstream_base_license": "apache-2.0",
         "files": {
             "4bit": "DeepSeek-R1-Distill-Qwen-32B-Q4_K_M.gguf",
             "8bit": "DeepSeek-R1-Distill-Qwen-32B-Q8_0.gguf",
@@ -60,6 +62,21 @@ def download(name: str, quantization: str, root: Path) -> Path:
         raise RuntimeError(
             f"{spec['base_id']}: licencia esperada {spec['license']}, recibida {declared!r}"
         )
+
+    upstream = None
+    if spec.get("upstream_base"):
+        upstream = api.model_info(spec["upstream_base"])
+        upstream_card = upstream.card_data
+        upstream_license = (
+            getattr(upstream_card, "license", None)
+            if upstream_card is not None else None
+        )
+        if upstream_license is None and isinstance(upstream_card, dict):
+            upstream_license = upstream_card.get("license")
+        if str(upstream_license).lower() != spec["upstream_base_license"]:
+            raise RuntimeError(
+                f"{spec['upstream_base']}: licencia upstream inesperada {upstream_license!r}"
+            )
 
     quant = api.model_info(spec["quant_repo"])
     filename = spec["files"][quantization]
@@ -99,6 +116,9 @@ def download(name: str, quantization: str, root: Path) -> Path:
         "license": spec["license"],
         "license_verified": True,
         "license_url": spec["license_url"],
+        "upstream_base": spec.get("upstream_base"),
+        "upstream_base_license": spec.get("upstream_base_license"),
+        "upstream_base_revision": upstream.sha if upstream is not None else None,
         "quantized_file_sha256": digest,
         "verified_at": datetime.now(UTC).isoformat(),
         "trust_remote_code": False,
