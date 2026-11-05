@@ -55,8 +55,14 @@ jobs:
         run: |
           [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -eq 50 ]
           IFS=',' read -ra SEED_LIST <<< "$TRAIN_SEEDS"
-          [ "${#SEED_LIST[@]}" -ge 1 ] && [ "${#SEED_LIST[@]}" -le 8 ]
-          for seed in "${SEED_LIST[@]}"; do [[ "$seed" =~ ^[0-9]+$ ]] && [ "$seed" -le 2147483647 ]; done
+          [ "${#SEED_LIST[@]}" -eq 4 ]
+          declare -A SEEN=()
+          for raw in "${SEED_LIST[@]}"; do
+            seed="$(echo "$raw" | xargs)"
+            [[ "$seed" =~ ^[0-9]+$ ]] && [ "$seed" -le 2147483647 ]
+            [ -z "${SEEN[$seed]+x}" ] || { echo "Semilla duplicada: $seed"; exit 1; }
+            SEEN[$seed]=1
+          done
           if [ "$EVAL_LIMIT" = "0" ]; then [ "${#SEED_LIST[@]}" -eq 1 ]; fi
       - uses: actions/setup-python@v6
         with:
@@ -189,7 +195,7 @@ jobs:
       - name: Screen multiple seeds against one cached compact holdout
         run: |
           python scripts/screen_training_seeds.py \
-            --text /tmp/ronin-native-train.txt \
+            --text /tmp/ronin-native-split/train-internal.txt \
             --validation-text /tmp/ronin-native-split/validation-internal.txt \
             --base-checkpoint checkpoints/main.pt \
             --seeds "$TRAIN_SEEDS" \
