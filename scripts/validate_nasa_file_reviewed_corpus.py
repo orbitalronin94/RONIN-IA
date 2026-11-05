@@ -11,7 +11,7 @@ SOURCE = ROOT / "data/datasets/candidates/nasa-ntrs-public-use/documents"
 REVIEW = ROOT / "data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json"
 
 def git_blob_sha1(data: bytes) -> str:
-    return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\\0" + data).hexdigest()
+    return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
 
 def main() -> int:
     manifest = json.loads((BASE / "manifest.json").read_text(encoding="utf-8"))
