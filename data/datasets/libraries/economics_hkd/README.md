@@ -27,3 +27,11 @@ El ensamblador asigna únicamente documentos con señal temática suficiente. Lo
 - Gate global G-0.
 
 **Entrenamiento bloqueado.** La presencia de un texto en un artefacto candidato no lo convierte en material admitido. Los recuentos y hashes de cada ejecución se conservan en `library-pack-manifest.json`.
+
+
+## Candidato transversal: Naciones Unidas v1.0
+
+- Fuente oficial con alcance de derechos de la colección verificado: documentos de Naciones Unidas de 1990–2014, seis idiomas, incluido español.
+- Se conserva en el pool transversal de candidatos; **no se asigna todavía a esta biblioteca** hasta clasificar cada documento por tema y densidad.
+- Payload, hashes, controles de privacidad/calidad, deduplicación, particiones y revisión humana pendientes. No entrenable.
+- Expediente: `data/datasets/candidates/un-parallel-corpus-v1/README.md`.
