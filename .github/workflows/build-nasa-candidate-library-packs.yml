@@ -1,0 +1,53 @@
+name: Build NASA candidate library packs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/build-nasa-candidate-library-packs.yml"
+      - "scripts/build_nasa_candidate_library_packs.py"
+      - "data/datasets/candidates/nasa-ntrs-public-use/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ronin-nasa-candidate-library-packs
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Validate source records and assemble domain libraries
+        run: python scripts/build_nasa_candidate_library_packs.py
+      - name: Commit candidate-only library packs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/datasets/libraries/candidate-packs/nasa-ntrs-public-use
+          git commit -m "data: add NASA NTRS candidate packs to domain libraries"
+          for attempt in $(seq 1 10); do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 5
+          done
+          echo "Could not publish NASA candidate library packs" >&2
+          exit 1
+      - name: Upload reproducible pack manifest
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-nasa-candidate-library-packs
+          path: data/datasets/libraries/candidate-packs/nasa-ntrs-public-use/
+          retention-days: 90
+          compression-level: 1
