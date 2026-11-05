@@ -5,7 +5,7 @@ This deliberately does not claim global G-0, near-duplicate clearance, or benchm
 holdout clearance. It checks exact payload integrity and exact overlap against the
 three currently consumed train partitions before the papers enter a training mix.
 """
-import argparse
+import argparse  # noqa: I001
 import gzip
 import hashlib
 import json
@@ -59,7 +59,7 @@ def main() -> None:
     )
 
     seen: set[str] = set()
-    rows: list[dict[str, Any]] = []
+    rows: list[dict] = []
     total_bytes = 0
     email_hits: list[str] = []
     for record in manifest.get("records", []):
