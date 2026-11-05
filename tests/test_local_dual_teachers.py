@@ -9,12 +9,18 @@ from scripts.download_dual_teachers import MODELS
 
 
 def test_dual_tutor_registry_uses_official_model_ids_and_licenses():
-    assert MODELS["qwen3.6-27b"]["repo_id"] == "Qwen/Qwen3.6-27B"
+    assert MODELS["qwen3.6-27b"]["base_id"] == "Qwen/Qwen3.6-27B"
     assert MODELS["qwen3.6-27b"]["license"] == "apache-2.0"
-    assert MODELS["deepseek-r1-distill-32b"]["repo_id"] == (
+    assert MODELS["qwen3.6-27b"]["quant_repo"] == "ggml-org/Qwen3.6-27B-GGUF"
+    assert MODELS["qwen3.6-27b"]["files"]["4bit"].endswith("Q4_K_M.gguf")
+    assert MODELS["qwen3.6-27b"]["files"]["8bit"].endswith("Q8_0.gguf")
+    assert MODELS["deepseek-r1-distill-32b"]["base_id"] == (
         "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
     )
     assert MODELS["deepseek-r1-distill-32b"]["license"] == "mit"
+    assert MODELS["deepseek-r1-distill-32b"]["quant_repo"] == (
+        "bartowski/DeepSeek-R1-Distill-Qwen-32B-GGUF"
+    )
 
 
 def test_dual_tutor_prompt_does_not_leak_gold_answer():
@@ -45,7 +51,7 @@ def test_parser_rejects_unstructured_or_short_explanations():
 
 
 def test_manifest_verifies_apache_model(tmp_path):
-    weights = tmp_path / "model.safetensors"
+    weights = tmp_path / "model-Q4_K_M.gguf"
     weights.write_bytes(b"local model fixture")
     manifest = {
         "model_id": "Qwen/Qwen3.6-27B",
@@ -53,16 +59,17 @@ def test_manifest_verifies_apache_model(tmp_path):
         "license": "apache-2.0",
         "license_verified": True,
         "trust_remote_code": False,
-        "files_sha256": {
-            "model.safetensors": hashlib.sha256(weights.read_bytes()).hexdigest()
-        },
+        "quantization_format": "GGUF",
+        "quantization": "4bit",
+        "quantized_file": weights.name,
+        "quantized_file_sha256": hashlib.sha256(weights.read_bytes()).hexdigest(),
     }
     (tmp_path / "ronin-teacher-manifest.json").write_text(json.dumps(manifest))
-    assert verify_manifest(tmp_path)["license"] == "apache-2.0"
+    assert verify_manifest(tmp_path, "4bit")["license"] == "apache-2.0"
 
 
 def test_manifest_rejects_modified_or_unverified_files(tmp_path):
-    weights = tmp_path / "model.safetensors"
+    weights = tmp_path / "model-Q4_K_M.gguf"
     weights.write_bytes(b"initial")
     manifest = {
         "model_id": "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
@@ -70,15 +77,16 @@ def test_manifest_rejects_modified_or_unverified_files(tmp_path):
         "license": "mit",
         "license_verified": True,
         "trust_remote_code": False,
-        "files_sha256": {
-            "model.safetensors": hashlib.sha256(b"initial").hexdigest()
-        },
+        "quantization_format": "GGUF",
+        "quantization": "4bit",
+        "quantized_file": weights.name,
+        "quantized_file_sha256": hashlib.sha256(b"initial").hexdigest(),
     }
     manifest_path = tmp_path / "ronin-teacher-manifest.json"
     manifest_path.write_text(json.dumps(manifest))
     weights.write_bytes(b"modified")
     with pytest.raises(ValueError, match="Hash incorrecto"):
-        verify_manifest(tmp_path)
+        verify_manifest(tmp_path, "4bit")
     manifest["license_verified"] = False
     manifest_path.write_text(json.dumps(manifest))
     with pytest.raises(ValueError, match="licencia/código remoto"):
