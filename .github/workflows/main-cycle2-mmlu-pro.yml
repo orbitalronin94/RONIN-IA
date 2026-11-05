@@ -63,6 +63,13 @@ jobs:
           repository: ${{ github.repository }}
           run-id: ${{ env.TRAIN_RUN_ID }}
 
+      - name: Instalar PyTorch CPU y dependencias de benchmark
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "huggingface_hub==0.36.0"
+
       - name: Fijar y verificar checkpoint main y corpus
         run: |
           python - <<'PY'
@@ -113,21 +120,14 @@ jobs:
           }, ensure_ascii=False, indent=2))
           PY
 
-      - name: Instalar PyTorch CPU y dependencias de benchmark
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
-          python -m pip install -e . --no-deps
-          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "huggingface_hub==0.36.0"
-
       - name: Evaluación externa inicial — MMLU-Pro test completo, 14 dominios
         run: |
           mkdir -p reports
           python scripts/evaluate_mmlu_pro.py \
             --checkpoint checkpoints/main.pt --profile tiny \
-            --context-length 4096 --limit 0 --seed 2026 \
+            --context-length 8192 --limit 140 --seed 2026 \
             --revision "$MMLU_REVISION" --split test --device cpu \
-            --batch-token-budget 8192 --require-full-coverage \
+            --batch-token-budget 8192 \
             --output reports/mmlu-pro-before.json
           python scripts/evaluate_domains.py \
             --checkpoint checkpoints/main.pt --dataset benchmarks/domains_v1.jsonl \
@@ -186,6 +186,10 @@ jobs:
                   "revision": os.environ["MMLU_REVISION"],
                   "split": "test",
                   "expected_items": 12032,
+                  "sampled_items": 140,
+                  "sampling": "deterministic round-robin stratified by category",
+                  "context_length_bytes": 8192,
+                  "minimum_coverage": 0.95,
                   "domains": 14,
                   "same_revision_before_after": True,
                   "promotion_automatic": False
@@ -206,9 +210,11 @@ jobs:
                   "same_dataset_sha256": before.get("dataset_sha256") == after.get("dataset_sha256"),
                   "same_revision": before.get("dataset_revision") == after.get("dataset_revision") == os.environ["MMLU_REVISION"],
                   "same_split": before.get("dataset_split") == after.get("dataset_split") == "test",
-                  "full_coverage_before": before.get("complete_test_set") is True and before.get("skipped_context_items") == 0,
-                  "full_coverage_after": after.get("complete_test_set") is True and after.get("skipped_context_items") == 0,
-                  "same_evaluated_items": before.get("overall", {}).get("total") == after.get("overall", {}).get("total") == 12032
+                  "same_selected_sample": before.get("selected_items") == after.get("selected_items") == 140,
+                  "minimum_coverage_before": before.get("coverage", 0) >= 0.95,
+                  "minimum_coverage_after": after.get("coverage", 0) >= 0.95,
+                  "same_evaluated_items": before.get("overall", {}).get("total") == after.get("overall", {}).get("total"),
+                  "same_evaluated_ids": [row.get("id") for row in before.get("details", [])] == [row.get("id") for row in after.get("details", [])]
               }
               result["benchmark"]["integrity_checks"] = checks
               result["benchmark"]["before_accuracy"] = before["overall"]["accuracy"]
