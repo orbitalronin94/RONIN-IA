@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:07 | [Integración continua #1141 (run 41999841687)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999841687) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): keep acquired ScienceVerse texts in candidate tier. Trigger: push; rama: main; intento: 1. | 0d8cc7d8 |
 | 2026-11-05 09:07 | [Integración continua #1140 (run 41999835312)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999835312) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): keep acquired ScienceVerse texts in candidate tier. Trigger: push; rama: main; intento: 1. | 82720d0d |
 | 2026-11-05 09:07 | [Integración continua #1131 (run 41999646962)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999646962) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Wire dual tutor distillation to local GGUF servers. Trigger: push; rama: main; intento: 1. | b98e80e9 |
 | 2026-11-05 09:07 | [Integración continua #1136 (run 41999711239)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41999711239) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: Correct README local tutor runtime. Trigger: push; rama: main; intento: 1. | 4744d3b3 |
