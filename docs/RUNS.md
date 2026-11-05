@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 12:40 | [Integración continua #1439 (run 42028642502)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028642502) | failure | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): link NASA scoped promotion and validation runs. Trigger: push; rama: main; intento: 1. | 8828d020 |
 | 2026-11-05 12:37 | [Integración continua #1437 (run 42028489261)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028489261) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): clarify NASA file-reviewed subset accounting. Trigger: push; rama: main; intento: 1. | 26802a3b |
 | 2026-11-05 12:36 | [Integración continua #1438 (run 42028588712)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028588712) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(data\): validate two NASA train promotions and four held records. Trigger: push; rama: main; intento: 1. | 33910e9c |
 | 2026-11-05 12:36 | [Integración continua #1433 (run 42028138055)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42028138055) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: fix\(data\): use verified sidecar count in promotion report. Trigger: push; rama: main; intento: 1. | 6bfb4cb8 |
