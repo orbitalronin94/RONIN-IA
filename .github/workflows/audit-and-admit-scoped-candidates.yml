@@ -1,0 +1,62 @@
+name: Audit and admit scoped candidate documents
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/audit-and-admit-scoped-candidates.yml"
+      - "scripts/audit_and_admit_scoped_candidates.py"
+      - "data/datasets/candidates/nasa-ntrs-public-use/**"
+      - "data/datasets/candidates/scienceverse-text-export-v1/**"
+      - "data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json"
+      - "data/datasets/reviews/human-review-attestation-2026-11-05.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ronin-scoped-candidate-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Audit all candidate documents and materialize scoped admissions
+        run: python scripts/audit_and_admit_scoped_candidates.py
+      - name: Commit audited admissions and report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/datasets/admitted/nasa-ntrs-public-use-v1 data/datasets/reviews/candidate-document-audit-2026-11-05.json
+          if git diff --cached --quiet; then
+            echo "Candidate audit outputs are unchanged."
+            exit 0
+          fi
+          git commit -m "data: publish scoped NASA admissions and candidate audit"
+          for attempt in $(seq 1 10); do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 5
+          done
+          echo "Could not publish candidate audit outputs" >&2
+          exit 1
+      - name: Upload complete candidate audit
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-candidate-document-audit
+          path: |
+            data/datasets/admitted/nasa-ntrs-public-use-v1/
+            data/datasets/reviews/candidate-document-audit-2026-11-05.json
+          retention-days: 90
+          compression-level: 1
