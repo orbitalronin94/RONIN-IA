@@ -136,7 +136,8 @@ class RoninLM(nn.Module):
         self.final_norm = RMSNorm(config.d_model, config.rms_norm_eps)
         self.lm_head = nn.Linear(config.d_model, config.vocab_size, bias=False)
         self.apply(self._init_weights)
-        self.lm_head.weight = self.token_embedding.weight
+        if config.tie_embeddings:
+            self.lm_head.weight = self.token_embedding.weight
 
     @staticmethod
     def _init_weights(module: nn.Module) -> None:
