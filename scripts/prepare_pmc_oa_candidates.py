@@ -80,11 +80,13 @@ def rows_from_db(
 ) -> Iterator[tuple[Any, ...]]:
     if order not in {"ASC", "DESC"}:
         raise ValueError("invalid score order")
+    # Reverse the secondary key together with the score so ASC and DESC
+    # select complementary halves even when many records share identical scores.
     query = (
         "SELECT id, text_blob, license, provenance, score, components, source_revision, "
         "pmcid, doi, title, publication_date, language, metadata_etag, metadata_sha256, "
         "xml_url, xml_https_url, xml_md5, xml_sha256, text_sha, pmid, citation "
-        "FROM docs WHERE domain=? ORDER BY score " + order + ", id ASC LIMIT ?"
+        "FROM docs WHERE domain=? ORDER BY score " + order + ", id " + order + " LIMIT ?"
     )
     for row in db.execute(query, (domain, limit)):
         (
