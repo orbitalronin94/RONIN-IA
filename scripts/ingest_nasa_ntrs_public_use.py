@@ -127,7 +127,8 @@ def main() -> None:
              "pii_rejected": 0, "download_failures": 0}
 
     for domain, categories in CATEGORIES.items():
-        for category in categories:            taken = 0
+        for category in categories:
+            taken = 0
             for page_from in range(0, 600, 100):
                 params = urllib.parse.urlencode({
                     "subjectCategory": category,
@@ -142,7 +143,6 @@ def main() -> None:
                 stats["queries"] += 1
                 results = payload.get("results") or []
                 stats["records_seen"] += len(results)
-                taken = 0
                 for meta in results:
                     doc_id = str(meta.get("id", "")).strip()
                     if not doc_id or doc_id in seen_ids:
