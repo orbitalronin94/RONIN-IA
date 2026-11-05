@@ -1,54 +1,56 @@
-# Operaciones de entrenamiento
+# Entrenamiento del modelo RONIN
 
-El entrenador es compartido por todos los perfiles. La configuración cambia las dimensiones del modelo y los recursos; no debe seleccionar una implementación de entrenamiento diferente.
+## Modelo de partida
 
-## Comportamiento inicial implementado
+El ciclo principal parte de **RONIN-tiny-main-001**, checkpoint de 9.922.880 parámetros y paso 1.000. Su SHA-256 está fijado en `weights/main-model.json`. El entrenamiento no reconstruye el modelo desde cero: carga estrictamente sus pesos y conserva una copia de referencia para la evaluación anterior.
 
-- Optimizador AdamW.
-- Calentamiento lineal seguido de una reducción coseno hasta la tasa de aprendizaje mínima configurada.
-- Acumulación de gradientes y recorte global.
-- Selección de precisión en tiempo de ejecución: BF16 en CUDA compatible, en otro caso FP16 en CUDA y FP32 en CPU. Las solicitudes explícitas de una precisión no compatible deben fallar claramente.
-- Detección de pérdidas y normas de gradiente no finitas.
-- Escritura atómica y periódica de checkpoints que contienen modelo, optimizador, escalador, paso, estados aleatorios de Python/NumPy/CPU/CUDA y estado del generador del muestreador de siguiente token.
-- Reanudación desde checkpoint con igualdad estricta de configuración de entrenamiento; la tasa de aprendizaje se reconstruye a partir del paso global.
+## Ciclo nativo sin tutores
 
-La reanudación actual admite el muestreador determinista de lotes de siguiente token. Un futuro cargador de datos en streaming o distribuido deberá proporcionar un cursor/estado serializable antes de poder afirmar que la reanudación es exacta.
+El workflow operativo es [main-native-no-tutor-holdout.yml](../.github/workflows/main-native-no-tutor-holdout.yml).
 
-## Próximos pasos obligatorios
+1. Descarga el checkpoint main y verifica su hash.
+2. Recupera únicamente particiones train admitidas y verifica manifiestos, identificadores, bytes y SHA-256.
+3. Ensambla el corpus sin incluir validation ni test.
+4. Evalúa el checkpoint base en los holdouts fijos.
+5. Ejecuta fine-tuning nativo con PyTorch, sin modelos tutores ni datos sintéticos generados por terceros.
+6. Evalúa el candidato con exactamente los mismos holdouts y publica pesos e informes como artefactos.
+7. Deja el candidato pendiente de revisión; nunca sustituye automáticamente los pesos main.
 
-- Añadir bucle de validación y selección del mejor checkpoint.
-- Añadir telemetría de desbordamientos y pasos omitidos del GradScaler.
-- Añadir checkpointing de activaciones y estrategias distribuidas de datos/modelo.
-- Añadir detección de picos de pérdida, diagnóstico y recuperación acotada. Nunca revertir pesos en silencio sin registrar el evento.
-- Añadir parada temprana solo a experimentos de datos finitos configurados expresamente; no debe detener de forma silenciosa ejecuciones largas de preentrenamiento.
-- Añadir rotación de checkpoints, protección de espacio en disco y cierre seguro ante señales.
-- Registrar tokens vistos, tokens por segundo, pasos del optimizador, lote efectivo, norma de gradiente, tasa de aprendizaje, precisión y hardware.
-- Guardar la configuración resuelta exacta y las huellas de datos/tokenizador en cada ejecución.
+El corte de corpus fijado por el workflow contiene 9.108 documentos: 608 de literatura española, 8.498 de Mathlib4 y 2 NASA NTRS revisados individualmente. Son 237.957.184 bytes de origen. ScienceVerse, Papers del propietario y el resto de NASA no forman parte de esta mezcla de entrenamiento.
 
-## Seguridad operativa
+## Entrenamiento local
 
-Los cálculos de adecuación al hardware y coste se etiquetan como estimaciones hasta que se contrasten con benchmarks en el equipo de destino. Incluir parámetros, gradientes, estados del optimizador, activaciones, búferes temporales de atención, fragmentación y comunicación distribuida. Una estimación simple basada solo en parámetros no garantiza que el modelo quepa.
+Python 3.11, PyTorch 2.2 o posterior:
 
+```bash
+python -m pip install -e '.[dev]'
+python scripts/train_text.py \
+  --text /ruta/corpus-autorizado.txt \
+  --profile tiny \
+  --steps 500 \
+  --seed 20261106 \
+  --init-checkpoint weights/ronin-main.pt \
+  --device cpu \
+  --num-threads 2 \
+  --checkpoints checkpoints/candidate
+```
 
-## Ciclo sintético recurrente con warm-start
+El archivo de entrada debe contener solo texto UTF-8 autorizado para entrenamiento. El script permite inicializar desde un checkpoint y guarda el checkpoint final. Los informes de throughput pueden escribirse con `--metrics-out`.
 
-El workflow `synthetic-training-cycles.yml` puede ejecutarse manualmente, al modificar el pipeline en `main` y cada seis horas. La primera semilla de cada ciclo recupera los últimos pesos sintéticos aceptados desde la caché de Actions; las demás semillas siguen siendo controles independientes desde inicialización reproducible.
+## Entrenador
 
-La promoción del warm-start exige simultáneamente:
-- menor bits-per-byte en la validación sintética fija;
-- exactitud no inferior en el piloto multidominio de 23 preguntas.
+- AdamW.
+- Warm-up lineal y scheduler coseno.
+- Acumulación de gradientes y clipping global.
+- FP32 en CPU; BF16/FP16 cuando el dispositivo lo soporta.
+- Detección de pérdidas y gradientes no finitos.
+- Checkpoints atómicos con pesos, estado del optimizador, escalador, paso y estados aleatorios.
+- Reanudación con validación estricta de configuración.
 
-Si cualquiera de las dos condiciones falla, no se guarda el checkpoint nuevo y la siguiente iteración conserva el último estado aceptado. El optimizador se reinicia entre ciclos; solo se transfieren los pesos. Esto es un experimento de currículo sintético y continuidad técnica, no aprendizaje de conocimiento externo ni una evaluación de razonamiento general. La caché de Actions es almacenamiento experimental, no un release del modelo.
+## Reglas de datos
 
+Los datos se leen desde `data/datasets/`. La carpeta distingue corpus admitidos, candidatos, particiones y registros de derechos. Descargado no significa entrenable: solo se usa una partición con derechos compatibles, payload íntegro, hash verificado y asignación train explícita. Validation y test quedan fuera de los gradientes.
 
-## Ciclos rápidos con corpus abierto y promoción por validación
+## Pesos
 
-El workflow `rapid-open-training-cycles.yml` ejecuta hasta tres ciclos cortos consecutivos y, cuando una ejecución termina correctamente, el workflow separado `rapid-open-training-dispatcher.yml` recibe el evento `workflow_run` y solicita automáticamente la siguiente tanda mediante `workflow_dispatch`. Separar el dispatcher evita que el workflow de entrenamiento se dispare a sí mismo en una cadena recursiva. El primer ciclo arranca automáticamente cuando el workflow llega a `main` (push limitado al propio YAML); no requiere activación manual. Después, cada finalización correcta encadena la tanda siguiente. Un `cron` cada seis horas sirve como recuperación si la cadena se detiene. Usa el corpus público fijado por `prepare_open_corpora.py`, con partición por obra; conserva el último checkpoint aceptado y hace warm-start del siguiente ciclo.
-
-**Gate obligatorio:** el workflow llama a `assert_g0_passed.py` antes de descargar textos o entrenar. Si G-0 no está en PASS, la ejecución falla de forma cerrada, no descarga textos ni modifica pesos y corta la cadena; el arranque periódico vuelve a intentarlo más tarde. Una etiqueta de licencia o la disponibilidad pública no sustituyen la revisión humana.
-
-**Regla de promoción:** solo acepta el checkpoint si mejora estrictamente la accuracy de MMLU-Pro `validation` y no empeora bits-per-byte en el split de validación textual. Si no cumple ambas condiciones, restaura el checkpoint anterior y continúa desde él. El test de MMLU-Pro permanece fuera de este bucle y se reserva para evaluación final no usada en selección.
-
-La referencia operativa del último modelo aceptado por estos ciclos es la caché `ronin-open-warmstart` de GitHub Actions; no es todavía un release descargable ni una referencia inmutable a largo plazo. Cada ejecución publica el informe de ciclos, hashes, split y checkpoint. La promoción a versión pública exige después el test completo y actualización explícita del model card/README.
-
-La validación recurrente puede sobreajustarse con el tiempo; por ello, una subida en validation no se presenta como mejora general ni como aprobación de release. El test final intacto sigue siendo la barrera de publicación.
+La identidad del modelo principal está en `weights/main-model.json`. El workflow [pin-main-weights.yml](../.github/workflows/pin-main-weights.yml) extrae los pesos del artefacto histórico, comprueba su SHA-256 y publica un artefacto limpio `ronin-main-weights-v1`. No se confunde el manifiesto con el archivo de tensores.
