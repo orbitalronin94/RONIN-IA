@@ -118,6 +118,9 @@ class RoninLM(nn.Module):
         self.blocks = nn.ModuleList(
             [TransformerBlock(config) for _ in range(config.n_layers)]
         )
+        self.extra_layer_scale = (
+            nn.Parameter(torch.zeros(())) if config.identity_last_layer else None
+        )
         self.final_norm = RMSNorm(config.d_model, config.rms_norm_eps)
         self.lm_head = nn.Linear(config.d_model, config.vocab_size, bias=False)
         self.apply(self._init_weights)
@@ -137,8 +140,11 @@ class RoninLM(nn.Module):
         if length < 1 or length > self.config.context_length:
             raise ValueError("la secuencia debe estar entre 1 y context_length")
         x = self.dropout(self.token_embedding(input_ids))
-        for block in self.blocks:
-            x = block(x)
+        for index, block in enumerate(self.blocks):
+            if self.extra_layer_scale is not None and index == len(self.blocks) - 1:
+                x = x + self.extra_layer_scale * (block(x) - x)
+            else:
+                x = block(x)
         return x
 
     def forward_last_logits(
