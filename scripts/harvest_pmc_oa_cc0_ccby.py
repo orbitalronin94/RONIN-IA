@@ -7,7 +7,9 @@ candidate text plus provenance; it never marks documents training_eligible.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import concurrent.futures
+import calendar
 import gzip
 import hashlib
 import json
@@ -51,26 +53,46 @@ def request_bytes(url: str, attempts: int = 5) -> bytes:
 
 
 def esearch_ids(term: str, limit: int) -> list[str]:
-    ids: list[str] = []
-    retstart = 0
-    while len(ids) < limit:
+    """Query PMC in date windows; ESearch caps a single result set at 9,999 IDs."""
+    found: list[str] = []
+
+    def query_window(start: dt.date, end: dt.date, remaining: int) -> None:
+        if remaining <= 0:
+            return
+        date_filter = f'{start:%Y/%m/%d}:{end:%Y/%m/%d}[pmcrdat]'
+        query = f"({term}) AND {date_filter}"
         params = urllib.parse.urlencode({
-            "db": "pmc", "term": term, "retmode": "xml",
-            "retmax": min(10000, limit - len(ids)), "retstart": retstart,
-            "sort": "pub date", "tool": "ronin_ia_corpus_harvester",
+            "db": "pmc", "term": query, "retmode": "xml",
+            "retmax": min(9998, remaining), "retstart": 0,
+            "tool": "ronin_ia_corpus_harvester",
         })
         root = ET.fromstring(request_bytes(EUTILS + "?" + params))
         error = root.findtext("ERROR")
         if error:
             raise RuntimeError("NCBI ESearch error: " + error)
-        batch = [node.text for node in root.findall(".//Id") if node.text]
         count = int(root.findtext("Count") or "0")
-        ids.extend(batch)
-        retstart += len(batch)
-        if not batch or retstart >= count:
-            break
+        if count > 9998:
+            if start >= end:
+                raise RuntimeError(f"PMC date bucket exceeds ESearch cap on {start}")
+            midpoint = start + (end - start) // 2
+            query_window(midpoint + dt.timedelta(days=1), end, remaining)
+            query_window(start, midpoint, remaining - len(found))
+            return
+        batch = [node.text for node in root.findall(".//Id") if node.text]
+        found.extend(batch[:remaining])
         time.sleep(0.36)
-    return ids
+
+    today = dt.date.today()
+    year, month = today.year, today.month
+    while year >= 1990 and len(found) < limit:
+        last_day = calendar.monthrange(year, month)[1]
+        end_day = min(last_day, today.day) if (year, month) == (today.year, today.month) else last_day
+        query_window(dt.date(year, month, 1), dt.date(year, month, end_day), limit - len(found))
+        month -= 1
+        if month == 0:
+            month = 12
+            year -= 1
+    return found
 
 
 def metadata_for(pmcid: str) -> dict | None:
