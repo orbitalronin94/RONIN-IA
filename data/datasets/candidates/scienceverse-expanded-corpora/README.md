@@ -1,6 +1,6 @@
 # ScienceVerse / papers — expansión de candidatos de texto científico
 
-**Estado a 5 de noviembre de 2026:** cinco de los siete corpus prioritarios tienen su asset RDS completo en candidates/scienceverse-fulltext/. Son **3.091 filas DOI elegibles** y **95.948.088 bytes de RDS**. Continúan como candidatos: el RDS no es texto plano, no se ha completado la exportación textual ni el gate jurídico Level A, calidad, privacidad, deduplicación o particionado. No son bytes de texto admitido.
+**Estado a 5 de noviembre de 2026:** cinco de los siete corpus prioritarios tienen su asset RDS completo en candidates/scienceverse-fulltext/. Son **3.087 DOI únicos elegibles** y **95.948.088 bytes de RDS**. Continúan como candidatos: el RDS no es texto plano, no se ha completado la exportación textual ni el gate jurídico Level A, calidad, privacidad, deduplicación o particionado. No son bytes de texto admitido.
 
 ## Fuente y revisión fijada
 
@@ -17,10 +17,10 @@
 | eLife (elife) | 1.000 | Catálogo; payload pendiente | biología / medicina |
 | Frontiers in Psychology (frontiers) | 1.000 | Catálogo; payload pendiente | ciencias sociales |
 | i-Perception (iperc) | 496 | Descargado: 496 elegibles | social_sciences_general |
-| Judgment and Decision Making (jdm) | 855 | Descargado: 855 elegibles | social_sciences_general |
+| Judgment and Decision Making (jdm) | 855 | Descargado: 851 DOI únicos; 4 filas duplicadas/conflictivas excluidas | social_sciences_general |
 | Journal of Cognition (joc) | 447 elegibles de 448 filas | Descargado; 1 fila excluida por conversión incompleta | social_sciences_general |
 | Open Mind (openmind) | 293 | Descargado: 293 elegibles | philosophy_general |
-| **Total** | **5.091** | **3.091 elegibles descargados; 2.000 aún sin payload** | |
+| **Total** | **5.091** | **3.087 elegibles descargados; 2.000 aún sin payload** | |
 
 ## Assets adquiridos y hashes SHA-256
 
@@ -29,7 +29,7 @@ Los siguientes tamaños son del RDS comprimido, no del texto extraído.
 | Corpus / release | Filas de manifiesto | Filas elegibles | Excluidas | Bytes RDS | SHA-256 del RDS |
 |---|---:|---:|---:|---:|---|
 | bmcmed-2026-06-19 | 1.000 | 1.000 | 0 | 30.450.200 | fe81c3c6688cb007ccdbbd082b22e74bdaa17ce2e9735ddc276e083108d8d000 |
-| jdm-2026-06-21 | 855 | 855 | 0 | 24.875.707 | 3381725686b9b1bae2a2c764ea87fdf52b8575cf8d87902388abd333319d3aa6 |
+| jdm-2026-06-21 | 855 | 851 | 4 | 24.875.707 | 3381725686b9b1bae2a2c764ea87fdf52b8575cf8d87902388abd333319d3aa6 |
 | joc-2026-06-20 | 448 | 447 | 1 | 15.559.915 | 12766fe41d80dcffc1da26056c929c7e39fb56be772809fa1620887df8838ae5 |
 | openmind-2026-06-21 | 293 | 293 | 0 | 12.639.050 | c27fd53e8e640f7ac4cb3cfe43d04bfdc8a80c050956df3ec8abc6931d796feb |
 | iperc-2026-06-21 | 496 | 496 | 0 | 12.423.216 | bf444b56b364d4f6697ce28f4f67d507b4bf57409ebefda0fa4a6ea960f45ed0 |
@@ -59,3 +59,8 @@ El manifiesto contiene 448 filas; la fila 10.5334/joc.316 declara CC BY 4.0, per
 - Solo entonces se podrá clasificar cada documento entre General/HKD mediante ranking RONIN reproducible. Los dominios de destino de la tabla son provisionales, no una asignación ya realizada.
 
 **Estado final:** 3.091 documentos candidatos en cinco assets RDS; 95.948.088 bytes comprimidos; 0 bytes de texto admitido Level A; 0 bibliotecas completadas por esta fuente; G-0 global continúa FAIL; training_eligible=false.
+
+
+### Auditoría de identidad DOI
+
+La revisión de identidad detectó cuatro filas de JDM que no deben contarse como cuatro documentos nuevos: un DOI repetido con el mismo título y un DOI asociado a tres títulos diferentes. Se conservó una sola fila del primer grupo y se excluyeron las tres filas del segundo grupo por conflicto DOI/título. Por eso el manifiesto elegible de JDM tiene 851 documentos únicos, no 855. Los objetos RDS originales se conservan íntegros; la exportación futura deberá usar únicamente el manifiesto elegible.
