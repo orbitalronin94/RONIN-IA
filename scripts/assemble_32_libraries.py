@@ -19,7 +19,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.select_knowledge_dense_corpus import score_record  # noqa: E402
+from scripts.select_knowledge_dense_corpus import DOMAIN_TERMS, score_record, tokens  # noqa: E402
 
 DOMAINS = (
     "mathematics",
@@ -67,11 +67,10 @@ def verify_payload(label: str, payload: bytes, expected_sha256: str) -> bytes:
     return payload
 
 
-def domain_scores(text: str) -> dict[str, dict[str, float]]:
-    return {
-        domain: score_record(text, domain, Counter(), 1)
-        for domain in DOMAINS
-    }
+DOMAIN_TERM_SETS = {
+    domain: set(tokens(DOMAIN_TERMS[domain]))
+    for domain in DOMAINS
+}
 
 
 def density_for_domain(text: str, domain: str) -> float:
@@ -79,20 +78,15 @@ def density_for_domain(text: str, domain: str) -> float:
 
 
 def choose_domain(text: str) -> tuple[str | None, float, dict[str, float]]:
-    scores = domain_scores(text)
-    ranked = sorted(
-        DOMAINS,
-        key=lambda domain: (
-            scores[domain]["domain_relevance"],
-            scores[domain]["semantic_density"],
-            domain,
-        ),
-        reverse=True,
-    )
-    best = ranked[0]
-    if scores[best]["domain_relevance"] < 0.125:
+    unique_words = set(tokens(text))
+    if not unique_words:
         return None, 0.0, {}
-    return best, scores[best]["semantic_density"], scores[best]
+    matches = {domain: len(unique_words & DOMAIN_TERM_SETS[domain]) for domain in DOMAINS}
+    best = max(DOMAINS, key=lambda domain: (matches[domain], domain))
+    if matches[best] == 0:
+        return None, 0.0, {}
+    details = score_record(text, best, Counter(), 1)
+    return best, details["semantic_density"], details
 
 
 def add_unique_record(
