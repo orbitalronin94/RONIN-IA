@@ -52,7 +52,7 @@ Se ha registrado una revisión a nivel de archivo en `data/datasets/reviews/nasa
 
 La auditoría por archivo se amplió de cuatro a **ocho textos**. El resultado acumulado queda así:
 
-- **5 pasan revisión manual de legibilidad como candidatos:** `19620002819`, `19630000935`, `19620004488`, `19630000937` y `19640011871`. En los cuatro se contrastaron título/autoría y la determinación de distribución/copyright con sus fichas NTRS oficiales, y se inspeccionó OCR en secciones representativas.
+- **6 pasan revisión manual de legibilidad como candidatos:** `19620002819`, `19630000935`, `19620004488`, `19630000937`, `19640011871` y `19630005290`. En los cuatro se contrastaron título/autoría y la determinación de distribución/copyright con sus fichas NTRS oficiales, y se inspeccionó OCR en secciones representativas.
 - **3 retenidos por OCR severo:** `19620000001`, `19620002834` y `19620002866`.
 - **1 retenido por derechos y OCR no resueltos a nivel de documento:** `19630000936`. Su texto parece corresponder a una sección del volumen NASA-TN-D-1510, pero no se resolvió una ficha individual con determinación de derechos propia; la ficha del volumen advierte que algunas partes pueden contener material protegido. No se hereda automáticamente el permiso del volumen.
 
@@ -62,3 +62,6 @@ El constructor comprueba para los 824 textos NASA del paquete los SHA-256 y tama
 
 
 Revisión añadida: el documento NASA-SP-7002 / NTRS 19640011871 (*High Energy Propellants: A Continuing Bibliography*) se inspeccionó en portada, introducción, entradas bibliográficas y sección posterior. Su ficha individual confirma autoría institucional NASA, distribución pública y uso público gubernamental. El OCR separa letras y contiene errores locales, pero la estructura de bibliografía anotada y las referencias siguen siendo legibles. Se clasifica como candidato con ruido OCR; no se admite hasta superar las puertas globales.
+
+
+Segunda revisión añadida: NTRS 19630005290 / NASA-SP-30 (*The Observatory Generation of Satellites*). La ficha individual confirma distribución pública y uso público gubernamental. Se inspeccionaron portada/foreword y varios tramos del cuerpo: la prosa técnica principal es coherente, aunque el OCR presenta sustituciones y daños en figuras/tablas. Se marca como candidato con ruido OCR, no como admitido.
