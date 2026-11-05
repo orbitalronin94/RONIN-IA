@@ -52,3 +52,22 @@ No se aceptan en bloque:
 - **Estado final: candidato de alta prioridad; no Grado A, no entrenable todavía.**
 
 Fuente de catálogo y licencia: README upstream, tabla "Available corpora", que identifica 18 colecciones, 15.179 artículos y licencia por corpus: https://github.com/scienceverse/papers
+
+## Adquisición real preparada en RONIN (2026-11-05)
+
+Se ha añadido un proceso de adquisición directa a `main`:
+
+- Workflow: `.github/workflows/ingest-scienceverse-ccby.yml`.
+- Script: `scripts/ingest_scienceverse_ccby.py`.
+- Cuatro releases de paperlists completos fijados por tag:
+  - BMC Medicine: 1.000 artículos → `medicine_health_general`.
+  - Judgment and Decision Making: 855 → `social_sciences_general`.
+  - Journal of Cognition: 447 → `social_sciences_general`.
+  - Open Mind: 293 → `philosophy_general`.
+- Total de manifiestos esperados: **2.595 artículos**.
+- El script descarga el manifiesto DOI por DOI y rechaza el corpus completo si una sola fila no declara exactamente CC-BY 4.0. Descarga además el asset RDS de texto completo, calcula SHA-256 y escribe procedencia.
+- Si pasa la auditoría, el workflow incorpora los RDS, manifiestos y registros de procedencia directamente en `data/datasets/admitted/scienceverse/` y hace commit en `main`.
+
+**No confundir el número esperado con la admisión completada:** el commit de código activa la adquisición; los archivos solo se contabilizarán cuando el workflow haya terminado correctamente y se verifiquen los RDS, manifiestos y hashes. Antes de entrenar hay que ejecutar deduplicación global, control de retractaciones/correcciones, privacidad y particionado por DOI.
+
+Fuente primaria: https://github.com/scienceverse/papers (manifiestos y releases upstream).
