@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 08:48 | [Integración continua #1081 (run 41997227428)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997227428) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: map additional ScienceVerse CC-BY paper corpora. Trigger: push; rama: main; intento: 1. | e59cf7bc |
 | 2026-11-05 08:48 | [Integración continua #1090 (run 41997303057)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997303057) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): track ScienceVerse candidates in philosophy_hkd. Trigger: push; rama: main; intento: 1. | b1d5c634 |
 | 2026-11-05 08:48 | [Integración continua #1088 (run 41997292750)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997292750) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): track ScienceVerse candidates in social_sciences_hkd. Trigger: push; rama: main; intento: 1. | 8a3aa968 |
 | 2026-11-05 08:48 | [Integración continua #1085 (run 41997258983)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41997258983) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): track ScienceVerse candidates in biology_general. Trigger: push; rama: main; intento: 1. | 1b0152cb |
