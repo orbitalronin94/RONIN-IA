@@ -1,0 +1,133 @@
+name: RONIN — torneo conservador de checkpoints 6/50
+on:
+  workflow_dispatch:
+    inputs:
+      base_run_id:
+        description: Run que contiene el checkpoint ganador 6/50
+        required: true
+        default: "42078016306"
+        type: string
+      second_run_id:
+        description: Run que contiene la continuación 5/50 para interpolación
+        required: true
+        default: "42079641128"
+        type: string
+permissions:
+  actions: read
+  contents: read
+concurrency:
+  group: ronin-checkpoint-tournament-6of50
+  cancel-in-progress: false
+jobs:
+  tournament:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      LITERATURE_RUN_ID: "41926088900"
+      MATHLIB_RUN_ID: "42026633643"
+      NASA_RUN_ID: "42028138060"
+      MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "dill==0.3.8" "multiprocess==0.70.16" "huggingface_hub==0.36.0"
+      - name: Download winner checkpoint artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-corpus-seed-202-500steps-${{ inputs.base_run_id }}
+          path: incoming/winner
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.base_run_id }}
+      - name: Download second-cycle checkpoint artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-corpus-seed-202-500steps-${{ inputs.second_run_id }}
+          path: incoming/second
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.second_run_id }}
+      - name: Download admitted literature train partition
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-admitted-literature-es-v1-train
+          path: incoming/literature
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.LITERATURE_RUN_ID }}
+      - name: Download admitted Mathlib4 train partition
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-admitted-mathlib4-v1
+          path: incoming/mathlib4
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.MATHLIB_RUN_ID }}
+      - name: Download individually reviewed NASA train partition
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-nasa-ntrs-file-reviewed-train
+          path: incoming/nasa
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.NASA_RUN_ID }}
+      - name: Verify checkpoints and prepare train-only corpus
+        run: |
+          python - <<'PY'
+          import hashlib, shutil
+          from pathlib import Path
+          def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+          winner_candidates=list(Path("incoming/winner").rglob("step-00000500.pt"))
+          second_candidates=list(Path("incoming/second").rglob("step-00000500.pt"))
+          assert len(winner_candidates)==1, winner_candidates
+          assert len(second_candidates)==1, second_candidates
+          winner=winner_candidates[0]; second=second_candidates[0]
+          assert sha(winner)=="7cda8dacb0b61d7278ba9990285a6a7e47403de8a00d201da06f5f002224c1cf", sha(winner)
+          assert sha(second)=="64c9ea763f716c12f78f7f71b8b4ee27558e852369ba28eb54846c474889b058", sha(second)
+          Path("checkpoints").mkdir(exist_ok=True)
+          shutil.copy2(winner,"checkpoints/winner.pt"); shutil.copy2(second,"checkpoints/second.pt")
+          lit=Path("incoming/literature/train.txt"); math=Path("incoming/mathlib4/train.txt"); nasa=Path("incoming/nasa/train.txt")
+          assert all(p.is_file() for p in (lit,math,nasa))
+          out=Path("/tmp/ronin-tournament-combined.txt")
+          out.write_bytes(lit.read_bytes()+b"\n\n"+math.read_bytes()+b"\n\n"+nasa.read_bytes())
+          print("winner",sha(winner),"second",sha(second),"combined corpus bytes",out.stat().st_size)
+          PY
+      - name: Prepare internal validation split from admitted training corpus
+        run: python scripts/prepare_legacy_training_split.py --input /tmp/ronin-tournament-combined.txt --output-dir /tmp/ronin-tournament-split --validation-fraction 0.05 --seed 42006
+      - name: Compile tournament implementation
+        run: python -m compileall -q ronin scripts/run_checkpoint_tournament.py scripts/evaluate_mmlu_pro.py scripts/evaluate_text.py
+      - name: Run A/B/C training and D interpolation tournament
+        run: |
+          python scripts/run_checkpoint_tournament.py \
+            --base-checkpoint checkpoints/winner.pt \
+            --second-checkpoint checkpoints/second.pt \
+            --combined-text /tmp/ronin-tournament-split/train-internal.txt \
+            --literature-text incoming/literature/train.txt \
+            --mathlib-text incoming/mathlib4/train.txt \
+            --nasa-text incoming/nasa/train.txt \
+            --validation-text /tmp/ronin-tournament-split/validation-internal.txt \
+            --revision "$MMLU_REVISION" \
+            --context-length 4096 \
+            --batch-token-budget 8192 \
+            --num-threads 2 \
+            --output-dir tournament-results
+      - name: Upload complete tournament results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-checkpoint-tournament-6of50-${{ github.run_id }}
+          path: tournament-results/
+          if-no-files-found: warn
+          retention-days: 90
+          compression-level: 6
