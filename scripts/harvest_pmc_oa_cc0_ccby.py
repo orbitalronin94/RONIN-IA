@@ -52,8 +52,8 @@ def request_bytes(url: str, attempts: int = 5) -> bytes:
     raise RuntimeError("unreachable retry loop")
 
 
-def esearch_ids(term: str, limit: int) -> list[str]:
-    """Query PMC in date windows; ESearch caps a single result set at 9,999 IDs."""
+def esearch_ids(term: str, limit: int, excluded_ids: set[str]) -> list[str]:
+    """Walk PMC date windows while skipping IDs already screened in prior runs."""
     found: list[str] = []
 
     def query_window(start: dt.date, end: dt.date, remaining: int) -> None:
@@ -63,7 +63,7 @@ def esearch_ids(term: str, limit: int) -> list[str]:
         query = f"({term}) AND {date_filter}"
         params = urllib.parse.urlencode({
             "db": "pmc", "term": query, "retmode": "xml",
-            "retmax": min(9998, remaining), "retstart": 0,
+            "retmax": 9998, "retstart": 0,
             "tool": "ronin_ia_corpus_harvester",
         })
         root = ET.fromstring(request_bytes(EUTILS + "?" + params))
@@ -79,7 +79,8 @@ def esearch_ids(term: str, limit: int) -> list[str]:
             query_window(start, midpoint, remaining - len(found))
             return
         batch = [node.text for node in root.findall(".//Id") if node.text]
-        found.extend(batch[:remaining])
+        fresh = [value for value in batch if value not in excluded_ids]
+        found.extend(fresh[:remaining])
         time.sleep(0.36)
 
     today = dt.date.today()
@@ -222,8 +223,8 @@ def fetch_record(pmcid: str, min_text_bytes: int) -> dict | None:
             "text": text,
         }
     except Exception as exc:
-        print(f"skip PMC{pmcid}: {type(exc).__name__}: {exc}", file=sys.stderr)
-        return None
+        print(f"retry PMC{pmcid}: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return {"_fetch_error": f"{type(exc).__name__}: {exc}"}
 
 
 def main() -> int:
@@ -239,6 +240,14 @@ def main() -> int:
     manifest = out / "manifest.jsonl"
     existing = set()
     existing_hashes = set()
+    processed_path = out / "processed-pmcids.jsonl"
+    processed_ids = set()
+    if processed_path.exists():
+        for line in processed_path.read_text(encoding="utf-8").splitlines():
+            try:
+                processed_ids.add(str(json.loads(line)["pmcid"]).removeprefix("PMC"))
+            except Exception:
+                continue
     if manifest.exists():
         for line in manifest.read_text(encoding="utf-8").splitlines():
             try:
@@ -246,12 +255,14 @@ def main() -> int:
                 existing.add(str(item.get("pmcid")))
                 if item.get("sha256"):
                     existing_hashes.add(str(item["sha256"]))
+                if item.get("pmcid"):
+                    processed_ids.add(str(item["pmcid"]).removeprefix("PMC"))
             except Exception:
                 continue
 
     term = "((cc0_license[Filter] OR cc_by_license[Filter]) AND open_access[Filter])"
-    ids = [value for value in esearch_ids(term, args.max_candidates * 3) if "PMC" + value not in existing]
-    print(f"ESearch candidates={len(ids)} already_present={len(existing)}", flush=True)
+    ids = esearch_ids(term, args.max_candidates * 3, processed_ids)
+    print(f"ESearch candidates={len(ids)} already_screened={len(processed_ids)} already_present={len(existing)}", flush=True)
 
     shard_index = 1
     while (out / f"part-{shard_index:05d}.jsonl.gz").exists():
@@ -262,18 +273,32 @@ def main() -> int:
     accepted = 0
     total_text_bytes = 0
     manifest_file = manifest.open("a", encoding="utf-8")
+    processed_file = processed_path.open("a", encoding="utf-8")
+    screened_out = 0
+    exact_duplicates = 0
+    fetch_errors = 0
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as pool:
-            for record in pool.map(lambda value: fetch_record(value, args.min_text_bytes), ids):
+            results = pool.map(lambda value: (value, fetch_record(value, args.min_text_bytes)), ids)
+            for pmcid, record in results:
+                if isinstance(record, dict) and record.get("_fetch_error"):
+                    fetch_errors += 1
+                    continue
                 if record is None:
+                    processed_file.write(json.dumps({"pmcid": "PMC" + pmcid, "status": "screened_out"}) + "\n")
+                    screened_out += 1
                     continue
                 size = record["text_bytes"]
                 if size < args.min_text_bytes:
+                    processed_file.write(json.dumps({"pmcid": "PMC" + pmcid, "status": "below_minimum"}) + "\n")
+                    screened_out += 1
                     continue
                 if record["sha256"] in existing_hashes:
+                    processed_file.write(json.dumps({"pmcid": "PMC" + pmcid, "status": "exact_duplicate"}) + "\n")
+                    exact_duplicates += 1
                     continue
                 if total_text_bytes + size > args.max_text_bytes:
-                    continue
+                    break
                 line = (json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
                 if current_file is None or shard_raw + len(line) > 64 * 1024**2:
                     if current_file:
@@ -287,6 +312,7 @@ def main() -> int:
                 manifest_file.write(json.dumps({k: v for k, v in record.items() if k != "text"}, ensure_ascii=False) + "\n")
                 existing.add(str(record["pmcid"]))
                 existing_hashes.add(str(record["sha256"]))
+                processed_file.write(json.dumps({"pmcid": str(record["pmcid"]), "status": "accepted"}) + "\n")
                 accepted += 1
                 total_text_bytes += size
                 if accepted % 250 == 0:
@@ -296,12 +322,17 @@ def main() -> int:
         if current_file:
             current_file.close()
         manifest_file.close()
+        processed_file.close()
 
     summary = {
         "source": "PMC Article Datasets on AWS",
         "query": term,
         "license_allowlist": sorted(ALLOWED_LICENSES),
         "accepted_documents_this_run": accepted,
+        "screened_out_documents_this_run": screened_out,
+        "exact_duplicates_this_run": exact_duplicates,
+        "fetch_errors_this_run": fetch_errors,
+        "processed_ids_total": len(processed_ids) + accepted + screened_out + exact_duplicates,
         "text_bytes_this_run": total_text_bytes,
         "text_gib_this_run": round(total_text_bytes / 1024**3, 4),
         "training_eligible": False,
