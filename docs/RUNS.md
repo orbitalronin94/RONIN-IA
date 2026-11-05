@@ -19,6 +19,7 @@ Instantánea de los **100 runs más recientes** disponibles en GitHub Actions al
 
 | Fecha UTC | Workflow / ejecución | Estado | Qué ocurrió / qué se incorporó | Commit |
 |---|---|---|---|---|
+| 2026-11-05 09:18 | [Integración continua #1173 (run 42001033173)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001033173) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: ci: add ScienceVerse RDS inspection workflow. Trigger: push; rama: main; intento: 1. | a30f2b76 |
 | 2026-11-05 09:18 | [Integración continua #1175 (run 42001183047)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001183047) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: data: add honest 64-library Level-A inventory. Trigger: push; rama: main; intento: 1. | 72b9378d |
 | 2026-11-05 09:17 | [Integración continua #1174 (run 42001139152)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42001139152) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: docs\(data\): record acquired ScienceVerse full-text payloads. Trigger: push; rama: main; intento: 1. | 65116d24 |
 | 2026-11-05 09:16 | [Integración continua #1171 (run 42000827224)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42000827224) | cancelled | Lint, comprobación del paquete, pruebas y smoke test técnico. Commit: test\(data\): cover exact literature reconstruction and level-A holdback. Trigger: push; rama: main; intento: 1. | ebc5cfa7 |
