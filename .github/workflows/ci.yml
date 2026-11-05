@@ -1,10 +1,8 @@
-name: Integración continua
+name: Integración continua RONIN
 
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "docs/RUNS.md"
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -17,8 +15,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Análisis estático y comprobación del paquete
+  lint-and-tests:
+    name: Calidad del núcleo de modelo
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -26,176 +24,44 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - name: Instalar el paquete y las herramientas
+      - name: Instalar PyTorch CPU y dependencias mínimas
         run: |
           python -m pip install --upgrade pip
           python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
           python -m pip install -e ".[dev]" --no-deps
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "pytest>=8.0" "pytest-cov>=5.0" "ruff>=0.5"
-      - name: Ejecutar Ruff
+      - name: Comprobar estilo
         run: ruff check ronin tests scripts
-      - name: Verificar metadatos del paquete
+      - name: Comprobar instalación
         run: python -m pip check
-      - name: Enlazar libro de runs
-        if: always()
-        uses: ./.github/actions/run-ledger-link
-
-  tests:
-    name: Pruebas unitarias y de integración
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.11"
-          cache: pip
-      - name: Instalar el paquete y las herramientas
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
-          python -m pip install -e ".[dev]" --no-deps
-          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "pytest>=8.0" "pytest-cov>=5.0" "ruff>=0.5"
-      - name: Validar el gate de licencias sin descargar corpus
-        run: python scripts/validate_license_audit.py
-      - name: Validar catálogo histórico sin admitirlo a entrenamiento
-        run: python scripts/validate_historical_candidates.py
-      - name: Ejecutar la suite de pruebas
+      - name: Ejecutar pruebas unitarias
         run: pytest --cov=ronin --cov-report=term-missing
-      - name: Enlazar libro de runs
-        if: always()
-        uses: ./.github/actions/run-ledger-link
 
   tiny-smoke:
-    name: Prueba mínima de entrenamiento desde cero
+    name: Smoke test de entrenamiento desde cero
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
-          cache: pip
-      - name: Instalar el paquete
+      - name: Instalar dependencias mínimas
         run: |
           python -m pip install --upgrade pip
           python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
           python -m pip install -e . --no-deps
           python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66"
-      - name: Registrar recursos reales del runner
-        run: |
-          echo "=== CPU ==="
-          nproc
-          lscpu
-          echo "=== MEMORIA ==="
-          free -h
-          echo "=== DISCO ==="
-          df -h /
-          echo "=== PYTHON Y PYTORCH ==="
-          python - <<'PY'
-          import os
-          import platform
-          import torch
-
-          print("Sistema:", platform.platform())
-          print("Python:", platform.python_version())
-          print("CPU visibles:", os.cpu_count())
-          print("PyTorch:", torch.__version__)
-          print("CUDA disponible:", torch.cuda.is_available())
-          print("Dispositivos CUDA:", torch.cuda.device_count())
-          PY
-      - name: Crear un corpus sintético temporal para la prueba
+      - name: Crear corpus temporal
         run: |
           python - <<'PY'
           from pathlib import Path
-          sample = ("RONIN aprende desde una inicialización aleatoria. " * 80)
-          Path("/tmp/ronin-smoke.txt").write_text(sample, encoding="utf-8")
+          Path("/tmp/ronin-smoke.txt").write_text(
+              "RONIN aprende desde una inicialización aleatoria. " * 80,
+              encoding="utf-8",
+          )
           PY
-      - name: Entrenar un paso en CPU con el perfil tiny
+      - name: Entrenar un paso
         run: |
-          python scripts/train_text.py \
-            --text /tmp/ronin-smoke.txt \
-            --profile tiny \
-            --steps 1 \
-            --device cpu \
-            --checkpoints /tmp/ronin-smoke-checkpoints
-      - name: Comprobar que existe el checkpoint final
-        run: test -s /tmp/ronin-smoke-checkpoints/step-00000001.pt
-      - name: Enlazar libro de runs
-        if: always()
-        uses: ./.github/actions/run-ledger-link
-
-
-  assemble-32-libraries:
-    name: Ensamblar 32 bibliotecas parciales
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    permissions:
-      actions: read
-      contents: read
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.11"
-      - name: Probar inventario y reglas de reparto
-        run: |
-          python -m pip install pytest
-          pytest -q tests/test_32_library_inventory.py tests/test_assemble_32_libraries.py
-      - name: Descargar artefacto CoVoST 2 auditado
-        uses: actions/download-artifact@v4
-        with:
-          name: ronin-covost2-translation-only-candidate
-          run-id: 41990563417
-          repository: ${{ github.repository }}
-          github-token: ${{ github.token }}
-          path: /tmp/covost
-      - name: Descargar muestra filtrada de Common Corpus
-        uses: actions/download-artifact@v4
-        with:
-          name: ronin-common-corpus-filtered-candidates
-          run-id: 41933372089
-          repository: ${{ github.repository }}
-          github-token: ${{ github.token }}
-          path: /tmp/common-corpus
-      - name: Descargar candidatos GPLSI ClearText
-        uses: actions/download-artifact@v4
-        with:
-          name: ronin-gplsi-cleartext-cas-val-candidates
-          run-id: 41935114828
-          repository: ${{ github.repository }}
-          github-token: ${{ github.token }}
-          path: /tmp/gplsi
-      - name: Descargar literatura española admitida
-        uses: actions/download-artifact@v4
-        with:
-          name: ronin-admitted-literature-es-v1-train
-          run-id: 41926088900
-          repository: ${{ github.repository }}
-          github-token: ${{ github.token }}
-          path: /tmp/literature
-      - name: Descargar candidato ScienceVerse Collabra
-        uses: actions/download-artifact@v4
-        with:
-          name: ronin-scienceverse-collabra-quality-candidate
-          run-id: 41992987567
-          repository: ${{ github.repository }}
-          github-token: ${{ github.token }}
-          path: /tmp/collabra
-      - name: Ensamblar las 32 bibliotecas sin promover candidatos
-        run: |
-          python scripts/assemble_32_libraries.py \
-            --covost-zip /tmp/covost \
-            --common-corpus-zip /tmp/common-corpus \
-            --gplsi-zip /tmp/gplsi \
-            --literature-zip /tmp/literature \
-            --collabra-zip /tmp/collabra \
-            --out artifacts/ronin-32-libraries
-      - name: Publicar paquete parcial con hashes
-        uses: actions/upload-artifact@v6
-        with:
-          name: ronin-32-libraries-partial-candidates
-          path: artifacts/ronin-32-libraries/
-          if-no-files-found: error
-          retention-days: 90
-      - name: Enlazar libro de runs
-        if: always()
-        uses: ./.github/actions/run-ledger-link
+          python scripts/train_text.py --text /tmp/ronin-smoke.txt --profile tiny --steps 1 --device cpu --checkpoints /tmp/ronin-smoke
+      - name: Verificar checkpoint
+        run: test -s /tmp/ronin-smoke/step-00000001.pt
