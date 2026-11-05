@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import codecs
 import hashlib
 import json
 import re
@@ -55,27 +56,34 @@ def prepare_mixture(inputs: Iterable[tuple[str, Path]], output: Path, manifest_p
                 raise ValueError("los archivos de entrada no pueden sobrescribir las salidas")
             if not source_path.is_file():
                 raise FileNotFoundError(f"no existe el corpus {name}: {source_path}")
-            data = source_path.read_bytes()
-            if not data:
-                raise ValueError(f"el corpus {name} está vacío")
-            data.decode("utf-8")
-            digest = sha256_bytes(data)
             header = f"\n\n=== FUENTE DE ENTRENAMIENTO: {name} ===\n\n".encode()
             destination.write(header)
-            destination.write(data)
-            if not data.endswith(b"\n"):
-                destination.write(b"\n")
             output_digest.update(header)
-            output_digest.update(data)
-            if not data.endswith(b"\n"):
+            source_digest = hashlib.sha256()
+            decoder = codecs.getincrementaldecoder("utf-8")("strict")
+            source_bytes = 0
+            last_byte = b""
+            with source_path.open("rb") as source:
+                while chunk := source.read(1024 * 1024):
+                    decoder.decode(chunk, final=False)
+                    source_digest.update(chunk)
+                    output_digest.update(chunk)
+                    destination.write(chunk)
+                    source_bytes += len(chunk)
+                    last_byte = chunk[-1:]
+                decoder.decode(b"", final=True)
+            if source_bytes == 0:
+                raise ValueError(f"el corpus {name} está vacío")
+            if last_byte != b"\n":
+                destination.write(b"\n")
                 output_digest.update(b"\n")
             rows.append({
                 "id": name,
                 "input_filename": source_path.name,
-                "bytes": len(data),
-                "sha256": digest,
+                "bytes": source_bytes,
+                "sha256": source_digest.hexdigest(),
             })
-            total_input_bytes += len(data)
+            total_input_bytes += source_bytes
 
     for row in rows:
         row["byte_share"] = row["bytes"] / total_input_bytes

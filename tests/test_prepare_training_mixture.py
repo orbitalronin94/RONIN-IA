@@ -53,3 +53,27 @@ def test_training_mixture_rejects_empty_and_duplicate_sources(tmp_path):
             tmp_path / "out.txt",
             tmp_path / "out.json",
         )
+
+
+
+def test_training_mixture_streams_large_utf8_source_without_changing_hashes(tmp_path):
+    source = tmp_path / "large-train.txt"
+    payload = ("áβ🙂 texto científico\n" * 70000).encode("utf-8")
+    source.write_bytes(payload)
+    output = tmp_path / "mixture.txt"
+    manifest = tmp_path / "manifest.json"
+
+    result = prepare_mixture([("large", source)], output, manifest)
+
+    expected = b"\n\n=== FUENTE DE ENTRENAMIENTO: large ===\n\n" + payload
+    assert output.read_bytes() == expected
+    assert result["sources"][0]["bytes"] == len(payload)
+    assert result["sources"][0]["sha256"] == hashlib.sha256(payload).hexdigest()
+    assert result["output_sha256"] == hashlib.sha256(expected).hexdigest()
+
+
+def test_training_mixture_rejects_invalid_utf8_stream(tmp_path):
+    source = tmp_path / "invalid-train.txt"
+    source.write_bytes(b"valid prefix " + b"\xff")
+    with pytest.raises(UnicodeDecodeError):
+        prepare_mixture([("invalid", source)], tmp_path / "out.txt", tmp_path / "out.json")
