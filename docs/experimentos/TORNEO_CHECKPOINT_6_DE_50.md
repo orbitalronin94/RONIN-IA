@@ -2,7 +2,7 @@
 
 ## Estado
 
-Diseño experimental. No modifica `main`, no sustituye `weights/ronin-main.pt` y no autoriza promoción automática.
+Implementación añadida en esta rama. No modifica `main`, no sustituye `weights/ronin-main.pt` y no autoriza promoción automática. El workflow es manual y no se ha lanzado todavía.
 
 Checkpoint de partida (ganador del screening):
 - SHA-256: `7cda8dacb0b61d7278ba9990285a6a7e47403de8a00d201da06f5f002224c1cf`
@@ -24,7 +24,7 @@ Checkpoint de partida (ganador del screening):
 
 La mezcla no asigna 5 % a NASA: con solo dos documentos esa proporción los sobremuestrearía intensamente. El límite 0.5 % es un techo experimental, no una afirmación de que NASA aporte más señal. Se comparará también contra muestreo proporcional al corpus como control de B/C.
 
-## Implementación requerida antes de ejecutar
+## Implementación disponible en esta rama
 
 1. Añadir una penalización explícita a la pérdida de entrenamiento:
    `loss_total = loss_corpus + lambda * mean((W - W0)^2)`.
@@ -60,4 +60,4 @@ Un candidato no gana por mejorar BPB/PPL únicamente.
 
 El máximo son 300 pasos de entrenamiento (A/B/C: 100 cada uno); D no entrena. La interpolación produce tres variantes sin consumir pasos. Las variantes no se ejecutan en paralelo si compiten por CPU; se ejecutan secuencialmente para mantener throughput y memoria predecibles.
 
-La ejecución queda bloqueada hasta que el código de anclaje, mezcla por fuente, interpolación y gate pareado estricto esté implementado y probado. Ninguna PR ni workflow debe promover pesos automáticamente.
+La implementación está disponible en `scripts/run_checkpoint_tournament.py`, `ronin/data/source_batches.py` y `ronin/training/loop.py`. El workflow manual está en `.github/workflows/checkpoint-tournament-6of50.yml`. Antes de lanzar el workflow, deben pasar los checks de la PR y verificarse los artefactos de origen. El workflow no promueve pesos automáticamente.
