@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Acquire fixed ScienceVerse full-text paperlists with per-article CC-BY audit."""
-import csv, hashlib, json, pathlib, urllib.request, shutil
+import csv
+import hashlib
+import json
+import pathlib
+import urllib.request
 
 ROOT = pathlib.Path("data/datasets/candidates/scienceverse-fulltext")
 CORPORA = {
@@ -40,14 +44,26 @@ def main():
         # Only rows with successful PDF+XML conversion are eligible when
         # those fields exist; other corpora already contain converted rows.
         converted=[]
+        excluded=[]
         for row in rows:
+            reasons=[]
             if row.get("license","").strip().upper()!="CC-BY 4.0":
-                continue
+                reasons.append("license_not_CC-BY_4.0")
             if "pdf_exists" in row and row["pdf_exists"].strip().upper()!="TRUE":
-                continue
+                reasons.append("pdf_missing_or_not_converted")
             if "xml_exists" in row and row["xml_exists"].strip().upper()!="TRUE":
-                continue
-            converted.append(row)
+                reasons.append("xml_missing_or_not_converted")
+            if "in_rds" in row and row["in_rds"].strip().upper()!="TRUE":
+                reasons.append("not_in_RDS")
+            if reasons:
+                excluded.append({
+                    "doi":row.get("doi"),
+                    "title":row.get("title"),
+                    "license":row.get("license"),
+                    "reasons":reasons,
+                })
+            else:
+                converted.append(row)
         if len(converted)!=meta["expected"]:
             raise SystemExit(f"{name}: expected {meta['expected']} converted CC-BY 4.0 papers, got {len(converted)} from {len(rows)} manifest rows")
         eligible=dest/"eligible-manifest.csv"
@@ -68,7 +84,14 @@ def main():
             "documents_in_manifest":len(rows),
             "documents_converted_and_license_verified":len(converted),
             "eligible_manifest_file":eligible.name,
-            "license_filter":"every manifest row explicitly declares CC-BY 4.0",
+            "license_filter":"eligible rows require exact CC-BY 4.0 plus successful PDF/XML conversion and in_rds=TRUE when those fields exist",
+            "documents_excluded":len(excluded),
+            "excluded_rows":excluded,
+            "rights_evidence_status":"per-DOI upstream manifest declaration; publisher article-license and third-party review still required for Level A",
+            "level_a_cleared":False,
+            "privacy_review":"pending",
+            "retractions_corrections_review":"pending",
+            "quality_review":"pending",
             "target_library":meta["target"],
             "payload_file":payload.name,
             "payload_bytes":payload.stat().st_size,
@@ -84,7 +107,11 @@ def main():
                        "Keep all derived train/validation/test partitions document-grouped by DOI."]
         }
         (dest/"provenance.json").write_text(json.dumps(record,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-        total+=len(rows)
+        total+=len(converted)
         print(f"{name}: {len(rows)} docs; payload {payload.stat().st_size} bytes; sha256 {record['payload_sha256']}")
-    # Remove any prior misplaced copy from the admitted tree after the candidate\n    # payload has been downloaded and verified successfully.\n    old=pathlib.Path("data/datasets/admitted/scienceverse")\n    if old.exists(): shutil.rmtree(old)\n    print(f"VERIFIED_CANDIDATE_DOCS={total}")
+    # Never delete or overwrite anything in the admitted tree from a candidate workflow.
+    old=pathlib.Path("data/datasets/admitted/scienceverse")
+    if old.exists():
+        print("WARNING: legacy admitted/scienceverse path exists; preserved for manual reconciliation.")
+    print(f"VERIFIED_CANDIDATE_DOCS={total}")
 if __name__=="__main__": main()
