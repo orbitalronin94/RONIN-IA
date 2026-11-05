@@ -119,7 +119,7 @@ jobs:
           import hashlib,json
           from pathlib import Path
           parts=[Path("incoming/literature/train.txt").read_bytes(),Path("incoming/mathlib4/train.txt").read_bytes(),Path("incoming/nasa-file-reviewed/train.txt").read_bytes()]
-          out=Path("/tmp/ronin-native-train.txt"); out.write_bytes(b"\\n\\n".join(parts))
+          out=Path("/tmp/ronin-native-train.txt"); out.write_bytes(b"\n\n".join(parts))
           report={"experiment":"ronin-native-no-questions-seed-202-pr114-followup-v1","tutor_used":False,"question_answer_data_used":False,
             "sources":[
               {"dataset_id":"ronin-spanish-public-domain-literature-v2","documents":608,"bytes":140295523,"sha256":"9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"},
@@ -127,7 +127,7 @@ jobs:
               {"dataset_id":"nasa-ntrs-file-reviewed-v1","documents":2,"bytes":32409,"sha256":"874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"}],
             "train_documents":9108,"combined_bytes":out.stat().st_size,"combined_sha256":hashlib.sha256(out.read_bytes()).hexdigest(),
             "validation_test_partitions_in_training":False,"mmlu_questions_downloaded_or_used":False}
-          Path("reports").mkdir(exist_ok=True); Path("reports/corpus-only-manifest.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\\n")
+          Path("reports").mkdir(exist_ok=True); Path("reports/corpus-only-manifest.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
           print(json.dumps(report,ensure_ascii=False,indent=2))
           PY
       - name: Recreate identical deterministic internal 95/5 split
@@ -161,7 +161,7 @@ jobs:
                 "validation_tokens":after["evaluated_tokens"],"decision":"REVIEW_ONLY","note":"No benchmark questions were downloaded or used for training."}
           else:
               summary={"experiment":"ronin-native-no-questions-seed-202-pr114-followup-v1","additional_training_steps":2000,"decision":"INCOMPLETE","note":"Inspect logs."}
-          Path("reports/no-questions-summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\\n")
+          Path("reports/no-questions-summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\n")
           print(json.dumps(summary,ensure_ascii=False,indent=2))
           PY
       - name: Upload corpus-only report and checkpoint
