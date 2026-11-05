@@ -1,4 +1,4 @@
-from scripts.assemble_32_libraries import balance_general_hkd, stable_partition
+from scripts.assemble_32_libraries import balance_general_hkd, choose_domain, stable_partition
 
 
 def test_general_hkd_are_disjoint_and_byte_balanced() -> None:
@@ -23,3 +23,22 @@ def test_single_document_stays_in_general() -> None:
 
 def test_partition_is_deterministic() -> None:
     assert stable_partition("same-document") == stable_partition("same-document")
+
+
+def test_topic_router_rejects_generic_single_term_sentences() -> None:
+    assert choose_domain("The system was used by the group.") == (None, 0.0, {})
+    assert choose_domain("Grup de nenes musulmanes de peu.") == (None, 0.0, {})
+
+
+def test_topic_router_requires_distinctive_domain_evidence() -> None:
+    domain, _, details = choose_domain(
+        "The algorithm compiles a database query and checks the protocol."
+    )
+    assert domain == "computer_science"
+    assert details["routing_hit_count"] >= 2
+
+    domain, _, details = choose_domain(
+        "Inflation and monetary policy influence GDP and the interest rate."
+    )
+    assert domain == "economics"
+    assert details["routing_hit_count"] >= 2
