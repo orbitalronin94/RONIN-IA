@@ -33,8 +33,8 @@ def evaluate(checkpoint, rows, all_hash, args):
 def assert_gate(before, after):
     before_ids=[x["id"] for x in before["details"]]; after_ids=[x["id"] for x in after["details"]]
     for label,report in (("before",before),("after",after)):
-        if report["selected_items"] != 50 or report["evaluated_items"] != 50 or report["coverage"] != 1.0 or report.get("skipped_items",0) != 0:
-            raise RuntimeError(f"paired holdout gate failed for {label}: selected={report.get(chr(115)+chr(101)+chr(108)+chr(101)+chr(99)+chr(116)+chr(101)+chr(100)+chr(95)+chr(105)+chr(116)+chr(101)+chr(109)+chr(115))} evaluated={report.get(chr(101)+chr(118)+chr(97)+chr(108)+chr(117)+chr(97)+chr(116)+chr(101)+chr(100)+chr(95)+chr(105)+chr(116)+chr(101)+chr(109)+chr(115))} coverage={report.get(chr(99)+chr(111)+chr(118)+chr(101)+chr(114)+chr(97)+chr(103)+chr(101))}")
+        if report["selected_items"] != 50 or report["evaluated_items"] != 50 or report["coverage"] != 1.0 or report.get("skipped_context_items",0) != 0:
+            raise RuntimeError(f"paired holdout gate failed for {label}: selected={report.get("selected_items")} evaluated={report.get("evaluated_items")} coverage={report.get("coverage")}")
     if before_ids != after_ids or before["dataset_sha256"] != after["dataset_sha256"] or before["dataset_revision"] != after["dataset_revision"] or before["dataset_split"] != after["dataset_split"]:
         raise RuntimeError("paired holdout identity mismatch")
 
