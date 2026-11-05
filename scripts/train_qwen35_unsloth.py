@@ -52,10 +52,10 @@ def make_text_chunks(path: Path, max_chars: int) -> list[str]:
 
 def load_validation_rows(limit: int, seed: int) -> tuple[list[dict[str, Any]], str]:
     from scripts.evaluate_mmlu_pro import (
-        DATASET_REVISION as REVISION,
         load_external_dataset,
         rows_sha256,
         select_stratified,
+        DATASET_REVISION as REVISION,
     )
 
     rows = load_external_dataset(REVISION, split="validation")
@@ -81,6 +81,7 @@ def evaluate_model(
     max_new_tokens: int = 64,
 ) -> dict[str, Any]:
     import torch
+
     from scripts.evaluate_mmlu_pro import format_prompt
 
     model.eval()
@@ -157,11 +158,13 @@ def main() -> None:
         parser.error("--eval-limit debe estar entre 1 y 500")
 
     import torch
+    import transformers
     import trl
     import unsloth
+
     from datasets import Dataset
     from huggingface_hub import model_info
-    from transformers import __version__ as transformers_version, set_seed
+    from transformers import set_seed
     from trl import SFTConfig, SFTTrainer
     from unsloth import FastLanguageModel
 
@@ -252,6 +255,14 @@ def main() -> None:
     summary = {
         "experiment": "ronin-qwen35-4b-unsloth-lora-v1",
         "model_id": MODEL_ID,
+        "model_revision": model_revision,
+        "model_license": "Apache-2.0",
+        "package_versions": {
+            "torch": torch.__version__,
+            "transformers": transformers.__version__,
+            "trl": getattr(trl, "__version__", "unknown"),
+            "unsloth": getattr(unsloth, "__version__", "unknown"),
+        },
         "method": "BF16/FP16 LoRA; QLoRA intentionally disabled per current Unsloth guidance",
         "train_file": str(args.train_file),
         "train_file_sha256": sha256_file(args.train_file),
