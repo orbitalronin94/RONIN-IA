@@ -120,7 +120,7 @@ jobs:
           ndocs=Path("incoming/nasa-file-reviewed/documents.train.jsonl")
           assert all(p.is_file() for p in (base,lit,lm,math,mmf,nasa,nmf,ndocs))
           assert sha(base)==model_manifest["weights_sha256"]
-          assert model_manifest["checkpoint_sha256"]=="a90a01a3e7f53e2e4aec1f0c1f0c137eedfe219f3fc3cc65f5eea827829d6f25"
+          assert model_manifest["checkpoint_sha256"]=="86d7d97360f1eb0ac35e9dc12f69c366101629641115ba1c2a1341b2b7d257ae"
           assert sha(lit)=="9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
           l=json.loads(lm.read_text())
           assert l.get("dataset_id")=="ronin-spanish-public-domain-literature-v2"
@@ -156,7 +156,7 @@ jobs:
           model=RoninLM(model_config)
           model.load_state_dict(state_dict,strict=True)
           parameter_count=sum(p.numel() for p in model.parameters())
-          assert ck.get("step",model_manifest["checkpoint_step"])==model_manifest["checkpoint_step"]==1000
+          assert ck.get("step",model_manifest["checkpoint_step"])==model_manifest["checkpoint_step"]==500
           assert parameter_count==model_manifest["parameters"]==9922880
           print("Modelo verificado:", model_manifest["model_name"], "| parámetros=", parameter_count, "| pesos_sha256=", model_manifest["weights_sha256"])
           Path("checkpoints").mkdir(exist_ok=True)
@@ -205,6 +205,7 @@ jobs:
             --steps "$STEPS" \
             --eval-limit "$EVAL_LIMIT" \
             --eval-split validation \
+            --require-paired-holdout \
             --revision "$MMLU_REVISION" \
             --context-length 4096 \
             --batch-token-budget 8192 \
