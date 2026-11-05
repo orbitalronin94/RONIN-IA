@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: write
 
 concurrency:
@@ -34,12 +35,18 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A data/datasets/candidates/scienceverse-fulltext
           git commit -m "data: add ScienceVerse CC-BY full-text candidates"
-          for attempt in 1 2 3; do
-            git pull --rebase origin main
-            if git push origin HEAD:main; then
-              exit 0
+          # The repository's run-ledger workflow writes commits to main after
+          # other workflows finish. Wait for those writes to settle before pushing.
+          for attempt in $(seq 1 20); do
+            pending=$(gh run list --workflow run-ledger.yml --limit 30 --json status --jq '[.[] | select(.status == "queued" or .status == "in_progress" or .status == "pending")] | length')
+            if [ "$pending" = "0" ]; then
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then
+                exit 0
+              fi
             fi
-            sleep 3
+            sleep 5
           done
-          echo "Unable to fast-forward main after three attempts" >&2
+          echo "Unable to push candidate payload after waiting for run-ledger writes" >&2
           exit 1
