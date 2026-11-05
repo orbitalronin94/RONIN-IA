@@ -53,4 +53,4 @@ Los datos se leen desde `data/datasets/`. La carpeta distingue corpus admitidos,
 
 ## Pesos
 
-La identidad del modelo principal está en `weights/main-model.json`. El workflow [pin-main-weights.yml](../.github/workflows/pin-main-weights.yml) extrae los pesos del artefacto histórico, comprueba su SHA-256 y publica un artefacto limpio `ronin-main-weights-v1`. No se confunde el manifiesto con el archivo de tensores.
+La identidad del modelo principal está en `weights/main-model.json`. El workflow [pin-main-weights.yml](../.github/workflows/pin-main-weights.yml) extrae los tensores del artefacto histórico, verifica el hash del checkpoint fuente y versiona `weights/ronin-main.pt` como `state_dict` compacto. También publica `ronin-main-weights-v1` como copia de recuperación. No se confunde el manifiesto con el archivo de tensores.
