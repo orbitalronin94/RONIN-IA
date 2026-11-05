@@ -59,6 +59,8 @@ jobs:
         run: python scripts/validate_license_audit.py
       - name: Validar catálogo histórico sin admitirlo a entrenamiento
         run: python scripts/validate_historical_candidates.py
+      - name: Probar clasificación de licencias por DOI de ScienceVerse
+        run: pytest -q tests/test_scienceverse_collabra_rights.py
       - name: Ejecutar la suite de pruebas
         run: pytest --cov=ronin --cov-report=term-missing
       - name: Enlazar libro de runs
@@ -122,3 +124,20 @@ jobs:
       - name: Enlazar libro de runs
         if: always()
         uses: ./.github/actions/run-ledger-link
+
+  collabra-rights-preflight:
+    name: Preflight de licencias ScienceVerse Collabra
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Verificar licencia por DOI y manifiesto fijado
+        run: python scripts/preflight_scienceverse_collabra_rights.py
+      - uses: actions/upload-artifact@v6
+        with:
+          name: ronin-scienceverse-collabra-rights-preflight
+          path: artifacts/scienceverse-collabra/
+          if-no-files-found: error
+          retention-days: 90
