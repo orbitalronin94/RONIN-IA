@@ -1,0 +1,62 @@
+name: Acquire and classify public-source corpus candidates
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/acquire_public_sources.py"
+      - ".github/workflows/acquire-public-sources.yml"
+      - "data/datasets/acquisition/source-candidates-200gb.json"
+  workflow_dispatch:
+    inputs:
+      limit_per_source:
+        description: Maximum documents per source for this acquisition pass
+        required: true
+        default: "250"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-source-acquisition-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+      - name: Install PDF text extractor
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+      - name: Download, classify and deduplicate source documents
+        env:
+          LIMIT_PER_SOURCE: ${{ inputs.limit_per_source || '250' }}
+        run: |
+          python scripts/acquire_public_sources.py --limit-per-source "$LIMIT_PER_SOURCE"
+      - name: Validate candidate manifest
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("data/datasets/candidates/public-sources-2026-11-06/manifest.jsonl")
+          rows=[json.loads(x) for x in p.read_text(encoding="utf-8").splitlines()] if p.exists() else []
+          assert all(r.get("training_eligible") is False for r in rows)
+          assert all(r.get("text_sha256") and r.get("source_url") and r.get("rights_evidence") for r in rows)
+          print("candidate_records=",len(rows))
+          print("candidate_text_bytes=",sum(r["text_bytes"] for r in rows))
+          print("training_eligible=0 (human/global rights and split gates remain mandatory)")
+          PY
+      - name: Upload classified documents and acquisition audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-source-acquisition-candidates
+          path: data/datasets/candidates/public-sources-2026-11-06/
+          if-no-files-found: error
+          retention-days: 30
