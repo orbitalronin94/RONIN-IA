@@ -1,108 +1,155 @@
+<div align="center">
+
 # RONIN-IA
 
-**Un modelo propio. Un pipeline experimental. Un corpus trazable.**
+### Investigación abierta sobre modelos pequeños, corpus trazables y entrenamiento verificable.
 
-RONIN es un modelo causal Transformer implementado en PyTorch. El proyecto investiga cómo mejorar un modelo pequeño mediante entrenamiento reproducible, adquisición de corpus abiertos y evaluación pareada.
+**Un modelo propio. Datos auditables. Experimentos sin atajos.**
 
-> **El proceso de entrenamiento todavía es experimental.** No existe una receta única ni un protocolo definitivo fijado. Cambiamos pasos, semillas, mezclas de datos, estrategias de selección y profundidad de evaluación entre experimentos. La configuración efectiva de cada ejecución está en su workflow, en los inputs del run y en sus artefactos.
+[Modelo y pesos](weights/) · [Biblioteca de datasets](data/datasets/) · [Experimentos](https://github.com/orbitalronin94/RONIN-IA/actions) · [Documentación](docs/)
 
-## Estado del proyecto
+[![GitHub Actions](https://img.shields.io/badge/experimentos-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)](https://github.com/orbitalronin94/RONIN-IA/actions)
+[![PyTorch](https://img.shields.io/badge/framework-PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![License](https://img.shields.io/badge/license-MIT-0A7B55.svg)](LICENSE)
 
-### Modelo de referencia en `main`
+</div>
 
-El checkpoint versionado en `main` es la **línea base operativa**, no una afirmación de que sea el mejor candidato posible ni una receta de entrenamiento que debamos repetir sin cambios.
+---
 
-- Nombre: **RONIN-tiny-seed95-100-001**.
-- Arquitectura: Transformer causal con RoPE, RMSNorm, SwiGLU, GQA y tokenización byte-v1.
-- Parámetros: 9.922.880.
-- Checkpoint de origen: 100 pasos, semilla 95; el manifiesto conserva hashes, procedencia y configuración.
-- Pesos compactos: `weights/ronin-main.pt`; identidad y procedencia: `weights/main-model.json`.
+## En dos minutos
 
-La evaluación que acompañó a esa línea base registró:
+RONIN es un modelo causal Transformer implementado en PyTorch. El proyecto explora cuánto puede aprender un modelo pequeño a partir de corpus abiertos o autorizados, con procedencia documentada y evaluaciones reproducibles.
 
-| Métrica | Antes | Después | Lectura |
-|---|---:|---:|---|
-| Validación interna BPB | 4,5654 | 4,3373 | Mejora en el corpus de validación interna |
-| Validación interna PPL | 23,6764 | 20,2137 | Mejora en predicción del texto evaluado |
-| MMLU-Pro validation (50 preguntas) | 5/50 | 7/50 | Screening pequeño; no es el test oficial |
+> **El entrenamiento sigue siendo experimental.** No existe todavía una receta única: pasos, semillas, arquitectura, mezcla de datos y profundidad de evaluación cambian según la hipótesis de cada experimento. El workflow, sus inputs, logs y artefactos son la fuente de verdad de cada run.
 
-El screening de 50 preguntas se clasificó como `SCREENING_ONLY`. No demuestra razonamiento general ni sustituye una evaluación completa e independiente. Los detalles y hashes vigentes están en [`weights/main-model.json`](weights/main-model.json).
+### Accesos principales
 
-### Entrenamiento: experimentación, no receta fija
-
-Los workflows son experimentos con objetivos y presupuestos diferentes. No deben interpretarse como etapas obligatorias de un único pipeline ni como una configuración estable:
-
-| Workflow | Propósito | Qué puede variar |
-|---|---|---|
-| [Cribado multi-semilla sin tutor](.github/workflows/main-native-no-tutor-holdout.yml) | Partir de los pesos propios, entrenar candidatos y compararlos con los mismos holdouts | Pasos, semillas y límite/profundidad de evaluación mediante inputs |
-| [Torneo adaptativo de 50 semillas](.github/workflows/adaptive-50-seed-tournament.yml) | Explorar distintas semillas y seleccionar candidatos para análisis posterior | Estrategia y selección del torneo según el workflow versionado |
-| [Corpus semilla 202, 500 pasos](.github/workflows/micro-corpus-4-seeds.yml) | Experimento específico asociado a cambios de corpus | Semilla y presupuesto están fijados por el diseño de este experimento |
-
-También pueden existir ejecuciones experimentales lanzadas desde ramas o PR que no estén integradas en `main`. Por ejemplo, los experimentos de mayor duración —como el de 10.000 pasos— deben leerse desde su ejecución concreta y no confundirse con el workflow general disponible en la rama principal.
-
-**Consulta el [historial de GitHub Actions](https://github.com/orbitalronin94/RONIN-IA/actions) para conocer qué se ha ejecutado realmente.** Cada run es la referencia para su commit, workflow, inputs, pasos, conclusión y artefactos. Un nombre de workflow o un valor por defecto no define por sí solo el proceso completo del proyecto.
-
-### Cómo interpretamos los resultados
-
-- Una ejecución correcta de Actions significa que el workflow terminó; no significa que el modelo haya mejorado.
-- Una bajada de loss, BPB o perplexity es evidencia sobre la distribución evaluada, no prueba suficiente de razonamiento.
-- Los candidatos no sustituyen automáticamente al checkpoint de `main`.
-- La promoción exige revisar el benchmark pareado, el holdout, la integridad del checkpoint y las métricas relevantes.
-- No se deben comparar puntuaciones obtenidas con diferentes preguntas, splits o protocolos como si fueran equivalentes.
-- Los resultados de screening se etiquetan como tales; no se presentan como certificación oficial.
-
-## Corpus y datos entrenables
-
-La raíz canónica de datos es `data/datasets/`. Su [README de corpus](data/datasets/README.md) mantiene el inventario detallado de fuentes, documentos, bytes, bibliotecas, particiones y controles.
-
-El corpus de entrenamiento evoluciona a medida que se adquieren y admiten fuentes. Por eso, los recuentos del inventario son una fotografía documental y no deben atribuirse retroactivamente a checkpoints entrenados con cortes anteriores.
-
-Un documento descargado no es automáticamente entrenable. Se requiere procedencia, derechos compatibles, integridad del payload, controles aplicables y asignación explícita a la partición train. Validation y test deben permanecer fuera de los gradientes. Los límites de admisión por fuente no equivalen a una certificación global del corpus: los manifiestos describen exactamente qué controles han pasado y cuáles siguen pendientes.
-
-## Estructura del repositorio
-
-| Ruta | Contenido |
+| Área | Qué encontrarás |
 |---|---|
-| `weights/` | Identidad, procedencia, hashes y pesos del modelo de referencia |
-| `data/datasets/` | Corpus, bibliotecas, particiones, manifiestos y registros de derechos |
-| `ronin/` | Arquitectura, tokenizador, datos, entrenamiento y evaluación |
-| `scripts/` | Herramientas para entrenar, preparar datos y evaluar |
-| `configs/` | Configuraciones de arquitectura |
-| `.github/workflows/` | Experimentos, adquisición de datos y controles automatizados |
-| `docs/` | Protocolo, decisiones y documentación técnica |
+| [Biblioteca de datasets](data/datasets/README.md) | Inventario, bibliotecas, fuentes, derechos, particiones y estado entrenable |
+| [Manifiestos de datasets](data/datasets/) | Payloads y manifiestos por fuente; hashes y trazabilidad |
+| [Pesos versionados](weights/ronin-main.pt) | Paquete compacto PyTorch del modelo fijado en `main` |
+| [Manifiesto del modelo](weights/main-model.json) | Arquitectura, parámetros, hashes, procedencia y evaluación |
+| [Historial de experimentos](https://github.com/orbitalronin94/RONIN-IA/actions) | Runs, workflows, inputs, logs y artefactos descargables |
+| [Documentación técnica](docs/) | Entrenamiento, evaluación, decisiones y protocolos |
 
-## Entrenamiento local
+## Estado del modelo
 
-Requisitos orientativos del entorno actual: Python 3.11 y PyTorch 2.2 o posterior.
+<details>
+<summary><strong>Modelo de referencia en main</strong></summary>
+
+| Propiedad | Valor |
+|---|---|
+| Identificador | `RONIN-tiny-seed95-100-001` |
+| Parámetros | **9.922.880 (~9,9 M)** |
+| Arquitectura | Transformer causal, RoPE, RMSNorm, SwiGLU y GQA |
+| Tokenización | byte-v1 |
+| Checkpoint de origen | 100 pasos, seed 95 |
+| Pesos | [weights/ronin-main.pt](weights/ronin-main.pt) |
+| Manifiesto | [weights/main-model.json](weights/main-model.json) |
+
+La evaluación asociada a esta línea base fue un screening MMLU-Pro de 50 preguntas: 5/50 → 7/50. Se clasifica como `SCREENING_ONLY`; no demuestra razonamiento general ni equivale al test independiente completo.
+
+</details>
+
+### Último experimento largo: 10.000 pasos
+
+<details>
+<summary><strong>Run #42181780771 — candidato experimental, no promocionado</strong></summary>
+
+- [Ejecución en GitHub Actions](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42181780771)
+- [Artefacto descargable (checkpoint + informes)](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42181780771/artifacts/13489465699)
+- Rama: `experiment/seed95-10000-full-holdout`
+- Seed: 95 · pasos completados: 10.000 · loss final: **2,11482**
+- Corpus realmente ensamblado en este run: **279.352 unidades train-scoped**, 256.612.919 bytes combinados. No atribuirle retroactivamente las fuentes incorporadas después.
+- MMLU-Pro test: **1.295/12.032 → 1.314/12.032** (10,763 % → 10,921 %; +0,158 puntos porcentuales).
+- Bits per byte: **3,8152 → 2,9798**.
+- Cobertura: 12.032/12.032; evaluación pareada antes/después.
+- Estado: candidato para revisión; no modifica los pesos de `main`.
+
+La reducción de BPB es una señal de mejor predicción en la distribución evaluada. La ganancia en MMLU-Pro es modesta y no basta por sí sola para afirmar una mejora general de razonamiento.
+
+</details>
+
+## Corpus y bibliotecas
+
+La raíz canónica de datos es [`data/datasets/`](data/datasets/). Consulta su [inventario completo](data/datasets/README.md) antes de interpretar cifras.
+
+| Indicador del inventario | Último corte documentado |
+|---|---:|
+| Unidades train-scoped | **286.468** |
+| Texto UTF-8 train-scoped | **684.738.932 bytes** |
+| Bibliotecas objetivo | **64** (32 dominios × General/HKD) |
+| Bibliotecas que alcanzan el mínimo Level A | **5/64** |
+| Bibliotecas globalmente training-eligible | **0/64**; G-0 global sigue FAIL |
+
+Fuentes train-scoped registradas: literatura española, Mathlib4, NASA file-reviewed, Papers propios, ScienceVerse y CoVoST 2. Estos totales son del inventario documental, **no** el corpus usado en todos los entrenamientos. Los manifiestos de cada fuente mandan.
+
+**No confundimos estados:** candidato descargado ≠ admitido ≠ train-eligible. Solo particiones `train` expresamente admitidas pueden alimentar gradientes. Validation/test permanecen aislados. Los controles globales pendientes se declaran; no presentamos el corpus completo como certificado.
+
+## Cómo trabajamos
+
+1. **Adquirir:** registrar fuente, revisión upstream, licencia y procedencia.
+2. **Auditar:** verificar payload, hashes, calidad, privacidad y duplicados según el alcance declarado.
+3. **Particionar:** mantener train, validation y test separados.
+4. **Entrenar:** fijar checkpoint de partida, arquitectura, seed, presupuesto y mezcla efectiva.
+5. **Evaluar:** comparar antes/después con el mismo holdout, IDs y protocolo.
+6. **Revisar:** conservar informes y pesos candidatos; promover solo con decisión explícita.
+
+### Workflows de referencia
+
+| Workflow | Objetivo |
+|---|---|
+| [Cribado nativo sin tutor](.github/workflows/main-native-no-tutor-holdout.yml) | Entrenamiento de candidatos y evaluación pareada |
+| [Torneo adaptativo de semillas](.github/workflows/adaptive-50-seed-tournament.yml) | Explorar y comparar semillas |
+| [Experimentos de corpus](.github/workflows/micro-corpus-4-seeds.yml) | Probar mezclas y presupuestos concretos |
+
+Los workflows evolucionan. Revisa el YAML y los inputs del run concreto; sus valores por defecto no constituyen una receta universal.
+
+## Próximo experimento: escalado ×10
+
+La siguiente hipótesis de trabajo es ampliar la arquitectura desde ~9,9 M hasta aproximadamente **100 M de parámetros**, entrenar durante **1.000 pasos** y usar todas las particiones `train` admitidas y verificables disponibles al iniciar la ejecución.
+
+El experimento deberá:
+- partir de un checkpoint identificado y preservar el original;
+- documentar cómo se amplían los pesos y qué capas/embeddings cambian;
+- descubrir y verificar dinámicamente cada fuente train-eligible, sin incorporar validation/test;
+- registrar mezcla, bytes, documentos, hashes y procedencia efectiva;
+- medir el mismo holdout antes/después y conservar loss, BPB, throughput y métricas por dominio;
+- publicar el candidato como artefacto, sin promoción automática.
+
+**Estado:** diseño experimental; no se considera ejecutado hasta que exista un run y sus artefactos.
+
+## Reproducir localmente
+
+Entorno orientativo: Python 3.11 y PyTorch 2.2 o posterior.
 
 ```bash
 python -m pip install -e '.[dev]'
 pytest -q
 ```
 
-El script `scripts/train_text.py` permite ejecutar un entrenamiento local sobre texto UTF-8 autorizado:
+Entrenamiento local de texto autorizado (ejemplo, no receta oficial):
 
 ```bash
 python scripts/train_text.py --text /ruta/al/corpus.txt --profile tiny --steps 500
 ```
 
-Este comando es una vía de ejecución local, no el protocolo oficial ni una configuración recomendada para todos los experimentos. Consulta [docs/TRAINING.md](docs/TRAINING.md) y el workflow concreto antes de interpretar o reproducir un resultado.
-
-Para el protocolo de evaluación externo, consulta [MMLU-Pro y su protocolo](docs/HOLDOUT_EXTERNO_MMLU_PRO.md).
+Consulta [docs/TRAINING.md](docs/TRAINING.md) y [el protocolo MMLU-Pro](docs/HOLDOUT_EXTERNO_MMLU_PRO.md) antes de comparar resultados.
 
 ## Principios
 
-- **Evidencia antes que promoción.** Ningún candidato pasa a ser modelo principal solo por completar el entrenamiento.
-- **Experimentos explícitos.** Cada run debe poder relacionarse con su workflow, commit, inputs, corpus y artefactos.
-- **Mismo holdout antes y después.** Las comparaciones pareadas deben mantener preguntas, splits y protocolo.
-- **Datos trazables.** Adquisición, admisión y elegibilidad de entrenamiento son estados diferentes.
-- **Sin atribuciones retroactivas.** Un corpus incorporado después no se atribuye a entrenamientos anteriores.
-- **Sin receta prematura.** El proceso seguirá cambiando mientras estemos explorando qué configuración mejora realmente el modelo.
+- Evidencia antes que promoción.
+- Mismo holdout antes y después.
+- Datos con procedencia, licencia y hashes.
+- Sin atribuciones retroactivas de corpus.
+- Sin confundir predicción de texto con razonamiento.
+- Sin fijar una receta antes de que los experimentos la justifiquen.
 
-## Aviso
+---
 
-> Sepan cuantos este repositorio vieren que aquí se hace escarnio de cuanto los doctos predicaron sobre acrecentar modelos. Non hay hueste de tarjetas gráficas, nin caudal de dineros, nin ley del escalado que valga. Hay un ingenio de nueve millones que apenas distingue el saludo del mandado, y un artificio de trazas que non se rompe.
->
-> Al modelo non le tengo ley, ca es ruin y él lo sabe. Al artificio se la tengo entera.
->
-> Quien viniere por el modelo, tórnese por do vino, que aquí non hay sino el método. Quien viniere por las trazas, quédese, mas sepa desde luego que el método es largo y el modelo, corto. Non me pidáis que lo aderece, que quien se consuela con el modelo es porque non ha mirado las trazas.
+<div align="center">
+
+**RONIN-IA · El método es largo; el modelo todavía está creciendo.**
+
+</div>
