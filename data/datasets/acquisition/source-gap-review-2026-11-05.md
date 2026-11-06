@@ -82,3 +82,18 @@ Un bloque solo pasa a `admitted/` y aumenta el contador train cuando se conserva
 - manifiesto reproducible y revisión humana documentada.
 
 **Resultado de esta auditoría:** 0 documentos nuevos promovidos. El objetivo es identificar huecos y ordenar la adquisición; no inflar el corpus con cifras de catálogo. La siguiente acción de código debe materializar BNE/BDH como candidato verificable y solo después ejecutar su promoción por documento.
+
+
+## Actualización de alcance — 2026-11-06
+
+Se añaden ocho fuentes al registro de adquisición y se documentan puertas de derechos específicas en `new-sources-scope-2026-11-06.md`: BNE/BDH, USGS, NOAA, NIST, DOE OSTI, Europeana, Library of Congress y GovInfo.
+
+### Nuevas decisiones
+
+- BNE/BDH y USGS pasan a P0 para preflight y adquisición piloto.
+- NOAA, NIST y GovInfo pasan a P1/P2 con revisión documental de autoría y material de terceros.
+- Europeana y LOC requieren rights URI/aviso por objeto; CC0 de metadatos no autoriza reutilizar el payload.
+- DOE OSTI sigue discovery-only: acceso público no equivale a dominio público.
+- OpenStax se excluye del corpus general por CC BY-NC-SA y su restricción no comercial.
+
+**Resultado de esta actualización:** 8 fuentes nuevas scopeadas; 0 documentos nuevos descargados o promovidos; 0 bytes nuevos entrenables. No se modifica la cifra de train scoped ni el holdout.
