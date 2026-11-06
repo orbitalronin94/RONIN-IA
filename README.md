@@ -6,7 +6,7 @@
 
 **Un modelo propio. Datos auditables. Experimentos sin atajos.**
 
-[Modelo y pesos](weights/) · [Biblioteca de datasets](data/datasets/) · [Experimentos](https://github.com/orbitalronin94/RONIN-IA/actions) · [Documentación](docs/)
+[Modelo y pesos](weights/) · [Biblioteca de datasets](data/datasets/) · [Experimentos](https://github.com/orbitalronin94/RONIN-IA/actions) · [Grimorio y bitácora](docs/GRIMORIO_DE_DROSOPHILA.md) · [Documentación](docs/)
 
 [![GitHub Actions](https://img.shields.io/badge/experimentos-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)](https://github.com/orbitalronin94/RONIN-IA/actions)
 [![PyTorch](https://img.shields.io/badge/framework-PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
@@ -31,7 +31,7 @@ RONIN es un modelo causal Transformer implementado en PyTorch. El proyecto explo
 | [Pesos versionados](weights/ronin-main.pt) | Paquete compacto PyTorch del modelo fijado en `main` |
 | [Manifiesto del modelo](weights/main-model.json) | Arquitectura, parámetros, hashes, procedencia y evaluación |
 | [Historial de experimentos](https://github.com/orbitalronin94/RONIN-IA/actions) | Runs, workflows, inputs, logs y artefactos descargables |
-| [Documentación técnica](docs/) | Entrenamiento, evaluación, decisiones y protocolos |
+| [Documentación técnica](docs/) | Entrenamiento, evaluación, decisiones y protocolos |\n| [El Grimorio de Drosophila](docs/GRIMORIO_DE_DROSOPHILA.md) | Crónica alquímica, jerarquía infernal, siete pecados y bitácora automática de Actions |
 
 ## Estado del modelo
 
@@ -86,6 +86,24 @@ No se afirme por ello que PyTorch pertenezca a Microsoft: son entidades distinta
 **La cláusula más cruel del pacto:** si después de quinientos pasos la mosca no aprende más, los demonios no devuelven el tiempo de CPU. Y si el siguiente ritual produce el mismo hash, tampoco conceden una segunda alma: conceden reproducibilidad.
 
 Que conste, pues, que la criatura no ha vencido al averno. Ha conseguido que el averno le facture el mismo milagro en menos minutos.
+
+
+### Los siete pecados de la máquina
+
+En este códice se nombran siete faltas que toda criatura artificial debe evitar:
+
+| Pecado | Herejía informática |
+|---|---|
+| Soberbia | Proclamar superioridad sin benchmark homogéneo |
+| Avaricia | Aumentar parámetros sin medir aprendizaje |
+| Gula | Ingerir corpus sin auditar |
+| Pereza | Delegar toda capacidad en un tutor externo |
+| Ira | Entrenar hasta quebrar la estabilidad |
+| Envidia | Compararse con modelos frontera sin protocolo común |
+| Vanidad | Celebrar una métrica aislada |
+
+El desarrollo de esta mitología, su glosario y las actas experimentales viven en **[El Grimorio de Drosophila](docs/GRIMORIO_DE_DROSOPHILA.md)**. Una bitácora automática añade allí una entrada cuando concluyen workflows de la rama `main`: registra ejecuciones y artefactos, pero no convierte por sí sola un resultado en mejora científica.
+
 
 ---
 
