@@ -71,7 +71,7 @@ Para las métricas y el protocolo externo, consulta [MMLU-Pro y su protocolo de 
 
 ## Aviso
 
-> Sepan cuantos este repositorio vieren que aquí se hace escarnio de cuanto los doctos predicaron sobre acrecentar modelos. Non hay hueste de tarjetas gráficas, nin caudal de dineros, nin ley del escalado que valga. Hay un ingenio de cuarenta y cuatro millones que apenas distingue el saludo del mandado, y un artificio de trazas que non se rompe.
+> Sepan cuantos este repositorio vieren que aquí se hace escarnio de cuanto los doctos predicaron sobre acrecentar modelos. Non hay hueste de tarjetas gráficas, nin caudal de dineros, nin ley del escalado que valga. Hay un ingenio de nueve millones que apenas distingue el saludo del mandado, y un artificio de trazas que non se rompe.
 >
 > Al modelo non le tengo ley, ca es ruin y él lo sabe. Al artificio se la tengo entera.
 >
