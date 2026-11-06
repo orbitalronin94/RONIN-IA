@@ -117,12 +117,6 @@ def main() -> int:
         ),
         "percent_of_200gb_target": round(100 * unique_text_bytes / TARGET_BYTES, 4),
         "one_percent_milestone_reached": unique_text_bytes >= MILESTONE_BYTES,
-        "documents_with_verified_metadata_snapshots": sum(
-            1 for item in seen.values() if item.get("metadata_snapshot_sha256")
-        ),
-        "documents_without_metadata_snapshots": sum(
-            1 for item in seen.values() if not item.get("metadata_snapshot_sha256")
-        ),
         "training_eligible": False,
         "global_dedup_and_admission_still_required": True,
     }
