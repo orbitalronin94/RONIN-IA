@@ -40,6 +40,7 @@ def main() -> None:
     parser.add_argument("--base-checkpoint", type=Path, required=True)
     parser.add_argument("--seeds", required=True, help="Semillas separadas por comas")
     parser.add_argument("--steps", type=int, default=500)
+    parser.add_argument("--checkpoint-every", type=int, default=None, help="Intervalo de checkpoints para limitar I/O")
     parser.add_argument("--eval-limit", type=int, default=64, help="0 evalúa el split completo; en screening usar validation")
     parser.add_argument("--eval-split", choices=["validation", "test"], default="test", help="validation para selección; test solo para auditoría final")
     parser.add_argument("--revision", default=DATASET_REVISION)
