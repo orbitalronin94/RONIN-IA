@@ -1,22 +1,28 @@
 name: RONIN — cribado multi-semilla sin tutor + holdout por etapas
 on:
+  push:
+    branches: [experiment/seed95-10000-full-holdout]
+    paths:
+      - ".github/workflows/main-native-no-tutor-holdout.yml"
+      - "scripts/train_text.py"
+      - "scripts/screen_training_seeds.py"
   workflow_dispatch:
     inputs:
       steps:
         description: Pasos de entrenamiento desde el checkpoint propio
         required: true
-        default: "500"
+        default: "10000"
         type: string
       eval_limit:
         description: Benchmark de desarrollo (64/128/256/1024); 0 = certificación MMLU-Pro completa
         required: true
-        default: "1024"
+        default: "0"
         type: choice
         options: ["64", "128", "256", "1024", "0"]
       seeds:
         description: Semillas separadas por comas (máximo 8); con eval_limit=0 usa solo la ganadora
         required: true
-        default: "20261108"
+        default: "95"
         type: string
 permissions:
   actions: read
@@ -55,11 +61,15 @@ jobs:
             data/datasets/rights_registry
       - name: Validate budget
         run: |
-          [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -ge 100 ] && [ "$STEPS" -le 1000 ]
+          [[ "$STEPS" =~ ^[0-9]+$ ]] && [ "$STEPS" -ge 100 ] && [ "$STEPS" -le 10000 ]
           IFS=',' read -ra SEED_LIST <<< "$TRAIN_SEEDS"
           [ "${#SEED_LIST[@]}" -ge 1 ] && [ "${#SEED_LIST[@]}" -le 8 ]
           for seed in "${SEED_LIST[@]}"; do [[ "$seed" =~ ^[0-9]+$ ]] && [ "$seed" -le 2147483647 ]; done
           if [ "$EVAL_LIMIT" = "0" ]; then [ "${#SEED_LIST[@]}" -eq 1 ]; fi
+          [ "$STEPS" -eq 10000 ]
+          [ "$EVAL_LIMIT" = "0" ]
+          [ "${#SEED_LIST[@]}" -eq 1 ]
+          [ "${SEED_LIST[0]}" = "95" ]
       - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
@@ -226,8 +236,9 @@ jobs:
             --steps "$STEPS" \
             --eval-limit "$EVAL_LIMIT" \
             --revision "$MMLU_REVISION" \
-            --context-length 4096 \
-            --batch-token-budget 8192 \
+            --context-length 8192 \
+            --batch-token-budget 16384 \
+            --checkpoint-every 10000 \
             --device cpu \
             --num-threads 2 \
             --output-dir reports/seed-screen
@@ -238,7 +249,7 @@ jobs:
           name: ronin-native-no-tutor-${{ github.run_id }}
           path: |
             reports/
-            checkpoints/seed-20261108/step-00000500.pt
+            checkpoints/seed-95/step-00010000.pt
           if-no-files-found: warn
           retention-days: 90
           compression-level: 6
