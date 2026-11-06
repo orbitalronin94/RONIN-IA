@@ -1,114 +1,331 @@
 #!/usr/bin/env python3
 """Acquire official UN Parallel Corpus v1.0 English-Spanish bitext; candidate-only."""
-import argparse, gzip, hashlib, html.parser, itertools, json, re, shutil, tarfile, time, urllib.parse, urllib.request
+from __future__ import annotations
+
+import argparse
+import gzip
+import hashlib
+import html.parser
+import itertools
+import json
+import re
+import shutil
+import tarfile
+import time
+import urllib.parse
+import urllib.request
 from collections import Counter
 from pathlib import Path
 
-PAGE="https://www.un.org/dgacm/content/uncorpus/Download"
-SOURCE="https://www.un.org/dgacm/en/content/uncorpus"
-FILES=("UNv1.0.en-es.tar.gz.00","UNv1.0.en-es.tar.gz.01")
-UA="RONIN-IA-corpus-acquisition/1.0 (research; UN attribution preserved)"
-EMAIL=re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
-URL=re.compile(r"(?i)(?:https?://|www\.)")
-SYMBOL=re.compile(r"\b[A-Z]/(?:[A-Z]+/)?[A-Z0-9][A-Z0-9./-]{2,}\b")
+DOWNLOAD_PAGE = "https://www.un.org/dgacm/content/uncorpus/Download"
+SOURCE_PAGE = "https://www.un.org/dgacm/en/content/uncorpus"
+CHUNK_NAMES = ("UNv1.0.en-es.tar.gz.00", "UNv1.0.en-es.tar.gz.01")
+USER_AGENT = "RONIN-IA-corpus-acquisition/1.0 (research; UN attribution preserved)"
+EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
+URL_RE = re.compile(r"(?i)(?:https?://|www\.)")
+DOC_SYMBOL_RE = re.compile(r"\b[A-Z]/(?:[A-Z]+/)?[A-Z0-9][A-Z0-9./-]{2,}\b")
 
-class Parser(html.parser.HTMLParser):
-    def __init__(self): super().__init__(); self.hrefs=[]
-    def handle_starttag(self,tag,attrs):
-        if tag.lower()=="a":
-            href=dict(attrs).get("href")
-            if href: self.hrefs.append(href)
 
-def request(url,target=None):
-    req=urllib.request.Request(url,headers={"User-Agent":UA})
-    with urllib.request.urlopen(req,timeout=180) as r:
-        if target is None: return r.read()
-        h=hashlib.sha256(); n=0
-        with target.open("wb") as f:
+class DownloadPageParser(html.parser.HTMLParser):
+    """Collect anchor links from the official UN download page."""
+
+    def __init__(self):
+        super().__init__()
+        self.hrefs = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag.lower() == "a":
+            href = dict(attrs).get("href")
+            if href:
+                self.hrefs.append(href)
+
+
+def request_bytes(url: str) -> bytes:
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(request, timeout=180) as response:
+        return response.read()
+
+
+def download_to_file(url: str, target: Path) -> dict:
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    digest = hashlib.sha256()
+    byte_count = 0
+    with urllib.request.urlopen(request, timeout=180) as response:
+        with target.open("wb") as output:
             while True:
-                b=r.read(1024*1024)
-                if not b: break
-                f.write(b); h.update(b); n+=len(b)
-        return {"bytes":n,"sha256":h.hexdigest()}
+                chunk = response.read(1024 * 1024)
+                if not chunk:
+                    break
+                output.write(chunk)
+                digest.update(chunk)
+                byte_count += len(chunk)
+    return {"bytes": byte_count, "sha256": digest.hexdigest()}
 
-def discover():
-    p=Parser(); p.feed(request(PAGE).decode("utf-8","replace"))
-    out={}
-    for href in p.hrefs:
-        name=urllib.parse.unquote(href).rsplit("/",1)[-1].split("?",1)[0]
-        if name in FILES: out[name]=urllib.parse.urljoin(PAGE,href)
-    if any(x not in out for x in FILES): raise RuntimeError("Official UN download page did not expose both en-es chunks")
-    return out
 
-def norm(s):
+def discover_chunk_urls() -> dict[str, str]:
+    parser = DownloadPageParser()
+    parser.feed(request_bytes(DOWNLOAD_PAGE).decode("utf-8", errors="replace"))
+    urls = {}
+    for href in parser.hrefs:
+        filename = urllib.parse.unquote(href).rsplit("/", 1)[-1].split("?", 1)[0]
+        if filename in CHUNK_NAMES:
+            urls[filename] = urllib.parse.urljoin(DOWNLOAD_PAGE, href)
+    missing = [name for name in CHUNK_NAMES if name not in urls]
+    if missing:
+        raise RuntimeError(
+            "Official UN page did not expose expected en-es chunks: "
+            + ", ".join(missing)
+        )
+    return urls
+
+
+def normalize_text(value: str) -> str:
     import unicodedata
-    return " ".join(unicodedata.normalize("NFC",s).split())
 
-def main():
-    ap=argparse.ArgumentParser()
-    ap.add_argument("--out",type=Path,default=Path("artifacts/un-parallel-en-es"))
-    ap.add_argument("--max-pairs",type=int,default=2_000_000)
-    a=ap.parse_args(); a.out.mkdir(parents=True,exist_ok=True); work=a.out/"work"; work.mkdir(exist_ok=True)
-    urls=discover(); chunks=[]; archive=work/"UNv1.0.en-es.tar.gz"
-    with archive.open("wb") as dst:
-        for name in FILES:
-            part=work/name; meta=request(urls[name],part); chunks.append({"filename":name,"url":urls[name],**meta})
-            with part.open("rb") as src:
-                while True:
-                    b=src.read(1024*1024)
-                    if not b: break
-                    dst.write(b)
-    archive_digest=hashlib.sha256()
-    with archive.open("rb") as archive_stream:
-        for block in iter(lambda: archive_stream.read(1024*1024), b""):
-            archive_digest.update(block)
-    archive_hash=archive_digest.hexdigest()
-    required={".en":"english.txt",".es":"spanish.txt",".ids":"ids.txt"}; extracted={}
-    with tarfile.open(archive,"r:gz") as tf:
-        for m in tf.getmembers():
-            if not m.isfile(): continue
-            base=Path(m.name).name
-            for suffix,outname in required.items():
-                if base.endswith(suffix) and suffix not in extracted:
-                    src=tf.extractfile(m)
-                    if src is None: raise RuntimeError("Unreadable archive member "+m.name)
-                    dest=work/outname
-                    with dest.open("wb") as f:
-                        while True:
-                            b=src.read(1024*1024)
-                            if not b: break
-                            f.write(b)
-                    extracted[suffix]=dest
-    if set(extracted)!=set(required): raise RuntimeError("Unexpected archive layout; expected .en, .es and .ids files")
-    outputs={s:gzip.open(a.out/(s+".jsonl.gz"),"wt",encoding="utf-8",newline="") for s in ("train","validation","test")}
-    counts=Counter(); sizes=Counter(); excluded=Counter(); seen=set(); langbytes=Counter(); n=0
+    return " ".join(unicodedata.normalize("NFC", value).split())
+
+
+def extract_archive(archive_path: Path, work_dir: Path) -> dict[str, Path]:
+    suffix_to_name = {
+        ".en": "english.txt",
+        ".es": "spanish.txt",
+        ".ids": "ids.txt",
+    }
+    extracted = {}
+    with tarfile.open(archive_path, "r:gz") as archive:
+        for member in archive.getmembers():
+            if not member.isfile():
+                continue
+            basename = Path(member.name).name
+            for suffix, output_name in suffix_to_name.items():
+                if not basename.endswith(suffix) or suffix in extracted:
+                    continue
+                source = archive.extractfile(member)
+                if source is None:
+                    raise RuntimeError("Cannot read archive member " + member.name)
+                target = work_dir / output_name
+                with target.open("wb") as output:
+                    shutil.copyfileobj(source, output, length=1024 * 1024)
+                extracted[suffix] = target
+    if set(extracted) != set(suffix_to_name):
+        raise RuntimeError(
+            "Unexpected UN archive layout; expected .en, .es and .ids members"
+        )
+    return extracted
+
+
+def document_key_for(identifier: str, line_number: int) -> str:
+    match = DOC_SYMBOL_RE.search(identifier.upper())
+    if match:
+        return match.group(0)
+    return identifier.strip() or f"line-{line_number}"
+
+
+def split_for_document(document_key: str) -> str:
+    namespace = "RONIN-UN-ENES-v1\0"
+    digest = hashlib.sha256((namespace + document_key).encode()).digest()
+    bucket = int.from_bytes(digest[:8], "big") % 100
+    if bucket < 90:
+        return "train"
+    if bucket < 95:
+        return "validation"
+    return "test"
+
+
+def stream_hash(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for block in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=Path("artifacts/un-parallel-en-es"),
+    )
+    parser.add_argument("--max-pairs", type=int, default=2_000_000)
+    args = parser.parse_args()
+    args.out.mkdir(parents=True, exist_ok=True)
+    work_dir = args.out / "work"
+    work_dir.mkdir(exist_ok=True)
+
+    chunk_urls = discover_chunk_urls()
+    chunk_records = []
+    archive_path = work_dir / "UNv1.0.en-es.tar.gz"
+    with archive_path.open("wb") as combined:
+        for filename in CHUNK_NAMES:
+            part_path = work_dir / filename
+            metadata = download_to_file(chunk_urls[filename], part_path)
+            chunk_records.append(
+                {"filename": filename, "url": chunk_urls[filename], **metadata}
+            )
+            with part_path.open("rb") as part:
+                shutil.copyfileobj(part, combined, length=1024 * 1024)
+
+    archive_sha256 = stream_hash(archive_path)
+    extracted = extract_archive(archive_path, work_dir)
+    output_files = {
+        name: gzip.open(
+            args.out / f"{name}.jsonl.gz",
+            "wt",
+            encoding="utf-8",
+            newline="",
+        )
+        for name in ("train", "validation", "test")
+    }
+    counts = Counter()
+    split_bytes = Counter()
+    excluded = Counter()
+    language_bytes = Counter()
+    seen_pairs = set()
+    accepted_pairs = 0
+
     try:
-        with extracted[".en"].open(encoding="utf-8") as en, extracted[".es"].open(encoding="utf-8") as es, extracted[".ids"].open(encoding="utf-8") as ids:
-            for line_no,triple in enumerate(itertools.zip_longest(en,es,ids),1):
-                if any(x is None for x in triple): raise RuntimeError("EN/ES/ID files have unequal line counts")
-                en_text,es_text,identifier=(norm(x.rstrip("\r\n")) for x in triple)
-                if not en_text or not es_text: excluded["empty_pair"]+=1; continue
-                if len(en_text)<12 or len(es_text)<12: excluded["short_pair"]+=1; continue
-                if EMAIL.search(en_text) or EMAIL.search(es_text): excluded["email_pattern"]+=1; continue
-                if URL.search(en_text) or URL.search(es_text): excluded["url_pattern"]+=1; continue
-                if "\ufffd" in en_text or "\ufffd" in es_text: excluded["replacement_character"]+=1; continue
-                digest=hashlib.sha256((en_text+"\0"+es_text).encode()).hexdigest()
-                if digest in seen: excluded["exact_duplicate_pair"]+=1; continue
-                seen.add(digest)
-                match=SYMBOL.search(identifier.upper()); doc=match.group(0) if match else identifier.strip()
-                if not doc: doc="line-"+str(line_no)
-                bucket=int.from_bytes(hashlib.sha256(("RONIN-UN-ENES-v1\0"+doc).encode()).digest()[:8],"big")%100
-                split="train" if bucket<90 else ("validation" if bucket<95 else "test")
-                row={"english":en_text,"spanish":es_text,"source_id":identifier.strip(),"document_key":doc,"source_line":line_no,"language_pair":"en-es","source_dataset":"United Nations Parallel Corpus v1.0","source_version":"1990-2014","text_sha256":digest}
-                encoded=json.dumps(row,ensure_ascii=False,sort_keys=True)+"\n"
-                outputs[split].write(encoded); counts[split]+=1; sizes[split]+=len(encoded.encode())
-                langbytes["english"]+=len(en_text.encode()); langbytes["spanish"]+=len(es_text.encode()); n+=1
-                if n>=a.max_pairs: break
+        with (
+            extracted[".en"].open(encoding="utf-8") as english,
+            extracted[".es"].open(encoding="utf-8") as spanish,
+            extracted[".ids"].open(encoding="utf-8") as identifiers,
+        ):
+            rows = itertools.zip_longest(english, spanish, identifiers)
+            for line_number, triple in enumerate(rows, start=1):
+                if any(value is None for value in triple):
+                    raise RuntimeError(
+                        "UN English/Spanish/ID files have unequal line counts"
+                    )
+                english_text, spanish_text, source_id = (
+                    normalize_text(value.rstrip("\r\n")) for value in triple
+                )
+                if not english_text or not spanish_text:
+                    excluded["empty_pair"] += 1
+                    continue
+                if len(english_text) < 12 or len(spanish_text) < 12:
+                    excluded["short_pair"] += 1
+                    continue
+                if EMAIL_RE.search(english_text) or EMAIL_RE.search(spanish_text):
+                    excluded["email_pattern"] += 1
+                    continue
+                if URL_RE.search(english_text) or URL_RE.search(spanish_text):
+                    excluded["url_pattern"] += 1
+                    continue
+                if "\ufffd" in english_text or "\ufffd" in spanish_text:
+                    excluded["replacement_character"] += 1
+                    continue
+
+                pair_digest = hashlib.sha256(
+                    (english_text + "\0" + spanish_text).encode("utf-8")
+                ).hexdigest()
+                if pair_digest in seen_pairs:
+                    excluded["exact_duplicate_pair"] += 1
+                    continue
+                seen_pairs.add(pair_digest)
+
+                document_key = document_key_for(source_id, line_number)
+                split = split_for_document(document_key)
+                record = {
+                    "english": english_text,
+                    "spanish": spanish_text,
+                    "source_id": source_id.strip(),
+                    "document_key": document_key,
+                    "source_line": line_number,
+                    "language_pair": "en-es",
+                    "source_dataset": "United Nations Parallel Corpus v1.0",
+                    "source_version": "1990-2014",
+                    "text_sha256": pair_digest,
+                }
+                encoded = json.dumps(
+                    record, ensure_ascii=False, sort_keys=True
+                ) + "\n"
+                output_files[split].write(encoded)
+                counts[split] += 1
+                split_bytes[split] += len(encoded.encode("utf-8"))
+                language_bytes["english"] += len(english_text.encode("utf-8"))
+                language_bytes["spanish"] += len(spanish_text.encode("utf-8"))
+                accepted_pairs += 1
+                if accepted_pairs >= args.max_pairs:
+                    break
     finally:
-        for f in outputs.values(): f.close()
-    if n==0: raise RuntimeError("No usable aligned en-es pairs")
-    manifest={"schema_version":1,"dataset_id":"un-parallel-corpus-v1-en-es","status":"candidate_scoped_partitions_pending_review","source":SOURCE,"download_page":PAGE,"rights":"UN states that UN Parallel Corpus v1.0 contains official records and parliamentary documents in the public domain; preserve UN attribution and disclaimer.","attribution":"United Nations, Department for General Assembly and Conference Management, United Nations Parallel Corpus v1.0; Ziemski, Junczys-Dowmunt & Pouliquen (2016), LREC.","document_period":"1990-2014","excluded_source_data":["official 2015 development set","official 2015 test set","non-en-es bitext archives"],"archive_sha256":archive_hash,"chunks":chunks,"unique_aligned_pairs":n,"excluded":dict(excluded),"language_text_utf8_bytes":dict(langbytes),"partitions":{s:{"pairs":counts[s],"jsonl_utf8_bytes":sizes[s],"training_eligible":False} for s in outputs},"split_policy":"90/5/5 deterministic SHA-256 split grouped by UN document symbol extracted from source ID; full source ID fallback","training_eligible":False,"pending":["bilingual human sample review","document-key grouping audit","global exact/near deduplication","PII/privacy review","holdout contamination check","scoped admission"],"retrieved_at_utc":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())}
-    (a.out/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-    print(json.dumps({"pairs":n,"partitions":dict(counts),"excluded":dict(excluded),"language_text_utf8_bytes":dict(langbytes),"archive_sha256":archive_hash,"training_eligible":False},ensure_ascii=False,indent=2))
-    shutil.rmtree(work)
-if __name__=="__main__": main()
+        for output in output_files.values():
+            output.close()
+
+    if accepted_pairs == 0:
+        raise RuntimeError("No usable aligned UN en-es pairs were found")
+
+    manifest = {
+        "schema_version": 1,
+        "dataset_id": "un-parallel-corpus-v1-en-es",
+        "status": "candidate_scoped_partitions_pending_review",
+        "source": SOURCE_PAGE,
+        "download_page": DOWNLOAD_PAGE,
+        "rights": (
+            "UN states that UN Parallel Corpus v1.0 contains official records "
+            "and parliamentary documents in the public domain; preserve UN "
+            "attribution and disclaimer."
+        ),
+        "attribution": (
+            "United Nations, Department for General Assembly and Conference "
+            "Management, United Nations Parallel Corpus v1.0; Ziemski, "
+            "Junczys-Dowmunt & Pouliquen (2016), LREC."
+        ),
+        "document_period": "1990-2014",
+        "excluded_source_data": [
+            "official 2015 development set",
+            "official 2015 test set",
+            "non-en-es bitext archives",
+        ],
+        "archive_sha256": archive_sha256,
+        "chunks": chunk_records,
+        "unique_aligned_pairs": accepted_pairs,
+        "excluded": dict(sorted(excluded.items())),
+        "language_text_utf8_bytes": dict(language_bytes),
+        "partitions": {
+            name: {
+                "pairs": counts[name],
+                "jsonl_utf8_bytes": split_bytes[name],
+                "training_eligible": False,
+            }
+            for name in output_files
+        },
+        "split_policy": (
+            "90/5/5 deterministic SHA-256 split grouped by UN document "
+            "symbol extracted from source ID; full source ID fallback"
+        ),
+        "training_eligible": False,
+        "pending": [
+            "bilingual human sample review",
+            "document-key grouping audit",
+            "global exact/near deduplication",
+            "PII/privacy review",
+            "holdout contamination check",
+            "scoped admission",
+        ],
+        "retrieved_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+    manifest_path = args.out / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    print(
+        json.dumps(
+            {
+                "pairs": accepted_pairs,
+                "partitions": dict(counts),
+                "excluded": dict(excluded),
+                "language_text_utf8_bytes": dict(language_bytes),
+                "archive_sha256": archive_sha256,
+                "training_eligible": False,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+    shutil.rmtree(work_dir)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
