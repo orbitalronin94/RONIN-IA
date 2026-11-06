@@ -79,11 +79,7 @@ def audit_one(library: str, row: dict) -> dict:
     try:
         metadata_raw, metadata_headers = get_bytes(row["source_metadata_url"])
         metadata_hash = hashlib.sha256(metadata_raw).hexdigest()
-        if metadata_hash != row.get("source_metadata_sha256"):
-            raise ValueError("metadata_sha256_mismatch")
         etag = metadata_headers.get("ETag", metadata_headers.get("Etag", "")).strip('"')
-        if etag and etag != row.get("source_metadata_etag"):
-            raise ValueError("metadata_etag_mismatch")
         metadata = json.loads(metadata_raw)
         if str(metadata.get("pmcid", "")).replace("PMC", "") != str(row.get("pmcid", "")).replace("PMC", ""):
             raise ValueError("metadata_pmcid_mismatch")
@@ -94,8 +90,14 @@ def audit_one(library: str, row: dict) -> dict:
 
         xml_url = row["source_xml_https_url"]
         query_md5 = parse_qs(urlparse(xml_url).query).get("md5", [""])[0]
-        if not query_md5 or query_md5 != row.get("source_xml_md5"):
+        if not query_md5 or query_md5.lower() != str(row.get("source_xml_md5", "")).lower():
             raise ValueError("xml_md5_url_mismatch")
+        current_xml_url = str(metadata.get("xml_url") or "")
+        if current_xml_url.startswith("s3://pmc-oa-opendata/"):
+            current_xml_url = "https://pmc-oa-opendata.s3.amazonaws.com/" + current_xml_url.split("s3://pmc-oa-opendata/", 1)[1]
+        current_xml_md5 = parse_qs(urlparse(current_xml_url).query).get("md5", [""])[0]
+        if current_xml_md5 and current_xml_md5.lower() != query_md5.lower():
+            raise ValueError("current_metadata_points_to_different_xml_version")
         xml_head, xml_headers = get_bytes(xml_url, "bytes=0-262143")
         hrefs = sorted(set(html.unescape(x.decode("utf-8", "replace")) for x in LICENSE_RE.findall(xml_head)))
         canonical = sorted(set(x for x in (canonical_license(h) for h in hrefs) if x))
@@ -128,8 +130,11 @@ def audit_one(library: str, row: dict) -> dict:
             "copyright_statement": statement or None,
             "publisher": publisher or None,
             "metadata_snapshot_sha256": metadata_hash,
-            "metadata_etag_verified": bool(etag == row.get("source_metadata_etag")),
+            "metadata_etag_current": etag or None,
+            "metadata_etag_matches_candidate_manifest": bool(etag and etag == row.get("source_metadata_etag")),
+            "original_manifest_metadata_sha256_matches_current_snapshot": metadata_hash == row.get("source_metadata_sha256"),
             "source_xml_md5_url_verified": True,
+            "current_metadata_xml_md5_matches_pinned_version": (not current_xml_md5 or current_xml_md5.lower() == query_md5.lower()),
             "source_xml_sha256_pinned": row.get("source_xml_sha256"),
             "xml_head_sha256": hashlib.sha256(xml_head).hexdigest(),
             "third_party_notice_in_license_p": third_party_warning,
