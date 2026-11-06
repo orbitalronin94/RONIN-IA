@@ -8,7 +8,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-
 DEFAULT_MANIFEST = Path("data/datasets/libraries/manifest-64.json")
 DEFAULT_RIGHTS = Path("data/datasets/rights_registry/records.jsonl")
 MINIMUM_BYTES = 1024 * 1024
