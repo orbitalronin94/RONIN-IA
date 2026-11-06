@@ -2,29 +2,30 @@
 
 **Un modelo propio. Un pipeline reproducible. Un corpus trazable.**
 
-RONIN es un modelo causal Transformer implementado en PyTorch. El modelo operativo fijado en `main` es **RONIN-tiny-seed202-500-001**: 9.922.880 parámetros, RoPE, RMSNorm, SwiGLU, GQA y tokenización byte-v1.
+RONIN es un modelo causal Transformer implementado en PyTorch. El modelo operativo fijado en main es **RONIN-tiny-seed95-100-001**: 9.922.880 parámetros, RoPE, RMSNorm, SwiGLU, GQA y tokenización byte-v1.
 
 ## Modelo principal
 
-- Base: checkpoint anterior de `main`, SHA-256 de pesos `5aa7cd5a8188784b9fbf2e0c0454b6504d32e2188e3ac0291a0a255d88bce49e`.
-- Entrenamiento: 500 pasos adicionales de next-token prediction, semilla 202, 128.000 tokens, CPU con 2 hilos.
-- Corpus: 9.108 documentos admitidos (literatura española, Mathlib4 y 2 documentos NASA revisados individualmente); sin preguntas, QA sintético ni tutor.
-- Corpus train scoped disponible para los siguientes ciclos: **286.468 documentos y 684.738.932 bytes UTF-8**; incluye 270.244 traducciones CoVoST 2 en inglés/catalán. Sus validation/test permanecen excluidos. Este inventario ampliado no se atribuye retroactivamente al checkpoint actual, que sigue entrenado con el corpus indicado arriba.
-- Checkpoint de origen: SHA-256 `86d7d97360f1eb0ac35e9dc12f69c366101629641115ba1c2a1341b2b7d257ae`.
-- Run: [GitHub Actions #42071401130](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42071401130).
-- Artefacto de origen: `ronin-corpus-seed-202-500steps-42071401130`. El workflow de fijación extrae y valida el state_dict y lo versiona como `weights/ronin-main.pt`; el manifiesto `weights/main-model.json` conserva hashes y procedencia.
+- Base: RONIN-tiny de main, pesos SHA-256 ee250e1b0e99f2983267ae030dd7d589395e25de028bb052dbff33894c8fe4b7.
+- Entrenamiento: 100 pasos adicionales de next-token prediction, semilla 95, 25.600 tokens, CPU; sin tutor ni preguntas de benchmark en los gradientes.
+- Corpus: 286.468 unidades train-scoped y 684.738.932 bytes UTF-8 (literatura española, Mathlib4, NASA revisado, Papers propios, ScienceVerse CC-BY y CoVoST 2 CC0). Las particiones validation/test permanecen excluidas de los gradientes.
+- Checkpoint de origen: SHA-256 161c5f414c5aa116b7461d76efd4dfbbffa9d6c72fe4da82cc6bae85f3f60409.
+- Run: [GitHub Actions #42121731925](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42121731925).
+- Artefacto de origen: ronin-corpus-100-runs-100-steps-42121731925; el workflow valida la arquitectura y extrae únicamente los pesos del modelo, sin estado del optimizador.
 
 ### Evaluación pareada antes/después
 
-| Métrica | Main anterior | Seed 202 | Cambio |
+| Métrica | Main anterior | Seed 95 | Cambio |
 |---|---:|---:|---:|
-| Validación interna BPB | 4,4189 | 3,8783 | -12,23 % |
-| Validación interna PPL | 21,3904 | 14,7058 | -31,25 % |
-| MMLU-Pro validation | 5/50 (10 %) | 5/50 (10 %) | 0 pp |
+| Validación interna BPB | 4,5654 | 4,3373 | -4,99 % |
+| Validación interna PPL | 23,6764 | 20,2137 | -14,63 % |
+| MMLU-Pro validation | 5/50 (10 %) | 7/50 (14 %) | +4 pp |
 
-El screening MMLU-Pro usó los mismos 50 IDs, revisión `b189ec765aa7ed75c8acfea42df31fdae71f97be`, selección estratificada determinista y cobertura del 100 %. La muestra es pequeña (cada acierto equivale a 2 puntos porcentuales), pertenece al split `validation` y **no es el protocolo oficial ni una certificación de razonamiento**. El candidato no mejoró los aciertos MMLU-Pro; la mejora observada corresponde a predicción de texto en la validación interna.
+El cribado MMLU-Pro utilizó los mismos 50 IDs del split validation, revisión b189ec765aa7ed75c8acfea42df31fdae71f97be, selección estratificada determinista y cobertura del 100 %. La muestra no es el conjunto completo ni el protocolo oficial. Cada acierto equivale a 2 puntos porcentuales; por tanto, el resultado **no certifica razonamiento general** y requiere evaluación independiente en un holdout no usado para seleccionar la semilla.
 
-Por decisión del proyecto, este checkpoint queda fijado como **base operativa de los próximos experimentos**, no como una afirmación de superioridad general. Los ciclos siguientes medirán el mismo holdout antes y después, conservarán el checkpoint de partida y no promocionarán automáticamente candidatos.
+Por decisión explícita del propietario del proyecto, seed 95 queda fijada como **base operativa de main** tras el screening de 100 semillas. La promoción no cambia la clasificación de la evidencia: el resultado sigue siendo SCREENING_ONLY, no una afirmación de superioridad general. Se conservan el hash del checkpoint, el hash de los pesos compactos y la procedencia en weights/main-model.json.
+
+El corpus train-scoped ampliado no se atribuye retroactivamente a los entrenamientos anteriores. Los siguientes ciclos medirán el mismo holdout antes y después, conservarán el checkpoint de partida y no promocionarán candidatos automáticamente.
 
 ## Estructura del repositorio
 
