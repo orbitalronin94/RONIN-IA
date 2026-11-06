@@ -21,6 +21,9 @@ def test_editorial_notice_titles_are_held() -> None:
     assert classify_editorial_notice("A study – CORRIGENDUM") == (
         "correction_or_editorial_notice"
     )
+    assert classify_editorial_notice("A study - correction") == (
+        "correction_or_editorial_notice"
+    )
 
 def test_legitimate_research_titles_are_not_held() -> None:
     assert classify_editorial_notice(

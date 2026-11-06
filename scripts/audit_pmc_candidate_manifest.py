@@ -31,7 +31,7 @@ EDITORIAL_PREFIX = re.compile(
     re.IGNORECASE,
 )
 EDITORIAL_SUFFIX = re.compile(
-    r"\b(?:corrigendum|erratum|correction|addendum)\s*$",
+    r"(?:^|[—–-:]\s*)(?:corrigendum|erratum|correction|addendum)\s*$",
     re.IGNORECASE,
 )
 
