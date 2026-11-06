@@ -44,13 +44,13 @@ RONIN es un modelo causal Transformer implementado en PyTorch. El proyecto explo
 | Parámetros | **100.900.160 (~100,9 M)** |
 | Expansión | ×10,17 desde el checkpoint de 9,9 M |
 | Pasos de continuación | 500 |
-| Checkpoint | [Artefacto del run #42203609278](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278/artifacts/13495833454) |
+| Checkpoint | [Artefacto del nuevo main — run #42207268776](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42207268776/artifacts/13497987527) |
 | SHA-256 | `f3f8e2e75e418f8630372c242378a28010db83148d169d85ad3e4f73114cda9a` |
 | Manifiesto | [ronin-drosophila-main.json](weights/ronin-drosophila-main.json) |
 
 El checkpoint de 403.629.045 bytes se conserva como artefacto de GitHub Actions; no se ha copiado a `weights/ronin-main.pt`. El modelo compacto de 9.922.880 parámetros sigue empaquetado como fallback en [weights/ronin-main.pt](weights/ronin-main.pt), con su identidad descrita en [main-model.json](weights/main-model.json).
 
-La expansión conservó la función antes del entrenamiento (diferencia máxima absoluta de logits: 1,4305×10⁻⁶). En el screening MMLU-Pro pareado obtuvo 5/64 antes y 5/64 después: no se detectó regresión en esa muestra, pero tampoco mejora. Es un screening de validación, no un holdout independiente completo.
+La expansión conservó la función antes del entrenamiento (diferencia máxima absoluta de logits: 1,4305×10⁻⁶). El nuevo run #42207268776 repitió el entrenamiento de 500 pasos y produjo exactamente el mismo checkpoint que #42203609278: SHA-256 idéntico. En el screening MMLU-Pro pareado obtuvo 5/64 antes y 5/64 después: no se detectó regresión en esa muestra, pero tampoco mejora. Es un screening de validación, no un holdout independiente completo.
 
 </details>
 
@@ -75,6 +75,17 @@ Quien viniere con la tabla de los modelos frontera en la mano, tórnese por do v
 #### De la humildad del número
 
 Non fagamos como los mercaderes que llaman seda al hilo. Un delta máximo absoluto de logits de 1,4305×10⁻⁶ demuestra que la expansión conservó la función antes del entrenamiento; non demuestra que la criatura sepa más. Conservar la función es oficio de cirujano; aprender es oficio de maestro. La mosca ha pasado por el cirujano. El maestro aún non ha llegado.
+
+
+### Del pacto infernal: PyTorch, Microsoft y la mosca
+
+Y aconteció que, para dar cuerpo a la criatura, hubimos de parlamentar con dos potestades del averno informático. La primera fue **PyTorch**, grimorio tensorial mediante el cual los números obedecen, los gradientes descienden y las matrices reclaman sacrificios de memoria. La segunda fue **Microsoft**, bajo cuya jurisdicción de nubes y Actions se encendieron los hornos donde la criatura fue expandida y sometida a quinientos pasos de penitencia.
+
+No se afirme por ello que PyTorch pertenezca a Microsoft: son entidades distintas; aquí se las reúne por conveniencia literaria y por el común estrépito de sus máquinas. El pacto verdadero, menos sobrenatural y más verificable, fue éste: código ejecutado en PyTorch, cómputo hospedado por GitHub Actions, artefactos sellados con SHA-256 y un manifiesto que deja constancia de lo ocurrido.
+
+**La cláusula más cruel del pacto:** si después de quinientos pasos la mosca no aprende más, los demonios no devuelven el tiempo de CPU. Y si el siguiente ritual produce el mismo hash, tampoco conceden una segunda alma: conceden reproducibilidad.
+
+Que conste, pues, que la criatura no ha vencido al averno. Ha conseguido que el averno le facture el mismo milagro en menos minutos.
 
 ---
 
@@ -223,9 +234,9 @@ Los workflows evolucionan. Revisa el YAML y los inputs del run concreto; sus val
 
 ## Modelo experimental principal: Ronin - Drosophila
 
-La referencia experimental vigente es **Ronin - Drosophila (100.900.160 parámetros)**, promovida por decisión explícita tras el run [#42203609278](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278). Consulta el [manifiesto principal](weights/ronin-drosophila-main.json) para hashes, corpus, arquitectura y evaluación.
+La referencia experimental vigente es **Ronin - Drosophila (100.900.160 parámetros)**, promovida como nuevo `main` experimental tras el run [#42207268776](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42207268776). Consulta el [manifiesto principal](weights/ronin-drosophila-main.json) para hashes, corpus, arquitectura y evaluación.
 
-El checkpoint de 403.629.045 bytes se sirve como [artefacto de GitHub Actions](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278/artifacts/13495833454). Por tamaño, no reemplaza el archivo Git [weights/ronin-main.pt](weights/ronin-main.pt): ese paquete de 9,9 M permanece como fallback compacto. La promoción experimental no debe confundirse con sustituir físicamente el paquete distribuido.
+El checkpoint de 403.629.045 bytes se sirve como [artefacto del nuevo main en GitHub Actions](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42207268776/artifacts/13497987527). Por tamaño, no reemplaza el archivo Git [weights/ronin-main.pt](weights/ronin-main.pt): ese paquete de 9,9 M permanece como fallback compacto. La promoción experimental no debe confundirse con sustituir físicamente el paquete distribuido.
 
 La evidencia disponible acredita la expansión funcional (logit delta máximo 1,4305×10⁻⁶ antes de entrenar) y ausencia de regresión detectada en el screening pareado MMLU-Pro (5/64 antes y después). No acredita una mejora general de razonamiento. Los controles globales G-0, near-duplicates y contaminación de holdout continúan declarados como FAIL/PENDING en el manifiesto; se mantienen visibles para no ocultar límites del experimento.
 
