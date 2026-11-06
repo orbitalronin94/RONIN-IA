@@ -77,15 +77,15 @@ def validate(record: dict, line: int | str, policy: dict) -> list[str]:
         errors.append(f"line {line}: license/basis {license_id!r} is not allowlisted")
 
     scope = record["rights_assertion_scope"]
-    if scope not in ALL_SCOPES:
+    if not isinstance(scope, str) or scope not in ALL_SCOPES:
         errors.append(f"line {line}: invalid rights_assertion_scope")
 
     level = record["rights_level"]
-    if level not in {"A", "B", "C", "D"}:
+    if not isinstance(level, str) or level not in {"A", "B", "C", "D"}:
         errors.append(f"line {line}: invalid rights_level")
 
     review_state = record["third_party_content_review"]
-    if review_state not in REVIEW_STATES:
+    if not isinstance(review_state, str) or review_state not in REVIEW_STATES:
         errors.append(f"line {line}: invalid third_party_content_review state")
     if level == "A" and review_state not in {"clear", "excluded_or_separately_cleared"}:
         errors.append(f"line {line}: level A requires third-party content clearance or explicit exclusion")
@@ -106,7 +106,7 @@ def validate(record: dict, line: int | str, policy: dict) -> list[str]:
             errors.append(f"line {line}: jurisdictions_cleared contains unsupported jurisdictions")
 
     signoff = record.get("human_legal_signoff")
-    if signoff is not None and signoff not in SIGNOFF_STATES:
+    if signoff is not None and (not isinstance(signoff, str) or signoff not in SIGNOFF_STATES):
         errors.append(f"line {line}: invalid human_legal_signoff state")
 
     public_domain_evidence = record.get("public_domain_evidence_uri")
