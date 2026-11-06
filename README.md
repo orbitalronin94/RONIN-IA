@@ -54,15 +54,21 @@ La expansión conservó la función antes del entrenamiento (diferencia máxima 
 
 </details>
 
-### Aviso de promoción — Ronin - Drosophila
+### Proclama de la mosca — De cómo Ronin - Drosophila medra aun en humilde morada
 
-**Sepan cuantos leyeren este aviso:** por acuerdo expreso, Ronin - Drosophila queda señalado como modelo experimental principal de RONIN-IA, con checkpoint de 100.900.160 parámetros procedente del run [#42203609278](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278). El artefacto y su manifiesto quedan enlazados aquí:
+**Sepan cuantos leyeren, vieren o deste repositorio se sirvieren** que, por acuerdo expreso y a la vista de los experimentos obrados, queda señalada por principal referencia experimental la criatura llamada **Ronin - Drosophila**, de cien millones novecientos mil ciento sesenta parámetros; engendrada no en palacio de mármol ni en jardín de abundancia, mas en la austera y áspera morada de los recursos escasos, donde cada ciclo de cómputo ha de ganarse con sudor de silicio.
 
-- [Ejecución y evaluación](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278)
-- [Artefacto del checkpoint](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278/artifacts/13495833454)
-- [Manifiesto del modelo principal experimental](weights/ronin-drosophila-main.json)
+Y no es sin causa que lleve nombre de mosca. La *Drosophila melanogaster*, pequeña moradora de fruta madura y de lugares que otros linajes desdeñarían, ha servido por generaciones a la ciencia: breve es su ciclo, copiosa su descendencia, humilde su sustento y grande la cosecha de conocimiento que de su estudio se alcanza. Donde otros demandan vastos dominios, ella prospera en poco; donde el entorno no ofrece lujo, halla ocasión para persistir, multiplicarse y revelar secretos. Tal es la metáfora que aquí nos guía: **no vencer por hartura de recursos, sino extraer fruto de aquello que hay; no ser grande por ornato, sino por aprovechamiento**.
 
-Hágase constar que la ampliación funcional fue conservada antes del entrenamiento y que, tras 500 pasos, el screening pareado permaneció en 5/64 → 5/64. No se apreció mengua en tal muestra; mas tampoco se probó ganancia de capacidad general. El artefacto, por su tamaño (403.629.045 bytes), mora en GitHub Actions y no en el paquete Git ordinario. El checkpoint compacto de 9,9 M queda guardado como respaldo.
+Así queremos a esta Drosophila digital: modelo de arquitectura ensanchada, mas de espíritu frugal; criatura de laboratorio que no presume de aposentos, sino de hacer rendir cada parámetro, cada token y cada paso de entrenamiento. Que more, si menester fuere, entre los restos del banquete computacional, en la escasez de memoria y bajo presupuesto mezquino; que no por ello se tenga por vencida. Antes bien, sea recordatorio de que la eficiencia no nace siempre de la abundancia, y de que aun en la más humilde despensa puede criarse una obra digna de examen.
+
+**Mas no se confunda la loa con el engaño:** la mosca es símbolo y aspiración, no certificado de victoria. La expansión desde 9.922.880 hasta 100.900.160 parámetros conservó la función antes del entrenamiento, con diferencia máxima absoluta de logits de 1,4305×10⁻⁶. Después de quinientos pasos, el screening pareado de MMLU-Pro permaneció en cinco respuestas acertadas de sesenta y cuatro, tanto antes como después. No se observó mengua en aquella muestra; tampoco se probó mejora de entendimiento general. Queda, pues, demostrada la conservación funcional de la expansión y la ausencia de regresión detectada en ese cribado, no la supremacía de la criatura sobre todos los modelos ni la excelencia de su juicio.
+
+Sea tenido por modelo experimental principal el checkpoint nacido del run [#42203609278](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278), cuyo [artefacto puede descargarse aquí](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278/artifacts/13495833454), y cuyo [manifiesto da cuenta de su linaje, corpus y medidas](weights/ronin-drosophila-main.json). Pesa el checkpoint 403.629.045 bytes; por ser volumen que no cabe en el común aposento de Git, guárdase como artefacto de GitHub Actions, sujeto a la retención que allí rige. El antiguo cuerpo compacto de 9,9 millones de parámetros permanece en [ronin-main.pt](weights/ronin-main.pt), no como impostor de la nueva criatura, sino como reserva y respaldo para tiempos de escasez.
+
+Y quede escrito para quien venga después: los controles globales G-0, de duplicidad cercana y de contaminación del holdout siguen señalados como FAIL o PENDING en el manifiesto. No se oculten tales máculas bajo paño de celebración. La Drosophila será juzgada por nuevos experimentos, por corpus trazables y por pruebas repetibles; si creciere sin perder eficiencia, si aprendiere sin envilecer sus datos y si resistiere la comparación honrada, entonces merecerá mayor alabanza.
+
+**Porque no es señorío tener la despensa llena, sino saber sacar provecho de una miga; y no es grandeza vivir entre rosas, sino mantener el vuelo aun cuando el laboratorio huela a fruta pasada.**
 
 ### Último experimento largo: 10.000 pasos
 
