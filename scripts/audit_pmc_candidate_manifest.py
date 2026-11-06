@@ -6,7 +6,7 @@ import argparse
 import hashlib
 import json
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -233,7 +233,7 @@ def audit_records(
 
     report: dict[str, Any] = {
         "schema": "ronin-pmc-candidate-screen-v1",
-        "reviewed_at_utc": datetime.now(timezone.utc).isoformat(),
+        "reviewed_at_utc": datetime.now(UTC).isoformat(),
         "source_manifest": str(DEFAULT_MANIFEST),
         "source_manifest_sha256": manifest_sha256,
         "candidate_documents": len(records),
