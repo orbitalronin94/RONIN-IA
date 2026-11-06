@@ -1,0 +1,75 @@
+{
+  "schema": "ronin-document-quality-review-overlay-v1",
+  "review_date": "2026-11-06",
+  "dataset_id": "nasa-ntrs-public-use-v1",
+  "review_type": "assistant_content_quality_screen",
+  "reviewer_role": "AI-assisted content triage; not human legal sign-off",
+  "scope": "Six records previously labelled assistant_review_pass_candidate_only. Each exact text payload was opened and inspected. This overlay supersedes only the earlier assistant quality suggestion; it does not change NASA rights metadata or claim individual human review.",
+  "training_eligible": false,
+  "decision": "hold_all_six",
+  "summary": "The earlier assistant-pass label was too permissive. Five records show systematic OCR character loss (notably dropped 't' characters) and/or severely garbled tables; one is a slide/figure-heavy extraction with repeated graph axes and local browser-address artifacts. None should enter train without source-PDF re-extraction and a new exact-hash review.",
+  "records": [
+    {
+      "document_id": "20220017876",
+      "title": "Energy landscape in Ni-Co-Cr and related alloys",
+      "text_sha256": "6368ef8a7b60bc3cd8a3ea6f9fcee13ca00ae802ec0836f631f3cbcb46b3a717",
+      "text_bytes": 19785,
+      "quality_decision": "hold",
+      "reason": "Slide/figure-heavy extraction: repeated graph axes, duplicated figure labels and chart fragments dominate; local 127.0.0.1 browser address/timestamps leak into extracted text; usable abstract but body is not a coherent article.",
+      "next_action": "Re-extract from source PDF with layout-aware OCR and retain only if the article body can be reconstructed coherently."
+    },
+    {
+      "document_id": "20230003042",
+      "title": "Thermo-Optical Properties of Lunar Dust Simulants",
+      "text_sha256": "2d5a7ec4c22a695cbe4b61432163e936f9a83f22e8ea5414dfd97ff90f1bbd68",
+      "text_bytes": 19118,
+      "quality_decision": "hold",
+      "reason": "Systematic OCR character loss throughout the document (for example, 'Introduction' becomes 'In roduc ion', and 'thermal' becomes 'hermo'); words and headings are corrupted across nearly every paragraph.",
+      "next_action": "Re-extract from source PDF; do not repair by blind character substitution."
+    },
+    {
+      "document_id": "20230005951",
+      "title": "Development of Two High-Energy Bus ‘Cores’",
+      "text_sha256": "dad237c5c255f2d9352fbfe1a268c653927e4b68b4a20bd8c0b3fe754e58f2b8",
+      "text_bytes": 28726,
+      "quality_decision": "hold",
+      "reason": "Systematic missing 't' characters across headings and technical prose; slide deck with repeated slide labels and large numeric chart dumps rather than a clean article transcript.",
+      "next_action": "Re-extract source slides with layout-aware OCR; retain only coherent text and captions."
+    },
+    {
+      "document_id": "20230008492",
+      "title": "Reactive Additive Manufacturing for Fourth Industrial Revolution Exploration Systems (RAMFIRE)",
+      "text_sha256": "f82eadef3e41d7648c12184dc7a5008c66fccd2976ec722efb195d843d223510",
+      "text_bytes": 1444,
+      "quality_decision": "hold",
+      "reason": "Only 1,444 bytes; mostly labels and image filenames, no substantive continuous explanation. Below the repository's 1,000-character/150-word minimum after accounting for actual content.",
+      "next_action": "Exclude unless a substantially complete source document is obtained."
+    },
+    {
+      "document_id": "20230013676",
+      "title": "In-Space Transportation Sensitivity to Roundtrip Mission Duration and Mars Vicinity Stay Time",
+      "text_sha256": "94753538370e60e2983d1274d16a5483fbfc0fe8bd311896ef8a6bcd26ffd2ad",
+      "text_bytes": 11172,
+      "quality_decision": "hold",
+      "reason": "Systematic OCR character loss across headings and prose, plus flattened tables and corrupted numeric series; not reliable technical text as extracted.",
+      "next_action": "Re-extract from source PDF and validate equations/tables against the rendered source."
+    },
+    {
+      "document_id": "20230016792",
+      "title": "Conversion of ORDEM 3.X & MEM 3 Into STENVI File Format",
+      "text_sha256": "360a9a7910f3f68de72ca765e5afd31aaa4a6941f4c7b7cfa482ebb41a8c8518",
+      "text_bytes": 22026,
+      "quality_decision": "hold",
+      "reason": "Systematic dropped-character OCR damage throughout prose; technical tables are flattened and column relationships are difficult to reconstruct.",
+      "next_action": "Re-extract from source PDF with table-aware processing and verify against original."
+    }
+  ],
+  "unchanged_gates": [
+    "NASA public-use metadata",
+    "third-party rights status",
+    "global exact/near-duplicate",
+    "benchmark holdout",
+    "General/HKD disjointness"
+  ],
+  "admission_rule": "No document is promoted by this overlay. All six remain non-trainable until a corrected payload has a new SHA-256 and passes the full source-specific admission workflow."
+}
