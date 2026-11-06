@@ -112,6 +112,22 @@ jobs:
           test -s incoming/nasa-v2/train.txt
           cat incoming/nasa-v1/documents.train.jsonl incoming/nasa-v2/documents.train.jsonl > incoming/nasa/documents.train.jsonl
           cat incoming/nasa-v1/train.txt incoming/nasa-v2/train.txt > incoming/nasa/train.txt
+      - name: Assert pinned source hashes and six NASA records
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          sha=lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          assert sha("incoming/literature/train.txt") == "9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
+          assert sha("incoming/mathlib4/train.txt") == "7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"
+          assert sha("incoming/nasa-v1/train.txt") == "874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"
+          nasa_v2=json.loads(Path("incoming/nasa-v2/audit.json").read_text())
+          assert nasa_v2["new_train_documents"] == 4
+          assert nasa_v2["new_train_utf8_bytes"] == 669461
+          assert sha("incoming/nasa-v2/train.txt") == nasa_v2["train_sha256"]
+          assert sum(1 for line in Path("incoming/nasa/documents.train.jsonl").read_text().splitlines() if line.strip()) == 6
+          print("Pinned literature, Mathlib4 and NASA partitions verified; NASA total = 6.")
+          PY
       - name: Verify the nine owner-authorized Papers documents
         run: |
           python scripts/verify_ronin_authored_papers_training.py \
