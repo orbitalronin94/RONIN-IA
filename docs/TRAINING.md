@@ -106,7 +106,7 @@ La finalidad es que cada resultado sea interpretable y reproducible sin fingir q
 El workflow [expand-10x-from-10k.yml](../.github/workflows/expand-10x-from-10k.yml) define un experimento independiente, no una nueva línea base:
 
 - Origen inmutable: run [42181780771](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42181780771), checkpoint `checkpoints/seed-95/step-00010000.pt`, SHA-256 `7a7fe93350b72ebc8d645900c2ae8be455a60334e04ac95176e09bab72f981ed`.
-- Expansión de 9.922.880 a 100.899.840 parámetros: se mantiene el ancho residual, atención, RoPE, vocabulario y tokenizer; se ensancha SwiGLU de 854 a 12.700 canales.
+- Expansión de 9.922.880 a 100.900.160 parámetros: se mantiene el ancho residual, atención, RoPE, vocabulario y tokenizer; se ensancha SwiGLU de 854 a 12.700 canales.
 - Las nuevas columnas de salida SwiGLU se inicializan a cero. Antes de entrenar, el script exige equivalencia de logits con el checkpoint original; si no se cumple, detiene el experimento.
 - Continuación de exactamente 1.000 pasos, sin tutor, con seis particiones train scoped: literatura, Mathlib4, NASA file-reviewed, Papers propios, ScienceVerse y CoVoST 2 translation-only.
 - Validation/test no se incorporan a los gradientes. El workflow registra hashes y recuentos por fuente; los controles globales G-0, near-duplicates y contaminación del holdout siguen declarados como pendientes.
