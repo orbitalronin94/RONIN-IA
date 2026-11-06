@@ -1,11 +1,6 @@
 name: Harvest PMC OA CC0 and CC-BY corpus
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "scripts/harvest_pmc_oa_cc0_ccby.py"
-      - ".github/workflows/harvest-pmc-oa-training-candidates.yml"
   workflow_dispatch:
     inputs:
       max_text_gib:
@@ -37,7 +32,9 @@ jobs:
           sparse-checkout: |
             scripts/harvest_pmc_oa_cc0_ccby.py
             scripts/verify_pmc_oa_candidate_corpus.py
+            scripts/audit_pmc_candidate_manifest.py
             data/datasets/candidates/pmc-oa-cc0-ccby-v2
+            data/datasets/reviews
 
       - name: Check first one-percent milestone
         id: gate
@@ -72,6 +69,9 @@ jobs:
         if: steps.gate.outputs.complete != 'true'
         run: python scripts/verify_pmc_oa_candidate_corpus.py
 
+      - name: Audit editorial notices and exact license versions
+        run: python scripts/audit_pmc_candidate_manifest.py
+
       - name: Commit corpus shards and provenance to main
         if: steps.gate.outputs.complete != 'true'
         env:
@@ -79,7 +79,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/datasets/candidates/pmc-oa-cc0-ccby-v2
+          git add data/datasets/candidates/pmc-oa-cc0-ccby-v2 data/datasets/reviews/pmc-candidate-screen-2026-11-06.json
           if git diff --cached --quiet; then
             echo "No new eligible PMC documents in this run."
             exit 0
