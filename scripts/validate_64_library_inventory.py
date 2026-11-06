@@ -5,17 +5,15 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from typing import Any
-from pathlib import Path
-
-
-DEFAULT_MANIFEST = Path("data/datasets/libraries/manifest-64.json")
-DEFAULT_RIGHTS = Path("data/datasets/rights_registry/records.jsonl")
+import pathlib
+import typing
+DEFAULT_MANIFEST = pathlib.Path("data/datasets/libraries/manifest-64.json")
+DEFAULT_RIGHTS = pathlib.Path("data/datasets/rights_registry/records.jsonl")
 MINIMUM_BYTES = 1024 * 1024
 TARGET_BYTES = 10 * 1024 * 1024 * 1024
 
 
-def read_json(path: Path, errors: list[str]) -> dict[str, Any] | None:
+def read_json(path: pathlib.Path, errors: list[str]) -> dict[str, typing.Any] | None:
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
@@ -27,8 +25,8 @@ def read_json(path: Path, errors: list[str]) -> dict[str, Any] | None:
     return value
 
 
-def read_jsonl(path: Path, errors: list[str]) -> list[dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
+def read_jsonl(path: pathlib.Path, errors: list[str]) -> list[dict[str, typing.Any]]:
+    rows: list[dict[str, typing.Any]] = []
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
     except OSError as exc:
@@ -49,7 +47,7 @@ def read_jsonl(path: Path, errors: list[str]) -> list[dict[str, Any]]:
     return rows
 
 
-def sha256_file(path: Path) -> str | None:
+def sha256_file(path: pathlib.Path) -> str | None:
     digest = hashlib.sha256()
     try:
         with path.open("rb") as handle:
@@ -60,18 +58,18 @@ def sha256_file(path: Path) -> str | None:
     return digest.hexdigest()
 
 
-def nonnegative_int(value: Any) -> bool:
+def nonnegative_int(value: typing.Any) -> bool:
     return isinstance(value, int) and not isinstance(value, bool) and value >= 0
 
 
-def gate_pass(value: Any) -> bool:
+def gate_pass(value: typing.Any) -> bool:
     if not isinstance(value, str):
         return False
     normalized = value.strip().upper()
     return normalized.startswith("PASS") and "PENDING" not in normalized and "NOT_RUN" not in normalized
 
 
-def validate_inventory(manifest: dict[str, Any], root: Path) -> tuple[list[str], dict[str, Any]]:
+def validate_inventory(manifest: dict[str, typing.Any], root: pathlib.Path) -> tuple[list[str], dict[str, typing.Any]]:
     errors: list[str] = []
     policy = manifest.get("policy", {})
     inventory = manifest.get("inventory_counts", {})
@@ -418,8 +416,8 @@ def validate_inventory(manifest: dict[str, Any], root: Path) -> tuple[list[str],
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
-    parser.add_argument("--root", type=Path, default=Path("."))
+    parser.add_argument("--manifest", type=pathlib.Path, default=DEFAULT_MANIFEST)
+    parser.add_argument("--root", type=pathlib.Path, default=pathlib.Path("."))
     args = parser.parse_args()
     errors: list[str] = []
     manifest = read_json(args.root / args.manifest, errors)

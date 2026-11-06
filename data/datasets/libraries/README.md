@@ -60,3 +60,25 @@ Ejecutar:
 - `python -m pytest -q tests/test_64_library_inventory.py tests/test_rights_registry.py`
 
 El libro de ejecuciones está en [docs/RUNS.md](../../docs/RUNS.md). Un workflow verde valida estructura y consistencia; no sustituye la evidencia jurídica ni declara completas las bibliotecas.
+
+
+## Revisión de promoción — 6 de noviembre de 2026
+
+La auditoría de los seis registros NASA que figuraban como `assistant_review_pass_candidate_only` ha corregido seis falsos positivos de calidad. Se abrió cada payload de texto y los seis quedan **retenidos**, sin cambiar su estado de derechos:
+
+- 5/6 presentan pérdida sistemática de caracteres por OCR (principalmente desaparición de la letra «t»), tablas aplanadas o texto técnico corrupto.
+- 1/6 es una extracción dominada por diapositivas, ejes de gráficas repetidos y artefactos de direcciones locales.
+- El registro RAMFIRE tiene solo 1.444 bytes y carece de prosa sustantiva.
+- Los 801 registros NASA restantes que aparecen como `not_individually_reviewed` continúan bloqueados; no se infiere revisión individual a partir de una autorización de fuente.
+
+Detalle reproducible, hashes y decisiones: [revisión de calidad NASA](../reviews/nasa-assistant-quality-review-2026-11-06.json). Es una revisión de calidad asistida por IA, no una firma legal ni una autorización de derechos. Solo una reextracción que genere un nuevo hash y supere los controles puede reabrir esos seis.
+
+### Orden de trabajo para ampliar train
+
+1. **ScienceVerse:** 7.103 documentos / 426.975.945 bytes ya verificados como train scoped y consumidos por el ciclo nativo. No contarlos como Level A estricto.
+2. **CoVoST 2:** 270.244 segmentos / 18.385.485 bytes verificados en train scoped; validation/test están excluidos. Son segmentos de traducción, no documentos largos.
+3. **NASA NTRS:** 6 documentos file-reviewed ya consumidos por train (701.870 bytes). No promover el resto de los 813 sin revisión documental, recheck NASA y deduplicación.
+4. **PMC OA:** 5.006 artículos / 34.682.285 bytes siguen como candidatos CC0/CC-BY. Siguiente trabajo: asignación de bibliotecas, particionado por artículo, auditoría de calidad/privacidad y deduplicación global; todavía no son entrenables.
+5. **UN Parallel Corpus:** 2.000.000 de pares en-es adquiridos y particionados (1.736.740 train / 81.624 validation / 181.636 test); 725.039.191 bytes de texto bruto en ambos idiomas. Sigue como candidato: falta auditar agrupación documental, muestra bilingüe, privacidad, deduplicación global y holdout.
+
+La revisión no rebaja el estándar Level A estricto: el inventario continúa en 0/64 bibliotecas completas y G-0 permanece FAIL.
