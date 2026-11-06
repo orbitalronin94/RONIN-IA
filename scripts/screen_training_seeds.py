@@ -95,6 +95,15 @@ def main() -> None:
         "split": args.eval_split,
         "total_available": len(all_rows),
     }
+    if args.eval_limit == 0 and not (
+        base_mmlu.get("complete_test_set") is True
+        and base_mmlu.get("evaluated_items") == 12032
+        and base_mmlu.get("coverage") == 1.0
+    ):
+        raise RuntimeError(
+            "La medición PRE no cubrió las 12.032 preguntas del test sin exclusiones; "
+            "se cancela el entrenamiento para no presentar una auditoría incompleta."
+        )
     write_json(reports / "mmlu-holdout-before.json", base_mmlu)
 
     base_language = evaluate_checkpoint(
@@ -128,6 +137,8 @@ def main() -> None:
             "--checkpoints", str(candidate_dir),
             "--metrics-out", str(training_metrics),
         ]
+        if args.checkpoint_every is not None:
+            command.extend(["--checkpoint-every", str(args.checkpoint_every)])
         subprocess.run(command, check=True)
         candidate_checkpoint = candidate_dir / f"step-{args.steps:08d}.pt"
         if not candidate_checkpoint.is_file() or candidate_checkpoint.stat().st_size == 0:
@@ -154,6 +165,14 @@ def main() -> None:
             dataset_split_size=len(all_rows),        )
         mmlu_after["dataset_revision"] = args.revision
         mmlu_after["sampling"] = base_mmlu["sampling"]
+        if args.eval_limit == 0 and not (
+            mmlu_after.get("complete_test_set") is True
+            and mmlu_after.get("evaluated_items") == 12032
+            and mmlu_after.get("coverage") == 1.0
+        ):
+            raise RuntimeError(
+                f"La medición POST de seed={seed} no cubrió las 12.032 preguntas del test sin exclusiones."
+            )
 
         before_ids = [item["id"] for item in base_mmlu["details"]]
         after_ids = [item["id"] for item in mmlu_after["details"]]
@@ -164,8 +183,9 @@ def main() -> None:
             and base_mmlu["selected_items"] == mmlu_after["selected_items"]
             and base_mmlu["evaluated_items"] == mmlu_after["evaluated_items"]
             and before_ids == after_ids
-            and base_mmlu["coverage"] >= 0.95
-            and mmlu_after["coverage"] >= 0.95
+            and base_mmlu["coverage"] == 1.0
+            and mmlu_after["coverage"] == 1.0
+            and (args.eval_limit != 0 or (base_mmlu["complete_test_set"] and mmlu_after["complete_test_set"]))
         )
         delta_pp = (
             mmlu_after["overall"]["accuracy"] - base_mmlu["overall"]["accuracy"]
