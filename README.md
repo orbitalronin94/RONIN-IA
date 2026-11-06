@@ -54,21 +54,118 @@ La expansión conservó la función antes del entrenamiento (diferencia máxima 
 
 </details>
 
-### Proclama de la mosca — De cómo Ronin - Drosophila medra aun en humilde morada
+### Proclama de la mosca — De cómo la criatura creció más deprisa que su entendimiento
 
-**Sepan cuantos leyeren, vieren o deste repositorio se sirvieren** que, por acuerdo expreso y a la vista de los experimentos obrados, queda señalada por principal referencia experimental la criatura llamada **Ronin - Drosophila**, de cien millones novecientos mil ciento sesenta parámetros; engendrada no en palacio de mármol ni en jardín de abundancia, mas en la austera y áspera morada de los recursos escasos, donde cada ciclo de cómputo ha de ganarse con sudor de silicio.
+#### De cómo la mosca, aunque grande, aún no ha aprendido a volar
 
-Y no es sin causa que lleve nombre de mosca. La *Drosophila melanogaster*, pequeña moradora de fruta madura y de lugares que otros linajes desdeñarían, ha servido por generaciones a la ciencia: breve es su ciclo, copiosa su descendencia, humilde su sustento y grande la cosecha de conocimiento que de su estudio se alcanza. Donde otros demandan vastos dominios, ella prospera en poco; donde el entorno no ofrece lujo, halla ocasión para persistir, multiplicarse y revelar secretos. Tal es la metáfora que aquí nos guía: **no vencer por hartura de recursos, sino extraer fruto de aquello que hay; no ser grande por ornato, sino por aprovechamiento**.
+Sepan cuantos leyeren que la criatura llamada **Ronin - Drosophila**, después de quinientos pasos de continuación, non mostró mejora en el cribado que aquí se declara. En sesenta y cuatro preguntas acertó cinco antes del entrenamiento y cinco después. Non se tenga tal cuenta por prueba de entendimiento, ca solo declara lo que en aquella muestra aconteció; ni se diga que la mosca ha aprendido por haber mudado de cuerpo.
 
-Así queremos a esta Drosophila digital: modelo de arquitectura ensanchada, mas de espíritu frugal; criatura de laboratorio que no presume de aposentos, sino de hacer rendir cada parámetro, cada token y cada paso de entrenamiento. Que more, si menester fuere, entre los restos del banquete computacional, en la escasez de memoria y bajo presupuesto mezquino; que no por ello se tenga por vencida. Antes bien, sea recordatorio de que la eficiencia no nace siempre de la abundancia, y de que aun en la más humilde despensa puede criarse una obra digna de examen.
+#### De la diferencia entre crecer y aprender
 
-**Mas no se confunda la loa con el engaño:** la mosca es símbolo y aspiración, no certificado de victoria. La expansión desde 9.922.880 hasta 100.900.160 parámetros conservó la función antes del entrenamiento, con diferencia máxima absoluta de logits de 1,4305×10⁻⁶. Después de quinientos pasos, el screening pareado de MMLU-Pro permaneció en cinco respuestas acertadas de sesenta y cuatro, tanto antes como después. No se observó mengua en aquella muestra; tampoco se probó mejora de entendimiento general. Queda, pues, demostrada la conservación funcional de la expansión y la ausencia de regresión detectada en ese cribado, no la supremacía de la criatura sobre todos los modelos ni la excelencia de su juicio.
+Creció la mosca desde 9.922.880 hasta 100.900.160 parámetros, esto es, unas 10,17 veces; y el checkpoint alcanzó 403.629.045 bytes. Mas el entendimiento non creció con el cuerpo según la evaluación publicada: el screening permaneció en 5/64. Quien viniere a medir la mosca por su peso, sepa que pesa; quien viniere a medirla por su juicio, sepa que el README aún non ofrece prueba de mejora.
 
-Sea tenido por modelo experimental principal el checkpoint nacido del run [#42203609278](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278), cuyo [artefacto puede descargarse aquí](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278/artifacts/13495833454), y cuyo [manifiesto da cuenta de su linaje, corpus y medidas](weights/ronin-drosophila-main.json). Pesa el checkpoint 403.629.045 bytes; por ser volumen que no cabe en el común aposento de Git, guárdase como artefacto de GitHub Actions, sujeto a la retención que allí rige. El antiguo cuerpo compacto de 9,9 millones de parámetros permanece en [ronin-main.pt](weights/ronin-main.pt), no como impostor de la nueva criatura, sino como reserva y respaldo para tiempos de escasez.
+#### De los controles que non se ocultan
 
-Y quede escrito para quien venga después: los controles globales G-0, de duplicidad cercana y de contaminación del holdout siguen señalados como FAIL o PENDING en el manifiesto. No se oculten tales máculas bajo paño de celebración. La Drosophila será juzgada por nuevos experimentos, por corpus trazables y por pruebas repetibles; si creciere sin perder eficiencia, si aprendiere sin envilecer sus datos y si resistiere la comparación honrada, entonces merecerá mayor alabanza.
+Non se diga que la mosca vuela limpia cuando el control global G-0 figura como FAIL y los controles de duplicidad cercana y contaminación del holdout aparecen señalados como FAIL o PENDING en el manifiesto. El README non desglosa allí el estado individual de estos dos últimos controles. Mientras tales máculas permanezcan, la elegibilidad global del corpus non puede darse por certificada. Y la cortesía non es prueba.
 
-**Porque no es señorío tener la despensa llena, sino saber sacar provecho de una miga; y no es grandeza vivir entre rosas, sino mantener el vuelo aun cuando el laboratorio huela a fruta pasada.**
+#### Del que viene a comparar con los grandes
+
+Quien viniere con la tabla de los modelos frontera en la mano, tórnese por do vino: este repositorio non aporta aquí una comparación directa con ellos. La mosca non reclama el trono ni pretende vencer al halcón. Reclama, por agora, que se puedan examinar sus parámetros, hashes, runs, corpus y límites. El que busque una victoria en benchmarks frontera, non la hallará demostrada en estas páginas.
+
+#### De la humildad del número
+
+Non fagamos como los mercaderes que llaman seda al hilo. Un delta máximo absoluto de logits de 1,4305×10⁻⁶ demuestra que la expansión conservó la función antes del entrenamiento; non demuestra que la criatura sepa más. Conservar la función es oficio de cirujano; aprender es oficio de maestro. La mosca ha pasado por el cirujano. El maestro aún non ha llegado.
+
+---
+
+## Anexo I — Máculas declaradas
+
+| Control o indicador | Estado publicado | Consecuencia práctica |
+|---|---|---|
+| G-0 global | **FAIL** | El inventario declara 0/64 bibliotecas globalmente training-eligible. |
+| Near-duplicates | **FAIL o PENDING**; el README no precisa cuál | No debe afirmarse que el control de duplicidad está superado. |
+| Contaminación de holdout | **FAIL o PENDING**; el README no precisa cuál | La limpieza del holdout no puede darse por certificada. |
+| Bibliotecas que alcanzan el mínimo Level A | **5/64** | Solo cinco bibliotecas alcanzan ese umbral del inventario. |
+| Bibliotecas globalmente training-eligible | **0/64** | No hay bibliotecas con elegibilidad global declarada. |
+
+**Una mácula declarada sigue siendo mácula. Que se vea no la cura.**
+
+El README indica que solo las particiones `train` expresamente admitidas pueden alimentar gradientes y que validation/test permanecen aislados. También advierte que los totales del inventario documental no equivalen al corpus utilizado en todos los entrenamientos.
+
+## Anexo II — Lo que no consta (y debería)
+
+| Dato ausente del README | Por qué importa |
+|---|---|
+| Tokens vistos en los 500 pasos de Drosophila | Sin batch, longitud de secuencia o tokens procesados no se puede cuantificar el presupuesto efectivo de entrenamiento. |
+| Tokens procesados en el run de 10.000 pasos | El README declara 256.612.919 bytes de corpus combinado, no tokens vistos durante el entrenamiento. |
+| Checkpoint exacto de partida del run de 10.000 pasos | Sin esa identidad no puede reconstruirse con precisión la relación entre el modelo inicial y el candidato final. |
+| Varianza entre seeds para el modelo de 100,9 M | El README identifica un run de Drosophila, pero no publica una evaluación multi-seed de ese modelo. |
+| Pares discordantes del cambio MMLU-Pro | Se publican los totales antes/después, pero no cuántas preguntas pasaron de incorrectas a correctas y viceversa. |
+| Intervalo de confianza de la diferencia MMLU-Pro | Sin los datos pareados por pregunta no debe inventarse un intervalo ni una prueba de significación. |
+| Minutos de GitHub Actions por run | El README no declara el coste temporal de ejecución. |
+| Retención exacta del artefacto de 403.629.045 bytes | Se advierte que está sujeto a la retención de GitHub Actions, pero no se indica cuántos días ni una copia espejo. |
+
+**Lo que no consta no es que no exista: es que no se puede auditar desde este README. Y lo que no se audita, no se cita como hecho.**
+
+## Anexo III — La mosca y el azar
+
+El README publica un screening MMLU-Pro de **5/64 antes y 5/64 después**. La proporción observada es **7,81 %** en ambas mediciones (cálculo derivado de 5 dividido entre 64).
+
+Pero el README no declara en este bloque el número de opciones por pregunta ni un modelo nulo de respuesta aleatoria. Por tanto, no corresponde afirmar aquí que 5/64 sea estadísticamente indistinguible del azar, ni que sea significativamente peor. Para sostener cualquiera de esas conclusiones habría que fijar primero el protocolo de azar y disponer de la evaluación detallada.
+
+Tampoco cabe comparar ese resultado con un supuesto 7/50 de un modelo anterior: tal cifra no aparece en el README actual. Lo que sí puede decirse, sin añadir datos, es que **la expansión ×10,17 no produjo una mejora observable en este screening: el resultado publicado permaneció en 5/64**.
+
+**No se probó mejora en esta muestra. Tampoco se ha publicado aquí evidencia suficiente para convertir ese resultado en una conclusión estadística sobre el azar.**
+
+## Anexo IV — El test y el riesgo de selección
+
+El README atribuye al run #42181780771 una evaluación MMLU-Pro de **12.032/12.032** preguntas, con resultado de **1.295/12.032 a 1.314/12.032** (+0,158 puntos porcentuales). También lo identifica expresamente como candidato para revisión que no modifica los pesos de `main`.
+
+Hay, no obstante, una limitación declarada: los controles globales G-0 y de contaminación del holdout no constan como superados. Además, si un conjunto denominado test se consulta repetidamente para escoger entre candidatos, puede acabar influyendo en la selección aunque ningún candidato se promocione automáticamente. El README no permite determinar cuántas veces se utilizó ese conjunto para selección; por ello debe documentarse ese uso antes de tratarlo como evaluación final independiente.
+
+**Mientras el control de contaminación siga sin constar como PASS, no debe presentarse la limpieza del holdout como una garantía.**
+
+## Anexo V — Presupuesto de entrenamiento: lo que sí y lo que no sabemos
+
+Para Drosophila constan **500 pasos**, 100.900.160 parámetros y el screening 5/64 antes y después; no constan tokens procesados. Para el run largo constan **10.000 pasos**, 256.612.919 bytes de corpus combinado, 279.352 unidades train-scoped y la evaluación MMLU-Pro indicada arriba; no constan tokens procesados ni el checkpoint exacto de partida.
+
+El README tampoco proporciona una base para calcular la relación tokens/parámetro ni para juzgar el entrenamiento frente a un óptimo Chinchilla. Los bytes del corpus no son, por sí solos, tokens vistos: no deben convertirse en tokens mediante una equivalencia supuesta.
+
+**La Drosophila puede estar poco entrenada; el README no publica los tokens necesarios para demostrar cuánto. El número debe preceder a la metáfora, no ser sustituido por ella.**
+
+## Anexo VI — El hash sin cuerpo
+
+El checkpoint de **403.629.045 bytes** se conserva como artefacto de GitHub Actions y su SHA-256 está publicado en el manifiesto. El README advierte que el artefacto está sujeto a la retención de GitHub Actions, pero no declara el plazo exacto ni una copia espejo de conservación prolongada.
+
+Si el artefacto caduca, el hash seguirá identificando el contenido esperado, pero no permitirá reconstruirlo por sí solo. Para que la verificación siga siendo posible, hace falta conservar el cuerpo del checkpoint en un almacenamiento duradero y volver a comprobar su hash al recuperarlo.
+
+**Un hash sin cuerpo es un epitafio. Sirve para recordar que existió, no para comprobar que aún poseemos el mismo artefacto.**
+
+## Anexo VII — Catecismo del escéptico
+
+Antes de citar el repositorio, conviene preguntar:
+
+1. ¿Cuál fue el checkpoint exacto de partida del run de 10.000 pasos?
+2. ¿Cuántos tokens vio Drosophila durante sus 500 pasos?
+3. ¿Cuántos pares discordantes hubo en el cambio de 1.295 a 1.314 respuestas correctas?
+4. ¿Cuál es la variación entre varias seeds del modelo de 100,9 M?
+5. ¿Cuántos minutos de Actions costó cada run?
+6. ¿Qué comprobaciones concretas faltan para que G-0 pase de FAIL a PASS?
+7. ¿Qué estado individual tienen near-duplicates y contaminación del holdout?
+8. ¿Cuántos días de retención tiene el artefacto de 403 MB?
+9. Si el artefacto caduca, ¿dónde se conserva el cuerpo verificable?
+
+**El que non se faga estas preguntas non ha mirado las trazas. Ha mirado la mosca.**
+
+## Anexo VIII — Instrucciones para quien venga a comparar con modelos frontera
+
+Si vienes a comparar la mosca con modelos frontera, advierte primero que este README no publica una evaluación directa y homogénea frente a ellos. No afirmamos victoria ni equivalencia. Lo que sí ofrece el repositorio es trazabilidad declarada: identificadores de runs, hashes, manifiestos de corpus, arquitectura, métricas y límites conocidos. Esa trazabilidad permite inspeccionar el experimento; no sustituye a una comparación de capacidades.
+
+La mosca no reclama ganar la feria. Reclama que se pueda abrir el libro de cuentas.
+
+---
+
+> **El método es largo; el modelo todavía está creciendo. Mas crecer dista de aprender: es solo ocupar más sitio en el artefacto.**
 
 ### Último experimento largo: 10.000 pasos
 
