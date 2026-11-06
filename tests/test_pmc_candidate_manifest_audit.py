@@ -82,6 +82,7 @@ def test_audit_readiness_requires_the_complete_rights_bundle() -> None:
         "license": "CC BY 4.0",
         "sha256": "a" * 64,
         "metadata_snapshot_sha256": "b" * 64,
+        "metadata_snapshot_path": "metadata-snapshots/PMC3.2.json",
         "text_bytes": 500,
         "rights_holder_or_provider": "Named publisher",
         "rights_assertion_scope": "exact_text_and_version",
@@ -135,3 +136,42 @@ def test_pmc_metadata_snapshot_rejects_hash_mismatch(tmp_path):
     }
     with pytest.raises(ValueError, match="SHA-256 changed"):
         persist_metadata_snapshot(tmp_path, record)
+
+
+
+def test_metadata_snapshot_verifier_checks_exact_file_bytes(tmp_path):
+    import hashlib
+
+    from scripts.verify_pmc_oa_candidate_corpus import verify_metadata_snapshot
+
+    raw = b'{"pmcid":"PMC9","version":1}'
+    path = tmp_path / "metadata-snapshots" / "PMC9.1.json"
+    path.parent.mkdir()
+    path.write_bytes(raw)
+    item = {
+        "metadata_snapshot_sha256": hashlib.sha256(raw).hexdigest(),
+        "metadata_snapshot_path": "metadata-snapshots/PMC9.1.json",
+    }
+    assert verify_metadata_snapshot(item, root=tmp_path) is True
+
+
+def test_metadata_snapshot_verifier_keeps_legacy_missing_snapshot_unverified(tmp_path):
+    from scripts.verify_pmc_oa_candidate_corpus import verify_metadata_snapshot
+
+    assert verify_metadata_snapshot({}, root=tmp_path) is False
+    assert verify_metadata_snapshot(
+        {"metadata_snapshot_sha256": "a" * 64}, root=tmp_path
+    ) is False
+
+
+def test_metadata_snapshot_verifier_rejects_path_escape(tmp_path):
+    import pytest
+
+    from scripts.verify_pmc_oa_candidate_corpus import verify_metadata_snapshot
+
+    item = {
+        "metadata_snapshot_sha256": "a" * 64,
+        "metadata_snapshot_path": "../outside.json",
+    }
+    with pytest.raises(ValueError, match="escapes candidate root"):
+        verify_metadata_snapshot(item, root=tmp_path)
