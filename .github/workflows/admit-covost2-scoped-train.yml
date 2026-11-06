@@ -7,11 +7,8 @@ on:
       - "scripts/ingest_covost2_translation_only.py"
       - "scripts/audit_covost2_candidate.py"
       - "scripts/promote_covost2_scoped_train.py"
-      - "scripts/validate_rights_registry.py"
       - "data/datasets/reviews/covost2-manual-review-2026-11-05.json"
-      - "data/datasets/rights_registry/records.jsonl"
-      - "data/datasets/rights_registry/policy.json"
-      - ".github/workflows/admit-covost2-scoped-train.yml"
+      - "scripts/verify_covost2_training.py"
   pull_request:
     paths:
       - "scripts/ingest_covost2_translation_only.py"
@@ -68,7 +65,7 @@ jobs:
           retention-days: 90
           compression-level: 1
       - name: Persist verified train payload and manifest on main
-        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: success() && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
