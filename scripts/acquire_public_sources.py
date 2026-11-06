@@ -26,7 +26,7 @@ BNE_TXT = "https://www.bne.es/media/datosgob/bdh/dominiopublico/dominiopublico_t
 USGS_API = "https://pubs.usgs.gov/pubs-services/publication/"
 EMAIL = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
 SSN = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
-URL_RE = re.compile(r"https?://[^\s<>\\"']+", re.I)
+URL_RE = re.compile(r"""https?://[^\s<>"']+""", re.I)
 
 
 def get(url: str, timeout: int = 90) -> bytes:
