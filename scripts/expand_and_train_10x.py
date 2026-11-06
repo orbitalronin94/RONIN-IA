@@ -150,7 +150,7 @@ def main() -> None:
     full_checkpoint.unlink()
 
     # Paired compact MMLU-Pro validation screening; never an automatic promotion.
-    from evaluate_mmlu_pro import evaluate_rows, load_external_dataset, rows_sha256, select_stratified
+    from evaluate_mmlu_pro import (\n        evaluate_rows,\n        load_external_dataset,\n        rows_sha256,\n        select_stratified,\n    )
     rows = load_external_dataset(args.mmlu_revision, split="validation")
     selected = select_stratified(rows, args.mmlu_limit, seed=2026)
     dataset_hash = rows_sha256(rows)
