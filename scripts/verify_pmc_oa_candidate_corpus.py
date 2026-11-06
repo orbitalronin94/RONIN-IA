@@ -75,21 +75,6 @@ def main() -> int:
 
                 metadata_hash = item.get("metadata_snapshot_sha256")
                 metadata_path = item.get("metadata_snapshot_path")
-                if metadata_path and not metadata_hash:
-                    raise ValueError(f"{shard}:{line_number}: metadata snapshot path has no SHA-256")
-                if metadata_hash:
-                    if not isinstance(metadata_path, str) or not metadata_path:
-                        raise ValueError(f"{shard}:{line_number}: metadata snapshot hash has no persisted path")
-                    snapshot = (ROOT / metadata_path).resolve()
-                    if ROOT.resolve() not in snapshot.parents:
-                        raise ValueError(f"{shard}:{line_number}: metadata snapshot path escapes candidate root")
-                    try:
-                        snapshot_raw = snapshot.read_bytes()
-                    except OSError as exc:
-                        raise ValueError(f"{shard}:{line_number}: metadata snapshot is missing: {metadata_path}") from exc
-                    if hashlib.sha256(snapshot_raw).hexdigest() != metadata_hash:
-                        raise ValueError(f"{shard}:{line_number}: metadata snapshot SHA-256 mismatch")
-
                 metadata_snapshot_verified = verify_metadata_snapshot(
                     item, label=f"{shard}:{line_number}"
                 )
