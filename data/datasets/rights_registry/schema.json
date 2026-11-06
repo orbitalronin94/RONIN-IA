@@ -116,7 +116,8 @@
     },
     "public_domain_evidence_uri": {
       "type": "string",
-      "format": "uri"
+      "format": "uri",
+      "description": "For public-domain-basis records, exact evidence for the named work and edition; required for Level A."
     },
     "human_legal_signoff": {
       "type": "string",
@@ -124,7 +125,8 @@
         "approved",
         "pending",
         "not_applicable"
-      ]
+      ],
+      "description": "Required and must be approved before a public-domain-basis record can be Level A."
     },
     "rights_level": {
       "type": "string",
@@ -143,5 +145,91 @@
       "type": "string",
       "const": "RONIN-RIGHTS-A-1"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "rights_level": {
+            "const": "A"
+          },
+          "license_id": {
+            "const": "PUBLIC-DOMAIN-ES-ART13"
+          }
+        },
+        "required": [
+          "rights_level",
+          "license_id"
+        ]
+      },
+      "then": {
+        "required": [
+          "public_domain_evidence_uri",
+          "human_legal_signoff"
+        ],
+        "properties": {
+          "rights_assertion_scope": {
+            "const": "exact_work_and_edition"
+          },
+          "human_legal_signoff": {
+            "const": "approved"
+          },
+          "jurisdictions_cleared": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "ES"
+                }
+              },
+              {
+                "contains": {
+                  "const": "EU"
+                }
+              },
+              {
+                "contains": {
+                  "const": "US"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rights_level": {
+            "const": "A"
+          },
+          "license_id": {
+            "enum": [
+              "CC0-1.0",
+              "CC-BY-2.0",
+              "CC-BY-3.0",
+              "CC-BY-4.0",
+              "MIT",
+              "Apache-2.0",
+              "BSD-2-Clause",
+              "BSD-3-Clause"
+            ]
+          }
+        },
+        "required": [
+          "rights_level",
+          "license_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "rights_assertion_scope": {
+            "enum": [
+              "exact_text_and_version",
+              "exact_metadata_file_and_version"
+            ]
+          }
+        }
+      }
+    }
+  ]
 }
