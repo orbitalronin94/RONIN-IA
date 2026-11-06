@@ -54,8 +54,6 @@ La evaluación asociada a esta línea base fue un screening MMLU-Pro de 50 pregu
 
 ### Candidato mergeable actual: Ronin - Drosophila
 
-<badge> Candidato mergeable · no sustituye todavía los pesos versionados en main </badge>
-
 **Nombre oficial:** **Ronin - Drosophila (100.900.160 parámetros)**  
 **Identificador técnico:** `Ronin-Drosophila-100900160`
 
