@@ -2,18 +2,18 @@
 
 Este directorio es el registro operativo de adquisición, revisión, admisión y preparación de corpus para RONIN. **Los recuentos distinguen documentos admitidos a nivel de fuente, documentos listos para entrenamiento y candidatos. No deben sumarse categorías que puedan solaparse. Esta es la única raíz canónica de datos: `data/datasets/`.**
 
-> Corte documental: 5 de noviembre de 2026. Los manifiestos enlazados son la fuente de verdad; esta página resume su estado y no sustituye sus hashes ni decisiones por documento.
+> Corte documental: 6 de noviembre de 2026. Los manifiestos enlazados son la fuente de verdad; esta página resume su estado y no sustituye sus hashes ni decisiones por documento.
 
 ## Estado actual — cifras verificadas
 
 | Fuente / corpus | Documentos | Estado documental | ¿Entrenable ahora? |
 |---|---:|---|---|
-| Literatura española legacy (`literature-es-v1`) | 608 train (+18 validation y 18 test aislados) | Admitido Level A scoped; 140.295.523 bytes train | Sí, bajo su alcance de corpus y controles; la validación global del inventario de bibliotecas sigue pendiente |
-| Lean mathlib4 (`mathlib4-v1`) | 8.697 admitidos (8.498 train, 91 validation, 108 test; 2 retenidos) | Admitido scoped; 97.629.252 bytes train; Apache-2.0; 8.650 matemáticas + 47 lógica | Sí, solo la partición train de este manifiesto; la validación global del inventario sigue pendiente |
+| Literatura española legacy (`literature-es-v1`) | 608 train (+18 validation y 18 test aislados) | Admitido scoped legacy; 140.295.523 bytes train | Train scoped histórico; no cuenta como Level A estricto v2 en las 64 bibliotecas |
+| Lean mathlib4 (`mathlib4-v1`) | 8.697 admitidos (8.498 train, 91 validation, 108 test; 2 retenidos) | Admitido scoped; 97.629.252 bytes train; Apache-2.0; 8.650 matemáticas + 47 lógica | Train scoped bajo su manifiesto; no está asignado a las 64 bibliotecas Level A estrictas |
 | NASA NTRS public-use | 813 de 824 scoped; 6 train file-reviewed; 807 aún no train | 6 documentos / 701.870 bytes en dos manifiestos file-reviewed; 4 OCR/rights holds | Sí, solo los 6 archivos revisados; recheck semanal y near-duplicate global pendientes |
 | Papers propios | 9 Markdown (README excluido) | 750.857 bytes; hashes/bytes verificados; dedup exacta contra 9.108 documentos train existentes; auditoría de estructura y privacidad PASS | Sí, train scoped interno; near-duplicate global y holdout siguen pendientes |
 | NASA file-reviewed | 6 train + 4 retenidos (subconjunto de NASA NTRS) | 701.870 bytes train; 4 nuevos promovidos tras verificar Git blob SHA-1, candidate pack y bytes; 4 OCR/rights holds | Sí, train scoped de los 6 archivos aprobados; near-duplicate global pendiente |
-| ScienceVerse | 7.403 registros fuente; 7.365 admitidos scoped; 7.103 train; 262 retenidos | 426.975.945 bytes train; CC BY/CC0 por DOI; hashes y dedup exacta cruzada PASS | Sí, train scoped en 4 bibliotecas General; near-duplicate global y holdout pendientes |
+| ScienceVerse | 7.403 registros fuente; 7.365 admitidos scoped; 7.103 train; 262 retenidos | 426.975.945 bytes train; CC BY/CC0 por DOI; hashes y dedup exacta cruzada PASS | Train scoped en 4 bibliotecas General; no cuenta como Level A estricto v2; near-duplicate global y holdout pendientes |
 | CoVoST 2 translation-only | 270.244 train; 34.051 validation y 33.678 test aislados | 18.385.485 bytes UTF-8 de texto train; 77.509.998 bytes JSONL; CC0-1.0; inglés y catalán | Sí, train scoped tras materialización verificable; solo traducciones; near-duplicate global y holdout pendientes |
 
 **Cómo leer los totales:** los cuatro manifiestos base registran 10.163 entradas (literatura, Mathlib4, NASA y Papers), más 7.403 registros fuente de ScienceVerse. CoVoST es una fuente independiente: 350.705 filas originales, 337.973 traducciones únicas tras filtros y 270.244 documentos en train. La cifra **entrenable por partición** pasa a **286.468 documentos y 684.738.932 bytes UTF-8**: 608 literatura + 8.498 Mathlib4 + 6 NASA file-reviewed + 9 Papers propios + 7.103 ScienceVerse + 270.244 CoVoST. Validation/test permanecen aislados. No es una afirmación de G-0 global ni de ausencia de near-duplicates; el estado train scoped se limita a cada manifiesto y sus controles.
@@ -60,11 +60,12 @@ El objetivo canónico es **64 bibliotecas**. General y HKD deben ser disjuntas g
 
 - Mínimo Level A: **1 MiB de texto admitido por biblioteca** (64 MiB en total).
 - Objetivo de escala: 10 GiB por biblioteca (640 GiB en total).
-- Estado del inventario Level A scoped: **7.249 documentos / 539.887.336 bytes**; **5/64** bibliotecas alcanzan el mínimo de 1 MiB, 59 están por debajo. Cuatro bibliotecas nuevas proceden de ScienceVerse: `social_sciences_general`, `biology_general`, `medicine_health_general` y `philosophy_general`.
-- Bibliotecas globalmente training-eligible en el manifiesto de 64: **0/64** por G-0; bibliotecas con train scoped habilitado: **4/64** (ScienceVerse).
-- validación global validación global: **FAIL**.
+- **Level A estricto admitido en las 64 bibliotecas: 0 documentos / 0 bytes; 0/64 alcanzan 1 MiB, 64/64 siguen por debajo y 0/64 están completas.**
+- Material scoped visible en el inventario, pero no computable como Level A estricto: **7.711 documentos / 567.271.468 bytes** en cinco bibliotecas General (608 de literatura legacy + 7.103 de ScienceVerse).
+- Registro de derechos: **11 entradas (9 A, 2 B)**. Seis A son exportaciones de metadatos; tres A describen el payload CoVoST 2, que aún no se asigna a una biblioteca. Ninguna de estas entradas equivale a una biblioteca Level A completa.
+- Train scoped habilitado en cuatro bibliotecas General de ScienceVerse; **training-eligible global: 0/64** porque G-0 sigue **FAIL**. Near-duplicate global, emparejamiento General/HKD y contaminación de holdouts siguen pendientes.
 
-El manifiesto `libraries/manifest-64.json` cuenta el corpus legacy y ScienceVerse en sus cuatro bibliotecas General. NASA y Papers conservan admisión train scoped en manifiestos propios, pero no se suman a los contadores Level A de esas bibliotecas.
+El manifiesto `libraries/manifest-64.json` mantiene separados los derechos A de origen, la admisión estricta por biblioteca y la elegibilidad global. Literatura, Mathlib4, NASA, Papers, ScienceVerse y CoVoST conservan sus manifiestos scoped; no se suman automáticamente a los contadores Level A de las 64 bibliotecas.
 
 ## Qué significa cada estado
 
@@ -133,7 +134,21 @@ Los números siguientes son **inventarios de candidatos**, no admisiones. Hay sn
 | CoVoST 2 | 350.705 filas originales; 337.973 únicas; 270.244 train, 34.051 validation y 33.678 test | **Admitido train scoped**: 18.385.485 bytes UTF-8 de texto; CC0-1.0; solo traducciones; audio, fuentes, IDs, rutas y Tatoeba excluidos. Near-duplicate global y holdout pendientes. |
 | PleIAs Common Corpus | 2.159 filas, 5.971.320 bytes | 2.149 CC0, 4 CC BY 3.0 y 6 CC BY 4.0; 17.472 filas con licencias no permitidas, 311 con patrones básicos de email/teléfono y 8 inválidas/sobredimensionadas excluidas. Revisión humana, privacidad, calidad y splits pendientes. |
 | GPLSI ClearText CAS/VAL | 17 documentos candidatos (11 CAS y 6 VAL) | Derechos de los documentos originales pendientes; un documento NC-ND en cuarentena. |
-| UN Parallel Corpus | Workflow de ingestión en-es y validador incorporados | No atribuir un recuento de textos hasta que exista un run/artefacto verificado. La fuente declara dominio público para UN Parallel Corpus v1.0; siguen pendientes hashes, calidad, privacidad, deduplicación y particiones. |
+| UN Parallel Corpus v1.0 en-es | 2.000.000 de pares candidatos; 725.039.191 bytes UTF-8 de texto en ambos idiomas | Run 42192346933 y artefacto verificado; 1.736.740 train, 81.624 validation, 181.636 test. Las tres particiones siguen `training_eligible=false`; derechos territoriales, revisión bilingüe, privacidad y deduplicación global pendientes. |
+
+### PMC OA CC0 / CC-BY: auditoría de candidatos (6 de noviembre de 2026)
+
+- El manifiesto actual contiene **5.006 documentos / 34.682.285 bytes** candidatos con hashes exactos.
+- Se retienen **1.024 avisos editoriales** (retractions, expressions of concern, corrections, corrigenda y errata), **3.151.513 bytes**; quedan 3.982 candidatos no editoriales / 31.530.772 bytes.
+- Entre los restantes, **3.939** llevan el código genérico `CC BY` sin versión explícita (30.599.774 bytes): no se puede convertir por defecto en CC BY 4.0. **43 CC0** (981.420 bytes) quedan como candidatos de revisión, no admitidos.
+- Los 5.006 registros actuales carecen del hash SHA-256 del snapshot de metadatos y de resolución individual del titular, terceros y cobertura ES/EU/US. Resultado: **0 documentos / 0 bytes Level A estrictos**.
+- Se endureció el harvester para no aceptar códigos CC BY sin versión, no asumir 4.0, conservar el SHA-256 del JSON de metadatos por artículo/versión y excluir avisos editoriales. El workflow de auditoría independiente genera un informe reproducible; el corpus sigue siendo candidate-only.
+
+### UN Parallel Corpus v1.0 en-es: adquisición verificada
+
+- Run [42192346933](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42192346933), artefacto [13490034426](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42192346933/artifacts/13490034426); ZIP de 365.422.326 bytes, SHA-256 verificado `5231fc6951b06f7ea59e1d3ed46f502f982432568556e6266d0501035c50fce1`.
+- 2.000.000 de pares alineados; train 1.736.740, validation 81.624 y test 181.636. Los conjuntos oficiales de 2015 no se descargaron.
+- Los hashes por par, los recuentos/bytes JSONL y la separación de claves documentales entre splits se verificaron sin colisiones. El lote sigue como candidato: falta revisar la agrupación documental, muestra bilingüe, privacidad, near-duplicates globales y la cobertura territorial de la declaración de dominio público.
 
 **No existe un total global fiable de candidatos únicos.** El ledger de ingestión registra runs, artefactos y hashes por fuente; el número de filas de un snapshot no debe sumarse con otra exportación de la misma familia sin reconciliación.
 
