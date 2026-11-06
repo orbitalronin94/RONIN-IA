@@ -9,6 +9,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 DEFAULT_MANIFEST = Path(
     "data/datasets/candidates/pmc-oa-cc0-ccby-v2/manifest.jsonl"
@@ -62,6 +63,13 @@ def canonical_license_id(value: str) -> str | None:
 
 def _valid_hash(value: Any) -> bool:
     return isinstance(value, str) and SHA256.fullmatch(value) is not None
+
+
+def _valid_url(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    parsed = urlparse(value)
+    return parsed.scheme == "https" and bool(parsed.netloc)
 
 
 def _read_manifest(path: Path) -> tuple[list[dict[str, Any]], str]:
@@ -165,7 +173,12 @@ def audit_records(
         if not _valid_hash(metadata_hash):
             missing_metadata_hash += 1
         holder = str(record.get("rights_holder_or_provider") or "").strip()
-        if not holder or holder.lower() in {"unknown", "unresolved", "n/a"}:
+        holder_valid = bool(holder) and holder.lower() not in {
+            "unknown",
+            "unresolved",
+            "n/a",
+        }
+        if not holder_valid:
             missing_rights_holder += 1
         if record.get("third_party_content_review") not in {
             "clear",
@@ -182,13 +195,20 @@ def audit_records(
             record.get("source_version")
             or (record.get("pmcid") and record.get("version") is not None)
         )
+        required_urls = (
+            "source_url",
+            "rights_statement_uri",
+            "license_uri",
+            "provenance_uri",
+        )
         if (
             canonical
             and _valid_hash(record.get("sha256"))
             and _valid_hash(metadata_hash)
-            and holder
+            and holder_valid
             and exact_scope
             and attribution
+            and all(_valid_url(record.get(key)) for key in required_urls)
             and record.get("third_party_content_review")
             in {"clear", "excluded_or_separately_cleared"}
             and {"ES", "EU", "US"}.issubset(jurisdictions)
