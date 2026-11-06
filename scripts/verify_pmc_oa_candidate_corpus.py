@@ -45,7 +45,30 @@ def main() -> int:
                     raise ValueError(f"{shard}:{line_number}: disallowed license {license_code!r}")
                 if item.get("training_eligible") is not False:
                     raise ValueError(f"{shard}:{line_number}: candidate incorrectly marked trainable")
-                seen[digest] = {"text_bytes": len(raw), "pmcid": item.get("pmcid")}
+
+                metadata_hash = item.get("metadata_snapshot_sha256")
+                metadata_path = item.get("metadata_snapshot_path")
+                if metadata_path and not metadata_hash:
+                    raise ValueError(f"{shard}:{line_number}: metadata snapshot path has no SHA-256")
+                if metadata_hash:
+                    if not isinstance(metadata_path, str) or not metadata_path:
+                        raise ValueError(f"{shard}:{line_number}: metadata snapshot hash has no persisted path")
+                    snapshot = (ROOT / metadata_path).resolve()
+                    if ROOT.resolve() not in snapshot.parents:
+                        raise ValueError(f"{shard}:{line_number}: metadata snapshot path escapes candidate root")
+                    try:
+                        snapshot_raw = snapshot.read_bytes()
+                    except OSError as exc:
+                        raise ValueError(f"{shard}:{line_number}: metadata snapshot is missing: {metadata_path}") from exc
+                    if hashlib.sha256(snapshot_raw).hexdigest() != metadata_hash:
+                        raise ValueError(f"{shard}:{line_number}: metadata snapshot SHA-256 mismatch")
+
+                seen[digest] = {
+                    "text_bytes": len(raw),
+                    "pmcid": item.get("pmcid"),
+                    "metadata_snapshot_sha256": metadata_hash,
+                    "metadata_snapshot_path": metadata_path,
+                }
 
     manifest_hashes = set(manifest)
     shard_hashes = set(seen)
@@ -66,6 +89,12 @@ def main() -> int:
         "compressed_shard_gib": round(stored_bytes / 1024**3, 4),
         "percent_of_200gb_target": round(100 * unique_text_bytes / TARGET_BYTES, 4),
         "one_percent_milestone_reached": unique_text_bytes >= MILESTONE_BYTES,
+        "documents_with_verified_metadata_snapshots": sum(
+            1 for item in seen.values() if item.get("metadata_snapshot_sha256")
+        ),
+        "documents_without_metadata_snapshots": sum(
+            1 for item in seen.values() if not item.get("metadata_snapshot_sha256")
+        ),
         "training_eligible": False,
         "global_dedup_and_admission_still_required": True,
     }
