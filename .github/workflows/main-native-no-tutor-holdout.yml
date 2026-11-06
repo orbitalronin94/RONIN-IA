@@ -1,4 +1,4 @@
-name: RONIN — cribado multi-semilla sin tutor + holdout por etapas
+name: RONIN — 10.000 pasos + auditoría completa MMLU-Pro
 on:
   push:
     branches: [experiment/seed95-10000-full-holdout]
@@ -14,7 +14,7 @@ on:
         default: "10000"
         type: string
       eval_limit:
-        description: Benchmark de desarrollo (64/128/256/1024); 0 = certificación MMLU-Pro completa
+        description: MMLU-Pro test; 0 = las 12.032 preguntas completas, sin exclusiones
         required: true
         default: "0"
         type: choice
@@ -42,9 +42,9 @@ jobs:
       MATHLIB_RUN_ID: "42026633643"
       NASA_FILE_REVIEWED_RUN_ID: "42028138060"
       MMLU_REVISION: "b189ec765aa7ed75c8acfea42df31fdae71f97be"
-      STEPS: ${{ inputs.steps || '500' }}
-      EVAL_LIMIT: ${{ inputs.eval_limit || '1024' }}
-      TRAIN_SEEDS: ${{ inputs.seeds || '20261108' }}
+      STEPS: ${{ inputs.steps || '10000' }}
+      EVAL_LIMIT: ${{ inputs.eval_limit || '0' }}
+      TRAIN_SEEDS: ${{ inputs.seeds || '95' }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -226,7 +226,7 @@ jobs:
       - name: Create internal validation split from train only
         run: |
           python scripts/prepare_legacy_training_split.py --input /tmp/ronin-native-train.txt --output-dir /tmp/ronin-native-split --validation-fraction 0.05 --seed 42006
-      - name: Screen multiple seeds against one cached compact holdout
+      - name: Train seed 95 for 10,000 steps; compare full MMLU-Pro test before and after
         run: |
           python scripts/screen_training_seeds.py \
             --text /tmp/ronin-native-train.txt \
