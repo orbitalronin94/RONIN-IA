@@ -71,3 +71,29 @@ def test_audit_never_promotes_candidates() -> None:
     assert report["strict_level_a_ready_documents"] == 0
     assert report["strict_level_a_admitted_documents"] == 0
     assert report["training_eligible"] is False
+
+
+def test_audit_readiness_requires_the_complete_rights_bundle() -> None:
+    record = {
+        "pmcid": "PMC3",
+        "version": 2,
+        "source_version": "PMC3.2",
+        "title": "A substantive article",
+        "license": "CC BY 4.0",
+        "sha256": "a" * 64,
+        "metadata_snapshot_sha256": "b" * 64,
+        "text_bytes": 500,
+        "rights_holder_or_provider": "Named publisher",
+        "rights_assertion_scope": "exact_text_and_version",
+        "attribution": "Article citation and NLM acknowledgement",
+        "source_url": "https://example.org/article",
+        "rights_statement_uri": "https://creativecommons.org/licenses/by/4.0/",
+        "license_uri": "https://creativecommons.org/licenses/by/4.0/",
+        "provenance_uri": "https://example.org/metadata.json",
+        "third_party_content_review": "excluded_or_separately_cleared",
+        "jurisdictions_cleared": ["ES", "EU", "US"],
+    }
+    report = audit_records([record], "c" * 64)
+    assert report["strict_level_a_ready_documents"] == 1
+    assert report["strict_level_a_admitted_documents"] == 0
+    assert report["training_eligible"] is False
