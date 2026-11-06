@@ -75,5 +75,13 @@ jobs:
             echo "CoVoST payload already matches the committed manifest; nothing to persist."
           else
             git commit -m "data(covost): persist verified scoped train partition"
-            git push origin HEAD:main
+            git fetch origin main
+            git rebase origin/main
+            if ! git push origin HEAD:main; then
+              echo "Concurrent main update detected; rebasing once before retry."
+              sleep 3
+              git fetch origin main
+              git rebase origin/main
+              git push origin HEAD:main
+            fi
           fi
