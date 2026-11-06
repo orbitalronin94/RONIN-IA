@@ -10,6 +10,26 @@ Last reconciled: **2026-11-06**. This ledger distinguishes a successful workflow
 - BNE: official TXT distribution returned HTTP 403. This is a source access block, not a transient 5xx; no retry loop was added.
 - Strict Level A admitted: **0 documents / 0 bytes**. Training-eligible: **0**. USGS material remains candidate/Level B pending exact-work rights and third-party review.
 
+## 2026-11-06 — UN Parallel Corpus v1.0 en-es candidate
+
+- Run: [42192346933](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42192346933) — ingest, partition validation and artifact upload completed successfully.
+- Artifact: [13490034426](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42192346933/artifacts/13490034426), 365,422,326 bytes. Downloaded and re-hashed locally: ZIP SHA-256 `5231fc6951b06f7ea59e1d3ed46f502f982432568556e6266d0501035c50fce1`, matching GitHub's artifact digest.
+- The two official source chunks total 2,090,437,729 bytes; their SHA-256 values are `a7560a7a4e28995ce3408ab0f4709411370ce5d3c8a5a332fe0871811b65ed90` and `8f841616beec53d23661c89f2d7ebadadd4ea9567c68167ed3014c3c94d4f51b`. Reconstructed source archive SHA-256: `056fa24b6d8eca50cdbbaaf36cdb6ad5a1b0df8d88176ccf76736a803d1edc19`.
+- Accepted 2,000,000 unique aligned pairs. Train: 1,736,740; validation: 81,624; test: 181,636. Raw bilingual UTF-8 text: 725,039,191 bytes (train 628,841,294; validation 29,741,420; test 66,456,477).
+- JSONL UTF-8 sizes: train 1,224,469,735; validation 57,966,948; test 127,436,498 bytes. Compressed partition SHA-256: train `c3febc6db2c5e23ad82277d4e65f6cbd2aa9aebea570b6f0dc171a9d0d423670`, validation `558e68f2e5834713d62960fe3de5d60d61fb4462f50bc635c53395218583e142`, test `7a84fc9d676f3da1b43aabdee4d7e2b4ebad95e67993bd309c369212254b8dce`.
+- Re-verification streamed all 2M rows: row counts and JSONL byte totals match the manifest; zero pair-hash mismatches, zero missing required fields, zero duplicate pair hashes across splits and zero shared document keys across train/validation/test.
+- Exclusions: 104,122 short pairs, 262,032 exact duplicate pairs, 9 email patterns and 28 URLs. The official 2015 development/test sets and non-en-es archives were not ingested.
+- **Candidate only:** every partition has `training_eligible=false`. The provider's public-domain description has not been reconciled to exact item/version evidence and ES/EU/US coverage. Bilingual human sampling, source-ID/document grouping semantics, privacy, global near-duplicate and benchmark/holdout checks remain pending. No bytes count toward the 64 strict Level-A libraries.
+
+## 2026-11-06 — PMC OA candidate audit: editorial notices and license versions
+
+- Existing manifest: 5,006 candidate article versions / 34,682,285 UTF-8 text bytes; manifest Git blob SHA-1 `a7ddaca9f6b7008f03e3dd15484f70759ecbece8`. These are not admissions.
+- A title-level audit holds 1,024 editorial notices (265 retraction notices, 95 expressions of concern, 664 corrections/corrigenda/errata/addenda), 3,151,513 bytes. The remaining 3,982 substantive-title candidates total 31,530,772 bytes.
+- After that screen, 3,939 records still expose only generic `CC BY` with no version (30,599,774 bytes); the old harvester had inferred a CC BY 4.0 URL by default. That inference is not accepted. Forty-three CC0 candidates total 981,420 bytes.
+- All 5,006 old manifest records lack an item/version metadata snapshot SHA-256. The exact copyright holder, third-party figure/table clearance and ES/EU/US rights coverage are also unresolved. **Strict Level A admitted: 0 documents / 0 bytes.**
+- Harvester hardening in commits [140dfe1](https://github.com/orbitalronin94/RONIN-IA/commit/140dfe12016d5117265d08965a0159405d3fd3ff), [e7580ec](https://github.com/orbitalronin94/RONIN-IA/commit/e7580ecde69e943e1c9a66407361e7c15b7a99f2) and [3424443](https://github.com/orbitalronin94/RONIN-IA/commit/3424443d5e66461cf15b366020b37a506f501ea3): generic CC BY is no longer canonicalized, editorial notices are excluded from future candidate batches, and exact metadata JSON snapshot hashes/URLs are retained. Missing holder, third-party and territorial evidence still blocks Level A.
+- Audit workflow [definition](https://github.com/orbitalronin94/RONIN-IA/blob/main/.github/workflows/audit-pmc-candidate-corpus.yml) runs hash verification and candidate audit separately from the expensive scheduled/manual harvester. Tests cover title classification, exact license versioning and the complete Level-A evidence bundle.
+
 ## 2026-11-05 — ScienceVerse train audit
 
 - Run: [42110130695](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42110130695) — audit job completed successfully; every audit step passed.
@@ -56,7 +76,7 @@ Earlier CoVoST reruns [42194688065](https://github.com/orbitalronin94/RONIN-IA/a
 - Strict Level A admitted into libraries: **0 documents / 0 bytes**; 0/64 reach 1 MiB; 0/64 fully complete; 0/64 training-eligible.
 - Preserved scoped material, reported separately: 7,711 documents / 567,271,468 UTF-8 bytes across five General libraries (608 legacy literature + 7,103 ScienceVerse). None counts toward the strict Level-A minimum until its evidence is reconciled.
 - CoVoST 2 rights-Level-A train payload: 270,244 segments / 18,385,485 UTF-8 bytes, not yet assigned to a library because global near-duplicate and benchmark/holdout gates are pending.
-- Rights ledger: 11 records (9 A, 2 B); six A records are metadata-only and do not authorize training on the described works.
+- Rights ledger: 11 records (9 A, 2 B); six A records are metadata-only and do not authorize training on the described works. Three A records describe CoVoST 2 text, but that source is not assigned to a strict Level-A library.
 - Global G-0: **FAIL**. No library is training-eligible.
 
 ## Reconciliation commits
@@ -65,3 +85,11 @@ Earlier CoVoST reruns [42194688065](https://github.com/orbitalronin94/RONIN-IA/a
 - [e7ee36d](https://github.com/orbitalronin94/RONIN-IA/commit/e7ee36dfd7c14edd999fc384b2cdb9f85ac5e47c) — strict Level-A accounting in 64-library inventory.
 - [8507390](https://github.com/orbitalronin94/RONIN-IA/commit/8507390640c465102894ffa42f4bfefd01d6c7e0) — library documentation corrected.
 - [af6e732](https://github.com/orbitalronin94/RONIN-IA/commit/af6e732079212bd09aafefb434077b33755f550d) — dataset README corrected.
+
+
+## Reconciliation commits — 2026-11-06
+
+- [826f8d6](https://github.com/orbitalronin94/RONIN-IA/commit/826f8d64b63ab806335a8bc755450818b176e503) — repaired Ruff import ordering in the 64-library validator.
+- [91a14b0](https://github.com/orbitalronin94/RONIN-IA/commit/91a14b0a15b4926362d4254fe1829e014fe3c8cb) and [d284fc9](https://github.com/orbitalronin94/RONIN-IA/commit/d284fc9404f1505d38794f8cc59790e37756233d) — PMC candidate-audit regression tests.
+- [d9a1f94](https://github.com/orbitalronin94/RONIN-IA/commit/d9a1f94d995c034069f4e7ad6dd07f09bc6dd38a) and [f7d51b0](https://github.com/orbitalronin94/RONIN-IA/commit/f7d51b0a34faac313e692792205a6946280db6da) — separate the expensive PMC harvest from the lightweight reproducible audit.
+- [d93f996](https://github.com/orbitalronin94/RONIN-IA/commit/d93f9965b72b934a1a5a2d34b821add18d160c13) — reconcile dataset documentation with strict 0/64 status and verified UN/PMC candidate results.
