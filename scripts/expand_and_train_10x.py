@@ -3,7 +3,7 @@
 
 The expansion keeps the residual stream, attention, tokenizer and RoPE unchanged.
 New SwiGLU channels start with zero contribution, so logits are functionally
-identical before the 1,000-step continuation. The experiment never promotes weights.
+identical before the 500-step continuation. The experiment never promotes weights.
 """
 from __future__ import annotations
 
@@ -72,7 +72,7 @@ def main() -> None:
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--text", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, default=Path("experiment-output"))
-    parser.add_argument("--steps", type=int, default=1000)
+    parser.add_argument("--steps", type=int, default=500)
     parser.add_argument("--seed", type=int, default=20261106)
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--num-threads", type=int, default=2)
@@ -80,8 +80,8 @@ def main() -> None:
     parser.add_argument("--mmlu-limit", type=int, default=128)
     args = parser.parse_args()
 
-    if args.steps != 1000:
-        raise ValueError("This experiment is pinned to exactly 1,000 optimizer steps")
+    if args.steps != 500:
+        raise ValueError("This experiment is pinned to exactly 500 optimizer steps")
     if not args.checkpoint.is_file() or sha256_file(args.checkpoint) != BASE_CHECKPOINT_SHA256:
         raise ValueError("The input is not the verified 10,000-step winning checkpoint")
     if not args.text.is_file() or args.text.stat().st_size == 0:
@@ -126,11 +126,11 @@ def main() -> None:
         min_learning_rate=1e-6,
         weight_decay=0.1,
         warmup_steps=50,
-        max_steps=1000,
+        max_steps=500,
         grad_clip_norm=1.0,
         seed=args.seed,
         precision="auto",
-        checkpoint_every=1000,
+        checkpoint_every=500,
     )
     metrics_path = args.output_dir / "training-metrics.json"
     train(
@@ -142,11 +142,11 @@ def main() -> None:
         metrics_path=metrics_path,
         optimizer_mode="foreach",
     )
-    full_checkpoint = args.output_dir / "checkpoints" / "step-00001000.pt"
+    full_checkpoint = args.output_dir / "checkpoints" / "step-00000500.pt"
     if not full_checkpoint.is_file():
-        raise RuntimeError("The final 1,000-step checkpoint was not created")
+        raise RuntimeError("The final 500-step checkpoint was not created")
     final_checkpoint = args.output_dir / "expanded-final.pt"
-    torch.save({"model": expanded_model.state_dict(), "step": 1000}, final_checkpoint)
+    torch.save({"model": expanded_model.state_dict(), "step": 500}, final_checkpoint)
     full_checkpoint.unlink()
 
     # Paired compact MMLU-Pro validation screening; never an automatic promotion.
@@ -178,7 +178,7 @@ def main() -> None:
         "target_parameters": actual_parameters,
         "target_d_ff": TARGET_D_FF,
         "functional_preservation": {"max_abs_logit_delta_before_training": max_abs_delta, "passed": True},
-        "training_steps": 1000,
+        "training_steps": 500,
         "training_corpus_sha256": sha256_file(args.text),
         "training_corpus_bytes": args.text.stat().st_size,
         "final_checkpoint_sha256": sha256_file(final_checkpoint),
