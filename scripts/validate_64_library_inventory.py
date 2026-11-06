@@ -340,6 +340,10 @@ def validate_inventory(manifest: dict[str, Any], root: Path) -> tuple[list[str],
         if scienceverse.get("counted_in_strict_level_a_libraries") is not False:
             errors.append("ScienceVerse scoped train must not count toward strict Level A library minima")
 
+    legacy = manifest.get("legacy_scoped_corpus", {})
+    if legacy.get("counted_toward_level_a_library_minimum") is not False:
+        errors.append("legacy scoped corpus must not count toward strict Level A library minima")
+
     rights_a = manifest.get("rights_level_a_not_library_admitted", {})
     covost = rights_a.get("covost2_cc0_translation_only") if isinstance(rights_a, dict) else None
     if isinstance(covost, dict):
@@ -354,6 +358,8 @@ def validate_inventory(manifest: dict[str, Any], root: Path) -> tuple[list[str],
                 errors.append("CoVoST rights record id does not match its admitted manifest")
         if covost.get("counted_in_64_library_minimum") is not False:
             errors.append("CoVoST must remain outside the 64-library minimum until assignment gates pass")
+        if covost.get("library_training_eligible") is not False:
+            errors.append("CoVoST cannot become library training-eligible while global G-0 and global dedup/holdout gates are pending")
 
     if source_docs != inventory.get("scoped_source_documents"):
         errors.append("inventory scoped_source_documents does not match scoped source manifests")
