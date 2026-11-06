@@ -24,9 +24,9 @@ from pathlib import Path
 UA = "RONIN-IA-corpus-acquisition/1.1 (open research corpus; see repository)"
 BNE_TXT = "https://www.bne.es/media/datosgob/bdh/dominiopublico/dominiopublico_txt.zip"
 USGS_API = "https://pubs.usgs.gov/pubs-services/publication/"
-EMAIL = re.compile(r"(?i)\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b")
-SSN = re.compile(r"\\b\\d{3}-\\d{2}-\\d{4}\\b")
-URL_RE = re.compile(r"https?://[^\\s<>\\\"']+", re.I)
+EMAIL = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
+SSN = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
+URL_RE = re.compile(r"https?://[^\s<>\\"']+", re.I)
 
 
 def get(url: str, timeout: int = 90) -> bytes:
@@ -41,11 +41,11 @@ def sha256(data: bytes) -> str:
 
 def clean_text(raw: bytes) -> tuple[str, dict]:
     decoded = raw.decode("utf-8", errors="replace")
-    replacement_chars = decoded.count("\\ufffd")
-    text = decoded.replace("\\x00", " ")
-    text = re.sub(r"[ \\t]+", " ", text)
-    text = re.sub(r"\\n{4,}", "\\n\\n\\n", text).strip()
-    words = re.findall(r"\\b\\w+\\b", text, flags=re.UNICODE)
+    replacement_chars = decoded.count("\ufffd")
+    text = decoded.replace("\x00", " ")
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{4,}", "\n\n\n", text).strip()
+    words = re.findall(r"\b\w+\b", text, flags=re.UNICODE)
     alpha_count = sum(character.isalpha() for character in text)
     alpha_ratio = alpha_count / max(1, len(text))
     stats = {
@@ -70,7 +70,7 @@ def quality_reasons(text: str, stats: dict, minimum_bytes: int) -> list[str]:
     if SSN.search(text):
         reasons.append("ssn_pattern")
     boilerplate = re.findall(
-        r"\\b(?:lorem ipsum|page intentionally left blank|table of contents)\\b",
+        r"\b(?:lorem ipsum|page intentionally left blank|table of contents)\b",
         text,
         flags=re.IGNORECASE,
     )
@@ -390,7 +390,7 @@ def main() -> int:
 
     with manifest.open("a", encoding="utf-8") as manifest_file:
         for row in unique_rows:
-            manifest_file.write(json.dumps(row, ensure_ascii=False) + "\\n")
+            manifest_file.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     audit.update(
         {
@@ -411,7 +411,7 @@ def main() -> int:
     )
     audit_path = output_dir / "acquisition-audit.json"
     audit_path.write_text(
-        json.dumps(audit, ensure_ascii=False, indent=2) + "\\n",
+        json.dumps(audit, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     print(json.dumps(audit, ensure_ascii=False, indent=2))
