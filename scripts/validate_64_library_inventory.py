@@ -5,8 +5,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from pathlib import Path
 from typing import Any
+from pathlib import Path
 
 
 DEFAULT_MANIFEST = Path("data/datasets/libraries/manifest-64.json")
