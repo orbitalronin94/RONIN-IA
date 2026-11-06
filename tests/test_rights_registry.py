@@ -118,17 +118,22 @@ def test_level_a_requires_third_party_clearance():
     assert any("third-party content clearance" in error for error in errors)
 
 
-def test_retrieved_at_must_have_timezone():
+def test_retrieved_at_accepts_date_only_when_source_has_date_precision():
+    record = base_record(retrieved_at="2026-11-05")
+    assert validate(record, 1, POLICY) == []
+
+
+def test_retrieved_at_timestamp_must_have_timezone():
     record = base_record(retrieved_at="2026-11-06T09:10:00")
     errors = validate(record, 1, POLICY)
-    assert any("timestamp with timezone" in error for error in errors)
+    assert any("timezone-aware timestamp" in error for error in errors)
 
 
 def test_actual_repository_ledger_passes():
     registry = ROOT / "data/datasets/rights_registry/records.jsonl"
     records = [json.loads(line) for line in registry.read_text(encoding="utf-8").splitlines() if line.strip()]
-    assert len(records) == 10
+    assert len(records) == 11
     errors = [error for index, record in enumerate(records, 1) for error in validate(record, index, POLICY)]
     assert errors == []
-    assert sum(record["rights_level"] == "A" for record in records) == 8
+    assert sum(record["rights_level"] == "A" for record in records) == 9
     assert sum(record["rights_level"] == "B" for record in records) == 2
