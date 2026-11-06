@@ -63,8 +63,8 @@ def main() -> None:
             parser.error("--context-length must be between 128 and 8192")
         model_config = replace(model_config, context_length=args.context_length)
     if args.steps is not None:
-        if not 1 <= args.steps <= 1_000:
-            parser.error("--steps must be between 1 and 1000 for the tiny profile")
+        if not 1 <= args.steps <= 2_000:
+            parser.error("--steps must be between 1 and 2000 for the tiny profile")
         training_config = replace(
             training_config,
             max_steps=args.steps,

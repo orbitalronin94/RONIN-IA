@@ -1,0 +1,224 @@
+name: RONIN — 500 pasos adicionales desde el candidato PR #113 (sin preguntas)
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+permissions:
+  actions: read
+  contents: read
+concurrency:
+  group: ronin-seed-202-pr113-no-questions-500
+  cancel-in-progress: false
+jobs:
+  corpus-only-followup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      LITERATURE_RUN_ID: "41926088900"
+      MATHLIB_RUN_ID: "42026633643"
+      NASA_FILE_REVIEWED_RUN_ID: "42028138060"
+      SOURCE_RUN_ID: "42064238338"
+      EXPECTED_INITIAL_CHECKPOINT_SHA256: "11e2f7677383e9b104fe8ffb95c58ba907883df2dc435b214616449328617a5b"
+      STEPS: "500"
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github
+            LICENSE
+            pyproject.toml
+            weights
+            ronin
+            scripts
+      - name: Validate fixed experiment budget
+        run: test "$STEPS" = "500"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install CPU training dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66"
+          python -m compileall -q scripts/prepare_legacy_training_split.py scripts/train_text.py scripts/evaluate_text.py
+      - name: Download the exact seed-202 candidate artifact from PR #113
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-corpus-seed-202-500steps-42064238338
+          path: incoming/pr113
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+      - name: Download admitted literature train partition
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-admitted-literature-es-v1-train
+          path: incoming/literature
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.LITERATURE_RUN_ID }}
+      - name: Download admitted Mathlib4 train partition
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-admitted-mathlib4-v1
+          path: incoming/mathlib4
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.MATHLIB_RUN_ID }}
+      - name: Download individually reviewed NASA train partition
+        uses: actions/download-artifact@v7
+        with:
+          name: ronin-nasa-ntrs-file-reviewed-train
+          path: incoming/nasa-file-reviewed
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.NASA_FILE_REVIEWED_RUN_ID }}
+      - name: Verify PR #113 checkpoint and admitted corpus partitions
+        run: |
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          import torch
+          def sha(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+          initial = Path("incoming/pr113/checkpoints/seed-202/step-00000500.pt")
+          assert initial.is_file(), f"Missing PR #113 candidate: {initial}"
+          actual = sha(initial)
+          assert actual == os.environ["EXPECTED_INITIAL_CHECKPOINT_SHA256"], f"Checkpoint SHA mismatch: {actual}"
+          checkpoint = torch.load(initial, map_location="cpu", weights_only=False)
+          assert isinstance(checkpoint, dict) and isinstance(checkpoint.get("model"), dict)
+          assert checkpoint.get("step") == 500, checkpoint.get("step")
+          lit, lm = Path("incoming/literature/train.txt"), Path("incoming/literature/dataset-manifest.json")
+          math, mm = Path("incoming/mathlib4/train.txt"), Path("incoming/mathlib4/manifest.json")
+          nasa, nm = Path("incoming/nasa-file-reviewed/train.txt"), Path("incoming/nasa-file-reviewed/manifest.json")
+          ndocs = Path("incoming/nasa-file-reviewed/documents.train.jsonl")
+          assert all(p.is_file() for p in (lit, lm, math, mm, nasa, nm, ndocs))
+          assert sha(lit) == "9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
+          l = json.loads(lm.read_text(encoding="utf-8"))
+          assert l.get("dataset_id") == "ronin-spanish-public-domain-literature-v2"
+          assert l.get("status") == "admitted_scoped_training_partition" and l.get("training_eligible") is True
+          assert l.get("document_count") == 608 and l.get("train_bytes") == 140295523
+          assert l.get("validation_test_included") is False
+          m = json.loads(mm.read_text(encoding="utf-8"))
+          part = m["aggregate"]["partitions"]["train"]
+          assert m.get("dataset_id") == "mathlib4-lean-proof-corpus-v1"
+          assert m.get("status") == "admitted_scoped_training_partition"
+          assert part["training_eligible"] is True and part["documents"] == 8498
+          math_sha = "7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"
+          assert part["text_sha256"] == math_sha and sha(math) == math_sha
+          n = json.loads(nm.read_text(encoding="utf-8"))
+          npart = n["partitions"]["train"]
+          assert n.get("dataset_id") == "nasa-ntrs-file-reviewed-v1"
+          assert n.get("status") == "admitted_scoped_training_partition" and n.get("training_eligible") is True
+          assert npart.get("training_eligible") is True and npart.get("documents") == 2
+          assert sha(nasa) == npart["sha256"] == "874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"
+          rows = [json.loads(line) for line in ndocs.read_text(encoding="utf-8").splitlines() if line.strip()]
+          assert len(rows) == 2 and all(row.get("partition") == "train" for row in rows)
+          assert {row.get("document_id") for row in rows} == {"19620002819", "19630000935"}
+          print(json.dumps({"initial_checkpoint_sha256": actual, "initial_checkpoint_step": checkpoint["step"],
+            "literature_documents": 608, "mathlib4_documents": 8498, "nasa_reviewed_documents": 2,
+            "training_documents": 9108, "validation_test_partitions_in_training": False,
+            "question_or_answer_training_data_used": False}, indent=2))
+          PY
+      - name: Assemble only admitted training partitions
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          parts = [Path("incoming/literature/train.txt").read_bytes(),
+                   Path("incoming/mathlib4/train.txt").read_bytes(),
+                   Path("incoming/nasa-file-reviewed/train.txt").read_bytes()]
+          out = Path("/tmp/ronin-native-train.txt")
+          out.write_bytes(b"\n\n".join(parts))
+          report = {
+            "experiment": "ronin-native-no-questions-seed-202-pr113-followup-v1",
+            "tutor_used": False, "question_answer_data_used": False,
+            "sources": [
+              {"dataset_id":"ronin-spanish-public-domain-literature-v2","documents":608,"bytes":140295523,"sha256":"9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"},
+              {"dataset_id":"mathlib4-lean-proof-corpus-v1","documents":8498,"bytes":97629252,"sha256":"7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"},
+              {"dataset_id":"nasa-ntrs-file-reviewed-v1","documents":2,"bytes":32409,"sha256":"874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"}],
+            "train_documents":9108, "combined_bytes":out.stat().st_size,
+            "combined_sha256":hashlib.sha256(out.read_bytes()).hexdigest(),
+            "validation_test_partitions_in_training":False, "mmlu_questions_downloaded_or_used":False}
+          Path("reports").mkdir(exist_ok=True)
+          Path("reports/corpus-only-manifest.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+      - name: Recreate the same deterministic internal 95/5 split
+        run: |
+          python scripts/prepare_legacy_training_split.py \
+            --input /tmp/ronin-native-train.txt \
+            --output-dir /tmp/ronin-native-split \
+            --validation-fraction 0.05 --seed 42006
+      - name: Measure PR #113 candidate on internal corpus validation
+        run: |
+          python scripts/evaluate_text.py \
+            --checkpoint incoming/pr113/checkpoints/seed-202/step-00000500.pt \
+            --validation-text /tmp/ronin-native-split/validation-internal.txt \
+            --profile tiny --batches 128 --batch-size 2 --seed 2026 \
+            --device cpu --output reports/language-before.json
+      - name: Train 500 additional steps from PR #113 candidate (raw corpus only)
+        run: |
+          python scripts/train_text.py \
+            --text /tmp/ronin-native-split/train-internal.txt \
+            --profile tiny --steps "$STEPS" --seed 202 \
+            --init-checkpoint incoming/pr113/checkpoints/seed-202/step-00000500.pt \
+            --learning-rate 0.00001 --min-learning-rate 0.000001 \
+            --device cpu --num-threads 2 \
+            --checkpoints checkpoints/seed-202-pr113-followup \
+            --metrics-out reports/training-throughput.json
+      - name: Measure candidate on the identical internal corpus validation
+        run: |
+          python scripts/evaluate_text.py \
+            --checkpoint checkpoints/seed-202-pr113-followup/step-00000500.pt \
+            --validation-text /tmp/ronin-native-split/validation-internal.txt \
+            --profile tiny --batches 128 --batch-size 2 --seed 2026 \
+            --device cpu --output reports/language-after.json
+      - name: Summarize paired corpus-only experiment
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          before_path, after_path = Path("reports/language-before.json"), Path("reports/language-after.json")
+          if before_path.is_file() and after_path.is_file():
+              before, after = json.loads(before_path.read_text()), json.loads(after_path.read_text())
+              summary = {
+                "experiment":"ronin-native-no-questions-seed-202-pr113-followup-v1",
+                "initialization":"PR #113 seed-202 checkpoint after 500 steps",
+                "additional_training_steps":500,
+                "training_objective":"causal next-token prediction on admitted raw corpus",
+                "question_answer_data_used":False,"mmlu_questions_used":False,"tutor_used":False,
+                "automatic_promotion":False,
+                "same_internal_validation_sha256":before["validation_sha256"] == after["validation_sha256"],
+                "before_bits_per_byte":before["bits_per_byte"],"after_bits_per_byte":after["bits_per_byte"],
+                "bits_per_byte_delta":after["bits_per_byte"]-before["bits_per_byte"],
+                "before_perplexity":before["perplexity"],"after_perplexity":after["perplexity"],
+                "perplexity_ratio":after["perplexity"]/before["perplexity"],
+                "before_checkpoint_sha256":before["checkpoint_sha256"],
+                "after_checkpoint_sha256":after["checkpoint_sha256"],
+                "validation_tokens":after["evaluated_tokens"],"decision":"REVIEW_ONLY",
+                "note":"No MMLU-Pro or other question benchmark was downloaded, used for training, or evaluated."
+              }
+          else:
+              summary={"experiment":"ronin-native-no-questions-seed-202-pr113-followup-v1",
+                       "additional_training_steps":500,"decision":"INCOMPLETE",
+                       "note":"Training or validation failed; inspect preceding logs."}
+          Path("reports/no-questions-summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\n")
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          PY
+      - name: Upload corpus-only report and checkpoint
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ronin-seed-202-pr113-no-questions-500-${{ github.run_id }}
+          path: |
+            reports/
+            checkpoints/seed-202-pr113-followup/step-00000500.pt
+          if-no-files-found: warn
+          retention-days: 90
+          compression-level: 6
