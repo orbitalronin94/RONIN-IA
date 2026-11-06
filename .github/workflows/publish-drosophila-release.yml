@@ -1,0 +1,57 @@
+name: Publish Drosophila checkpoint release asset
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/publish-drosophila-release.yml"
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download the promoted Actions checkpoint
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/drosophila
+          gh run download 42207268776 \
+            --repo orbitalronin94/RONIN-IA \
+            --name ronin-expand-10x-from-10k-42207268776 \
+            --dir /tmp/drosophila
+          CHECKPOINT="$(find /tmp/drosophila -type f -name expanded-final.pt -print -quit)"
+          test -n "$CHECKPOINT"
+          EXPECTED="f3f8e2e75e418f8630372c242378a28010db83148d169d85ad3e4f73114cda9a"
+          ACTUAL="$(sha256sum "$CHECKPOINT" | cut -d ' ' -f1)"
+          test "$ACTUAL" = "$EXPECTED"
+          cp "$CHECKPOINT" /tmp/ronin-drosophila-100900160.pt
+
+      - name: Publish durable public release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/release-notes.md <<'EOF'
+          Experimental checkpoint mirror for HERETIC-RONIN.
+
+          Model: Ronin-Drosophila-100900160
+          Parameters: 100,900,160
+          Source run: https://github.com/orbitalronin94/RONIN-IA/actions/runs/42207268776
+          Source artifact: 13497987527
+          SHA-256: f3f8e2e75e418f8630372c242378a28010db83148d169d85ad3e4f73114cda9a
+
+          This is an experimental checkpoint, not a general-capability claim. See
+          weights/ronin-drosophila-main.json for training and evaluation limitations.
+          EOF
+          gh release create heretic-drosophila-100900160-2026-11-06 \
+            /tmp/ronin-drosophila-100900160.pt \
+            --repo orbitalronin94/RONIN-IA \
+            --title "Ronin Drosophila 100.9M — HERETIC bootstrap" \
+            --notes-file /tmp/release-notes.md
