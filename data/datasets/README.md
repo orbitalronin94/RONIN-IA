@@ -199,38 +199,20 @@ Los payloads grandes pueden publicarse como artefactos versionados de GitHub Act
 - [Manifiesto Papers propios](admitted/ronin-authored-papers-v1/manifest.json)
 - [Manifiesto train scoped ScienceVerse](admitted/scienceverse-ccby-v1/train-eligibility-manifest.json)
 
-## Decisión operativa
+## Decisión operativa — estándar Level A estricto
 
-El corpus legacy de **608 documentos** continúa siendo la única fuente contabilizada en los mínimos Level A del inventario de 64 bibliotecas; Mathlib4 tiene una partición train scoped separada, pero no se ha incorporado al inventario Level A de 64 bibliotecas. Los corpus siguientes están admitidos en alcance documental propio, pero **no se suman a esos mínimos**:
+El inventario de 64 bibliotecas aplica ahora el estándar explícito por ítem y versión: licencia canónica compatible o dominio público demostrado para la obra/edición; cobertura ES/EU/US; titular/proveedor y alcance; atribución; procedencia; snapshot de metadatos con SHA-256; hash del payload; revisión de terceros; calidad, privacidad, deduplicación exacta y near-duplicate global; separación General/HKD y splits verificables.
 
-- **NASA NTRS:** 813/824 admitidos; 32.313.859 bytes normalizados; 11 retenidos.
-- **ScienceVerse:** 7.365/7.403 admitidos scoped; 7.103 train y 426.975.945 bytes; 262 retenidos (262 por exceso de caracteres de reemplazo).
-- **Papers propio:** 9/9 Markdown admitidos con autorización del propietario; README excluido; 750.857 bytes.
+**Contabilidad estricta actual: 0 documentos / 0 bytes Level A admitidos en las 64 bibliotecas; 0/64 alcanzan 1 MiB; 0/64 están completas; 0/64 son training-eligible. G-0 global continúa FAIL.**
 
-Los 7.365 ScienceVerse admitidos scoped tienen DOI único, SHA-256 de texto único dentro de las 13 exportaciones, licencia por documento CC-BY-4.0 o CC0 y atribución presente. La auditoría train posterior promovió 7.103 documentos (426.975.945 bytes) tras integridad, mínimos de calidad, filtros de email/SSN y deduplicación exacta contra los train actuales; retuvo 262 por exceso de caracteres de reemplazo. La attestation del propietario cubre la revisión humana de las fuentes mapeadas; el manifiesto mantiene trazabilidad por documento.
+Los corpus scoped anteriores se conservan sin borrar datos ni cambiar sus artefactos, pero ya no se computan como Level A estricto:
 
-**Entrenamiento scoped:** el mix incorpora 608 literatura, 8.498 Mathlib4, 6 NASA file-reviewed, 9 Papers propios, 7.103 ScienceVerse y 270.244 CoVoST 2. NASA restante (807), los 262 ScienceVerse retenidos, CoVoST validation/test y otros candidatos siguen fuera. Near-duplicates globales, contaminación de benchmarks/holdouts, emparejamiento General/HKD global y G-0 siguen pendientes.
+- Literatura española: 608 documentos train / 140.295.523 bytes UTF-8.
+- ScienceVerse: 7.103 documentos train / 426.975.945 bytes UTF-8; 262 retenidos en el filtro final. El manifiesto de fuente y el inventario fueron reconciliados contra el artefacto del run 42110130695. Sus asignaciones General son 2.741 Social Sciences, 2.377 Biology, 1.694 Medicine/Health y 291 Philosophy.
+- Total scoped conservado: **7.711 documentos / 567.271.468 bytes**, reportados fuera de los contadores Level A.
 
-## Auditoría integral de candidatos (2026-11-05)
+CoVoST 2 sí dispone de evidencia de derechos Level A CC0-1.0 para el payload de traducciones: 270.244 segmentos / 18.385.485 bytes UTF-8. Aún no se asigna a ninguna biblioteca porque near-duplicate global y contaminación de benchmark/holdout siguen pendientes. No se confunde su elegibilidad scoped de origen con admisión global o de biblioteca.
 
-El workflow \`Audit and admit scoped candidate documents\` ejecutó correctamente la auditoría y materialización:
+El registro de derechos tiene 10 entradas: 8 A (cinco exportaciones solo de metadatos y tres payloads/versiones CoVoST) y 2 B (BOE). Las entradas de metadatos no cuentan como texto. Los candidatos PMC y USGS tampoco cuentan como Level A admitido. BNE sigue bloqueada por HTTP 403.
 
-- NASA: [813 documentos admitidos en alcance acotado](admitted/nasa-ntrs-public-use-v1/manifest.json), 11 retenidos.
-- ScienceVerse: [7.365 documentos admitidos scoped](admitted/scienceverse-ccby-v1/manifest.json); [7.103 train scoped](admitted/scienceverse-ccby-v1/train-eligibility-manifest.json), 262 retenidos.
-- NASA file-reviewed: [2 documentos originales](admitted/nasa-ntrs-file-reviewed-v1/manifest.json) + [4 adicionales](admitted/nasa-ntrs-file-reviewed-v2/manifest.json), 6 train en total.
-- Papers: [9 documentos propios admitidos](admitted/ronin-authored-papers-v1/manifest.json), README excluido.
-- Informe global por fuente y documento: [candidate-document-audit-2026-11-05.json](reviews/candidate-document-audit-2026-11-05.json).
-
-Los payloads NASA y ScienceVerse preservan hashes del origen y del contenido admitido. El manifiesto de ScienceVerse habilita `training_eligible:true` solo para la partición train scoped de 7.103 documentos; el G-0 global permanece FAIL. NASA restante sigue pendiente. Esta promoción no equivale a G-0 global ni altera los mínimos Level A fuera de las cuatro bibliotecas General indicadas.
-
-
-## Expansión a 200 GB
-
-La hoja de ruta multi-fuente y sus reglas de contabilidad están en [`acquisition/200gb-expansion-roadmap-2026-11.md`](acquisition/200gb-expansion-roadmap-2026-11.md). El primer flujo de adquisición de texto completo está en [`candidates/pmc-oa-cc0-ccby-v2/`](candidates/pmc-oa-cc0-ccby-v2/): PMC OA con verificación de licencia por artículo, manifiestos SHA-256 y estado no entrenable hasta superar G-0. El tamaño de texto UTF-8 se contabiliza por separado del tamaño comprimido.
-
-
-## Adquisición USGS — lote 001 (6 de noviembre de 2026)
-
-La ejecución corregida [42190061006](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42190061006) consultó 250 registros del Publications Warehouse, extrajo 40 PDF, rechazó 29 por calidad/privacidad automática y dejó 11 candidatos. Siete documentos (159.663 bytes UTF-8) pasan a revisión inicial de derechos; cuatro se apartaron por marcas de crédito/reproducción de terceros. El índice con títulos, DOI, URLs y hashes está en [batch-001-manifest.json](candidates/usgs-publications-2026-11-06/batch-001-manifest.json), con auditoría en [README del lote](candidates/usgs-publications-2026-11-06/README.md).
-
-**No se incrementa aún el total entrenable de 286.468 documentos / 684.738.932 bytes.** El lote está en Level B, con `training_eligible=0`, sin partición y pendiente de firma jurídica humana y controles de terceros, privacidad y deduplicación. BNE/BDH devolvió HTTP 403 y no aportó documentos.
+El estado detallado, hashes, artefactos y bloqueos está en [el inventario 64](libraries/README.md), [el registro de derechos](rights_registry/README.md) y [docs/RUNS.md](../../docs/RUNS.md).
