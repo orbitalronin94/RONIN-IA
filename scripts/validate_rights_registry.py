@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -33,9 +33,15 @@ def is_uri(value: object) -> bool:
     return parsed.scheme in {"https", "http"} and bool(parsed.netloc)
 
 
-def has_timezone(value: object) -> bool:
+def has_valid_retrieved_at(value: object) -> bool:
+    """Accept a precise timezone-aware timestamp or a source date with date-only precision."""
     if not isinstance(value, str) or not value.strip():
         return False
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        try:
+            return date.fromisoformat(value).isoformat() == value
+        except ValueError:
+            return False
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError:
@@ -63,8 +69,8 @@ def validate(record: dict, line: int | str, policy: dict) -> list[str]:
         if not is_uri(record[key]):
             errors.append(f"line {line}: {key} must be an absolute HTTP(S) URL")
 
-    if not has_timezone(record["retrieved_at"]):
-        errors.append(f"line {line}: retrieved_at must be an ISO-8601 timestamp with timezone")
+    if not has_valid_retrieved_at(record["retrieved_at"]):
+        errors.append(f"line {line}: retrieved_at must be an ISO-8601 date or timezone-aware timestamp")
 
     for key in ("metadata_snapshot_sha256", "payload_sha256"):
         if not isinstance(record[key], str) or not HASH.fullmatch(record[key]):
