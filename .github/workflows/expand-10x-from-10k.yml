@@ -37,11 +37,15 @@ jobs:
             scripts/expand_and_train_10x.py
             scripts/evaluate_mmlu_pro.py
             scripts/verify_scienceverse_training.py
+            scripts/verify_nasa_scoped_train.py
             scripts/verify_ronin_authored_papers_training.py
             scripts/verify_covost2_training.py
             data/datasets/admitted/scienceverse-ccby-v1
             data/datasets/admitted/ronin-authored-papers-v1
             data/datasets/admitted/covost2-cc0-translation-only
+            data/datasets/candidates/nasa-ntrs-public-use
+            data/datasets/libraries/candidate-packs/nasa-ntrs-public-use
+            data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json
             data/datasets/rights_registry
       - uses: actions/setup-python@v7
         with:
@@ -85,20 +89,23 @@ jobs:
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: 42028138060
-      - name: Download four newly reviewed NASA train records
-        uses: actions/download-artifact@v8
-        with:
-          name: ronin-nasa-reviewed-train-42110638977
-          path: incoming/nasa-v2
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: 42110638977
+      - name: Verify the six manually reviewed NASA records and materialize four new train documents
+        run: |
+          python scripts/verify_nasa_scoped_train.py \\
+            --manifest data/datasets/libraries/candidate-packs/nasa-ntrs-public-use/manifest.json \\
+            --review data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json \\
+            --documents data/datasets/candidates/nasa-ntrs-public-use/documents \\
+            --literature incoming/literature/documents.train.jsonl \\
+            --mathlib incoming/mathlib4/documents.train.jsonl.gz \\
+            --nasa-reviewed-train incoming/nasa-v1/documents.train.jsonl \\
+            --papers-manifest data/datasets/admitted/ronin-authored-papers-v1/manifest.json \\
+            --output incoming/nasa-v2
       - name: Verify and join NASA file-reviewed train records
         run: |
+          mkdir -p incoming/nasa
           test -s incoming/nasa-v1/train.txt
           test -s incoming/nasa-v2/train.txt
           cat incoming/nasa-v1/documents.train.jsonl incoming/nasa-v2/documents.train.jsonl > incoming/nasa/documents.train.jsonl
-          mkdir -p incoming/nasa
           cat incoming/nasa-v1/train.txt incoming/nasa-v2/train.txt > incoming/nasa/train.txt
       - name: Verify the nine owner-authorized Papers documents
         run: |
