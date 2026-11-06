@@ -1,0 +1,53 @@
+name: Audit PMC RUN5 exact article rights sample
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/audit_pmc_run5_rights.py"
+      - ".github/workflows/audit-pmc-run5-rights.yml"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: pmc-run5-rights-sample
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Download immutable PMC RUN5 candidate artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 42025156962 --name ronin-pmc-oa-biology_medicine-candidates --dir /tmp/pmc-biology
+          gh run download 42025156962 --name ronin-pmc-oa-chemistry-candidates --dir /tmp/pmc-chemistry
+
+      - name: Verify exact per-version rights evidence on 32 stratified samples
+        run: |
+          python scripts/audit_pmc_run5_rights.py \
+            --biology-root /tmp/pmc-biology \
+            --chemistry-root /tmp/pmc-chemistry \
+            --out /tmp/pmc-run5-rights-sample.json
+
+      - name: Upload rights audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-pmc-run5-rights-sample
+          path: /tmp/pmc-run5-rights-sample.json
+          retention-days: 90
