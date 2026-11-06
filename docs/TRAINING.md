@@ -2,128 +2,128 @@
 
 ## Estado: proceso experimental
 
-RONIN **no tiene todavía un protocolo de entrenamiento único y definitivo**. Los experimentos cambian según la hipótesis que se quiere probar: número de pasos, semilla, corpus, inicialización, selección de candidatos, presupuesto de evaluación y holdout utilizado.
+RONIN **no tiene todavía un protocolo de entrenamiento único y definitivo**. Los experimentos cambian según la hipótesis: pasos, semilla, corpus, inicialización, selección de candidatos, presupuesto de evaluación y holdout.
 
-Por tanto:
-
-- No interpretes los valores por defecto de un workflow como una receta global del proyecto.
-- No asumas que todos los workflows ejecutan la misma secuencia.
+- No interpretes los valores por defecto de un workflow como receta global.
 - No atribuyas a un checkpoint los datos incorporados después de su entrenamiento.
-- No consideres que un run exitoso demuestra una mejora del modelo.
+- No consideres que un run exitoso demuestra una mejora.
+- Registra tokens procesados, no solo pasos.
+- Separa minutos reales de runner, tiempo de entrenamiento y tiempo total de workflow.
 - La configuración real de cada experimento se obtiene de su YAML, commit, inputs, logs y artefactos.
 
-El [historial de GitHub Actions](https://github.com/orbitalronin94/RONIN-IA/actions) es el registro operativo de ejecuciones. Los workflows versionados describen los experimentos disponibles en cada commit.
+El [historial de GitHub Actions](https://github.com/orbitalronin94/RONIN-IA/actions) es el registro operativo. Consulta [historial experimental](EXPERIMENT_HISTORY.md), [reproducibilidad](REPRODUCIBILITY.md), [procedencia del corpus](CORPUS_PROVENANCE.md) y [métricas](METRICS.md).
 
-## Línea base y candidatos
+## Roles de los modelos
 
-El modelo versionado en `main` se identifica en [`weights/main-model.json`](../weights/main-model.json). Ese manifiesto es la fuente de verdad para el nombre, arquitectura, parámetros, checkpoint de origen, hashes y evaluación asociada.
+### Línea base operativa en main
 
-La línea base actual es **RONIN-tiny-seed95-100-001**, con 9.922.880 parámetros y checkpoint de origen de 100 pasos. Es una referencia operativa para comparar experimentos; no implica que 100 pasos sea la duración óptima ni que el modelo haya alcanzado una configuración final.
+El paquete weights/ronin-main.pt y el manifiesto weights/main-model.json fijan **RONIN-tiny-seed95-100-001**, de 9.922.880 parámetros. Su checkpoint de origen tiene 100 pasos y seed 95. Sigue siendo el modelo operativo de main hasta una promoción explícita.
 
-Los candidatos experimentales se mantienen separados del modelo principal. La promoción requiere revisión explícita de sus métricas y procedencia.
+### Drosophila: candidato de organismo modelo
+
+**Ronin - Drosophila (100.900.160 parámetros)** es un candidato experimental mergeable, no el modelo principal promocionado. Su expansión parte del checkpoint ganador de 10.000 pasos (run 42181780771; SHA-256 7a7fe93350b72ebc8d645900c2ae8be455a60334e04ac95176e09bab72f981ed) y continúa durante 500 pasos en CPU (run 42198068241).
+
+El script scripts/expand_and_train_10x.py ensancha SwiGLU de 854 a 12.700 canales, conserva el resto de los tensores compatibles y pone a cero la contribución de los canales nuevos. Exige una comprobación de equivalencia de logits antes de entrenar. El modelo resultante tiene 100.900.160 parámetros.
+
+**Clasificación de evidencia: MODEL_ORGANISM_ONLY + SCREENING_ONLY. No certifica razonamiento general.** El screening publicado usa 64 preguntas del split validation, con los mismos IDs: 5/64 antes y 5/64 después. No es el test completo de MMLU-Pro.
+
+## Régimen de Drosophila: qué se ejecutó
+
+El script de expansión fija los siguientes valores:
+
+| Parámetro | Valor |
+|---|---:|
+| Perfil de arquitectura de partida | tiny |
+| Longitud de contexto | 128 |
+| Batch size | 1 |
+| Acumulación de gradiente | 1 |
+| Pasos | 500 |
+| Posiciones de entrada nominales | 64.000 |
+| Learning rate inicial | 1e-5 |
+| Learning rate mínimo | 1e-6 |
+| Warmup | 50 pasos |
+| Weight decay | 0,1 |
+| Gradient clipping | 1,0 |
+| Seed de continuación | 20261106 (valor por defecto del script) |
+| Dispositivo | CPU |
+| Hilos | 2 |
+
+El sampler selecciona ventanas aleatorias del corpus con reemplazo. Por ello, 64.000 posiciones nominales no significan 64.000 bytes únicos ni una pasada completa por el corpus. La exposición efectiva y su relación con el entrenamiento previo se explican en [METRICS.md](METRICS.md).
 
 ## Familias de workflows
 
-Los siguientes workflows ilustran enfoques distintos. Su configuración puede evolucionar entre commits:
+### Expansión funcional ×10 desde el ganador de 10k
 
-### Cribado multi-semilla sin tutor y holdout por etapas
+[expand-10x-from-10k.yml](../.github/workflows/expand-10x-from-10k.yml)
+
+- Descarga el checkpoint exacto del run 42181780771.
+- Verifica literatura, Mathlib4, NASA file-reviewed, Papers propios, ScienceVerse y CoVoST 2 translation-only.
+- Ensambla únicamente particiones train scoped.
+- Ejecuta prueba de expansión funcional, 500 pasos y screening MMLU-Pro validation de 64 preguntas.
+- Publica checkpoint e informe como artefacto.
+- No promociona pesos automáticamente.
+
+### Cribado multi-semilla sin tutor
 
 [main-native-no-tutor-holdout.yml](../.github/workflows/main-native-no-tutor-holdout.yml)
 
-Permite configurar pasos, semillas y profundidad de evaluación mediante `workflow_dispatch`. Parte de los pesos propios, verifica las particiones admitidas, prepara una partición de validación interna desde train, entrena candidatos y los compara. El workflow de la rama principal impone límites a sus inputs; no debe confundirse con experimentos de mayor duración lanzados desde otras ramas.
+Permite configurar pasos, semillas y profundidad de evaluación. Su corpus y checkpoint de partida son los fijados por el propio workflow; no son intercambiables con el experimento Drosophila.
 
 ### Torneo adaptativo de semillas
 
 [adaptive-50-seed-tournament.yml](../.github/workflows/adaptive-50-seed-tournament.yml)
 
-Explora candidatos mediante un torneo de semillas. Su objetivo es comparar inicializaciones/candidatos bajo el protocolo definido por ese workflow. El resultado del torneo es una selección experimental, no una promoción automática.
-
-### Experimentos asociados a un corpus o presupuesto concretos
-
-[micro-corpus-4-seeds.yml](../.github/workflows/micro-corpus-4-seeds.yml)
-
-Este workflow define un experimento específico con semilla 202 y 500 pasos, asociado a una ejecución de PR. Sus parámetros son propios de ese experimento y no constituyen una regla general para futuros entrenamientos.
-
-Además, pueden lanzarse experimentos desde ramas que todavía no estén integradas en `main`, incluidos presupuestos de pasos distintos. Para interpretarlos hay que consultar la ejecución exacta en Actions, no extrapolar la configuración de otro workflow.
+Explora candidatos bajo su propio protocolo. No debe confundirse con cuatro seeds independientes de Drosophila.
 
 ## Datos y particiones
 
-La raíz canónica es `data/datasets/`; su [inventario](../data/datasets/README.md) enlaza manifiestos, fuentes y estado de admisión.
+La raíz canónica es data/datasets/; su [inventario](../data/datasets/README.md) enlaza manifiestos, fuentes y estado de admisión.
 
-Un corpus solo puede entrar en entrenamiento cuando la partición train correspondiente está explícitamente admitida y supera los controles declarados por su manifiesto. La descarga o la presencia de un documento en una biblioteca no bastan para considerarlo entrenable.
+- **Train:** única partición que puede contribuir a gradientes.
+- **Validation:** desarrollo y screening; nunca se incorpora a gradientes.
+- **Test/holdout:** evaluación independiente; no debe usarse para entrenar ni seleccionar repetidamente sin declarar el riesgo de contaminación por selección.
 
-- **Train:** únicos datos que pueden contribuir a los gradientes.
-- **Validation:** se utiliza para medir y seleccionar dentro de los límites del protocolo; nunca se incorpora a los gradientes.
-- **Test/holdout:** debe permanecer aislado de entrenamiento y selección cuando se use como evaluación independiente.
-
-Los controles son por fuente y por alcance. No describas el corpus completo como globalmente certificado si el manifiesto mantiene gates globales, near-duplicates o contaminación de holdout pendientes.
+Un estado train-scoped no certifica automáticamente el corpus global. G-0, near-duplicates y contaminación de benchmarks/holdouts deben leerse según cada manifiesto.
 
 ## Evaluación y promoción
 
-Siempre que sea posible, compara el checkpoint inicial y el candidato con exactamente las mismas preguntas, splits, revisión y configuración.
+- Loss, BPB y perplexity miden predicción de texto en una distribución concreta.
+- Un screening MMLU-Pro es una muestra de cribado, no el benchmark completo.
+- Validation no sustituye un resultado independiente en test/holdout.
+- Una comparación exige los mismos IDs, split, revisión, prompt y protocolo.
+- La promoción requiere revisar checkpoint, corpus, particiones, evaluación y limitaciones.
 
-Interpreta las métricas según su alcance:
-
-- Loss, BPB y perplexity miden predicción del texto en una distribución concreta.
-- Una muestra de MMLU-Pro es screening; no equivale al benchmark completo ni a una certificación de capacidad general.
-- Una mejora en validation no sustituye un resultado independiente en test/holdout.
-- Los resultados no son comparables si cambian las preguntas, el split o el protocolo sin declararlo.
-
-La promoción de un candidato requiere revisar, como mínimo, el benchmark pareado, la integridad/hash del checkpoint, el corpus realmente utilizado, las particiones y cualquier limitación del informe. Ningún workflow debe promocionar automáticamente un candidato por haber terminado con `success`.
+Ningún candidato se promociona por el mero hecho de que Actions termine con success.
 
 ## Entrenamiento local
 
-Entorno orientativo: Python 3.11 y PyTorch 2.2 o posterior.
+El perfil local expuesto por scripts/train_text.py es tiny (9.922.880 parámetros). No existe un --profile drosophila en ese entrenador. El comando siguiente es un smoke test limitado a 1.000 pasos, no una reproducción del candidato de 100,9M:
 
-```bash
+~~~bash
 python -m pip install -e '.[dev]'
 pytest -q
 python scripts/train_text.py \
   --text /ruta/al/corpus-autorizado.txt \
   --profile tiny \
-  --steps 500
-```
+  --steps 500 \
+  --seed 20261106 \
+  --device cpu \
+  --num-threads 2 \
+  --metrics-out metrics.json
+~~~
 
-El ejemplo muestra cómo invocar el entrenador local; los 500 pasos son ilustrativos y no una recomendación universal. Para reproducir un experimento, usa sus parámetros y artefactos reales.
+Para reproducir Drosophila hay que recuperar el checkpoint base y el corpus exactos del run, instalar el entorno y ejecutar el flujo de expansión. No se publica un tiempo local de referencia porque no existe una medición comparable verificada.
 
 ## Registro mínimo de cada experimento
 
-Al documentar un run, registra:
+1. URL e ID de Actions, workflow, commit y runner.
+2. Checkpoint inicial/final y SHA-256.
+3. Arquitectura, parámetros, seed y estado del optimizador.
+4. Pasos, batch, acumulación, longitud de secuencia y **tokens/posiciones realmente procesados**.
+5. Manifiestos, documentos, bytes y hashes de cada partición train.
+6. Confirmación de que validation/test no entraron en gradientes.
+7. Tiempo total del job, tiempo de entrenamiento y minutos facturables del runner.
+8. Holdout, revisión, IDs, cobertura y métricas antes/después.
+9. Número de seeds, resultados individuales, media, desviación y decisión.
 
-1. URL e ID de GitHub Actions, workflow y commit.
-2. Checkpoint inicial y sus hashes.
-3. Semilla, pasos, configuración y dispositivo.
-4. Manifiestos, fuentes y bytes/documentos realmente usados en train.
-5. Confirmación de que validation/test no entraron en los gradientes.
-6. Holdout, revisión, número de preguntas y protocolo.
-7. Métricas antes/después, límites y decisión (screening, candidato o promoción).
-8. Checkpoint candidato y artefactos publicados.
-
-La finalidad es que cada resultado sea interpretable y reproducible sin fingir que ya existe una receta estable.
-
-## Candidato mergeable: Ronin - Drosophila (100.900.160 parámetros)
-
-El nombre oficial del candidato es **Ronin - Drosophila (100.900.160 parámetros)**; su identificador técnico es `Ronin-Drosophila-100900160`. El manifiesto está en [ronin-drosophila-100900160-candidate.json](../weights/ronin-drosophila-100900160-candidate.json).
-
-- Run de expansión/continuación: [#42198068241](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42198068241); checkpoint disponible como [artefacto](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42198068241/artifacts/13494355120).
-- Parámetros: 100.900.160; ×10,17 respecto a 9.922.880.
-- Entrenamiento: 500 pasos desde el ganador de 10.000 pasos, sin tutor.
-- Checkpoint SHA-256: `7d9345ecb9e3d7ad22aa628b93324ffd18e7b8a477f2d24c04885eced587d2f3`.
-- Screening pareado MMLU-Pro: 5/64 antes y 5/64 después; variación 0,00 puntos porcentuales.
-- Estado: candidato mergeable para revisión; no se ha demostrado mejora en ese screening. G-0 global, near-duplicates y contaminación de holdout permanecen pendientes.
-
-La identidad Drosophila no cambia la procedencia ni el estado de evaluación. El manifiesto de `main` y los pesos versionados siguen describiendo la línea base antigua hasta que el checkpoint candidato se promocione explícitamente.
-
-## Expansión funcional ×10 desde el ganador de 10.000 pasos
-
-El workflow [expand-10x-from-10k.yml](../.github/workflows/expand-10x-from-10k.yml) define un experimento independiente, no una nueva línea base:
-
-- Origen inmutable: run [42181780771](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42181780771), checkpoint `checkpoints/seed-95/step-00010000.pt`, SHA-256 `7a7fe93350b72ebc8d645900c2ae8be455a60334e04ac95176e09bab72f981ed`.
-- Expansión de 9.922.880 a 100.900.160 parámetros: se mantiene el ancho residual, atención, RoPE, vocabulario y tokenizer; se ensancha SwiGLU de 854 a 12.700 canales.
-- Las nuevas columnas de salida SwiGLU se inicializan a cero. Antes de entrenar, el script exige equivalencia de logits con el checkpoint original; si no se cumple, detiene el experimento.
-- Continuación de exactamente 500 pasos, sin tutor, con seis particiones train scoped: literatura, Mathlib4, NASA file-reviewed, Papers propios, ScienceVerse y CoVoST 2 translation-only.
-- Validation/test no se incorporan a los gradientes. El workflow registra hashes y recuentos por fuente; los controles globales G-0, near-duplicates y contaminación del holdout siguen declarados como pendientes.
-- La evaluación MMLU-Pro usa un screening pareado de 64 preguntas de validation, con los mismos IDs antes/después. No es una certificación ni un test independiente.
-- El artefacto resultante es candidato experimental. No hay promoción automática a `main`.
-
-El workflow se puede lanzar desde GitHub Actions después de integrar esta definición en `main`. Su estado y resultados se consultan en el run y artefacto concretos.
+El objetivo es que cada resultado sea interpretable sin fingir que existe una receta estable.
