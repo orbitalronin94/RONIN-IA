@@ -52,6 +52,24 @@ La evaluación asociada a esta línea base fue un screening MMLU-Pro de 50 pregu
 
 </details>
 
+### Candidato mergeable actual: Ronin - Drosophila
+
+<badge> Candidato mergeable · no sustituye todavía los pesos versionados en main </badge>
+
+**Nombre oficial:** **Ronin - Drosophila (100.900.160 parámetros)**  
+**Identificador técnico:** `Ronin-Drosophila-100900160`
+
+- Origen: ganador del entrenamiento de 10.000 pasos, run [#42181780771](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42181780771).
+- Expansión y continuación: run [#42198068241](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42198068241), 500 pasos.
+- Arquitectura: Transformer causal con RoPE, RMSNorm, GQA y SwiGLU ampliado a 12.700 canales.
+- Parámetros: **100.900.160** (desde 9.922.880; ×10,17).
+- Conservación funcional previa al entrenamiento: diferencia máxima absoluta de logits **1,4305×10⁻⁶**; comprobación superada.
+- Screening MMLU-Pro pareado: **5/64 antes y 5/64 después**. No se observa mejora en esta muestra.
+- Checkpoint SHA-256: `7d9345ecb9e3d7ad22aa628b93324ffd18e7b8a477f2d24c04885eced587d2f3`.
+- [Artefacto del checkpoint](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42198068241/artifacts/13494355120) · [Manifiesto del candidato](weights/ronin-drosophila-100900160-candidate.json).
+
+El candidato queda identificado con el nombre Drosophila y está preparado para revisión/merge como candidato. La etiqueta *mergeable* no significa que haya demostrado una mejora de capacidad: el screening no cambió y los gates globales G-0, near-duplicates y contaminación de holdout siguen pendientes. El modelo empaquetado en `main` continúa siendo la línea base anterior hasta que se promocionen explícitamente los nuevos pesos.
+
 ### Último experimento largo: 10.000 pasos
 
 <details>
@@ -106,19 +124,11 @@ Fuentes train-scoped registradas: literatura española, Mathlib4, NASA file-revi
 
 Los workflows evolucionan. Revisa el YAML y los inputs del run concreto; sus valores por defecto no constituyen una receta universal.
 
-## Próximo experimento: escalado ×10
+## Modelo mergeable: Ronin - Drosophila
 
-La siguiente hipótesis de trabajo es ampliar la arquitectura desde ~9,9 M hasta aproximadamente **100 M de parámetros**, entrenar durante **1.000 pasos** y usar todas las particiones `train` admitidas y verificables disponibles al iniciar la ejecución.
+El candidato actual de referencia para revisión es **Ronin - Drosophila (100.900.160 parámetros)**. Su expansión ×10,17 y continuación de 500 pasos se ejecutaron en el run [#42198068241](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42198068241). El manifiesto reproducible está en [weights/ronin-drosophila-100900160-candidate.json](weights/ronin-drosophila-100900160-candidate.json).
 
-El experimento deberá:
-- partir de un checkpoint identificado y preservar el original;
-- documentar cómo se amplían los pesos y qué capas/embeddings cambian;
-- descubrir y verificar dinámicamente cada fuente train-eligible, sin incorporar validation/test;
-- registrar mezcla, bytes, documentos, hashes y procedencia efectiva;
-- medir el mismo holdout antes/después y conservar loss, BPB, throughput y métricas por dominio;
-- publicar el candidato como artefacto, sin promoción automática.
-
-**Estado:** diseño experimental; no se considera ejecutado hasta que exista un run y sus artefactos.
+La condición de mergeable identifica el candidato que queremos integrar como modelo de trabajo; no equivale a una promoción automática de pesos ni a una mejora demostrada en razonamiento. El screening MMLU-Pro permaneció en 5/64 antes y después, y los gates globales siguen pendientes. La promoción a pesos principales requiere resolver esos controles y actualizar de forma atómica el paquete y el manifiesto principal.
 
 ## Reproducir localmente
 
