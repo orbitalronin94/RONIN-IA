@@ -36,37 +36,33 @@ RONIN es un modelo causal Transformer implementado en PyTorch. El proyecto explo
 ## Estado del modelo
 
 <details>
-<summary><strong>Modelo de referencia en main</strong></summary>
+<summary><strong>Modelo experimental principal: Ronin - Drosophila</strong></summary>
 
 | Propiedad | Valor |
 |---|---|
-| Identificador | `RONIN-tiny-seed95-100-001` |
-| Parámetros | **9.922.880 (~9,9 M)** |
-| Arquitectura | Transformer causal, RoPE, RMSNorm, SwiGLU y GQA |
-| Tokenización | byte-v1 |
-| Checkpoint de origen | 100 pasos, seed 95 |
-| Pesos | [weights/ronin-main.pt](weights/ronin-main.pt) |
-| Manifiesto | [weights/main-model.json](weights/main-model.json) |
+| Identificador | `Ronin-Drosophila-100900160` |
+| Parámetros | **100.900.160 (~100,9 M)** |
+| Expansión | ×10,17 desde el checkpoint de 9,9 M |
+| Pasos de continuación | 500 |
+| Checkpoint | [Artefacto del run #42203609278](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278/artifacts/13495833454) |
+| SHA-256 | `f3f8e2e75e418f8630372c242378a28010db83148d169d85ad3e4f73114cda9a` |
+| Manifiesto | [ronin-drosophila-main.json](weights/ronin-drosophila-main.json) |
 
-La evaluación asociada a esta línea base fue un screening MMLU-Pro de 50 preguntas: 5/50 → 7/50. Se clasifica como `SCREENING_ONLY`; no demuestra razonamiento general ni equivale al test independiente completo.
+El checkpoint de 403.629.045 bytes se conserva como artefacto de GitHub Actions; no se ha copiado a `weights/ronin-main.pt`. El modelo compacto de 9.922.880 parámetros sigue empaquetado como fallback en [weights/ronin-main.pt](weights/ronin-main.pt), con su identidad descrita en [main-model.json](weights/main-model.json).
+
+La expansión conservó la función antes del entrenamiento (diferencia máxima absoluta de logits: 1,4305×10⁻⁶). En el screening MMLU-Pro pareado obtuvo 5/64 antes y 5/64 después: no se detectó regresión en esa muestra, pero tampoco mejora. Es un screening de validación, no un holdout independiente completo.
 
 </details>
 
-### Candidato mergeable actual: Ronin - Drosophila
+### Aviso de promoción — Ronin - Drosophila
 
-**Nombre oficial:** **Ronin - Drosophila (100.900.160 parámetros)**  
-**Identificador técnico:** `Ronin-Drosophila-100900160`
+**Sepan cuantos leyeren este aviso:** por acuerdo expreso, Ronin - Drosophila queda señalado como modelo experimental principal de RONIN-IA, con checkpoint de 100.900.160 parámetros procedente del run [#42203609278](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278). El artefacto y su manifiesto quedan enlazados aquí:
 
-- Origen: ganador del entrenamiento de 10.000 pasos, run [#42181780771](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42181780771).
-- Expansión y continuación: run [#42198068241](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42198068241), 500 pasos.
-- Arquitectura: Transformer causal con RoPE, RMSNorm, GQA y SwiGLU ampliado a 12.700 canales.
-- Parámetros: **100.900.160** (desde 9.922.880; ×10,17).
-- Conservación funcional previa al entrenamiento: diferencia máxima absoluta de logits **1,4305×10⁻⁶**; comprobación superada.
-- Screening MMLU-Pro pareado: **5/64 antes y 5/64 después**. No se observa mejora en esta muestra.
-- Checkpoint SHA-256: `7d9345ecb9e3d7ad22aa628b93324ffd18e7b8a477f2d24c04885eced587d2f3`.
-- [Artefacto del checkpoint](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42198068241/artifacts/13494355120) · [Manifiesto del candidato](weights/ronin-drosophila-100900160-candidate.json).
+- [Ejecución y evaluación](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278)
+- [Artefacto del checkpoint](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278/artifacts/13495833454)
+- [Manifiesto del modelo principal experimental](weights/ronin-drosophila-main.json)
 
-El candidato queda identificado con el nombre Drosophila y está preparado para revisión/merge como candidato. La etiqueta *mergeable* no significa que haya demostrado una mejora de capacidad: el screening no cambió y los gates globales G-0, near-duplicates y contaminación de holdout siguen pendientes. El modelo empaquetado en `main` continúa siendo la línea base anterior hasta que se promocionen explícitamente los nuevos pesos.
+Hágase constar que la ampliación funcional fue conservada antes del entrenamiento y que, tras 500 pasos, el screening pareado permaneció en 5/64 → 5/64. No se apreció mengua en tal muestra; mas tampoco se probó ganancia de capacidad general. El artefacto, por su tamaño (403.629.045 bytes), mora en GitHub Actions y no en el paquete Git ordinario. El checkpoint compacto de 9,9 M queda guardado como respaldo.
 
 ### Último experimento largo: 10.000 pasos
 
@@ -122,11 +118,13 @@ Fuentes train-scoped registradas: literatura española, Mathlib4, NASA file-revi
 
 Los workflows evolucionan. Revisa el YAML y los inputs del run concreto; sus valores por defecto no constituyen una receta universal.
 
-## Modelo mergeable: Ronin - Drosophila
+## Modelo experimental principal: Ronin - Drosophila
 
-El candidato actual de referencia para revisión es **Ronin - Drosophila (100.900.160 parámetros)**. Su expansión ×10,17 y continuación de 500 pasos se ejecutaron en el run [#42198068241](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42198068241). El manifiesto reproducible está en [weights/ronin-drosophila-100900160-candidate.json](weights/ronin-drosophila-100900160-candidate.json).
+La referencia experimental vigente es **Ronin - Drosophila (100.900.160 parámetros)**, promovida por decisión explícita tras el run [#42203609278](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278). Consulta el [manifiesto principal](weights/ronin-drosophila-main.json) para hashes, corpus, arquitectura y evaluación.
 
-La condición de mergeable identifica el candidato que queremos integrar como modelo de trabajo; no equivale a una promoción automática de pesos ni a una mejora demostrada en razonamiento. El screening MMLU-Pro permaneció en 5/64 antes y después, y los gates globales siguen pendientes. La promoción a pesos principales requiere resolver esos controles y actualizar de forma atómica el paquete y el manifiesto principal.
+El checkpoint de 403.629.045 bytes se sirve como [artefacto de GitHub Actions](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278/artifacts/13495833454). Por tamaño, no reemplaza el archivo Git [weights/ronin-main.pt](weights/ronin-main.pt): ese paquete de 9,9 M permanece como fallback compacto. La promoción experimental no debe confundirse con sustituir físicamente el paquete distribuido.
+
+La evidencia disponible acredita la expansión funcional (logit delta máximo 1,4305×10⁻⁶ antes de entrenar) y ausencia de regresión detectada en el screening pareado MMLU-Pro (5/64 antes y después). No acredita una mejora general de razonamiento. Los controles globales G-0, near-duplicates y contaminación de holdout continúan declarados como FAIL/PENDING en el manifiesto; se mantienen visibles para no ocultar límites del experimento.
 
 ## Reproducir localmente
 
