@@ -1,0 +1,47 @@
+name: Validate strict 64-library inventory
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/datasets/libraries/manifest-64.json"
+      - "data/datasets/libraries/README.md"
+      - "data/datasets/admitted/**"
+      - "data/datasets/rights_registry/**"
+      - "scripts/validate_64_library_inventory.py"
+      - "scripts/validate_rights_registry.py"
+      - "tests/test_64_library_inventory.py"
+      - "tests/test_rights_registry.py"
+      - ".github/workflows/validate-64-library-inventory.yml"
+  pull_request:
+    paths:
+      - "data/datasets/libraries/manifest-64.json"
+      - "data/datasets/libraries/README.md"
+      - "data/datasets/admitted/**"
+      - "data/datasets/rights_registry/**"
+      - "scripts/validate_64_library_inventory.py"
+      - "scripts/validate_rights_registry.py"
+      - "tests/test_64_library_inventory.py"
+      - "tests/test_rights_registry.py"
+      - ".github/workflows/validate-64-library-inventory.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Validate 32-domain / 64-library inventory
+        run: python scripts/validate_64_library_inventory.py
+      - name: Validate item/version rights registry
+        run: python scripts/validate_rights_registry.py
+      - name: Install test runner
+        run: python -m pip install pytest
+      - name: Run corpus and rights tests
+        run: python -m pytest -q tests/test_64_library_inventory.py tests/test_rights_registry.py
