@@ -2,7 +2,7 @@
 
 Este directorio es el registro operativo de adquisición, revisión, admisión y preparación de corpus para RONIN. **Los recuentos distinguen documentos admitidos a nivel de fuente, documentos listos para entrenamiento y candidatos. No deben sumarse categorías que puedan solaparse. Esta es la única raíz canónica de datos: `data/datasets/`.**
 
-> Corte documental: 5 de noviembre de 2026. Los manifiestos enlazados son la fuente de verdad; esta página resume su estado y no sustituye sus hashes ni decisiones por documento.
+> Corte documental: 6 de noviembre de 2026. Los manifiestos enlazados son la fuente de verdad; esta página resume su estado y no sustituye sus hashes ni decisiones por documento.
 
 ## Estado actual — cifras verificadas
 
@@ -213,6 +213,6 @@ Los corpus scoped anteriores se conservan sin borrar datos ni cambiar sus artefa
 
 CoVoST 2 sí dispone de evidencia de derechos Level A CC0-1.0 para el payload de traducciones: 270.244 segmentos / 18.385.485 bytes UTF-8. Aún no se asigna a ninguna biblioteca porque near-duplicate global y contaminación de benchmark/holdout siguen pendientes. No se confunde su elegibilidad scoped de origen con admisión global o de biblioteca.
 
-El registro de derechos tiene 10 entradas: 8 A (cinco exportaciones solo de metadatos y tres payloads/versiones CoVoST) y 2 B (BOE). Las entradas de metadatos no cuentan como texto. Los candidatos PMC y USGS tampoco cuentan como Level A admitido. BNE sigue bloqueada por HTTP 403.
+El registro de derechos tiene 11 entradas: 9 A (seis exportaciones solo de metadatos y tres payloads/versiones CoVoST) y 2 B (BOE). Las entradas de metadatos no cuentan como texto. Los candidatos PMC y USGS tampoco cuentan como Level A admitido. BNE sigue bloqueada por HTTP 403.
 
 El estado detallado, hashes, artefactos y bloqueos está en [el inventario 64](libraries/README.md), [el registro de derechos](rights_registry/README.md) y [docs/RUNS.md](../../docs/RUNS.md).
