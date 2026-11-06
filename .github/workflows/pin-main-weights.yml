@@ -1,4 +1,4 @@
-name: RONIN — fijar pesos del modelo main
+name: RONIN — promover checkpoint seed 95 a main
 
 on:
   push:
@@ -11,8 +11,12 @@ permissions:
   actions: read
   contents: write
 
+concurrency:
+  group: ronin-promote-seed95-main
+  cancel-in-progress: false
+
 jobs:
-  extract-and-pin:
+  extract-validate-promote:
     runs-on: ubuntu-26.04
     timeout-minutes: 180
     steps:
@@ -20,27 +24,28 @@ jobs:
         with:
           sparse-checkout: |
             .github
+            README.md
             weights
             configs
             ronin
-      - name: Descargar artefacto del candidato seed 202
+      - name: Descargar artefacto de las 100 corridas
         uses: actions/download-artifact@v8
         with:
-          name: ronin-corpus-seed-202-500steps-42071401130
-          path: incoming/seed-202
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: "42071401130"
+          name: ronin-corpus-100-runs-100-steps-42121731925
+          path: incoming/seed-screening
+          github-token: \${{ github.token }}
+          repository: \${{ github.repository }}
+          run-id: "42121731925"
       - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
-      - name: Instalar PyTorch para validar el checkpoint
+      - name: Instalar PyTorch para validar y extraer el modelo
         run: |
           python -m pip install --upgrade pip
           python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
           python -m pip install "numpy>=1.26"
-      - name: Extraer, validar y empaquetar únicamente los pesos principales
+      - name: Validar procedencia, arquitectura y métricas; empaquetar solo pesos
         shell: bash
         run: |
           set -euo pipefail
@@ -51,17 +56,32 @@ jobs:
           from ronin.config import get_profile
           from ronin.models.transformer import RoninLM
 
-          expected = "86d7d97360f1eb0ac35e9dc12f69c366101629641115ba1c2a1341b2b7d257ae"
-          matches = list(Path("incoming/seed-202").rglob("step-00000500.pt"))
+          expected_checkpoint = "161c5f414c5aa116b7461d76efd4dfbbffa9d6c72fe4da82cc6bae85f3f60409"
+          expected_base_weights = "ee250e1b0e99f2983267ae030dd7d589395e25de028bb052dbff33894c8fe4b7"
+          source_commit = "7669c833d385cdbc3010c76b82d499d68671f204"
+          source_run = 42121731925
+          source_artifact = "ronin-corpus-100-runs-100-steps-42121731925"
+
+          matches = list(Path("incoming/seed-screening").rglob("rank-1-seed-95.pt"))
           if len(matches) != 1:
-              raise SystemExit(f"Se esperaba un checkpoint seed-202; encontrados: {len(matches)}")
+              raise SystemExit(f"Se esperaba un único checkpoint rank-1 seed-95; encontrados: {len(matches)}")
           source = matches[0]
           digest = hashlib.sha256(source.read_bytes()).hexdigest()
-          if digest != expected:
-              raise SystemExit(f"SHA-256 inesperado: {digest}")
+          if digest != expected_checkpoint:
+              raise SystemExit(f"SHA-256 del checkpoint inesperado: {digest}")
+
           payload = torch.load(source, map_location="cpu", weights_only=False)
-          if payload.get("step") != 500 or not isinstance(payload.get("model"), dict):
-              raise SystemExit("El checkpoint no corresponde al ciclo seed-202 de 500 pasos")
+          if payload.get("step") != 100 or not isinstance(payload.get("model"), dict):
+              raise SystemExit("El candidato no corresponde a seed 95, paso 100")
+          if payload.get("training_config", {}).get("seed") != 95:
+              raise SystemExit("La configuración del checkpoint no identifica seed 95")
+
+          manifest_path = Path("weights/main-model.json")
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          if manifest.get("weights_sha256") != expected_base_weights:
+              raise SystemExit("main cambió desde el screening; no se puede promover sobre una base distinta")
+          if manifest.get("parameters") != 9922880:
+              raise SystemExit("El manifiesto de main no identifica el perfil tiny esperado")
 
           model_config, _ = get_profile("tiny")
           model = RoninLM(model_config)
@@ -73,7 +93,7 @@ jobs:
           target.parent.mkdir(parents=True, exist_ok=True)
           torch.save({
               "model": model.state_dict(),
-              "step": 500,
+              "step": 100,
               "profile": "tiny",
               "training_config": payload.get("training_config"),
               "weights_only": True,
@@ -82,18 +102,103 @@ jobs:
               raise SystemExit(f"Los pesos no caben como archivo Git normal: {target.stat().st_size} bytes")
           weights_digest = hashlib.sha256(target.read_bytes()).hexdigest()
 
-          manifest_path = Path("weights/main-model.json")
-          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-          if manifest.get("checkpoint_sha256") != expected:
-              raise SystemExit("El manifiesto no apunta al checkpoint esperado")
-          manifest["weights_path"] = "weights/ronin-main.pt"
-          manifest["weights_sha256"] = weights_digest
-          manifest["weights_bytes"] = target.stat().st_size
-          manifest["checkpoint_storage"] = "versioned compact model state; optimizer state intentionally excluded"
+          manifest.update({
+              "model_name": "RONIN-tiny-seed95-100-001",
+              "status": "main",
+              "branch": "main",
+              "source_workflow_run_id": source_run,
+              "source_workflow_url": f"https://github.com/orbitalronin94/RONIN-IA/actions/runs/{source_run}",
+              "source_commit": source_commit,
+              "checkpoint_artifact": source_artifact,
+              "checkpoint_path": "checkpoints/top-candidates/rank-1-seed-95.pt",
+              "checkpoint_sha256": digest,
+              "checkpoint_step": 100,
+              "parameters": 9922880,
+              "architecture": "RONIN causal Transformer; RoPE, RMSNorm, SwiGLU, GQA; byte-v1",
+              "training": {
+                  "initialization": "weights_only_from_previous_main",
+                  "base_weights_sha256": expected_base_weights,
+                  "dataset": "ronin-native-no-tutor-100-runs-100-step-v1",
+                  "documents": 286468,
+                  "source_bytes": 684738932,
+                  "steps": 100,
+                  "tokens_processed": 25600,
+                  "seed": 95,
+                  "tutor_used": False,
+                  "questions_used": False,
+                  "optimizer_state_restored": False
+              },
+              "evaluation": {
+                  "internal_validation": {
+                      "bits_per_byte_before": 4.565380443810757,
+                      "bits_per_byte_after": 4.3372588358104185,
+                      "perplexity_before": 23.676442886983022,
+                      "perplexity_after": 20.213662423929566
+                  },
+                  "mmlu_pro_screening": {
+                      "dataset_revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+                      "split": "validation",
+                      "selected_questions": 50,
+                      "available_questions": 70,
+                      "sampling_seed": 2026,
+                      "coverage": 1.0,
+                      "correct_before": 5,
+                      "correct_after": 7,
+                      "accuracy_before": 0.1,
+                      "accuracy_after": 0.14,
+                      "delta_percentage_points": 4.0,
+                      "same_question_ids": True,
+                      "official_benchmark": False,
+                      "decision": "SCREENING_ONLY",
+                      "interpretation": "Promoted by explicit project-owner decision as the operational main baseline; the 50-question validation screening is not independent test evidence or a certification of general reasoning."
+                  }
+              },
+              "weights_path": "weights/ronin-main.pt",
+              "weights_sha256": weights_digest,
+              "weights_bytes": target.stat().st_size,
+              "checkpoint_storage": "versioned compact model state; optimizer state intentionally excluded",
+              "promotion_policy": "Explicit project-owner promotion after 100-seed screening; retain the screening-only caveat and require independent holdout evaluation."
+          })
           manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+          readme_path = Path("README.md")
+          readme = readme_path.read_text(encoding="utf-8")
+          start = readme.index("# RONIN-IA")
+          end = readme.index("## Estructura del repositorio")
+          replacement = """# RONIN-IA
+
+**Un modelo propio. Un pipeline reproducible. Un corpus trazable.**
+
+RONIN es un modelo causal Transformer implementado en PyTorch. El modelo operativo fijado en main es **RONIN-tiny-seed95-100-001**: 9.922.880 parámetros, RoPE, RMSNorm, SwiGLU, GQA y tokenización byte-v1.
+
+## Modelo principal
+
+- Base: RONIN-tiny de main, pesos SHA-256 ee250e1b0e99f2983267ae030dd7d589395e25de028bb052dbff33894c8fe4b7.
+- Entrenamiento: 100 pasos adicionales de next-token prediction, semilla 95, 25.600 tokens, CPU; sin tutor ni preguntas de benchmark en los gradientes.
+- Corpus: 286.468 unidades train-scoped y 684.738.932 bytes UTF-8 (literatura española, Mathlib4, NASA revisado, Papers propios, ScienceVerse CC-BY y CoVoST 2 CC0). Las particiones validation/test permanecen excluidas de los gradientes.
+- Checkpoint de origen: SHA-256 161c5f414c5aa116b7461d76efd4dfbbffa9d6c72fe4da82cc6bae85f3f60409.
+- Run: [GitHub Actions #42121731925](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42121731925).
+- Artefacto de origen: ronin-corpus-100-runs-100-steps-42121731925; el workflow valida la arquitectura y extrae únicamente los pesos del modelo, sin estado del optimizador.
+
+### Evaluación pareada antes/después
+
+| Métrica | Main anterior | Seed 95 | Cambio |
+|---|---:|---:|---:|
+| Validación interna BPB | 4,5654 | 4,3373 | -4,99 % |
+| Validación interna PPL | 23,6764 | 20,2137 | -14,63 % |
+| MMLU-Pro validation | 5/50 (10 %) | 7/50 (14 %) | +4 pp |
+
+El cribado MMLU-Pro utilizó los mismos 50 IDs del split validation, revisión b189ec765aa7ed75c8acfea42df31fdae71f97be, selección estratificada determinista y cobertura del 100 %. La muestra no es el conjunto completo ni el protocolo oficial. Cada acierto equivale a 2 puntos porcentuales; por tanto, el resultado **no certifica razonamiento general** y requiere evaluación independiente en un holdout no usado para seleccionar la semilla.
+
+Por decisión explícita del propietario del proyecto, seed 95 queda fijada como **base operativa de main** tras el screening de 100 semillas. La promoción no cambia la clasificación de la evidencia: el resultado sigue siendo SCREENING_ONLY, no una afirmación de superioridad general. Se conservan el hash del checkpoint, el hash de los pesos compactos y la procedencia en weights/main-model.json.
+
+El corpus train-scoped ampliado no se atribuye retroactivamente a los entrenamientos anteriores. Los siguientes ciclos medirán el mismo holdout antes y después, conservarán el checkpoint de partida y no promocionarán candidatos automáticamente.
+
+"""
+          readme_path.write_text(readme[:start] + replacement + readme[end:], encoding="utf-8")
           print(f"checkpoint_sha256={digest} weights_sha256={weights_digest} weights_bytes={target.stat().st_size}")
           PY
-      - name: Incorporar los pesos verificados a main
+      - name: Incorporar seed 95 a main
         shell: bash
         run: |
           set -euo pipefail
@@ -101,17 +206,14 @@ jobs:
           git checkout -B main origin/main
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add weights/ronin-main.pt weights/main-model.json
-          if git diff --cached --quiet; then
-            echo "Los pesos y el manifiesto ya están actualizados en main."
-          else
-            git commit -m "model: promote verified seed-202 weights to main"
-            git push origin main
-          fi
+          git add weights/ronin-main.pt weights/main-model.json README.md
+          git diff --cached --check
+          git commit -m "model: promote seed95 checkpoint to main (screening baseline)"
+          git push origin main
       - name: Publicar copia de recuperación de los pesos
         uses: actions/upload-artifact@v7
         with:
-          name: ronin-main-seed202-weights
+          name: ronin-main-seed95-weights
           path: weights/ronin-main.pt
           if-no-files-found: error
           retention-days: 90
