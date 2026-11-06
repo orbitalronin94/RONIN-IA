@@ -1,73 +1,62 @@
 # Inventario canónico de las 64 bibliotecas
 
-El objetivo de RONIN es **32 dominios × General/HKD = 64 bibliotecas**. El inventario canónico está en manifest-64.json y se valida con scripts/validate_64_library_inventory.py. El manifiesto manifest-32.json y sus 32 directorios describen el pipeline parcial legado RUN5 de 16 dominios; no son el objetivo final.
+El objetivo es **32 dominios × General/HKD = 64 bibliotecas**. La fuente de verdad es [manifest-64.json](manifest-64.json). El estándar vigente es **Level A estricto por ítem y versión**; los corpus admitidos bajo políticas scoped anteriores se conservan, pero no se cuentan como Level A ni cubren el mínimo.
 
-## Estado verificable a 6 de noviembre de 2026
+## Estado verificado — 6 de noviembre de 2026
 
-- Dominios catalogados: **32**.
-- Slots General/HKD: **64**.
-- Documentos Level A admitidos en las 64 bibliotecas: **608**.
-- Bytes de texto Level A admitidos: **140.295.523**.
-- Bibliotecas que alcanzan el mínimo de 1 MiB Level A: **1/64** (Humanidades — General).
+- Dominios catalogados: **32**; IDs General/HKD: **64**.
+- Texto Level A estricto admitido en las 64 bibliotecas: **0 documentos / 0 bytes**.
+- Bibliotecas que alcanzan 1 MiB Level A estricto: **0/64**; por debajo: **64/64**.
+- Bibliotecas plenamente completas (derechos, calidad, privacidad, near-duplicate global, General/HKD, splits y manifiestos): **0/64**.
 - Bibliotecas training-eligible: **0/64**.
 - G-0 global: **FAIL**.
 
-El catálogo no es una descarga y una descarga no es una admisión. Los contadores de manifest-64.json se mantienen a cero hasta que existan payloads de texto exactos, derechos por ítem/versión, calidad, privacidad, deduplicación, atribución, splits y hashes aprobados.
+No se han rebajado gates para conservar los contadores anteriores. Los datos scoped existentes se muestran aparte y siguen disponibles para reconciliación, pero no cuentan hacia los 64 MiB mínimos.
 
-## Umbrales y reparto
+## Material scoped conservado — no computa como Level A estricto
 
-- Mínimo operativo: **1 MiB de texto Level A por biblioteca**.
-- Objetivo posterior: **10 GiB por biblioteca** cuando las fuentes y capacidad lo permitan.
-- Mínimo total de 64 bibliotecas: **64 MiB**; objetivo de escala total: **640 GiB**.
-- General/HKD: particiones disjuntas por documento y clúster near-duplicate.
-- HKD: ranking RONIN por densidad semántica, descendente, con desempate estable por identificador documental.
-- Balance: bytes UTF-8, no solo número de documentos.
-- Deduplicación exacta y near-duplicate global entre las 64 bibliotecas, corpus admitidos y conjuntos de evaluación.
-- Train/validation/test se separan de forma determinista y agrupada por documento/DOI; validation/test/holdout nunca pasan a train.
+| Biblioteca General | Documentos/segmentos scoped | Bytes UTF-8 | Fuente y bloqueo principal |
+|---|---:|---:|---|
+| humanities_general | 608 | 140.295.523 | CLiGS Textbox, CONSSA y ELTeC-spa; falta evidencia estricta por obra/edición, snapshot de metadatos y cobertura ES/EU/US |
+| philosophy_general | 291 | 22.265.918 | ScienceVerse/Open Mind; falta reconciliación estricta de titular, snapshot y jurisdicciones |
+| biology_general | 2.377 | 157.788.625 | ScienceVerse; mismos bloqueos, más near-duplicate global y pareja HKD |
+| medicine_health_general | 1.694 | 82.340.385 | ScienceVerse; mismos bloqueos, más near-duplicate global y pareja HKD |
+| social_sciences_general | 2.741 | 164.581.017 | ScienceVerse; mismos bloqueos, más near-duplicate global y pareja HKD |
+| **Total scoped** | **7.711** | **567.271.468** | **0 bytes computan como Level A estricto** |
 
-## Pool legacy que no se cuenta como Level A
+La auditoría verificable de ScienceVerse (run [42110130695](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42110130695), artefacto 13453391506) contiene 7.103 documentos train y 426.975.945 bytes UTF-8. Se reconciliaron el manifiesto de fuente y el inventario: 2.741 Social Sciences, 2.377 Biology, 1.694 Medicine/Health y 291 Philosophy; 262 documentos quedaron retenidos por exceso de caracteres de reemplazo. El artefacto ZIP SHA-256 verificado es `a55eed4a9165579d578ba110150b95c7bec7c312e476c8c744da8266350cd57f`; `documents.train.jsonl` SHA-256 `bc09ca772a9fc3b5c3be0de10d1ee83beea1bf29f2b403d1e56b36049afc49dc`. La elegibilidad de origen no equivale a Level A estricto de biblioteca: faltan snapshot SHA-256 por ítem en el registro, evidencia explícita de titular/proveedor y ES/EU/US, near-duplicate global, contaminación de benchmark/holdout y separación General/HKD.
 
-El corpus admitted/literature-es-v1 conserva 608 documentos train y 140.295.523 bytes, con SHA-256 9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78. Sus 18 validation y 18 test permanecen aislados. Aporta **608 documentos train y 140.295.523 bytes** a `humanities_general` como Level A scoped-equivalent, con SHA-256 9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78. Se aplica el estándar legacy: fuentes públicas fijadas, derechos/procedencia por documento, hashes, particiones disjuntas, cero duplicados exactos en train y auditorías previas registradas. No se exige nueva reconciliación territorial general.
+El corpus de literatura española mantiene 608 train y 140.295.523 bytes, con validation/test separados. Se conserva bajo su manifiesto scoped anterior; no se convierte automáticamente en dominio público territorial ni en Level A estricto. Debe reconciliarse cada obra/edición y su evidencia jurídica antes de computarlo.
 
-La reconstrucción de esos 608 fragmentos se valida por character_count y SHA-256 individual en scripts/assemble_32_libraries.py. Los fragmentos se conservan exactamente; los conserva como material Level A scoped-equivalent. `humanities_hkd` queda pendiente de ranking semántico; no se inventa una división HKD.
+## Rights Level A que todavía no está asignado a una biblioteca
 
-## Candidatos de volumen relevantes
+CoVoST 2 tiene una declaración CC0-1.0 por versión y un registro de derechos Level A para el payload de traducciones. El train contiene **270.244 segmentos / 18.385.485 bytes UTF-8**; su train gzip SHA-256 es `771e6845e0097554398de8d3416e3effeb3c173cff341f037ac5437ea6344623`. El run [42119196514](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42119196514) y el artefacto 13457877574 se verificaron por SHA-256 `9e17ae5e0cd5f8a1e316ef767b6b1af34d34ab51ed33b18a010ff64c127c1f96`. No se asigna todavía a General/HKD: near-duplicate global y contaminación de benchmark/holdout siguen **PENDING**. Cada fila es un segmento de traducción, no un documento largo.
 
-- ScienceVerse: cuatro RDS con 2.595 filas DOI elegibles y 83.524.872 bytes comprimidos. No son bytes de texto. Falta inspección RDS, extracción textual, verificación de derechos del editor, privacidad, retractaciones, deduplicación y splits. Expediente: ../candidates/scienceverse-expanded-corpora/README.md.
-- Naciones Unidas Parallel Corpus: fuente con declaración de dominio público del proveedor; falta descarga, validación de payload/alineaciones, privacidad y revisión por documento. Expediente: ../candidates/un-parallel-corpus-v1/README.md.
-- PMC OA: candidatos de texto completo condicionados a licencia por versión y a la consolidación/hash de shards. Nunca se promueven automáticamente.
-- arXiv: metadatos CC0 no equivalen a licencia del artículo; el texto completo requiere licencia por versión CC BY 4.0/CC0 y comprobación de terceros.
-- NASA NTRS / NIST: solo documentos o datos propios con declaración de reutilización inequívoca; excluir trabajos de terceros.
-- BNE / Project Gutenberg: metadatos no transfieren derechos al OCR; dominio público estadounidense no prueba dominio público en España/UE.
+El registro de derechos contiene **8 registros A (5 solo de metadatos y 3 payloads/versiones CoVoST) y 2 registros B**. Los metadatos CC0 no son texto entrenable. Los dos registros BOE no son Level A: la base española por sí sola no acredita ES/EU/US.
 
-## Derechos Level A
+## Otros candidatos y bloqueos
 
-rights_registry/records.jsonl contiene 10 registros (8 A, 2 B). Los registros Level A incluyen seis exportaciones de metadatos y dos payloads candidatos CoVoST; ninguno se ha admitido como texto en las 64 bibliotecas. Los dos registros BOE están en Level B y no cuentan para el mínimo Level A. La evidencia de un proveedor, SPDX, Crossref, AWS Open Data Registry o una etiqueta genérica no sustituye la comprobación de derechos exactos y terceros.
+- PMC OA: 5.006 candidatos y 34.682.285 bytes UTF-8 en el último resumen; no admitidos, sin asignación a bibliotecas y con gates globales pendientes.
+- USGS batch 001: 40 extracciones / 4.182.611 bytes candidatos; 29 rechazados por calidad y 11 en revisión de derechos. Siete se seleccionaron para revisión inicial (159.663 bytes); **0 Level A admitidos**. BNE respondió HTTP 403 y queda bloqueada.
+- NASA NTRS y los nueve Papers propios siguen en corpus scoped separado; no cuentan al mínimo Level A.
+- El catálogo de 64 IDs no significa que existan 64 payloads.
 
-## G-0 y entrenamiento
+## Umbrales y gates
 
-G-0 permanece independiente. Mientras sea FAIL, ninguna biblioteca puede ser training-eligible aunque supere el mínimo Level A. No se entrenará con candidatos, con datos de permisos privados, con chain-of-thought privado de tutores ni con validation/test/holdout.
+- Mínimo operativo: **1 MiB de texto Level A estricto por biblioteca** (64 MiB total).
+- Escala posterior: **10 GiB por biblioteca** (640 GiB total), solo cuando existan fuentes y capacidad verificables.
+- General/HKD deben ser disjuntos por documento y clúster near-duplicate. HKD requiere ranking RONIN reproducible por densidad semántica, con desempate estable.
+- Deduplicación exacta y near-duplicate global contra todos los corpus y conjuntos de evaluación.
+- PII, secretos, malware, idioma/calidad, atribución, splits y hashes se verifican sobre el payload exacto.
+- Validation/test/holdout nunca pasan a train. MMLU-Pro test no se usa para entrenamiento ni selección.
+- G-0 es independiente: mientras sea FAIL, las 64 bibliotecas permanecen `training_eligible=false`.
+
+## Validación y trazabilidad
 
 Ejecutar:
-- python scripts/validate_64_library_inventory.py
-- pytest -q tests/test_64_library_inventory.py
 
-El workflow .github/workflows/validate-64-library-inventory.yml publica los recuentos estructurales. Un PASS del inventario solo demuestra que los 32 pares General/HKD están bien catalogados y que no se ha habilitado entrenamiento; no demuestra que las bibliotecas estén completas.
+- `python scripts/validate_64_library_inventory.py`
+- `python scripts/validate_rights_registry.py`
+- `python -m pytest -q tests/test_64_library_inventory.py tests/test_rights_registry.py`
 
-
-## Estándar Level A actualizado — equivalencia legacy
-
-Level A ya no exige una nueva auditoría territorial general ES/EU/US cuando el corpus cumple el estándar scoped de `literature-es-v1`: acceso anónimo público; revisión de fuente inmutable; derechos y procedencia por documento; hashes de payload/texto; train/validation/test deterministas y disjuntos; cero duplicados exactos en train; auditoría humana y de calidad registrada; y escaneo previo de PII/secretos. Se mantienen exclusiones de terceros, privacidad, atribución, integridad y calidad. Los registros de catálogo o licencias de metadatos no bastan para admitir texto.
-
-El inventario registra 608 documentos y 140.295.523 bytes en `humanities_general` (1/64 bibliotecas sobre el mínimo). `humanities_hkd` queda pendiente de ranking. G-0 global sigue FAIL.
-
-
-## Lote externo en revisión — USGS (6 de noviembre de 2026)
-
-Se ha ejecutado la primera adquisición corregida desde USGS Publications Warehouse. El lote consultó 250 registros, descargó y extrajo 40 PDF y dejó 11 candidatos tras los filtros automáticos. Para revisión inicial de derechos se han seleccionado **7 documentos / 159.663 bytes UTF-8**; otros cuatro se excluyeron por marcas de crédito o reproducción de terceros. La auditoría completa está en [USGS batch 001](../candidates/usgs-publications-2026-11-06/README.md) y el índice por documento en [batch-001-manifest.json](../candidates/usgs-publications-2026-11-06/batch-001-manifest.json).
-
-**Contabilidad:** estos siete textos son candidatos Level B, no Level A. No se suman a los 608 documentos / 140.295.523 bytes del inventario Level A, no ocupan todavía una biblioteca General/HKD y aportan **0 documentos / 0 bytes entrenables**. La política RONIN-RIGHTS-A-1 exige firma jurídica humana para declarar dominio público; también faltan la revisión final de terceros, privacidad, deduplicación exacta global, asignación de dominio y splits deterministas.
-
-BNE/BDH no produjo contenido en esta ejecución: la distribución oficial TXT respondió HTTP 403. Se mantiene como bloqueo de adquisición, no como corpus adquirido.
-
-La ejecución corregida está en [GitHub Actions run 42190061006](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42190061006). Su artefacto contiene las 40 extracciones y la auditoría automática; el manifiesto versionado de este directorio conserva los siete candidatos seleccionados y sus hashes, pero no incorpora sus textos al corpus train.
+El libro de ejecuciones está en [docs/RUNS.md](../../docs/RUNS.md). Un workflow verde valida estructura y consistencia; no sustituye la evidencia jurídica ni declara completas las bibliotecas.
