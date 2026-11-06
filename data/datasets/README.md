@@ -227,3 +227,10 @@ Los payloads NASA y ScienceVerse preservan hashes del origen y del contenido adm
 ## Expansión a 200 GB
 
 La hoja de ruta multi-fuente y sus reglas de contabilidad están en [`acquisition/200gb-expansion-roadmap-2026-11.md`](acquisition/200gb-expansion-roadmap-2026-11.md). El primer flujo de adquisición de texto completo está en [`candidates/pmc-oa-cc0-ccby-v2/`](candidates/pmc-oa-cc0-ccby-v2/): PMC OA con verificación de licencia por artículo, manifiestos SHA-256 y estado no entrenable hasta superar G-0. El tamaño de texto UTF-8 se contabiliza por separado del tamaño comprimido.
+
+
+## Adquisición USGS — lote 001 (6 de noviembre de 2026)
+
+La ejecución corregida [42190061006](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42190061006) consultó 250 registros del Publications Warehouse, extrajo 40 PDF, rechazó 29 por calidad/privacidad automática y dejó 11 candidatos. Siete documentos (159.663 bytes UTF-8) pasan a revisión inicial de derechos; cuatro se apartaron por marcas de crédito/reproducción de terceros. El índice con títulos, DOI, URLs y hashes está en [batch-001-manifest.json](candidates/usgs-publications-2026-11-06/batch-001-manifest.json), con auditoría en [README del lote](candidates/usgs-publications-2026-11-06/README.md).
+
+**No se incrementa aún el total entrenable de 286.468 documentos / 684.738.932 bytes.** El lote está en Level B, con `training_eligible=0`, sin partición y pendiente de firma jurídica humana y controles de terceros, privacidad y deduplicación. BNE/BDH devolvió HTTP 403 y no aportó documentos.
