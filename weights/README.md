@@ -1,12 +1,16 @@
-# Pesos del modelo principal
+# Pesos del modelo de referencia
 
-El modelo operativo actual es `RONIN-tiny-seed202-500-001`, fijado desde el checkpoint de 500 pasos de la semilla 202. El fichero `ronin-main.pt` contiene el paquete compacto de pesos PyTorch (sin estado del optimizador).
+El checkpoint versionado en `main` es **RONIN-tiny-seed95-100-001**, con 9.922.880 parámetros. Este directorio contiene el paquete compacto PyTorch `ronin-main.pt` (sin estado del optimizador) y el manifiesto de identidad/procedencia.
 
-- Checkpoint de origen: SHA-256 `86d7d97360f1eb0ac35e9dc12f69c366101629641115ba1c2a1341b2b7d257ae`.
-- Paquete versionado: 39.719.989 bytes; SHA-256 `ee250e1b0e99f2983267ae030dd7d589395e25de028bb052dbff33894c8fe4b7`.
-- Procedencia: [GitHub Actions #42071401130](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42071401130).
-- Validación de extracción y publicación: [GitHub Actions #42074008702](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42074008702).
+- **Pesos:** [ronin-main.pt](ronin-main.pt)
+- **Manifiesto:** [main-model.json](main-model.json)
+- **SHA-256 del paquete:** `4fb699cf3633ce610f66f2066ce182ceb957b2b0bead2b97c42cccf7f7021d11`
+- **Tamaño:** 39.719.989 bytes.
+- **Checkpoint de origen:** 100 pasos, seed 95.
+- **Procedencia:** [GitHub Actions #42121731925](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42121731925).
 
-El manifiesto `main-model.json` conserva el paso de origen, arquitectura, evaluación pareada, procedencia y hashes. El workflow `.github/workflows/pin-main-weights.yml` recupera el artefacto histórico, verifica el SHA-256 del checkpoint, carga el state_dict con comprobación estricta de arquitectura y actualiza el paquete y el manifiesto en `main`.
+El manifiesto es la fuente de verdad para arquitectura, número de parámetros, checkpoint de origen, hashes, evaluación y política de promoción.
 
-Los ciclos posteriores deben cargar `weights/ronin-main.pt`, medir el holdout antes y después con idénticos IDs y no sustituir los pesos de `main` automáticamente.
+Los experimentos posteriores —incluido el candidato de 10.000 pasos— no sustituyen automáticamente estos pesos. Sus checkpoints se publican como artefactos de Actions hasta que exista una decisión explícita de promoción y se actualicen juntos el paquete y el manifiesto.
+
+No confundas el inventario actual de datasets con el corpus histórico usado para crear este checkpoint. Cada manifiesto de experimento registra el corte real de datos utilizado.
