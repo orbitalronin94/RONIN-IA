@@ -2,7 +2,7 @@
 
 El objetivo de RONIN es **32 dominios × General/HKD = 64 bibliotecas**. El inventario canónico está en manifest-64.json y se valida con scripts/validate_64_library_inventory.py. El manifiesto manifest-32.json y sus 32 directorios describen el pipeline parcial legado RUN5 de 16 dominios; no son el objetivo final.
 
-## Estado verificable a 5 de noviembre de 2026
+## Estado verificable a 6 de noviembre de 2026
 
 - Dominios catalogados: **32**.
 - Slots General/HKD: **64**.
@@ -60,3 +60,14 @@ El workflow .github/workflows/validate-64-library-inventory.yml publica los recu
 Level A ya no exige una nueva auditoría territorial general ES/EU/US cuando el corpus cumple el estándar scoped de `literature-es-v1`: acceso anónimo público; revisión de fuente inmutable; derechos y procedencia por documento; hashes de payload/texto; train/validation/test deterministas y disjuntos; cero duplicados exactos en train; auditoría humana y de calidad registrada; y escaneo previo de PII/secretos. Se mantienen exclusiones de terceros, privacidad, atribución, integridad y calidad. Los registros de catálogo o licencias de metadatos no bastan para admitir texto.
 
 El inventario registra 608 documentos y 140.295.523 bytes en `humanities_general` (1/64 bibliotecas sobre el mínimo). `humanities_hkd` queda pendiente de ranking. G-0 global sigue FAIL.
+
+
+## Lote externo en revisión — USGS (6 de noviembre de 2026)
+
+Se ha ejecutado la primera adquisición corregida desde USGS Publications Warehouse. El lote consultó 250 registros, descargó y extrajo 40 PDF y dejó 11 candidatos tras los filtros automáticos. Para revisión inicial de derechos se han seleccionado **7 documentos / 159.663 bytes UTF-8**; otros cuatro se excluyeron por marcas de crédito o reproducción de terceros. La auditoría completa está en [USGS batch 001](../candidates/usgs-publications-2026-11-06/README.md) y el índice por documento en [batch-001-manifest.json](../candidates/usgs-publications-2026-11-06/batch-001-manifest.json).
+
+**Contabilidad:** estos siete textos son candidatos Level B, no Level A. No se suman a los 608 documentos / 140.295.523 bytes del inventario Level A, no ocupan todavía una biblioteca General/HKD y aportan **0 documentos / 0 bytes entrenables**. La política RONIN-RIGHTS-A-1 exige firma jurídica humana para declarar dominio público; también faltan la revisión final de terceros, privacidad, deduplicación exacta global, asignación de dominio y splits deterministas.
+
+BNE/BDH no produjo contenido en esta ejecución: la distribución oficial TXT respondió HTTP 403. Se mantiene como bloqueo de adquisición, no como corpus adquirido.
+
+La ejecución corregida está en [GitHub Actions run 42190061006](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42190061006). Su artefacto contiene las 40 extracciones y la auditoría automática; el manifiesto versionado de este directorio conserva los siete candidatos seleccionados y sus hashes, pero no incorpora sus textos al corpus train.
