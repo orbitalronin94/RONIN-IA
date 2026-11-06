@@ -53,3 +53,12 @@ Git no es un almacén de objetos de 200 GB. El repositorio ya contiene cientos d
 ## Estado
 
 El objetivo de 200 GB es un objetivo de adquisición, no una cifra ya conseguida. El hito del 1 % solo se marcará cuando los manifiestos sumen al menos 2.000.000.000 bytes de texto incorporado y los shards correspondientes existan en un almacenamiento persistente verificable. La elegibilidad para entrenamiento se contabiliza aparte.
+
+
+## Ampliación de fuentes (2026-11-06)
+
+Se han scopeado ocho fuentes nuevas en `source-candidates-200gb.json`: BNE/BDH, USGS Publications Warehouse, NOAA Institutional Repository, NIST Publications, DOE OSTI, Europeana, Library of Congress y GovInfo. La ficha detallada está en `new-sources-scope-2026-11-06.md`.
+
+Orden de adquisición: BNE/BDH y USGS primero; NOAA/NIST/GovInfo después; Europeana/LOC con derechos por ítem; DOE OSTI permanece en discovery-only salvo prueba expresa de reutilización. OpenStax queda excluido del corpus general por CC BY-NC-SA.
+
+**Contabilidad de esta ampliación:** 8 fuentes añadidas al registro; 0 documentos descargados; 0 documentos admitidos; 0 bytes nuevos. El scope no altera el tamaño del corpus ni el estado de entrenamiento.
