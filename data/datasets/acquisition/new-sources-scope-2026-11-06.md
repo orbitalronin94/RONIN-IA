@@ -47,3 +47,21 @@ Fecha: 2026-11-06. Esta PR amplía el registro de adquisición; **no incorpora t
 - Documentos nuevos admitidos como entrenables: 0.
 - Bytes nuevos contabilizables: 0.
 - No se modifica el modelo ni el holdout.
+
+
+## Adquisición ejecutable incluida en la PR
+
+La PR incorpora `scripts/acquire_public_sources.py` y `.github/workflows/acquire-public-sources.yml`. El workflow se ejecuta automáticamente en cada actualización de esta PR que toque el harvester o su workflow, y también permite ejecución manual.
+
+### Fuentes con descarga de texto implementada
+
+- **BNE/BDH**: descarga el ZIP TXT de la colección oficial de documentos en dominio público. Cada entrada textual se convierte en un registro con atribución BNE, hashes SHA-256 del payload y del texto normalizado, bytes UTF-8, controles básicos de calidad/PII y estado de clasificación. La elegibilidad de la colección se limita al dataset BDH de dominio público, no al catálogo BNE completo.
+- **USGS Publications Warehouse**: pagina el API oficial, filtra conservadoramente registros que parecen informes USGS, exige PDF alojado en `pubs.usgs.gov`, descarga y extrae texto con `pdftotext`. Se conserva metadata y hash del PDF. El resultado queda como candidato pendiente de revisión de autoría y material de terceros; el filtro automático no declara derechos finales.
+
+### Clasificación y salida
+
+El workflow aplica umbral de longitud, densidad alfabética, corrupción de codificación y patrones de correo/SSN; deduplica por SHA-256 del texto contra el manifiesto del lote; genera `manifest.jsonl` y `acquisition-audit.json`; valida que ningún registro se marque entrenable y publica ambos como artefacto de Actions durante 30 días.
+
+**Importante:** el artefacto es una bandeja de adquisición temporal, no un almacén persistente de 200 GB. Ningún candidato se promueve automáticamente: falta deduplicación global contra el corpus y holdouts, revisión humana de derechos por documento y particionado aislado. NOAA, NIST, DOE OSTI, Europeana, LOC y GovInfo permanecen scopeados, pero no se descargan como texto en este primer ejecutor porque requieren endpoints, credenciales o verificación item-level adicionales. El informe del workflow debe mostrar fallos de fuente explícitamente, no convertirlos en cero documentos sin explicación.
+
+Límites iniciales: 250 documentos por fuente y por ejecución, configurables hasta 5.000; se puede elevar después de comprobar carga, tamaño de artefactos y tasa de falsos positivos.
