@@ -1,73 +1,103 @@
 # RONIN-IA
 
-**Un modelo propio. Un pipeline reproducible. Un corpus trazable.**
+**Un modelo propio. Un pipeline experimental. Un corpus trazable.**
 
-RONIN es un modelo causal Transformer implementado en PyTorch. El modelo operativo fijado en main es **RONIN-tiny-seed95-100-001**: 9.922.880 parámetros, RoPE, RMSNorm, SwiGLU, GQA y tokenización byte-v1.
+RONIN es un modelo causal Transformer implementado en PyTorch. El proyecto investiga cómo mejorar un modelo pequeño mediante entrenamiento reproducible, adquisición de corpus abiertos y evaluación pareada.
 
-## Modelo principal
+> **El proceso de entrenamiento todavía es experimental.** No existe una receta única ni un protocolo definitivo fijado. Cambiamos pasos, semillas, mezclas de datos, estrategias de selección y profundidad de evaluación entre experimentos. La configuración efectiva de cada ejecución está en su workflow, en los inputs del run y en sus artefactos.
 
-- Base: RONIN-tiny de main, pesos SHA-256 ee250e1b0e99f2983267ae030dd7d589395e25de028bb052dbff33894c8fe4b7.
-- Entrenamiento: 100 pasos adicionales de next-token prediction, semilla 95, 25.600 tokens, CPU; sin tutor ni preguntas de benchmark en los gradientes.
-- Corpus: 286.468 unidades train-scoped y 684.738.932 bytes UTF-8 (literatura española, Mathlib4, NASA revisado, Papers propios, ScienceVerse CC-BY y CoVoST 2 CC0). Las particiones validation/test permanecen excluidas de los gradientes.
-- Checkpoint de origen: SHA-256 161c5f414c5aa116b7461d76efd4dfbbffa9d6c72fe4da82cc6bae85f3f60409.
-- Run: [GitHub Actions #42121731925](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42121731925).
-- Artefacto de origen: ronin-corpus-100-runs-100-steps-42121731925; el workflow valida la arquitectura y extrae únicamente los pesos del modelo, sin estado del optimizador.
+## Estado del proyecto
 
-### Evaluación pareada antes/después
+### Modelo de referencia en `main`
 
-| Métrica | Main anterior | Seed 95 | Cambio |
-|---|---:|---:|---:|
-| Validación interna BPB | 4,5654 | 4,3373 | -4,99 % |
-| Validación interna PPL | 23,6764 | 20,2137 | -14,63 % |
-| MMLU-Pro validation | 5/50 (10 %) | 7/50 (14 %) | +4 pp |
+El checkpoint versionado en `main` es la **línea base operativa**, no una afirmación de que sea el mejor candidato posible ni una receta de entrenamiento que debamos repetir sin cambios.
 
-El cribado MMLU-Pro utilizó los mismos 50 IDs del split validation, revisión b189ec765aa7ed75c8acfea42df31fdae71f97be, selección estratificada determinista y cobertura del 100 %. La muestra no es el conjunto completo ni el protocolo oficial. Cada acierto equivale a 2 puntos porcentuales; por tanto, el resultado **no certifica razonamiento general** y requiere evaluación independiente en un holdout no usado para seleccionar la semilla.
+- Nombre: **RONIN-tiny-seed95-100-001**.
+- Arquitectura: Transformer causal con RoPE, RMSNorm, SwiGLU, GQA y tokenización byte-v1.
+- Parámetros: 9.922.880.
+- Checkpoint de origen: 100 pasos, semilla 95; el manifiesto conserva hashes, procedencia y configuración.
+- Pesos compactos: `weights/ronin-main.pt`; identidad y procedencia: `weights/main-model.json`.
 
-Por decisión explícita del propietario del proyecto, seed 95 queda fijada como **base operativa de main** tras el screening de 100 semillas. La promoción no cambia la clasificación de la evidencia: el resultado sigue siendo SCREENING_ONLY, no una afirmación de superioridad general. Se conservan el hash del checkpoint, el hash de los pesos compactos y la procedencia en weights/main-model.json.
+La evaluación que acompañó a esa línea base registró:
 
-El corpus train-scoped ampliado no se atribuye retroactivamente a los entrenamientos anteriores. Los siguientes ciclos medirán el mismo holdout antes y después, conservarán el checkpoint de partida y no promocionarán candidatos automáticamente.
+| Métrica | Antes | Después | Lectura |
+|---|---:|---:|---|
+| Validación interna BPB | 4,5654 | 4,3373 | Mejora en el corpus de validación interna |
+| Validación interna PPL | 23,6764 | 20,2137 | Mejora en predicción del texto evaluado |
+| MMLU-Pro validation (50 preguntas) | 5/50 | 7/50 | Screening pequeño; no es el test oficial |
+
+El screening de 50 preguntas se clasificó como `SCREENING_ONLY`. No demuestra razonamiento general ni sustituye una evaluación completa e independiente. Los detalles y hashes vigentes están en [`weights/main-model.json`](weights/main-model.json).
+
+### Entrenamiento: experimentación, no receta fija
+
+Los workflows son experimentos con objetivos y presupuestos diferentes. No deben interpretarse como etapas obligatorias de un único pipeline ni como una configuración estable:
+
+| Workflow | Propósito | Qué puede variar |
+|---|---|---|
+| [Cribado multi-semilla sin tutor](.github/workflows/main-native-no-tutor-holdout.yml) | Partir de los pesos propios, entrenar candidatos y compararlos con los mismos holdouts | Pasos, semillas y límite/profundidad de evaluación mediante inputs |
+| [Torneo adaptativo de 50 semillas](.github/workflows/adaptive-50-seed-tournament.yml) | Explorar distintas semillas y seleccionar candidatos para análisis posterior | Estrategia y selección del torneo según el workflow versionado |
+| [Corpus semilla 202, 500 pasos](.github/workflows/micro-corpus-4-seeds.yml) | Experimento específico asociado a cambios de corpus | Semilla y presupuesto están fijados por el diseño de este experimento |
+
+También pueden existir ejecuciones experimentales lanzadas desde ramas o PR que no estén integradas en `main`. Por ejemplo, los experimentos de mayor duración —como el de 10.000 pasos— deben leerse desde su ejecución concreta y no confundirse con el workflow general disponible en la rama principal.
+
+**Consulta el [historial de GitHub Actions](https://github.com/orbitalronin94/RONIN-IA/actions) para conocer qué se ha ejecutado realmente.** Cada run es la referencia para su commit, workflow, inputs, pasos, conclusión y artefactos. Un nombre de workflow o un valor por defecto no define por sí solo el proceso completo del proyecto.
+
+### Cómo interpretamos los resultados
+
+- Una ejecución correcta de Actions significa que el workflow terminó; no significa que el modelo haya mejorado.
+- Una bajada de loss, BPB o perplexity es evidencia sobre la distribución evaluada, no prueba suficiente de razonamiento.
+- Los candidatos no sustituyen automáticamente al checkpoint de `main`.
+- La promoción exige revisar el benchmark pareado, el holdout, la integridad del checkpoint y las métricas relevantes.
+- No se deben comparar puntuaciones obtenidas con diferentes preguntas, splits o protocolos como si fueran equivalentes.
+- Los resultados de screening se etiquetan como tales; no se presentan como certificación oficial.
+
+## Corpus y datos entrenables
+
+La raíz canónica de datos es `data/datasets/`. Su [README de corpus](data/datasets/README.md) mantiene el inventario detallado de fuentes, documentos, bytes, bibliotecas, particiones y controles.
+
+El corpus de entrenamiento evoluciona a medida que se adquieren y admiten fuentes. Por eso, los recuentos del inventario son una fotografía documental y no deben atribuirse retroactivamente a checkpoints entrenados con cortes anteriores.
+
+Un documento descargado no es automáticamente entrenable. Se requiere procedencia, derechos compatibles, integridad del payload, controles aplicables y asignación explícita a la partición train. Validation y test deben permanecer fuera de los gradientes. Los límites de admisión por fuente no equivalen a una certificación global del corpus: los manifiestos describen exactamente qué controles han pasado y cuáles siguen pendientes.
 
 ## Estructura del repositorio
 
 | Ruta | Contenido |
 |---|---|
-| `weights/` | Identidad, procedencia, hashes y pesos del modelo main |
+| `weights/` | Identidad, procedencia, hashes y pesos del modelo de referencia |
 | `data/datasets/` | Corpus, bibliotecas, particiones, manifiestos y registros de derechos |
 | `ronin/` | Arquitectura, tokenizador, datos, entrenamiento y evaluación |
-| `scripts/` | Entrada mínima para entrenar y evaluar |
-| `configs/` | Configuración del modelo tiny |
-| `.github/workflows/` | CI y ciclos reproducibles de entrenamiento |
+| `scripts/` | Herramientas para entrenar, preparar datos y evaluar |
+| `configs/` | Configuraciones de arquitectura |
+| `.github/workflows/` | Experimentos, adquisición de datos y controles automatizados |
+| `docs/` | Protocolo, decisiones y documentación técnica |
 
-Los corpus candidatos permanecen separados de los documentos habilitados para entrenamiento. Un documento no se considera entrenable por el mero hecho de estar descargado: se exige procedencia, derechos compatibles, integridad del payload y partición explícita. Los conjuntos de validación y test nunca se incorporan a los gradientes.
+## Entrenamiento local
 
-## Entrenar y evaluar
-
-Requisitos: Python 3.11 y PyTorch 2.2 o posterior.
+Requisitos orientativos del entorno actual: Python 3.11 y PyTorch 2.2 o posterior.
 
 ```bash
 python -m pip install -e '.[dev]'
 pytest -q
 ```
 
-El ciclo oficial sin tutor está en [main-native-no-tutor-holdout.yml](.github/workflows/main-native-no-tutor-holdout.yml) (ejecución manual). Recupera los pesos fijados en `main`, verifica los corpus admitidos y añade CoVoST 2 cuando su payload scoped ya está materializado; mide el modelo antes, ejecuta fine-tuning nativo sin tutores y vuelve a medir exactamente los mismos holdouts. El checkpoint actual no incorpora retroactivamente este corpus ampliado. Cada ejecución produce un candidato; la promoción requiere revisión explícita.
-
-El benchmark de desarrollo MMLU-Pro puede ejecutarse con muestras de screening o con el split completo. Una muestra pequeña sirve para cribar, no para declarar capacidad general. El test oficial se mantiene separado de entrenamiento y selección.
-
-Para ejecutar entrenamiento local con un corpus UTF-8 autorizado:
+El script `scripts/train_text.py` permite ejecutar un entrenamiento local sobre texto UTF-8 autorizado:
 
 ```bash
 python scripts/train_text.py --text /ruta/al/corpus.txt --profile tiny --steps 500
 ```
 
-Para las métricas y el protocolo externo, consulta [MMLU-Pro y su protocolo de evaluación](docs/HOLDOUT_EXTERNO_MMLU_PRO.md).
+Este comando es una vía de ejecución local, no el protocolo oficial ni una configuración recomendada para todos los experimentos. Consulta [docs/TRAINING.md](docs/TRAINING.md) y el workflow concreto antes de interpretar o reproducir un resultado.
+
+Para el protocolo de evaluación externo, consulta [MMLU-Pro y su protocolo](docs/HOLDOUT_EXTERNO_MMLU_PRO.md).
 
 ## Principios
 
-- **Modelo corto, método largo.** No se atribuye al modelo una capacidad que las mediciones no demuestren.
-- **Sin tutores por defecto.** El estudiante aprende de corpus admitidos y verificables.
-- **Mismo holdout antes y después.** Las comparaciones deben ser reproducibles y con cobertura declarada.
-- **Los pesos mandan.** Se conserva la identidad criptográfica del checkpoint y se separan los candidatos del modelo principal.
-- **Datos primero.** La adquisición, la admisión y la elegibilidad de entrenamiento son estados distintos.
+- **Evidencia antes que promoción.** Ningún candidato pasa a ser modelo principal solo por completar el entrenamiento.
+- **Experimentos explícitos.** Cada run debe poder relacionarse con su workflow, commit, inputs, corpus y artefactos.
+- **Mismo holdout antes y después.** Las comparaciones pareadas deben mantener preguntas, splits y protocolo.
+- **Datos trazables.** Adquisición, admisión y elegibilidad de entrenamiento son estados diferentes.
+- **Sin atribuciones retroactivas.** Un corpus incorporado después no se atribuye a entrenamientos anteriores.
+- **Sin receta prematura.** El proceso seguirá cambiando mientras estemos explorando qué configuración mejora realmente el modelo.
 
 ## Aviso
 
