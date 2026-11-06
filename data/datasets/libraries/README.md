@@ -79,6 +79,6 @@ Detalle reproducible, hashes y decisiones: [revisión de calidad NASA](../review
 2. **CoVoST 2:** 270.244 segmentos / 18.385.485 bytes verificados en train scoped; validation/test están excluidos. Son segmentos de traducción, no documentos largos.
 3. **NASA NTRS:** 6 documentos file-reviewed ya consumidos por train (701.870 bytes). No promover el resto de los 813 sin revisión documental, recheck NASA y deduplicación.
 4. **PMC OA:** 5.006 artículos / 34.682.285 bytes siguen como candidatos CC0/CC-BY. Siguiente trabajo: asignación de bibliotecas, particionado por artículo, auditoría de calidad/privacidad y deduplicación global; todavía no son entrenables.
-5. **UN Parallel Corpus:** candidato separado, pendiente de completar adquisición y auditoría bilingüe.
+5. **UN Parallel Corpus:** 2.000.000 de pares en-es adquiridos y particionados (1.736.740 train / 81.624 validation / 181.636 test); 725.039.191 bytes de texto bruto en ambos idiomas. Sigue como candidato: falta auditar agrupación documental, muestra bilingüe, privacidad, deduplicación global y holdout.
 
 La revisión no rebaja el estándar Level A estricto: el inventario continúa en 0/64 bibliotecas completas y G-0 permanece FAIL.
