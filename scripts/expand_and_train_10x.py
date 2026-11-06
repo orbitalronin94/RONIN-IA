@@ -19,6 +19,7 @@ from ronin.config import TrainingConfig, get_profile
 from ronin.data.batches import NextTokenBatches, encode_text_file
 from ronin.models.transformer import RoninLM
 from ronin.training.loop import train
+from ronin.tokenizer.byte import ByteTokenizer
 from ronin.utils.repro import seed_everything
 
 BASE_RUN_ID = 42181780771
@@ -116,9 +117,7 @@ def main() -> None:
         raise ValueError(f"Expansion changed the function before training (max delta={max_abs_delta})")
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    initial_path = args.output_dir / "expanded-initial.pt"
-    torch.save({"model": expanded_model.state_dict(), "step": BASE_STEP}, initial_path)
-    tokens = encode_text_file(args.text, __import__("ronin.tokenizer.byte", fromlist=["ByteTokenizer"]).ByteTokenizer())
+    tokens = encode_text_file(args.text, ByteTokenizer())
     batches = NextTokenBatches(tokens, batch_size=1, sequence_length=base_config.context_length, seed=args.seed)
     training_config = TrainingConfig(
         batch_size=1,
@@ -143,9 +142,12 @@ def main() -> None:
         metrics_path=metrics_path,
         optimizer_mode="foreach",
     )
-    final_checkpoint = args.output_dir / "checkpoints" / "step-00001000.pt"
-    if not final_checkpoint.is_file():
+    full_checkpoint = args.output_dir / "checkpoints" / "step-00001000.pt"
+    if not full_checkpoint.is_file():
         raise RuntimeError("The final 1,000-step checkpoint was not created")
+    final_checkpoint = args.output_dir / "expanded-final.pt"
+    torch.save({"model": expanded_model.state_dict(), "step": 1000}, final_checkpoint)
+    full_checkpoint.unlink()
 
     # Paired compact MMLU-Pro validation screening; never an automatic promotion.
     from evaluate_mmlu_pro import load_external_dataset, rows_sha256, select_stratified, evaluate_rows
