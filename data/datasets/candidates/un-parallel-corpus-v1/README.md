@@ -82,3 +82,17 @@ Se añade el harvester `scripts/ingest_un_parallel_en_es.py` y el workflow `.git
 - El resultado sigue siendo candidato: no se habilita entrenamiento hasta revisión bilingüe, validación del agrupamiento documental, deduplicación global, privacidad y control de contaminación de holdouts.
 
 El objetivo de esta ejecución es convertir una fuente de alto volumen (más de 120.000 alineaciones en-es según las estadísticas oficiales) en un lote auditable, no afirmar de antemano que todos sus segmentos son entrenables.
+
+
+## Primera adquisición verificada — 6 de noviembre de 2026
+
+Run: [42192346933](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42192346933) · artefacto `ronin-un-parallel-en-es-candidate` (365.422.326 bytes; retención 90 días).
+
+- 2.000.000 de pares inglés-español alineados aceptados.
+- Train: 1.736.740 pares; validation: 81.624; test: 181.636.
+- Texto UTF-8 de ambos idiomas en el lote: 725.039.191 bytes.
+- JSONL UTF-8 de la partición train: 1.224.469.735 bytes.
+- Excluidos: 104.122 pares cortos, 262.032 duplicados exactos, 9 patrones de email y 28 URLs.
+- SHA-256 del archivo fuente reconstruido: `056fa24b6d8eca50cdbbaaf36cdb6ad5a1b0df8d88176ccf76736a803d1edc19`.
+
+Las tres particiones se generaron y verificaron, pero todas permanecen `training_eligible=false`. Antes de admitir train hay que auditar que los IDs agrupan correctamente los documentos, revisar una muestra bilingüe, ejecutar deduplicación global y comprobaciones de privacidad y contaminación de holdout. El artefacto es candidato, no texto ya integrado en el entrenamiento.
