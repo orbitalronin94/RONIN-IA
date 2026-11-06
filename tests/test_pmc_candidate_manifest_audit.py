@@ -102,7 +102,6 @@ def test_audit_readiness_requires_the_complete_rights_bundle() -> None:
 
 def test_exact_pmc_metadata_snapshot_is_persisted_and_hash_bound(tmp_path):
     import hashlib
-    import json
 
     from scripts.harvest_pmc_oa_cc0_ccby import persist_metadata_snapshot
 
