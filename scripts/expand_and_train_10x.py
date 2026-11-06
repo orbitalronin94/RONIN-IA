@@ -18,8 +18,8 @@ import torch
 from ronin.config import TrainingConfig, get_profile
 from ronin.data.batches import NextTokenBatches, encode_text_file
 from ronin.models.transformer import RoninLM
-from ronin.training.loop import train
 from ronin.tokenizer.byte import ByteTokenizer
+from ronin.training.loop import train
 from ronin.utils.repro import seed_everything
 
 BASE_RUN_ID = 42181780771
@@ -150,7 +150,7 @@ def main() -> None:
     full_checkpoint.unlink()
 
     # Paired compact MMLU-Pro validation screening; never an automatic promotion.
-    from evaluate_mmlu_pro import load_external_dataset, rows_sha256, select_stratified, evaluate_rows
+    from evaluate_mmlu_pro import evaluate_rows, load_external_dataset, rows_sha256, select_stratified
     rows = load_external_dataset(args.mmlu_revision, split="validation")
     selected = select_stratified(rows, args.mmlu_limit, seed=2026)
     dataset_hash = rows_sha256(rows)
