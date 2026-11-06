@@ -144,9 +144,10 @@ def audit_one(library: str, row: dict) -> dict:
     return result
 
 
-def load_sample_rows(root: Path) -> list[tuple[str, dict]]:
+def load_sample_rows(root: Path, libraries: list[str]) -> list[tuple[str, dict]]:
     selected = []
-    for library, ids in SAMPLE_IDS.items():
+    for library in libraries:
+        ids = SAMPLE_IDS[library]
         folder = root / library
         rows = [
             json.loads(line)
@@ -168,7 +169,7 @@ def main() -> int:
     parser.add_argument("--chemistry-root", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
-    selected = load_sample_rows(args.biology_root) + load_sample_rows(args.chemistry_root)
+    selected = load_sample_rows(args.biology_root, ["biology_medicine_general", "biology_medicine_hkd"]) + load_sample_rows(args.chemistry_root, ["chemistry_general", "chemistry_hkd"])
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
         results = list(pool.map(lambda pair: audit_one(pair[0], pair[1]), selected))
     args.out.parent.mkdir(parents=True, exist_ok=True)
