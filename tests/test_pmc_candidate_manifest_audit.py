@@ -4,6 +4,7 @@ from scripts.audit_pmc_candidate_manifest import (
     classify_editorial_notice,
 )
 
+
 def test_editorial_notice_titles_are_held() -> None:
     assert classify_editorial_notice("RETRACTION: A withdrawn study") == (
         "retraction_notice"
