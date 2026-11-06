@@ -21,7 +21,9 @@ def test_editorial_notice_titles_are_held() -> None:
     assert classify_editorial_notice("A study – CORRIGENDUM") == (
         "correction_or_editorial_notice"
     )
-
+    assert classify_editorial_notice("A study - correction") == (
+        "correction_or_editorial_notice"
+    )
 
 def test_legitimate_research_titles_are_not_held() -> None:
     assert classify_editorial_notice(
@@ -31,7 +33,6 @@ def test_legitimate_research_titles_are_not_held() -> None:
         "Explicit pixel-value correction of imaging artifacts"
     ) is None
 
-
 def test_only_explicit_versioned_licenses_are_canonicalized() -> None:
     assert canonical_license_id("CC0") == "CC0-1.0"
     assert canonical_license_id("CC0 1.0") == "CC0-1.0"
@@ -40,7 +41,6 @@ def test_only_explicit_versioned_licenses_are_canonicalized() -> None:
     assert canonical_license_id("CC BY") is None
     assert canonical_license_id("CC BY-NC 4.0") is None
     assert canonical_license_id("CC BY-SA 4.0") is None
-
 
 def test_audit_never_promotes_candidates() -> None:
     records = [
@@ -72,7 +72,6 @@ def test_audit_never_promotes_candidates() -> None:
     assert report["strict_level_a_admitted_documents"] == 0
     assert report["training_eligible"] is False
 
-
 def test_audit_readiness_requires_the_complete_rights_bundle() -> None:
     record = {
         "pmcid": "PMC3",
@@ -82,6 +81,7 @@ def test_audit_readiness_requires_the_complete_rights_bundle() -> None:
         "license": "CC BY 4.0",
         "sha256": "a" * 64,
         "metadata_snapshot_sha256": "b" * 64,
+        "metadata_snapshot_path": "metadata-snapshots/PMC3.2.json",
         "text_bytes": 500,
         "rights_holder_or_provider": "Named publisher",
         "rights_assertion_scope": "exact_text_and_version",
@@ -97,8 +97,6 @@ def test_audit_readiness_requires_the_complete_rights_bundle() -> None:
     assert report["strict_level_a_ready_documents"] == 1
     assert report["strict_level_a_admitted_documents"] == 0
     assert report["training_eligible"] is False
-
-
 
 def test_exact_pmc_metadata_snapshot_is_persisted_and_hash_bound(tmp_path):
     import hashlib
@@ -121,7 +119,6 @@ def test_exact_pmc_metadata_snapshot_is_persisted_and_hash_bound(tmp_path):
     assert relative == "metadata-snapshots/PMC123.2.json"
     assert "_metadata_snapshot_raw" not in record
 
-
 def test_pmc_metadata_snapshot_rejects_hash_mismatch(tmp_path):
     import pytest
 
@@ -135,3 +132,38 @@ def test_pmc_metadata_snapshot_rejects_hash_mismatch(tmp_path):
     }
     with pytest.raises(ValueError, match="SHA-256 changed"):
         persist_metadata_snapshot(tmp_path, record)
+
+def test_metadata_snapshot_verifier_checks_exact_file_bytes(tmp_path):
+    import hashlib
+
+    from scripts.verify_pmc_oa_candidate_corpus import verify_metadata_snapshot
+
+    raw = b'{"pmcid":"PMC9","version":1}'
+    path = tmp_path / "metadata-snapshots" / "PMC9.1.json"
+    path.parent.mkdir()
+    path.write_bytes(raw)
+    item = {
+        "metadata_snapshot_sha256": hashlib.sha256(raw).hexdigest(),
+        "metadata_snapshot_path": "metadata-snapshots/PMC9.1.json",
+    }
+    assert verify_metadata_snapshot(item, root=tmp_path) is True
+
+def test_metadata_snapshot_verifier_keeps_legacy_missing_snapshot_unverified(tmp_path):
+    from scripts.verify_pmc_oa_candidate_corpus import verify_metadata_snapshot
+
+    assert verify_metadata_snapshot({}, root=tmp_path) is False
+    assert verify_metadata_snapshot(
+        {"metadata_snapshot_sha256": "a" * 64}, root=tmp_path
+    ) is False
+
+def test_metadata_snapshot_verifier_rejects_path_escape(tmp_path):
+    import pytest
+
+    from scripts.verify_pmc_oa_candidate_corpus import verify_metadata_snapshot
+
+    item = {
+        "metadata_snapshot_sha256": "a" * 64,
+        "metadata_snapshot_path": "../outside.json",
+    }
+    with pytest.raises(ValueError, match="escapes candidate root"):
+        verify_metadata_snapshot(item, root=tmp_path)

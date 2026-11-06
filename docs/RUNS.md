@@ -2,6 +2,21 @@
 
 Last reconciled: **2026-11-06**. This ledger distinguishes a successful workflow from a rights decision, source-scoped admission, strict Level-A library admission, and global training eligibility. Artifact ZIP digests marked *verified* were downloaded and re-hashed during this review; other digests are explicitly identified as API-reported.
 
+## 2026-11-06 — PMC candidate audit and metadata-snapshot gap
+
+- Audit run: [42198979546](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42198979546), job `127829261156`; the audit and artifact-upload steps completed successfully.
+- Audit artifact: [13493472410](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42198979546/artifacts/13493472410), 130,176 bytes; upload-log ZIP SHA-256 `7433095c907b50d747a63538c23fb82a99b1219e4bea34b98d2ba06ccc8071da` (reported by Actions, not independently re-downloaded).
+- Candidate manifest: 5,006 exact-unique article versions / 34,682,285 UTF-8 bytes. Editorial-title screen holds 1,024 notices / 3,151,513 bytes; 3,982 substantive-title candidates remain / 31,530,772 bytes.
+- Remaining license codes: 3,939 generic `CC BY` declarations (30,599,774 bytes) without an explicit version, plus 43 `CC0` candidates (981,420 bytes). Generic CC BY is not normalized to CC BY 4.0.
+- The 3,982 substantive candidates lack an item/version metadata snapshot SHA-256 in the old manifest. The current corpus verifier also reports **0/5,006 persisted metadata snapshots**. Exact holder, third-party figure/table clearance and ES/EU/US scope remain unresolved. Strict Level A ready/admitted: **0 documents / 0 bytes**; training-eligible: **false**.
+- The audit summary is persisted on `main` (current reconciliation commit [f59e45d](https://github.com/orbitalronin94/RONIN-IA/commit/f59e45d30ebd10305c233e0227efcab2cfdc0ab8)). This is a candidate audit, not an admission.
+
+### PMC harvester evidence hardening under review
+
+- [901b957](https://github.com/orbitalronin94/RONIN-IA/commit/901b9572c2f19df58243f74ec296ef63b5924b0e) records exact upstream metadata JSON bytes for newly accepted PMC article versions, their SHA-256 and a repository-relative snapshot path.
+- [08154bd](https://github.com/orbitalronin94/RONIN-IA/commit/08154bdf43b258a4ed43f20f51c358ecd6333d31) adds snapshot verification to candidate shards and reports verified versus missing snapshots. Legacy records without a persisted snapshot remain candidate-only and unverified.
+- Follow-up import compatibility, strict readiness on persisted snapshots, and regression tests are being prepared on branch `ronin/pmc-metadata-snapshot-integrity`; not merged at this ledger cut.
+
 ## 2026-11-06 — public-source acquisition: USGS / BNE
 
 - Run: [42190061006](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42190061006) — completed successfully.

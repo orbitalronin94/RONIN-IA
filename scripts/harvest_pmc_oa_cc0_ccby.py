@@ -22,10 +22,16 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from audit_pmc_candidate_manifest import (
-    canonical_license_id,
-    classify_editorial_notice,
-)
+try:
+    from .audit_pmc_candidate_manifest import (
+        canonical_license_id,
+        classify_editorial_notice,
+    )
+except ImportError:  # Direct execution as a script.
+    from audit_pmc_candidate_manifest import (
+        canonical_license_id,
+        classify_editorial_notice,
+    )
 
 BASE = "https://pmc-oa-opendata.s3.amazonaws.com"
 EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"

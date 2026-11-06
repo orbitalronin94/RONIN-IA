@@ -6,7 +6,7 @@ import argparse
 import hashlib
 import json
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -31,7 +31,7 @@ EDITORIAL_PREFIX = re.compile(
     re.IGNORECASE,
 )
 EDITORIAL_SUFFIX = re.compile(
-    r"\b(?:corrigendum|erratum|correction|addendum)\s*$",
+    r"(?:^|[-—–:]\s*)(?:corrigendum|erratum|correction|addendum)\s*$",
     re.IGNORECASE,
 )
 
@@ -141,6 +141,7 @@ def audit_records(
     unresolved = []
     cc0_followup = []
     missing_metadata_hash = 0
+    missing_metadata_snapshot_file = 0
     missing_rights_holder = 0
     missing_third_party_review = 0
     missing_jurisdictions = 0
@@ -172,6 +173,9 @@ def audit_records(
         metadata_hash = record.get("metadata_snapshot_sha256")
         if not _valid_hash(metadata_hash):
             missing_metadata_hash += 1
+        metadata_snapshot_path = record.get("metadata_snapshot_path")
+        if not isinstance(metadata_snapshot_path, str) or not metadata_snapshot_path:
+            missing_metadata_snapshot_file += 1
         holder = str(record.get("rights_holder_or_provider") or "").strip()
         holder_valid = bool(holder) and holder.lower() not in {
             "unknown",
@@ -205,6 +209,8 @@ def audit_records(
             canonical
             and _valid_hash(record.get("sha256"))
             and _valid_hash(metadata_hash)
+            and isinstance(metadata_snapshot_path, str)
+            and bool(metadata_snapshot_path)
             and holder_valid
             and exact_scope
             and attribution
@@ -227,7 +233,7 @@ def audit_records(
 
     report: dict[str, Any] = {
         "schema": "ronin-pmc-candidate-screen-v1",
-        "reviewed_at_utc": datetime.now(timezone.utc).isoformat(),
+        "reviewed_at_utc": datetime.now(UTC).isoformat(),
         "source_manifest": str(DEFAULT_MANIFEST),
         "source_manifest_sha256": manifest_sha256,
         "candidate_documents": len(records),
@@ -247,6 +253,7 @@ def audit_records(
         "unresolved_license_version_documents": len(unresolved),
         "unresolved_license_version_text_utf8_bytes": text_bytes(unresolved),
         "missing_metadata_snapshot_sha256_documents": missing_metadata_hash,
+        "missing_persisted_metadata_snapshot_documents": missing_metadata_snapshot_file,
         "missing_rights_holder_or_provider_documents": missing_rights_holder,
         "missing_third_party_clearance_documents": missing_third_party_review,
         "missing_es_eu_us_clearance_documents": missing_jurisdictions,
@@ -259,7 +266,7 @@ def audit_records(
         "blockers": [
             "Editorial notices are held outside substantive candidate review.",
             "Generic CC BY without an explicit version is not canonicalized.",
-            "Per-item metadata snapshot SHA-256 is absent from the current manifest.",
+            "A persisted per-item metadata snapshot path is required in addition to its SHA-256.",
             "The exact copyright holder/provider is not resolved per article version.",
             "Third-party figure/table content has not been cleared or excluded.",
             "ES/EU/US rights coverage is not documented per item/version.",
