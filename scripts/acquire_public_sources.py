@@ -173,7 +173,7 @@ def publication_items(payload: object) -> list[dict]:
         return [item for item in payload if isinstance(item, dict)]
     if not isinstance(payload, dict):
         return []
-    for key in ("publications", "results", "data"):
+    for key in ("records", "publications", "results", "data"):
         value = payload.get(key)
         if isinstance(value, list):
             return [item for item in value if isinstance(item, dict)]
@@ -234,33 +234,30 @@ def acquire_usgs(limit: int, minimum_bytes: int) -> tuple[list[dict], dict]:
                 ),
                 None,
             )
-            authors = json.dumps(
-                item.get("authors", item.get("author", "")), ensure_ascii=False
-            ).lower()
-            publication_type = str(
-                item.get("publicationType") or item.get("type") or ""
-            ).lower()
+            contributors = item.get("contributors") or {}
+            author_rows = contributors.get("authors", []) if isinstance(contributors, dict) else []
+            authors = json.dumps(author_rows, ensure_ascii=False).lower()
+            publication_type = item.get("publicationType") or item.get("type") or ""
+            if isinstance(publication_type, dict):
+                publication_type = publication_type.get("text", "")
             publisher = str(
                 item.get("publisher") or item.get("contributingOffice") or ""
             ).lower()
-            series = str(item.get("seriesTitle") or "").lower()
+            series_value = item.get("seriesTitle") or ""
+            if isinstance(series_value, dict):
+                series_value = series_value.get("text", "")
+            series = str(series_value).lower()
 
             usgs_owned = (
                 "usgs" in publisher
-                or "u.s. geological survey" in authors
                 or any(
-                    phrase in series
-                    for phrase in (
-                        "scientific investigations",
-                        "open-file report",
-                        "professional paper",
-                        "circular",
-                        "water-resources",
-                    )
+                    isinstance(author, dict) and author.get("usgs") is True
+                    for author in author_rows
                 )
+                or "u.s. geological survey" in authors
             )
             report_like = any(
-                phrase in f"{publication_type} {series}"
+                phrase in f"{publication_type} {series}".lower()
                 for phrase in (
                     "report",
                     "professional paper",
@@ -415,7 +412,15 @@ def main() -> int:
         encoding="utf-8",
     )
     print(json.dumps(audit, ensure_ascii=False, indent=2))
-    if all("error" in result for result in audit["sources"].values()):
+    if not unique_rows:
+        audit["no_candidates_reason"] = (
+            "All acquisition sources returned zero usable text records; "
+            "inspect per-source errors and API result counts."
+        )
+        audit_path.write_text(
+            json.dumps(audit, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
         return 1
     return 0
 
