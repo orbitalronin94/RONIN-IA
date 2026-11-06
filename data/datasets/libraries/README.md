@@ -32,7 +32,7 @@ El corpus de literatura española mantiene 608 train y 140.295.523 bytes, con va
 
 CoVoST 2 tiene una declaración CC0-1.0 por versión y un registro de derechos Level A para el payload de traducciones. El train contiene **270.244 segmentos / 18.385.485 bytes UTF-8**; su train gzip SHA-256 es `771e6845e0097554398de8d3416e3effeb3c173cff341f037ac5437ea6344623`. El run [42119196514](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42119196514) y el artefacto 13457877574 se verificaron por SHA-256 `9e17ae5e0cd5f8a1e316ef767b6b1af34d34ab51ed33b18a010ff64c127c1f96`. No se asigna todavía a General/HKD: near-duplicate global y contaminación de benchmark/holdout siguen **PENDING**. Cada fila es un segmento de traducción, no un documento largo.
 
-El registro de derechos contiene **8 registros A (5 solo de metadatos y 3 payloads/versiones CoVoST) y 2 registros B**. Los metadatos CC0 no son texto entrenable. Los dos registros BOE no son Level A: la base española por sí sola no acredita ES/EU/US.
+El registro de derechos contiene **9 registros A (6 solo de metadatos y 3 payloads/versiones CoVoST) y 2 registros B**. Los metadatos CC0 no son texto entrenable. Los dos registros BOE no son Level A: la base española por sí sola no acredita ES/EU/US.
 
 ## Otros candidatos y bloqueos
 
