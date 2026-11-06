@@ -31,6 +31,17 @@ Last reconciled: **2026-11-06**. This ledger distinguishes a successful workflow
 - Validation (34,051 segments) and test (33,678 segments) remain separate and are not included in train.
 - Global near-duplicate and benchmark/holdout contamination remain **PENDING**; G-0 remains **FAIL**. This is source-scoped train, not a completed General/HKD library and not global training eligibility.
 
+### CoVoST re-audit — 2026-11-06
+
+- Run: [42195275235](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42195275235). Rights validation, quality audit, manual-review gate, promotion script and payload re-verification all passed; the final workflow step failed only because its Git push raced with concurrent commits to `main`.
+- Artifact: 13491278009, 46,709,044 bytes, ZIP SHA-256 `147ea654bd5d953ddf08836ccf9c1ed22c38181084012f34c7cd809a7929df48` (**verified locally**).
+- Re-audit of 350,705 raw translation rows / 70,851,102 bytes kept 337,973 unique rows; 4 URL rows, 1 email/contact row, 43 exact duplicates and 12,684 short rows were excluded. Three phone-like patterns were reviewed as year/date ranges, not phone numbers.
+- Final partitions are unchanged: train 270,244 / 18,385,485 UTF-8 bytes; validation 34,051; test 33,678. Train gzip SHA-256 remains `771e6845e0097554398de8d3416e3effeb3c173cff341f037ac5437ea6344623`; train text SHA-256 remains `d99851ca0c92b21d172b78c94f2b457d4764c67c146e704a49bb692e5d276a5c`. Both were re-hashed from the artifact and match the already committed payload.
+- Exact dedup compared 7,103 ScienceVerse train docs, 8,498 Mathlib4 docs, 6 NASA docs, 9 Papers docs and 608 literature docs; zero exact matches. Global near-duplicate and benchmark/holdout contamination remain **PENDING**; G-0 remains **FAIL**.
+- The train payload did not change. The manifest now points to the verified re-audit artifact; the persistence workflow was hardened to fetch/rebase and retry once after a non-fast-forward race.
+
+Earlier CoVoST reruns [42194688065](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42194688065), [42194736202](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42194736202) and [42194793383](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42194793383) failed at the old rights validator because it treated the BOE public-domain basis as an unapproved license. The validator now separates licenses from public-domain bases and accepts truthful date-only retrieval records; the current ledger validation passes.
+
 ## 2026-11-04 — PMC OA CC0/CC-BY candidate shards
 
 - Run: [41927029208](https://github.com/orbitalronin94/RONIN-IA/actions/runs/41927029208) — both chemistry and biology/medicine jobs completed successfully.
