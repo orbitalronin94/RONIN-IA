@@ -9,10 +9,7 @@ from scripts.expand_and_train_10x import widen_swiglu
 
 def test_swiglu_widening_preserves_logits_before_training() -> None:
     torch.manual_seed(7)
-    base_config = ModelConfig(
-        vocab_size=256, context_length=32, n_layers=2, n_heads=4,
-        d_model=32, d_ff=64,
-    )
+    base_config = ModelConfig(vocab_size=256, context_length=32, n_layers=2, n_heads=4, d_model=32, d_ff=64)
     expanded_config = replace(base_config, d_ff=96)
     base = RoninLM(base_config).eval()
     expanded = RoninLM(expanded_config).eval()
@@ -25,18 +22,13 @@ def test_swiglu_widening_preserves_logits_before_training() -> None:
 
 
 def test_widening_rejects_non_swiglu_shape_changes() -> None:
-    torch.manual_seed(11)
-    config = ModelConfig(
-        vocab_size=256, context_length=32, n_layers=1, n_heads=2,
-        d_model=16, d_ff=32,
-    )
+    config = ModelConfig(vocab_size=256, context_length=32, n_layers=1, n_heads=2, d_model=16, d_ff=32)
     base = RoninLM(config)
-    changed = dict(base.state_dict())
-    changed["final_norm.weight"] = torch.zeros(17)
+    source = dict(base.state_dict())
     target = dict(base.state_dict())
     target["final_norm.weight"] = torch.zeros(17)
     try:
-        widen_swiglu(changed, target)
+        widen_swiglu(source, target)
     except ValueError as error:
         assert "Unexpected shape change outside SwiGLU" in str(error)
     else:
