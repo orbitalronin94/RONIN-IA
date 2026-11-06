@@ -22,10 +22,22 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from audit_pmc_candidate_manifest import (
+    canonical_license_id,
+    classify_editorial_notice,
+)
+
 BASE = "https://pmc-oa-opendata.s3.amazonaws.com"
 EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 USER_AGENT = "RONIN-IA-open-corpus-harvester/1.0 (research corpus acquisition)"
-ALLOWED_LICENSES = {"CC0", "CC0 1.0", "CC BY", "CC BY 4.0", "CC BY 3.0", "CC BY 2.0", "CC BY 1.0"}
+ALLOWED_LICENSES = {
+    "CC0",
+    "CC0 1.0",
+    "CC BY 1.0",
+    "CC BY 2.0",
+    "CC BY 3.0",
+    "CC BY 4.0",
+}
 EMAIL_RE = re.compile(rb"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", re.I)
 SSN_RE = re.compile(rb"\b\d{3}-\d{2}-\d{4}\b")
 CARD_RE = re.compile(rb"\b(?:\d[ -]*?){13,19}\b")
@@ -122,8 +134,14 @@ def metadata_for(pmcid: str) -> list[dict]:
         ]
         for key in keys:
             try:
-                value = json.loads(request_bytes(BASE + "/" + urllib.parse.quote(key, safe="/")))
+                metadata_url = BASE + "/" + urllib.parse.quote(key, safe="/")
+                raw_metadata = request_bytes(metadata_url)
+                value = json.loads(raw_metadata)
                 if isinstance(value, dict):
+                    value["_metadata_snapshot_sha256"] = hashlib.sha256(
+                        raw_metadata
+                    ).hexdigest()
+                    value["_metadata_snapshot_url"] = metadata_url
                     records.append(value)
             except urllib.error.HTTPError as exc:
                 if exc.code != 404:
@@ -139,8 +157,7 @@ def is_yes(value: object) -> bool:
     return value is True or str(value).strip().lower() in {"yes", "true", "1"}
 
 def eligible_license(value: str) -> bool:
-    normalized = " ".join((value or "").upper().replace("-", " ").split())
-    return normalized in ALLOWED_LICENSES
+    return canonical_license_id(value) is not None
 
 
 def has_payment_card(raw: bytes) -> bool:
@@ -163,10 +180,12 @@ def has_payment_card(raw: bytes) -> bool:
 
 
 def license_url(value: str) -> str:
-    upper = value.upper()
-    if upper.startswith("CC0"):
+    license_id = canonical_license_id(value)
+    if license_id is None:
+        raise ValueError(f"License code has no explicit reusable version: {value!r}")
+    if license_id == "CC0-1.0":
         return "https://creativecommons.org/publicdomain/zero/1.0/"
-    version = next((item for item in ("4.0", "3.0", "2.0", "1.0") if item in upper), "4.0")
+    version = license_id.rsplit("-", 1)[-1]
     return f"https://creativecommons.org/licenses/by/{version}/"
 
 
@@ -185,6 +204,11 @@ def fetch_record(pmcid: str, min_text_bytes: int) -> dict | None:
                                         -int(item.get("version") or 0)))
         meta = eligible[0]
         license_code = str(meta.get("license_code") or "").strip()
+        license_id = canonical_license_id(license_code)
+        if license_id is None or classify_editorial_notice(
+            str(meta.get("title") or "")
+        ):
+            return None
         text_url = meta.get("text_url")
         if not isinstance(text_url, str):
             return None
@@ -201,21 +225,33 @@ def fetch_record(pmcid: str, min_text_bytes: int) -> dict | None:
         return {
             "pmcid": meta.get("pmcid", "PMC" + pmcid),
             "version": meta.get("version"),
+            "source_version": f"{meta.get('pmcid', 'PMC' + pmcid)}.{meta.get('version')}",
             "pmid": meta.get("pmid"),
             "doi": meta.get("doi"),
             "title": meta.get("title"),
             "citation": meta.get("citation"),
             "license": license_code,
-            "license_url": (
-                "https://creativecommons.org/publicdomain/zero/1.0/"
-                if license_code.upper().startswith("CC0")
-                else "https://creativecommons.org/licenses/by/"
-                + next((version for version in ("4.0", "3.0", "2.0", "1.0") if version in license_code), "4.0")
-                + "/"
-            ),
+            "license_id": license_id,
+            "license_url": license_url(license_code),
+            "metadata_snapshot_sha256": meta.get("_metadata_snapshot_sha256"),
+            "metadata_snapshot_url": meta.get("_metadata_snapshot_url"),
             "source": "PubMed Central Article Datasets on AWS",
-            "source_url": "https://pmc.ncbi.nlm.nih.gov/tools/pmcaws/",
-            "retrieved_text_url": text_url,
+            "source_url": text_url,
+            "rights_statement_uri": license_url(license_code),
+            "license_uri": license_url(license_code),
+            "rights_holder_or_provider": (
+                "PMC Article Datasets; original publisher/author rights holder "
+                "requires article-level verification"
+            ),
+            "rights_holder_status": "pending_article_copyright_statement_review",
+            "rights_assertion_scope": "exact_text_and_version",
+            "attribution": (
+                "Acknowledge NIH/NLM/NCBI PubMed Central as the source; cite the "
+                "article authors, title and DOI; do not imply NIH/NLM endorsement."
+            ),
+            "third_party_content_review": "pending",
+            "jurisdictions_cleared": [],
+            "provenance_uri": meta.get("_metadata_snapshot_url"),
             "sha256": digest,
             "text_bytes": len(text.encode("utf-8")),
             "partition": "candidate_train_pending_global_dedup",
