@@ -1,15 +1,17 @@
 name: RONIN — expansión funcional ×10 desde ganador 10k
-run-name: RONIN ×10 · checkpoint 10k · 1.000 pasos · seis fuentes
+run-name: RONIN ×10 · checkpoint ganador 10k · 500 pasos · seis fuentes
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       steps:
-        description: Pasos de continuación (el experimento está fijado a 1000)
+        description: Pasos de continuación (el experimento está fijado a 500)
         required: true
-        default: "1000"
+        default: "500"
         type: choice
-        options: ["1000"]
+        options: ["500"]
 
 permissions:
   actions: read
@@ -194,7 +196,7 @@ jobs:
           Path("reports/six-source-mixture.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
           print(json.dumps(report,ensure_ascii=False,indent=2))
           PY
-      - name: Expand, prove functional equivalence, train 1,000 steps and screen MMLU-Pro
+      - name: Expand, prove functional equivalence, train 500 steps and screen MMLU-Pro
         run: |
           python scripts/expand_and_train_10x.py \
             --checkpoint incoming/winner-10k/checkpoints/seed-95/step-00010000.pt \
