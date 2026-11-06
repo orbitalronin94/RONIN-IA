@@ -1,0 +1,217 @@
+name: RONIN — expansión funcional ×10 desde ganador 10k
+run-name: RONIN ×10 · checkpoint 10k · 1.000 pasos · seis fuentes
+
+on:
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: Pasos de continuación (el experimento está fijado a 1000)
+        required: true
+        default: "1000"
+        type: choice
+        options: ["1000"]
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: ronin-expand-10x-from-10k
+  cancel-in-progress: false
+
+jobs:
+  expand-train-evaluate:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 360
+    env:
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout: |
+            pyproject.toml
+            ronin
+            tests/test_expand_10x.py
+            scripts/expand_and_train_10x.py
+            scripts/evaluate_mmlu_pro.py
+            scripts/verify_scienceverse_training.py
+            scripts/verify_nasa_scoped_train.py
+            scripts/verify_ronin_authored_papers_training.py
+            scripts/verify_covost2_training.py
+            data/datasets/admitted/scienceverse-ccby-v1
+            data/datasets/admitted/ronin-authored-papers-v1
+            data/datasets/admitted/covost2-cc0-translation-only
+            data/datasets/candidates/nasa-ntrs-public-use
+            data/datasets/libraries/candidate-packs/nasa-ntrs-public-use
+            data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json
+            data/datasets/rights_registry
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install CPU training and benchmark dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e . --no-deps
+          python -m pip install pytest
+          python -m compileall -q scripts/expand_and_train_10x.py scripts/evaluate_mmlu_pro.py
+          python -m pip install "numpy>=1.26" "PyYAML>=6.0" "tqdm>=4.66" "datasets==3.6.0" "dill==0.3.8" "multiprocess==0.70.16" "huggingface_hub==0.36.0"
+      - name: Test function-preserving expansion on a small model
+        run: pytest -q tests/test_expand_10x.py
+      - name: Download the exact winning 10,000-step checkpoint
+        uses: actions/download-artifact@v8
+        with:
+          name: ronin-native-no-tutor-42181780771
+          path: incoming/winner-10k
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 42181780771
+      - name: Download admitted literature train partition
+        uses: actions/download-artifact@v8
+        with:
+          name: ronin-admitted-literature-es-v1-train
+          path: incoming/literature
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 41926088900
+      - name: Download admitted Mathlib4 train partition
+        uses: actions/download-artifact@v8
+        with:
+          name: ronin-admitted-mathlib4-v1
+          path: incoming/mathlib4
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 42026633643
+      - name: Download two previously reviewed NASA train records
+        uses: actions/download-artifact@v8
+        with:
+          name: ronin-nasa-ntrs-file-reviewed-train
+          path: incoming/nasa-v1
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 42028138060
+      - name: Verify the six manually reviewed NASA records and materialize four new train documents
+        run: |
+          python scripts/verify_nasa_scoped_train.py \
+            --manifest data/datasets/libraries/candidate-packs/nasa-ntrs-public-use/manifest.json \
+            --review data/datasets/reviews/nasa-ntrs-file-review-2026-11-05.json \
+            --documents data/datasets/candidates/nasa-ntrs-public-use/documents \
+            --literature incoming/literature/documents.train.jsonl \
+            --mathlib incoming/mathlib4/documents.train.jsonl.gz \
+            --nasa-reviewed-train incoming/nasa-v1/documents.train.jsonl \
+            --papers-manifest data/datasets/admitted/ronin-authored-papers-v1/manifest.json \
+            --output incoming/nasa-v2
+      - name: Verify and join NASA file-reviewed train records
+        run: |
+          mkdir -p incoming/nasa
+          test -s incoming/nasa-v1/train.txt
+          test -s incoming/nasa-v2/train.txt
+          cat incoming/nasa-v1/documents.train.jsonl incoming/nasa-v2/documents.train.jsonl > incoming/nasa/documents.train.jsonl
+          cat incoming/nasa-v1/train.txt incoming/nasa-v2/train.txt > incoming/nasa/train.txt
+      - name: Assert pinned source hashes and six NASA records
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          sha=lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          assert sha("incoming/literature/train.txt") == "9cd5d7e83ed7690713add22c40fdf35eaf1fb88da3dafb748ca8201b08df9a78"
+          assert sha("incoming/mathlib4/train.txt") == "7c82a4d1e0f3788d6038002b41ae1ead1bf6a16cbf4e332f59f015501325667c"
+          assert sha("incoming/nasa-v1/train.txt") == "874c77ef785236ce726a89a217b450684f36b82402b35174d9bbf3328249d1f8"
+          nasa_v2=json.loads(Path("incoming/nasa-v2/audit.json").read_text())
+          assert nasa_v2["new_train_documents"] == 4
+          assert nasa_v2["new_train_utf8_bytes"] == 669461
+          assert sha("incoming/nasa-v2/train.txt") == nasa_v2["train_sha256"]
+          assert sum(1 for line in Path("incoming/nasa/documents.train.jsonl").read_text().splitlines() if line.strip()) == 6
+          print("Pinned literature, Mathlib4 and NASA partitions verified; NASA total = 6.")
+          PY
+      - name: Verify the nine owner-authorized Papers documents
+        run: |
+          python scripts/verify_ronin_authored_papers_training.py \
+            --manifest data/datasets/admitted/ronin-authored-papers-v1/manifest.json \
+            --documents-dir data/datasets/admitted/ronin-authored-papers-v1/documents \
+            --literature-jsonl incoming/literature/documents.train.jsonl \
+            --mathlib-jsonl-gz incoming/mathlib4/documents.train.jsonl.gz \
+            --nasa-jsonl incoming/nasa/documents.train.jsonl \
+            --report reports/papers-train-audit.json
+      - name: Verify and materialize the 7,103 ScienceVerse train documents
+        run: |
+          python scripts/verify_scienceverse_training.py \
+            --root data/datasets/admitted/scienceverse-ccby-v1 \
+            --literature-jsonl incoming/literature/documents.train.jsonl \
+            --mathlib-jsonl-gz incoming/mathlib4/documents.train.jsonl.gz \
+            --nasa-jsonl incoming/nasa/documents.train.jsonl \
+            --papers-manifest data/datasets/admitted/ronin-authored-papers-v1/manifest.json \
+            --output-dir incoming/scienceverse
+      - name: Verify the CoVoST 2 CC0 translation-only train partition
+        run: |
+          python scripts/verify_covost2_training.py \
+            --manifest data/datasets/admitted/covost2-cc0-translation-only/manifest.json \
+            --output-text incoming/covost2/train.txt
+      - name: Assemble the six admitted source-scoped train partitions
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path(".")
+          papers_manifest=json.loads(Path("data/datasets/admitted/ronin-authored-papers-v1/manifest.json").read_text())
+          paper_texts=[]
+          for record in papers_manifest["records"]:
+              payload=record["payload"]
+              path=Path("data/datasets/admitted/ronin-authored-papers-v1") / payload["path"]
+              raw=path.read_bytes()
+              assert len(raw)==payload["bytes"] and hashlib.sha256(raw).hexdigest()==payload["sha256"]
+              paper_texts.append(raw)
+          sources=[
+            ("literature_es",Path("incoming/literature/train.txt").read_bytes(),608),
+            ("mathlib4",Path("incoming/mathlib4/train.txt").read_bytes(),8498),
+            ("nasa_file_reviewed",Path("incoming/nasa/train.txt").read_bytes(),6),
+            ("ronin_authored_papers",b"\n\n".join(paper_texts),9),
+            ("scienceverse",Path("incoming/scienceverse/train.txt").read_bytes(),7103),
+            ("covost2_translation_only",Path("incoming/covost2/train.txt").read_bytes(),270244),
+          ]
+          for name,data,count in sources:
+              assert data, f"empty source: {name}"
+              print(f"{name}: {count} train documents, {len(data)} bytes, sha256={hashlib.sha256(data).hexdigest()}")
+          combined=b"\n\n".join(data for _,data,_ in sources)
+          out=Path("incoming/ronin-six-source-train.txt")
+          out.parent.mkdir(parents=True,exist_ok=True)
+          out.write_bytes(combined)
+          report={
+            "schema":"ronin-six-source-train-mixture-v1",
+            "sources":[{"dataset_id":name,"documents":count,"bytes":len(data),"sha256":hashlib.sha256(data).hexdigest()} for name,data,count in sources],
+            "train_documents":sum(count for _,_,count in sources),
+            "combined_bytes":len(combined),
+            "combined_sha256":hashlib.sha256(combined).hexdigest(),
+            "validation_test_in_training":False,
+            "tutor_used":False,
+            "scope":"Only the six source-scoped train partitions. Global G-0 remains FAIL; global near-duplicate and benchmark-holdout gates remain PENDING."
+          }
+          Path("reports").mkdir(exist_ok=True)
+          Path("reports/six-source-mixture.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+      - name: Expand, prove functional equivalence, train 1,000 steps and screen MMLU-Pro
+        run: |
+          python scripts/expand_and_train_10x.py \
+            --checkpoint incoming/winner-10k/checkpoints/seed-95/step-00010000.pt \
+            --text incoming/ronin-six-source-train.txt \
+            --output-dir experiment-output \
+            --steps "${{ inputs.steps }}" \
+            --device cpu \
+            --num-threads 2 \
+            --mmlu-limit 64
+      - name: Upload expanded checkpoint and complete experiment report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ronin-expand-10x-from-10k-${{ github.run_id }}
+          path: |
+            experiment-output/
+            reports/
+          if-no-files-found: warn
+          retention-days: 90
+          compression-level: 6
