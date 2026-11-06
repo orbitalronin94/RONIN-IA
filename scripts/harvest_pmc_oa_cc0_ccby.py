@@ -142,6 +142,9 @@ def metadata_for(pmcid: str) -> list[dict]:
                         raw_metadata
                     ).hexdigest()
                     value["_metadata_snapshot_url"] = metadata_url
+                    # Preserve the exact bytes whose digest is recorded. The
+                    # raw snapshot is persisted only for accepted article versions.
+                    value["_metadata_snapshot_raw"] = raw_metadata
                     records.append(value)
             except urllib.error.HTTPError as exc:
                 if exc.code != 404:
@@ -187,6 +190,29 @@ def license_url(value: str) -> str:
         return "https://creativecommons.org/publicdomain/zero/1.0/"
     version = license_id.rsplit("-", 1)[-1]
     return f"https://creativecommons.org/licenses/by/{version}/"
+
+
+def persist_metadata_snapshot(out: Path, record: dict) -> None:
+    """Persist the exact upstream metadata bytes and bind their path/hash to a record."""
+    raw = record.pop("_metadata_snapshot_raw", None)
+    expected = record.get("metadata_snapshot_sha256")
+    if not isinstance(raw, bytes) or not isinstance(expected, str):
+        raise ValueError("accepted PMC record lacks its exact metadata snapshot bytes/hash")
+    actual = hashlib.sha256(raw).hexdigest()
+    if actual != expected:
+        raise ValueError("PMC metadata snapshot SHA-256 changed before persistence")
+
+    pmcid = re.sub(r"[^A-Za-z0-9_.-]", "_", str(record.get("pmcid") or "unknown"))
+    version = re.sub(r"[^A-Za-z0-9_.-]", "_", str(record.get("version") or "unknown"))
+    relative = Path("metadata-snapshots") / f"{pmcid}.{version}.json"
+    destination = out / relative
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if destination.exists():
+        if destination.read_bytes() != raw:
+            raise ValueError(f"immutable PMC metadata snapshot collision: {relative}")
+    else:
+        destination.write_bytes(raw)
+    record["metadata_snapshot_path"] = relative.as_posix()
 
 
 def fetch_record(pmcid: str, min_text_bytes: int) -> dict | None:
@@ -235,6 +261,7 @@ def fetch_record(pmcid: str, min_text_bytes: int) -> dict | None:
             "license_url": license_url(license_code),
             "metadata_snapshot_sha256": meta.get("_metadata_snapshot_sha256"),
             "metadata_snapshot_url": meta.get("_metadata_snapshot_url"),
+            "_metadata_snapshot_raw": meta.get("_metadata_snapshot_raw"),
             "source": "PubMed Central Article Datasets on AWS",
             "source_url": text_url,
             "rights_statement_uri": license_url(license_code),
@@ -335,6 +362,7 @@ def main() -> int:
                     continue
                 if total_text_bytes + size > args.max_text_bytes:
                     break
+                persist_metadata_snapshot(out, record)
                 line = (json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
                 if current_file is None or shard_raw + len(line) > 64 * 1024**2:
                     if current_file:
