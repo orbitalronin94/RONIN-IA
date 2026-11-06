@@ -101,6 +101,19 @@ Al documentar un run, registra:
 
 La finalidad es que cada resultado sea interpretable y reproducible sin fingir que ya existe una receta estable.
 
+## Candidato mergeable: Ronin - Drosophila (100.900.160 parámetros)
+
+El nombre oficial del candidato es **Ronin - Drosophila (100.900.160 parámetros)**; su identificador técnico es `Ronin-Drosophila-100900160`. El manifiesto está en [ronin-drosophila-100900160-candidate.json](../weights/ronin-drosophila-100900160-candidate.json).
+
+- Run de expansión/continuación: [#42198068241](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42198068241); checkpoint disponible como [artefacto](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42198068241/artifacts/13494355120).
+- Parámetros: 100.900.160; ×10,17 respecto a 9.922.880.
+- Entrenamiento: 500 pasos desde el ganador de 10.000 pasos, sin tutor.
+- Checkpoint SHA-256: `7d9345ecb9e3d7ad22aa628b93324ffd18e7b8a477f2d24c04885eced587d2f3`.
+- Screening pareado MMLU-Pro: 5/64 antes y 5/64 después; variación 0,00 puntos porcentuales.
+- Estado: candidato mergeable para revisión; no se ha demostrado mejora en ese screening. G-0 global, near-duplicates y contaminación de holdout permanecen pendientes.
+
+La identidad Drosophila no cambia la procedencia ni el estado de evaluación. El manifiesto de `main` y los pesos versionados siguen describiendo la línea base antigua hasta que el checkpoint candidato se promocione explícitamente.
+
 ## Expansión funcional ×10 desde el ganador de 10.000 pasos
 
 El workflow [expand-10x-from-10k.yml](../.github/workflows/expand-10x-from-10k.yml) define un experimento independiente, no una nueva línea base:
