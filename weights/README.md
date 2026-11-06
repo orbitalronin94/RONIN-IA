@@ -1,27 +1,34 @@
-# Pesos del modelo de referencia
+# Pesos y modelos publicados
 
-El checkpoint versionado en `main` es **RONIN-tiny-seed95-100-001**, con 9.922.880 parámetros. Este directorio contiene el paquete compacto PyTorch `ronin-main.pt` (sin estado del optimizador) y el manifiesto de identidad/procedencia.
+## Modelo experimental principal: Ronin - Drosophila
 
-- **Pesos:** [ronin-main.pt](ronin-main.pt)
+**Nombre:** Ronin - Drosophila (**100.900.160 parámetros**).  
+**Identificador:** `Ronin-Drosophila-100900160`.  
+**Manifiesto principal:** [ronin-drosophila-main.json](ronin-drosophila-main.json).  
+**Run de expansión ×10:** [#42203609278](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278).  
+**Artefacto del checkpoint:** [expanded-final.pt + informes](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42203609278/artifacts/13495833454).  
+**SHA-256:** `f3f8e2e75e418f8630372c242378a28010db83148d169d85ad3e4f73114cda9a`.  
+**Tamaño:** 403.629.045 bytes.
+
+Drosophila es el modelo experimental principal por decisión expresa. El checkpoint se almacena como artefacto de GitHub Actions porque supera el límite práctico de un archivo Git ordinario. Los artefactos tienen política de retención: para distribución duradera habrá que publicar una release o migrar a almacenamiento de pesos adecuado.
+
+## Fallback compacto empaquetado en Git
+
+El archivo [ronin-main.pt](ronin-main.pt) sigue conteniendo **RONIN-tiny-seed95-100-001**, con 9.922.880 parámetros.
+
 - **Manifiesto:** [main-model.json](main-model.json)
-- **SHA-256 del paquete:** `4fb699cf3633ce610f66f2066ce182ceb957b2b0bead2b97c42cccf7f7021d11`
+- **SHA-256:** `4fb699cf3633ce610f66f2066ce182ceb957b2b0bead2b97c42cccf7f7021d11`
 - **Tamaño:** 39.719.989 bytes.
-- **Checkpoint de origen:** 100 pasos, seed 95.
 - **Procedencia:** [GitHub Actions #42121731925](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42121731925).
 
-El manifiesto es la fuente de verdad para arquitectura, número de parámetros, checkpoint de origen, hashes, evaluación y política de promoción.
+Este paquete se conserva como fallback reproducible y compacto. No se debe interpretar como si contuviera los pesos de Drosophila.
 
-## Candidato mergeable: Ronin - Drosophila
+## Evaluación y límites
 
-**Nombre oficial:** Ronin - Drosophila (**100.900.160 parámetros**).  
-**Identificador técnico:** `Ronin-Drosophila-100900160`.  
-**Manifiesto:** [ronin-drosophila-100900160-candidate.json](ronin-drosophila-100900160-candidate.json).  
-**Run:** [#42198068241](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42198068241).  
-**Artefacto:** [checkpoint e informes](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42198068241/artifacts/13494355120).  
-**SHA-256 del checkpoint:** `7d9345ecb9e3d7ad22aa628b93324ffd18e7b8a477f2d24c04885eced587d2f3`.
+La expansión preservó los logits antes del entrenamiento (diferencia absoluta máxima 1,4305×10⁻⁶). Tras 500 pasos, el screening MMLU-Pro pareado quedó en 5/64 antes y 5/64 después. Esto significa que no se detectó regresión en esa muestra; no demuestra mejora general ni sustituye una evaluación independiente completa.
 
-Este es el candidato designado para revisión/merge. Su screening MMLU-Pro pareado fue 5/64 antes y 5/64 después; por tanto, no hay mejora demostrada en esa muestra. Los gates globales G-0, near-duplicates y contaminación del holdout siguen pendientes. El checkpoint candidato se conserva como artefacto de Actions; no se debe confundir con el paquete `ronin-main.pt` que continúa versionado en `main`.
+El manifiesto principal experimental registra asimismo G-0 como FAIL y las comprobaciones globales de near-duplicates y contaminación de holdout como PENDING. La promoción del modelo experimental no borra esas limitaciones.
 
-Los experimentos posteriores —incluido el candidato de 10.000 pasos— no sustituyen automáticamente estos pesos. Sus checkpoints se publican como artefactos de Actions hasta que exista una decisión explícita de promoción y se actualicen juntos el paquete y el manifiesto.
+## Histórico
 
-No confundas el inventario actual de datasets con el corpus histórico usado para crear este checkpoint. Cada manifiesto de experimento registra el corte real de datos utilizado.
+El manifiesto [ronin-drosophila-100900160-candidate.json](ronin-drosophila-100900160-candidate.json) conserva la procedencia del candidato anterior, run #42198068241. El checkpoint actual promovido procede del run #42203609278 y está descrito en el manifiesto principal experimental.
