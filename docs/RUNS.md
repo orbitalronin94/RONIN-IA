@@ -45,7 +45,7 @@ Last reconciled: **2026-11-06**. This ledger distinguishes a successful workflow
 - Strict Level A admitted into libraries: **0 documents / 0 bytes**; 0/64 reach 1 MiB; 0/64 fully complete; 0/64 training-eligible.
 - Preserved scoped material, reported separately: 7,711 documents / 567,271,468 UTF-8 bytes across five General libraries (608 legacy literature + 7,103 ScienceVerse). None counts toward the strict Level-A minimum until its evidence is reconciled.
 - CoVoST 2 rights-Level-A train payload: 270,244 segments / 18,385,485 UTF-8 bytes, not yet assigned to a library because global near-duplicate and benchmark/holdout gates are pending.
-- Rights ledger: 10 records (8 A, 2 B); five A records are metadata-only and do not authorize training on the described works.
+- Rights ledger: 11 records (9 A, 2 B); six A records are metadata-only and do not authorize training on the described works.
 - Global G-0: **FAIL**. No library is training-eligible.
 
 ## Reconciliation commits
