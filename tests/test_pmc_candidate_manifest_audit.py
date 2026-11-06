@@ -97,3 +97,42 @@ def test_audit_readiness_requires_the_complete_rights_bundle() -> None:
     assert report["strict_level_a_ready_documents"] == 1
     assert report["strict_level_a_admitted_documents"] == 0
     assert report["training_eligible"] is False
+
+
+
+def test_exact_pmc_metadata_snapshot_is_persisted_and_hash_bound(tmp_path):
+    import hashlib
+    import json
+
+    from scripts.harvest_pmc_oa_cc0_ccby import persist_metadata_snapshot
+
+    raw = b'{"pmcid":"PMC123","version":2,"license_code":"CC0"}'
+    record = {
+        "pmcid": "PMC123",
+        "version": 2,
+        "metadata_snapshot_sha256": hashlib.sha256(raw).hexdigest(),
+        "_metadata_snapshot_raw": raw,
+    }
+    persist_metadata_snapshot(tmp_path, record)
+
+    relative = record["metadata_snapshot_path"]
+    saved = (tmp_path / relative).read_bytes()
+    assert saved == raw
+    assert hashlib.sha256(saved).hexdigest() == record["metadata_snapshot_sha256"]
+    assert relative == "metadata-snapshots/PMC123.2.json"
+    assert "_metadata_snapshot_raw" not in record
+
+
+def test_pmc_metadata_snapshot_rejects_hash_mismatch(tmp_path):
+    import pytest
+
+    from scripts.harvest_pmc_oa_cc0_ccby import persist_metadata_snapshot
+
+    record = {
+        "pmcid": "PMC123",
+        "version": 2,
+        "metadata_snapshot_sha256": "0" * 64,
+        "_metadata_snapshot_raw": b'{"pmcid":"PMC123"}',
+    }
+    with pytest.raises(ValueError, match="SHA-256 changed"):
+        persist_metadata_snapshot(tmp_path, record)
