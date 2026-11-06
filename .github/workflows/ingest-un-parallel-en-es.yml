@@ -1,0 +1,63 @@
+name: Ingest UN Parallel Corpus v1.0 English-Spanish candidate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/ingest_un_parallel_en_es.py"
+      - ".github/workflows/ingest-un-parallel-en-es.yml"
+      - "data/datasets/candidates/un-parallel-corpus-v1/README.md"
+  workflow_dispatch:
+    inputs:
+      max_pairs:
+        description: Maximum aligned pairs to process
+        required: true
+        default: "2000000"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: un-parallel-en-es-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Download official English-Spanish corpus and audit alignment
+        env:
+          MAX_PAIRS: ${{ inputs.max_pairs || '2000000' }}
+        run: python scripts/ingest_un_parallel_en_es.py --max-pairs "$MAX_PAIRS"
+      - name: Validate candidate partitions
+        run: |
+          python - <<'PY'
+          import gzip, json
+          from pathlib import Path
+          root=Path("artifacts/un-parallel-en-es")
+          m=json.loads((root/"manifest.json").read_text())
+          assert m["unique_aligned_pairs"] > 1000
+          assert m["partitions"]["train"]["pairs"] > 0
+          assert m["training_eligible"] is False
+          for split in ("train","validation","test"):
+              with gzip.open(root/(split+".jsonl.gz"),"rt",encoding="utf-8") as f:
+                  n=sum(1 for line in f if line.strip())
+              assert n == m["partitions"][split]["pairs"]
+          print(json.dumps({"pairs":m["unique_aligned_pairs"],"partitions":m["partitions"],"training_eligible":False},indent=2))
+          PY
+      - name: Upload partitions and provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronin-un-parallel-en-es-candidate
+          path: artifacts/un-parallel-en-es/
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 1

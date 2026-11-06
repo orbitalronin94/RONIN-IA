@@ -69,3 +69,16 @@ Se ha incorporado directamente a `main`:
 
 **Límite importante:** este primer paso genera un paquete candidato, no un corpus admitido. Igualar líneas no demuestra alineación semántica ni calidad. Siguen pendientes auditoría documental, privacidad, deduplicación con los 608 textos admitidos, clasificación temática General/HKD, revisión humana y particionado. Los conjuntos de desarrollo/prueba oficiales de 2015 no se descargan. No usar en entrenamiento hasta completar esos controles.
 
+
+
+## Ingestión reproducible en-es añadida (6 de noviembre de 2026)
+
+Se añade el harvester `scripts/ingest_un_parallel_en_es.py` y el workflow `.github/workflows/ingest-un-parallel-en-es.yml`. El workflow localiza los dos fragmentos del bitexto inglés-español desde la página oficial, reconstruye el archivo, comprueba que los tres flujos (inglés, español e identificadores) tengan el mismo número de líneas y genera particiones deterministas train/validation/test agrupadas por símbolo documental cuando el identificador lo permite.
+
+- Solo procesa el corpus 1990–2014; no descarga ni mezcla el set oficial de 2015.
+- Conserva IDs de origen, hashes, atribución ONU y evidencia de dominio público.
+- Excluye pares vacíos/cortos, emails, URLs, caracteres de reemplazo y duplicados exactos.
+- Publica los payloads gzip y el manifiesto como artefacto de Actions durante 90 días.
+- El resultado sigue siendo candidato: no se habilita entrenamiento hasta revisión bilingüe, validación del agrupamiento documental, deduplicación global, privacidad y control de contaminación de holdouts.
+
+El objetivo de esta ejecución es convertir una fuente de alto volumen (más de 120.000 alineaciones en-es según las estadísticas oficiales) en un lote auditable, no afirmar de antemano que todos sus segmentos son entrenables.
