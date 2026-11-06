@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Acquire official UN Parallel Corpus v1.0 English-Spanish bitext; candidate-only."""
-import argparse, gzip, hashlib, html.parser, itertools, json, re, tarfile, time, urllib.parse, urllib.request
+import argparse, gzip, hashlib, html.parser, itertools, json, re, shutil, tarfile, time, urllib.parse, urllib.request
 from collections import Counter
 from pathlib import Path
 
@@ -58,7 +58,11 @@ def main():
                     b=src.read(1024*1024)
                     if not b: break
                     dst.write(b)
-    archive_hash=hashlib.sha256(archive.read_bytes()).hexdigest()
+    archive_digest=hashlib.sha256()
+    with archive.open("rb") as archive_stream:
+        for block in iter(lambda: archive_stream.read(1024*1024), b""):
+            archive_digest.update(block)
+    archive_hash=archive_digest.hexdigest()
     required={".en":"english.txt",".es":"spanish.txt",".ids":"ids.txt"}; extracted={}
     with tarfile.open(archive,"r:gz") as tf:
         for m in tf.getmembers():
@@ -106,4 +110,5 @@ def main():
     manifest={"schema_version":1,"dataset_id":"un-parallel-corpus-v1-en-es","status":"candidate_scoped_partitions_pending_review","source":SOURCE,"download_page":PAGE,"rights":"UN states that UN Parallel Corpus v1.0 contains official records and parliamentary documents in the public domain; preserve UN attribution and disclaimer.","attribution":"United Nations, Department for General Assembly and Conference Management, United Nations Parallel Corpus v1.0; Ziemski, Junczys-Dowmunt & Pouliquen (2016), LREC.","document_period":"1990-2014","excluded_source_data":["official 2015 development set","official 2015 test set","non-en-es bitext archives"],"archive_sha256":archive_hash,"chunks":chunks,"unique_aligned_pairs":n,"excluded":dict(excluded),"language_text_utf8_bytes":dict(langbytes),"partitions":{s:{"pairs":counts[s],"jsonl_utf8_bytes":sizes[s],"training_eligible":False} for s in outputs},"split_policy":"90/5/5 deterministic SHA-256 split grouped by UN document symbol extracted from source ID; full source ID fallback","training_eligible":False,"pending":["bilingual human sample review","document-key grouping audit","global exact/near deduplication","PII/privacy review","holdout contamination check","scoped admission"],"retrieved_at_utc":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())}
     (a.out/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps({"pairs":n,"partitions":dict(counts),"excluded":dict(excluded),"language_text_utf8_bytes":dict(langbytes),"archive_sha256":archive_hash,"training_eligible":False},ensure_ascii=False,indent=2))
+    shutil.rmtree(work)
 if __name__=="__main__": main()
