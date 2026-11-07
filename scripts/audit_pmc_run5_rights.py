@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Audit exact PMC OA article-version rights evidence for the RUN5 candidate sample.
 
-Downloads each exact PMC metadata JSON and the opening XML range, verifies the
-pinned metadata hash/ETag and XML MD5 URL, and extracts the article-level CC
-license URI plus copyright/publisher evidence. This is an evidence audit only;
-it does not admit or enable training.
+Downloads each exact PMC metadata JSON and streams the complete article XML,
+verifying metadata ETag, XML MD5 and full-payload SHA-256 before extracting the
+article-level CC license URI plus copyright/publisher evidence. This is an
+evidence audit only; it does not admit or enable training.
 """
 from __future__ import annotations
 
@@ -53,6 +53,10 @@ HOLDER_RE = re.compile(rb"<copyright-holder\b[^>]*>(.*?)</copyright-holder>", re
 STATEMENT_RE = re.compile(rb"<copyright-statement\b[^>]*>(.*?)</copyright-statement>", re.I | re.S)
 PUBLISHER_RE = re.compile(rb"<publisher-name\b[^>]*>(.*?)</publisher-name>", re.I | re.S)
 LICENSE_P_RE = re.compile(rb"<license-p\b[^>]*>(.*?)</license-p>", re.I | re.S)
+LICENSE_URL_RE = re.compile(
+    rb"https?://creativecommons\.org/(?:licenses/by/(?:2\.0|3\.0|4\.0)|publicdomain/zero/1\.0)/?",
+    re.I,
+)
 
 
 def get_bytes(url: str, range_header: str | None = None) -> tuple[bytes, dict]:
@@ -115,6 +119,10 @@ def extract_license_evidence(xml_head: bytes) -> dict[str, list[str]]:
     raw_hrefs = set(LICENSE_RE.findall(xml_head))
     for license_block in LICENSE_P_RE.findall(xml_head):
         raw_hrefs.update(HREF_RE.findall(license_block))
+        # Some PMC records place the exact canonical CC URI in plain text,
+        # rather than an ext-link href. Accept only explicit allowlisted URLs;
+        # never infer a version from a bare "CC BY 4.0" label.
+        raw_hrefs.update(LICENSE_URL_RE.findall(license_block))
     evidence: dict[str, set[str]] = {}
     for raw_uri in raw_hrefs:
         uri = html.unescape(raw_uri.decode("utf-8", "replace")).strip()
