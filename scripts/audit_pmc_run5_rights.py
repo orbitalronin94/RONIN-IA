@@ -19,6 +19,7 @@ import urllib.request
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+# Regression coverage: tests/test_pmc_run5_rights.py exercises the XML patterns below.
 USER_AGENT = "RONIN-IA-PMC-rights-audit/1.0 (research corpus rights verification)"
 SAMPLE_IDS = {
     "biology_medicine_general": [
