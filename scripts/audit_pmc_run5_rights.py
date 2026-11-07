@@ -17,7 +17,7 @@ import re
 import urllib.error
 import urllib.request
 from pathlib import Path
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import parse_qs, urlparse
 
 USER_AGENT = "RONIN-IA-PMC-rights-audit/1.0 (research corpus rights verification)"
 SAMPLE_IDS = {
