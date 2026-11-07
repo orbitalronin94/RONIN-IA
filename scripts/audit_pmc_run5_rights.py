@@ -106,6 +106,13 @@ def audit_one(library: str, row: dict) -> dict:
         xml_head, xml_headers = get_bytes(xml_url, "bytes=0-262143")
         license_tags = [tag.decode("utf-8", "replace") for tag in LICENSE_TAG_RE.findall(xml_head)]
         hrefs = sorted(set(html.unescape(x.decode("utf-8", "replace")) for x in LICENSE_RE.findall(xml_head)))
+        license_p_raw = LICENSE_P_RE.findall(xml_head)
+        license_p_texts = [clean_xml_text(x) for x in license_p_raw]
+        license_p_hrefs = sorted(set(
+            html.unescape(x.decode("utf-8", "replace"))
+            for raw in license_p_raw
+            for x in re.findall(rb"(?:[A-Za-z_][\w.-]*:)?href\s*=\s*['\"]([^'\"]+)['\"]", raw, re.I)
+        ))
         canonical = sorted(set(x for x in (canonical_license(h) for h in hrefs) if x))
         result.update({
             "xml_head_bytes": len(xml_head),
@@ -113,6 +120,8 @@ def audit_one(library: str, row: dict) -> dict:
             "xml_license_tag_count": len(license_tags),
             "xml_license_tag_preview": license_tags[:5],
             "license_hrefs_found": hrefs[:10],
+            "license_p_hrefs_found": license_p_hrefs[:10],
+            "license_p_texts": license_p_texts[:3],
             "metadata_license_code": metadata.get("license_code"),
         })
         if len(canonical) != 1 or len(hrefs) != 1:
