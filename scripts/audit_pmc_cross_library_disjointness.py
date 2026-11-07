@@ -116,7 +116,7 @@ def _pair_map_by_key(
     for index, row in enumerate(entries):
         groups[str(row[key])].append(index)
     pairs: dict[tuple[int, int], set[str]] = {}
-    for value, indices in groups.items():
+    for indices in groups.values():
         if len(indices) < 2:
             continue
         for left, right in itertools.combinations(indices, 2):
