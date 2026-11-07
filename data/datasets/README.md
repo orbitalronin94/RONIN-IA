@@ -2,7 +2,7 @@
 
 Este directorio es el registro operativo de adquisición, revisión, admisión y preparación de corpus para RONIN. **Los recuentos distinguen documentos admitidos a nivel de fuente, documentos listos para entrenamiento y candidatos. No deben sumarse categorías que puedan solaparse. Esta es la única raíz canónica de datos: `data/datasets/`.**
 
-> Corte documental: 6 de noviembre de 2026. Los manifiestos enlazados son la fuente de verdad; esta página resume su estado y no sustituye sus hashes ni decisiones por documento.
+> Corte documental: 7 de noviembre de 2026. Los manifiestos enlazados son la fuente de verdad; esta página resume su estado y no sustituye sus hashes ni decisiones por documento.
 
 ## Estado actual — cifras verificadas
 
@@ -142,6 +142,7 @@ Los números siguientes son **inventarios de candidatos**, no admisiones. Hay sn
 - Se retienen **1.024 avisos editoriales** (retractions, expressions of concern, corrections, corrigenda y errata), **3.151.513 bytes**; quedan 3.982 candidatos no editoriales / 31.530.772 bytes.
 - Entre los restantes, **3.939** llevan el código genérico `CC BY` sin versión explícita (30.599.774 bytes): no se puede convertir por defecto en CC BY 4.0. **43 CC0** (981.420 bytes) quedan como candidatos de revisión, no admitidos.
 - Los 5.006 registros actuales carecen del hash SHA-256 del snapshot de metadatos y de resolución individual del titular, terceros y cobertura ES/EU/US. Resultado: **0 documentos / 0 bytes Level A estrictos**.
+- **Muestra de derechos del 7 de noviembre:** run [42364138717](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42364138717), artefacto [13570632162](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42364138717/artifacts/13570632162), 41.370 bytes comprimidos, SHA-256 verificado `4e5c85c2e5f958ece6d6f17888a05988e53a8939fc572268b4fe48fc9a077e37`. Se auditaron 32 artículos/versiones estratificados: 28 tienen URI CC versionada explícita (27 CC-BY-4.0 y 1 CC-BY-3.0); 24 siguen pendientes de revisión completa y 4 quedan retenidos por avisos de terceros. Otros 4 se retienen porque solo declaran «CC-BY 4.0» sin URI canónica; no se infiere la versión. Los 32 snapshots JSON y los hashes completos XML/MD5/SHA-256 se verificaron 32/32. Es una muestra, no un barrido del corpus: **no añade documentos ni bytes Level A**.
 - Se endureció el harvester para no aceptar códigos CC BY sin versión, no asumir 4.0, conservar el SHA-256 del JSON de metadatos por artículo/versión y excluir avisos editoriales. El workflow de auditoría independiente genera un informe reproducible; el corpus sigue siendo candidate-only.
 
 ### UN Parallel Corpus v1.0 en-es: adquisición verificada
