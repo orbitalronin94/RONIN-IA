@@ -1,6 +1,6 @@
 # RUNS — RONIN corpus and rights evidence
 
-Last reconciled: **2026-11-06**. This ledger distinguishes a successful workflow from a rights decision, source-scoped admission, strict Level-A library admission, and global training eligibility. Artifact ZIP digests marked *verified* were downloaded and re-hashed during this review; other digests are explicitly identified as API-reported.
+Last reconciled: **2026-11-07**. This ledger distinguishes a successful workflow from a rights decision, source-scoped admission, strict Level-A library admission, and global training eligibility. Artifact ZIP digests marked *verified* were downloaded and re-hashed during this review; other digests are explicitly identified as API-reported.
 
 ## 2026-11-06 — PMC candidate audit and metadata-snapshot gap
 
@@ -108,3 +108,16 @@ Earlier CoVoST reruns [42194688065](https://github.com/orbitalronin94/RONIN-IA/a
 - [91a14b0](https://github.com/orbitalronin94/RONIN-IA/commit/91a14b0a15b4926362d4254fe1829e014fe3c8cb) and [d284fc9](https://github.com/orbitalronin94/RONIN-IA/commit/d284fc9404f1505d38794f8cc59790e37756233d) — PMC candidate-audit regression tests.
 - [d9a1f94](https://github.com/orbitalronin94/RONIN-IA/commit/d9a1f94d995c034069f4e7ad6dd07f09bc6dd38a) and [f7d51b0](https://github.com/orbitalronin94/RONIN-IA/commit/f7d51b0a34faac313e692792205a6946280db6da) — separate the expensive PMC harvest from the lightweight reproducible audit.
 - [d93f996](https://github.com/orbitalronin94/RONIN-IA/commit/d93f9965b72b934a1a5a2d34b821add18d160c13) — reconcile dataset documentation with strict 0/64 status and verified UN/PMC candidate results.
+
+## 2026-11-07 — PMC RUN5 exact rights-evidence sample
+
+- Audit run: [42364138717](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42364138717), job `128378547666`; completed successfully. This is an evidence-sample audit, not a rights certification or corpus admission.
+- Artifact: [13570632162](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42364138717/artifacts/13570632162), 41,370 bytes; ZIP SHA-256 `4e5c85c2e5f958ece6d6f17888a05988e53a8939fc572268b4fe48fc9a077e37` (**downloaded and independently re-hashed**).
+- The artifact contains 33 files: the report plus **32 exact per-item/version metadata JSON snapshots**. All 32 raw snapshot SHA-256 values and byte lengths were independently rechecked against the report; 32/32 match. Candidate canonical-JSON hashes also match 32/32. These are distinct hashes: the report records the raw HTTP snapshot hash separately from the canonical JSON hash.
+- Full XML was streamed and hashed for all 32 sample articles. The URL MD5, actual full-XML MD5, pinned full-XML SHA-256 and downloaded full-XML SHA-256 reconcile for 32/32. Metadata ETags match the candidate manifest for 32/32.
+- Rights evidence result: 28/32 rows have one exact, allowlisted, versioned CC URI in the article's `license-p`; 27 are CC-BY-4.0 and one CC-BY-3.0. Of those 28, **24 remain `A_PENDING_FULL_CORPUS_AND_EXTRACTION_CHECK`** and **4 remain `B_HOLD_THIRD_PARTY_NOTICE`**. Four additional rows remain HOLD because their XML only says “CC-BY 4.0” without a canonical versioned URI; no license version is inferred.
+- Parser correction: explicit Creative Commons URLs embedded as plain text inside `license-p` are now recognized, while a bare “CC-BY 4.0” label remains insufficient. Regression test added. Commits: [61b5e4f](https://github.com/orbitalronin94/RONIN-IA/commit/61b5e4f7f8933b1fae00c5dbc3ffb77bfb031302) (test), [484cbdb](https://github.com/orbitalronin94/RONIN-IA/commit/484cbdbb9d342384c1ad11bb0c930065fa031695) (parser).
+- CI for the parser/test commit: [42364138740](https://github.com/orbitalronin94/RONIN-IA/actions/runs/42364138740), both lint/tests and one-step smoke training succeeded.
+- **No rights-registry record was added and no PMC text was admitted.** The 32 rows are a stratified sample from the 5,006-document candidate run, not a full-corpus audit. Full per-item rights review, extraction/content and third-party checks, privacy, quality, global exact/near-duplicate checks, benchmark/holdout clearance and deterministic library splits remain outstanding. Strict Level A admitted remains **0 documents / 0 bytes across 64 libraries**; G-0 remains **FAIL**.
+- To avoid launching this 500-step CPU experiment for documentation or rights-audit commits, the expansion workflow now runs on push only when its training code or pinned training inputs change; manual dispatch remains available. Commit: [7cd479](https://github.com/orbitalronin94/RONIN-IA/commit/7cd4797d1100df408550ddf2ef8d8d0f6bf4e55e). Two earlier pushes had already queued/running training attempts before this guard was merged; this commit does not claim to cancel them.
+
