@@ -1,0 +1,67 @@
+name: Audit PMC RUN5 global library disjointness
+run-name: PMC RUN5 · exact/near duplicate and split-isolation gate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/audit_pmc_cross_library_disjointness.py"
+      - ".github/workflows/audit-pmc-run5-global-disjointness.yml"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: pmc-run5-global-disjointness
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Download immutable PMC RUN5 candidate artifacts
+        env:
+          GH_TOKEN: \${{ github.token }}
+        run: |
+          gh run download 42025156962 --name ronin-pmc-oa-biology_medicine-candidates --dir /tmp/pmc-biology
+          gh run download 42025156962 --name ronin-pmc-oa-chemistry-candidates --dir /tmp/pmc-chemistry
+
+      - name: Audit exact and near duplicates across all four libraries
+        id: disjointness
+        continue-on-error: true
+        run: |
+          python scripts/audit_pmc_cross_library_disjointness.py \
+            --biology-root /tmp/pmc-biology \
+            --chemistry-root /tmp/pmc-chemistry \
+            --out /tmp/pmc-run5-global-disjointness.json \
+            --hamming-threshold 3 \
+            --fail-on-duplicates
+
+      - name: Upload global disjointness report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ronin-pmc-run5-global-disjointness
+          path: /tmp/pmc-run5-global-disjointness.json
+          if-no-files-found: warn
+          retention-days: 90
+          compression-level: 6
+
+      - name: Enforce global General/HKD disjointness gate
+        if: steps.disjointness.outcome == 'failure'
+        run: |
+          echo "PMC RUN5 contains exact or near duplicates across libraries. Candidate admission is blocked." >&2
+          exit 1
