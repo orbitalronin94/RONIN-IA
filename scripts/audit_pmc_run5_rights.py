@@ -104,6 +104,12 @@ def canonical_license(uri: str) -> str | None:
     return None
 
 
+def canonical_metadata_sha256(metadata: dict) -> str:
+    """Match the candidate harvester's stable sorted-key JSON serialization."""
+    canonical = json.dumps(metadata, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
 def extract_license_evidence(xml_head: bytes) -> dict[str, list[str]]:
     """Collect canonical, versioned license URIs from article license markup."""
     raw_hrefs = set(LICENSE_RE.findall(xml_head))
@@ -133,10 +139,7 @@ def audit_one(library: str, row: dict, snapshot_dir: Path) -> dict:
         if not expected_etag or etag != expected_etag:
             raise ValueError("metadata_etag_mismatch")
         metadata = json.loads(metadata_raw)
-        canonical_metadata = json.dumps(
-            metadata, ensure_ascii=False, sort_keys=True, separators=(",", ":")
-        ).encode("utf-8")
-        canonical_metadata_hash = hashlib.sha256(canonical_metadata).hexdigest()
+        canonical_metadata_hash = canonical_metadata_sha256(metadata)
         if str(metadata.get("pmcid", "")).replace("PMC", "") != str(row.get("pmcid", "")).replace("PMC", ""):
             raise ValueError("metadata_pmcid_mismatch")
         if str(metadata.get("version")) != str(row.get("source_version", "").split("@")[0].split(".")[-1]):
@@ -168,6 +171,23 @@ def audit_one(library: str, row: dict, snapshot_dir: Path) -> dict:
         if snapshot_path.exists() and snapshot_path.read_bytes() != metadata_raw:
             raise ValueError("immutable_metadata_snapshot_collision")
         snapshot_path.write_bytes(metadata_raw)
+        result.update({
+            "metadata_snapshot_sha256": metadata_hash,
+            "metadata_snapshot_path": snapshot_name,
+            "metadata_snapshot_bytes": len(metadata_raw),
+            "metadata_snapshot_canonical_json_sha256": canonical_metadata_hash,
+            "candidate_source_metadata_sha256": row.get("source_metadata_sha256"),
+            "candidate_source_metadata_sha256_matches_raw": metadata_hash == row.get("source_metadata_sha256"),
+            "candidate_source_metadata_sha256_matches_canonical_json": canonical_metadata_hash == row.get("source_metadata_sha256"),
+            "metadata_etag_current": etag,
+            "metadata_etag_matches_candidate_manifest": etag == expected_etag,
+            "source_xml_md5_actual": xml_md5,
+            "source_xml_md5_url_verified": xml_md5.lower() == query_md5.lower(),
+            "source_xml_sha256_actual": xml_sha256,
+            "source_xml_sha256_pinned": expected_xml_sha256,
+            "source_xml_sha256_matches_candidate": xml_sha256 == expected_xml_sha256,
+            "source_xml_bytes": xml_bytes,
+        })
         license_tags = [tag.decode("utf-8", "replace") for tag in LICENSE_TAG_RE.findall(xml_head)]
         hrefs = sorted(set(html.unescape(x.decode("utf-8", "replace")) for x in LICENSE_RE.findall(xml_head)))
         license_p_raw = LICENSE_P_RE.findall(xml_head)
