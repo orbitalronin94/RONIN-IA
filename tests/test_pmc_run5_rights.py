@@ -54,3 +54,29 @@ def test_clean_xml_text_collapses_whitespace_and_decodes_entities() -> None:
     assert clean_xml_text(b"<p>First&nbsp;line\n  &amp; second</p>") == (
         "First line & second"
     )
+
+
+def test_license_evidence_is_extracted_from_license_p_and_ignores_publisher_links() -> None:
+    from scripts.audit_pmc_run5_rights import extract_license_evidence
+
+    xml = (
+        b"<license><license-p>Open access under "
+        b"<ext-link xlink:href='https://creativecommons.org/licenses/by/4.0/'>"
+        b"CC BY 4.0</ext-link>; see "
+        b"<ext-link xlink:href='https://www.example.org/'>publisher</ext-link>."
+        b"</license-p></license>"
+    )
+    assert extract_license_evidence(xml) == {
+        "CC-BY-4.0": ["https://creativecommons.org/licenses/by/4.0"]
+    }
+
+
+def test_license_evidence_holds_conflicting_versioned_licenses() -> None:
+    from scripts.audit_pmc_run5_rights import extract_license_evidence
+
+    xml = (
+        b"<license-p><ext-link href='https://creativecommons.org/licenses/by/4.0/'>"
+        b"CC BY 4.0</ext-link><ext-link href='https://creativecommons.org/licenses/by/3.0/'>"
+        b"CC BY 3.0</ext-link></license-p>"
+    )
+    assert set(extract_license_evidence(xml)) == {"CC-BY-3.0", "CC-BY-4.0"}
