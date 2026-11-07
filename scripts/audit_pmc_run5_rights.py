@@ -44,6 +44,10 @@ LICENSE_RE = re.compile(
     rb"<(?:[A-Za-z_][\w.-]*:)?license\b[^>]*(?:[A-Za-z_][\w.-]*:)?href\s*=\s*['\"]([^'\"]+)['\"]",
     re.I,
 )
+HREF_RE = re.compile(
+    rb"(?:[A-Za-z_][\w.-]*:)?href\s*=\s*['\"]([^'\"]+)['\"]",
+    re.I,
+)
 TAG_RE = re.compile(rb"<[^>]+>")
 HOLDER_RE = re.compile(rb"<copyright-holder\b[^>]*>(.*?)</copyright-holder>", re.I | re.S)
 STATEMENT_RE = re.compile(rb"<copyright-statement\b[^>]*>(.*?)</copyright-statement>", re.I | re.S)
@@ -113,7 +117,8 @@ def audit_one(library: str, row: dict) -> dict:
             for raw in license_p_raw
             for x in re.findall(rb"(?:[A-Za-z_][\w.-]*:)?href\s*=\s*['\"]([^'\"]+)['\"]", raw, re.I)
         ))
-        canonical = sorted(set(x for x in (canonical_license(h) for h in hrefs) if x))
+        license_evidence = extract_license_evidence(xml_head)
+        canonical = sorted(license_evidence)
         result.update({
             "xml_head_bytes": len(xml_head),
             "xml_head_sha256": hashlib.sha256(xml_head).hexdigest(),
@@ -122,12 +127,13 @@ def audit_one(library: str, row: dict) -> dict:
             "license_hrefs_found": hrefs[:10],
             "license_p_hrefs_found": license_p_hrefs[:10],
             "license_p_texts": license_p_texts[:3],
+            "canonical_license_evidence": license_evidence,
             "metadata_license_code": metadata.get("license_code"),
         })
-        if len(canonical) != 1 or len(hrefs) != 1:
+        if len(canonical) != 1:
             raise ValueError("exact_article_license_uri_missing_or_ambiguous")
-        license_uri = hrefs[0].replace("http://", "https://")
         license_id = canonical[0]
+        license_uri = license_evidence[license_id][0] + "/"
         if license_id not in {"CC0-1.0", "CC-BY-2.0", "CC-BY-3.0", "CC-BY-4.0"}:
             raise ValueError("license_not_allowlisted")
 
