@@ -80,3 +80,17 @@ def test_license_evidence_holds_conflicting_versioned_licenses() -> None:
         b"CC BY 3.0</ext-link></license-p>"
     )
     assert set(extract_license_evidence(xml)) == {"CC-BY-3.0", "CC-BY-4.0"}
+
+
+def test_read_full_xml_hashes_complete_stream_and_keeps_bounded_prefix() -> None:
+    import hashlib
+    import io
+
+    from scripts.audit_pmc_run5_rights import read_full_xml
+
+    payload = b"<article>" + (b"x" * 400_000) + b"</article>"
+    head, sha256, md5, total_bytes = read_full_xml(io.BytesIO(payload))
+    assert len(head) == 300_000
+    assert sha256 == hashlib.sha256(payload).hexdigest()
+    assert md5 == hashlib.md5(payload, usedforsecurity=False).hexdigest()
+    assert total_bytes == len(payload)
