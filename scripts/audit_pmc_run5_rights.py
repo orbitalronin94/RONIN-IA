@@ -64,6 +64,28 @@ def get_bytes(url: str, range_header: str | None = None) -> tuple[bytes, dict]:
         return response.read(300_000), dict(response.headers.items())
 
 
+def read_full_xml(stream) -> tuple[bytes, str, str, int]:
+    """Hash the complete XML while retaining only its bounded metadata prefix."""
+    sha256 = hashlib.sha256()
+    md5 = hashlib.md5(usedforsecurity=False)
+    head = bytearray()
+    total_bytes = 0
+    while chunk := stream.read(1024 * 1024):
+        sha256.update(chunk)
+        md5.update(chunk)
+        total_bytes += len(chunk)
+        if len(head) < 300_000:
+            head.extend(chunk[: 300_000 - len(head)])
+    return bytes(head), sha256.hexdigest(), md5.hexdigest(), total_bytes
+
+
+def get_full_xml(url: str) -> tuple[bytes, str, str, int, dict]:
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(request, timeout=180) as response:
+        head, sha256, md5, total_bytes = read_full_xml(response)
+        return head, sha256, md5, total_bytes, dict(response.headers.items())
+
+
 def clean_xml_text(raw: bytes) -> str:
     value = TAG_RE.sub(b" ", raw)
     return re.sub(r"\s+", " ", html.unescape(value.decode("utf-8", "replace"))).strip()
@@ -100,14 +122,21 @@ def extract_license_evidence(xml_head: bytes) -> dict[str, list[str]]:
     }
 
 
-def audit_one(library: str, row: dict) -> dict:
+def audit_one(library: str, row: dict, snapshot_dir: Path) -> dict:
     doc_id = row["document_id"]
     result = {"library": library, "document_id": doc_id, "title": row.get("title")}
     try:
         metadata_raw, metadata_headers = get_bytes(row["source_metadata_url"])
         metadata_hash = hashlib.sha256(metadata_raw).hexdigest()
         etag = metadata_headers.get("ETag", metadata_headers.get("Etag", "")).strip('"')
+        expected_etag = str(row.get("source_metadata_etag") or "").strip('"')
+        if not expected_etag or etag != expected_etag:
+            raise ValueError("metadata_etag_mismatch")
         metadata = json.loads(metadata_raw)
+        canonical_metadata = json.dumps(
+            metadata, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")
+        canonical_metadata_hash = hashlib.sha256(canonical_metadata).hexdigest()
         if str(metadata.get("pmcid", "")).replace("PMC", "") != str(row.get("pmcid", "")).replace("PMC", ""):
             raise ValueError("metadata_pmcid_mismatch")
         if str(metadata.get("version")) != str(row.get("source_version", "").split("@")[0].split(".")[-1]):
@@ -125,7 +154,20 @@ def audit_one(library: str, row: dict) -> dict:
         current_xml_md5 = parse_qs(urlparse(current_xml_url).query).get("md5", [""])[0]
         if current_xml_md5 and current_xml_md5.lower() != query_md5.lower():
             raise ValueError("current_metadata_points_to_different_xml_version")
-        xml_head, xml_headers = get_bytes(xml_url, "bytes=0-262143")
+        xml_head, xml_sha256, xml_md5, xml_bytes, xml_headers = get_full_xml(xml_url)
+        if xml_md5.lower() != query_md5.lower():
+            raise ValueError("xml_md5_payload_mismatch")
+        expected_xml_sha256 = str(row.get("source_xml_sha256") or "").lower()
+        if not expected_xml_sha256 or xml_sha256 != expected_xml_sha256:
+            raise ValueError("xml_sha256_payload_mismatch")
+        snapshot_dir.mkdir(parents=True, exist_ok=True)
+        safe_pmcid = re.sub(r"[^A-Za-z0-9_.-]", "_", str(row.get("pmcid") or doc_id))
+        safe_version = re.sub(r"[^A-Za-z0-9_.-]", "_", str(metadata.get("version") or "unknown"))
+        snapshot_name = f"{safe_pmcid}.{safe_version}.json"
+        snapshot_path = snapshot_dir / snapshot_name
+        if snapshot_path.exists() and snapshot_path.read_bytes() != metadata_raw:
+            raise ValueError("immutable_metadata_snapshot_collision")
+        snapshot_path.write_bytes(metadata_raw)
         license_tags = [tag.decode("utf-8", "replace") for tag in LICENSE_TAG_RE.findall(xml_head)]
         hrefs = sorted(set(html.unescape(x.decode("utf-8", "replace")) for x in LICENSE_RE.findall(xml_head)))
         license_p_raw = LICENSE_P_RE.findall(xml_head)
@@ -177,16 +219,33 @@ def audit_one(library: str, row: dict) -> dict:
             "copyright_statement": statement or None,
             "publisher": publisher or None,
             "metadata_snapshot_sha256": metadata_hash,
-            "metadata_etag_current": etag or None,
-            "metadata_etag_matches_candidate_manifest": bool(etag and etag == row.get("source_metadata_etag")),
-            "original_manifest_metadata_sha256_matches_current_snapshot": metadata_hash == row.get("source_metadata_sha256"),
-            "source_xml_md5_url_verified": True,
+            "metadata_snapshot_path": snapshot_name,
+            "metadata_snapshot_bytes": len(metadata_raw),
+            "metadata_snapshot_canonical_json_sha256": canonical_metadata_hash,
+            "candidate_source_metadata_sha256": row.get("source_metadata_sha256"),
+            "candidate_source_metadata_sha256_matches_raw": metadata_hash == row.get("source_metadata_sha256"),
+            "candidate_source_metadata_sha256_matches_canonical_json": canonical_metadata_hash == row.get("source_metadata_sha256"),
+            "metadata_etag_current": etag,
+            "metadata_etag_matches_candidate_manifest": etag == expected_etag,
+            "source_xml_md5_actual": xml_md5,
+            "source_xml_md5_url_verified": xml_md5.lower() == query_md5.lower(),
             "current_metadata_xml_md5_matches_pinned_version": (not current_xml_md5 or current_xml_md5.lower() == query_md5.lower()),
-            "source_xml_sha256_pinned": row.get("source_xml_sha256"),
+            "source_xml_sha256_actual": xml_sha256,
+            "source_xml_sha256_pinned": expected_xml_sha256,
+            "source_xml_sha256_matches_candidate": xml_sha256 == expected_xml_sha256,
+            "source_xml_bytes": xml_bytes,
+            "xml_content_length_header": xml_headers.get("Content-Length"),
             "xml_head_sha256": hashlib.sha256(xml_head).hexdigest(),
             "third_party_notice_in_license_p": third_party_warning,
             "license_p_excerpt": " | ".join(license_ps)[:1200],
-            "rights_candidate_level": "A_PENDING_FULL_CORPUS_AND_EXTRACTION_CHECK" if not third_party_warning else "B_HOLD_THIRD_PARTY_NOTICE",
+            "rights_candidate_level": (
+                "B_HOLD_THIRD_PARTY_NOTICE"
+                if third_party_warning
+                else "B_HOLD_METADATA_HASH_RECONCILIATION"
+                if metadata_hash != row.get("source_metadata_sha256")
+                and canonical_metadata_hash != row.get("source_metadata_sha256")
+                else "A_PENDING_FULL_CORPUS_AND_EXTRACTION_CHECK"
+            ),
             "attribution": row.get("citation"),
             "source_metadata_url": row.get("source_metadata_url"),
             "source_xml_url": xml_url,
@@ -220,10 +279,11 @@ def main() -> int:
     parser.add_argument("--biology-root", type=Path, required=True)
     parser.add_argument("--chemistry-root", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--snapshot-dir", type=Path, required=True)
     args = parser.parse_args()
     selected = load_sample_rows(args.biology_root, ["biology_medicine_general", "biology_medicine_hkd"]) + load_sample_rows(args.chemistry_root, ["chemistry_general", "chemistry_hkd"])
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
-        results = list(pool.map(lambda pair: audit_one(pair[0], pair[1]), selected))
+        results = list(pool.map(lambda pair: audit_one(pair[0], pair[1], args.snapshot_dir), selected))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     report = {
         "schema": "ronin-pmc-run5-rights-sample-audit-v1",
@@ -233,6 +293,9 @@ def main() -> int:
         "held": sum(r["status"] == "HOLD" for r in results),
         "license_counts": {},
         "third_party_notice_count": sum(bool(r.get("third_party_notice_in_license_p")) for r in results),
+        "metadata_snapshots_persisted": sum(bool(r.get("metadata_snapshot_path")) for r in results),
+        "metadata_hash_reconciliation_holds": sum(r.get("rights_candidate_level") == "B_HOLD_METADATA_HASH_RECONCILIATION" for r in results),
+        "snapshot_directory": str(args.snapshot_dir),
         "results": results,
         "note": "Sample evidence only. Does not establish rights for unreviewed article versions or enable training.",
     }
