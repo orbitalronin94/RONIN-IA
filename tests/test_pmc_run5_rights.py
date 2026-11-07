@@ -107,3 +107,20 @@ def test_canonical_metadata_sha256_matches_sorted_utf8_json_contract() -> None:
         json.dumps(metadata, sort_keys=True, ensure_ascii=False).encode("utf-8")
     ).hexdigest()
     assert canonical_metadata_sha256(metadata) == expected
+
+def test_license_evidence_reads_exact_cc_url_from_license_p_text_without_inference() -> None:
+    from scripts.audit_pmc_run5_rights import extract_license_evidence
+
+    explicit_url = (
+        b"<license><license-p>This article is open access under "
+        b"(http://creativecommons.org/licenses/by/4.0/).</license-p></license>"
+    )
+    bare_label = (
+        b"<license><license-p>This article is licensed under CC-BY 4.0"
+        b"</license-p></license>"
+    )
+    assert extract_license_evidence(explicit_url) == {
+        "CC-BY-4.0": ["https://creativecommons.org/licenses/by/4.0"]
+    }
+    # A human-readable label without a canonical URI remains insufficient evidence.
+    assert extract_license_evidence(bare_label) == {}
