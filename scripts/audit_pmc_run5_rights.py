@@ -39,8 +39,9 @@ SAMPLE_IDS = {
         "PMC12431153.1", "PMC12235380.1", "PMC12952585.1", "PMC11767514.1",
     ],
 }
+LICENSE_TAG_RE = re.compile(rb"<(?:[A-Za-z_][\w.-]*:)?license\b[^>]*>", re.I)
 LICENSE_RE = re.compile(
-    rb"<license\b[^>]*(?:xlink:href|href)\s*=\s*['\"]([^'\"]+)['\"]",
+    rb"<(?:[A-Za-z_][\w.-]*:)?license\b[^>]*(?:[A-Za-z_][\w.-]*:)?href\s*=\s*['\"]([^'\"]+)['\"]",
     re.I,
 )
 TAG_RE = re.compile(rb"<[^>]+>")
@@ -103,8 +104,17 @@ def audit_one(library: str, row: dict) -> dict:
         if current_xml_md5 and current_xml_md5.lower() != query_md5.lower():
             raise ValueError("current_metadata_points_to_different_xml_version")
         xml_head, xml_headers = get_bytes(xml_url, "bytes=0-262143")
+        license_tags = [tag.decode("utf-8", "replace") for tag in LICENSE_TAG_RE.findall(xml_head)]
         hrefs = sorted(set(html.unescape(x.decode("utf-8", "replace")) for x in LICENSE_RE.findall(xml_head)))
         canonical = sorted(set(x for x in (canonical_license(h) for h in hrefs) if x))
+        result.update({
+            "xml_head_bytes": len(xml_head),
+            "xml_head_sha256": hashlib.sha256(xml_head).hexdigest(),
+            "xml_license_tag_count": len(license_tags),
+            "xml_license_tag_preview": license_tags[:5],
+            "license_hrefs_found": hrefs[:10],
+            "metadata_license_code": metadata.get("license_code"),
+        })
         if len(canonical) != 1 or len(hrefs) != 1:
             raise ValueError("exact_article_license_uri_missing_or_ambiguous")
         license_uri = hrefs[0].replace("http://", "https://")
