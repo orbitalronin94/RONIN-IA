@@ -82,6 +82,24 @@ def canonical_license(uri: str) -> str | None:
     return None
 
 
+def extract_license_evidence(xml_head: bytes) -> dict[str, list[str]]:
+    """Collect canonical, versioned license URIs from article license markup."""
+    raw_hrefs = set(LICENSE_RE.findall(xml_head))
+    for license_block in LICENSE_P_RE.findall(xml_head):
+        raw_hrefs.update(HREF_RE.findall(license_block))
+    evidence: dict[str, set[str]] = {}
+    for raw_uri in raw_hrefs:
+        uri = html.unescape(raw_uri.decode("utf-8", "replace")).strip()
+        license_id = canonical_license(uri)
+        if license_id:
+            normalized_uri = uri.replace("http://", "https://").rstrip("/")
+            evidence.setdefault(license_id, set()).add(normalized_uri)
+    return {
+        license_id: sorted(uris)
+        for license_id, uris in sorted(evidence.items())
+    }
+
+
 def audit_one(library: str, row: dict) -> dict:
     doc_id = row["document_id"]
     result = {"library": library, "document_id": doc_id, "title": row.get("title")}
