@@ -39,14 +39,14 @@ SAMPLE_IDS = {
     ],
 }
 LICENSE_RE = re.compile(
-    rb'<license\\b[^>]*(?:xlink:href|href)\\s*=\\s*["\\\']([^"\\\']+)["\\\']',
+    rb"<license\b[^>]*(?:xlink:href|href)\s*=\s*['\"]([^'\"]+)['\"]",
     re.I,
 )
 TAG_RE = re.compile(rb"<[^>]+>")
-HOLDER_RE = re.compile(rb"<copyright-holder\\b[^>]*>(.*?)</copyright-holder>", re.I | re.S)
-STATEMENT_RE = re.compile(rb"<copyright-statement\\b[^>]*>(.*?)</copyright-statement>", re.I | re.S)
-PUBLISHER_RE = re.compile(rb"<publisher-name\\b[^>]*>(.*?)</publisher-name>", re.I | re.S)
-LICENSE_P_RE = re.compile(rb"<license-p\\b[^>]*>(.*?)</license-p>", re.I | re.S)
+HOLDER_RE = re.compile(rb"<copyright-holder\b[^>]*>(.*?)</copyright-holder>", re.I | re.S)
+STATEMENT_RE = re.compile(rb"<copyright-statement\b[^>]*>(.*?)</copyright-statement>", re.I | re.S)
+PUBLISHER_RE = re.compile(rb"<publisher-name\b[^>]*>(.*?)</publisher-name>", re.I | re.S)
+LICENSE_P_RE = re.compile(rb"<license-p\b[^>]*>(.*?)</license-p>", re.I | re.S)
 
 
 def get_bytes(url: str, range_header: str | None = None) -> tuple[bytes, dict]:
@@ -60,14 +60,17 @@ def get_bytes(url: str, range_header: str | None = None) -> tuple[bytes, dict]:
 
 def clean_xml_text(raw: bytes) -> str:
     value = TAG_RE.sub(b" ", raw)
-    return re.sub(r"\\s+", " ", html.unescape(value.decode("utf-8", "replace"))).strip()
+    return re.sub(r"\s+", " ", html.unescape(value.decode("utf-8", "replace"))).strip()
 
 
 def canonical_license(uri: str) -> str | None:
     value = uri.strip().lower().replace("http://", "https://").rstrip("/")
-    m = re.fullmatch(r"https://creativecommons\\.org/licenses/by/(2\\.0|3\\.0|4\\.0)", value)
-    if m:
-        return "CC-BY-" + m.group(1)
+    match = re.fullmatch(
+        r"https://creativecommons\.org/licenses/by/(2\.0|3\.0|4\.0)",
+        value,
+    )
+    if match:
+        return "CC-BY-" + match.group(1)
     if value == "https://creativecommons.org/publicdomain/zero/1.0":
         return "CC0-1.0"
     return None
