@@ -94,3 +94,16 @@ def test_read_full_xml_hashes_complete_stream_and_keeps_bounded_prefix() -> None
     assert sha256 == hashlib.sha256(payload).hexdigest()
     assert md5 == hashlib.md5(payload, usedforsecurity=False).hexdigest()
     assert total_bytes == len(payload)
+
+
+def test_canonical_metadata_sha256_matches_sorted_utf8_json_contract() -> None:
+    import hashlib
+    import json
+
+    from scripts.audit_pmc_run5_rights import canonical_metadata_sha256
+
+    metadata = {"title": "Neurología y datos", "version": 1, "pmcid": "PMC123"}
+    expected = hashlib.sha256(
+        json.dumps(metadata, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    ).hexdigest()
+    assert canonical_metadata_sha256(metadata) == expected
