@@ -127,12 +127,12 @@ def current_text(xml_raw: bytes, today: date | None = None) -> tuple[str, dict, 
         body = node_text(latest)
         if not body:
             continue
-        chunks.append(f"## {title}\\n{body}")
+        chunks.append(f"## {title}\n{body}")
         block_count += 1
         version_count += len(versions)
         image_count += len(latest.findall(".//img"))
 
-    return "\\n\\n".join(chunks).strip(), {
+    return "\n\n".join(chunks).strip(), {
         "current_blocks": block_count,
         "versions_seen": version_count,
         "embedded_images_excluded": image_count,
