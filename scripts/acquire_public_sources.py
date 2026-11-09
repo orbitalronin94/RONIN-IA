@@ -30,7 +30,15 @@ URL_RE = re.compile(r"""https?://[^\s<>"']+""", re.I)
 
 
 def get(url: str, timeout: int = 90) -> bytes:
-    request = urllib.request.Request(url, headers={"User-Agent": UA})
+    headers = {
+        "User-Agent": UA,
+        "Accept": "application/zip, application/octet-stream, */*",
+    }
+    if urllib.parse.urlparse(url).hostname == "www.bne.es":
+        # BNE's public data distribution is linked from the official Spanish
+        # open-data catalogue; preserve that referrer for its CDN/WAF.
+        headers["Referer"] = "https://datos.gob.es/es/catalogo/ea0019768-biblioteca-digital-documentos-en-dominio-publico1"
+    request = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(request, timeout=timeout) as response:
         return response.read()
 
