@@ -1,0 +1,77 @@
+name: Acquire active Spanish consolidated legislation from BOE
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/acquire_boe_legislation.py"
+      - ".github/workflows/acquire-boe-consolidated.yml"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Maximum legislation records to inspect (1..5000)
+        required: true
+        default: "250"
+        type: string
+      offset:
+        description: API offset for the next batch
+        required: true
+        default: "0"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: boe-consolidated-acquisition-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  acquire-boe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+      - name: Acquire active finalized state legislation
+        env:
+          LIMIT: ${{ inputs.limit || '250' }}
+          OFFSET: ${{ inputs.offset || '0' }}
+        run: python scripts/acquire_boe_legislation.py --limit "$LIMIT" --offset "$OFFSET"
+      - name: Validate exact provenance and candidate-only rights state
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path("data/datasets/candidates/boe-consolidated-2026-11-09")
+          rows=[json.loads(x) for x in (root/"manifest.jsonl").read_text(encoding="utf-8").splitlines()]
+          assert rows, "No active finalized BOE legislation passed text checks"
+          assert all(r["source"]=="BOE-consolidated-legislation" for r in rows)
+          assert all(r["language"]=="es" for r in rows)
+          assert all(r["rights_level"]=="B" and r["training_eligible"] is False for r in rows)
+          assert all("carácter meramente informativo" in r["attribution"] for r in rows)
+          assert len({r["text_sha256"] for r in rows})==len(rows)
+          for r in rows:
+            metadata=(root/r["metadata_snapshot_path"]).read_bytes()
+            xml=(root/r["xml_snapshot_path"]).read_bytes()
+            assert hashlib.sha256(metadata).hexdigest()==r["metadata_snapshot_sha256"]
+            assert hashlib.sha256(xml).hexdigest()==r["text_snapshot_sha256"]
+            assert hashlib.sha256(r["text"].encode("utf-8")).hexdigest()==r["payload_sha256"]
+          audit=json.loads((root/"acquisition-audit.json").read_text(encoding="utf-8"))
+          print(json.dumps({
+            "candidate_documents":len(rows),
+            "candidate_text_bytes":sum(r["text_bytes"] for r in rows),
+            "candidate_words":sum(r["quality"]["words"] for r in rows),
+            "rights_level_B":len(rows),
+            "training_eligible":0
+          },ensure_ascii=False,indent=2))
+          PY
+      - name: Publish BOE candidate corpus
+        uses: actions/upload-artifact@v4
+        with:
+          name: boe-active-consolidated-spanish-candidates
+          path: data/datasets/candidates/boe-consolidated-2026-11-09/
+          if-no-files-found: error
+          retention-days: 90
