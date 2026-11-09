@@ -211,7 +211,7 @@ def main() -> int:
     license_checks = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
         checks = list(pool.map(verify_book_license, unique.values()))
-    for book, license_info in zip(unique.values(), checks):
+    for book, license_info in zip(unique.values(), checks, strict=False):
         snapshot_path = out / "metadata-snapshots" / f"{book['book_id']}-page.html"
         snapshot_path.parent.mkdir(parents=True, exist_ok=True)
         if license_info.get("snapshot"):
