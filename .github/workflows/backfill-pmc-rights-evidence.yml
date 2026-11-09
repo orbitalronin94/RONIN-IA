@@ -1,0 +1,52 @@
+name: Backfill PMC article-version rights evidence
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/backfill_pmc_rights_evidence.py"
+      - ".github/workflows/backfill-pmc-rights-evidence.yml"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Maximum substantive candidate article versions to inspect (1..5000)
+        required: true
+        default: "5000"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pmc-rights-evidence-backfill-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+      - name: Backfill exact metadata JSON and JATS license evidence
+        env:
+          LIMIT: ${{ inputs.limit || '5000' }}
+        run: python scripts/backfill_pmc_rights_evidence.py --limit "$LIMIT" --workers 6
+      - name: Verify exact text hashes and persisted metadata snapshots
+        run: python scripts/verify_pmc_oa_candidate_corpus.py
+      - name: Re-run strict rights and editorial audit
+        run: python scripts/audit_pmc_candidate_manifest.py
+      - name: Publish rights evidence and candidate corpus artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pmc-rights-evidence-backfill
+          path: |
+            data/datasets/candidates/pmc-oa-cc0-ccby-v2/manifest.jsonl
+            data/datasets/candidates/pmc-oa-cc0-ccby-v2/part-*.jsonl.gz
+            data/datasets/candidates/pmc-oa-cc0-ccby-v2/metadata-snapshots/
+            data/datasets/candidates/pmc-oa-cc0-ccby-v2/rights-evidence*.json*
+            data/datasets/reviews/pmc-candidate-screen-2026-11-06.json
+          if-no-files-found: error
+          retention-days: 90
