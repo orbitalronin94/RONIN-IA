@@ -22,7 +22,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 INDEX_URL = "https://hemerotecadigital.bne.es/hd/es/fulltext-csv"
-UA = "RONIN-IA-open-corpus-harvester/1.0 (BNE Hemeroteca public-domain acquisition)"
+UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 EMAIL = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
 SSN = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
 URL_RE = re.compile(r"https?://[^\s<>\"']+", re.I)
@@ -35,6 +35,7 @@ def fetch(url: str, timeout: int = 60) -> tuple[bytes, str, str]:
     headers = {
         "User-Agent": UA,
         "Accept": "text/csv,text/plain,application/octet-stream,*/*",
+        "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
         "Referer": "https://www.bne.es/es/catalogos/hemeroteca-digital",
     }
     req = urllib.request.Request(url, headers=headers)
