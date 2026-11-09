@@ -324,8 +324,36 @@ def main() -> int:
             1 for item in evidence_by_hash.values()
             if item.get("third_party_content_nodes", 0) > 0
         ),
-        "third_party_review_pending": len(evidence_by_hash),
-        "jurisdictions_cleared": 0,
+        "third_party_review_pending": sum(
+            1 for item in evidence_by_hash.values()
+            if item.get("third_party_content_review") == "pending"
+        ),
+        "third_party_review_clear": sum(
+            1 for item in evidence_by_hash.values()
+            if item.get("third_party_content_review") == "clear"
+        ),
+        "jurisdictions_cleared": sum(
+            1 for item in evidence_by_hash.values()
+            if {"ES", "EU", "US"}.issubset(set(item.get("jurisdictions_cleared", [])))
+        ),
+        "rights_level_A_ready": sum(
+            1 for item in evidence_by_hash.values()
+            if item.get("third_party_content_review") == "clear"
+            and item.get("license_id") in {"CC-BY-4.0", "CC-BY-3.0", "CC0-1.0"}
+            and {"ES", "EU", "US"}.issubset(set(item.get("jurisdictions_cleared", [])))
+        ),
+        "rights_level_B_pending": sum(
+            1 for item in evidence_by_hash.values()
+            if item.get("license_id") in {"CC-BY-4.0", "CC-BY-3.0", "CC0-1.0"}
+            and (
+                item.get("third_party_content_review") != "clear"
+                or not {"ES", "EU", "US"}.issubset(set(item.get("jurisdictions_cleared", [])))
+            )
+        ),
+        "unresolved_license_version_documents": sum(
+            1 for item in evidence_by_hash.values()
+            if item.get("license_id") not in {"CC-BY-4.0", "CC-BY-3.0", "CC0-1.0"}
+        ),
         "training_eligible": 0,
         "errors": len(errors),
         "error_samples": errors[:100],
