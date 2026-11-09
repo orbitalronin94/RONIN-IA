@@ -8,7 +8,9 @@ pending until page-level exceptions and third-party material are screened.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import hashlib
+import urllib.request
 import json
 import re
 import subprocess
@@ -97,30 +99,66 @@ def extract_book_objects(payload) -> list[dict]:
     books = []
     seen = set()
     for obj in walk_objects(payload):
-        identifier = obj.get("id") or obj.get("book_id") or obj.get("bookId")
+        identifier = obj.get("bookID") or obj.get("id") or obj.get("book_id") or obj.get("bookId")
         title = obj.get("title") or obj.get("name") or obj.get("book_title")
-        license_value = obj.get("license") or obj.get("license_name") or obj.get("licenseName")
-        if not identifier or not title or not license_value:
+        if not identifier or not title:
             continue
         library = obj.get("library") or "espanol"
         book_id = str(identifier)
         if book_id.isdigit():
             book_id = f"{library}-{book_id}"
-        if not book_id.startswith("espanol-"):
+        if not book_id.startswith("espanol-") or book_id in seen:
             continue
-        if book_id in seen:
+        links = obj.get("links") if isinstance(obj.get("links"), dict) else {}
+        online_url = obj.get("url") or obj.get("uri") or obj.get("book_url") or links.get("online") or ""
+        if not str(online_url).startswith("https://espanol.libretexts.org/"):
+            continue
+        license_code = license_text(
+            obj.get("license") or obj.get("license_name") or obj.get("licenseName")
+        )
+        normalized_code = license_code.lower().replace("-", "").replace("_", "")
+        if any(flag in normalized_code for flag in ("ccbync", "ccbysa", "ccbynd", "ccbyncsa")):
             continue
         seen.add(book_id)
         books.append({
             "book_id": book_id,
             "title": str(title),
-            "license": license_text(license_value),
+            "license_code": license_code,
+            "license": license_code,
             "authors": obj.get("authors") or obj.get("author") or "",
-            "url": obj.get("url") or obj.get("uri") or obj.get("book_url") or "",
+            "url": str(online_url),
             "raw": obj,
         })
     return books
 
+
+def verify_book_license(book: dict) -> dict | None:
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,*/*",
+        "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+    }
+    request = urllib.request.Request(book["url"], headers=headers)
+    with urllib.request.urlopen(request, timeout=60) as response:
+        raw = response.read()
+    html = raw.decode("utf-8", errors="replace")
+    match = re.search(
+        r"https?://creativecommons\\.org/licenses/by/4\\.0/?",
+        html,
+        re.IGNORECASE,
+    )
+    if not match:
+        return None
+    uri = match.group(0)
+    if not uri.endswith("/"):
+        uri += "/"
+    return {
+        "license": "CC BY 4.0",
+        "license_id": "CC-BY-4.0",
+        "license_uri": uri,
+        "license_page_snapshot": raw,
+        "license_page_snapshot_sha256": sha256(raw),
+    }
 
 def index_entries(index_payload) -> list[dict]:
     entries = []
@@ -163,12 +201,28 @@ def main() -> int:
 
     unique = {}
     for book in discovered:
-        if is_cc_by_4(book["license"]):
-            unique.setdefault(book["book_id"], book)
+        unique.setdefault(book["book_id"], book)
 
-    selected = list(unique.values())[:args.max_books]
+    verified = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+        checks = list(pool.map(verify_book_license, unique.values()))
+    for book, license_info in zip(unique.values(), checks):
+        if not license_info:
+            continue
+        book.update({
+            "license": license_info["license"],
+            "license_id": license_info["license_id"],
+            "license_uri": license_info["license_uri"],
+            "license_page_snapshot_sha256": license_info["license_page_snapshot_sha256"],
+        })
+        snapshot_path = search_dir / f"{book['book_id']}-license-page.html"
+        snapshot_path.write_bytes(license_info["license_page_snapshot"])
+        book["license_page_snapshot_path"] = str(snapshot_path.relative_to(out))
+        verified.append(book)
+
+    selected = verified[:args.max_books]
     if not selected:
-        raise RuntimeError("No Spanish LibreTexts books with explicit CC BY 4.0 metadata found")
+        raise RuntimeError("No Spanish LibreTexts book page exposed an exact CC BY 4.0 license URI")
     (out / "selected-books.json").write_text(
         json.dumps(selected, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
@@ -211,7 +265,8 @@ def main() -> int:
             title = entry.get("title") or title_from_markdown(text, page.stem)
             page_url = entry.get("url") or book["url"]
             page_license = entry.get("license") or book["license"]
-            if page_license and not is_cc_by_4(page_license):
+            page_license_code = page_license.lower().replace("-", "").replace("_", "")
+            if page_license and page_license_code not in {"ccby", "ccby4.0", "ccby40"} and not is_cc_by_4(page_license):
                 reasons.append("page_license_not_cc_by_4")
             record = {
                 "schema_version": 1,
@@ -226,7 +281,7 @@ def main() -> int:
                 "book_url": book["url"],
                 "license_id": "CC-BY-4.0",
                 "license": "CC BY 4.0",
-                "license_uri": CC_BY_URI,
+                "license_uri": book.get("license_uri") or CC_BY_URI,
                 "rights_statement_uri": book["url"],
                 "rights_holder_or_provider": str(book["authors"] or "LibreTexts contributors"),
                 "rights_assertion_scope": "book_level_license_page_level_review_pending",
