@@ -184,6 +184,41 @@ def publication_items(payload: object) -> list[dict]:
     return []
 
 
+SPANISH_STOPWORDS = set(
+    "el la los las de del en que y por para con una un se es sus sobre más como "
+    "donde durante desde hasta entre este esta estos estas al o u no sí también "
+    "pero muy puede pueden fue han ha son era eran cada cuando después antes así "
+    "también sin contra hacia".split()
+)
+ENGLISH_STOPWORDS = set(
+    "the of and to in for with from by as on at is are was were be been that this "
+    "these those it its an a or not can may more than into after before during if "
+    "which who their his her they we you".split()
+)
+
+
+def language_profile(text: str) -> dict:
+    tokens = re.findall(r"\\b[\\wáéíóúñü]+\\b", text.lower())
+    spanish = sum(token in SPANISH_STOPWORDS for token in tokens)
+    english = sum(token in ENGLISH_STOPWORDS for token in tokens)
+    evidence = spanish + english
+    spanish_ratio = spanish / max(1, evidence)
+    detected = (
+        "Spanish"
+        if spanish >= 20 and spanish_ratio >= 0.55
+        else "English"
+        if english >= 20 and spanish_ratio <= 0.35
+        else "undetermined"
+    )
+    return {
+        "detected_language": detected,
+        "spanish_function_words": spanish,
+        "english_function_words": english,
+        "spanish_ratio": round(spanish_ratio, 4),
+        "tokens": len(tokens),
+    }
+
+
 def acquire_usgs(
     limit: int,
     minimum_bytes: int,
@@ -288,6 +323,14 @@ def acquire_usgs(
                         capture_output=True,
                         check=True,
                     )
+                extracted_text = result.stdout.decode("utf-8", errors="replace")
+                content_language = language_profile(extracted_text)
+                if (
+                    language_filter
+                    and content_language["detected_language"].casefold()
+                    != language_filter.casefold()
+                ):
+                    continue
                 rows.append(
                     make_record(
                         source="USGS-Publications-Warehouse",
@@ -308,6 +351,7 @@ def acquire_usgs(
                         extra={
                             "metadata": item,
                             "language": language or "unknown",
+                            "content_language_profile": content_language,
                             "pdf_sha256": sha256(pdf_bytes),
                             "publisher_or_author_gate": (
                                 "passed_heuristic_pending_human_review"
