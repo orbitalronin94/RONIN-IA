@@ -113,10 +113,22 @@ def current_text(xml_raw: bytes, today: date | None = None) -> tuple[str, dict, 
         versions = block.findall("./version")
         if not versions:
             continue
+        today_key = today.strftime("%Y%m%d")
+        effective_versions = []
+        for version in versions:
+            effective_date = (
+                version.attrib.get("fecha_vigencia")
+                or version.attrib.get("fecha_publicacion", "")
+            )
+            if effective_date and effective_date <= today_key:
+                effective_versions.append(version)
+        if not effective_versions:
+            continue
         latest = max(
-            versions,
+            effective_versions,
             key=lambda v: (
-                v.attrib.get("fecha_vigencia", ""),
+                v.attrib.get("fecha_vigencia")
+                or v.attrib.get("fecha_publicacion", ""),
                 v.attrib.get("fecha_publicacion", ""),
                 v.attrib.get("id_norma", ""),
             ),
