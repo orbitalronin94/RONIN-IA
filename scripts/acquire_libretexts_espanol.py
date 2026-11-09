@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Discover and extract Spanish LibreTexts books with explicit CC BY 4.0 metadata.
+"""Discover and extract Spanish LibreTexts books with explicit CC BY 2.0/2.5/3.0/4.0 metadata.
 
 The result is a candidate corpus. Book-level licensing is preserved per page,
 images are removed from text exports, and every page remains rights-review
@@ -262,7 +262,7 @@ def main() -> int:
 
     selected = verified[:args.max_books]
     if not selected:
-        raise RuntimeError("No Spanish LibreTexts book page exposed an exact CC BY 4.0 license URI")
+        raise RuntimeError("No Spanish LibreTexts book page exposed an exact accepted CC BY license version")
     (out / "selected-books.json").write_text(
         json.dumps(selected, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
@@ -339,7 +339,7 @@ def main() -> int:
                 "third_party_images_removed_from_text": True,
                 "attribution": (
                     f"Based on {book['title']} by {book['authors'] or 'LibreTexts contributors'}, "
-                    f"LibreTexts Español; CC BY 4.0. Source: {page_url or book['url']}"
+                    f"LibreTexts Español; {book['license']}. Source: {page_url or book['url']}"
                 ),
                 "retrieved_at": datetime.now(UTC).isoformat(),
                 "raw_sha256": sha256(raw_bytes),
