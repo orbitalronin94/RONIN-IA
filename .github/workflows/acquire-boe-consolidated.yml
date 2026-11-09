@@ -43,7 +43,7 @@ jobs:
       - name: Validate exact provenance and candidate-only rights state
         run: |
           python - <<'PY'
-          import json
+          import hashlib, json
           from pathlib import Path
           root=Path("data/datasets/candidates/boe-consolidated-2026-11-09")
           rows=[json.loads(x) for x in (root/"manifest.jsonl").read_text(encoding="utf-8").splitlines()]
@@ -53,6 +53,12 @@ jobs:
           assert all(r["rights_level"]=="B" and r["training_eligible"] is False for r in rows)
           assert all("carácter meramente informativo" in r["attribution"] for r in rows)
           assert len({r["text_sha256"] for r in rows})==len(rows)
+          for r in rows:
+            metadata=(root/r["metadata_snapshot_path"]).read_bytes()
+            xml=(root/r["xml_snapshot_path"]).read_bytes()
+            assert hashlib.sha256(metadata).hexdigest()==r["metadata_snapshot_sha256"]
+            assert hashlib.sha256(xml).hexdigest()==r["text_snapshot_sha256"]
+            assert hashlib.sha256(r["text"].encode("utf-8")).hexdigest()==r["payload_sha256"]
           audit=json.loads((root/"acquisition-audit.json").read_text(encoding="utf-8"))
           print(json.dumps({
             "candidate_documents":len(rows),
