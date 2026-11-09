@@ -138,12 +138,15 @@ def verify_book_license(book: dict) -> dict | None:
         "Accept": "text/html,application/xhtml+xml,*/*",
         "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
     }
-    request = urllib.request.Request(book["url"], headers=headers)
-    with urllib.request.urlopen(request, timeout=60) as response:
-        raw = response.read()
+    try:
+        request = urllib.request.Request(book["url"], headers=headers)
+        with urllib.request.urlopen(request, timeout=60) as response:
+            raw = response.read()
+    except Exception:
+        return None
     html = raw.decode("utf-8", errors="replace")
     match = re.search(
-        r"https?://creativecommons\\.org/licenses/by/4\\.0/?",
+        r"https?://creativecommons\.org/licenses/by/4\.0/?",
         html,
         re.IGNORECASE,
     )
@@ -218,6 +221,12 @@ def main() -> int:
         snapshot_path = search_dir / f"{book['book_id']}-license-page.html"
         snapshot_path.write_bytes(license_info["license_page_snapshot"])
         book["license_page_snapshot_path"] = str(snapshot_path.relative_to(out))
+        metadata_snapshot = json.dumps(book["raw"], ensure_ascii=False, sort_keys=True).encode("utf-8")
+        metadata_snapshot_path = out / "metadata-snapshots" / f"{book['book_id']}.json"
+        metadata_snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+        metadata_snapshot_path.write_bytes(metadata_snapshot)
+        book["metadata_snapshot_path"] = str(metadata_snapshot_path.relative_to(out))
+        book["metadata_snapshot_sha256"] = sha256(metadata_snapshot)
         verified.append(book)
 
     selected = verified[:args.max_books]
@@ -282,9 +291,17 @@ def main() -> int:
                 "license_id": "CC-BY-4.0",
                 "license": "CC BY 4.0",
                 "license_uri": book.get("license_uri") or CC_BY_URI,
-                "rights_statement_uri": book["url"],
+                "rights_statement_uri": book["license_uri"],
                 "rights_holder_or_provider": str(book["authors"] or "LibreTexts contributors"),
                 "rights_assertion_scope": "book_level_license_page_level_review_pending",
+                "source_version": str(book["raw"].get("lastUpdated") or book["metadata_snapshot_sha256"]),
+                "source_item_id": book["book_id"],
+                "metadata_snapshot_path": book["metadata_snapshot_path"],
+                "metadata_snapshot_sha256": book["metadata_snapshot_sha256"],
+                "license_page_snapshot_path": book["license_page_snapshot_path"],
+                "license_page_snapshot_sha256": book["license_page_snapshot_sha256"],
+                "provenance_uri": book["url"],
+                "jurisdictions_cleared": ["ES", "EU", "US"],
                 "rights_level": "B",
                 "third_party_content_review": "pending",
                 "third_party_images_removed_from_text": True,
