@@ -9,6 +9,7 @@ def test_current_text_selects_latest_version_and_excludes_expired_blocks():
       <bloque id="a1" tipo="precepto" titulo="Artículo 1">
         <version fecha_publicacion="20200101"><p>Texto antiguo.</p></version>
         <version fecha_publicacion="20240101"><p>Texto vigente.</p><img src="BASE64-IMAGE"/></version>
+        <version fecha_publicacion="20260101" fecha_vigencia="20280101"><p>Texto futuro.</p></version>
       </bloque>
       <bloque id="old" tipo="precepto" titulo="Artículo derogado" fecha_caducidad="20200101">
         <version fecha_publicacion="20100101"><p>No debe aparecer.</p></version>
@@ -17,6 +18,7 @@ def test_current_text_selects_latest_version_and_excludes_expired_blocks():
     text, stats, metadata = current_text(xml, today=date(2026, 11, 9))
     assert "Texto vigente." in text
     assert "Texto antiguo." not in text
+    assert "Texto futuro." not in text
     assert "No debe aparecer." not in text
     assert "BASE64-IMAGE" not in text
     assert stats["current_blocks"] == 1
