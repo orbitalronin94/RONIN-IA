@@ -55,6 +55,7 @@ jobs:
           assert rows, "No Spanish USGS documents passed the text-quality screen"
           assert all(r["source"]=="USGS-Publications-Warehouse" for r in rows)
           assert all("spanish" in r.get("language","").lower() for r in rows)
+          assert all(r.get("content_language_profile",{}).get("detected_language")=="Spanish" for r in rows)
           assert all(r["training_eligible"] is False for r in rows)
           assert len({r["text_sha256"] for r in rows})==len(rows)
           print(json.dumps({
