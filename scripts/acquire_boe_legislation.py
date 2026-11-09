@@ -73,7 +73,7 @@ def clean_text(value: str) -> str:
 
 
 def node_text(node: ET.Element) -> str:
-    return clean_text("".join(node.itertext()))
+    return clean_text(" ".join(node.itertext()))
 
 
 def get_field(item: dict, key: str) -> str:
