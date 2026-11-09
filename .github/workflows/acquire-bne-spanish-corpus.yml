@@ -1,0 +1,66 @@
+name: Acquire Spanish public-domain corpus from BNE/BDH
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/acquire_public_sources.py"
+      - ".github/workflows/acquire-bne-spanish-corpus.yml"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Maximum BNE text documents to inspect (1..5000)
+        required: true
+        default: "5000"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bne-spanish-corpus-acquisition-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  acquire-bne:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+      - name: Acquire BNE public-domain TXT records
+        env:
+          BNE_LIMIT: ${{ inputs.limit || '5000' }}
+        run: |
+          python scripts/acquire_public_sources.py --limit-per-source "$BNE_LIMIT" --skip-usgs
+      - name: Validate candidate-only output and calculate exact totals
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("data/datasets/candidates/public-sources-2026-11-06/manifest.jsonl")
+          rows = [json.loads(line) for line in p.read_text(encoding="utf-8").splitlines()]
+          assert rows, "BNE returned no candidate records"
+          assert all(r["source"] == "BNE-BDH-public-domain" for r in rows)
+          assert all(r["training_eligible"] is False for r in rows)
+          assert len({r["text_sha256"] for r in rows}) == len(rows), "duplicate text hashes"
+          audit = json.loads(Path("data/datasets/candidates/public-sources-2026-11-06/acquisition-audit.json").read_text(encoding="utf-8"))
+          print(json.dumps({
+              "candidate_documents": len(rows),
+              "candidate_text_bytes": sum(r["text_bytes"] for r in rows),
+              "candidate_words": sum(r["quality"]["words"] for r in rows),
+              "quality_rejected": audit["quality_rejected"],
+              "rights_review_pending": audit["rights_review_pending"],
+              "training_eligible": 0,
+              "unique_text_hashes": len({r["text_sha256"] for r in rows}),
+          }, ensure_ascii=False, indent=2))
+          PY
+      - name: Publish BNE acquisition artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bne-spanish-public-domain-candidates
+          path: data/datasets/candidates/public-sources-2026-11-06/
+          if-no-files-found: error
+          retention-days: 90
