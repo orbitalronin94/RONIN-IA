@@ -25,8 +25,8 @@ def test_parse_jats_rights_extracts_version_holder_authors_and_third_party_nodes
         <permissions>
           <copyright-statement>Copyright 2026 Ada Lovelace</copyright-statement>
           <copyright-holder>Ada Lovelace</copyright-holder>
-          <license xlink:href="https://creativecommons.org/licenses/by/4.0/">
-            <license-p>Creative Commons Attribution 4.0 International</license-p>
+          <license>
+            <license-p>https://creativecommons.org/licenses/by/4.0/ This work is licensed under a Creative Commons Attribution 4.0 International License.</license-p>
           </license>
         </permissions>
       </article-meta></front>
