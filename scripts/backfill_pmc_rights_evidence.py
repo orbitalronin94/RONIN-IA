@@ -48,7 +48,7 @@ def license_from_uri(uri: str) -> tuple[str | None, str | None]:
 def local_text(node: ET.Element | None) -> str:
     if node is None:
         return ""
-    return " ".join("".join(node.itertext()).split())
+    return " ".join(" ".join(node.itertext()).split())
 
 
 def parse_jats_rights(raw: bytes) -> dict:
