@@ -55,7 +55,7 @@ def canonical_license_id(value: str) -> str | None:
     )
     if normalized in {"CC0", "CC0 1.0"}:
         return "CC0-1.0"
-    match = re.fullmatch(r"CC BY ([1-4]\.0)", normalized)
+    match = re.fullmatch(r"CC BY ((?:[1-4]\.0|2\.5))", normalized)
     if match:
         return f"CC-BY-{match.group(1)}"
     return None
