@@ -14,6 +14,7 @@ import json
 import re
 import subprocess
 import time
+import urllib.request
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -133,10 +134,17 @@ def extract_book_objects(payload) -> list[dict]:
 
 def verify_book_license(book: dict) -> dict | None:
     try:
-        raw_text = run_cli([
-            "page", book["book_id"], "--json", "--content", "metadata"
-        ])
-        payload = json.loads(raw_text)
+        page_id = book["book_id"].rsplit("-", 1)[-1]
+        url = f"https://espanol.libretexts.org/@api/deki/pages/{page_id}?dream.out.format=json"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            "Accept": "application/json,text/plain,*/*",
+            "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+        }
+        request = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(request, timeout=60) as response:
+            raw = response.read()
+        payload = json.loads(raw.decode("utf-8"))
     except Exception:
         return None
 
@@ -152,7 +160,6 @@ def verify_book_license(book: dict) -> dict | None:
     has_version_40 = "licenseversion:40" in evidence or "ccby4.0" in evidence or "creativecommonsattribution4.0" in evidence
     if not (has_ccby and has_version_40):
         return None
-    raw = raw_text.encode("utf-8")
     return {
         "license": "CC BY 4.0",
         "license_id": "CC-BY-4.0",
