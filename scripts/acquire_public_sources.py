@@ -21,7 +21,7 @@ import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
 
-UA = "RONIN-IA-corpus-acquisition/1.1 (open research corpus; see repository)"
+UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 BNE_TXT = "https://www.bne.es/media/datosgob/bdh/dominiopublico/dominiopublico_txt.zip"
 USGS_API = "https://pubs.usgs.gov/pubs-services/publication/"
 EMAIL = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
@@ -33,6 +33,7 @@ def get(url: str, timeout: int = 90) -> bytes:
     headers = {
         "User-Agent": UA,
         "Accept": "application/zip, application/octet-stream, */*",
+        "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
     }
     if urllib.parse.urlparse(url).hostname == "www.bne.es":
         # BNE's public data distribution is linked from the official Spanish
