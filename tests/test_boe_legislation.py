@@ -14,7 +14,7 @@ def test_current_text_selects_latest_version_and_excludes_expired_blocks():
       <bloque id="old" tipo="precepto" titulo="Artículo derogado" fecha_caducidad="20200101">
         <version fecha_publicacion="20100101"><p>No debe aparecer.</p></version>
       </bloque>
-    </texto></data></response>""".encode("utf-8")
+    </texto></data></response>""".encode()
     text, stats, metadata = current_text(xml, today=date(2026, 11, 9))
     assert "Texto vigente." in text
     assert "Texto antiguo." not in text
