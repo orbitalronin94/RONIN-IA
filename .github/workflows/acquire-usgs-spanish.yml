@@ -1,0 +1,74 @@
+name: Acquire Spanish USGS publications
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/acquire_public_sources.py"
+      - ".github/workflows/acquire-usgs-spanish.yml"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Maximum Spanish text candidates to acquire
+        required: true
+        default: "500"
+        type: string
+      max_pages:
+        description: Number of 50-record metadata pages to scan
+        required: true
+        default: "100"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: usgs-spanish-acquisition-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  acquire-spanish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+      - name: Install PDF text extractor
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+      - name: Scan USGS metadata and acquire Spanish-language reports
+        env:
+          LIMIT: ${{ inputs.limit || '500' }}
+          MAX_PAGES: ${{ inputs.max_pages || '100' }}
+        run: |
+          python scripts/acquire_public_sources.py --skip-bne --limit-per-source "$LIMIT" --usgs-language-filter Spanish --usgs-max-pages "$MAX_PAGES"
+      - name: Validate Spanish-only candidate output
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("data/datasets/candidates/public-sources-2026-11-06/manifest.jsonl")
+          rows=[json.loads(x) for x in p.read_text(encoding="utf-8").splitlines()]
+          assert rows, "No Spanish USGS documents passed the text-quality screen"
+          assert all(r["source"]=="USGS-Publications-Warehouse" for r in rows)
+          assert all("spanish" in r.get("language","").lower() for r in rows)
+          assert all(r["training_eligible"] is False for r in rows)
+          assert len({r["text_sha256"] for r in rows})==len(rows)
+          print(json.dumps({
+            "candidate_documents":len(rows),
+            "candidate_text_bytes":sum(r["text_bytes"] for r in rows),
+            "candidate_words":sum(r["quality"]["words"] for r in rows),
+            "languages":sorted({r["language"] for r in rows}),
+            "training_eligible":0
+          },ensure_ascii=False,indent=2))
+          PY
+      - name: Publish Spanish USGS candidates
+        uses: actions/upload-artifact@v4
+        with:
+          name: usgs-spanish-publications-candidates
+          path: data/datasets/candidates/public-sources-2026-11-06/
+          if-no-files-found: error
+          retention-days: 90
