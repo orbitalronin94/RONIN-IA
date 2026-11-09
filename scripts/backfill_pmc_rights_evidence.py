@@ -63,7 +63,7 @@ def parse_jats_rights(raw: bytes) -> dict:
     license_uris = []
     license_texts = []
     license_url_pattern = re.compile(
-        r"https?://creativecommons\\.org/(?:licenses/by/[1-4]\\.0|publicdomain/zero/1\\.0)/?",
+        r"https?://creativecommons\.org/(?:licenses/by/[1-4]\.0|publicdomain/zero/1\.0)/?",
         re.IGNORECASE,
     )
     for node in license_nodes:
