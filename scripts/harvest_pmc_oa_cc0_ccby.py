@@ -84,10 +84,33 @@ def esearch_ids(term: str, limit: int, excluded_ids: set[str]) -> list[str]:
             "retmax": 9998, "retstart": 0,
             "tool": "ronin_ia_corpus_harvester",
         })
-        root = ET.fromstring(request_bytes(EUTILS + "?" + params))
-        error = root.findtext("ERROR")
-        if error:
-            raise RuntimeError("NCBI ESearch error: " + error)
+        try:
+            root = ET.fromstring(request_bytes(EUTILS + "?" + params))
+            error = root.findtext("ERROR")
+            if error:
+                raise RuntimeError("NCBI ESearch error: " + error)
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, RuntimeError) as exc:
+            # ESearch occasionally returns transient 429/5xx backend errors even
+            # after request_bytes retries. Split the affected date range so one
+            # overloaded month cannot abort an otherwise useful multi-month run.
+            transient = not isinstance(exc, RuntimeError) or any(
+                marker in str(exc).lower()
+                for marker in ("429", "500", "502", "503", "504", "temporarily unavailable")
+            )
+            if not transient or start >= end:
+                raise
+            midpoint = start + (end - start) // 2
+            print(
+                f"NCBI transient error for {start}..{end}; retrying as smaller windows: {exc}",
+                flush=True,
+            )
+            query_window(start, midpoint, remaining)
+            query_window(
+                midpoint + dt.timedelta(days=1),
+                end,
+                max(0, remaining - len(found)),
+            )
+            return
         count = int(root.findtext("Count") or "0")
         if count > 9998:
             if start >= end:
