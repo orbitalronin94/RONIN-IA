@@ -291,6 +291,7 @@ def main() -> int:
                 "book_url": book["url"],
                 "license_id": "CC-BY-4.0",
                 "license": "CC BY 4.0",
+                "license_evidence": book.get("license_evidence", "license:ccby; licenseversion:40"),
                 "license_uri": book.get("license_uri") or CC_BY_URI,
                 "rights_statement_uri": book["license_uri"],
                 "rights_holder_or_provider": str(book["authors"] or "LibreTexts contributors"),
