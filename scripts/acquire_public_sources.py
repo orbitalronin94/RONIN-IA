@@ -184,12 +184,18 @@ def publication_items(payload: object) -> list[dict]:
     return []
 
 
-def acquire_usgs(limit: int, minimum_bytes: int) -> tuple[list[dict], dict]:
+def acquire_usgs(
+    limit: int,
+    minimum_bytes: int,
+    language_filter: str = "",
+    max_pages: int = 100,
+    start_page: int = 1,
+) -> tuple[list[dict], dict]:
     rows = []
     seen_ids = set()
-    page = 1
+    page = start_page
     pages = 0
-    page_limit = max(1, (limit + 49) // 50)
+    page_limit = max(1, max_pages)
 
     while len(rows) < limit and pages < page_limit:
         query = urllib.parse.urlencode(
@@ -224,6 +230,9 @@ def acquire_usgs(limit: int, minimum_bytes: int) -> tuple[list[dict], dict]:
             seen_ids.add(identifier)
 
             title = item.get("title") or item.get("citation") or identifier
+            language = str(item.get("language") or "")
+            if language_filter and language_filter.casefold() not in language.casefold():
+                continue
             serialized = json.dumps(item, ensure_ascii=False)
             links = URL_RE.findall(serialized)
             pdf_url = next(
@@ -298,6 +307,7 @@ def acquire_usgs(limit: int, minimum_bytes: int) -> tuple[list[dict], dict]:
                         minimum_bytes=minimum_bytes,
                         extra={
                             "metadata": item,
+                            "language": language or "unknown",
                             "pdf_sha256": sha256(pdf_bytes),
                             "publisher_or_author_gate": (
                                 "passed_heuristic_pending_human_review"
@@ -313,6 +323,9 @@ def acquire_usgs(limit: int, minimum_bytes: int) -> tuple[list[dict], dict]:
 
     metadata = {
         "pages": pages,
+        "start_page": start_page,
+        "max_pages": max_pages,
+        "language_filter": language_filter or None,
         "metadata_records_seen": len(seen_ids),
         "text_records": len(rows),
     }
@@ -341,6 +354,9 @@ def main() -> int:
     parser.add_argument("--min-text-bytes", type=int, default=1500)
     parser.add_argument("--skip-bne", action="store_true")
     parser.add_argument("--skip-usgs", action="store_true")
+    parser.add_argument("--usgs-language-filter", default="")
+    parser.add_argument("--usgs-max-pages", type=int, default=100)
+    parser.add_argument("--usgs-start-page", type=int, default=1)
     args = parser.parse_args()
 
     if not 1 <= args.limit_per_source <= 5000:
@@ -368,7 +384,13 @@ def main() -> int:
 
     if not args.skip_usgs:
         try:
-            rows, metadata = acquire_usgs(args.limit_per_source, args.min_text_bytes)
+            rows, metadata = acquire_usgs(
+                args.limit_per_source,
+                args.min_text_bytes,
+                args.usgs_language_filter,
+                args.usgs_max_pages,
+                args.usgs_start_page,
+            )
             audit["sources"]["usgs"] = metadata
             acquired.extend(rows)
         except Exception as error:  # source errors are recorded for auditability
