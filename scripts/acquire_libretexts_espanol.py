@@ -68,11 +68,15 @@ def license_text(value) -> str:
     return str(value or "")
 
 
-def is_cc_by_4(value: str) -> bool:
+def is_accepted_cc_by(value: str) -> bool:
     normalized = value.upper().replace("-", " ").replace("_", " ")
     if "NC" in normalized or "ND" in normalized or "SA" in normalized:
         return False
-    return ("CC BY 4.0" in normalized or "CC BY 4 INTERNATIONAL" in normalized or "CREATIVECOMMONS.ORG/LICENSES/BY/4.0" in normalized)
+    return any(
+        f"CC BY {version}" in normalized
+        or f"CREATIVECOMMONS.ORG/LICENSES/BY/{version}" in normalized
+        for version in ("2.0", "2.5", "3.0", "4.0")
+    )
 
 
 def normalize_markdown(raw: str) -> str:
@@ -148,17 +152,24 @@ def verify_book_license(book: dict) -> dict:
     html = raw.decode("utf-8", errors="replace")
     compact = re.sub(r"\s+", "", html).lower()
     has_ccby = "license:ccby" in compact or "license%3accby" in compact
-    has_version_40 = (
-        "licenseversion:40" in compact
-        or "licenseversion%3a40" in compact
-        or "creativecommonsattribution4.0" in compact
-    )
+    version_match = re.search(r"licenseversion:(20|25|30|40)", compact)
+    if not has_ccby or not version_match:
+        return {
+            "license_verified": False,
+            "error": "Exact CC BY version tag not present",
+            "snapshot": raw,
+            "snapshot_sha256": sha256(raw),
+        }
+    version_code = version_match.group(1)
+    version = {"20": "2.0", "25": "2.5", "30": "3.0", "40": "4.0"}[version_code]
+    license_id = f"CC-BY-{version}"
+    license_uri = f"https://creativecommons.org/licenses/by/{version}/"
     return {
-        "license_verified": bool(has_ccby and has_version_40),
-        "license": "CC BY 4.0" if has_ccby and has_version_40 else "",
-        "license_id": "CC-BY-4.0" if has_ccby and has_version_40 else "",
-        "license_uri": "https://creativecommons.org/licenses/by/4.0/" if has_ccby and has_version_40 else "",
-        "license_evidence": "license:ccby; licenseversion:40" if has_ccby and has_version_40 else "",
+        "license_verified": True,
+        "license": f"CC BY {version}",
+        "license_id": license_id,
+        "license_uri": license_uri,
+        "license_evidence": f"license:ccby; licenseversion:{version_code}",
         "error": "",
         "snapshot": raw,
         "snapshot_sha256": sha256(raw),
@@ -295,7 +306,7 @@ def main() -> int:
             page_url = entry.get("url") or book["url"]
             page_license = entry.get("license") or book["license"]
             page_license_code = page_license.lower().replace("-", "").replace("_", "")
-            if page_license and page_license_code not in {"ccby", "ccby4.0", "ccby40"} and not is_cc_by_4(page_license):
+            if page_license and page_license_code not in {"ccby", "ccby2.0", "ccby2.5", "ccby3.0", "ccby4.0", "ccby20", "ccby25", "ccby30", "ccby40"} and not is_accepted_cc_by(page_license):
                 reasons.append("page_license_not_cc_by_4")
             record = {
                 "schema_version": 1,
@@ -308,9 +319,9 @@ def main() -> int:
                 "language": "es",
                 "source_url": page_url or book["url"],
                 "book_url": book["url"],
-                "license_id": "CC-BY-4.0",
-                "license": "CC BY 4.0",
-                "license_evidence": book.get("license_evidence", "license:ccby; licenseversion:40"),
+                "license_id": book["license_id"],
+                "license": book["license"],
+                "license_evidence": book.get("license_evidence", ""),
                 "license_uri": book.get("license_uri") or CC_BY_URI,
                 "rights_statement_uri": book["license_uri"],
                 "rights_holder_or_provider": str(book["authors"] or "LibreTexts contributors"),
