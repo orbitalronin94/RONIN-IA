@@ -70,12 +70,13 @@ def is_cc_by_4(value: str) -> bool:
     normalized = value.upper().replace("-", " ").replace("_", " ")
     if "NC" in normalized or "ND" in normalized or "SA" in normalized:
         return False
-    return "CC BY 4.0" in normalized or "CC BY 4 INTERNATIONAL" in normalized
+    return ("CC BY 4.0" in normalized or "CC BY 4 INTERNATIONAL" in normalized or "CREATIVECOMMONS.ORG/LICENSES/BY/4.0" in normalized)
 
 
 def normalize_markdown(raw: str) -> str:
     text = raw.replace("\r\n", "\n").replace("\r", "\n")
     text = IMAGE_MD.sub("", text)
+    text = re.sub(r"!\\[[^\\]]*\\]\\([^)]+\\)", "", text)
     text = HTML_IMG.sub("", text)
     text = re.sub(r"(?m)^\s*\[?(?:Image|Imagen):?[^\n]*$", "", text, flags=re.I)
     text = re.sub(r"(?m)^\s*[-*_]{3,}\s*$", "", text)
@@ -189,7 +190,8 @@ def main() -> int:
         for page in pages:
             if page.name == "README.md":
                 continue
-            raw = page.read_text(encoding="utf-8", errors="replace")
+            raw_bytes = page.read_bytes()
+            raw = raw_bytes.decode("utf-8", errors="replace")
             text = normalize_markdown(raw)
             encoded = text.encode("utf-8")
             words = len(re.findall(r"\b\w+\b", text, flags=re.UNICODE))
@@ -236,7 +238,7 @@ def main() -> int:
                     f"LibreTexts Español; CC BY 4.0. Source: {page_url or book['url']}"
                 ),
                 "retrieved_at": datetime.now(UTC).isoformat(),
-                "raw_sha256": sha256(raw.encode("utf-8")),
+                "raw_sha256": sha256(raw_bytes),
                 "text_sha256": sha256(encoded),
                 "payload_sha256": sha256(encoded),
                 "text_bytes": len(encoded),
