@@ -1,0 +1,73 @@
+name: Backfill PMC article-version rights evidence
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/backfill_pmc_rights_evidence.py"
+      - ".github/workflows/backfill-pmc-rights-evidence.yml"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Maximum substantive candidate article versions to inspect (1..5000)
+        required: true
+        default: "5000"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pmc-rights-evidence-backfill-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+      - name: Backfill exact metadata JSON and JATS license evidence
+        env:
+          LIMIT: ${{ inputs.limit || '5000' }}
+        run: python scripts/backfill_pmc_rights_evidence.py --limit "$LIMIT" --workers 6
+      - name: Verify exact text hashes and persisted metadata snapshots
+        run: python scripts/verify_pmc_oa_candidate_corpus.py
+      - name: Re-run strict rights and editorial audit
+        run: python scripts/audit_pmc_candidate_manifest.py
+      - name: Cross-check rights summary against strict audit
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path("data/datasets/candidates/pmc-oa-cc0-ccby-v2")
+          summary=json.loads((root/"rights-evidence-summary.json").read_text(encoding="utf-8"))
+          audit=json.loads(Path("data/datasets/reviews/pmc-candidate-screen-2026-11-06.json").read_text(encoding="utf-8"))
+          assert summary["rights_level_A_ready"]==audit["strict_level_a_ready_documents"]
+          assert summary["third_party_review_pending"]==audit["missing_third_party_clearance_documents"]
+          assert summary["jurisdictions_cleared"]==summary["documents_with_exact_cc_license_uri"]
+          assert summary["training_eligible"]==0 and audit["training_eligible"] is False
+          print(json.dumps({
+            "substantive_documents":summary["substantive_documents_targeted"],
+            "exact_license_versions":summary["documents_with_exact_cc_license_uri"],
+            "rights_level_A_ready":summary["rights_level_A_ready"],
+            "rights_level_B_pending":summary["rights_level_B_pending"],
+            "training_eligible":0
+          },ensure_ascii=False,indent=2))
+          PY
+      - name: Publish rights evidence and candidate corpus artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pmc-rights-evidence-backfill
+          path: |
+            data/datasets/candidates/pmc-oa-cc0-ccby-v2/manifest.jsonl
+            data/datasets/candidates/pmc-oa-cc0-ccby-v2/part-*.jsonl.gz
+            data/datasets/candidates/pmc-oa-cc0-ccby-v2/metadata-snapshots/
+            data/datasets/candidates/pmc-oa-cc0-ccby-v2/rights-evidence*.json*
+            data/datasets/reviews/pmc-candidate-screen-2026-11-06.json
+          if-no-files-found: error
+          retention-days: 90
