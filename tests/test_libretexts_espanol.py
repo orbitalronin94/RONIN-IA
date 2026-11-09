@@ -1,4 +1,8 @@
-from scripts.acquire_libretexts_espanol import is_cc_by_4, normalize_markdown
+from scripts.acquire_libretexts_espanol import (
+    extract_book_objects,
+    is_cc_by_4,
+    normalize_markdown,
+)
 
 
 def test_cc_by_4_filter_rejects_noncommercial_and_sharealike():
@@ -16,9 +20,6 @@ def test_normalize_markdown_removes_images_but_keeps_math_and_text():
     assert "Texto antes" in cleaned and "después" in cleaned
     assert "$$E=mc^2$$" in cleaned
 
-from scripts.acquire_libretexts_espanol import extract_book_objects
-
-
 def test_extract_book_objects_handles_commons_book_id_and_license_code():
     books = extract_book_objects([{
         "bookID": "espanol-51387",
@@ -35,7 +36,7 @@ def test_extract_book_objects_handles_commons_book_id_and_license_code():
 
 def test_extract_book_objects_rejects_noncommercial_and_sharealike():
     books = extract_book_objects([
-        {"bookID":"espanol-1","title":"NC","library":"espanol","license":"ccbyncsa","links":{"online":"https://espanol.libretexts.org/NC"}},
-        {"bookID":"espanol-2","title":"SA","library":"espanol","license":"ccbysa","links":{"online":"https://espanol.libretexts.org/SA"}},
+        {"bookID": "espanol-1", "title": "NC", "library": "espanol", "license": "ccbyncsa", "links": {"online": "https://espanol.libretexts.org/NC"}},
+        {"bookID": "espanol-2", "title": "SA", "library": "espanol", "license": "ccbysa", "links": {"online": "https://espanol.libretexts.org/SA"}},
     ])
     assert books == []
