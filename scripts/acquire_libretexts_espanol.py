@@ -76,7 +76,7 @@ def is_cc_by_4(value: str) -> bool:
 def normalize_markdown(raw: str) -> str:
     text = raw.replace("\r\n", "\n").replace("\r", "\n")
     text = IMAGE_MD.sub("", text)
-    text = re.sub(r"!\\[[^\\]]*\\]\\([^)]+\\)", "", text)
+    text = re.sub(r"!\[[^\]]*\]\([^)]+\)", "", text)
     text = HTML_IMG.sub("", text)
     text = re.sub(r"(?m)^\s*\[?(?:Image|Imagen):?[^\n]*$", "", text, flags=re.I)
     text = re.sub(r"(?m)^\s*[-*_]{3,}\s*$", "", text)
