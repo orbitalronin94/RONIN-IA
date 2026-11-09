@@ -152,8 +152,21 @@ def active_state(item: dict) -> bool:
 
 
 def list_items(limit: int, offset: int) -> tuple[list[dict], bytes, str]:
-    query = urllib.parse.urlencode({"limit": limit, "offset": offset})
-    url = f"{API}?{query}"
+    search = {
+        "query": {
+            "query_string": {
+                "query": "ambito@codigo:1 and vigencia_agotada:N and estado_consolidacion@codigo:3"
+            },
+            "range": {},
+        },
+        "sort": [{"fecha_publicacion": "desc"}],
+    }
+    params = urllib.parse.urlencode({
+        "limit": limit,
+        "offset": offset,
+        "query": json.dumps(search, ensure_ascii=False, separators=(",", ":")),
+    })
+    url = f"{API}?{params}"
     raw = fetch(url, "application/json")
     payload = json.loads(raw.decode("utf-8"))
     status = payload.get("status", {})
