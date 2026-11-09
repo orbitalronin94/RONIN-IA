@@ -1,11 +1,11 @@
 from scripts.acquire_libretexts_espanol import (
     extract_book_objects,
-    is_cc_by_4,
+    is_accepted_cc_by,
     normalize_markdown,
 )
 
 
-def test_cc_by_4_filter_rejects_noncommercial_and_sharealike():
+def test_cc_by_filter_accepts_permissive_versions_and_rejects_restrictive_licenses():
     assert is_cc_by_4("CC BY 4.0 International")
     assert is_cc_by_4("https://creativecommons.org/licenses/by/4.0/")
     assert not is_cc_by_4("CC BY-NC-SA 4.0")
