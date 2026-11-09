@@ -42,12 +42,12 @@ jobs:
         run: |
           go install github.com/johnnylibretexts/libretexts-cli/cmd/libretexts@v0.0.0-20260904054340-d2f0db7c2e34
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
-      - name: Discover and extract Spanish CC BY 4.0 books
+      - name: Discover and extract Spanish books with exact accepted CC BY licenses
         env:
           MAX_BOOKS: ${{ inputs.max_books || '8' }}
           MAX_PAGES: ${{ inputs.max_pages || '500' }}
         run: python scripts/acquire_libretexts_espanol.py --max-books "$MAX_BOOKS" --max-pages "$MAX_PAGES"
-      - name: Validate CC BY-only candidate pages and hashes
+      - name: Validate exact CC BY license evidence, payload hashes and snapshots
         run: |
           python - <<'PY'
           import hashlib,json
