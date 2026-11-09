@@ -198,7 +198,7 @@ ENGLISH_STOPWORDS = set(
 
 
 def language_profile(text: str) -> dict:
-    tokens = re.findall(r"\\b[\\wáéíóúñü]+\\b", text.lower())
+    tokens = re.findall(r"\b[\wáéíóúñü]+\b", text.lower())
     spanish = sum(token in SPANISH_STOPWORDS for token in tokens)
     english = sum(token in ENGLISH_STOPWORDS for token in tokens)
     evidence = spanish + english
