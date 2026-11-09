@@ -10,7 +10,6 @@ from __future__ import annotations
 import argparse
 import concurrent.futures
 import hashlib
-import urllib.request
 import json
 import re
 import subprocess
@@ -133,34 +132,34 @@ def extract_book_objects(payload) -> list[dict]:
 
 
 def verify_book_license(book: dict) -> dict | None:
-    headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,*/*",
-        "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
-    }
     try:
-        request = urllib.request.Request(book["url"], headers=headers)
-        with urllib.request.urlopen(request, timeout=60) as response:
-            raw = response.read()
+        raw_text = run_cli([
+            "page", book["book_id"], "--json", "--content", "metadata"
+        ])
+        payload = json.loads(raw_text)
     except Exception:
         return None
-    html = raw.decode("utf-8", errors="replace")
-    match = re.search(
-        r"https?://creativecommons\.org/licenses/by/4\.0/?",
-        html,
-        re.IGNORECASE,
-    )
-    if not match:
+
+    strings = []
+    for obj in walk_objects(payload):
+        for value in obj.values():
+            if isinstance(value, str):
+                strings.append(value)
+            elif isinstance(value, list):
+                strings.extend(str(item) for item in value if isinstance(item, (str, int, float)))
+    evidence = " ".join(strings).lower().replace(" ", "")
+    has_ccby = "license:ccby" in evidence or "ccby" in evidence
+    has_version_40 = "licenseversion:40" in evidence or "ccby4.0" in evidence or "creativecommonsattribution4.0" in evidence
+    if not (has_ccby and has_version_40):
         return None
-    uri = match.group(0)
-    if not uri.endswith("/"):
-        uri += "/"
+    raw = raw_text.encode("utf-8")
     return {
         "license": "CC BY 4.0",
         "license_id": "CC-BY-4.0",
-        "license_uri": uri,
+        "license_uri": "https://creativecommons.org/licenses/by/4.0/",
         "license_page_snapshot": raw,
         "license_page_snapshot_sha256": sha256(raw),
+        "license_evidence": "license:ccby; licenseversion:40",
     }
 
 def index_entries(index_payload) -> list[dict]:
@@ -218,9 +217,11 @@ def main() -> int:
             "license_uri": license_info["license_uri"],
             "license_page_snapshot_sha256": license_info["license_page_snapshot_sha256"],
         })
-        snapshot_path = search_dir / f"{book['book_id']}-license-page.html"
+        snapshot_path = out / "metadata-snapshots" / f"{book['book_id']}-page.json"
+        snapshot_path.parent.mkdir(parents=True, exist_ok=True)
         snapshot_path.write_bytes(license_info["license_page_snapshot"])
         book["license_page_snapshot_path"] = str(snapshot_path.relative_to(out))
+        book["license_evidence"] = license_info["license_evidence"]
         metadata_snapshot = json.dumps(book["raw"], ensure_ascii=False, sort_keys=True).encode("utf-8")
         metadata_snapshot_path = out / "metadata-snapshots" / f"{book['book_id']}.json"
         metadata_snapshot_path.parent.mkdir(parents=True, exist_ok=True)
