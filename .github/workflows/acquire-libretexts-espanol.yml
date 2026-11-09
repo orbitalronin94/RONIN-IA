@@ -1,0 +1,79 @@
+name: Acquire Spanish LibreTexts CC BY 4.0 textbooks
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/acquire_libretexts_espanol.py"
+      - ".github/workflows/acquire-libretexts-espanol.yml"
+  workflow_dispatch:
+    inputs:
+      max_books:
+        description: Maximum CC BY 4.0 books to extract
+        required: true
+        default: "8"
+        type: string
+      max_pages:
+        description: Maximum pages per book
+        required: true
+        default: "500"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: libretexts-espanol-acquisition-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.26.4"
+      - name: Install pinned LibreTexts extraction CLI
+        run: |
+          go install github.com/johnnylibretexts/libretexts-cli/cmd/libretexts@v0.0.0-20260904054340-d2f0db7c2e34
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - name: Discover and extract Spanish CC BY 4.0 books
+        env:
+          MAX_BOOKS: ${{ inputs.max_books || '8' }}
+          MAX_PAGES: ${{ inputs.max_pages || '500' }}
+        run: python scripts/acquire_libretexts_espanol.py --max-books "$MAX_BOOKS" --max-pages "$MAX_PAGES"
+      - name: Validate CC BY-only candidate pages and hashes
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path("data/datasets/candidates/libretexts-espanol-2026-11-09")
+          rows=[json.loads(x) for x in (root/"manifest.jsonl").read_text(encoding="utf-8").splitlines()]
+          assert rows, "No Spanish LibreTexts pages passed candidate filters"
+          assert all(r["language"]=="es" and r["license_id"]=="CC-BY-4.0" for r in rows)
+          assert all(r["rights_level"]=="B" and r["training_eligible"] is False for r in rows)
+          assert len({r["text_sha256"] for r in rows})==len(rows)
+          for r in rows:
+            assert hashlib.sha256(r["text"].encode("utf-8")).hexdigest()==r["payload_sha256"]
+          audit=json.loads((root/"acquisition-audit.json").read_text(encoding="utf-8"))
+          print(json.dumps({
+            "books_selected":audit["books_selected"],
+            "candidate_pages":len(rows),
+            "candidate_text_bytes":sum(r["text_bytes"] for r in rows),
+            "candidate_words":sum(r["quality"]["words"] for r in rows),
+            "rights_level_B":len(rows),
+            "training_eligible":0
+          },ensure_ascii=False,indent=2))
+          PY
+      - name: Publish Spanish LibreTexts candidate corpus
+        uses: actions/upload-artifact@v4
+        with:
+          name: libretexts-espanol-ccby4-candidates
+          path: data/datasets/candidates/libretexts-espanol-2026-11-09/
+          if-no-files-found: error
+          retention-days: 90
