@@ -1,0 +1,63 @@
+name: Acquire Spanish historical press OCR from BNE Hemeroteca
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/acquire_bne_hemeroteca.py"
+      - ".github/workflows/acquire-bne-hemeroteca.yml"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Maximum public-domain title texts to acquire (1..5000)
+        required: true
+        default: "1000"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bne-hemeroteca-acquisition-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  acquire-hemeroteca:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+      - name: Acquire public-domain Spanish newspaper and magazine OCR
+        env:
+          LIMIT: ${{ inputs.limit || '500' }}
+        run: python scripts/acquire_bne_hemeroteca.py --limit "$LIMIT"
+      - name: Validate candidate-only output and exact totals
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path("data/datasets/candidates/bne-hemeroteca-2026-11-09")
+          rows=[json.loads(line) for line in (root/"manifest.jsonl").read_text(encoding="utf-8").splitlines()]
+          assert rows, "No Hemeroteca OCR documents acquired"
+          assert all(r["source"] == "BNE-Hemeroteca-Digital-public-domain" for r in rows)
+          assert all(r["language"] == "es" and r["training_eligible"] is False for r in rows)
+          assert len({r["text_sha256"] for r in rows}) == len(rows)
+          audit=json.loads((root/"acquisition-audit.json").read_text(encoding="utf-8"))
+          print(json.dumps({
+            "documents":len(rows),
+            "candidate_text_bytes":sum(r["text_bytes"] for r in rows),
+            "candidate_words":sum(r["quality"]["words"] for r in rows),
+            "ocr_quality_holds":audit["quality_rejected"],
+            "training_eligible":0
+          },ensure_ascii=False,indent=2))
+          PY
+      - name: Publish BNE Hemeroteca acquisition artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bne-hemeroteca-spanish-public-domain-candidates
+          path: data/datasets/candidates/bne-hemeroteca-2026-11-09/
+          if-no-files-found: error
+          retention-days: 90
