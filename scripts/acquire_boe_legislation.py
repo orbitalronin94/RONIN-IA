@@ -181,6 +181,8 @@ def main() -> int:
     list_snapshot.write_bytes(list_raw)
     snapshots_dir = out / "metadata-snapshots"
     snapshots_dir.mkdir(parents=True, exist_ok=True)
+    xml_snapshots_dir = out / "xml-snapshots"
+    xml_snapshots_dir.mkdir(parents=True, exist_ok=True)
 
     manifest = []
     rejected = []
@@ -199,6 +201,8 @@ def main() -> int:
         text_url = f"{API}/id/{urllib.parse.quote(identifier, safe='')}/texto"
         try:
             xml_raw = fetch(text_url, "application/xml")
+            xml_snapshot_path = xml_snapshots_dir / f"{identifier}.xml"
+            xml_snapshot_path.write_bytes(xml_raw)
             text, stats = current_text(xml_raw)
         except Exception as exc:
             rejected.append({"id": identifier, "reason": f"{type(exc).__name__}: {exc}"})
@@ -248,6 +252,7 @@ def main() -> int:
             "metadata_snapshot_sha256": sha256(item_snapshot),
             "metadata_list_snapshot_sha256": sha256(list_raw),
             "text_snapshot_sha256": sha256(xml_raw),
+            "xml_snapshot_path": f"xml-snapshots/{identifier}.xml",
             "text_sha256": sha256(encoded),
             "payload_sha256": sha256(encoded),
             "text_bytes": len(encoded),
