@@ -1,0 +1,70 @@
+name: Acquire USGS public-domain science reports
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/acquire_public_sources.py"
+      - ".github/workflows/acquire-usgs-science-corpus.yml"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Maximum USGS report candidates to inspect (1..5000)
+        required: true
+        default: "500"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: usgs-science-acquisition-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  acquire-usgs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+      - name: Install PDF text extractor
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+      - name: Acquire USGS report candidates
+        env:
+          USGS_LIMIT: ${{ inputs.limit || '500' }}
+        run: |
+          python scripts/acquire_public_sources.py --limit-per-source "$USGS_LIMIT" --skip-bne
+      - name: Validate candidate-only output and calculate exact totals
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("data/datasets/candidates/public-sources-2026-11-06/manifest.jsonl")
+          rows = [json.loads(line) for line in p.read_text(encoding="utf-8").splitlines()]
+          assert rows, "USGS returned no candidate records"
+          assert all(r["source"] == "USGS-Publications-Warehouse" for r in rows)
+          assert all(r["training_eligible"] is False for r in rows)
+          assert len({r["text_sha256"] for r in rows}) == len(rows), "duplicate text hashes"
+          audit = json.loads(Path("data/datasets/candidates/public-sources-2026-11-06/acquisition-audit.json").read_text(encoding="utf-8"))
+          print(json.dumps({
+              "candidate_documents": len(rows),
+              "candidate_text_bytes": sum(r["text_bytes"] for r in rows),
+              "candidate_words": sum(r["quality"]["words"] for r in rows),
+              "quality_rejected": audit["quality_rejected"],
+              "rights_review_pending": audit["rights_review_pending"],
+              "training_eligible": 0,
+              "unique_text_hashes": len({r["text_sha256"] for r in rows}),
+          }, ensure_ascii=False, indent=2))
+          PY
+      - name: Publish USGS acquisition artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: usgs-science-public-domain-candidates
+          path: data/datasets/candidates/public-sources-2026-11-06/
+          if-no-files-found: error
+          retention-days: 90
