@@ -179,6 +179,8 @@ def main() -> int:
     rows, list_raw, list_url = list_items(args.limit, args.offset)
     list_snapshot = out / f"list-offset-{args.offset}-limit-{args.limit}.json"
     list_snapshot.write_bytes(list_raw)
+    snapshots_dir = out / "metadata-snapshots"
+    snapshots_dir.mkdir(parents=True, exist_ok=True)
 
     manifest = []
     rejected = []
@@ -203,6 +205,9 @@ def main() -> int:
             continue
 
         encoded = text.encode("utf-8")
+        item_snapshot = json.dumps(item, ensure_ascii=False, sort_keys=True).encode("utf-8")
+        item_snapshot_path = snapshots_dir / f"{identifier}.json"
+        item_snapshot_path.write_bytes(item_snapshot)
         reasons = []
         if len(text) < args.min_text_chars:
             reasons.append("too_short")
@@ -231,15 +236,20 @@ def main() -> int:
             "schema_version": 1,
             "source": "BOE-consolidated-legislation",
             "source_id": identifier,
+            "source_item_id": identifier,
             "source_version": f"updated:{updated};published:{published}",
+            "provenance_uri": text_url,
             "title": title,
             "language": "es",
             "source_url": text_url,
             "item_url": html_url,
             "metadata_snapshot_url": list_url,
-            "metadata_snapshot_sha256": sha256(list_raw),
+            "metadata_snapshot_path": f"metadata-snapshots/{identifier}.json",
+            "metadata_snapshot_sha256": sha256(item_snapshot),
+            "metadata_list_snapshot_sha256": sha256(list_raw),
             "text_snapshot_sha256": sha256(xml_raw),
             "text_sha256": sha256(encoded),
+            "payload_sha256": sha256(encoded),
             "text_bytes": len(encoded),
             "text_chars": len(text),
             "quality": {
@@ -281,12 +291,8 @@ def main() -> int:
             },
             "text": text,
         }
-        if reasons:
-            record["classification"] = "rejected_quality_or_privacy"
-            record["rejection_reasons"] = reasons
-        else:
-            record["classification"] = "candidate_rights_level_B"
-            record["rejection_reasons"] = []
+        record["classification"] = "candidate_rights_level_B"
+        record["rejection_reasons"] = []
         manifest.append(record)
         time.sleep(0.1)
 
