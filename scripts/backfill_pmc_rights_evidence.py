@@ -14,12 +14,20 @@ import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from audit_pmc_candidate_manifest import classify_editorial_notice
-from harvest_pmc_oa_cc0_ccby import (
-    metadata_for,
-    request_bytes,
-    s3_public_https,
-)
+try:
+    from .audit_pmc_candidate_manifest import classify_editorial_notice
+    from .harvest_pmc_oa_cc0_ccby import (
+        metadata_for,
+        request_bytes,
+        s3_public_https,
+    )
+except ImportError:  # Direct execution as a script.
+    from audit_pmc_candidate_manifest import classify_editorial_notice
+    from harvest_pmc_oa_cc0_ccby import (
+        metadata_for,
+        request_bytes,
+        s3_public_https,
+    )
 
 ROOT_DEFAULT = Path("data/datasets/candidates/pmc-oa-cc0-ccby-v2")
 XLINK = "{http://www.w3.org/1999/xlink}href"
