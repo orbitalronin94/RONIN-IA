@@ -83,12 +83,20 @@ def get_field(item: dict, key: str) -> str:
     return str(value or "")
 
 
-def current_text(xml_raw: bytes, today: date | None = None) -> tuple[str, dict]:
+def current_text(xml_raw: bytes, today: date | None = None) -> tuple[str, dict, dict]:
     today = today or date.today()
     root = ET.fromstring(xml_raw)
     status = root.findtext("./status/code")
     if status != "200":
-        raise RuntimeError(f"BOE text API returned status {status}")
+        raise RuntimeError(f"BOE document API returned status {status}")
+    metadata_node = root.find("./data/metadatos")
+    if metadata_node is None:
+        raise RuntimeError("BOE response has no data/metadatos node")
+    detail_metadata = {
+        child.tag: node_text(child)
+        for child in list(metadata_node)
+        if child is not None
+    }
     text_node = root.find("./data/texto")
     if text_node is None:
         raise RuntimeError("BOE response has no data/texto node")
@@ -119,27 +127,22 @@ def current_text(xml_raw: bytes, today: date | None = None) -> tuple[str, dict]:
         body = node_text(latest)
         if not body:
             continue
-        chunks.append(f"## {title}\n{body}")
+        chunks.append(f"## {title}\\n{body}")
         block_count += 1
         version_count += len(versions)
         image_count += len(latest.findall(".//img"))
 
-    return "\n\n".join(chunks).strip(), {
+    return "\\n\\n".join(chunks).strip(), {
         "current_blocks": block_count,
         "versions_seen": version_count,
         "embedded_images_excluded": image_count,
-    }
-
+    }, detail_metadata
 
 def active_state(item: dict) -> bool:
     state = get_field(item, "estado_consolidacion").casefold()
     if state != "finalizado":
         return False
     if str(item.get("vigencia_agotada", "S")).upper() != "N":
-        return False
-    if str(item.get("estatus_derogacion", "S")).upper() != "N":
-        return False
-    if str(item.get("estatus_anulacion", "S")).upper() != "N":
         return False
     if get_field(item, "ambito").casefold() != "estatal":
         return False
@@ -198,12 +201,18 @@ def main() -> int:
             rejected.append({"id": identifier, "reason": "missing_identifier_title_or_official_url"})
             continue
 
-        text_url = f"{API}/id/{urllib.parse.quote(identifier, safe='')}/texto"
+        text_url = f"{API}/id/{urllib.parse.quote(identifier, safe='')}"
         try:
             xml_raw = fetch(text_url, "application/xml")
             xml_snapshot_path = xml_snapshots_dir / f"{identifier}.xml"
             xml_snapshot_path.write_bytes(xml_raw)
-            text, stats = current_text(xml_raw)
+            text, stats, detail_metadata = current_text(xml_raw)
+            if detail_metadata.get("estatus_derogacion", "N").upper() == "S":
+                rejected.append({"id": identifier, "reason": "derogated"})
+                continue
+            if detail_metadata.get("estatus_anulacion", "N").upper() == "S":
+                rejected.append({"id": identifier, "reason": "annulled"})
+                continue
         except Exception as exc:
             rejected.append({"id": identifier, "reason": f"{type(exc).__name__}: {exc}"})
             continue
@@ -281,6 +290,7 @@ def main() -> int:
             "retrieved_at": datetime.now(UTC).isoformat(),
             "training_eligible": False,
             "partition": "unassigned_pending_rights_quality_dedup_split",
+            "detail_metadata": detail_metadata,
             "metadata": {
                 "fecha_actualizacion": updated,
                 "fecha_publicacion": published,
@@ -290,8 +300,8 @@ def main() -> int:
                 "departamento": get_field(item, "departamento"),
                 "rango": title_range,
                 "vigencia_agotada": str(item.get("vigencia_agotada") or ""),
-                "estatus_derogacion": str(item.get("estatus_derogacion") or ""),
-                "estatus_anulacion": str(item.get("estatus_anulacion") or ""),
+                "estatus_derogacion": detail_metadata.get("estatus_derogacion", ""),
+                "estatus_anulacion": detail_metadata.get("estatus_anulacion", ""),
                 "url_eli": str(item.get("url_eli") or ""),
             },
             "text": text,
