@@ -67,14 +67,20 @@ def sha256(raw: bytes) -> str:
 
 
 def run_cli(args: list[str], timeout: int = 3600) -> str:
-    result = subprocess.run(
-        ["libretexts", *args],
-        check=True,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        timeout=timeout,
-    )
+    try:
+        result = subprocess.run(
+            ["libretexts", *args],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=timeout,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(
+            f"LibreTexts CLI failed for {args!r}: "
+            f"stdout={exc.stdout[-2000:]!r}; stderr={exc.stderr[-4000:]!r}"
+        ) from exc
     return result.stdout
 
 
