@@ -1,0 +1,68 @@
+name: Acquire Spanish open textbooks from Pressbooks networks
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/acquire_pressbooks_spanish.py"
+      - ".github/workflows/acquire-pressbooks-spanish.yml"
+  workflow_dispatch:
+    inputs:
+      max_books:
+        description: Maximum number of Spanish CC books to download
+        required: false
+        default: "12"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pressbooks-spanish-acquisition
+  cancel-in-progress: false
+
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.26.4"
+      - name: Install Pressbooks CLI
+        run: go install github.com/johnnylibretexts/pressbooks-cli/cmd/pressbooks-pp-cli@latest
+      - name: Discover and download Spanish CC books
+        run: |
+          python scripts/acquire_pressbooks_spanish.py --max-books "${{ inputs.max_books || '12' }}"
+      - name: Validate rights labels and content hashes
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path("data/datasets/candidates/pressbooks-spanish-2026-11-09")
+          rows=[json.loads(x) for x in (root/"manifest.jsonl").read_text(encoding="utf-8").splitlines()]
+          accepted={"CC-BY-2.0","CC-BY-2.5","CC-BY-3.0","CC-BY-4.0","CC0-1.0"}
+          for r in rows:
+            assert r["language"].lower().startswith("es") or "spanish" in r["language"].lower()
+            assert r["license_id"] in accepted
+            assert r["rights_level"]=="B" and r["training_eligible"] is False
+            assert hashlib.sha256((root/r["text_path"]).read_bytes()).hexdigest()==r["payload_sha256"]
+            assert hashlib.sha256((root/r["metadata_snapshot_path"]).read_bytes()).hexdigest()==r["metadata_snapshot_sha256"]
+          audit=json.loads((root/"acquisition-audit.json").read_text(encoding="utf-8"))
+          assert audit["training_eligible"]==0 and audit["rights_level_A"]==0
+          print(json.dumps({
+            "books":len(rows),
+            "words":audit["documents_words"],
+            "bytes":audit["documents_text_bytes"],
+            "licenses":audit["license_counts"],
+            "training_eligible":0
+          },ensure_ascii=False,indent=2))
+          PY
+      - name: Publish Pressbooks candidate corpus
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pressbooks-espanol-candidates
+          path: data/datasets/candidates/pressbooks-spanish-2026-11-09/
+          if-no-files-found: warn
+          retention-days: 90

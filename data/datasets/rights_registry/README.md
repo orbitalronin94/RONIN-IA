@@ -15,7 +15,7 @@ Una declaración de derechos del proveedor no demuestra por sí sola que el prov
 Licencias admitidas para nivel A:
 
 - CC0-1.0
-- CC-BY-2.0, CC-BY-3.0, CC-BY-4.0
+- CC-BY-2.0, CC-BY-2.5, CC-BY-3.0, CC-BY-4.0
 - MIT, Apache-2.0, BSD-2-Clause y BSD-3-Clause
 
 NC, ND, ShareAlike, desconocido, mixto y etiquetas genéricas de «abierto» no pasan el nivel A.
