@@ -19,16 +19,42 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 SEARCH_TERMS = [
-    "biología",
-    "química",
-    "cálculo",
-    "física",
-    "estadística",
-    "matemáticas",
     "filosofía",
+    "filosofía de la ciencia",
+    "epistemología",
+    "ética",
+    "historia de la filosofía",
     "historia",
+    "matemáticas",
+    "cálculo",
+    "álgebra",
+    "álgebra lineal",
+    "geometría",
+    "probabilidad",
+    "estadística",
+    "métodos numéricos",
+    "física",
+    "electromagnetismo",
+    "ecuaciones de maxwell",
+    "circuitos digitales",
+    "electricidad",
+    "electrónica",
+    "química",
+    "biología",
+    "microbiología",
+    "ecología",
+    "genética",
+    "botánica",
+    "anatomía",
     "astronomía",
     "economía",
+    "sociología",
+    "antropología",
+    "programación",
+    "informática",
+    "inteligencia artificial",
+    "mecánica",
+    "termodinámica",
 ]
 CC_BY_URI = "https://creativecommons.org/licenses/by/4.0/"
 IMAGE_MD = re.compile(r"(?m)^\s*!\[[^\]]*\]\([^\n]*\)\s*$")
@@ -192,11 +218,11 @@ def index_entries(index_payload) -> list[dict]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--max-books", type=int, default=8)
+    parser.add_argument("--max-books", type=int, default=12)
     parser.add_argument("--max-pages", type=int, default=500)
     parser.add_argument("--out", type=Path, default=Path("data/datasets/candidates/libretexts-espanol-2026-11-09"))
     args = parser.parse_args()
-    if not 1 <= args.max_books <= 20:
+    if not 1 <= args.max_books <= 30:
         raise SystemExit("--max-books must be between 1 and 20")
     if not 1 <= args.max_pages <= 2000:
         raise SystemExit("--max-pages must be between 1 and 2000")
