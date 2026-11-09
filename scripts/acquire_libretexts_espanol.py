@@ -132,41 +132,36 @@ def extract_book_objects(payload) -> list[dict]:
     return books
 
 
-def verify_book_license(book: dict) -> dict | None:
+def verify_book_license(book: dict) -> dict:
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,*/*",
+        "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+    }
     try:
-        page_id = book["book_id"].rsplit("-", 1)[-1]
-        url = f"https://espanol.libretexts.org/@api/deki/pages/{page_id}?dream.out.format=json"
-        headers = {
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-            "Accept": "application/json,text/plain,*/*",
-            "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
-        }
-        request = urllib.request.Request(url, headers=headers)
+        request = urllib.request.Request(book["url"], headers=headers)
         with urllib.request.urlopen(request, timeout=60) as response:
             raw = response.read()
-        payload = json.loads(raw.decode("utf-8"))
-    except Exception:
-        return None
+    except Exception as exc:
+        return {"license_verified": False, "error": f"{type(exc).__name__}: {exc}", "snapshot": b""}
 
-    strings = []
-    for obj in walk_objects(payload):
-        for value in obj.values():
-            if isinstance(value, str):
-                strings.append(value)
-            elif isinstance(value, list):
-                strings.extend(str(item) for item in value if isinstance(item, (str, int, float)))
-    evidence = " ".join(strings).lower().replace(" ", "")
-    has_ccby = "license:ccby" in evidence or "ccby" in evidence
-    has_version_40 = "licenseversion:40" in evidence or "ccby4.0" in evidence or "creativecommonsattribution4.0" in evidence
-    if not (has_ccby and has_version_40):
-        return None
+    html = raw.decode("utf-8", errors="replace")
+    compact = re.sub(r"\s+", "", html).lower()
+    has_ccby = "license:ccby" in compact or "license%3accby" in compact
+    has_version_40 = (
+        "licenseversion:40" in compact
+        or "licenseversion%3a40" in compact
+        or "creativecommonsattribution4.0" in compact
+    )
     return {
-        "license": "CC BY 4.0",
-        "license_id": "CC-BY-4.0",
-        "license_uri": "https://creativecommons.org/licenses/by/4.0/",
-        "license_page_snapshot": raw,
-        "license_page_snapshot_sha256": sha256(raw),
-        "license_evidence": "license:ccby; licenseversion:40",
+        "license_verified": bool(has_ccby and has_version_40),
+        "license": "CC BY 4.0" if has_ccby and has_version_40 else "",
+        "license_id": "CC-BY-4.0" if has_ccby and has_version_40 else "",
+        "license_uri": "https://creativecommons.org/licenses/by/4.0/" if has_ccby and has_version_40 else "",
+        "license_evidence": "license:ccby; licenseversion:40" if has_ccby and has_version_40 else "",
+        "error": "",
+        "snapshot": raw,
+        "snapshot_sha256": sha256(raw),
     }
 
 def index_entries(index_payload) -> list[dict]:
@@ -213,22 +208,35 @@ def main() -> int:
         unique.setdefault(book["book_id"], book)
 
     verified = []
+    license_checks = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
         checks = list(pool.map(verify_book_license, unique.values()))
     for book, license_info in zip(unique.values(), checks):
-        if not license_info:
+        snapshot_path = out / "metadata-snapshots" / f"{book['book_id']}-page.html"
+        snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+        if license_info.get("snapshot"):
+            snapshot_path.write_bytes(license_info["snapshot"])
+        check_record = {
+            "book_id": book["book_id"],
+            "title": book["title"],
+            "url": book["url"],
+            "license_code": book["license_code"],
+            "license_verified": license_info["license_verified"],
+            "error": license_info.get("error", ""),
+            "snapshot_sha256": license_info.get("snapshot_sha256", ""),
+            "snapshot_path": str(snapshot_path.relative_to(out)),
+        }
+        license_checks.append(check_record)
+        if not license_info["license_verified"]:
             continue
         book.update({
             "license": license_info["license"],
             "license_id": license_info["license_id"],
             "license_uri": license_info["license_uri"],
-            "license_page_snapshot_sha256": license_info["license_page_snapshot_sha256"],
+            "license_page_snapshot_sha256": license_info["snapshot_sha256"],
+            "license_page_snapshot_path": str(snapshot_path.relative_to(out)),
+            "license_evidence": license_info["license_evidence"],
         })
-        snapshot_path = out / "metadata-snapshots" / f"{book['book_id']}-page.json"
-        snapshot_path.parent.mkdir(parents=True, exist_ok=True)
-        snapshot_path.write_bytes(license_info["license_page_snapshot"])
-        book["license_page_snapshot_path"] = str(snapshot_path.relative_to(out))
-        book["license_evidence"] = license_info["license_evidence"]
         metadata_snapshot = json.dumps(book["raw"], ensure_ascii=False, sort_keys=True).encode("utf-8")
         metadata_snapshot_path = out / "metadata-snapshots" / f"{book['book_id']}.json"
         metadata_snapshot_path.parent.mkdir(parents=True, exist_ok=True)
@@ -236,6 +244,10 @@ def main() -> int:
         book["metadata_snapshot_path"] = str(metadata_snapshot_path.relative_to(out))
         book["metadata_snapshot_sha256"] = sha256(metadata_snapshot)
         verified.append(book)
+    (out / "license-checks.json").write_text(
+        json.dumps(license_checks, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
     selected = verified[:args.max_books]
     if not selected:
