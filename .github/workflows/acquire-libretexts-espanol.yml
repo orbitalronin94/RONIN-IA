@@ -60,6 +60,10 @@ jobs:
           assert len({r["text_sha256"] for r in rows})==len(rows)
           for r in rows:
             assert hashlib.sha256(r["text"].encode("utf-8")).hexdigest()==r["payload_sha256"]
+            metadata=(root/r["metadata_snapshot_path"]).read_bytes()
+            license_page=(root/r["license_page_snapshot_path"]).read_bytes()
+            assert hashlib.sha256(metadata).hexdigest()==r["metadata_snapshot_sha256"]
+            assert hashlib.sha256(license_page).hexdigest()==r["license_page_snapshot_sha256"]
           audit=json.loads((root/"acquisition-audit.json").read_text(encoding="utf-8"))
           print(json.dumps({
             "books_selected":audit["books_selected"],
