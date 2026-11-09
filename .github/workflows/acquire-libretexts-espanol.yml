@@ -1,4 +1,4 @@
-name: Acquire Spanish LibreTexts CC BY 4.0 textbooks
+name: Acquire Spanish LibreTexts CC BY textbooks
 
 on:
   pull_request:
@@ -55,7 +55,7 @@ jobs:
           root=Path("data/datasets/candidates/libretexts-espanol-2026-11-09")
           rows=[json.loads(x) for x in (root/"manifest.jsonl").read_text(encoding="utf-8").splitlines()]
           assert rows, "No Spanish LibreTexts pages passed candidate filters"
-          assert all(r["language"]=="es" and r["license_id"]=="CC-BY-4.0" for r in rows)
+          assert all(r["language"]=="es" and r["license_id"] in {"CC-BY-2.0","CC-BY-2.5","CC-BY-3.0","CC-BY-4.0"} for r in rows)
           assert all(r["rights_level"]=="B" and r["training_eligible"] is False for r in rows)
           assert len({r["text_sha256"] for r in rows})==len(rows)
           for r in rows:
@@ -78,7 +78,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: libretexts-espanol-ccby4-candidates
+          name: libretexts-espanol-ccby-candidates
           path: data/datasets/candidates/libretexts-espanol-2026-11-09/
           if-no-files-found: error
           retention-days: 90
