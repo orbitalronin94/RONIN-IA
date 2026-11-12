@@ -1,0 +1,445 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "ronin-massive-corpus-expansion-2026-11-05",
+  "generated_at": "2026-11-05",
+  "policy": {
+    "default_status": "candidate_only",
+    "training_eligible": false,
+    "automatic_admission": false,
+    "require_document_version_rights": true,
+    "require_sha256": true,
+    "require_global_exact_and_near_dedup": true,
+    "require_human_review": true,
+    "validation_test_holdout_never_train": true,
+    "large_payloads": "GitHub Actions artifacts; commit manifests and hashes only"
+  },
+  "existing_unlocks": [
+    {
+      "source_id": "scienceverse-ccby-v1",
+      "priority": 0,
+      "status": "admitted_scoped_not_training_eligible",
+      "documents": 7365,
+      "text_bytes": 446092799,
+      "domains": [
+        "biology",
+        "medicine_health",
+        "social_sciences",
+        "psychology"
+      ],
+      "blockers": [
+        "global exact/near dedup",
+        "deterministic splits",
+        "global validation"
+      ]
+    },
+    {
+      "source_id": "nasa-ntrs-public-use-v1",
+      "priority": 0,
+      "status": "admitted_scoped_not_training_eligible",
+      "documents": 813,
+      "text_bytes": 32313859,
+      "domains": [
+        "astronomy_earth_science",
+        "engineering_robotics",
+        "physics",
+        "geography",
+        "geology",
+        "climate_meteorology"
+      ],
+      "blockers": [
+        "per-document redistribution recheck",
+        "global dedup",
+        "global validation"
+      ],
+      "excluded_documents": 11
+    },
+    {
+      "source_id": "ronin-authored-papers-v1",
+      "priority": 0,
+      "status": "owner_authorized_not_training_eligible",
+      "documents": 9,
+      "text_bytes": 750857,
+      "domains": [
+        "computer_science",
+        "software_engineering",
+        "artificial_intelligence"
+      ],
+      "blockers": [
+        "global dedup",
+        "quality/privacy review",
+        "deterministic splits"
+      ]
+    },
+    {
+      "source_id": "covost2-cc0-translation-only",
+      "priority": 0,
+      "status": "rights_recorded_candidate",
+      "documents": null,
+      "text_bytes": 86874752,
+      "domains": [
+        "linguistics",
+        "education",
+        "general_multilingual"
+      ],
+      "blockers": [
+        "reconcile snapshots and unique rows",
+        "quality review",
+        "privacy review",
+        "dedup",
+        "splits"
+      ],
+      "notes": "432475 translation rows in one run; only translation field, no audio/source sentence/speaker identifiers"
+    },
+    {
+      "source_id": "pleias-common-corpus-filtered",
+      "priority": 0,
+      "status": "rights_scoped_candidate",
+      "documents": 2159,
+      "text_bytes": 5971320,
+      "domains": [
+        "mathematics",
+        "physics",
+        "computer_science",
+        "humanities",
+        "social_sciences"
+      ],
+      "blockers": [
+        "human review",
+        "privacy review",
+        "quality review",
+        "dedup",
+        "splits"
+      ],
+      "notes": "One run: 2149 CC0, 4 CC BY 3.0, 6 CC BY 4.0; other license groups and rejected records excluded"
+    },
+    {
+      "source_id": "bne-bdh-public-domain",
+      "priority": 0,
+      "status": "workflow_acquisition_candidate",
+      "documents": null,
+      "text_bytes": null,
+      "domains": [
+        "literature",
+        "history",
+        "philosophy",
+        "linguistics",
+        "humanities"
+      ],
+      "blockers": [
+        "execute existing acquisition workflow",
+        "hashes",
+        "record-to-text linkage",
+        "edition/author/translator rights",
+        "OCR quality",
+        "privacy",
+        "dedup",
+        "splits"
+      ],
+      "notes": "Existing workflow referenced in data/datasets/README.md"
+    }
+  ],
+  "new_sources": [
+    {
+      "source_id": "common-pile-v0.1-components",
+      "priority": 1,
+      "status": "discovery_only",
+      "url": "https://huggingface.co/common-pile",
+      "reported_collection_size": "8 TB",
+      "domains": [
+        "computer_science",
+        "law",
+        "science",
+        "humanities",
+        "education",
+        "government",
+        "literature"
+      ],
+      "license": "Public-domain and openly licensed component sources; verify per component",
+      "acquisition": "Enumerate 30+ source components; select only components with explicit compatible rights; acquire filtered subsets",
+      "blockers": [
+        "component-level license and version mapping",
+        "source-level provenance",
+        "privacy",
+        "quality",
+        "dedup",
+        "splits"
+      ],
+      "notes": "Do not treat the aggregate dataset license as blanket rights for every underlying work."
+    },
+    {
+      "source_id": "pmc-open-access-subset",
+      "priority": 1,
+      "status": "discovery_only",
+      "url": "https://pmc.ncbi.nlm.nih.gov/tools/openftlist/",
+      "reported_collection_size": null,
+      "domains": [
+        "biology",
+        "medicine_health",
+        "chemistry_materials"
+      ],
+      "license": "Per-article Creative Commons or other OA license; only compatible licenses",
+      "acquisition": "Use official OA subset packages/manifests; select exact CC0/CC BY versions",
+      "blockers": [
+        "article/version license verification",
+        "third-party figures/text",
+        "sensitive personal/clinical data",
+        "quality",
+        "dedup",
+        "splits"
+      ],
+      "notes": "PMC full archive is not all open access; do not bulk download non-OA articles."
+    },
+    {
+      "source_id": "nasa-ntrs-expanded",
+      "priority": 1,
+      "status": "candidate_discovery",
+      "url": "https://data.nasa.gov/dataset/nasa-technical-reports-server-ntrs",
+      "reported_collection_size": "200000+ full-text documents",
+      "domains": [
+        "aerospace",
+        "physics",
+        "engineering_robotics",
+        "astronomy_earth_science"
+      ],
+      "license": "Public access; per-document copyright and third-party review still required",
+      "acquisition": "OAI-PMH incremental harvest; reconcile IDs and hashes with existing 824+189 snapshots",
+      "blockers": [
+        "copyright/reuse by document",
+        "third-party material",
+        "global dedup",
+        "splits"
+      ]
+    },
+    {
+      "source_id": "noaa-institutional-repository",
+      "priority": 1,
+      "status": "candidate_discovery",
+      "url": "https://repository.library.noaa.gov/",
+      "reported_collection_size": null,
+      "domains": [
+        "climate_meteorology",
+        "oceanography",
+        "geography",
+        "biology"
+      ],
+      "license": "Mixed; government works may be CC0, journal/proceedings retain copyright",
+      "acquisition": "Select government-authored/public-domain items only, retain item-level evidence",
+      "blockers": [
+        "per-item rights",
+        "third-party content",
+        "dedup",
+        "splits"
+      ]
+    },
+    {
+      "source_id": "usgs-publications-warehouse",
+      "priority": 1,
+      "status": "candidate_discovery",
+      "url": "https://pubs.usgs.gov/",
+      "reported_collection_size": null,
+      "domains": [
+        "geology",
+        "geography",
+        "climate_meteorology",
+        "engineering"
+      ],
+      "license": "USGS reports generally public domain; embedded third-party images/content excluded",
+      "acquisition": "Target reports with clear USGS authorship; parse PDF/HTML and preserve attribution",
+      "blockers": [
+        "per-item rights",
+        "third-party images",
+        "OCR/text quality",
+        "dedup",
+        "splits"
+      ]
+    },
+    {
+      "source_id": "nist-technical-series",
+      "priority": 1,
+      "status": "candidate_discovery",
+      "url": "https://nvlpubs.nist.gov/",
+      "reported_collection_size": null,
+      "domains": [
+        "computer_science",
+        "mathematics",
+        "physics",
+        "engineering",
+        "cybersecurity"
+      ],
+      "license": "Per-document review; NIST warns some materials may be third party",
+      "acquisition": "Harvest NIST-authored publications only with explicit rights and metadata",
+      "blockers": [
+        "per-item rights",
+        "third-party content",
+        "dedup",
+        "splits"
+      ]
+    },
+    {
+      "source_id": "openwebmath-finemath",
+      "priority": 2,
+      "status": "candidate_discovery",
+      "url": "https://huggingface.co/datasets/open-web-math/open-web-math",
+      "reported_collection_size": "OpenWebMath reported 14.7B tokens",
+      "domains": [
+        "mathematics",
+        "statistics_probability",
+        "computer_science"
+      ],
+      "license": "Dataset collection license and Common Crawl terms; underlying pages need review",
+      "acquisition": "Sample first; inspect provenance and filter domains/content with compatible rights",
+      "blockers": [
+        "collection and source rights",
+        "Common Crawl terms",
+        "quality",
+        "dedup",
+        "splits"
+      ]
+    },
+    {
+      "source_id": "fineweb-edu",
+      "priority": 2,
+      "status": "candidate_discovery",
+      "url": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu",
+      "reported_collection_size": "1.3T tokens",
+      "domains": [
+        "general",
+        "education",
+        "science",
+        "humanities"
+      ],
+      "license": "ODC-By 1.0 plus Common Crawl terms; underlying web pages retain source rights",
+      "acquisition": "Do not ingest wholesale; evaluate a small, legally reviewed sample and only use if source-rights policy passes",
+      "blockers": [
+        "underlying page rights",
+        "Common Crawl terms",
+        "PII",
+        "quality",
+        "dedup",
+        "splits"
+      ]
+    },
+    {
+      "source_id": "un-parallel-corpus-v1",
+      "priority": 1,
+      "status": "workflow_candidate",
+      "url": "https://conferences.unite.un.org/UNCorpus",
+      "reported_collection_size": null,
+      "domains": [
+        "linguistics",
+        "law",
+        "government",
+        "international_relations"
+      ],
+      "license": "Public-domain claim for exact v1 corpus; verify version and conditions",
+      "acquisition": "Use existing repository ingestion workflow; hash, normalize, deduplicate, quality/privacy audit",
+      "blockers": [
+        "exact version/license evidence",
+        "payload hash",
+        "quality",
+        "privacy",
+        "dedup",
+        "splits"
+      ]
+    },
+    {
+      "source_id": "project-gutenberg-selected",
+      "priority": 2,
+      "status": "candidate_discovery",
+      "url": "https://www.gutenberg.org/",
+      "reported_collection_size": null,
+      "domains": [
+        "literature",
+        "history",
+        "philosophy",
+        "linguistics"
+      ],
+      "license": "Per-ebook and territorial copyright checks; Project Gutenberg terms vary outside US",
+      "acquisition": "Select author/translator/edition with public-domain status in Spain/EU; use official mirrors",
+      "blockers": [
+        "Spain/EU term check",
+        "translation/edition rights",
+        "per-item license",
+        "quality",
+        "dedup",
+        "splits"
+      ]
+    },
+    {
+      "source_id": "openstax",
+      "priority": 3,
+      "status": "excluded_for_commercial_path_pending_permission",
+      "url": "https://openstax.org/",
+      "reported_collection_size": null,
+      "domains": [
+        "mathematics",
+        "biology",
+        "physics",
+        "chemistry",
+        "economics"
+      ],
+      "license": "CC BY-NC-SA 4.0",
+      "acquisition": "Do not include in a corpus intended for commercial use unless additional permission is obtained",
+      "blockers": [
+        "non-commercial restriction",
+        "share-alike obligations"
+      ]
+    },
+    {
+      "source_id": "fineweb2-multilingual",
+      "priority": 1,
+      "status": "discovery_only_source_rights_review_required",
+      "url": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-2",
+      "reported_collection_size": "20.2 TB; approximately 5 billion documents and 1,868 language-script pairs (publisher card)",
+      "domains": [
+        "general_multilingual",
+        "linguistics",
+        "education",
+        "science",
+        "humanities",
+        "computer_science"
+      ],
+      "license": "ODC-By 1.0 dataset license; source data comes from 96 Common Crawl snapshots and remains subject to Common Crawl Terms of Use",
+      "acquisition": "Start with Spanish/English train-only shards; inspect source URL, opt-out status, PII treatment and source-rights evidence; never ingest test or removed subsets",
+      "blockers": [
+        "Common Crawl source terms and underlying page rights",
+        "document-level provenance and attribution",
+        "opt-out and personal-data controls",
+        "quality sampling",
+        "dedup against Common Corpus/FineWeb/Dolma",
+        "disjoint splits"
+      ],
+      "notes": "Very large multilingual complementary source. Dataset-level ODC-By is not treated as a blanket license for every underlying webpage; no text download or training admission is authorized by this catalog entry."
+    },
+    {
+      "source_id": "dolma-v1-7",
+      "priority": 1,
+      "status": "discovery_only_source_rights_review_required",
+      "url": "https://huggingface.co/datasets/allenai/dolma",
+      "reported_collection_size": "4.5 TB compressed for v1.7; approximately 3 trillion tokens reported for the Dolma family",
+      "domains": [
+        "general",
+        "science",
+        "computer_science",
+        "mathematics",
+        "humanities",
+        "literature"
+      ],
+      "license": "ODC-BY dataset license, additionally bound by the licenses and terms of original source datasets",
+      "acquisition": "Inventory v1.7 source components and versioned URL lists; select only components whose original rights, source overlap and redistribution conditions are compatible",
+      "blockers": [
+        "component-level source-license reconciliation",
+        "overlap with Common Crawl, arXiv, OpenWebMath, Gutenberg and other existing sources",
+        "PII/opt-out compliance",
+        "attribution and source provenance",
+        "dedup and splits"
+      ],
+      "notes": "Potentially valuable mixture of web, academic, code, books and encyclopedic material. Do not ingest the aggregate blindly; component-level source terms control."
+    }
+  ],
+  "notes": [
+    "Reported sizes are publisher-reported scale, not RONIN-downloaded or admitted bytes.",
+    "Do not add source-reported documents to current corpus counts until hashes and overlap are reconciled.",
+    "No benchmark test/validation material may be used for training."
+  ]
+}
