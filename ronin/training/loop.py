@@ -86,6 +86,8 @@ def train(
     metrics_path: str | Path | None = None,
     stop_after_step: int | None = None,
     optimizer_mode: str = "default",
+    anchor_reference: dict[str, torch.Tensor] | None = None,
+    anchor_lambda: float = 0.0,
 ) -> list[float]:
     """Train to config.max_steps; optionally resume from a full checkpoint.
 
@@ -98,6 +100,16 @@ def train(
         raise ValueError("stop_after_step must be between zero and config.max_steps")
     if optimizer_mode not in {"default", "foreach", "fused"}:
         raise ValueError("optimizer_mode must be default, foreach, or fused")
+    if anchor_lambda < 0 or (anchor_lambda > 0 and anchor_reference is None):
+        raise ValueError("anchor_lambda requires a reference state and cannot be negative")
+    if anchor_reference is not None:
+        current_names = dict(model.named_parameters())
+        if set(anchor_reference) != set(current_names):
+            raise ValueError("anchor reference parameter names do not match the model")
+        for name, parameter in current_names.items():
+            reference = anchor_reference[name]
+            if reference.shape != parameter.shape:
+                raise ValueError(f"anchor shape mismatch for {name}")
     seed_everything(config.seed)
     device = torch.device(device)
     model.to(device)
@@ -145,11 +157,19 @@ def train(
                 _, loss = model(inputs, targets)
                 if loss is None:
                     raise RuntimeError("model did not return a training loss")
-                scaled_loss = loss / config.gradient_accumulation_steps
+                total_loss = loss
+                if anchor_lambda > 0 and anchor_reference is not None:
+                    penalty = torch.zeros((), device=device, dtype=torch.float32)
+                    for name, parameter in model.named_parameters():
+                        reference = anchor_reference[name].to(device=device, dtype=torch.float32)
+                        penalty = penalty + (parameter.float() - reference).pow(2).sum()
+                    parameter_count = sum(parameter.numel() for parameter in model.parameters())
+                    total_loss = loss + anchor_lambda * penalty / max(1, parameter_count)
+                scaled_loss = total_loss / config.gradient_accumulation_steps
             if not torch.isfinite(loss):
                 raise FloatingPointError(f"non-finite loss at step {step}: {loss.item()}")
             scaler.scale(scaled_loss).backward()
-            accumulated += float(loss.detach())
+            accumulated += float(total_loss.detach())
         scaler.unscale_(optimizer)
         grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), config.grad_clip_norm)
         if not torch.isfinite(grad_norm):
@@ -187,6 +207,7 @@ def train(
             "target_steps": config.max_steps,
             "stop_after_step": effective_stop,
             "optimizer_mode": optimizer_mode,
+            "anchor_lambda": anchor_lambda,
             "total_training_seconds": total_seconds,
             "step_seconds_mean": statistics.mean(step_seconds) if step_seconds else 0.0,
             "step_seconds_median": statistics.median(step_seconds) if step_seconds else 0.0,
