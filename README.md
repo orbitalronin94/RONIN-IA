@@ -1,6 +1,8 @@
 <div align="center">
 
 # RONIN-IA
+**English summary:** RONIN-IA is an open research repository for compact Transformer language models, dataset curation, reproducible training experiments, model artifacts, and auditable evaluation workflows using PyTorch and GitHub Actions.
+
 
 ### Investigación abierta sobre modelos pequeños, corpus trazables y entrenamiento verificable.
 
